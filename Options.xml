@@ -1,0 +1,242 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+	<Script file="Auctionator.lua"/> 
+	
+	<Frame name="AuctionatorOptionsButtonFrame" frameStrata="HIGH" hidden="true">
+		<Size>
+			<AbsDimension x="768" y="520"/>
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT">
+				<Offset>
+					<AbsDimension x="0" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>
+		<Frames>
+			<Button name="AuctionatorOptionsButton" inherits="UIPanelButtonTemplate" text="Auctionator">
+				<Size><AbsDimension x="126" y="22"/>	</Size>
+				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnClick>
+						Auctionator_ShowOptionsFrame();
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
+			
+	<Frame name="AuctionatorOptionsFrame" frameStrata="HIGH" toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
+		<Size><AbsDimension x="400" y="375"/></Size>		
+		<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-170"/></Offset></Anchor></Anchors>
+
+		<Backdrop bgFile="Interface\CharacterFrame\UI-Party-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+			<BackgroundInsets><AbsInset left="11" right="12" top="12" bottom="11"/></BackgroundInsets>
+			<TileSize><AbsValue val="32"/></TileSize>
+			<EdgeSize><AbsValue val="32"/></EdgeSize>
+		</Backdrop>
+
+		<Layers>
+			<Layer level="ARTWORK">
+				<Texture name="AuctionatorConfigFrameHeader" file="Interface\DialogFrame\UI-DialogBox-Header">
+					<Size x="256" y="64"/>
+					<Anchors><Anchor point="TOP"><Offset x="0" y="12"/></Anchor></Anchors>
+				</Texture>
+				<FontString inherits="GameFontNormal" text="Auctionator">
+					<Anchors>
+						<Anchor point="TOP" relativeTo="AuctionatorConfigFrameHeader">
+							<Offset x="0" y="-14"/>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+
+		<Frames>
+			<Frame name="AuctionatorAboutTitleText">
+				<Size><AbsDimension y="30" /></Size>		
+				<Anchors>
+					<Anchor point="TOP"><Offset><AbsDimension y="-50"/></Offset></Anchor>
+					<Anchor point="LEFT"><Offset><AbsDimension x="30"/></Offset></Anchor>
+					<Anchor point="RIGHT"><Offset><AbsDimension x="-30"/></Offset></Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString inherits="GameFontNormal" text="About Auctionator" justifyH="LEFT" justifyV="TOP"></FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+			
+			
+			<Frame>
+				<Size><AbsDimension y="30" /></Size>		
+				<Anchors>
+					<Anchor point="TOP" relativeTo="AuctionatorAboutTitleText" relativePoint="BOTTOM"><Offset><AbsDimension y="-5"/></Offset></Anchor>
+					<Anchor point="LEFT"><Offset><AbsDimension x="30"/></Offset></Anchor>
+					<Anchor point="RIGHT"><Offset><AbsDimension x="-30"/></Offset></Anchor>
+				</Anchors> 
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="AuctionatorExplanation" inherits="GameFontHighlight" justifyH="LEFT" justifyV="TOP" >
+						<Anchors>
+							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors> 
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+			
+			<Button name="AuctionatorOptionsButton_More" inherits="UIPanelButtonTemplate" text="Read More">
+				<Size><AbsDimension x="80" y="18"/>	</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT" relativeTo="AuctionatorExplanation" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="-3" y="-5"/></Offset></Anchor>
+				</Anchors> 
+				<NormalFont inherits="GameFontNormalSmall"/>
+				<HighlightFont inherits="GameFontHighlightSmall"/>
+				<Scripts>
+					<OnClick>
+						AuctionatorDescriptionFrame:Show();
+					</OnClick>
+				</Scripts>
+			</Button>
+			
+			<Frame name="AuctionatorOption_Title">
+				<Size><AbsDimension y="30" /></Size>		
+				<Anchors>
+					<Anchor point="TOP"  ><Offset><AbsDimension y="-180"/></Offset></Anchor>
+					<Anchor point="LEFT" ><Offset><AbsDimension x="30"/></Offset></Anchor>
+					<Anchor point="RIGHT"><Offset><AbsDimension x="-30"/></Offset></Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="AuctionatorConfigFrameTitle" inherits="GameFontNormal" justifyH="LEFT" justifyV="TOP" text="Options">
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+			
+			<Frame name="AuctionatorOption_Enable_Alt_Box">
+				<Size><AbsDimension y="40" /></Size>		
+				<Anchors>
+					<Anchor point="TOP" relativeTo="AuctionatorOption_Title" relativePoint="BOTTOM" ><Offset><AbsDimension y="-5"/></Offset></Anchor>
+					<Anchor point="LEFT" ><Offset><AbsDimension x="40"/></Offset></Anchor>
+					<Anchor point="RIGHT"><Offset><AbsDimension x="-20"/></Offset></Anchor>
+				</Anchors>
+				
+				<Scripts>
+					<OnEnter>
+						Auctionator_ShowTooltip_EnableAlt();
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+					</OnLeave>
+				</Scripts>
+
+				<Frames>
+
+					<CheckButton name="AuctionatorOption_Enable_Alt" inherits="UICheckButtonTemplate">
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<FontString inherits="GameFontHighlight" text="Enable alt-key shortcut">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuctionatorOption_Enable_Alt">
+											<Offset><AbsDimension x="8" y="1"/></Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnEnter>
+								Auctionator_ShowTooltip_EnableAlt();
+							</OnEnter>
+							<OnLeave>
+								GameTooltip:Hide();
+							</OnLeave>
+						</Scripts>
+					</CheckButton>
+
+				</Frames>
+			</Frame>
+
+			<Frame name="AuctionatorOption_Open_First_Box">
+				<Size><AbsDimension y="40" /></Size>		
+				<Anchors>
+					<Anchor point="TOP" relativeTo="AuctionatorOption_Title" relativePoint="BOTTOM" ><Offset><AbsDimension y="-35"/></Offset></Anchor>
+					<Anchor point="LEFT" ><Offset><AbsDimension x="40"/></Offset></Anchor>
+					<Anchor point="RIGHT"><Offset><AbsDimension x="-20"/></Offset></Anchor>
+				</Anchors>
+				
+				<Scripts>
+					<OnEnter>
+						Auctionator_ShowTooltip_OpenFirst();
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide();
+					</OnLeave>
+				</Scripts>
+				
+				<Frames>
+					<CheckButton name="AuctionatorOption_Open_First" inherits="UICheckButtonTemplate">
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<FontString inherits="GameFontHighlight" text="Automatically open Auctionator panel">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuctionatorOption_Open_First">
+											<Offset><AbsDimension x="8" y="1"/></Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnEnter>
+								Auctionator_ShowTooltip_OpenFirst();
+							</OnEnter>
+							<OnLeave>
+								GameTooltip:Hide();
+							</OnLeave>
+						</Scripts>
+					</CheckButton>
+
+				</Frames>
+			</Frame>
+
+			<Frame>
+				<Size><AbsDimension x="150" y="40" /></Size>		
+				<Anchors>
+					<Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="25" y="5"/></Offset></Anchor>
+				</Anchors> 
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="AuctionatorVersionText" inherits="GameFontDisableSmall" justifyH="LEFT" justifyV="TOP"></FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+			
+			<Button name="AuctionatorOptionsButton_Cancel" inherits="UIPanelButtonTemplate" text="Cancel">
+				<Size><AbsDimension x="80" y="22"/>	</Size>
+				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnClick>
+						AuctionatorOptionsFrame:Hide();
+					</OnClick>
+				</Scripts>
+			</Button>
+
+			<Button name="AuctionatorOptionsButton_Okay" inherits="UIPanelButtonTemplate" text="Okay">
+				<Size><AbsDimension x="80" y="22"/>	</Size>
+				<Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuctionatorOptionsButton_Cancel"><Offset><AbsDimension x="-3" y="0"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnClick>
+						AuctionatorOptionsSave();
+						AuctionatorOptionsFrame:Hide();
+					</OnClick>
+				</Scripts>
+			</Button>
+		</Frames>
+	</Frame>
+</Ui>
