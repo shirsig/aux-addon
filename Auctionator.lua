@@ -32,6 +32,7 @@ local forceMsgAreaUpdate = false
 
 local scandata
 local sorteddata = {}
+sorteddata[""] = {}
 local basedata
 
 local currentAuctionItemName = ""
@@ -121,7 +122,7 @@ end
 
 
 function Auctionator_AuctionFrameTab_OnClick(index)
-
+	
 	if not index then
 		index = this:GetID()
 	end
@@ -486,14 +487,13 @@ function Auctionator_CalcBaseData()
 		basedata				= bestPrice[currentAuctionStackSize]
 		bestPriceOurStackSize	= bestPrice[currentAuctionStackSize]
 	end
-
+	
 	Auctionator_UpdateRecommendation()
 end
 
 -----------------------------------------
 
 function Auctionator_UpdateRecommendation()
-
 	--AuctionFrame:setTopLevel (false);
 	if basedata then
 		local newBuyoutPrice = basedata.itemPrice * currentAuctionStackSize
@@ -527,8 +527,6 @@ function Auctionator_UpdateRecommendation()
 		
 		MoneyInputFrame_SetCopper (BuyoutPrice, newBuyoutPrice)
 		MoneyInputFrame_SetCopper (StartPrice,  newStartPrice)
-
-		Auctionator_ScrollbarUpdate()
 		
 		if basedata.stackSize == sorteddata[currentAuctionItemName][1].stackSize and basedata.buyoutPrice == sorteddata[currentAuctionItemName][1].buyoutPrice then
 			Auctionator_Recommend_Basis_Text:SetText("(based on cheapest)")
@@ -538,6 +536,8 @@ function Auctionator_UpdateRecommendation()
 			Auctionator_Recommend_Basis_Text:SetText("(based on auction selected below)")
 		end
 	end
+	
+	Auctionator_ScrollbarUpdate()
 end
 
 
@@ -607,30 +607,30 @@ function Auctionator_Idle(self, elapsed)
 
 	local auctionItemName, auctionTexture, auctionCount = GetAuctionSellItemInfo(); 
 	
-	if auctionItemName == nil then
-	
-		currentAuctionItemName = ""
-		
-		if auctionator_pending_message then
-			Auctionator_SetMessage(auctionator_pending_message)
-			auctionator_pending_message = nil
-		elseif auctionator_last_item_posted == nil then
-			Auctionator_SetMessage("Drag an item to the Auction Item area\n\nto see recommended pricing information");
-		end
-		
-		processing_state = KM_NULL_STATE
-
-	else
+	if auctionItemName ~= currentAuctionItemName or forceMsgAreaUpdate then
 				
 		currentAuctionItemName  = auctionItemName
 		currentAuctionStackSize = auctionCount
 		currentAuctionTexture	= auctionTexture
 
-		if forceMsgAreaUpdate or sorteddata[currentAuctionItemName] == nil then
+		if auctionItemName == nil then
+	
+			currentAuctionItemName = ""
+			
+			if auctionator_pending_message then
+				Auctionator_SetMessage(auctionator_pending_message)
+				auctionator_pending_message = nil
+			elseif auctionator_last_item_posted == nil then
+				Auctionator_SetMessage("Drag an item to the Auction Item area\n\nto see recommended pricing information");
+			end
+		
+			processing_state = KM_NULL_STATE
+			
+		elseif forceMsgAreaUpdate or sorteddata[currentAuctionItemName] == nil then
+
 			forceMsgAreaUpdate = false
 
 			sorteddata[currentAuctionItemName] = {}
-			Auctionator_ScrollbarUpdate()
 
 			-- Auctionator_RecommendPerItem_Price:Hide()
 			-- Auctionator_RecommendPerStack_Price:Hide()
@@ -652,8 +652,9 @@ function Auctionator_Idle(self, elapsed)
 			processing_state = KM_PREQUERY
 
 			scandata = {}
+			
 		end
-
+		
 		Auctionator_CalcBaseData()
 	end
 	
@@ -722,7 +723,7 @@ function Auctionator_ScrollbarUpdate()
 
 	for line = 1,12 do
 
-		dataOffset = line + FauxScrollFrame_GetOffset (AuctionatorScrollFrame)
+		dataOffset = line + FauxScrollFrame_GetOffset(AuctionatorScrollFrame)
 		
 		local lineEntry = getglobal("AuctionatorEntry"..line)
 		
@@ -736,7 +737,7 @@ function Auctionator_ScrollbarUpdate()
 			local lineEntry_comm	= getglobal("AuctionatorEntry"..line.."_Comment")
 			local lineEntry_stack	= getglobal("AuctionatorEntry"..line.."_StackPrice")
 
-			if data.itemPrice == basedata.itemPrice and data.stackSize == basedata.stackSize then
+			if basedata ~= nil and data.itemPrice == basedata.itemPrice and data.stackSize == basedata.stackSize then
 				lineEntry:LockHighlight()
 			else
 				lineEntry:UnlockHighlight()
@@ -772,13 +773,17 @@ end
 function Auctionator_EntryOnClick()
 	local entryIndex = this:GetID()
 	
---	chatmsg (entryIndex)
+	-- chatmsg(entryIndex)
 	
 	basedata = sorteddata[currentAuctionItemName][entryIndex]
 
 	Auctionator_UpdateRecommendation()
 
 	PlaySound("igMainMenuOptionCheckBoxOn")
+end
+
+function Auctionator_RefreshButtonOnClick()
+	forceMsgAreaUpdate = true
 end
 
 -----------------------------------------

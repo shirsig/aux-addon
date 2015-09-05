@@ -314,8 +314,6 @@
 					</OnShow>
 				</Scripts>
 			</ScrollFrame>
-
-
 			
 			 <Button name="AuctionatorEntry1" inherits="AuctionatorEntryTemplate">
 			   <Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorScrollFrame" relativePoint="TOPLEFT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor></Anchors>
@@ -334,7 +332,16 @@
 			 <Button name="AuctionatorEntry13" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			 <Button name="AuctionatorEntry14" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			 <Button name="AuctionatorEntry15" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-                                                                                                        
+           
+			<Button name="AuctionatorRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
+				<Size><AbsDimension x="126" y="22"/>	</Size>
+				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-87" y="-38"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnClick>
+						Auctionator_RefreshButtonOnClick();
+					</OnClick>
+				</Scripts>
+			</Button>		   
 		</Frames>
 	</Frame>
 	
