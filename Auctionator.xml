@@ -16,7 +16,6 @@
 			
 			self = {};
 			self.TimeSinceLastUpdate = 0;
-			self.NumIdles = 0;
          </OnLoad>
 		<OnUpdate>
 			Auctionator_OnUpdate(self, elapsed);
