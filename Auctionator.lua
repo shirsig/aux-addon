@@ -333,33 +333,33 @@ end
 
 function Auctionator_OnAuctionUpdate ()
 
-	if (processing_state ~= KM_POSTQUERY) then
-		return;
+	if processing_state ~= KM_POSTQUERY then
+		return
 	end
 	
-	if (PanelTemplates_GetSelectedTab (AuctionFrame) ~= AUCTIONATOR_TAB_INDEX) then
-		return;
-	end;
+	if PanelTemplates_GetSelectedTab(AuctionFrame ~= AUCTIONATOR_TAB_INDEX) then
+		return
+	end
 	
-	processing_state = KM_ANALYZING;
+	processing_state = KM_ANALYZING
 	
-	local numBatchAuctions, totalAuctions = GetNumAuctionItems("list");
+	local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
 	
     --chatmsg("auctions:"..numBatchAuctions.." out of  "..totalAuctions)
 
-	if (totalAuctions >= 50) then
-		Auctionator_SetMessage ("Scanning auctions: page "..current_page);
+	if totalAuctions >= 50 then
+		Auctionator_SetMessage ("Scanning auctions: page "..current_page)
 	end
 	
-	if (numBatchAuctions > 0) then
+	if numBatchAuctions > 0 then
 	
-		local x;
+		local x
 		
 		for x = 1, numBatchAuctions do
 		
-			local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", x);
+			local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", x)
 
-			if (name == currentAuctionItemName and buyoutPrice > 0) then
+			if name == currentAuctionItemName and buyoutPrice > 0 then
 			
 				local sd = {};
 				
@@ -367,32 +367,28 @@ function Auctionator_OnAuctionUpdate ()
 				sd["buyoutPrice"]	= buyoutPrice;
 				sd["owner"]			= owner;
 				
-				tinsert (scandata, sd);
-				
+				tinsert (scandata, sd);	
 				
 			end
 		end
 	end
 
-	if (numBatchAuctions == 50) then
+	if numBatchAuctions == 50 then
 				
-		processing_state = KM_PREQUERY;	
+		processing_state = KM_PREQUERY
 		
 	else
 	
-		if (table.getn (scandata) > 0) then
-			Auctionator_Process_Scandata ();
-			Auctionator_CalcBaseData();
+		if table.getn(scandata) > 0 then
+			Auctionator_Process_Scandata()
+			Auctionator_CalcBaseData()
 		else
-			Auctionator_SetMessage ("No auctions were found for \n\n"..currentAuctionItemName);
+			Auctionator_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
 		end
 		
-		processing_state = KM_NULL_STATE;
+		processing_state = KM_NULL_STATE
 
 	end
-	
-	
-	
 end
 
 -----------------------------------------
@@ -592,24 +588,24 @@ function Auctionator_Idle(self, elapsed)
 
 	self.TimeSinceLastUpdate = self.TimeSinceLastUpdate + 0.1;--elapsed;
 	
-	if (AuctionatorMessage == nil) then
-		return;
-	end;
+	if AuctionatorMessage == nil then
+		return
+	end
 	
 	self.NumIdles = self.NumIdles + 1;
 	
-	if (self.TimeSinceLastUpdate > 0.25) then
+	if self.TimeSinceLastUpdate > 0.25 then
 	
 		self.TimeSinceLastUpdate = 0;
 
 		------- check whether to send a new auction query to get the next page -------
 
-		if (processing_state == KM_PREQUERY) then
+		if processing_state == KM_PREQUERY then
 			if (CanSendAuctionQuery()) then
-				processing_state = KM_IN_QUERY;
-				QueryAuctionItems (currentAuctionItemName, "", "", nil, currentAuctionClass, currentAuctionSubclass, current_page, nil, nil);
-				processing_state = KM_POSTQUERY;
-				current_page = current_page + 1;
+				processing_state = KM_IN_QUERY
+				QueryAuctionItems(currentAuctionItemName, "", "", nil, currentAuctionClass, currentAuctionSubclass, current_page, nil, nil)
+				processing_state = KM_POSTQUERY
+				current_page = current_page + 1
 			end
 		end
 	end
@@ -618,56 +614,104 @@ function Auctionator_Idle(self, elapsed)
 
 	local auctionItemName, auctionTexture, auctionCount = GetAuctionSellItemInfo(); 
 
-	if (auctionItemName == nil) then
-		auctionItemName = "";
-		auctionCount	= 0;
+	if auctionItemName == nil then
+		auctionItemName = ""
+		auctionCount	= 0
 	end
-
-	if (currentAuctionItemName ~= auctionItemName or currentAuctionStackSize ~= auctionCount or self.NumIdles == 1 or forceMsgAreaUpdate) then
 	
-		forceMsgAreaUpdate = false;
+    --- xxx
+	if auctionItemName == "" then
+	
+		-- currentAuctionItemName = ""
+						
+		if auctionator_pending_message then
+			Auctionator_SetMessage(auctionator_pending_message)
+			auctionator_pending_message = nil
+		elseif auctionator_last_item_posted == nil then
+			Auctionator_SetMessage ("Drag an item to the Auction Item area\n\nto see recommended pricing information");
+		end
 		
-		sorteddata = {};
-		Auctionator_ScrollbarUpdate();
+	elseif currentAuctionItemName ~= auctionItemName or self.NumIdles == 1 or forceMsgAreaUpdate then
+		
+		forceMsgAreaUpdate = false
+		
+		sorteddata = {}
+		Auctionator_ScrollbarUpdate()
 
-		currentAuctionItemName  = auctionItemName;
-		currentAuctionStackSize = auctionCount;
-		currentAuctionTexture	= auctionTexture;
+		currentAuctionItemName  = auctionItemName
+		currentAuctionStackSize = auctionCount
+		currentAuctionTexture	= auctionTexture
 		
-		Auctionator_RecommendPerItem_Price:Hide();
-		Auctionator_RecommendPerStack_Price:Hide();
+		Auctionator_RecommendPerItem_Price:Hide()
+		Auctionator_RecommendPerStack_Price:Hide()
 
 		processing_state = KM_NULL_STATE;
 		
-		basedata = nil;
+		basedata = nil
 		
-		if (currentAuctionItemName == "") then
-			
-			if (auctionator_pending_message) then
-				Auctionator_SetMessage (auctionator_pending_message);
-				auctionator_pending_message = nil;
-			elseif (auctionator_last_item_posted == nil) then
-				Auctionator_SetMessage ("Drag an item to the Auction Item area\n\nto see recommended pricing information");
-			end
-		else
-			local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName);
-		
-			currentAuctionClass		= ItemType2AuctionClass (sType);
-			currentAuctionSubclass	= "Guns"--Oh, no one's looking! SubType2AuctionSubclass (currentAuctionClass, sSubType);
+		local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName)
+	
+		currentAuctionClass		= ItemType2AuctionClass(sType)
+		currentAuctionSubclass	= "Guns"--Oh, no one's looking! SubType2AuctionSubclass (currentAuctionClass, sSubType)
 
-			SortAuctionItems("list", "buyout");
+		SortAuctionItems("list", "buyout")
 
-			if (IsAuctionSortReversed("list", "buyout")) then
-				SortAuctionItems("list", "buyout");
-			end
-		 
-			current_page = 0;
-			processing_state = KM_PREQUERY;
-
-			scandata = {};
+		if IsAuctionSortReversed("list", "buyout") then
+			SortAuctionItems("list", "buyout")
 		end
+	 
+		current_page = 0
+		processing_state = KM_PREQUERY
 
+		scandata = {}
 	end
+	--- xxx
+	
+	-- if currentAuctionItemName ~= auctionItemName or currentAuctionStackSize ~= auctionCount or self.NumIdles == 1 or forceMsgAreaUpdate then
+	
+		-- forceMsgAreaUpdate = false
+		
+		-- sorteddata = {}
+		-- Auctionator_ScrollbarUpdate()
+
+		-- currentAuctionItemName  = auctionItemName
+		-- currentAuctionStackSize = auctionCount
+		-- currentAuctionTexture	= auctionTexture
+		
+		-- Auctionator_RecommendPerItem_Price:Hide()
+		-- Auctionator_RecommendPerStack_Price:Hide()
+
+		-- processing_state = KM_NULL_STATE
+		
+		-- basedata = nil
+		
+		-- if currentAuctionItemName == "" then
+			
+			-- if auctionator_pending_message then
+				-- Auctionator_SetMessage(auctionator_pending_message)
+				-- auctionator_pending_message = nil
+			-- elseif auctionator_last_item_posted == nil then
+				-- Auctionator_SetMessage ("Drag an item to the Auction Item area\n\nto see recommended pricing information");
+			-- end
+		-- else
+			-- local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName);
+		
+			-- currentAuctionClass		= ItemType2AuctionClass (sType);
+			-- currentAuctionSubclass	= "Guns"--Oh, no one's looking! SubType2AuctionSubclass (currentAuctionClass, sSubType);
+
+			-- SortAuctionItems("list", "buyout")
+
+			-- if IsAuctionSortReversed("list", "buyout") then
+				-- SortAuctionItems("list", "buyout")
+			-- end
+		 
+			-- current_page = 0
+			-- processing_state = KM_PREQUERY
+
+			-- scandata = {}
+		-- end
+
+	-- end
 
 end
 
