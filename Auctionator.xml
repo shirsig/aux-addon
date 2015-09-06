@@ -27,7 +27,7 @@
    </Frame> 
 
 	<Button name="AuctionatorEntryTemplate" virtual="true" hidden="true">
-		<Size><AbsDimension x="550" y="16" /></Size>		
+		<Size><AbsDimension x="500" y="16" /></Size>		
 		<Frames>
 			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
@@ -59,20 +59,8 @@
 			</Frame>
 			
 			<Frame>
-				<Size><AbsDimension x="100" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="320" y="-3"/></Offset></Anchor></Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_Comment" inherits="GameFontHighlightSmall">
-							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Frame>
-			
-			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="440" y="-3"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="300" y="-3"/></Offset></Anchor></Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
 						<FontString name="$parent_StackPrice" inherits="GameFontHighlightSmall">
@@ -128,8 +116,6 @@
 					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="8" y="-50"/></Offset></Anchor></Anchors>
 				</FontString>
 
-
-
 				<FontString name="Auctionator_Recommend_Text" inherits="GameFontNormal" text="Recommended buyout price">
 					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="77" y="-38"/></Offset></Anchor></Anchors>
 				</FontString>
@@ -144,26 +130,22 @@
 
 				<FontString name="Auctionator_RecommendPerItem_Text" inherits="GameFontHighlightSmall" text="per item">
 					<Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Recommend_Text"><Offset><AbsDimension x="152" y="-51"/></Offset></Anchor></Anchors>
-				</FontString>
-			
-
+				</FontString>			
 			</Layer>
-
 
 			<Layer level="ARTWORK">
 
 				<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-					<Size><AbsDimension x="605" y="64"/></Size>
+					<Size><AbsDimension x="500" y="64"/></Size>
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="6" y="-167"/>
+								<AbsDimension x="8" y="-167"/>
 							</Offset>
 						</Anchor>
 					</Anchors>
 					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
 				</Texture>
-
 
 				<FontString inherits="GameFontHighlightSmall" text="Item Price">
 					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="70" y="1"/></Offset></Anchor></Anchors>
@@ -173,23 +155,13 @@
 					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="220" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 
-				<FontString inherits="GameFontHighlightSmall" text=" ">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="325" y="1"/></Offset></Anchor></Anchors>
-				</FontString>
-
 				<FontString inherits="GameFontHighlightSmall" text="Total Price">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="500" y="1"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="370" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
-
 			</Layer>
-
 		</Layers>
 
-
-
-		<Frames>
-			
-			
+		<Frames>		
 			<Button>
 				<Size><AbsDimension y="118" /></Size>
 				<Anchors>
@@ -201,8 +173,7 @@
 
 					</Layer>
 				</Layers>
-
-				
+		
 				<Scripts>
 					<OnLoad>
 						this:RegisterEvent("NEW_AUCTION_UPDATE");
@@ -243,12 +214,9 @@
 								<AbsValue val="16"/>
 							</EdgeSize>
 						</Backdrop>
-					</Frame>
-				
-				</Frames>
-				
+					</Frame>				
+				</Frames>			
 			</Button>
-
 
 			<Button name="Auctionator_RecommendItem_Tex">
 				<Size><AbsDimension x="37" y="37"/></Size>
@@ -267,7 +235,6 @@
 					</Layer>
 				</Layers>
 			</Button>
-
 
 			<Frame>
 				<Size><AbsDimension x="120" y="20" /></Size>
@@ -302,7 +269,7 @@
 			</Frame>
 
 			<ScrollFrame name="AuctionatorScrollFrame" inherits="FauxScrollFrameTemplate">
-				<Size><AbsDimension x="588" y="196"/></Size>
+				<Size><AbsDimension x="505" y="196"/></Size>
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-213"/></Offset></Anchor></Anchors>
 
 				<Scripts>
@@ -334,7 +301,7 @@
 			 <Button name="AuctionatorEntry15" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>
            
 			<Button name="AuctionatorRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
-				<Size><AbsDimension x="126" y="22"/>	</Size>
+				<Size><AbsDimension x="126" y="22"/></Size>
 				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-87" y="-38"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
@@ -344,5 +311,4 @@
 			</Button>		   
 		</Frames>
 	</Frame>
-	
 </Ui>

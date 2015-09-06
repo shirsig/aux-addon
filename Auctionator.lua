@@ -734,7 +734,7 @@ function Auctionator_ScrollbarUpdate()
 			local data = sorteddata[currentAuctionItemName][dataOffset]
 
 			local lineEntry_avail	= getglobal("AuctionatorEntry"..line.."_Availability")
-			local lineEntry_comm	= getglobal("AuctionatorEntry"..line.."_Comment")
+			-- local lineEntry_comm	= getglobal("AuctionatorEntry"..line.."_Comment")
 			local lineEntry_stack	= getglobal("AuctionatorEntry"..line.."_StackPrice")
 
 			if basedata ~= nil and data.itemPrice == basedata.itemPrice and data.stackSize == basedata.stackSize then
@@ -748,10 +748,10 @@ function Auctionator_ScrollbarUpdate()
 			end
 
 			
-			if		data.numYours == 0 then			lineEntry_comm:SetText("")
-			elseif	data.numYours == data.count then	lineEntry_comm:SetText("yours")
-			else										lineEntry_comm:SetText("yours: "..data.numYours)
-			end
+			-- if		data.numYours == 0 then			lineEntry_comm:SetText("")
+			-- elseif	data.numYours == data.count then	lineEntry_comm:SetText("yours")
+			-- else										lineEntry_comm:SetText("yours: "..data.numYours)
+			-- end
 				
 			
 			local tx = string.format("%i %s of %i", data.count, pluralizeIf("stack", data.count), data.stackSize)
