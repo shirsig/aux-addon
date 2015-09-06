@@ -1,7 +1,5 @@
-
-local AuctionatorVersion = "1.0.0-Vanilla"
-local AuctionatorAuthor  = "Zirco; Vanilla adaptation by Nimeral"
-
+local AuctionatorVersion = "2.0.0-Vanilla"
+local AuctionatorAuthor  = "Zirco; Vanilla adaptation by Nimeral; Fixed, Cleaned up and extended by Simon Hirsig"
 
 local AuctionatorLoaded = false
 
@@ -15,10 +13,11 @@ local AUCTIONATOR_TAB_INDEX = 4
 
 -----------------------------------------
 
-local auctionator_orig_AuctionFrameTab_OnClick
-local auctionator_orig_ContainerFrameItemButton_OnClick
-local auctionator_orig_AuctionFrameAuctions_Update
-local auctionator_orig_AuctionsCreateAuctionButton_OnClick
+local Auctionator_Orig_AuctionFrameBrowse_Search
+local Auctionator_Orig_AuctionFrameTab_OnClick
+local Auctionator_Orig_ContainerFrameItemButton_OnClick
+local Auctionator_Orig_AuctionFrameAuctions_Update
+local Auctionator_Orig_AuctionsCreateAuctionButton_OnClick
 
 local KM_NULL_STATE	= 0
 local KM_PREQUERY	= 1
@@ -27,8 +26,9 @@ local KM_POSTQUERY	= 3
 local KM_ANALYZING	= 4
 
 local processing_state	= KM_NULL_STATE
+local current_query
 local current_page
-local forceMsgAreaUpdate = false
+local force_refresh = false
 
 local scandata
 local sorteddata = {}
@@ -36,27 +36,20 @@ sorteddata[""] = {}
 local basedata
 
 local currentAuctionItemName = ""
-local currentAuctionStackSize = 1
-local currentAuctionTexture = nil
-
-local currentAuctionClass
-local currentAuctionSubclass
 
 local auctionator_last_buyoutprice = 1
 local auctionator_last_item_posted = nil
-local auctionator_pending_message = nil
 
 -----------------------------------------
 
-local	BoolToString, BoolToNum, NumToBool, pluralizeIf, round, chatmsg, calcNewPrice, roundPriceDown
+local	BoolToString, BoolToNum, NumToBool, pluralizeIf, round, calcNewPrice, roundPriceDown
 local	val2gsc, priceToString, ItemType2AuctionClass, SubType2AuctionSubclass
 
 -----------------------------------------
 
-
 function Auctionator_EventHandler()
 
---	chatmsg(event)
+--	log(event)
 
 	if event == "VARIABLES_LOADED"			then	Auctionator_OnLoad() 				end
 	if event == "ADDON_LOADED"				then	Auctionator_OnAddonLoaded() 		end
@@ -70,10 +63,9 @@ end
 
 -----------------------------------------
 
-
 function Auctionator_OnLoad()
 
-	chatmsg("Auctionator Loaded")
+	log("Auctionator Loaded")
 
 	AuctionatorLoaded = true
 
@@ -85,7 +77,6 @@ function Auctionator_OnAddonLoaded()
 
 	if string.lower (arg1) == "blizzard_auctionui" then			
 		Auctionator_AddSellTab()
-		Auctionator_AddSellPanel()
 		
 		Auctionator_SetupHookFunctions()
 		
@@ -117,9 +108,7 @@ function Auctionator_OnAddonLoaded()
 	end
 end
 
-
 -----------------------------------------
-
 
 function Auctionator_AuctionFrameTab_OnClick(index)
 	
@@ -134,9 +123,9 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 	end
 	
 	if index ~= AUCTIONATOR_TAB_INDEX then
-		auctionator_orig_AuctionFrameTab_OnClick(index)
+		Auctionator_Orig_AuctionFrameTab_OnClick(index)
 		auctionator_last_item_posted = nil
-		forceMsgAreaUpdate = true
+		force_refresh = true
 		
 	elseif index == AUCTIONATOR_TAB_INDEX then
 		AuctionFrameTab_OnClick(3)
@@ -160,14 +149,13 @@ end
 
 -----------------------------------------
 
-
 function Auctionator_ContainerFrameItemButton_OnClick(button)
 	
 	if (AUCTIONATOR_ENABLE_ALT == 0
 		or not AuctionFrame:IsShown()
 		or not IsAltKeyDown())
 	then
-		return auctionator_orig_ContainerFrameItemButton_OnClick(button)
+		return Auctionator_Orig_ContainerFrameItemButton_OnClick(button)
 	end
 
 	ClickAuctionSellItemButton()
@@ -189,13 +177,11 @@ end
 
 function Auctionator_AuctionFrameAuctions_Update()
 	
-	auctionator_orig_AuctionFrameAuctions_Update()
+	Auctionator_Orig_AuctionFrameAuctions_Update()
 
 	if PanelTemplates_GetSelectedTab(AuctionFrame) == AUCTIONATOR_TAB_INDEX  and	AuctionFrame:IsShown() then
 		Auctionator_HideElems(auctionsTabElements)
-	end
-
-	
+	end	
 end
 
 -----------------------------------------
@@ -212,7 +198,7 @@ function Auctionator_AuctionsCreateAuctionButton_OnClick()
 
 	end
 	
-	auctionator_orig_AuctionsCreateAuctionButton_OnClick()
+	Auctionator_Orig_AuctionsCreateAuctionButton_OnClick()
 
 end
 
@@ -243,31 +229,40 @@ end
 
 -----------------------------------------
 
-function Auctionator_SetupHookFunctions()
+function Auctionator_AuctionFrameBrowse_Search()
 	
-	auctionator_orig_AuctionFrameTab_OnClick = AuctionFrameTab_OnClick
-	AuctionFrameTab_OnClick = Auctionator_AuctionFrameTab_OnClick
-	
-	auctionator_orig_ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
-	ContainerFrameItemButton_OnClick = Auctionator_ContainerFrameItemButton_OnClick
-	
-	auctionator_orig_AuctionFrameAuctions_Update = AuctionFrameAuctions_Update
-	AuctionFrameAuctions_Update = Auctionator_AuctionFrameAuctions_Update
-	
-	auctionator_orig_AuctionsCreateAuctionButton_OnClick = AuctionsCreateAuctionButton_OnClick
-	AuctionsCreateAuctionButton_OnClick = Auctionator_AuctionsCreateAuctionButton_OnClick
+	Auctionator_SubmitQuery(Auctionator_CreateQuery{
+		name = BrowseName:GetText(),
+		exactMatch = false,
+		minLevel = BrowseMinLevel:GetText(),
+		maxLevel = BrowseMaxLevel:GetText(),
+		invTypeIndex = AuctionFrameBrowse.selectedInvtypeIndex,
+		classIndex = AuctionFrameBrowse.selectedClassIndex,
+		subclassIndex = AuctionFrameBrowse.selectedSubclassIndex,
+		isUsable = IsUsableCheckButton:GetChecked(),
+		qualityIndex = UIDropDownMenu_GetSelectedValue(BrowseDropDown)
+	})
 	
 end
 
 -----------------------------------------
 
-function Auctionator_AddSellPanel()
+function Auctionator_SetupHookFunctions()
 	
---	local frame = CreateFrame("Frame", "Auctionator_Sell_Panel", AuctionFrame, "Auctionator_Sell_Template");
-	--frame:SetParent("AuctionFrame");
-	--frame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT", 0, 0);
-	--relevel(frame);
---	frame:Hide();
+	Auctionator_Orig_AuctionFrameBrowse_Search = AuctionFrameBrowse_Search
+	AuctionFrameBrowse_Search = Auctionator_AuctionFrameBrowse_Search
+	
+	Auctionator_Orig_AuctionFrameTab_OnClick = AuctionFrameTab_OnClick
+	AuctionFrameTab_OnClick = Auctionator_AuctionFrameTab_OnClick
+	
+	Auctionator_Orig_ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
+	ContainerFrameItemButton_OnClick = Auctionator_ContainerFrameItemButton_OnClick
+	
+	Auctionator_Orig_AuctionFrameAuctions_Update = AuctionFrameAuctions_Update
+	AuctionFrameAuctions_Update = Auctionator_AuctionFrameAuctions_Update
+	
+	Auctionator_Orig_AuctionsCreateAuctionButton_OnClick = AuctionsCreateAuctionButton_OnClick
+	AuctionsCreateAuctionButton_OnClick = Auctionator_AuctionsCreateAuctionButton_OnClick
 	
 end
 
@@ -327,63 +322,100 @@ end
 -----------------------------------------
 
 function Auctionator_OnAuctionUpdate()
+	if processing_state == KM_POSTQUERY then
+		Auctionator_ProcessQuery()
+	end
+end
 
-	if processing_state ~= KM_POSTQUERY then
-		return
+-----------------------------------------
+
+function Auctionator_CompleteQuery(query)
+
+	if current_query.onComplete ~= nil then
+		current_query.onComplete(scandata);
 	end
 	
-	if PanelTemplates_GetSelectedTab(AuctionFrame) ~= AUCTIONATOR_TAB_INDEX then
-		return
+	current_query = nil
+	current_page = nil
+	scandata = nil
+	processing_state = KM_NULL_STATE
+end
+
+-----------------------------------------
+
+function Auctionator_AbortQuery(query)
+	if current_query.onAbort ~= nil then
+		current_query.onAbort();
 	end
 	
-	processing_state = KM_ANALYZING
+	current_query = nil
+	current_page = nil
+	scandata = nil
+	processing_state = KM_NULL_STATE
+end
+
+-----------------------------------------
+
+function Auctionator_AdvanceQuery()
+	QueryAuctionItems(
+		current_query.name,
+		current_query.minLevel,
+		current_query.maxLevel,
+		current_query.invTypeIndex,
+		current_query.classIndex,
+		current_query.subclassIndex,
+		current_page,
+		current_query.isUsable,
+		current_query.qualityIndex
+	)
+	processing_state = KM_POSTQUERY
+	current_page = current_page + 1
+end
+
+-----------------------------------------
+
+function Auctionator_ProcessQuery()
 	
 	local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
-	
-    --chatmsg("auctions:"..numBatchAuctions.." out of  "..totalAuctions)
 
 	if totalAuctions >= 50 then
 		Auctionator_SetMessage("Scanning auctions: page "..current_page)
 	end
-	
-	if numBatchAuctions > 0 then
-	
-		local x
-		
-		for x = 1, numBatchAuctions do
-		
-			local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", x)
-
-			if name == currentAuctionItemName and buyoutPrice > 0 then
 			
-				local sd = {}
-				
-				sd["stackSize"]		= count
-				sd["buyoutPrice"]	= buyoutPrice
-				sd["owner"]			= owner
-				
-				tinsert(scandata, sd)
-				
-			end
-		end
-	end
-
-	if numBatchAuctions == 50 then
-				
-		processing_state = KM_PREQUERY
-		
-	else
+	for x = 1, numBatchAuctions do
 	
-		if table.getn(scandata) > 0 then
-			Auctionator_Process_Scandata()
-			Auctionator_CalcBaseData()
-		else
-			Auctionator_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
-		end
-		
-		processing_state = KM_NULL_STATE
+		local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", x)
 
+		if name == currentAuctionItemName and buyoutPrice > 0 then	
+			local sd = {}
+			
+			sd["stackSize"]		= count
+			sd["buyoutPrice"]	= buyoutPrice
+			sd["owner"]			= owner
+			
+			tinsert(scandata, sd)
+		end
 	end
+
+	if numBatchAuctions == 50 then			
+		processing_state = KM_PREQUERY	
+	else
+		Auctionator_CompleteQuery()
+	end
+end
+
+-----------------------------------------
+
+function Auctionator_SubmitQuery(query)
+
+	if processing_state ~= KM_NULL_STATE then
+		Auctionator_AbortQuery()
+	end
+	
+	current_query = query
+	current_page = 0
+	scandata = {}
+	processing_state = KM_PREQUERY
 end
 
 -----------------------------------------
@@ -398,9 +430,9 @@ end
 
 -----------------------------------------
 
-function Auctionator_Process_Scandata()
+function Auctionator_Process_Scandata(auctionItemName)
 
-	sorteddata[currentAuctionItemName] = {}
+	sorteddata[auctionItemName] = {}
 	
 	if scandata == nil then
 		return
@@ -408,7 +440,6 @@ function Auctionator_Process_Scandata()
    
 	----- Condense the scan data into a table that has only a single entry per stacksize/price combo
 
-	local i,sd
 	local conddata = {}
 
 	for i,sd in ipairs(scandata) do
@@ -438,16 +469,14 @@ function Auctionator_Process_Scandata()
 
 
 	----- create a table of these entries sorted by itemPrice
-
-
+	
 	local n = 1
 	for i,v in pairs(conddata) do
-		sorteddata[currentAuctionItemName][n] = v
+		sorteddata[auctionItemName][n] = v
 		n = n + 1
 	end
 	
-	table.sort(sorteddata[currentAuctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
-
+	table.sort(sorteddata[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
 end
 
 -----------------------------------------
@@ -458,6 +487,11 @@ local bestPriceOurStackSize;
 
 function Auctionator_CalcBaseData()
 
+	local auctionItemName, auctionItemTexture, auctionItemStackSize = GetAuctionSellItemInfo()
+	if auctionItemName == nil then
+		auctionItemName =  ""
+	end
+	
 	local bestPrice	= {}		-- a table with one entry per stacksize that is the cheapest auction for that particular stacksize
 	local absoluteBest			-- the overall cheapest auction
 	
@@ -465,7 +499,7 @@ function Auctionator_CalcBaseData()
 
 	----- find the best price per stacksize and overall -----
 	
-	for j,sd in ipairs(sorteddata[currentAuctionItemName]) do
+	for j,sd in ipairs(sorteddata[auctionItemName]) do
 	
 		if bestPrice[sd.stackSize] == nil or bestPrice[sd.stackSize].itemPrice >= sd.itemPrice then
 			bestPrice[sd.stackSize] = sd
@@ -479,20 +513,19 @@ function Auctionator_CalcBaseData()
 	
 	basedata = absoluteBest
 
-	if bestPrice[currentAuctionStackSize] then
-		basedata				= bestPrice[currentAuctionStackSize]
-		bestPriceOurStackSize	= bestPrice[currentAuctionStackSize]
+	if bestPrice[auctionItemStackSize] then
+		basedata				= bestPrice[auctionItemStackSize]
+		bestPriceOurStackSize	= bestPrice[auctionItemStackSize]
 	end
 	
-	Auctionator_UpdateRecommendation()
+	Auctionator_UpdateRecommendation(auctionItemName, auctionItemTexture, auctionItemStackSize)
 end
 
 -----------------------------------------
 
-function Auctionator_UpdateRecommendation()
-	--AuctionFrame:setTopLevel (false);
+function Auctionator_UpdateRecommendation(auctionItemName, auctionItemTexture, auctionItemStackSize)
 	if basedata then
-		local newBuyoutPrice = basedata.itemPrice * currentAuctionStackSize
+		local newBuyoutPrice = basedata.itemPrice * auctionItemStackSize
 
 		if basedata.numYours < basedata.count then
 			newBuyoutPrice = calcNewPrice(newBuyoutPrice)
@@ -504,12 +537,12 @@ function Auctionator_UpdateRecommendation()
 		AuctionatorMessage:Hide()
 		
 		Auctionator_Recommend_Text:SetText("Recommended Buyout Price")
-		Auctionator_RecommendPerStack_Text:SetText("for your stack of "..currentAuctionStackSize)
+		Auctionator_RecommendPerStack_Text:SetText("for your stack of "..auctionItemStackSize)
 		
-		if currentAuctionTexture then
-			Auctionator_RecommendItem_Tex:SetNormalTexture(currentAuctionTexture)
-			if currentAuctionStackSize > 1 then
-				Auctionator_RecommendItem_TexCount:SetText(currentAuctionStackSize)
+		if auctionItemTexture then
+			Auctionator_RecommendItem_Tex:SetNormalTexture(auctionItemTexture)
+			if auctionItemStackSize > 1 then
+				Auctionator_RecommendItem_TexCount:SetText(auctionItemStackSize)
 				Auctionator_RecommendItem_TexCount:Show()
 			else
 				Auctionator_RecommendItem_TexCount:Hide()
@@ -518,11 +551,11 @@ function Auctionator_UpdateRecommendation()
 			Auctionator_RecommendItem_Tex:Hide()
 		end
 		
-		MoneyFrame_Update("Auctionator_RecommendPerItem_Price",  round(newBuyoutPrice / currentAuctionStackSize))
+		MoneyFrame_Update("Auctionator_RecommendPerItem_Price",  round(newBuyoutPrice / auctionItemStackSize))
 		MoneyFrame_Update("Auctionator_RecommendPerStack_Price", round(newBuyoutPrice))
 		
-		MoneyInputFrame_SetCopper (BuyoutPrice, newBuyoutPrice)
-		MoneyInputFrame_SetCopper (StartPrice,  newStartPrice)
+		MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
+		MoneyInputFrame_SetCopper(StartPrice,  newStartPrice)
 		
 		if basedata.stackSize == sorteddata[currentAuctionItemName][1].stackSize and basedata.buyoutPrice == sorteddata[currentAuctionItemName][1].buyoutPrice then
 			Auctionator_Recommend_Basis_Text:SetText("(based on cheapest)")
@@ -533,10 +566,8 @@ function Auctionator_UpdateRecommendation()
 		end
 	end
 	
-	Auctionator_ScrollbarUpdate()
+	Auctionator_ScrollbarUpdate(auctionItemName, auctionItemStackSize)
 end
-
-
 
 -----------------------------------------
 
@@ -562,75 +593,73 @@ function Auctionator_OnAuctionHouseClosed()
 	
 end
 
-
-
 -----------------------------------------
 
-function Auctionator_OnUpdate(self, elapsed)
-
-	Auctionator_Idle (self, elapsed)
-
+function Auctionator_CreateQuery(parameterMap)
+	local query = {
+		name = nil,
+		exactMatch = false,
+		minLevel = "",
+		maxLevel = "",
+		invTypeIndex = nil,
+		classIndex = nil,
+		subclassIndex = nil,
+		isUsable = nil,
+		qualityIndex = nil
+	}
+	
+	for k,v in pairs(parameterMap) do
+		query[k] = v
+	end
+	
+	return query
 end
 
-
 -----------------------------------------
 
-function Auctionator_Idle(self, elapsed)
-
-	self.TimeSinceLastUpdate = self.TimeSinceLastUpdate + 0.1;--elapsed;
+function Auctionator_OnUpdate(self)
 	
 	if AuctionatorMessage == nil then
 		return
 	end
 	
-	if self.TimeSinceLastUpdate > 0.25 then
+	if processing_state == KM_PREQUERY and GetTime() - self.TimeOfLastUpdate > 0.5 then
 	
-		self.TimeSinceLastUpdate = 0;
+		self.TimeOfLastUpdate = GetTime()
 
 		------- check whether to send a new auction query to get the next page -------
 
-		if processing_state == KM_PREQUERY then
-			if CanSendAuctionQuery() then
-				processing_state = KM_IN_QUERY
-				QueryAuctionItems(currentAuctionItemName, "", "", nil, currentAuctionClass, currentAuctionSubclass, current_page, nil, nil)
-				processing_state = KM_POSTQUERY
-				current_page = current_page + 1
-			end
+		if CanSendAuctionQuery() then
+			Auctionator_AdvanceQuery()
 		end
 	end
 	
 	------- check whether the "sell" item has changed -------
 
-	local auctionItemName, auctionTexture, auctionCount = GetAuctionSellItemInfo(); 
+	local auctionItemName, _, _ = GetAuctionSellItemInfo()
+	if auctionItemName == nil then
+		auctionItemName =  ""
+	end
 	
 	local auctionItemChanged = auctionItemName ~= currentAuctionItemName
 	
 	if auctionItemChanged and processing_state ~= KM_NULL_STATE then
-		sorteddata[currentAuctionItemName] = nil
+		Auctionator_AbortQuery()
 	end
 	
-	if auctionItemChanged or forceMsgAreaUpdate then
-				
-		currentAuctionItemName  = auctionItemName
-		currentAuctionStackSize = auctionCount
-		currentAuctionTexture	= auctionTexture
-
-		if auctionItemName == nil then
-	
-			currentAuctionItemName = ""
-			
-			if auctionator_pending_message then
-				Auctionator_SetMessage(auctionator_pending_message)
-				auctionator_pending_message = nil
-			elseif auctionator_last_item_posted == nil then
-				Auctionator_SetMessage("Drag an item to the Auction Item area\n\nto see recommended pricing information");
-			end
+	if auctionItemChanged or force_refresh then
 		
-			processing_state = KM_NULL_STATE
-			
-		elseif forceMsgAreaUpdate or sorteddata[currentAuctionItemName] == nil then
+		currentAuctionItemName = auctionItemName
 
-			forceMsgAreaUpdate = false
+		if currentAuctionItemName == "" then
+			
+			-- if auctionator_last_item_posted == nil then
+			Auctionator_SetMessage("Drag an item to the Auction Item area\n\nto see recommended pricing information");
+			-- end
+			
+		elseif force_refresh or sorteddata[currentAuctionItemName] == nil then
+
+			force_refresh = false
 
 			sorteddata[currentAuctionItemName] = {}
 
@@ -641,20 +670,29 @@ function Auctionator_Idle(self, elapsed)
 			
 			local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName)
 		
-			currentAuctionClass		= ItemType2AuctionClass(sType)
-			currentAuctionSubclass	= "Guns"--Oh, no one's looking! SubType2AuctionSubclass (currentAuctionClass, sSubType)
+			local currentAuctionClass		= ItemType2AuctionClass(sType)
+			local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
 
 			SortAuctionItems("list", "buyout")
 
 			if IsAuctionSortReversed("list", "buyout") then
 				SortAuctionItems("list", "buyout")
 			end
-		 
-			current_page = 0
-			processing_state = KM_PREQUERY
-
-			scandata = {}
 			
+			Auctionator_SubmitQuery(Auctionator_CreateQuery{
+				name = currentAuctionItemName,
+				exactMatch = true,
+				classIndex = currentAuctionClass,
+				subclassIndex = currentAuctionSubclass,
+				onComplete = function()
+					if table.getn(scandata) > 0 then
+						Auctionator_Process_Scandata(currentAuctionItemName)
+						Auctionator_CalcBaseData()
+					else
+						Auctionator_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
+					end
+				end
+			})		
 		end
 		
 		Auctionator_CalcBaseData()
@@ -664,12 +702,12 @@ end
 	
 -----------------------------------------
 
-function Auctionator_ScrollbarUpdate()
+function Auctionator_ScrollbarUpdate(auctionItemName, auctionItemStackSize)
 
 	local line				-- 1 through 12 of our window to scroll
 	local dataOffset		-- an index into our data calculated from the scroll offset
 
-	local numrows = table.getn(sorteddata[currentAuctionItemName])
+	local numrows = table.getn(sorteddata[auctionItemName])
 
 	if numrows == nil then
 		numrows = 0
@@ -685,9 +723,9 @@ function Auctionator_ScrollbarUpdate()
 		
 		lineEntry:SetID(dataOffset)
 		
-		if dataOffset <= numrows and sorteddata[currentAuctionItemName][dataOffset] then
+		if dataOffset <= numrows and sorteddata[auctionItemName][dataOffset] then
 			
-			local data = sorteddata[currentAuctionItemName][dataOffset]
+			local data = sorteddata[auctionItemName][dataOffset]
 
 			local lineEntry_avail	= getglobal("AuctionatorEntry"..line.."_Availability")
 			-- local lineEntry_comm	= getglobal("AuctionatorEntry"..line.."_Comment")
@@ -699,17 +737,17 @@ function Auctionator_ScrollbarUpdate()
 				lineEntry:UnlockHighlight()
 			end
 
-			if data.stackSize == currentAuctionStackSize then	lineEntry_avail:SetTextColor(0.2, 0.9, 0.2)
-			else													lineEntry_avail:SetTextColor(1.0, 1.0, 1.0)
+			if data.stackSize == auctionItemStackSize then
+				lineEntry_avail:SetTextColor(0.2, 0.9, 0.2)
+			else
+				lineEntry_avail:SetTextColor(1.0, 1.0, 1.0)
 			end
 
-			
 			-- if		data.numYours == 0 then			lineEntry_comm:SetText("")
 			-- elseif	data.numYours == data.count then	lineEntry_comm:SetText("yours")
 			-- else										lineEntry_comm:SetText("yours: "..data.numYours)
 			-- end
-				
-			
+						
 			local tx = string.format("%i %s of %i", data.count, pluralizeIf("stack", data.count), data.stackSize)
 
 			MoneyFrame_Update("AuctionatorEntry"..line.."_PerItem_Price", round(data.buyoutPrice/data.stackSize))
@@ -729,17 +767,22 @@ end
 function Auctionator_EntryOnClick()
 	local entryIndex = this:GetID()
 	
-	-- chatmsg(entryIndex)
+	-- log(entryIndex)
 	
-	basedata = sorteddata[currentAuctionItemName][entryIndex]
+	local auctionItemName, auctionItemTexture, auctionItemStackSize = GetAuctionSellItemInfo()
+	if auctionItemName == nil then
+		auctionItemName =  ""
+	end
 
-	Auctionator_UpdateRecommendation()
+	basedata = sorteddata[auctionItemName][entryIndex]
+
+	Auctionator_UpdateRecommendation(auctionItemName, auctionItemTexture, auctionItemStackSize)
 
 	PlaySound("igMainMenuOptionCheckBoxOn")
 end
 
 function Auctionator_RefreshButtonOnClick()
-	forceMsgAreaUpdate = true
+	force_refresh = true
 end
 
 -----------------------------------------
@@ -879,7 +922,7 @@ end
 
 -----------------------------------------
 
-function chatmsg(msg)
+function log(msg)
 	if DEFAULT_CHAT_FRAME then
 		DEFAULT_CHAT_FRAME:AddMessage(msg)
 	end
@@ -983,7 +1026,7 @@ function ItemType2AuctionClass(itemType)
 				end
 			end
 		end
-	else chatmsg("Can't GetAuctionItemClasses") end
+	else log("Can't GetAuctionItemClasses") end
 end
 
 -----------------------------------------
@@ -997,15 +1040,6 @@ function SubType2AuctionSubclass(auctionClass, itemSubtype)
 				return x
 			end
 		end
-	end
-end
-
-function relevel(frame) --Local
-	local myLevel = frame:GetFrameLevel() + 1
-	local children = { frame:GetChildren() }
-	for _,child in pairs(children) do
-		child:SetFrameLevel(myLevel)
-		relevel(child)
 	end
 end
 

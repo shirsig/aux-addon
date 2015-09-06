@@ -15,10 +15,10 @@
 			this:RegisterEvent("NEW_AUCTION_UPDATE");
 			
 			self = {};
-			self.TimeSinceLastUpdate = 0;
+			self.TimeOfLastUpdate = GetTime();
          </OnLoad>
 		<OnUpdate>
-			Auctionator_OnUpdate(self, elapsed);
+			Auctionator_OnUpdate(self);
 		</OnUpdate>
          <OnEvent> 
             Auctionator_EventHandler();
