@@ -107,13 +107,13 @@ function Auctionator_OnAddonLoaded()
 		--auctionsTabElements[16] = AuctionFrameAuctions
 		--auctionsTabElements[16] = AuctionFrame
 
-		recommendElements[1] = getglobal ("Auctionator_Recommend_Text")
-		recommendElements[2] = getglobal ("Auctionator_RecommendPerItem_Text")
-		recommendElements[3] = getglobal ("Auctionator_RecommendPerItem_Price")
-		recommendElements[4] = getglobal ("Auctionator_RecommendPerStack_Text")
-		recommendElements[5] = getglobal ("Auctionator_RecommendPerStack_Price")
-		recommendElements[6] = getglobal ("Auctionator_Recommend_Basis_Text")
-		recommendElements[7] = getglobal ("Auctionator_RecommendItem_Tex")
+		recommendElements[1] = getglobal("Auctionator_Recommend_Text")
+		recommendElements[2] = getglobal("Auctionator_RecommendPerItem_Text")
+		recommendElements[3] = getglobal("Auctionator_RecommendPerItem_Price")
+		recommendElements[4] = getglobal("Auctionator_RecommendPerStack_Text")
+		recommendElements[5] = getglobal("Auctionator_RecommendPerStack_Price")
+		recommendElements[6] = getglobal("Auctionator_Recommend_Basis_Text")
+		recommendElements[7] = getglobal("Auctionator_RecommendItem_Tex")
 	end
 end
 
@@ -603,7 +603,13 @@ function Auctionator_Idle(self, elapsed)
 
 	local auctionItemName, auctionTexture, auctionCount = GetAuctionSellItemInfo(); 
 	
-	if auctionItemName ~= currentAuctionItemName or forceMsgAreaUpdate then
+	local auctionItemChanged = auctionItemName ~= currentAuctionItemName
+	
+	if auctionItemChanged and processing_state ~= KM_NULL_STATE then
+		sorteddata[currentAuctionItemName] = nil
+	end
+	
+	if auctionItemChanged or forceMsgAreaUpdate then
 				
 		currentAuctionItemName  = auctionItemName
 		currentAuctionStackSize = auctionCount
@@ -653,52 +659,6 @@ function Auctionator_Idle(self, elapsed)
 		
 		Auctionator_CalcBaseData()
 	end
-	
-	-- if currentAuctionItemName ~= auctionItemName or currentAuctionStackSize ~= auctionCount or self.NumIdles == 1 or forceMsgAreaUpdate then
-	
-		-- forceMsgAreaUpdate = false
-		
-		-- sorteddata = {}
-		-- Auctionator_ScrollbarUpdate()
-
-		-- currentAuctionItemName  = auctionItemName
-		-- currentAuctionStackSize = auctionCount
-		-- currentAuctionTexture	= auctionTexture
-		
-		-- Auctionator_RecommendPerItem_Price:Hide()
-		-- Auctionator_RecommendPerStack_Price:Hide()
-
-		-- processing_state = KM_NULL_STATE
-		
-		-- basedata = nil
-		
-		-- if currentAuctionItemName == "" then
-			
-			-- if auctionator_pending_message then
-				-- Auctionator_SetMessage(auctionator_pending_message)
-				-- auctionator_pending_message = nil
-			-- elseif auctionator_last_item_posted == nil then
-				-- Auctionator_SetMessage ("Drag an item to the Auction Item area\n\nto see recommended pricing information");
-			-- end
-		-- else
-			-- local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName);
-		
-			-- currentAuctionClass		= ItemType2AuctionClass (sType);
-			-- currentAuctionSubclass	= "Guns"--Oh, no one's looking! SubType2AuctionSubclass (currentAuctionClass, sSubType);
-
-			-- SortAuctionItems("list", "buyout")
-
-			-- if IsAuctionSortReversed("list", "buyout") then
-				-- SortAuctionItems("list", "buyout")
-			-- end
-		 
-			-- current_page = 0
-			-- processing_state = KM_PREQUERY
-
-			-- scandata = {}
-		-- end
-
-	-- end
 end
 
 	
