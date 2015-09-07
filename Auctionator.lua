@@ -6,8 +6,8 @@ local AuctionatorLoaded = false
 local recommendationElements = {}
 local auctionsTabElements = {}
 
-AUCTIONATOR_ENABLE_ALT	= 1
-AUCTIONATOR_OPEN_FIRST	= 0
+AUCTIONATOR_ENABLE_ALT = 1
+AUCTIONATOR_OPEN_FIRST = 0
 auctionatorEntries = {}
 
 local AUCTIONATOR_TAB_INDEX = 4
@@ -21,11 +21,11 @@ local Auctionator_Orig_ContainerFrameItemButton_OnClick
 local Auctionator_Orig_AuctionFrameAuctions_Update
 local Auctionator_Orig_AuctionsCreateAuctionButton_OnClick
 
-local KM_NULL_STATE	= 0
-local KM_PREQUERY	= 1
-local KM_POSTQUERY	= 2
+local SCAN_STATE_IDLE = 0
+local SCAN_STATE_PREQUERY = 1
+local SCAN_STATE_POSTQUERY = 2
 
-local processingState = KM_NULL_STATE
+local scanState = SCAN_STATE_IDLE
 local currentQuery
 local currentPage
 local forceRefresh = false
@@ -289,7 +289,7 @@ end
 -----------------------------------------
 
 function Auctionator_OnAuctionUpdate()
-	if processingState == KM_POSTQUERY then
+	if scanState == SCAN_STATE_POSTQUERY then
 		Auctionator_Scan_Process()
 	end
 end
@@ -305,7 +305,7 @@ function Auctionator_Scan_Complete()
 	currentQuery = nil
 	currentPage = nil
 	scanData = nil
-	processingState = KM_NULL_STATE
+	scanState = SCAN_STATE_IDLE
 end
 
 -----------------------------------------
@@ -319,13 +319,13 @@ function Auctionator_Scan_Abort()
 	currentQuery = nil
 	currentPage = nil
 	scanData = nil
-	processingState = KM_NULL_STATE
+	scanState = SCAN_STATE_IDLE
 end
 
 -----------------------------------------
 
 function Auctionator_Scan_Query()
-	if processingState == KM_PREQUERY then
+	if scanState == SCAN_STATE_PREQUERY then
 		
 		QueryAuctionItems(
 			currentQuery.name,
@@ -338,7 +338,7 @@ function Auctionator_Scan_Query()
 			currentQuery.isUsable,
 			currentQuery.qualityIndex
 		)
-		processingState = KM_POSTQUERY
+		scanState = SCAN_STATE_POSTQUERY
 		currentPage = currentPage + 1
 	end
 end
@@ -347,7 +347,7 @@ end
 
 function Auctionator_Scan_Process()
 	
-	if processingState == KM_POSTQUERY then
+	if scanState == SCAN_STATE_POSTQUERY then
 	
 		-- SortAuctionItems("list", "buyout")
 		-- if IsAuctionSortReversed("list", "buyout") then
@@ -387,7 +387,7 @@ function Auctionator_Scan_Process()
 		end
 
 		if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
-			processingState = KM_PREQUERY	
+			scanState = SCAN_STATE_PREQUERY	
 		else
 			Auctionator_Scan_Complete()
 		end
@@ -400,14 +400,14 @@ function Auctionator_Scan_Start(query)
 
 	Auctionator_SetMessage("Scanning auctions ...")
 
-	if processingState ~= KM_NULL_STATE then
+	if scanState ~= SCAN_STATE_IDLE then
 		Auctionator_Scan_Abort()
 	end
 	
 	currentQuery = query
 	currentPage = 0
 	scanData = {}
-	processingState = KM_PREQUERY
+	scanState = SCAN_STATE_PREQUERY
 end
 
 -----------------------------------------
@@ -606,7 +606,7 @@ function Auctionator_OnNewAuctionUpdate()
 		return
 	end
 	
-	if processingState ~= KM_NULL_STATE then
+	if scanState ~= SCAN_STATE_IDLE then
 		Auctionator_Scan_Abort()
 	end
 	
@@ -647,7 +647,7 @@ function Auctionator_OnUpdate(self)
 		return
 	end
 	
-	if processingState == KM_PREQUERY and GetTime() - self.TimeOfLastUpdate > 0.5 then
+	if scanState == SCAN_STATE_PREQUERY and GetTime() - self.TimeOfLastUpdate > 0.5 then
 	
 		self.TimeOfLastUpdate = GetTime()
 
