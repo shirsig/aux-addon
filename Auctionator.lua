@@ -22,16 +22,8 @@ local Auctionator_Orig_ContainerFrameItemButton_OnClick
 local Auctionator_Orig_AuctionFrameAuctions_Update
 local Auctionator_Orig_AuctionsCreateAuctionButton_OnClick
 
-local SCAN_STATE_IDLE = 0
-local SCAN_STATE_PREQUERY = 1
-local SCAN_STATE_POSTQUERY = 2
-
-local scanState = SCAN_STATE_IDLE
-local currentQuery
-local currentPage
 local forceRefresh = false
 
-local scanData
 -- local searchResults = {}
 local selectedAuctionatorEntry
 
@@ -44,7 +36,7 @@ local lastItemPosted = nil
 
 -----------------------------------------
 
-local relevel, log, pluralizeIf, round, undercut, roundPriceDown
+local processScanResults, relevel, log, pluralizeIf, round, undercut, roundPriceDown
 local val2gsc, priceToString, ItemType2AuctionClass, SubType2AuctionSubclass
 
 -----------------------------------------
@@ -69,17 +61,6 @@ function Auctionator_OnLoad()
 
 	AuctionatorLoaded = true
 
-end
-
------------------------------------------
-
-function relevel(frame) --Local
-	local myLevel = frame:GetFrameLevel() + 1
-	local children = { frame:GetChildren() }
-	for _,child in pairs(children) do
-		child:SetFrameLevel(myLevel)
-		relevel(child)
-	end
 end
 
 -----------------------------------------
@@ -361,125 +342,9 @@ end
 -----------------------------------------
 
 function Auctionator_OnAuctionUpdate()
-	if scanState == SCAN_STATE_POSTQUERY then
+	if Auctionator_Scan_State_Postquery() then
 		Auctionator_Scan_Process()
 	end
-end
-
------------------------------------------
-
-function Auctionator_Scan_Complete()
-	
-	if currentQuery.onComplete then
-		currentQuery.onComplete(scanData);
-	end
-	
-	currentQuery = nil
-	currentPage = nil
-	scanData = nil
-	scanState = SCAN_STATE_IDLE
-end
-
------------------------------------------
-
-function Auctionator_Scan_Abort()
-
-	if currentQuery and currentQuery.onAbort then
-		currentQuery.onAbort();
-	end
-	
-	currentQuery = nil
-	currentPage = nil
-	scanData = nil
-	scanState = SCAN_STATE_IDLE
-end
-
------------------------------------------
-
-function Auctionator_Scan_Query()
-	if scanState == SCAN_STATE_PREQUERY then
-		
-		QueryAuctionItems(
-			currentQuery.name,
-			currentQuery.minLevel,
-			currentQuery.maxLevel,
-			currentQuery.invTypeIndex,
-			currentQuery.classIndex,
-			currentQuery.subclassIndex,
-			currentPage,
-			currentQuery.isUsable,
-			currentQuery.qualityIndex
-		)
-		scanState = SCAN_STATE_POSTQUERY
-		currentPage = currentPage + 1
-	end
-end
-
------------------------------------------
-
-function Auctionator_Scan_Process()
-	
-	if scanState == SCAN_STATE_POSTQUERY then
-	
-		-- SortAuctionItems("list", "buyout")
-		-- if IsAuctionSortReversed("list", "buyout") then
-			-- SortAuctionItems("list", "buyout")
-		-- end
-		
-		local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
-
-		if totalAuctions >= NUM_AUCTION_ITEMS_PER_PAGE then
-			Auctionator_SetMessage("Scanning auctions: page "..currentPage.." ...")
-		end
-				
-		for i = 1, numBatchAuctions do
-		
-			local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
-			local duration = GetAuctionItemTimeLeft("list", i);
-
-			local sd = {		
-				name			= name,
-				texture			= texture,
-				stackSize		= count,
-				quality			= quality,
-				canUse			= canUse,
-				level			= level,
-				minBid			= minBid,
-				minIncrement	= minIncrement,
-				buyoutPrice		= buyoutPrice,
-				bidAmount		= bidAmount,
-				highBidder		= highBidder,
-				owner			= owner,
-				duration		= duration
-			}
-			
-			if not currentQuery.exactMatch or (currentQuery.name == sd.name and sd.buyoutPrice > 0) then -- TODO separate option for buyout price
-				tinsert(scanData, sd)
-			end
-		end
-
-		if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
-			scanState = SCAN_STATE_PREQUERY	
-		else
-			Auctionator_Scan_Complete()
-		end
-	end
-end
-
------------------------------------------
-
-function Auctionator_Scan_Start(query)
-
-	Auctionator_SetMessage("Scanning auctions ...")
-
-	if scanState ~= SCAN_STATE_IDLE then
-		Auctionator_Scan_Abort()
-	end
-	
-	currentQuery = query
-	currentPage = 0
-	scanData = {}
-	scanState = SCAN_STATE_PREQUERY
 end
 
 -----------------------------------------
@@ -488,44 +353,6 @@ function Auctionator_SetMessage(msg)
 	Auctionator_HideElems(recommendationElements)
 	AuctionatorMessage:SetText(msg)
 	AuctionatorMessage:Show()
-end
-
------------------------------------------
-
-function Auctionator_ProcessScanResults(rawData, auctionItemName)
-
-	auctionatorEntries[auctionItemName] = {}
-	
-	----- Condense the scan rawData into a table that has only a single entry per stacksize/price combo
-	
-	local condData = {}
-
-	for _,rawDatum in ipairs(rawData) do
-	
-		local key = "_"..rawDatum.stackSize.."_"..rawDatum.buyoutPrice
-				
-		if condData[key] then
-			condData[key].count = condData[key].count + 1
-		else			
-			condData[key] = {
-					stackSize 	= rawDatum.stackSize,
-					buyoutPrice	= rawDatum.buyoutPrice,
-					itemPrice		= rawDatum.buyoutPrice / rawDatum.stackSize,
-					count			= 1,
-					numYours		= rawDatum.owner == UnitName("player") and 1 or 0
-			}
-		end
-	end
-
-	----- create a table of these entries sorted by itemPrice
-	
-	local n = 1
-	for _,condDatum in pairs(condData) do
-		auctionatorEntries[auctionItemName][n] = condDatum
-		n = n + 1
-	end
-	
-	table.sort(auctionatorEntries[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
 end
 
 -----------------------------------------
@@ -650,35 +477,13 @@ end
 
 -----------------------------------------
 
-function Auctionator_CreateQuery(parameterMap)
-	local query = {
-		name = nil,
-		exactMatch = false,
-		minLevel = "",
-		maxLevel = "",
-		invTypeIndex = nil,
-		classIndex = nil,
-		subclassIndex = nil,
-		isUsable = nil,
-		qualityIndex = nil
-	}
-	
-	for k,v in pairs(parameterMap) do
-		query[k] = v
-	end
-	
-	return query
-end
-
------------------------------------------
-
 function Auctionator_OnNewAuctionUpdate()
 
 	if PanelTemplates_GetSelectedTab(AuctionFrame) ~= AUCTIONATOR_TAB_INDEX then
 		return
 	end
 	
-	if scanState ~= SCAN_STATE_IDLE then
+	if not Auctionator_Scan_State_Idle() then
 		Auctionator_Scan_Abort()
 	end
 	
@@ -696,13 +501,13 @@ function Auctionator_OnNewAuctionUpdate()
 		local currentAuctionClass		= ItemType2AuctionClass(sType)
 		local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
 		
-		Auctionator_Scan_Start(Auctionator_CreateQuery{
+		Auctionator_Scan_Start(Auctionator_Scan_CreateQuery{
 			name = currentAuctionItemName,
 			exactMatch = true,
 			classIndex = currentAuctionClass,
 			subclassIndex = currentAuctionSubclass,
 			onComplete = function(data)
-				Auctionator_ProcessScanResults(data, currentAuctionItemName)
+				processScanResults(data, currentAuctionItemName)
 				Auctionator_SelectAuctionatorEntry()
 			end
 		})		
@@ -719,7 +524,7 @@ function Auctionator_OnUpdate()
 		return
 	end
 	
-	if scanState == SCAN_STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
+	if Auctionator_Scan_State_Prequery() and GetTime() - timeOfLastUpdate > 0.5 then
 	
 		timeOfLastUpdate = GetTime()
 
@@ -832,6 +637,55 @@ end
 
 --*****************************************************************]]
 
+function processScanResults(rawData, auctionItemName)
+
+	auctionatorEntries[auctionItemName] = {}
+	
+	----- Condense the scan rawData into a table that has only a single entry per stacksize/price combo
+	
+	local condData = {}
+
+	for _,rawDatum in ipairs(rawData) do
+	
+		local key = "_"..rawDatum.stackSize.."_"..rawDatum.buyoutPrice
+				
+		if condData[key] then
+			condData[key].count = condData[key].count + 1
+		else			
+			condData[key] = {
+					stackSize 	= rawDatum.stackSize,
+					buyoutPrice	= rawDatum.buyoutPrice,
+					itemPrice		= rawDatum.buyoutPrice / rawDatum.stackSize,
+					count			= 1,
+					numYours		= rawDatum.owner == UnitName("player") and 1 or 0
+			}
+		end
+	end
+
+	----- create a table of these entries sorted by itemPrice
+	
+	local n = 1
+	for _,condDatum in pairs(condData) do
+		auctionatorEntries[auctionItemName][n] = condDatum
+		n = n + 1
+	end
+	
+	table.sort(auctionatorEntries[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
+end
+
+-----------------------------------------
+
+function relevel(frame)
+	local myLevel = frame:GetFrameLevel() + 1
+	local children = { frame:GetChildren() }
+	for _,child in pairs(children) do
+		child:SetFrameLevel(myLevel)
+		relevel(child)
+	end
+end
+
+-----------------------------------------
+
 function pluralizeIf(word, count)
 
 	if count and count == 1 then
@@ -858,49 +712,7 @@ end
 -----------------------------------------
 
 function undercut(price)
-
 	return math.max(0, price - 1)
-
-	-- if price > 2000000 then
-		-- return roundPriceDown(price, 10000, 10000)
-	-- elseif price > 1000000 then
-		-- return roundPriceDown(price, 2500, 2500)
-	-- elseif price > 500000 then
-		-- return roundPriceDown(price, 1000, 1000)
-	-- elseif price > 50000 then
-		-- return roundPriceDown(price, 500, 500)
-	-- elseif price > 10000 then
-		-- return roundPriceDown(price, 500, 200)
-	-- elseif price > 2000 then
-		-- return roundPriceDown(price, 100, 50)
-	-- elseif price > 100 then
-		-- return roundPriceDown(price, 10, 5)
-	-- elseif price > 0 then
-		-- return math.floor(price - 1)
-	-- else
-		-- return 0
-	-- end
-end
-
------------------------------------------
--- roundPriceDown - rounds a price down to the next lowest multiple of a.
---				  - if the result is not at least b lower, rounds down by a again.
---
---	examples:  	(128790, 500, 250)  ->  128500 
---				(128700, 500, 250)  ->  128000 
---				(128400, 500, 250)  ->  128000
------------------------------------------
-
-function roundPriceDown(price, a, b)
-	
-	local newprice = math.floor(price / a) * a
-	
-	if (price - newprice) < b then
-		newprice = newprice - a
-	end
-	
-	return newprice
-	
 end
 
 -----------------------------------------
@@ -1129,7 +941,7 @@ end
 
 -- function Auctionator_AuctionFrameBrowse_Scan()
 	
-	-- Auctionator_Scan_Start(Auctionator_CreateQuery{
+	-- Auctionator_Scan_Start(Auctionator_Scan_CreateQuery{
 		-- name = BrowseName:GetText(),
 		-- exactMatch = false,
 		-- minLevel = BrowseMinLevel:GetText(),
@@ -1146,3 +958,179 @@ end
 	-- })
 	
 -- end
+
+--[[***************************************************************
+	
+	MULTI PAGE SCAN
+
+	All the functions below here should really be in a separate
+	file and the locals private to that file ...
+
+--*****************************************************************]]
+
+local SCAN_STATE_IDLE = 0
+local SCAN_STATE_PREQUERY = 1
+local SCAN_STATE_POSTQUERY = 2
+
+NUM_AUCTION_ITEMS_PER_PAGE = 50
+
+local currentQuery
+local currentPage
+local scanState = SCAN_STATE_IDLE
+
+local scanData
+
+-----------------------------------------
+
+function Auctionator_Scan_State_Idle()
+	return scanState == SCAN_STATE_IDLE
+end
+
+function Auctionator_Scan_State_Prequery()
+	return scanState == SCAN_STATE_PREQUERY
+end
+
+function Auctionator_Scan_State_Postquery()
+	return scanState == SCAN_STATE_POSTQUERY
+end
+
+-----------------------------------------
+
+function Auctionator_Scan_Complete()
+	
+	if currentQuery.onComplete then
+		currentQuery.onComplete(scanData);
+	end
+	
+	currentQuery = nil
+	currentPage = nil
+	scanData = nil
+	scanState = SCAN_STATE_IDLE
+end
+
+-----------------------------------------
+
+function Auctionator_Scan_Abort()
+
+	if currentQuery and currentQuery.onAbort then
+		currentQuery.onAbort();
+	end
+	
+	currentQuery = nil
+	currentPage = nil
+	scanData = nil
+	scanState = SCAN_STATE_IDLE
+end
+
+-----------------------------------------
+
+function Auctionator_Scan_Query()
+	if scanState == SCAN_STATE_PREQUERY then
+		
+		QueryAuctionItems(
+			currentQuery.name,
+			currentQuery.minLevel,
+			currentQuery.maxLevel,
+			currentQuery.invTypeIndex,
+			currentQuery.classIndex,
+			currentQuery.subclassIndex,
+			currentPage,
+			currentQuery.isUsable,
+			currentQuery.qualityIndex
+		)
+		scanState = SCAN_STATE_POSTQUERY
+		currentPage = currentPage + 1
+	end
+end
+
+-----------------------------------------
+
+function Auctionator_Scan_Process()
+	
+	if scanState == SCAN_STATE_POSTQUERY then
+	
+		-- SortAuctionItems("list", "buyout")
+		-- if IsAuctionSortReversed("list", "buyout") then
+			-- SortAuctionItems("list", "buyout")
+		-- end
+		
+		local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
+
+		if totalAuctions >= NUM_AUCTION_ITEMS_PER_PAGE then
+			Auctionator_SetMessage("Scanning auctions: page "..currentPage.." ...")
+		end
+				
+		for i = 1, numBatchAuctions do
+		
+			local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
+			local duration = GetAuctionItemTimeLeft("list", i)
+
+			local scanDatum = {		
+					name			= name,
+					texture			= texture,
+					stackSize		= count,
+					quality			= quality,
+					canUse			= canUse,
+					level			= level,
+					minBid			= minBid,
+					minIncrement	= minIncrement,
+					buyoutPrice		= buyoutPrice,
+					bidAmount		= bidAmount,
+					highBidder		= highBidder,
+					owner			= owner,
+					duration		= duration
+			}
+			
+			if not currentQuery.exactMatch or (currentQuery.name == scanDatum.name and scanDatum.buyoutPrice > 0) then -- TODO separate option for buyout price
+				tinsert(scanData, scanDatum)
+				if currentQuery.onReadDatum then
+					currentQuery.onReadDatum(scanDatum)
+				end
+			end
+		end
+
+		if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
+			scanState = SCAN_STATE_PREQUERY	
+		else
+			Auctionator_Scan_Complete()
+		end
+	end
+end
+
+-----------------------------------------
+
+function Auctionator_Scan_Start(query)
+	
+	Auctionator_SetMessage("Scanning auctions ...")
+
+	if scanState ~= SCAN_STATE_IDLE then
+		Auctionator_Scan_Abort()
+	end
+	
+	currentQuery = query
+	currentPage = 0
+	scanData = {}
+	scanState = SCAN_STATE_PREQUERY
+end
+
+-----------------------------------------
+
+function Auctionator_Scan_CreateQuery(parameterMap)
+	local query = {
+		name = nil,
+		exactMatch = false,
+		minLevel = "",
+		maxLevel = "",
+		invTypeIndex = nil,
+		classIndex = nil,
+		subclassIndex = nil,
+		isUsable = nil,
+		qualityIndex = nil
+	}
+	
+	for k,v in pairs(parameterMap) do
+		query[k] = v
+	end
+	
+	return query
+end
