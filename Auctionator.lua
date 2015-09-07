@@ -50,8 +50,6 @@ local val2gsc, priceToString, ItemType2AuctionClass, SubType2AuctionSubclass
 
 function Auctionator_EventHandler()
 
---	log(event)
-
 	if event == "VARIABLES_LOADED"			then	Auctionator_OnLoad() 				end
 	if event == "ADDON_LOADED"				then	Auctionator_OnAddonLoaded() 		end
 	if event == "AUCTION_ITEM_LIST_UPDATE"	then	Auctionator_OnAuctionUpdate() 		end
@@ -116,17 +114,17 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 	if not index then
 		index = this:GetID()
 	end
-
+	
+	Auctionator_Scan_Abort()
 	Auctionator_Sell_Template:Hide()
 	
 	if index == 3 then		
 		Auctionator_ShowElems(auctionsTabElements)
 	end
 	
-	if index ~= AUCTIONATOR_TAB_INDEX then
+	if index ~= AUCTIONATOR_TAB_INDEX then	
 		Auctionator_Orig_AuctionFrameTab_OnClick(index)
-		lastItemPosted = nil
-		
+		lastItemPosted = nil		
 	elseif index == AUCTIONATOR_TAB_INDEX then
 		AuctionFrameTab_OnClick(3)
 		
@@ -134,12 +132,10 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 		
 		Auctionator_HideElems(auctionsTabElements)
 		
-		Auctionator_HideElems(recommendationElements)
-		
 		Auctionator_Sell_Template:Show()
 		AuctionFrame:EnableMouse(false)
 		
-		Auctionator_CalcBaseData()
+		Auctionator_OnNewAuctionUpdate()
 	end
 end
 
@@ -158,16 +154,13 @@ function Auctionator_ContainerFrameItemButton_OnClick(button)
 	ClearCursor()
 	
 	if PanelTemplates_GetSelectedTab(AuctionFrame) ~= AUCTIONATOR_TAB_INDEX then
-	
 		AuctionFrameTab_OnClick(AUCTIONATOR_TAB_INDEX)
-	
 	end
 	
 	PickupContainerItem(this:GetParent():GetID(), this:GetID())
 	ClickAuctionSellItemButton()
 
 end
-
 
 -----------------------------------------
 
@@ -323,7 +316,7 @@ end
 
 function Auctionator_Scan_Abort()
 
-	if currentQuery.onAbort then
+	if currentQuery and currentQuery.onAbort then
 		currentQuery.onAbort();
 	end
 	
@@ -409,6 +402,8 @@ end
 
 function Auctionator_Scan_Start(query)
 
+	Auctionator_SetMessage("Scanning")
+
 	if processingState ~= KM_NULL_STATE then
 		Auctionator_Scan_Abort()
 	end
@@ -423,8 +418,6 @@ end
 
 function Auctionator_SetMessage(msg)
 	Auctionator_HideElems(recommendationElements)
-	Auctionator_HideElems(overallElements)
-
 	AuctionatorMessage:SetText(msg)
 	AuctionatorMessage:Show()
 end
@@ -521,7 +514,7 @@ function Auctionator_UpdateRecommendation()
 		AuctionatorRefreshButton:Disable()
 		Auctionator_SetMessage("Drag an item to the Auction Item area\n\nto see recommended pricing information")
 	else
-		AuctionatorRefreshButton:Enable()
+		AuctionatorRefreshButton:Enable()	
 		
 		if selectedAuctionatorEntry then
 			local newBuyoutPrice = selectedAuctionatorEntry.itemPrice * currentAuctionItemStackSize
@@ -532,8 +525,8 @@ function Auctionator_UpdateRecommendation()
 			
 			local newStartPrice = calcNewPrice(round(newBuyoutPrice * 0.95)) 
 			
+			AuctionatorMessage:Hide()	
 			Auctionator_ShowElems(recommendationElements)
-			AuctionatorMessage:Hide()
 			
 			Auctionator_Recommend_Text:SetText("Recommended Buyout Price")
 			Auctionator_RecommendPerStack_Text:SetText("for your stack of "..currentAuctionItemStackSize)
@@ -621,6 +614,10 @@ end
 
 function Auctionator_OnNewAuctionUpdate()
 
+	if PanelTemplates_GetSelectedTab(AuctionFrame) ~= AUCTIONATOR_TAB_INDEX then
+		return
+	end
+	
 	if processingState ~= KM_NULL_STATE then
 		Auctionator_Scan_Abort()
 	end
