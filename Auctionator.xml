@@ -151,7 +151,7 @@
 
 		<Frames>		
 			<Button>
-				<Size><AbsDimension x="470" y="80" /></Size>
+				<Size><AbsDimension x="475" y="80" /></Size>
 				<Anchors>
 					<Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
 				</Anchors>
