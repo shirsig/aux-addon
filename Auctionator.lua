@@ -299,7 +299,7 @@ end
 function Auctionator_Scan_Complete()
 	
 	if currentQuery.onComplete then
-		currentQuery.onComplete(scanData, currentQuery.name);
+		currentQuery.onComplete(scanData);
 	end
 	
 	currentQuery = nil
@@ -420,7 +420,7 @@ end
 
 -----------------------------------------
 
-function Auctionator_Process_ScanResults(rawData, auctionItemName)
+function Auctionator_ProcessScanResults(rawData, auctionItemName)
 
 	auctionatorEntries[auctionItemName] = {}
 	
@@ -462,7 +462,7 @@ local bestPriceOurStackSize;
 
 -----------------------------------------
 
-function Auctionator_CalcBaseData()
+function Auctionator_SelectAuctionatorEntry()
 	
 	if not currentAuctionItemName or not auctionatorEntries[currentAuctionItemName] then
 		selectedAuctionatorEntry = nil
@@ -629,14 +629,14 @@ function Auctionator_OnNewAuctionUpdate()
 			exactMatch = true,
 			classIndex = currentAuctionClass,
 			subclassIndex = currentAuctionSubclass,
-			onComplete = function(data, auctionItemName)
-				Auctionator_Process_ScanResults(data, auctionItemName)
-				Auctionator_CalcBaseData()
+			onComplete = function(data)
+				Auctionator_ProcessScanResults(data, currentAuctionItemName)
+				Auctionator_SelectAuctionatorEntry()
 			end
 		})		
 	end
 	
-	Auctionator_CalcBaseData()
+	Auctionator_SelectAuctionatorEntry()
 end
 
 -----------------------------------------
@@ -1167,7 +1167,7 @@ end
 		-- subclassIndex = AuctionFrameBrowse.selectedSubclassIndex,
 		-- isUsable = IsUsableCheckButton:GetChecked(),
 		-- qualityIndex = UIDropDownMenu_GetSelectedValue(BrowseDropDown),
-		-- onComplete = function(data, auctionItemName)
+		-- onComplete = function(data)
 			-- table.sort(data, function(a,b) return a.buyoutPrice < b.buyoutPrice end)
 			-- scanData = data
 		-- end
