@@ -746,7 +746,7 @@ function Auctionator_ScrollbarUpdate()
 	else
 		numrows = getn(auctionatorEntries[currentAuctionItemName])
 	end
-		
+	
 	FauxScrollFrame_Update(AuctionatorScrollFrame, numrows, 12, 16);
 
 	for line = 1,12 do
@@ -754,6 +754,12 @@ function Auctionator_ScrollbarUpdate()
 		dataOffset = line + FauxScrollFrame_GetOffset(AuctionatorScrollFrame)
 		
 		local lineEntry = getglobal("AuctionatorEntry"..line)
+		
+		if numrows <= 12 then
+			lineEntry:SetWidth(603)
+		else
+			lineEntry:SetWidth(585)
+		end
 		
 		lineEntry:SetID(dataOffset)
 		
