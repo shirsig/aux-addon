@@ -1,27 +1,49 @@
-local SCAN_STATE_IDLE = 0
-local SCAN_STATE_PREQUERY = 1
-local SCAN_STATE_POSTQUERY = 2
+local timeOfLastUpdate = GetTime()
 
-NUM_AUCTION_ITEMS_PER_PAGE = 50
+local eventFrame = CreateFrame("Frame")
+eventFrame:SetScript("OnUpdate", function()
+	if state == STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
+	
+		timeOfLastUpdate = GetTime()
+
+		if CanSendAuctionQuery() then
+			Auctionator_Scan_Query()
+		end
+	end
+end)
+eventFrame:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
+eventFrame:SetScript("OnEvent", function(event)
+	if state == STATE_POSTQUERY then
+		Auctionator_Scan_Process()
+	end
+end)
+
+-----------------------------------------
+
+local STATE_IDLE = 0
+local STATE_PREQUERY = 1
+local STATE_POSTQUERY = 2
+
+local NUM_AUCTION_ITEMS_PER_PAGE = 50
 
 local currentQuery
 local currentPage
-local scanState = SCAN_STATE_IDLE
+local state = STATE_IDLE
 
 local scanData
 
 -----------------------------------------
 
 function Auctionator_Scan_State_Idle()
-	return scanState == SCAN_STATE_IDLE
+	return state == STATE_IDLE
 end
 
 function Auctionator_Scan_State_Prequery()
-	return scanState == SCAN_STATE_PREQUERY
+	return state == STATE_PREQUERY
 end
 
 function Auctionator_Scan_State_Postquery()
-	return scanState == SCAN_STATE_POSTQUERY
+	return state == STATE_POSTQUERY
 end
 
 -----------------------------------------
@@ -35,7 +57,7 @@ function Auctionator_Scan_Complete()
 	currentQuery = nil
 	currentPage = nil
 	scanData = nil
-	scanState = SCAN_STATE_IDLE
+	state = STATE_IDLE
 end
 
 -----------------------------------------
@@ -49,13 +71,13 @@ function Auctionator_Scan_Abort()
 	currentQuery = nil
 	currentPage = nil
 	scanData = nil
-	scanState = SCAN_STATE_IDLE
+	state = STATE_IDLE
 end
 
 -----------------------------------------
 
 function Auctionator_Scan_Query()
-	if scanState == SCAN_STATE_PREQUERY then
+	if state == STATE_PREQUERY then
 		
 		QueryAuctionItems(
 			currentQuery.name,
@@ -68,7 +90,7 @@ function Auctionator_Scan_Query()
 			currentQuery.isUsable,
 			currentQuery.qualityIndex
 		)
-		scanState = SCAN_STATE_POSTQUERY
+		state = STATE_POSTQUERY
 		currentPage = currentPage + 1
 	end
 end
@@ -77,7 +99,7 @@ end
 
 function Auctionator_Scan_Process()
 	
-	if scanState == SCAN_STATE_POSTQUERY then
+	if state == STATE_POSTQUERY then
 	
 		-- SortAuctionItems("list", "buyout")
 		-- if IsAuctionSortReversed("list", "buyout") then
@@ -120,7 +142,7 @@ function Auctionator_Scan_Process()
 		end
 
 		if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
-			scanState = SCAN_STATE_PREQUERY	
+			state = STATE_PREQUERY	
 		else
 			Auctionator_Scan_Complete()
 		end
@@ -133,14 +155,14 @@ function Auctionator_Scan_Start(query)
 	
 	Auctionator_SetMessage("Scanning auctions ...")
 
-	if scanState ~= SCAN_STATE_IDLE then
+	if state ~= STATE_IDLE then
 		Auctionator_Scan_Abort()
 	end
 	
 	currentQuery = query
 	currentPage = 0
 	scanData = {}
-	scanState = SCAN_STATE_PREQUERY
+	state = STATE_PREQUERY
 end
 
 -----------------------------------------

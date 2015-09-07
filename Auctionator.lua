@@ -11,8 +11,6 @@ auctionatorEntries = {}
 
 local AUCTIONATOR_TAB_INDEX = 4
 
-local timeOfLastUpdate = GetTime()
-
 -----------------------------------------
 
 local Auctionator_Orig_AuctionFrameBrowse_Update
@@ -45,7 +43,6 @@ function Auctionator_EventHandler()
 
 	if event == "VARIABLES_LOADED"			then	Auctionator_OnLoad() 				end
 	if event == "ADDON_LOADED"				then	Auctionator_OnAddonLoaded() 		end
-	if event == "AUCTION_ITEM_LIST_UPDATE"	then	Auctionator_OnAuctionUpdate() 		end
 	if event == "AUCTION_OWNED_LIST_UPDATE"	then	Auctionator_OnAuctionOwnedUpdate() 	end
 	if event == "AUCTION_HOUSE_SHOW"		then	Auctionator_OnAuctionHouseShow() 	end
 	if event == "AUCTION_HOUSE_CLOSED"		then	Auctionator_OnAuctionHouseClosed() 	end
@@ -352,14 +349,6 @@ end
 
 -----------------------------------------
 
-function Auctionator_OnAuctionUpdate()
-	if Auctionator_Scan_State_Postquery() then
-		Auctionator_Scan_Process()
-	end
-end
-
------------------------------------------
-
 function Auctionator_SetMessage(msg)
 	Auctionator_HideElems(recommendationElements)
 	AuctionatorMessage:SetText(msg)
@@ -445,7 +434,6 @@ function Auctionator_UpdateRecommendation()
 			MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
 			MoneyInputFrame_SetCopper(StartPrice, newStartPrice)
 			
-			log(MoneyInputFrame_GetCopper(BuyoutPrice, newBuyoutPrice))
 			if selectedAuctionatorEntry.stackSize == auctionatorEntries[currentAuctionItemName][1].stackSize and selectedAuctionatorEntry.buyoutPrice == auctionatorEntries[currentAuctionItemName][1].buyoutPrice then
 				Auctionator_Recommend_Basis_Text:SetText("(based on cheapest)")
 			elseif bestPriceOurStackSize and selectedAuctionatorEntry.stackSize == bestPriceOurStackSize.stackSize and selectedAuctionatorEntry.buyoutPrice == bestPriceOurStackSize.buyoutPrice then
@@ -494,9 +482,7 @@ function Auctionator_OnNewAuctionUpdate()
 		return
 	end
 	
-	if not Auctionator_Scan_State_Idle() then
-		Auctionator_Scan_Abort()
-	end
+	Auctionator_Scan_Abort()
 	
 	currentAuctionItemName, currentAuctionItemTexture, currentAuctionItemStackSize = GetAuctionSellItemInfo()
 	
@@ -535,14 +521,7 @@ function Auctionator_OnUpdate()
 		return
 	end
 	
-	if Auctionator_Scan_State_Prequery() and GetTime() - timeOfLastUpdate > 0.5 then
-	
-		timeOfLastUpdate = GetTime()
 
-		if CanSendAuctionQuery() then
-			Auctionator_Scan_Query()
-		end
-	end
 	
 	if forceRefresh then
 		Auctionator_OnNewAuctionUpdate()

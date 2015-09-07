@@ -3,12 +3,11 @@
 	<Script file="Auctionator.lua"/> 
   
 	<!-- Frame to handle all core events --> 
-	<Frame name="Auctionator_core"> 
+	<Frame name="Auctionator_Core"> 
       <Scripts> 
 			<OnLoad> 
 				this:RegisterEvent("VARIABLES_LOADED")
 				this:RegisterEvent("ADDON_LOADED")
-				this:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
 				this:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
 				this:RegisterEvent("AUCTION_HOUSE_SHOW")
 				this:RegisterEvent("AUCTION_HOUSE_CLOSED")
