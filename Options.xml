@@ -15,8 +15,8 @@
 		</Anchors>
 		<Frames>
 			<Button name="AuctionatorOptionsButton" inherits="UIPanelButtonTemplate" text="Auctionator">
-				<Size><AbsDimension x="126" y="22"/>	</Size>
-				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="0"/></Offset></Anchor></Anchors>
+				<Size><AbsDimension x="126" y="22"/></Size>
+				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-18" y="10"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
 						Auctionator_ShowOptionsFrame()
