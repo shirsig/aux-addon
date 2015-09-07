@@ -298,10 +298,6 @@ end
 
 function Auctionator_Scan_Complete()
 	
-	if getn(scanData) == 0 then
-		Auctionator_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
-	end
-	
 	if currentQuery.onComplete then
 		currentQuery.onComplete(scanData, currentQuery.name);
 	end
@@ -547,6 +543,8 @@ function Auctionator_UpdateRecommendation()
 			else
 				Auctionator_Recommend_Basis_Text:SetText("(based on auction selected below)")
 			end
+		elseif auctionatorEntries[currentAuctionItemName] then
+			Auctionator_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
 		else 
 			Auctionator_HideElems(recommendationElements)
 		end
