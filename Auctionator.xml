@@ -13,12 +13,9 @@
 			this:RegisterEvent("AUCTION_HOUSE_SHOW")
 			this:RegisterEvent("AUCTION_HOUSE_CLOSED")
 			this:RegisterEvent("NEW_AUCTION_UPDATE")
-			
-			self = {}
-			self.TimeOfLastUpdate = GetTime()
          </OnLoad>
 		<OnUpdate>
-			Auctionator_OnUpdate(self)
+			Auctionator_OnUpdate()
 		</OnUpdate>
          <OnEvent> 
             Auctionator_EventHandler()

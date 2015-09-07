@@ -12,6 +12,8 @@ auctionatorEntries = {}
 
 local AUCTIONATOR_TAB_INDEX = 4
 
+local timeOfLastUpdate = GetTime()
+
 -----------------------------------------
 
 local Auctionator_Orig_AuctionFrameBrowse_Update
@@ -641,15 +643,15 @@ end
 
 -----------------------------------------
 
-function Auctionator_OnUpdate(self)
+function Auctionator_OnUpdate()
 	
 	if not AuctionatorMessage then
 		return
 	end
 	
-	if scanState == SCAN_STATE_PREQUERY and GetTime() - self.TimeOfLastUpdate > 0.5 then
+	if scanState == SCAN_STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
 	
-		self.TimeOfLastUpdate = GetTime()
+		timeOfLastUpdate = GetTime()
 
 		if CanSendAuctionQuery() then
 			Auctionator_Scan_Query()
