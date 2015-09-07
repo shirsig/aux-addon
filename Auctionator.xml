@@ -24,7 +24,7 @@
    </Frame> 
 
 	<Button name="AuctionatorEntryTemplate" virtual="true" hidden="true">
-		<Size><AbsDimension x="450" y="16" /></Size>		
+		<Size><AbsDimension x="546" y="16" /></Size>		
 		<Frames>
 			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
@@ -86,7 +86,7 @@
 		<Anchors>
 			<Anchor point="TOPLEFT">
 				<Offset>
-					<AbsDimension x="465" y="-159"/>
+					<AbsDimension x="467" y="-159"/>
 				</Offset>
 			</Anchor>
 		</Anchors>	
@@ -121,7 +121,7 @@
 
 			<Layer level="ARTWORK">
 				<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-					<Size><AbsDimension x="450" y="60"/></Size>
+					<Size><AbsDimension x="546" y="60"/></Size>
 					<Anchors>
 						<Anchor point="TOP">
 							<Offset>
@@ -148,7 +148,7 @@
 
 		<Frames>		
 			<Button>
-				<Size><AbsDimension x="475" y="80" /></Size>
+				<Size><AbsDimension x="548" y="81" /></Size>
 				<Anchors>
 					<Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
 				</Anchors>
@@ -252,7 +252,7 @@
 			</Frame>
 
 			<ScrollFrame name="AuctionatorScrollFrame" inherits="FauxScrollFrameTemplate">
-				<Size><AbsDimension x="450" y="196"/></Size>
+				<Size><AbsDimension x="500" y="196"/></Size>
 				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-105"/></Offset></Anchor></Anchors>
 
 				<Scripts>
