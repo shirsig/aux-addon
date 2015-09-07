@@ -2,7 +2,7 @@
 
 	<Script file="Options.lua"/> 
 	
-	<Frame name="AuctionatorOptionsButtonTemplate" virtual="true" frameStrata="HIGH" hidden="true">
+	<Frame name="AuctionatorOptionsButtonTemplate" virtual="true" hidden="true">
 		<Size>
 			<AbsDimension x="550" y="447"/>
 		</Size>

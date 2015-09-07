@@ -372,7 +372,6 @@ function Auctionator_SelectAuctionatorEntry()
 		----- find the best price per stacksize and overall -----
 		
 		for _,auctionatorEntry in ipairs(auctionatorEntries[currentAuctionItemName]) do
-		
 			if not bestPrice[auctionatorEntry.stackSize] or bestPrice[auctionatorEntry.stackSize].itemPrice >= auctionatorEntry.itemPrice then
 				bestPrice[auctionatorEntry.stackSize] = auctionatorEntry
 			end
@@ -433,8 +432,9 @@ function Auctionator_UpdateRecommendation()
 			MoneyFrame_Update("Auctionator_RecommendPerStack_Price", round(newBuyoutPrice))
 			
 			MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
-			MoneyInputFrame_SetCopper(StartPrice,  newStartPrice)
+			MoneyInputFrame_SetCopper(StartPrice, newStartPrice)
 			
+			log(MoneyInputFrame_GetCopper(BuyoutPrice, newBuyoutPrice))
 			if selectedAuctionatorEntry.stackSize == auctionatorEntries[currentAuctionItemName][1].stackSize and selectedAuctionatorEntry.buyoutPrice == auctionatorEntries[currentAuctionItemName][1].buyoutPrice then
 				Auctionator_Recommend_Basis_Text:SetText("(based on cheapest)")
 			elseif bestPriceOurStackSize and selectedAuctionatorEntry.stackSize == bestPriceOurStackSize.stackSize and selectedAuctionatorEntry.buyoutPrice == bestPriceOurStackSize.buyoutPrice then
@@ -573,6 +573,7 @@ function Auctionator_ScrollbarUpdate()
 			local auctionatorEntry = auctionatorEntries[currentAuctionItemName][dataOffset]
 
 			local lineEntry_avail	= getglobal("AuctionatorEntry"..line.."_Availability")
+			local lineEntry_comm	= getglobal("AuctionatorEntry"..line.."_Comment")
 			local lineEntry_stack	= getglobal("AuctionatorEntry"..line.."_StackPrice")
 
 			if selectedAuctionatorEntry and auctionatorEntry.itemPrice == selectedAuctionatorEntry.itemPrice and auctionatorEntry.stackSize == selectedAuctionatorEntry.stackSize then
@@ -587,10 +588,14 @@ function Auctionator_ScrollbarUpdate()
 				lineEntry_avail:SetTextColor(1.0, 1.0, 1.0)
 			end
 
-			-- if		auctionatorEntry.numYours == 0 then			lineEntry_comm:SetText("")
-			-- elseif	auctionatorEntry.numYours == auctionatorEntry.count then	lineEntry_comm:SetText("yours")
-			-- else										lineEntry_comm:SetText("yours: "..auctionatorEntry.numYours)
-			-- end
+			if auctionatorEntry.numYours == 0 then
+				lineEntry_comm:SetText("")
+			elseif
+				auctionatorEntry.numYours == auctionatorEntry.count then
+				lineEntry_comm:SetText("yours")
+			else
+				lineEntry_comm:SetText("yours: "..auctionatorEntry.numYours)
+			end
 						
 			local tx = string.format("%i %s of %i", auctionatorEntry.count, pluralizeIf("stack", auctionatorEntry.count), auctionatorEntry.stackSize)
 
