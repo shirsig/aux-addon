@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="Auctionator.lua"/> 
+	<Script file="Options.lua"/> 
 	
 	<Frame name="AuctionatorOptionsButtonFrame" frameStrata="HIGH" hidden="true">
 		<Size>
@@ -195,6 +195,50 @@
 						<Scripts>
 							<OnEnter>
 								Auctionator_ShowTooltip_OpenFirst()
+							</OnEnter>
+							<OnLeave>
+								GameTooltip:Hide()
+							</OnLeave>
+						</Scripts>
+					</CheckButton>
+
+				</Frames>
+			</Frame>
+			
+			<Frame name="AuctionatorOption_Instant_Buyout_Box">
+				<Size><AbsDimension y="40" /></Size>		
+				<Anchors>
+					<Anchor point="TOP" relativeTo="AuctionatorOption_Title" relativePoint="BOTTOM" ><Offset><AbsDimension y="-65"/></Offset></Anchor>
+					<Anchor point="LEFT" ><Offset><AbsDimension x="40"/></Offset></Anchor>
+					<Anchor point="RIGHT"><Offset><AbsDimension x="-20"/></Offset></Anchor>
+				</Anchors>
+				
+				<Scripts>
+					<OnEnter>
+						Auctionator_ShowTooltip_InstantBuyout()
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide()
+					</OnLeave>
+				</Scripts>
+				
+				<Frames>
+					<CheckButton name="AuctionatorOption_Instant_Buyout" inherits="UICheckButtonTemplate">
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+						<Layers>
+							<Layer level="BACKGROUND">
+								<FontString inherits="GameFontHighlight" text="Enable right-click instant buyout">
+									<Anchors>
+										<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuctionatorOption_Instant_Buyout">
+											<Offset><AbsDimension x="8" y="1"/></Offset>
+										</Anchor>
+									</Anchors>
+								</FontString>
+							</Layer>
+						</Layers>
+						<Scripts>
+							<OnEnter>
+								Auctionator_ShowTooltip_InstantBuyout()
 							</OnEnter>
 							<OnLeave>
 								GameTooltip:Hide()
