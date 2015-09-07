@@ -44,7 +44,7 @@ local lastItemPosted = nil
 
 -----------------------------------------
 
-local log, pluralizeIf, round, undercut, roundPriceDown
+local relevel, log, pluralizeIf, round, undercut, roundPriceDown
 local val2gsc, priceToString, ItemType2AuctionClass, SubType2AuctionSubclass
 
 -----------------------------------------
@@ -73,10 +73,40 @@ end
 
 -----------------------------------------
 
+function relevel(frame) --Local
+	local myLevel = frame:GetFrameLevel() + 1
+	local children = { frame:GetChildren() }
+	for _,child in pairs(children) do
+		child:SetFrameLevel(myLevel)
+		relevel(child)
+	end
+end
+
+-----------------------------------------
+
+function Auctionator_AddPanels()
+	
+	local sellFrame = CreateFrame("Frame", "Auctionator_Sell_Panel", AuctionFrame, "Auctionator_Sell_Template")
+	sellFrame:SetParent("AuctionFrame")
+	sellFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT", 210, 0)
+	relevel(sellFrame)
+	sellFrame:Hide()
+	
+	local optionsFrame = CreateFrame("Frame", "AuctionatorOptionsButtonPanel", AuctionFrame, "AuctionatorOptionsButtonTemplate")
+	optionsFrame:SetParent("AuctionFrame")
+	optionsFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT", 210, 0)
+	relevel(optionsFrame)
+	optionsFrame:Hide()
+	
+end
+
+-----------------------------------------
+
 function Auctionator_OnAddonLoaded()
 
-	if string.lower(arg1) == "blizzard_auctionui" then			
+	if string.lower(arg1) == "blizzard_auctionui" then
 		Auctionator_AddSellTab()
+		Auctionator_AddPanels()
 		
 		Auctionator_SetupHookFunctions()
 		
@@ -117,7 +147,7 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 	end
 	
 	Auctionator_Scan_Abort()
-	Auctionator_Sell_Template:Hide()
+	Auctionator_Sell_Panel:Hide()
 	
 	if index == 3 then		
 		Auctionator_ShowElems(auctionsTabElements)
@@ -133,7 +163,7 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 		
 		Auctionator_HideElems(auctionsTabElements)
 		
-		Auctionator_Sell_Template:Show()
+		Auctionator_Sell_Panel:Show()
 		AuctionFrame:EnableMouse(false)
 		
 		Auctionator_OnNewAuctionUpdate()
@@ -599,7 +629,7 @@ end
 
 function Auctionator_OnAuctionHouseShow()
 
-	AuctionatorOptionsButtonFrame:Show()
+	AuctionatorOptionsButtonPanel:Show()
 
 	if AUCTIONATOR_OPEN_FIRST ~= 0 then
 		AuctionFrameTab_OnClick(AUCTIONATOR_TAB_INDEX)
@@ -611,10 +641,10 @@ end
 
 function Auctionator_OnAuctionHouseClosed()
 
-	AuctionatorOptionsButtonFrame:Hide()
+	AuctionatorOptionsButtonPanel:Hide()
 	AuctionatorOptionsFrame:Hide()
 	AuctionatorDescriptionFrame:Hide()
-	Auctionator_Sell_Template:Hide()
+	Auctionator_Sell_Panel:Hide()
 	
 end
 

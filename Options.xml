@@ -2,21 +2,21 @@
 
 	<Script file="Options.lua"/> 
 	
-	<Frame name="AuctionatorOptionsButtonFrame" frameStrata="HIGH" hidden="true">
+	<Frame name="AuctionatorOptionsButtonTemplate" virtual="true" frameStrata="HIGH" hidden="true">
 		<Size>
-			<AbsDimension x="768" y="520"/>
+			<AbsDimension x="550" y="447"/>
 		</Size>
 		<Anchors>
 			<Anchor point="TOPLEFT">
 				<Offset>
-					<AbsDimension x="0" y="0"/>
+					<AbsDimension x="210" y="0"/>
 				</Offset>
 			</Anchor>
 		</Anchors>
 		<Frames>
 			<Button name="AuctionatorOptionsButton" inherits="UIPanelButtonTemplate" text="Auctionator">
 				<Size><AbsDimension x="126" y="22"/></Size>
-				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-18" y="10"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="472" y="-12"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
 						Auctionator_ShowOptionsFrame()

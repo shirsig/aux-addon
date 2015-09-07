@@ -5,26 +5,26 @@
 	<!-- Frame to handle all core events --> 
 	<Frame name="Auctionator_core"> 
       <Scripts> 
-         <OnLoad> 
-            this:RegisterEvent("VARIABLES_LOADED")
-			this:RegisterEvent("ADDON_LOADED")
-			this:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
-			this:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
-			this:RegisterEvent("AUCTION_HOUSE_SHOW")
-			this:RegisterEvent("AUCTION_HOUSE_CLOSED")
-			this:RegisterEvent("NEW_AUCTION_UPDATE")
-         </OnLoad>
-		<OnUpdate>
-			Auctionator_OnUpdate()
-		</OnUpdate>
-         <OnEvent> 
-            Auctionator_EventHandler()
-         </OnEvent> 
-      </Scripts> 
-   </Frame> 
+			<OnLoad> 
+				this:RegisterEvent("VARIABLES_LOADED")
+				this:RegisterEvent("ADDON_LOADED")
+				this:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
+				this:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
+				this:RegisterEvent("AUCTION_HOUSE_SHOW")
+				this:RegisterEvent("AUCTION_HOUSE_CLOSED")
+				this:RegisterEvent("NEW_AUCTION_UPDATE")
+			</OnLoad>
+			<OnUpdate>
+				Auctionator_OnUpdate()
+			</OnUpdate>
+			<OnEvent> 
+				Auctionator_EventHandler()
+			</OnEvent> 
+		</Scripts> 
+	</Frame> 
 
 	<Button name="AuctionatorEntryTemplate" virtual="true" hidden="true">
-		<Size><AbsDimension x="546" y="16" /></Size>		
+		<Size><AbsDimension x="603" y="16" /></Size>		
 		<Frames>
 			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
@@ -35,8 +35,8 @@
 						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnLoad>
-								SmallMoneyFrame_OnLoad()
-								MoneyFrame_SetType("STATIC")
+								SmallMoneyFrame_OnLoad();
+								MoneyFrame_SetType("STATIC");
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -56,8 +56,20 @@
 			</Frame>
 			
 			<Frame>
+				<Size><AbsDimension x="100" y="16" /></Size>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="320" y="-3"/></Offset></Anchor></Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="$parent_Comment" inherits="GameFontHighlightSmall">
+							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+			
+			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="300" y="-3"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="440" y="-3"/></Offset></Anchor></Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
 						<FontString name="$parent_StackPrice" inherits="GameFontHighlightSmall">
@@ -66,7 +78,6 @@
 					</Layer>
 				</Layers>
 			</Frame>
-			
 		</Frames>
 
 		<HighlightTexture file="Interface\HelpFrame\HelpFrameButton-Highlight" alphaMode="ADD">
@@ -74,19 +85,19 @@
 		</HighlightTexture>
 		<Scripts>
 			<OnClick>
-				Auctionator_EntryOnClick()
+				Auctionator_EntryOnClick();
 			</OnClick>
 		</Scripts>
 	</Button>
 
-	<Frame name="Auctionator_Sell_Template" frameStrata="HIGH" hidden="true">
+	<Frame name="Auctionator_Sell_Template" virtual="true" frameStrata="HIGH" hidden="true">
 		<Size>
-			<AbsDimension x="1" y="1"/>
+			<AbsDimension x="550" y="447"/>
 		</Size>
 		<Anchors>
 			<Anchor point="TOPLEFT">
 				<Offset>
-					<AbsDimension x="467" y="-159"/>
+					<AbsDimension x="210" y="0"/>
 				</Offset>
 			</Anchor>
 		</Anchors>	
@@ -95,15 +106,15 @@
 			<Layer level="BACKGROUND">
 				
 				<FontString name="AuctionatorTitle" inherits="GameFontNormal">
-					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-18"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="2" y="-58"/></Offset></Anchor></Anchors>
 				</FontString>
 
 				<FontString name="AuctionatorMessage" inherits="GameFontNormal">
-					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="28" y="-100"/></Offset></Anchor></Anchors>
 				</FontString>
 
 				<FontString name="Auctionator_Recommend_Text" inherits="GameFontNormal" text="Recommended buyout price">
-					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-90" y="-8"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="77" y="-98"/></Offset></Anchor></Anchors>
 				</FontString>
 
 				<FontString name="Auctionator_Recommend_Basis_Text" inherits="GameFontHighlightSmall" text="based on">
@@ -116,16 +127,16 @@
 
 				<FontString name="Auctionator_RecommendPerItem_Text" inherits="GameFontHighlightSmall" text="per item">
 					<Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Recommend_Text"><Offset><AbsDimension x="152" y="-51"/></Offset></Anchor></Anchors>
-				</FontString>			
+				</FontString>
 			</Layer>
 
 			<Layer level="ARTWORK">
 				<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-					<Size><AbsDimension x="546" y="60"/></Size>
+					<Size><AbsDimension x="606" y="64"/></Size>
 					<Anchors>
-						<Anchor point="TOP">
+						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="0" y="-62"/>
+								<AbsDimension x="6" y="-167"/>
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -140,24 +151,26 @@
 					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="220" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 
+				<FontString inherits="GameFontHighlightSmall" text=" ">
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="325" y="1"/></Offset></Anchor></Anchors>
+				</FontString>
+
 				<FontString inherits="GameFontHighlightSmall" text="Total Price">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="370" y="1"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="500" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
 
 		<Frames>		
 			<Button>
-				<Size><AbsDimension x="548" y="81" /></Size>
+				<Size><AbsDimension y="118"/></Size>
 				<Anchors>
-					<Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+					<Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-70"/></Offset></Anchor>
+					<Anchor point="RIGHT"><Offset><AbsDimension x="63"/></Offset></Anchor>
 				</Anchors>
 				<Layers>
-					<Layer level="BACKGROUND">
-
-					</Layer>
+					<Layer level="BACKGROUND"></Layer>
 				</Layers>
-		
 				<Scripts>
 					<OnLoad>
 						this:RegisterEvent("NEW_AUCTION_UPDATE")
@@ -197,13 +210,13 @@
 								<AbsValue val="16"/>
 							</EdgeSize>
 						</Backdrop>
-					</Frame>				
-				</Frames>			
+					</Frame>			
+				</Frames>		
 			</Button>
 
 			<Button name="Auctionator_RecommendItem_Tex">
 				<Size><AbsDimension x="37" y="37"/></Size>
-				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-210" y="-35"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="24" y="-87"/></Offset></Anchor></Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
 						<FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT" hidden="true">
@@ -220,7 +233,7 @@
 			</Button>
 
 			<Frame>
-				<Size><AbsDimension x="120" y="20" /></Size>
+				<Size><AbsDimension x="120" y="20"/></Size>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="Auctionator_Recommend_Text">
 						<Offset><AbsDimension x="32" y="-24"/></Offset>
@@ -236,7 +249,7 @@
 			</Frame>
 
 			<Frame>
-				<Size><AbsDimension x="120" y="20" /></Size>
+				<Size><AbsDimension x="120" y="20"/></Size>
 				<Anchors>
 					<Anchor point="TOPLEFT" relativeTo="Auctionator_Recommend_Text">
 						<Offset><AbsDimension x="32" y="-46"/></Offset>
@@ -251,47 +264,47 @@
 				</Frames>
 			</Frame>
 
-			<ScrollFrame name="AuctionatorScrollFrame" inherits="FauxScrollFrameTemplate">
-				<Size><AbsDimension x="500" y="196"/></Size>
-				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-105"/></Offset></Anchor></Anchors>
-
-				<Scripts>
-					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(16, Auctionator_ScrollbarUpdate);
-					</OnVerticalScroll>
-					<OnShow>
-						<!--Auctionator_ScrollbarUpdate()-->
-					</OnShow>
-				</Scripts>
-			</ScrollFrame>
-			
-			 <Button name="AuctionatorEntry1" inherits="AuctionatorEntryTemplate">
-			   <Anchors><Anchor point="TOP" relativeTo="AuctionatorScrollFrame"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-			 </Button>
-			 <Button name="AuctionatorEntry2"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry1"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry3"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry2"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry4"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry3"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry5"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry4"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry6"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry5"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry7"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry6"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry8"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry7"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry9"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry10" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry11" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry12" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry13" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry14" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			 <Button name="AuctionatorEntry15" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-           
 			<Button name="AuctionatorRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
-				<Size><AbsDimension x="114" y="20"/></Size>
-				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="149" y="-304"/></Offset></Anchor></Anchors>
+				<Size><AbsDimension x="126" y="22"/>	</Size>
+				<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="-14" y="-199"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
 						Auctionator_RefreshButtonOnClick()
 					</OnClick>
 				</Scripts>
-			</Button>		   
+			</Button>
+			
+			<ScrollFrame name="AuctionatorScrollFrame" inherits="FauxScrollFrameTemplate">
+				<Size><AbsDimension x="588" y="194"/></Size>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-213"/></Offset></Anchor></Anchors>
+
+				<Scripts>
+					<OnVerticalScroll>
+						FauxScrollFrame_OnVerticalScroll(16, Auctionator_ScrollbarUpdate)
+					</OnVerticalScroll>
+					<OnShow>
+						<!--Auctionator_ScrollbarUpdate();-->
+					</OnShow>
+				</Scripts>
+			</ScrollFrame>
+
+			<Button name="AuctionatorEntry1" inherits="AuctionatorEntryTemplate">
+			<Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorScrollFrame" relativePoint="TOPLEFT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor></Anchors>
+			</Button>
+			<Button name="AuctionatorEntry2"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry1"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry3"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry2"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry4"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry3"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry5"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry4"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry6"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry5"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry7"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry6"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry8"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry7"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry9"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry10" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry11" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry12" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry13" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry14" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorEntry15" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>	   
 		</Frames>
 	</Frame>
 </Ui>
