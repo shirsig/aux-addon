@@ -89,7 +89,7 @@
 		</Scripts>
 	</Button>
 
-	<Frame name="Auctionator_Sell_Template" virtual="true" frameStrata="HIGH" hidden="true">
+	<Frame name="Auctionator_Sell_Template" virtual="true" hidden="true">
 		<Size>
 			<AbsDimension x="550" y="447"/>
 		</Size>
