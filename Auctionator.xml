@@ -89,7 +89,7 @@
 		<Anchors>
 			<Anchor point="TOPLEFT">
 				<Offset>
-					<AbsDimension x="465" y="-160"/>
+					<AbsDimension x="465" y="-159"/>
 				</Offset>
 			</Anchor>
 		</Anchors>	
@@ -106,7 +106,7 @@
 				</FontString>
 
 				<FontString name="Auctionator_Recommend_Text" inherits="GameFontNormal" text="Recommended buyout price">
-					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-85" y="-8"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-90" y="-8"/></Offset></Anchor></Anchors>
 				</FontString>
 
 				<FontString name="Auctionator_Recommend_Basis_Text" inherits="GameFontHighlightSmall" text="based on">
@@ -128,7 +128,7 @@
 					<Anchors>
 						<Anchor point="TOP">
 							<Offset>
-								<AbsDimension x="0" y="-63"/>
+								<AbsDimension x="0" y="-62"/>
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -151,7 +151,7 @@
 
 		<Frames>		
 			<Button>
-				<Size><AbsDimension x="500" y="80" /></Size>
+				<Size><AbsDimension x="470" y="80" /></Size>
 				<Anchors>
 					<Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
 				</Anchors>
@@ -206,7 +206,7 @@
 
 			<Button name="Auctionator_RecommendItem_Tex">
 				<Size><AbsDimension x="37" y="37"/></Size>
-				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-180" y="-35"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-210" y="-35"/></Offset></Anchor></Anchors>
 				<Layers>
 					<Layer level="OVERLAY">
 						<FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT" hidden="true">
@@ -288,7 +288,7 @@
            
 			<Button name="AuctionatorRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
 				<Size><AbsDimension x="114" y="20"/></Size>
-				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="149" y="-303"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="149" y="-304"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
 						Auctionator_RefreshButtonOnClick()
