@@ -49,7 +49,6 @@ function Auctionator_EventHandler()
 	if event == "AUCTION_OWNED_LIST_UPDATE"	then	Auctionator_OnAuctionOwnedUpdate() 	end
 	if event == "AUCTION_HOUSE_SHOW"		then	Auctionator_OnAuctionHouseShow() 	end
 	if event == "AUCTION_HOUSE_CLOSED"		then	Auctionator_OnAuctionHouseClosed() 	end
-	if event == "NEW_AUCTION_UPDATE"		then	Auctionator_OnNewAuctionUpdate()	end
 
 end
 
@@ -223,11 +222,20 @@ end
 
 -----------------------------------------
 
+function Auctionator_AuctionSellItemButton_OnEvent()
+	Auctionator_Orig_AuctionSellItemButton_OnEvent()
+	Auctionator_OnNewAuctionUpdate()
+end
+
+-----------------------------------------
+
 function Auctionator_BrowseButton_OnClick(button)
 	if arg1 == "LeftButton" then
 		Auctionator_Orig_BrowseButton_OnClick(button)
 	end
 end
+
+-----------------------------------------
 
 function Auctionator_BrowseButton_OnMouseDown()
 	if arg1 == "RightButton" and AUCTIONATOR_INSTANT_BUYOUT then
@@ -272,6 +280,9 @@ function Auctionator_SetupHookFunctions()
 	BrowseButton8:RegisterForClicks("LeftButtonUp", "RightButtonDown")
 	BrowseButton8:SetScript("OnMouseDown", Auctionator_BrowseButton_OnMouseDown)
 
+	Auctionator_Orig_AuctionSellItemButton_OnEvent = AuctionSellItemButton_OnEvent
+	AuctionSellItemButton_OnEvent = Auctionator_AuctionSellItemButton_OnEvent
+	
 	Auctionator_Orig_AuctionFrameTab_OnClick = AuctionFrameTab_OnClick
 	AuctionFrameTab_OnClick = Auctionator_AuctionFrameTab_OnClick
 	

@@ -12,7 +12,6 @@
 				this:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
 				this:RegisterEvent("AUCTION_HOUSE_SHOW")
 				this:RegisterEvent("AUCTION_HOUSE_CLOSED")
-				this:RegisterEvent("NEW_AUCTION_UPDATE")
 			</OnLoad>
 			<OnUpdate>
 				Auctionator_OnUpdate()
