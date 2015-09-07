@@ -14,7 +14,7 @@
 
 		<Layers>
 			<Layer level="BACKGROUND">
-				<FontString name="AuctionatorAuthorText" inherits="GameFontDisableSmall" justifyH="LEFT" justifyV="TOP" text="Author: Zirco; Vanilla adaptation by Nimeral">
+				<FontString name="AuctionatorAuthorText" inherits="GameFontDisableSmall" justifyH="LEFT" justifyV="TOP">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT">
 							<Offset><AbsDimension x="30" y="20"/></Offset>
@@ -40,7 +40,7 @@
 				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						AuctionatorDescriptionFrame:Hide();
+						AuctionatorDescriptionFrame:Hide()
 					</OnClick>
 				</Scripts>
 			</Button>

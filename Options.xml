@@ -19,7 +19,7 @@
 				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						Auctionator_ShowOptionsFrame();
+						Auctionator_ShowOptionsFrame()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -96,7 +96,7 @@
 				<HighlightFont inherits="GameFontHighlightSmall"/>
 				<Scripts>
 					<OnClick>
-						AuctionatorDescriptionFrame:Show();
+						Auctionator_ShowDescriptionFrame()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -126,10 +126,10 @@
 				
 				<Scripts>
 					<OnEnter>
-						Auctionator_ShowTooltip_EnableAlt();
+						Auctionator_ShowTooltip_EnableAlt()
 					</OnEnter>
 					<OnLeave>
-						GameTooltip:Hide();
+						GameTooltip:Hide()
 					</OnLeave>
 				</Scripts>
 
@@ -150,10 +150,10 @@
 						</Layers>
 						<Scripts>
 							<OnEnter>
-								Auctionator_ShowTooltip_EnableAlt();
+								Auctionator_ShowTooltip_EnableAlt()
 							</OnEnter>
 							<OnLeave>
-								GameTooltip:Hide();
+								GameTooltip:Hide()
 							</OnLeave>
 						</Scripts>
 					</CheckButton>
@@ -171,10 +171,10 @@
 				
 				<Scripts>
 					<OnEnter>
-						Auctionator_ShowTooltip_OpenFirst();
+						Auctionator_ShowTooltip_OpenFirst()
 					</OnEnter>
 					<OnLeave>
-						GameTooltip:Hide();
+						GameTooltip:Hide()
 					</OnLeave>
 				</Scripts>
 				
@@ -194,10 +194,10 @@
 						</Layers>
 						<Scripts>
 							<OnEnter>
-								Auctionator_ShowTooltip_OpenFirst();
+								Auctionator_ShowTooltip_OpenFirst()
 							</OnEnter>
 							<OnLeave>
-								GameTooltip:Hide();
+								GameTooltip:Hide()
 							</OnLeave>
 						</Scripts>
 					</CheckButton>
@@ -222,7 +222,7 @@
 				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						AuctionatorOptionsFrame:Hide();
+						AuctionatorOptionsFrame:Hide()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -232,8 +232,8 @@
 				<Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuctionatorOptionsButton_Cancel"><Offset><AbsDimension x="-3" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						AuctionatorOptionsSave();
-						AuctionatorOptionsFrame:Hide();
+						AuctionatorOptionsSave()
+						AuctionatorOptionsFrame:Hide()
 					</OnClick>
 				</Scripts>
 			</Button>

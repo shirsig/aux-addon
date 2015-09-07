@@ -1,10 +1,10 @@
-local AuctionatorVersion = "2.0.0-Vanilla"
+local AuctionatorVersion = "1.1.0-Vanilla"
 local AuctionatorAuthor  = "Zirco; Vanilla adaptation by Nimeral; Fixed, Cleaned up and extended by Simon Hirsig"
 
 local AuctionatorLoaded = false
 
-local recommendElements		= {}
-local auctionsTabElements	= {}
+local recommendationElements = {}
+local auctionsTabElements = {}
 
 AUCTIONATOR_ENABLE_ALT	= 1
 AUCTIONATOR_OPEN_FIRST	= 0
@@ -13,7 +13,8 @@ local AUCTIONATOR_TAB_INDEX = 4
 
 -----------------------------------------
 
-local Auctionator_Orig_AuctionFrameBrowse_Search
+local Auctionator_Orig_AuctionFrameBrowse_Update
+local Auctionator_Orig_AuctionFrameBrowse_Scan
 local Auctionator_Orig_AuctionFrameTab_OnClick
 local Auctionator_Orig_ContainerFrameItemButton_OnClick
 local Auctionator_Orig_AuctionFrameAuctions_Update
@@ -21,29 +22,29 @@ local Auctionator_Orig_AuctionsCreateAuctionButton_OnClick
 
 local KM_NULL_STATE	= 0
 local KM_PREQUERY	= 1
-local KM_INQUERY	= 2
-local KM_POSTQUERY	= 3
-local KM_ANALYZING	= 4
+local KM_POSTQUERY	= 2
 
-local processing_state	= KM_NULL_STATE
-local current_query
-local current_page
-local force_refresh = false
+local processingState = KM_NULL_STATE
+local currentQuery
+local currentPage
+local forceRefresh = false
 
-local scandata
-local sorteddata = {}
-sorteddata[""] = {}
-local basedata
+local scanData
+local auctionatorEntries = {}
+-- local searchResults = {}
+local selectedAuctionatorEntry
 
-local currentAuctionItemName = ""
+local currentAuctionItemName = nil
+local currentAuctionItemTexture = nil
+local currentAuctionStackSize = nil
 
-local auctionator_last_buyoutprice = 1
-local auctionator_last_item_posted = nil
+local lastBuyoutPrice = 1
+local lastItemPosted = nil
 
 -----------------------------------------
 
-local	BoolToString, BoolToNum, NumToBool, pluralizeIf, round, calcNewPrice, roundPriceDown
-local	val2gsc, priceToString, ItemType2AuctionClass, SubType2AuctionSubclass
+local log, BoolToString, BoolToNum, NumToBool, pluralizeIf, round, calcNewPrice, roundPriceDown
+local val2gsc, priceToString, ItemType2AuctionClass, SubType2AuctionSubclass
 
 -----------------------------------------
 
@@ -75,7 +76,7 @@ end
 
 function Auctionator_OnAddonLoaded()
 
-	if string.lower (arg1) == "blizzard_auctionui" then			
+	if string.lower(arg1) == "blizzard_auctionui" then			
 		Auctionator_AddSellTab()
 		
 		Auctionator_SetupHookFunctions()
@@ -98,13 +99,13 @@ function Auctionator_OnAddonLoaded()
 		--auctionsTabElements[16] = AuctionFrameAuctions
 		--auctionsTabElements[16] = AuctionFrame
 
-		recommendElements[1] = getglobal("Auctionator_Recommend_Text")
-		recommendElements[2] = getglobal("Auctionator_RecommendPerItem_Text")
-		recommendElements[3] = getglobal("Auctionator_RecommendPerItem_Price")
-		recommendElements[4] = getglobal("Auctionator_RecommendPerStack_Text")
-		recommendElements[5] = getglobal("Auctionator_RecommendPerStack_Price")
-		recommendElements[6] = getglobal("Auctionator_Recommend_Basis_Text")
-		recommendElements[7] = getglobal("Auctionator_RecommendItem_Tex")
+		recommendationElements[1] = getglobal("Auctionator_Recommend_Text")
+		recommendationElements[2] = getglobal("Auctionator_RecommendPerItem_Text")
+		recommendationElements[3] = getglobal("Auctionator_RecommendPerItem_Price")
+		recommendationElements[4] = getglobal("Auctionator_RecommendPerStack_Text")
+		recommendationElements[5] = getglobal("Auctionator_RecommendPerStack_Price")
+		recommendationElements[6] = getglobal("Auctionator_Recommend_Basis_Text")
+		recommendationElements[7] = getglobal("Auctionator_RecommendItem_Tex")
 	end
 end
 
@@ -124,8 +125,7 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 	
 	if index ~= AUCTIONATOR_TAB_INDEX then
 		Auctionator_Orig_AuctionFrameTab_OnClick(index)
-		auctionator_last_item_posted = nil
-		force_refresh = true
+		lastItemPosted = nil
 		
 	elseif index == AUCTIONATOR_TAB_INDEX then
 		AuctionFrameTab_OnClick(3)
@@ -134,17 +134,13 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 		
 		Auctionator_HideElems(auctionsTabElements)
 		
-		Auctionator_HideElems(recommendElements)
+		Auctionator_HideElems(recommendationElements)
 		
 		Auctionator_Sell_Template:Show()
 		AuctionFrame:EnableMouse(false)
 		
-		if currentAuctionItemName ~= "" then
-			Auctionator_CalcBaseData()
-		end
-	
+		Auctionator_CalcBaseData()
 	end
-
 end
 
 -----------------------------------------
@@ -193,8 +189,8 @@ function Auctionator_AuctionsCreateAuctionButton_OnClick()
 	
 	if PanelTemplates_GetSelectedTab(AuctionFrame) == AUCTIONATOR_TAB_INDEX  and AuctionFrame:IsShown() then
 		
-		auctionator_last_buyoutprice = MoneyInputFrame_GetCopper(BuyoutPrice)
-		auctionator_last_item_posted = currentAuctionItemName
+		lastBuyoutPrice = MoneyInputFrame_GetCopper(BuyoutPrice)
+		lastItemPosted = currentAuctionItemName
 
 	end
 	
@@ -206,11 +202,11 @@ end
 
 function Auctionator_OnAuctionOwnedUpdate()
 
-	if auctionator_last_item_posted then
+	if lastItemPosted then
 	
-		Auctionator_Recommend_Text:SetText("Auction Created for "..auctionator_last_item_posted)
+		Auctionator_Recommend_Text:SetText("Auction Created for "..lastItemPosted)
 
-		MoneyFrame_Update("Auctionator_RecommendPerStack_Price", auctionator_last_buyoutprice)
+		MoneyFrame_Update("Auctionator_RecommendPerStack_Price", lastBuyoutPrice)
 
 		Auctionator_RecommendPerStack_Price:Show()
 		Auctionator_RecommendPerItem_Price:Hide()
@@ -222,35 +218,13 @@ end
 
 -----------------------------------------
 
-function Auctionator_OnNewAuctionUpdate()
-
-
-end
-
------------------------------------------
-
-function Auctionator_AuctionFrameBrowse_Search()
-	
-	Auctionator_SubmitQuery(Auctionator_CreateQuery{
-		name = BrowseName:GetText(),
-		exactMatch = false,
-		minLevel = BrowseMinLevel:GetText(),
-		maxLevel = BrowseMaxLevel:GetText(),
-		invTypeIndex = AuctionFrameBrowse.selectedInvtypeIndex,
-		classIndex = AuctionFrameBrowse.selectedClassIndex,
-		subclassIndex = AuctionFrameBrowse.selectedSubclassIndex,
-		isUsable = IsUsableCheckButton:GetChecked(),
-		qualityIndex = UIDropDownMenu_GetSelectedValue(BrowseDropDown)
-	})
-	
-end
-
------------------------------------------
-
 function Auctionator_SetupHookFunctions()
 	
-	Auctionator_Orig_AuctionFrameBrowse_Search = AuctionFrameBrowse_Search
-	AuctionFrameBrowse_Search = Auctionator_AuctionFrameBrowse_Search
+	-- Auctionator_Orig_AuctionFrameBrowse_Update = AuctionFrameBrowse_Update
+	-- AuctionFrameBrowse_Update = Auctionator_AuctionFrameBrowse_Update
+	
+	-- Auctionator_Orig_AuctionFrameBrowse_Scan = AuctionFrameBrowse_Scan
+	-- AuctionFrameBrowse_Scan = Auctionator_AuctionFrameBrowse_Scan
 	
 	Auctionator_Orig_AuctionFrameTab_OnClick = AuctionFrameTab_OnClick
 	AuctionFrameTab_OnClick = Auctionator_AuctionFrameTab_OnClick
@@ -322,106 +296,133 @@ end
 -----------------------------------------
 
 function Auctionator_OnAuctionUpdate()
-	if processing_state == KM_POSTQUERY then
-		Auctionator_ProcessQuery()
+	if processingState == KM_POSTQUERY then
+		Auctionator_Scan_Process()
 	end
 end
 
 -----------------------------------------
 
-function Auctionator_CompleteQuery(query)
-
-	if current_query.onComplete ~= nil then
-		current_query.onComplete(scandata);
+function Auctionator_Scan_Complete()
+	
+	if getn(scanData) == 0 then
+		Auctionator_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
 	end
 	
-	current_query = nil
-	current_page = nil
-	scandata = nil
-	processing_state = KM_NULL_STATE
-end
-
------------------------------------------
-
-function Auctionator_AbortQuery(query)
-	if current_query.onAbort ~= nil then
-		current_query.onAbort();
+	if currentQuery.onComplete then
+		currentQuery.onComplete(scanData, currentQuery.name);
 	end
 	
-	current_query = nil
-	current_page = nil
-	scandata = nil
-	processing_state = KM_NULL_STATE
+	currentQuery = nil
+	currentPage = nil
+	scanData = nil
+	processingState = KM_NULL_STATE
 end
 
 -----------------------------------------
 
-function Auctionator_AdvanceQuery()
-	QueryAuctionItems(
-		current_query.name,
-		current_query.minLevel,
-		current_query.maxLevel,
-		current_query.invTypeIndex,
-		current_query.classIndex,
-		current_query.subclassIndex,
-		current_page,
-		current_query.isUsable,
-		current_query.qualityIndex
-	)
-	processing_state = KM_POSTQUERY
-	current_page = current_page + 1
-end
+function Auctionator_Scan_Abort()
 
------------------------------------------
-
-function Auctionator_ProcessQuery()
-	
-	local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
-
-	if totalAuctions >= 50 then
-		Auctionator_SetMessage("Scanning auctions: page "..current_page)
+	if currentQuery.onAbort then
+		currentQuery.onAbort();
 	end
+	
+	currentQuery = nil
+	currentPage = nil
+	scanData = nil
+	processingState = KM_NULL_STATE
+end
+
+-----------------------------------------
+
+function Auctionator_Scan_Query()
+	if processingState == KM_PREQUERY then
+		
+		QueryAuctionItems(
+			currentQuery.name,
+			currentQuery.minLevel,
+			currentQuery.maxLevel,
+			currentQuery.invTypeIndex,
+			currentQuery.classIndex,
+			currentQuery.subclassIndex,
+			currentPage,
+			currentQuery.isUsable,
+			currentQuery.qualityIndex
+		)
+		processingState = KM_POSTQUERY
+		currentPage = currentPage + 1
+	end
+end
+
+-----------------------------------------
+
+function Auctionator_Scan_Process()
+	
+	if processingState == KM_POSTQUERY then
+	
+		-- SortAuctionItems("list", "buyout")
+		-- if IsAuctionSortReversed("list", "buyout") then
+			-- SortAuctionItems("list", "buyout")
+		-- end
+		
+		local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
+
+		if totalAuctions >= NUM_AUCTION_ITEMS_PER_PAGE then
+			Auctionator_SetMessage("Scanning auctions: page "..currentPage)
+		end
+				
+		for i = 1, numBatchAuctions do
+		
+			local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
+			local duration = GetAuctionItemTimeLeft("list", i);
+
+			local sd = {		
+				name			= name,
+				texture			= texture,
+				stackSize		= count,
+				quality			= quality,
+				canUse			= canUse,
+				level			= level,
+				minBid			= minBid,
+				minIncrement	= minIncrement,
+				buyoutPrice		= buyoutPrice,
+				bidAmount		= bidAmount,
+				highBidder		= highBidder,
+				owner			= owner,
+				duration		= duration
+			}
 			
-	for x = 1, numBatchAuctions do
-	
-		local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", x)
+			if not currentQuery.exactMatch or (currentQuery.name == sd.name and sd.buyoutPrice > 0) then -- TODO separate option for buyout price
+				tinsert(scanData, sd)
+			end
+		end
 
-		if name == currentAuctionItemName and buyoutPrice > 0 then	
-			local sd = {}
-			
-			sd["stackSize"]		= count
-			sd["buyoutPrice"]	= buyoutPrice
-			sd["owner"]			= owner
-			
-			tinsert(scandata, sd)
+		if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
+			processingState = KM_PREQUERY	
+		else
+			Auctionator_Scan_Complete()
 		end
 	end
-
-	if numBatchAuctions == 50 then			
-		processing_state = KM_PREQUERY	
-	else
-		Auctionator_CompleteQuery()
-	end
 end
 
 -----------------------------------------
 
-function Auctionator_SubmitQuery(query)
+function Auctionator_Scan_Start(query)
 
-	if processing_state ~= KM_NULL_STATE then
-		Auctionator_AbortQuery()
+	if processingState ~= KM_NULL_STATE then
+		Auctionator_Scan_Abort()
 	end
 	
-	current_query = query
-	current_page = 0
-	scandata = {}
-	processing_state = KM_PREQUERY
+	currentQuery = query
+	currentPage = 0
+	scanData = {}
+	processingState = KM_PREQUERY
 end
 
 -----------------------------------------
 
 function Auctionator_SetMessage(msg)
-	Auctionator_HideElems(recommendElements)
+	Auctionator_HideElems(recommendationElements)
 	Auctionator_HideElems(overallElements)
 
 	AuctionatorMessage:SetText(msg)
@@ -430,53 +431,49 @@ end
 
 -----------------------------------------
 
-function Auctionator_Process_Scandata(auctionItemName)
+function Auctionator_Process_ScanResults(rawData, auctionItemName)
 
-	sorteddata[auctionItemName] = {}
+	auctionatorEntries[auctionItemName] = {}
 	
-	if scandata == nil then
-		return
-	end
-   
-	----- Condense the scan data into a table that has only a single entry per stacksize/price combo
-
-	local conddata = {}
-
-	for i,sd in ipairs(scandata) do
+	if rawData then
 	
-		local key = "_"..sd.stackSize.."_"..sd.buyoutPrice
+		----- Condense the scan rawData into a table that has only a single entry per stacksize/price combo
+		local condData = {}
+
+		for i,sd in ipairs(rawData) do
 		
-	
-		if conddata[key] then
-			conddata[key].count = conddata[key].count + 1
-		else
-			local data = {}
-			
-			data.stackSize 		= sd.stackSize
-			data.buyoutPrice	= sd.buyoutPrice
-			data.itemPrice		= sd.buyoutPrice / sd.stackSize
-			data.count			= 1
-			data.numYours		= 0
-			
-			conddata[key] = data;
+			local key = "_"..sd.stackSize.."_"..sd.buyoutPrice
+					
+			if condData[key] then
+				condData[key].count = condData[key].count + 1
+			else
+				local rawData = {}
+				
+				rawData.stackSize 		= sd.stackSize
+				rawData.buyoutPrice	= sd.buyoutPrice
+				rawData.itemPrice		= sd.buyoutPrice / sd.stackSize
+				rawData.count			= 1
+				rawData.numYours		= 0
+				
+				condData[key] = rawData;
+			end
+
+			if sd.owner == UnitName("player") then
+				condData[key].numYours = condData[key].numYours + 1
+			end
+		
 		end
 
-		if sd.owner == UnitName("player") then
-			conddata[key].numYours = conddata[key].numYours + 1
+		----- create a table of these entries sorted by itemPrice
+		
+		local n = 1
+		for i,v in pairs(condData) do
+			auctionatorEntries[auctionItemName][n] = v
+			n = n + 1
 		end
-	
+		
+		table.sort(auctionatorEntries[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
 	end
-
-
-	----- create a table of these entries sorted by itemPrice
-	
-	local n = 1
-	for i,v in pairs(conddata) do
-		sorteddata[auctionItemName][n] = v
-		n = n + 1
-	end
-	
-	table.sort(sorteddata[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
 end
 
 -----------------------------------------
@@ -486,87 +483,92 @@ local bestPriceOurStackSize;
 -----------------------------------------
 
 function Auctionator_CalcBaseData()
+	
+	if not currentAuctionItemName or not auctionatorEntries[currentAuctionItemName] then
+		selectedAuctionatorEntry = nil
+	else
+		local bestPrice	= {}		-- a table with one entry per stacksize that is the cheapest auction for that particular stacksize
+		local absoluteBest			-- the overall cheapest auction
 
-	local auctionItemName, auctionItemTexture, auctionItemStackSize = GetAuctionSellItemInfo()
-	if auctionItemName == nil then
-		auctionItemName =  ""
-	end
-	
-	local bestPrice	= {}		-- a table with one entry per stacksize that is the cheapest auction for that particular stacksize
-	local absoluteBest			-- the overall cheapest auction
-	
-	local j, sd
-
-	----- find the best price per stacksize and overall -----
-	
-	for j,sd in ipairs(sorteddata[auctionItemName]) do
-	
-		if bestPrice[sd.stackSize] == nil or bestPrice[sd.stackSize].itemPrice >= sd.itemPrice then
-			bestPrice[sd.stackSize] = sd
+		----- find the best price per stacksize and overall -----
+		
+		for _,sd in ipairs(auctionatorEntries[currentAuctionItemName]) do
+		
+			if not bestPrice[sd.stackSize] or bestPrice[sd.stackSize].itemPrice >= sd.itemPrice then
+				bestPrice[sd.stackSize] = sd
+			end
+		
+			if not absoluteBest or absoluteBest.itemPrice > sd.itemPrice then
+				absoluteBest = sd
+			end	
 		end
-	
-		if absoluteBest == nil or absoluteBest.itemPrice > sd.itemPrice then
-			absoluteBest = sd
-		end
-	
-	end
-	
-	basedata = absoluteBest
+		
+		selectedAuctionatorEntry = absoluteBest
 
-	if bestPrice[auctionItemStackSize] then
-		basedata				= bestPrice[auctionItemStackSize]
-		bestPriceOurStackSize	= bestPrice[auctionItemStackSize]
+		if bestPrice[currentAuctionItemStackSize] then
+			selectedAuctionatorEntry				= bestPrice[currentAuctionItemStackSize]
+			bestPriceOurStackSize	= bestPrice[currentAuctionItemStackSize]
+		end
 	end
-	
-	Auctionator_UpdateRecommendation(auctionItemName, auctionItemTexture, auctionItemStackSize)
+	Auctionator_UpdateRecommendation()
 end
 
 -----------------------------------------
 
-function Auctionator_UpdateRecommendation(auctionItemName, auctionItemTexture, auctionItemStackSize)
-	if basedata then
-		local newBuyoutPrice = basedata.itemPrice * auctionItemStackSize
+function Auctionator_UpdateRecommendation()
 
-		if basedata.numYours < basedata.count then
-			newBuyoutPrice = calcNewPrice(newBuyoutPrice)
-		end
+	if not currentAuctionItemName then
+		AuctionatorRefreshButton:Disable()
+		Auctionator_SetMessage("Drag an item to the Auction Item area\n\nto see recommended pricing information")
+	else
+		AuctionatorRefreshButton:Enable()
 		
-		local newStartPrice = calcNewPrice(round(newBuyoutPrice *0.95)) 
-		
-		Auctionator_ShowElems(recommendElements)
-		AuctionatorMessage:Hide()
-		
-		Auctionator_Recommend_Text:SetText("Recommended Buyout Price")
-		Auctionator_RecommendPerStack_Text:SetText("for your stack of "..auctionItemStackSize)
-		
-		if auctionItemTexture then
-			Auctionator_RecommendItem_Tex:SetNormalTexture(auctionItemTexture)
-			if auctionItemStackSize > 1 then
-				Auctionator_RecommendItem_TexCount:SetText(auctionItemStackSize)
-				Auctionator_RecommendItem_TexCount:Show()
-			else
-				Auctionator_RecommendItem_TexCount:Hide()
+		if selectedAuctionatorEntry then
+			local newBuyoutPrice = selectedAuctionatorEntry.itemPrice * currentAuctionItemStackSize
+
+			if selectedAuctionatorEntry.numYours < selectedAuctionatorEntry.count then
+				newBuyoutPrice = calcNewPrice(newBuyoutPrice)
 			end
-		else
-			Auctionator_RecommendItem_Tex:Hide()
-		end
-		
-		MoneyFrame_Update("Auctionator_RecommendPerItem_Price",  round(newBuyoutPrice / auctionItemStackSize))
-		MoneyFrame_Update("Auctionator_RecommendPerStack_Price", round(newBuyoutPrice))
-		
-		MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
-		MoneyInputFrame_SetCopper(StartPrice,  newStartPrice)
-		
-		if basedata.stackSize == sorteddata[currentAuctionItemName][1].stackSize and basedata.buyoutPrice == sorteddata[currentAuctionItemName][1].buyoutPrice then
-			Auctionator_Recommend_Basis_Text:SetText("(based on cheapest)")
-		elseif bestPriceOurStackSize and basedata.stackSize == bestPriceOurStackSize.stackSize and basedata.buyoutPrice == bestPriceOurStackSize.buyoutPrice then
-			Auctionator_Recommend_Basis_Text:SetText("(based on cheapest stack of the same size)")
-		else
-			Auctionator_Recommend_Basis_Text:SetText("(based on auction selected below)")
+			
+			local newStartPrice = calcNewPrice(round(newBuyoutPrice * 0.95)) 
+			
+			Auctionator_ShowElems(recommendationElements)
+			AuctionatorMessage:Hide()
+			
+			Auctionator_Recommend_Text:SetText("Recommended Buyout Price")
+			Auctionator_RecommendPerStack_Text:SetText("for your stack of "..currentAuctionItemStackSize)
+			
+			if currentAuctionItemTexture then
+				Auctionator_RecommendItem_Tex:SetNormalTexture(currentAuctionItemTexture)
+				if currentAuctionItemStackSize > 1 then
+					Auctionator_RecommendItem_TexCount:SetText(currentAuctionItemStackSize)
+					Auctionator_RecommendItem_TexCount:Show()
+				else
+					Auctionator_RecommendItem_TexCount:Hide()
+				end
+			else
+				Auctionator_RecommendItem_Tex:Hide()
+			end
+			
+			MoneyFrame_Update("Auctionator_RecommendPerItem_Price",  round(newBuyoutPrice / currentAuctionItemStackSize))
+			MoneyFrame_Update("Auctionator_RecommendPerStack_Price", round(newBuyoutPrice))
+			
+			MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
+			MoneyInputFrame_SetCopper(StartPrice,  newStartPrice)
+			
+			if selectedAuctionatorEntry.stackSize == auctionatorEntries[currentAuctionItemName][1].stackSize and selectedAuctionatorEntry.buyoutPrice == auctionatorEntries[currentAuctionItemName][1].buyoutPrice then
+				Auctionator_Recommend_Basis_Text:SetText("(based on cheapest)")
+			elseif bestPriceOurStackSize and selectedAuctionatorEntry.stackSize == bestPriceOurStackSize.stackSize and selectedAuctionatorEntry.buyoutPrice == bestPriceOurStackSize.buyoutPrice then
+				Auctionator_Recommend_Basis_Text:SetText("(based on cheapest stack of the same size)")
+			else
+				Auctionator_Recommend_Basis_Text:SetText("(based on auction selected below)")
+			end
+		else 
+			Auctionator_HideElems(recommendationElements)
 		end
 	end
 	
-	Auctionator_ScrollbarUpdate(auctionItemName, auctionItemStackSize)
+	Auctionator_ScrollbarUpdate()
 end
 
 -----------------------------------------
@@ -576,7 +578,7 @@ function Auctionator_OnAuctionHouseShow()
 	AuctionatorOptionsButtonFrame:Show()
 
 	if AUCTIONATOR_OPEN_FIRST ~= 0 then
-		AuctionFrameTab_OnClick (AUCTIONATOR_TAB_INDEX)
+		AuctionFrameTab_OnClick(AUCTIONATOR_TAB_INDEX)
 	end
 
 end
@@ -617,100 +619,76 @@ end
 
 -----------------------------------------
 
+function Auctionator_OnNewAuctionUpdate()
+
+	if processingState ~= KM_NULL_STATE then
+		Auctionator_Scan_Abort()
+	end
+	
+	currentAuctionItemName, currentAuctionItemTexture, currentAuctionItemStackSize = GetAuctionSellItemInfo()
+	
+	if currentAuctionItemName and (forceRefresh or not auctionatorEntries[currentAuctionItemName]) then
+
+		forceRefresh = false
+
+		auctionatorEntries[currentAuctionItemName] = nil
+		selectedAuctionatorEntry = nil
+		
+		local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName)
+	
+		local currentAuctionClass		= ItemType2AuctionClass(sType)
+		local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
+		
+		Auctionator_Scan_Start(Auctionator_CreateQuery{
+			name = currentAuctionItemName,
+			exactMatch = true,
+			classIndex = currentAuctionClass,
+			subclassIndex = currentAuctionSubclass,
+			onComplete = function(data, auctionItemName)
+				Auctionator_Process_ScanResults(data, auctionItemName)
+				Auctionator_CalcBaseData()
+			end
+		})		
+	end
+	
+	Auctionator_CalcBaseData()
+end
+
+-----------------------------------------
+
 function Auctionator_OnUpdate(self)
 	
-	if AuctionatorMessage == nil then
+	if not AuctionatorMessage then
 		return
 	end
 	
-	if processing_state == KM_PREQUERY and GetTime() - self.TimeOfLastUpdate > 0.5 then
+	if processingState == KM_PREQUERY and GetTime() - self.TimeOfLastUpdate > 0.5 then
 	
 		self.TimeOfLastUpdate = GetTime()
 
-		------- check whether to send a new auction query to get the next page -------
-
 		if CanSendAuctionQuery() then
-			Auctionator_AdvanceQuery()
+			Auctionator_Scan_Query()
 		end
 	end
 	
-	------- check whether the "sell" item has changed -------
-
-	local auctionItemName, _, _ = GetAuctionSellItemInfo()
-	if auctionItemName == nil then
-		auctionItemName =  ""
-	end
-	
-	local auctionItemChanged = auctionItemName ~= currentAuctionItemName
-	
-	if auctionItemChanged and processing_state ~= KM_NULL_STATE then
-		Auctionator_AbortQuery()
-	end
-	
-	if auctionItemChanged or force_refresh then
-		
-		currentAuctionItemName = auctionItemName
-
-		if currentAuctionItemName == "" then
-			
-			-- if auctionator_last_item_posted == nil then
-			Auctionator_SetMessage("Drag an item to the Auction Item area\n\nto see recommended pricing information");
-			-- end
-			
-		elseif force_refresh or sorteddata[currentAuctionItemName] == nil then
-
-			force_refresh = false
-
-			sorteddata[currentAuctionItemName] = {}
-
-			-- Auctionator_RecommendPerItem_Price:Hide()
-			-- Auctionator_RecommendPerStack_Price:Hide()
-			
-			basedata = nil
-			
-			local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName)
-		
-			local currentAuctionClass		= ItemType2AuctionClass(sType)
-			local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
-
-			SortAuctionItems("list", "buyout")
-
-			if IsAuctionSortReversed("list", "buyout") then
-				SortAuctionItems("list", "buyout")
-			end
-			
-			Auctionator_SubmitQuery(Auctionator_CreateQuery{
-				name = currentAuctionItemName,
-				exactMatch = true,
-				classIndex = currentAuctionClass,
-				subclassIndex = currentAuctionSubclass,
-				onComplete = function()
-					if table.getn(scandata) > 0 then
-						Auctionator_Process_Scandata(currentAuctionItemName)
-						Auctionator_CalcBaseData()
-					else
-						Auctionator_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
-					end
-				end
-			})		
-		end
-		
-		Auctionator_CalcBaseData()
+	if forceRefresh then
+		Auctionator_OnNewAuctionUpdate()
 	end
 end
-
 	
 -----------------------------------------
 
-function Auctionator_ScrollbarUpdate(auctionItemName, auctionItemStackSize)
+function Auctionator_ScrollbarUpdate()
 
 	local line				-- 1 through 12 of our window to scroll
 	local dataOffset		-- an index into our data calculated from the scroll offset
 
-	local numrows = table.getn(sorteddata[auctionItemName])
 
-	if numrows == nil then
+	local numrows
+	if not currentAuctionItemName or not auctionatorEntries[currentAuctionItemName] then
 		numrows = 0
+	else
+		numrows = getn(auctionatorEntries[currentAuctionItemName])
 	end
 		
 	FauxScrollFrame_Update(AuctionatorScrollFrame, numrows, 12, 16);
@@ -723,21 +701,20 @@ function Auctionator_ScrollbarUpdate(auctionItemName, auctionItemStackSize)
 		
 		lineEntry:SetID(dataOffset)
 		
-		if dataOffset <= numrows and sorteddata[auctionItemName][dataOffset] then
+		if currentAuctionItemName and dataOffset <= numrows and auctionatorEntries[currentAuctionItemName][dataOffset] then
 			
-			local data = sorteddata[auctionItemName][dataOffset]
+			local data = auctionatorEntries[currentAuctionItemName][dataOffset]
 
 			local lineEntry_avail	= getglobal("AuctionatorEntry"..line.."_Availability")
-			-- local lineEntry_comm	= getglobal("AuctionatorEntry"..line.."_Comment")
 			local lineEntry_stack	= getglobal("AuctionatorEntry"..line.."_StackPrice")
 
-			if basedata ~= nil and data.itemPrice == basedata.itemPrice and data.stackSize == basedata.stackSize then
+			if selectedAuctionatorEntry and data.itemPrice == selectedAuctionatorEntry.itemPrice and data.stackSize == selectedAuctionatorEntry.stackSize then
 				lineEntry:LockHighlight()
 			else
 				lineEntry:UnlockHighlight()
 			end
 
-			if data.stackSize == auctionItemStackSize then
+			if data.stackSize == currentAuctionItemStackSize then
 				lineEntry_avail:SetTextColor(0.2, 0.9, 0.2)
 			else
 				lineEntry_avail:SetTextColor(1.0, 1.0, 1.0)
@@ -766,32 +743,31 @@ end
 
 function Auctionator_EntryOnClick()
 	local entryIndex = this:GetID()
-	
-	-- log(entryIndex)
-	
-	local auctionItemName, auctionItemTexture, auctionItemStackSize = GetAuctionSellItemInfo()
-	if auctionItemName == nil then
-		auctionItemName =  ""
-	end
 
-	basedata = sorteddata[auctionItemName][entryIndex]
+	selectedAuctionatorEntry = auctionatorEntries[currentAuctionItemName][entryIndex]
 
-	Auctionator_UpdateRecommendation(auctionItemName, auctionItemTexture, auctionItemStackSize)
+	Auctionator_UpdateRecommendation()
 
 	PlaySound("igMainMenuOptionCheckBoxOn")
 end
 
 function Auctionator_RefreshButtonOnClick()
-	force_refresh = true
+	forceRefresh = true
 end
 
 -----------------------------------------
 
 function AuctionatorMoneyFrame_OnLoad()
-
 	this.small = 1
 	SmallMoneyFrame_OnLoad()
 	MoneyFrame_SetType("AUCTION")
+end
+
+-----------------------------------------
+
+function Auctionator_ShowDescriptionFrame()
+	AuctionatorDescriptionFrame:Show()
+	AuctionatorAuthorText:SetText("Author: "..AuctionatorAuthor)
 end
 
 -----------------------------------------
@@ -822,13 +798,11 @@ function Auctionator_ShowOptionsFrame()
 					.."</p>"
 					.."</body></html>"
 
-
 	AuctionatorExplanation:SetText("Auctionator is an addon designed to make it easier and faster to setup your auctions at the auction house.")
 	AuctionatorDescriptionHTML:SetText(expText)
 	AuctionatorDescriptionHTML:SetSpacing(3)
 
 	AuctionatorVersionText:SetText("Version: "..AuctionatorVersion)
-
 	
 	AuctionatorOption_Enable_Alt:SetChecked(NumToBool(AUCTIONATOR_ENABLE_ALT))
 	AuctionatorOption_Open_First:SetChecked(NumToBool(AUCTIONATOR_OPEN_FIRST))
@@ -865,15 +839,12 @@ function Auctionator_ShowTooltip_OpenFirst()
 
 end
 
-
-
 --[[***************************************************************
 
 	All function below here are local utility functions.
 	These should be declared local at the top of this file.
 
 --*****************************************************************]]
-
 
 function BoolToString(b)
 	if b then
@@ -932,16 +903,25 @@ end
 
 function calcNewPrice(price)
 
-	if	price > 2000000	then return roundPriceDown(price, 10000, 10000)	end
-	if	price > 1000000	then return roundPriceDown(price,  2500,  2500)	end
-	if	price >  500000	then return roundPriceDown(price,  1000,  1000)	end
-	if	price >   50000	then return roundPriceDown(price,   500,   500)	end
-	if	price >   10000	then return roundPriceDown(price,   500,   200)	end
-	if	price >    2000	then return roundPriceDown(price,   100,    50)	end
-	if	price >     100	then return roundPriceDown(price,    10,     5)	end
-	if	price >       0	then return math.floor(price - 1)	end
-
-	return 0
+	if price > 2000000 then
+		return roundPriceDown(price, 10000, 10000)
+	elseif price > 1000000 then
+		return roundPriceDown(price, 2500, 2500)
+	elseif price > 500000 then
+		return roundPriceDown(price, 1000, 1000)
+	elseif price > 50000 then
+		return roundPriceDown(price, 500, 500)
+	elseif price > 10000 then
+		return roundPriceDown(price, 500, 200)
+	elseif price > 2000 then
+		return roundPriceDown(price, 100, 50)
+	elseif price > 100 then
+		return roundPriceDown(price, 10, 5)
+	elseif price > 0 then
+		return math.floor(price - 1)
+	else
+		return 0
+	end
 end
 
 -----------------------------------------
@@ -972,11 +952,11 @@ function val2gsc(v)
 	
 	local g = math.floor(rv/10000)
 	
-	rv = rv - g*10000
+	rv = rv - g * 10000
 	
 	local s = math.floor(rv/100)
 	
-	rv = rv - s*100
+	rv = rv - s * 100
 	
 	local c = rv
 			
@@ -991,18 +971,15 @@ function priceToString(val)
 
 	local st = ""
 	
-
 	if gold ~= 0 then
 		st = gold.."g "
 	end
-
 
 	if st ~= "" then
 		st = st..format("%02is ", silver)
 	elseif silver ~= 0 then
 		st = st..silver.."s "
 	end
-
 		
 	if st ~= "" then
 		st = st..format("%02ic", copper)
@@ -1017,8 +994,8 @@ end
 
 function ItemType2AuctionClass(itemType)
 	local itemClasses = { GetAuctionItemClasses() }
-	if itemClasses ~= nil then
-		if table.getn(itemClasses) > 0 then
+	if itemClasses then
+		if getn(itemClasses) > 0 then
 		local itemClass
 			for x, itemClass in pairs(itemClasses) do
 				if itemClass == itemType then
@@ -1043,7 +1020,171 @@ function SubType2AuctionSubclass(auctionClass, itemSubtype)
 	end
 end
 
+-----------------------------------------
 
+-- These functions were meant to be used for a search sorted by buyout price but that actually seems impossible to implement nicely with the vanilla interface
 
+-- function Auctionator_AuctionFrameBrowse_Update()
+	-- local numBatchAuctions = getn(searchResults)
+	-- local totalAuctions = numBatchAuctions
+	-- local button, buttonName, iconTexture, itemName, color, itemCount, moneyFrame, buyoutMoneyFrame, buyoutText, buttonHighlight
+	-- local offset = FauxScrollFrame_GetOffset(BrowseScrollFrame)
+	-- local index
+	-- local isLastSlotEmpty
+	-- local name, texture, count, quality, canUse, minBid, minIncrement, buyoutPrice, duration, bidAmount, highBidder
+	-- BrowseBidButton:Disable()
+	-- BrowseBuyoutButton:Disable()
+	-- -- Update sort arrows
+	-- SortButton_UpdateArrow(BrowseQualitySort, "list", "quality")
+	-- SortButton_UpdateArrow(BrowseLevelSort, "list", "level")
+	-- SortButton_UpdateArrow(BrowseDurationSort, "list", "duration")
+	-- SortButton_UpdateArrow(BrowseHighBidderSort, "list", "status")
+	-- SortButton_UpdateArrow(BrowseCurrentBidSort, "list", "bid")
 
+	-- -- Show the no results text if no items found
+	-- if numBatchAuctions == 0 then
+		-- BrowseNoResultsText:Show()
+	-- else
+		-- BrowseNoResultsText:Hide()
+	-- end
 
+	-- for i=1, NUM_BROWSE_TO_DISPLAY do
+		-- index = offset + i
+		-- button = getglobal("BrowseButton"..i)
+		-- -- Show or hide auction buttons
+		-- if index > numBatchAuctions then
+			-- button:Hide()
+			-- -- If the last button is empty then set isLastSlotEmpty var
+			-- if i == NUM_BROWSE_TO_DISPLAY then
+				-- isLastSlotEmpty = 1
+			-- end
+		-- else
+			-- button:Show()
+
+			-- buttonName = "BrowseButton"..i
+			-- local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder =  GetAuctionItemInfo("list", index);
+			-- -- duration = GetAuctionItemTimeLeft("list", offset + i)
+			-- -- Resize button if there isn't a scrollbar
+			-- buttonHighlight = getglobal("BrowseButton"..i.."Highlight")
+			-- if numBatchAuctions < NUM_BROWSE_TO_DISPLAY then
+				-- button:SetWidth(557)
+				-- buttonHighlight:SetWidth(523)
+				-- BrowseCurrentBidSort:SetWidth(173)
+			-- else
+				-- button:SetWidth(532)
+				-- buttonHighlight:SetWidth(502)
+				-- BrowseCurrentBidSort:SetWidth(157)
+			-- end
+			-- -- Set name and quality color
+			-- color = ITEM_QUALITY_COLORS[searchResults[i].quality]
+			-- itemName = getglobal(buttonName.."Name")
+			-- itemName:SetText(searchResults[i].name)
+			-- itemName:SetVertexColor(color.r, color.g, color.b)
+			-- -- Set level
+			-- if searchResults[i].level > UnitLevel("player") then
+				-- getglobal(buttonName.."Level"):SetText(RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE)
+			-- else
+				-- getglobal(buttonName.."Level"):SetText(searchResults[i].level)
+			-- end
+			-- -- Set high bidder
+			-- getglobal(buttonName.."HighBidder"):SetText(searchResults[i].highBidder)
+			-- -- Set closing time
+			-- getglobal(buttonName.."ClosingTimeText"):SetText(AuctionFrame_GetTimeLeftText(searchResults[i].duration))
+			-- getglobal(buttonName.."ClosingTime").tooltip = AuctionFrame_GetTimeLeftTooltipText(searchResults[i].duration)
+			-- -- Set item texture, count, and usability
+			-- iconTexture = getglobal(buttonName.."ItemIconTexture")
+			-- iconTexture:SetTexture(searchResults[i].texture)
+			-- if not searchResults[i].canUse then
+				-- iconTexture:SetVertexColor(1.0, 0.1, 0.1)
+			-- else
+				-- iconTexture:SetVertexColor(1.0, 1.0, 1.0)
+			-- end
+			-- itemCount = getglobal(buttonName.."ItemCount")
+			-- if searchResults[i].stackSize > 1 then
+				-- itemCount:SetText(searchResults[i].stackSize)
+				-- itemCount:Show()
+			-- else
+				-- itemCount:Hide()
+			-- end
+			-- -- Set high bid
+			-- moneyFrame = getglobal(buttonName.."MoneyFrame")
+			-- buyoutMoneyFrame = getglobal(buttonName.."BuyoutMoneyFrame")
+			-- buyoutText = getglobal(buttonName.."BuyoutText")
+			-- -- If not bidAmount set the bid amount to the min bid
+			-- if searchResults[i].bidAmount == 0 then
+				-- MoneyFrame_Update(moneyFrame:GetName(), searchResults[i].minBid)
+			-- else
+				-- MoneyFrame_Update(moneyFrame:GetName(), searchResults[i].bidAmount)
+			-- end
+			
+			-- if searchResults[i].buyoutPrice > 0 then
+				-- moneyFrame:SetPoint("RIGHT", buttonName, "RIGHT", 10, 10)
+				-- MoneyFrame_Update(buyoutMoneyFrame:GetName(), searchResults[i].buyoutPrice)
+				-- buyoutMoneyFrame:Show()
+				-- buyoutText:Show()
+			-- else
+				-- moneyFrame:SetPoint("RIGHT", buttonName, "RIGHT", 10, 3)
+				-- buyoutMoneyFrame:Hide()
+				-- buyoutText:Hide()
+			-- end
+			-- -- Set high bidder
+			-- local highBidder = searchResults[i].highBidder
+			-- if not highBidder then
+				-- highBidder = RED_FONT_COLOR_CODE..NO_BIDS..FONT_COLOR_CODE_CLOSE
+			-- end
+			-- getglobal(buttonName.."HighBidder"):SetText(highBidder)
+			-- -- Set highlight
+			-- if GetSelectedAuctionItem("list") and (offset + i) == GetSelectedAuctionItem("list") then
+				-- button:LockHighlight()
+				-- if highBidder ~= UnitName("player") then
+					-- BrowseBidButton:Enable()
+				-- end
+				
+				-- if searchResults[i].buyoutPrice > 0 and searchResults[i].buyoutPrice >= searchResults[i].minBid then
+					-- BrowseBuyoutButton:Enable()
+					-- AuctionFrame.buyoutPrice = searchResults[i].buyoutPrice
+				-- else
+					-- AuctionFrame.buyoutPrice = nil
+				-- end
+				-- -- Set bid
+				-- local bidAmount = searchResults[i].bidAmount
+				-- if bidAmount > 0 then
+					-- bidAmount = bidAmount + searchResults[i].minIncrement
+					-- MoneyInputFrame_SetCopper(BrowseBidPrice, bidAmount)
+				-- else
+					-- MoneyInputFrame_SetCopper(BrowseBidPrice, searchResults[i].minBid)
+				-- end
+				
+			-- else
+				-- button:UnlockHighlight()
+			-- end
+		-- end
+	-- end
+	
+	-- BrowsePrevPageButton:Hide()
+	-- BrowseNextPageButton:Hide()
+	-- BrowseScanCountText:Hide()
+	-- FauxScrollFrame_Update(BrowseScrollFrame, numBatchAuctions, NUM_BROWSE_TO_DISPLAY, AUCTIONS_BUTTON_HEIGHT)
+-- end
+
+-----------------------------------------
+
+-- function Auctionator_AuctionFrameBrowse_Scan()
+	
+	-- Auctionator_Scan_Start(Auctionator_CreateQuery{
+		-- name = BrowseName:GetText(),
+		-- exactMatch = false,
+		-- minLevel = BrowseMinLevel:GetText(),
+		-- maxLevel = BrowseMaxLevel:GetText(),
+		-- invTypeIndex = AuctionFrameBrowse.selectedInvtypeIndex,
+		-- classIndex = AuctionFrameBrowse.selectedClassIndex,
+		-- subclassIndex = AuctionFrameBrowse.selectedSubclassIndex,
+		-- isUsable = IsUsableCheckButton:GetChecked(),
+		-- qualityIndex = UIDropDownMenu_GetSelectedValue(BrowseDropDown),
+		-- onComplete = function(data, auctionItemName)
+			-- table.sort(data, function(a,b) return a.buyoutPrice < b.buyoutPrice end)
+			-- scanData = data
+		-- end
+	-- })
+	
+-- end

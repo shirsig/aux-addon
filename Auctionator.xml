@@ -6,22 +6,22 @@
 	<Frame name="Auctionator_core"> 
       <Scripts> 
          <OnLoad> 
-            this:RegisterEvent("VARIABLES_LOADED");
-			this:RegisterEvent("ADDON_LOADED");
-			this:RegisterEvent("AUCTION_ITEM_LIST_UPDATE");
-			this:RegisterEvent("AUCTION_OWNED_LIST_UPDATE");
-			this:RegisterEvent("AUCTION_HOUSE_SHOW");
-			this:RegisterEvent("AUCTION_HOUSE_CLOSED");
-			this:RegisterEvent("NEW_AUCTION_UPDATE");
+            this:RegisterEvent("VARIABLES_LOADED")
+			this:RegisterEvent("ADDON_LOADED")
+			this:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
+			this:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
+			this:RegisterEvent("AUCTION_HOUSE_SHOW")
+			this:RegisterEvent("AUCTION_HOUSE_CLOSED")
+			this:RegisterEvent("NEW_AUCTION_UPDATE")
 			
-			self = {};
-			self.TimeOfLastUpdate = GetTime();
+			self = {}
+			self.TimeOfLastUpdate = GetTime()
          </OnLoad>
 		<OnUpdate>
-			Auctionator_OnUpdate(self);
+			Auctionator_OnUpdate(self)
 		</OnUpdate>
          <OnEvent> 
-            Auctionator_EventHandler();
+            Auctionator_EventHandler()
          </OnEvent> 
       </Scripts> 
    </Frame> 
@@ -38,8 +38,8 @@
 						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnLoad>
-								SmallMoneyFrame_OnLoad();
-								MoneyFrame_SetType("STATIC");
+								SmallMoneyFrame_OnLoad()
+								MoneyFrame_SetType("STATIC")
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -77,7 +77,7 @@
 		</HighlightTexture>
 		<Scripts>
 			<OnClick>
-				Auctionator_EntryOnClick();
+				Auctionator_EntryOnClick()
 			</OnClick>
 		</Scripts>
 	</Button>
@@ -176,29 +176,29 @@
 		
 				<Scripts>
 					<OnLoad>
-						this:RegisterEvent("NEW_AUCTION_UPDATE");
-						this:RegisterForDrag("LeftButton");
+						this:RegisterEvent("NEW_AUCTION_UPDATE")
+						this:RegisterForDrag("LeftButton")
 					</OnLoad>
 					<OnEvent>
-						if ( event == "NEW_AUCTION_UPDATE") then
-							Auctionator_Hilite1:Hide();
+						if event == "NEW_AUCTION_UPDATE" then
+							Auctionator_Hilite1:Hide()
 						end
 					</OnEvent>
 					<OnClick>
-						ClickAuctionSellItemButton();
-						ClearCursor();
-						AuctionsFrameAuctions_ValidateAuction();
+						ClickAuctionSellItemButton()
+						ClearCursor()
+						AuctionsFrameAuctions_ValidateAuction()
 					</OnClick>
 					<OnReceiveDrag>
-						ClickAuctionSellItemButton();
-						ClearCursor();
-						AuctionsFrameAuctions_ValidateAuction();
+						ClickAuctionSellItemButton()
+						ClearCursor()
+						AuctionsFrameAuctions_ValidateAuction()
 					</OnReceiveDrag>
 					<OnEnter>
-						Auctionator_Hilite1:Show();
+						Auctionator_Hilite1:Show()
 					</OnEnter>
 					<OnLeave>
-						Auctionator_Hilite1:Hide();
+						Auctionator_Hilite1:Hide()
 					</OnLeave>
 				</Scripts>
 				
@@ -247,7 +247,7 @@
 					<Frame name="Auctionator_RecommendPerStack_Price" inherits="SmallMoneyFrameTemplate">
 						<Size><AbsDimension x="120" y="16" /></Size>
 						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts><OnLoad>AuctionatorMoneyFrame_OnLoad();</OnLoad></Scripts>
+						<Scripts><OnLoad>AuctionatorMoneyFrame_OnLoad()</OnLoad></Scripts>
 					</Frame>
 				</Frames>
 			</Frame>
@@ -263,7 +263,7 @@
 					<Frame name="Auctionator_RecommendPerItem_Price" inherits="SmallMoneyFrameTemplate">
 						<Size><AbsDimension x="120" y="16" /></Size>
 						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts><OnLoad>AuctionatorMoneyFrame_OnLoad();</OnLoad></Scripts>
+						<Scripts><OnLoad>AuctionatorMoneyFrame_OnLoad()</OnLoad></Scripts>
 					</Frame>
 				</Frames>
 			</Frame>
@@ -274,10 +274,10 @@
 
 				<Scripts>
 					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(16, Auctionator_ScrollbarUpdate); 
+						FauxScrollFrame_OnVerticalScroll(16, Auctionator_ScrollbarUpdate);
 					</OnVerticalScroll>
 					<OnShow>
-						<!--Auctionator_ScrollbarUpdate();-->
+						<!--Auctionator_ScrollbarUpdate()-->
 					</OnShow>
 				</Scripts>
 			</ScrollFrame>
@@ -305,7 +305,7 @@
 				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-87" y="-38"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						Auctionator_RefreshButtonOnClick();
+						Auctionator_RefreshButtonOnClick()
 					</OnClick>
 				</Scripts>
 			</Button>		   
