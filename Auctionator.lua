@@ -155,7 +155,7 @@ end
 
 function Auctionator_ContainerFrameItemButton_OnClick(button)
 	
-	if (AUCTIONATOR_ENABLE_ALT == 0
+	if (not AUCTIONATOR_ENABLE_ALT
 		or not AuctionFrame:IsShown()
 		or not IsAltKeyDown())
 	then
@@ -458,7 +458,7 @@ function Auctionator_OnAuctionHouseShow()
 
 	AuctionatorOptionsButtonPanel:Show()
 
-	if AUCTIONATOR_OPEN_FIRST ~= 0 then
+	if AUCTIONATOR_OPEN_FIRST then
 		AuctionFrameTab_OnClick(AUCTIONATOR_TAB_INDEX)
 	end
 
