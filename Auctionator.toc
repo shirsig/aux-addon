@@ -2,6 +2,7 @@
 ## Title: Auctionator
 ## Notes: A lightweight addon designed to help manage auctions
 ## SavedVariablesPerCharacter: AUCTIONATOR_ENABLE_ALT, AUCTIONATOR_OPEN_FIRST
+## SavedVariables: auctionatorEntries
 Auctionator.xml
 Options.xml
 About.xml

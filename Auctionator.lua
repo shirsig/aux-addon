@@ -1,5 +1,5 @@
 local AuctionatorVersion = "1.1.0-Vanilla"
-local AuctionatorAuthor  = "Zirco; Vanilla adaptation by Nimeral; Fixed, Cleaned up and extended by Simon Hirsig"
+local AuctionatorAuthor  = "Zirco; Backport by Nimeral; Reworked by Simon Hirsig"
 
 local AuctionatorLoaded = false
 
@@ -8,6 +8,7 @@ local auctionsTabElements = {}
 
 AUCTIONATOR_ENABLE_ALT	= 1
 AUCTIONATOR_OPEN_FIRST	= 0
+auctionatorEntries = {}
 
 local AUCTIONATOR_TAB_INDEX = 4
 
@@ -30,7 +31,6 @@ local currentPage
 local forceRefresh = false
 
 local scanData
-local auctionatorEntries = {}
 -- local searchResults = {}
 local selectedAuctionatorEntry
 
@@ -43,7 +43,7 @@ local lastItemPosted = nil
 
 -----------------------------------------
 
-local log, BoolToString, BoolToNum, NumToBool, pluralizeIf, round, calcNewPrice, roundPriceDown
+local log, BoolToString, BoolToNum, NumToBool, pluralizeIf, round, undercut, roundPriceDown
 local val2gsc, priceToString, ItemType2AuctionClass, SubType2AuctionSubclass
 
 -----------------------------------------
@@ -361,7 +361,7 @@ function Auctionator_Scan_Process()
 		local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
 
 		if totalAuctions >= NUM_AUCTION_ITEMS_PER_PAGE then
-			Auctionator_SetMessage("Scanning auctions: page "..currentPage)
+			Auctionator_SetMessage("Scanning auctions: page "..currentPage.." ...")
 		end
 				
 		for i = 1, numBatchAuctions do
@@ -402,7 +402,7 @@ end
 
 function Auctionator_Scan_Start(query)
 
-	Auctionator_SetMessage("Scanning")
+	Auctionator_SetMessage("Scanning auctions ...")
 
 	if processingState ~= KM_NULL_STATE then
 		Auctionator_Scan_Abort()
@@ -428,45 +428,36 @@ function Auctionator_Process_ScanResults(rawData, auctionItemName)
 
 	auctionatorEntries[auctionItemName] = {}
 	
-	if rawData then
+	----- Condense the scan rawData into a table that has only a single entry per stacksize/price combo
 	
-		----- Condense the scan rawData into a table that has only a single entry per stacksize/price combo
-		local condData = {}
+	local condData = {}
 
-		for i,sd in ipairs(rawData) do
-		
-			local key = "_"..sd.stackSize.."_"..sd.buyoutPrice
-					
-			if condData[key] then
-				condData[key].count = condData[key].count + 1
-			else
-				local rawData = {}
+	for _,rawDatum in ipairs(rawData) do
+	
+		local key = "_"..rawDatum.stackSize.."_"..rawDatum.buyoutPrice
 				
-				rawData.stackSize 		= sd.stackSize
-				rawData.buyoutPrice	= sd.buyoutPrice
-				rawData.itemPrice		= sd.buyoutPrice / sd.stackSize
-				rawData.count			= 1
-				rawData.numYours		= 0
-				
-				condData[key] = rawData;
-			end
-
-			if sd.owner == UnitName("player") then
-				condData[key].numYours = condData[key].numYours + 1
-			end
-		
+		if condData[key] then
+			condData[key].count = condData[key].count + 1
+		else			
+			condData[key] = {
+					stackSize 	= rawDatum.stackSize,
+					buyoutPrice	= rawDatum.buyoutPrice,
+					itemPrice		= rawDatum.buyoutPrice / rawDatum.stackSize,
+					count			= 1,
+					numYours		= rawDatum.owner == UnitName("player") and 1 or 0
+			}
 		end
-
-		----- create a table of these entries sorted by itemPrice
-		
-		local n = 1
-		for i,v in pairs(condData) do
-			auctionatorEntries[auctionItemName][n] = v
-			n = n + 1
-		end
-		
-		table.sort(auctionatorEntries[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
 	end
+
+	----- create a table of these entries sorted by itemPrice
+	
+	local n = 1
+	for _,condDatum in pairs(condData) do
+		auctionatorEntries[auctionItemName][n] = condDatum
+		n = n + 1
+	end
+	
+	table.sort(auctionatorEntries[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
 end
 
 -----------------------------------------
@@ -480,27 +471,27 @@ function Auctionator_CalcBaseData()
 	if not currentAuctionItemName or not auctionatorEntries[currentAuctionItemName] then
 		selectedAuctionatorEntry = nil
 	else
-		local bestPrice	= {}		-- a table with one entry per stacksize that is the cheapest auction for that particular stacksize
-		local absoluteBest			-- the overall cheapest auction
+		local bestPrice	= {} -- a table with one entry per stacksize that is the cheapest auction for that particular stacksize
+		local absoluteBest -- the overall cheapest auction
 
 		----- find the best price per stacksize and overall -----
 		
-		for _,sd in ipairs(auctionatorEntries[currentAuctionItemName]) do
+		for _,auctionatorEntry in ipairs(auctionatorEntries[currentAuctionItemName]) do
 		
-			if not bestPrice[sd.stackSize] or bestPrice[sd.stackSize].itemPrice >= sd.itemPrice then
-				bestPrice[sd.stackSize] = sd
+			if not bestPrice[auctionatorEntry.stackSize] or bestPrice[auctionatorEntry.stackSize].itemPrice >= auctionatorEntry.itemPrice then
+				bestPrice[auctionatorEntry.stackSize] = auctionatorEntry
 			end
 		
-			if not absoluteBest or absoluteBest.itemPrice > sd.itemPrice then
-				absoluteBest = sd
+			if not absoluteBest or absoluteBest.itemPrice > auctionatorEntry.itemPrice then
+				absoluteBest = auctionatorEntry
 			end	
 		end
 		
 		selectedAuctionatorEntry = absoluteBest
 
 		if bestPrice[currentAuctionItemStackSize] then
-			selectedAuctionatorEntry				= bestPrice[currentAuctionItemStackSize]
-			bestPriceOurStackSize	= bestPrice[currentAuctionItemStackSize]
+			selectedAuctionatorEntry = bestPrice[currentAuctionItemStackSize]
+			bestPriceOurStackSize = bestPrice[currentAuctionItemStackSize]
 		end
 	end
 	Auctionator_UpdateRecommendation()
@@ -520,10 +511,10 @@ function Auctionator_UpdateRecommendation()
 			local newBuyoutPrice = selectedAuctionatorEntry.itemPrice * currentAuctionItemStackSize
 
 			if selectedAuctionatorEntry.numYours < selectedAuctionatorEntry.count then
-				newBuyoutPrice = calcNewPrice(newBuyoutPrice)
+				newBuyoutPrice = undercut(newBuyoutPrice)
 			end
 			
-			local newStartPrice = calcNewPrice(round(newBuyoutPrice * 0.95)) 
+			local newStartPrice = newBuyoutPrice * 0.95 
 			
 			AuctionatorMessage:Hide()	
 			Auctionator_ShowElems(recommendationElements)
@@ -581,7 +572,6 @@ end
 function Auctionator_OnAuctionHouseClosed()
 
 	AuctionatorOptionsButtonFrame:Hide()
-	
 	AuctionatorOptionsFrame:Hide()
 	AuctionatorDescriptionFrame:Hide()
 	Auctionator_Sell_Template:Hide()
@@ -677,10 +667,9 @@ end
 
 function Auctionator_ScrollbarUpdate()
 
-	local line				-- 1 through 12 of our window to scroll
-	local dataOffset		-- an index into our data calculated from the scroll offset
-
-
+	local line -- 1 through 12 of our window to scroll
+	local dataOffset -- an index into our data calculated from the scroll offset
+	
 	local numrows
 	if not currentAuctionItemName or not auctionatorEntries[currentAuctionItemName] then
 		numrows = 0
@@ -700,34 +689,34 @@ function Auctionator_ScrollbarUpdate()
 		
 		if currentAuctionItemName and dataOffset <= numrows and auctionatorEntries[currentAuctionItemName][dataOffset] then
 			
-			local data = auctionatorEntries[currentAuctionItemName][dataOffset]
+			local auctionatorEntry = auctionatorEntries[currentAuctionItemName][dataOffset]
 
 			local lineEntry_avail	= getglobal("AuctionatorEntry"..line.."_Availability")
 			local lineEntry_stack	= getglobal("AuctionatorEntry"..line.."_StackPrice")
 
-			if selectedAuctionatorEntry and data.itemPrice == selectedAuctionatorEntry.itemPrice and data.stackSize == selectedAuctionatorEntry.stackSize then
+			if selectedAuctionatorEntry and auctionatorEntry.itemPrice == selectedAuctionatorEntry.itemPrice and auctionatorEntry.stackSize == selectedAuctionatorEntry.stackSize then
 				lineEntry:LockHighlight()
 			else
 				lineEntry:UnlockHighlight()
 			end
 
-			if data.stackSize == currentAuctionItemStackSize then
+			if auctionatorEntry.stackSize == currentAuctionItemStackSize then
 				lineEntry_avail:SetTextColor(0.2, 0.9, 0.2)
 			else
 				lineEntry_avail:SetTextColor(1.0, 1.0, 1.0)
 			end
 
-			-- if		data.numYours == 0 then			lineEntry_comm:SetText("")
-			-- elseif	data.numYours == data.count then	lineEntry_comm:SetText("yours")
-			-- else										lineEntry_comm:SetText("yours: "..data.numYours)
+			-- if		auctionatorEntry.numYours == 0 then			lineEntry_comm:SetText("")
+			-- elseif	auctionatorEntry.numYours == auctionatorEntry.count then	lineEntry_comm:SetText("yours")
+			-- else										lineEntry_comm:SetText("yours: "..auctionatorEntry.numYours)
 			-- end
 						
-			local tx = string.format("%i %s of %i", data.count, pluralizeIf("stack", data.count), data.stackSize)
+			local tx = string.format("%i %s of %i", auctionatorEntry.count, pluralizeIf("stack", auctionatorEntry.count), auctionatorEntry.stackSize)
 
-			MoneyFrame_Update("AuctionatorEntry"..line.."_PerItem_Price", round(data.buyoutPrice/data.stackSize))
+			MoneyFrame_Update("AuctionatorEntry"..line.."_PerItem_Price", round(auctionatorEntry.buyoutPrice/auctionatorEntry.stackSize))
 
 			lineEntry_avail:SetText(tx)
-			lineEntry_stack:SetText(priceToString(data.buyoutPrice))
+			lineEntry_stack:SetText(priceToString(auctionatorEntry.buyoutPrice))
 
 			lineEntry:Show()
 		else
@@ -898,27 +887,29 @@ end
 
 -----------------------------------------
 
-function calcNewPrice(price)
+function undercut(price)
 
-	if price > 2000000 then
-		return roundPriceDown(price, 10000, 10000)
-	elseif price > 1000000 then
-		return roundPriceDown(price, 2500, 2500)
-	elseif price > 500000 then
-		return roundPriceDown(price, 1000, 1000)
-	elseif price > 50000 then
-		return roundPriceDown(price, 500, 500)
-	elseif price > 10000 then
-		return roundPriceDown(price, 500, 200)
-	elseif price > 2000 then
-		return roundPriceDown(price, 100, 50)
-	elseif price > 100 then
-		return roundPriceDown(price, 10, 5)
-	elseif price > 0 then
-		return math.floor(price - 1)
-	else
-		return 0
-	end
+	return math.max(0, price - 1)
+
+	-- if price > 2000000 then
+		-- return roundPriceDown(price, 10000, 10000)
+	-- elseif price > 1000000 then
+		-- return roundPriceDown(price, 2500, 2500)
+	-- elseif price > 500000 then
+		-- return roundPriceDown(price, 1000, 1000)
+	-- elseif price > 50000 then
+		-- return roundPriceDown(price, 500, 500)
+	-- elseif price > 10000 then
+		-- return roundPriceDown(price, 500, 200)
+	-- elseif price > 2000 then
+		-- return roundPriceDown(price, 100, 50)
+	-- elseif price > 100 then
+		-- return roundPriceDown(price, 10, 5)
+	-- elseif price > 0 then
+		-- return math.floor(price - 1)
+	-- else
+		-- return 0
+	-- end
 end
 
 -----------------------------------------
