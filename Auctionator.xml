@@ -305,7 +305,7 @@
 			<Button name="AuctionatorEntry15" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>	   
 		</Frames>
 	</Frame>
-    <Frame name="Auctionator_Buy_Template" virtual="true" frameStrata="HIGH" hidden="true">
+    <Frame name="Auctionator_Buy_Template" virtual="true" hidden="true">
 		<Size>
 			<AbsDimension x="550" y="447"/>
 		</Size>
