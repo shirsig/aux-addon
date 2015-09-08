@@ -1,0 +1,16 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+	<Script file="Core.lua"/> 
+  
+	<!-- Frame to handle all core events --> 
+	<Frame>
+      <Scripts> 
+			<OnLoad> 
+				this:RegisterEvent("VARIABLES_LOADED")
+			</OnLoad>
+			<OnEvent> 
+				Auctionator_Core_OnEvent()
+			</OnEvent> 
+		</Scripts> 
+	</Frame>
+</Ui>

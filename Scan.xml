@@ -1,0 +1,19 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+	<Script file="Scan.lua"/>
+  
+	<!-- Frame to handle all core events --> 
+	<Frame>
+      <Scripts> 
+			<OnLoad> 
+				this:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
+			</OnLoad>
+			<OnEvent> 
+				Auctionator_Scan_OnEvent()
+			</OnEvent>
+			<OnUpdate>
+				Auctionator_Scan_OnUpdate()
+			</OnUpdate>
+		</Scripts> 
+	</Frame>
+</Ui>

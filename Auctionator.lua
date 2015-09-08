@@ -1,5 +1,3 @@
-local AuctionatorLoaded = false
-
 local recommendationElements = {}
 local defaultAuctionTabElements = {}
 local defaultBrowseTabElements = {}
@@ -42,28 +40,17 @@ local lastItemPosted = nil
 
 -----------------------------------------
 
-local processScanResults, relevel, log, pluralizeIf, round, undercut, roundPriceDown
+local processScanResults, relevel, Auctionator_Log, pluralizeIf, round, undercut, roundPriceDown
 local val2gsc, priceToString, ItemType2AuctionClass, SubType2AuctionSubclass
 
 -----------------------------------------
 
 function Auctionator_EventHandler()
 
-	if event == "VARIABLES_LOADED"			then	Auctionator_OnLoad() 				end
 	if event == "ADDON_LOADED"				then	Auctionator_OnAddonLoaded() 		end
 	if event == "AUCTION_OWNED_LIST_UPDATE"	then	Auctionator_OnAuctionOwnedUpdate() 	end
 	if event == "AUCTION_HOUSE_SHOW"		then	Auctionator_OnAuctionHouseShow() 	end
 	if event == "AUCTION_HOUSE_CLOSED"		then	Auctionator_OnAuctionHouseClosed() 	end
-
-end
-
------------------------------------------
-
-function Auctionator_OnLoad()
-
-	log("Auctionator Loaded")
-
-	AuctionatorLoaded = true
 
 end
 
@@ -88,7 +75,6 @@ function Auctionator_AddPanels()
 	optionsFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT", 210, 0)
 	relevel(optionsFrame)
 	optionsFrame:Hide()
-	
 end
 
 -----------------------------------------
@@ -323,22 +309,22 @@ function Auctionator_AddTabs()
 	Auctionator.tabs.sell.index = AuctionFrame.numTabs + 1
     Auctionator.tabs.buy.index = AuctionFrame.numTabs + 2
 
-	local sellFrameName = "AuctionFrameTab"..Auctionator.tabs.sell.index
-    local buyFrameName = "AuctionFrameTab"..Auctionator.tabs.buy.index
+	local sellTabName = "AuctionFrameTab"..Auctionator.tabs.sell.index
+    local buyTabName = "AuctionFrameTab"..Auctionator.tabs.buy.index
 
-	local sellFrame = CreateFrame("Button", sellFrameName, AuctionFrame, "AuctionTabTemplate")
-    local buyFrame = CreateFrame("Button", buyFrameName, AuctionFrame, "AuctionTabTemplate")
+	local sellTab = CreateFrame("Button", sellTabName, AuctionFrame, "AuctionTabTemplate")
+    local buyTab = CreateFrame("Button", buyTabName, AuctionFrame, "AuctionTabTemplate")
 
-	setglobal(sellFrameName, sellFrame)
-    setglobal(buyFrameName, buyFrame)
+	setglobal(sellTabName, sellTab)
+    setglobal(buyTabName, buyTab)
     
-	sellFrame:SetID(Auctionator.tabs.sell.index)
-	sellFrame:SetText("Auctionator")
-	sellFrame:SetPoint("LEFT", getglobal("AuctionFrameTab"..AuctionFrame.numTabs), "RIGHT", -8, 0)
+	sellTab:SetID(Auctionator.tabs.sell.index)
+	sellTab:SetText("Auctionator")
+	sellTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..AuctionFrame.numTabs), "RIGHT", -8, 0)
     
-    buyFrame:SetID(Auctionator.tabs.buy.index)
-	buyFrame:SetText("Buy")
-	-- buyFrame:SetPoint("LEFT", getglobal("AuctionFrameTab"..Auctionator.tabs.sell.index), "RIGHT", -8, 0)
+    buyTab:SetID(Auctionator.tabs.buy.index)
+	buyTab:SetText("Buy")
+	-- buyTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..Auctionator.tabs.sell.index), "RIGHT", -8, 0)
 	
 	PanelTemplates_SetNumTabs(AuctionFrame, Auctionator.tabs.buy.index)
     PanelTemplates_EnableTab(AuctionFrame, Auctionator.tabs.sell.index)
@@ -568,7 +554,7 @@ function Auctionator_ScrollbarUpdate()
 		
 		lineEntry:SetID(dataOffset)
 		
-		if currentAuctionItemName and dataOffset <= numrows and auctionatorEntries[currentAuctionItemName][dataOffset] then
+		if currentAuctionItemName and dataOffset <= numrows and auctionatorEntries[currentAuctionItemName] then
 			
 			local auctionatorEntry = auctionatorEntries[currentAuctionItemName][dataOffset]
 
@@ -711,14 +697,6 @@ end
 
 -----------------------------------------
 
-function log(msg)
-	if DEFAULT_CHAT_FRAME then
-		DEFAULT_CHAT_FRAME:AddMessage(msg)
-	end
-end
-
------------------------------------------
-
 function undercut(price)
 	return math.max(0, price - 1)
 end
@@ -781,7 +759,7 @@ function ItemType2AuctionClass(itemType)
 				end
 			end
 		end
-	else log("Can't GetAuctionItemClasses") end
+	else Auctionator_Log("Can't GetAuctionItemClasses") end
 end
 
 -----------------------------------------

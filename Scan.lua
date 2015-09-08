@@ -26,7 +26,7 @@ end
 function Auctionator_Scan_Complete()
 	
 	if currentQuery.onComplete then
-		currentQuery.onComplete(scanData);
+		currentQuery.onComplete(scanData)
 	end
 	
 	currentQuery = nil
@@ -40,7 +40,7 @@ end
 function Auctionator_Scan_Abort()
 
 	if currentQuery and currentQuery.onAbort then
-		currentQuery.onAbort();
+		currentQuery.onAbort()
 	end
 	
 	currentQuery = nil
@@ -158,8 +158,17 @@ end
 
 -----------------------------------------
 
-local eventFrame = CreateFrame("Frame")
-eventFrame:SetScript("OnUpdate", function()
+function Auctionator_Scan_OnEvent()
+	if event == "AUCTION_ITEM_LIST_UPDATE" then
+		if state == STATE_POSTQUERY then
+			processQueryResults()
+		end
+	end
+end
+
+-----------------------------------------
+
+function Auctionator_Scan_OnUpdate()
 	if state == STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
 	
 		timeOfLastUpdate = GetTime()
@@ -168,10 +177,4 @@ eventFrame:SetScript("OnUpdate", function()
 			submitQuery()
 		end
 	end
-end)
-eventFrame:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
-eventFrame:SetScript("OnEvent", function(event)
-	if state == STATE_POSTQUERY then
-		processQueryResults()
-	end
-end)
+end
