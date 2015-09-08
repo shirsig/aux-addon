@@ -344,12 +344,10 @@ function Auctionator_AddTabs()
 	sellFrame:SetID(Auctionator.tabs.sell.index)
 	sellFrame:SetText("Auctionator")
 	sellFrame:SetPoint("LEFT", getglobal("AuctionFrameTab"..AuctionFrame.numTabs), "RIGHT", -8, 0)
-	sellFrame:Show()
     
     buyFrame:SetID(Auctionator.tabs.buy.index)
 	buyFrame:SetText("Buy")
-	buyFrame:SetPoint("LEFT", getglobal("AuctionFrameTab"..Auctionator.tabs.sell.index), "RIGHT", -8, 0)
-	buyFrame:Show()
+	-- buyFrame:SetPoint("LEFT", getglobal("AuctionFrameTab"..Auctionator.tabs.sell.index), "RIGHT", -8, 0)
 	
 	PanelTemplates_SetNumTabs(AuctionFrame, Auctionator.tabs.buy.index)
     PanelTemplates_EnableTab(AuctionFrame, Auctionator.tabs.sell.index)
