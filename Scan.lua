@@ -1,5 +1,8 @@
 local timeOfLastUpdate = GetTime()
 
+-- forward declaration of local functions
+local submitQuery, processQueryResults
+
 local eventFrame = CreateFrame("Frame")
 eventFrame:SetScript("OnUpdate", function()
 	if state == STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
@@ -7,14 +10,14 @@ eventFrame:SetScript("OnUpdate", function()
 		timeOfLastUpdate = GetTime()
 
 		if CanSendAuctionQuery() then
-			Auctionator_Scan_Query()
+			submitQuery()
 		end
 	end
 end)
 eventFrame:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
 eventFrame:SetScript("OnEvent", function(event)
 	if state == STATE_POSTQUERY then
-		Auctionator_Scan_Process()
+		processQueryResults()
 	end
 end)
 
@@ -34,16 +37,8 @@ local scanData
 
 -----------------------------------------
 
-function Auctionator_Scan_State_Idle()
+function Auctionator_Scan_Idle()
 	return state == STATE_IDLE
-end
-
-function Auctionator_Scan_State_Prequery()
-	return state == STATE_PREQUERY
-end
-
-function Auctionator_Scan_State_Postquery()
-	return state == STATE_POSTQUERY
 end
 
 -----------------------------------------
@@ -76,7 +71,45 @@ end
 
 -----------------------------------------
 
-function Auctionator_Scan_Query()
+function Auctionator_Scan_Start(query)
+	
+	Auctionator_SetMessage("Scanning auctions ...")
+
+	if state ~= STATE_IDLE then
+		Auctionator_Scan_Abort()
+	end
+	
+	currentQuery = query
+	currentPage = 0
+	scanData = {}
+	state = STATE_PREQUERY
+end
+
+-----------------------------------------
+
+function Auctionator_Scan_CreateQuery(parameterMap)
+	local query = {
+		name = nil,
+		exactMatch = false,
+		minLevel = "",
+		maxLevel = "",
+		invTypeIndex = nil,
+		classIndex = nil,
+		subclassIndex = nil,
+		isUsable = nil,
+		qualityIndex = nil
+	}
+	
+	for k,v in pairs(parameterMap) do
+		query[k] = v
+	end
+	
+	return query
+end
+
+-----------------------------------------
+
+function submitQuery()
 	if state == STATE_PREQUERY then
 		
 		QueryAuctionItems(
@@ -97,7 +130,7 @@ end
 
 -----------------------------------------
 
-function Auctionator_Scan_Process()
+function processQueryResults()
 	
 	if state == STATE_POSTQUERY then
 	
@@ -147,42 +180,4 @@ function Auctionator_Scan_Process()
 			Auctionator_Scan_Complete()
 		end
 	end
-end
-
------------------------------------------
-
-function Auctionator_Scan_Start(query)
-	
-	Auctionator_SetMessage("Scanning auctions ...")
-
-	if state ~= STATE_IDLE then
-		Auctionator_Scan_Abort()
-	end
-	
-	currentQuery = query
-	currentPage = 0
-	scanData = {}
-	state = STATE_PREQUERY
-end
-
------------------------------------------
-
-function Auctionator_Scan_CreateQuery(parameterMap)
-	local query = {
-		name = nil,
-		exactMatch = false,
-		minLevel = "",
-		maxLevel = "",
-		invTypeIndex = nil,
-		classIndex = nil,
-		subclassIndex = nil,
-		isUsable = nil,
-		qualityIndex = nil
-	}
-	
-	for k,v in pairs(parameterMap) do
-		query[k] = v
-	end
-	
-	return query
 end
