@@ -1,5 +1,5 @@
-local processScanResults, scrollbarUpdate
-local processedData;
+local processScanResults
+local processedData
 
 function AuctionatorBuySearchButton_OnClick()
 	
@@ -8,12 +8,19 @@ function AuctionatorBuySearchButton_OnClick()
 		exactMatch = true,
 		onComplete = function(data)
 			processScanResults(data)
-			scrollbarUpdate()
-			Auctionator_Log("done"..getn(data))
+			Auctionator_Buy_ScrollbarUpdate()
 		end
 	})
 	
 end
+
+-----------------------------------------
+
+function AuctionatorBuyEntry_OnClick()
+
+end
+
+-----------------------------------------
 
 function processScanResults(rawData)
 
@@ -51,27 +58,28 @@ function processScanResults(rawData)
 	table.sort(processedData, function(a,b) return a.itemPrice < b.itemPrice end)
 end
 
-function scrollbarUpdate()
+-----------------------------------------
+
+function Auctionator_Buy_ScrollbarUpdate()
 
 	local line -- 1 through 15 of our window to scroll
 	local dataOffset -- an index into our data calculated from the scroll offset
 	
 	local numrows
-	if not currentAuctionItemName or not auctionatorEntries[currentAuctionItemName] then
+	if not processedData then
 		numrows = 0
 	else
-		numrows = getn(auctionatorEntries[currentAuctionItemName])
+		numrows = getn(processedData)
 	end
 	
-	FauxScrollFrame_Update(AuctionatorScrollFrame, numrows, 12, 16);
+	FauxScrollFrame_Update(AuctionatorBuyScrollFrame, numrows, 12, 16);
 
-	for line = 1,15 do
+	for line = 1,12 do
 
-		dataOffset = line + FauxScrollFrame_GetOffset(AuctionatorScrollFrame)
-		log(line)
+		dataOffset = line + FauxScrollFrame_GetOffset(AuctionatorBuyScrollFrame)
 		local lineEntry = getglobal("AuctionatorBuyEntry"..line)
 		
-		if numrows <= 15 then
+		if numrows <= 12 then
 			lineEntry:SetWidth(603)
 		else
 			lineEntry:SetWidth(585)
@@ -79,9 +87,9 @@ function scrollbarUpdate()
 		
 		lineEntry:SetID(dataOffset)
 		
-		if currentAuctionItemName and dataOffset <= numrows and auctionatorEntries[currentAuctionItemName][dataOffset] then
+		if dataOffset <= numrows and processedData[dataOffset] then
 			
-			local auctionatorEntry = auctionatorEntries[currentAuctionItemName][dataOffset]
+			local auctionatorEntry = processedData[dataOffset]
 
 			local lineEntry_avail	= getglobal("AuctionatorBuyEntry"..line.."_Availability")
 			local lineEntry_comm	= getglobal("AuctionatorBuyEntry"..line.."_Comment")
@@ -93,12 +101,6 @@ function scrollbarUpdate()
 				lineEntry:UnlockHighlight()
 			end
 
-			if auctionatorEntry.stackSize == currentAuctionItemStackSize then
-				lineEntry_avail:SetTextColor(0.2, 0.9, 0.2)
-			else
-				lineEntry_avail:SetTextColor(1.0, 1.0, 1.0)
-			end
-
 			if auctionatorEntry.numYours == 0 then
 				lineEntry_comm:SetText("")
 			elseif
@@ -108,12 +110,12 @@ function scrollbarUpdate()
 				lineEntry_comm:SetText("yours: "..auctionatorEntry.numYours)
 			end
 						
-			local tx = string.format("%i %s of %i", auctionatorEntry.count, pluralizeIf("stack", auctionatorEntry.count), auctionatorEntry.stackSize)
+			local tx = string.format("%i %s of %i", auctionatorEntry.count, Auctionator_PluralizeIf("stack", auctionatorEntry.count), auctionatorEntry.stackSize)
 
-			MoneyFrame_Update("AuctionatorBuyEntry"..line.."_PerItem_Price", round(auctionatorEntry.buyoutPrice/auctionatorEntry.stackSize))
+			MoneyFrame_Update("AuctionatorBuyEntry"..line.."_PerItem_Price", Auctionator_Round(auctionatorEntry.buyoutPrice/auctionatorEntry.stackSize))
 
 			lineEntry_avail:SetText(tx)
-			lineEntry_stack:SetText(priceToString(auctionatorEntry.buyoutPrice))
+			lineEntry_stack:SetText(Auctionator_PriceToString(auctionatorEntry.buyoutPrice))
 
 			lineEntry:Show()
 		else
@@ -269,10 +271,6 @@ end
 	-- FauxScrollFrame_Update(BrowseScrollFrame, numBatchAuctions, NUM_BROWSE_TO_DISPLAY, AUCTIONS_BUTTON_HEIGHT)
 -- end
 
-local eventFrame = CreateFrame("Frame")
-eventFrame:SetScript("OnUpdate", function()
-
-end)
 -- eventFrame:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
 -- eventFrame:SetScript("OnEvent", function(event)
 	-- if state == STATE_POSTQUERY then

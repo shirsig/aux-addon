@@ -30,8 +30,8 @@
 						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnLoad>
-								SmallMoneyFrame_OnLoad();
-								MoneyFrame_SetType("STATIC");
+								SmallMoneyFrame_OnLoad()
+								MoneyFrame_SetType("STATIC")
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -80,7 +80,7 @@
 		</HighlightTexture>
 		<Scripts>
 			<OnClick>
-				Auctionator_EntryOnClick();
+				Auctionator_EntryOnClick()
 			</OnClick>
 		</Scripts>
 	</Button>
@@ -260,7 +260,7 @@
 			</Frame>
 
 			<Button name="AuctionatorRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
-				<Size><AbsDimension x="126" y="22"/>	</Size>
+				<Size><AbsDimension x="126" y="22"/></Size>
 				<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="-14" y="-199"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>

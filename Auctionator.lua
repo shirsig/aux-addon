@@ -40,8 +40,8 @@ local lastItemPosted = nil
 
 -----------------------------------------
 
-local processScanResults, relevel, Auctionator_Log, pluralizeIf, round, undercut, roundPriceDown
-local val2gsc, priceToString, ItemType2AuctionClass, SubType2AuctionSubclass
+local processScanResults, relevel, undercut
+local ItemType2AuctionClass, SubType2AuctionSubclass
 
 -----------------------------------------
 
@@ -255,7 +255,9 @@ function Auctionator_BrowseButton_OnMouseDown()
 		SetSelectedAuctionItem("list", index)
 		
 		local _, _, _, _, _, _, _, _, buyoutPrice = GetAuctionItemInfo("list", index)
-		PlaceAuctionBid("list", index, buyoutPrice)
+		if buyoutPrice > 0 then
+			PlaceAuctionBid("list", index, buyoutPrice)
+		end
 		
 		AuctionFrameBrowse_Update()
 	end
@@ -433,8 +435,8 @@ function Auctionator_UpdateRecommendation()
 				Auctionator_RecommendItem_Tex:Hide()
 			end
 			
-			MoneyFrame_Update("Auctionator_RecommendPerItem_Price",  round(newBuyoutPrice / currentAuctionItemStackSize))
-			MoneyFrame_Update("Auctionator_RecommendPerStack_Price", round(newBuyoutPrice))
+			MoneyFrame_Update("Auctionator_RecommendPerItem_Price",  Auctionator_Round(newBuyoutPrice / currentAuctionItemStackSize))
+			MoneyFrame_Update("Auctionator_RecommendPerStack_Price", Auctionator_Round(newBuyoutPrice))
 			
 			MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
 			MoneyInputFrame_SetCopper(StartPrice, newStartPrice)
@@ -583,12 +585,12 @@ function Auctionator_ScrollbarUpdate()
 				lineEntry_comm:SetText("yours: "..auctionatorEntry.numYours)
 			end
 						
-			local tx = string.format("%i %s of %i", auctionatorEntry.count, pluralizeIf("stack", auctionatorEntry.count), auctionatorEntry.stackSize)
+			local tx = string.format("%i %s of %i", auctionatorEntry.count, Auctionator_PluralizeIf("stack", auctionatorEntry.count), auctionatorEntry.stackSize)
 
-			MoneyFrame_Update("AuctionatorEntry"..line.."_PerItem_Price", round(auctionatorEntry.buyoutPrice/auctionatorEntry.stackSize))
+			MoneyFrame_Update("AuctionatorEntry"..line.."_PerItem_Price", Auctionator_Round(auctionatorEntry.buyoutPrice/auctionatorEntry.stackSize))
 
 			lineEntry_avail:SetText(tx)
-			lineEntry_stack:SetText(priceToString(auctionatorEntry.buyoutPrice))
+			lineEntry_stack:SetText(Auctionator_PriceToString(auctionatorEntry.buyoutPrice))
 
 			lineEntry:Show()
 		else
@@ -680,70 +682,8 @@ end
 
 -----------------------------------------
 
-function pluralizeIf(word, count)
-
-	if count and count == 1 then
-		return word
-	else
-		return word.."s"
-	end
-end
-
------------------------------------------
-
-function round(v)
-	return math.floor(v + 0.5)
-end
-
------------------------------------------
-
 function undercut(price)
 	return math.max(0, price - 1)
-end
-
------------------------------------------
-
-function val2gsc(v)
-	local rv = round(v)
-	
-	local g = math.floor(rv/10000)
-	
-	rv = rv - g * 10000
-	
-	local s = math.floor(rv/100)
-	
-	rv = rv - s * 100
-	
-	local c = rv
-			
-	return g, s, c
-end
-
------------------------------------------
-
-function priceToString(val)
-
-	local gold, silver, copper  = val2gsc(val)
-
-	local st = ""
-	
-	if gold ~= 0 then
-		st = gold.."g "
-	end
-
-	if st ~= "" then
-		st = st..format("%02is ", silver)
-	elseif silver ~= 0 then
-		st = st..silver.."s "
-	end
-		
-	if st ~= "" then
-		st = st..format("%02ic", copper)
-	elseif copper ~= 0 then
-		st = st..copper.."c"
-	end
-	
-	return st
 end
 
 -----------------------------------------
