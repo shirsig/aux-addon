@@ -3,16 +3,14 @@
 	<Script file="Auctionator.lua"/> 
   
 	<!-- Frame to handle all core events --> 
-	<Frame name="Auctionator_core"> 
+	<Frame name="Auctionator_Core"> 
       <Scripts> 
 			<OnLoad> 
 				this:RegisterEvent("VARIABLES_LOADED")
 				this:RegisterEvent("ADDON_LOADED")
-				this:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
 				this:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
 				this:RegisterEvent("AUCTION_HOUSE_SHOW")
 				this:RegisterEvent("AUCTION_HOUSE_CLOSED")
-				this:RegisterEvent("NEW_AUCTION_UPDATE")
 			</OnLoad>
 			<OnUpdate>
 				Auctionator_OnUpdate()
@@ -90,7 +88,7 @@
 		</Scripts>
 	</Button>
 
-	<Frame name="Auctionator_Sell_Template" virtual="true" frameStrata="HIGH" hidden="true">
+	<Frame name="Auctionator_Sell_Template" virtual="true" hidden="true">
 		<Size>
 			<AbsDimension x="550" y="447"/>
 		</Size>
@@ -151,7 +149,7 @@
 					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="220" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 
-				<FontString inherits="GameFontHighlightSmall" text=" ">
+				<FontString inherits="GameFontHighlightSmall" text="">
 					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="325" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 

@@ -22,8 +22,6 @@ Auctionator = {
     }
 }
 
-local timeOfLastUpdate = GetTime()
-
 -----------------------------------------
 
 local Auctionator_Orig_AuctionFrameBrowse_Update
@@ -56,11 +54,9 @@ function Auctionator_EventHandler()
 
 	if event == "VARIABLES_LOADED"			then	Auctionator_OnLoad() 				end
 	if event == "ADDON_LOADED"				then	Auctionator_OnAddonLoaded() 		end
-	if event == "AUCTION_ITEM_LIST_UPDATE"	then	Auctionator_OnAuctionUpdate() 		end
 	if event == "AUCTION_OWNED_LIST_UPDATE"	then	Auctionator_OnAuctionOwnedUpdate() 	end
 	if event == "AUCTION_HOUSE_SHOW"		then	Auctionator_OnAuctionHouseShow() 	end
 	if event == "AUCTION_HOUSE_CLOSED"		then	Auctionator_OnAuctionHouseClosed() 	end
-	if event == "NEW_AUCTION_UPDATE"		then	Auctionator_OnNewAuctionUpdate()	end
 
 end
 
@@ -254,11 +250,20 @@ end
 
 -----------------------------------------
 
+function Auctionator_AuctionSellItemButton_OnEvent()
+	Auctionator_Orig_AuctionSellItemButton_OnEvent()
+	Auctionator_OnNewAuctionUpdate()
+end
+
+-----------------------------------------
+
 function Auctionator_BrowseButton_OnClick(button)
 	if arg1 == "LeftButton" then
 		Auctionator_Orig_BrowseButton_OnClick(button)
 	end
 end
+
+-----------------------------------------
 
 function Auctionator_BrowseButton_OnMouseDown()
 	if arg1 == "RightButton" and AUCTIONATOR_INSTANT_BUYOUT then
@@ -303,6 +308,9 @@ function Auctionator_SetupHookFunctions()
 	BrowseButton8:RegisterForClicks("LeftButtonUp", "RightButtonDown")
 	BrowseButton8:SetScript("OnMouseDown", Auctionator_BrowseButton_OnMouseDown)
 
+	Auctionator_Orig_AuctionSellItemButton_OnEvent = AuctionSellItemButton_OnEvent
+	AuctionSellItemButton_OnEvent = Auctionator_AuctionSellItemButton_OnEvent
+	
 	Auctionator_Orig_AuctionFrameTab_OnClick = AuctionFrameTab_OnClick
 	AuctionFrameTab_OnClick = Auctionator_AuctionFrameTab_OnClick
 	
@@ -372,14 +380,6 @@ end
 
 -----------------------------------------
 
-function Auctionator_OnAuctionUpdate()
-	if Auctionator_Scan_State_Postquery() then
-		Auctionator_Scan_Process()
-	end
-end
-
------------------------------------------
-
 function Auctionator_SetMessage(msg)
 	Auctionator_HideElems(recommendationElements)
 	AuctionatorMessage:SetText(msg)
@@ -403,7 +403,6 @@ function Auctionator_SelectAuctionatorEntry()
 		----- find the best price per stacksize and overall -----
 		
 		for _,auctionatorEntry in ipairs(auctionatorEntries[currentAuctionItemName]) do
-		
 			if not bestPrice[auctionatorEntry.stackSize] or bestPrice[auctionatorEntry.stackSize].itemPrice >= auctionatorEntry.itemPrice then
 				bestPrice[auctionatorEntry.stackSize] = auctionatorEntry
 			end
@@ -464,7 +463,7 @@ function Auctionator_UpdateRecommendation()
 			MoneyFrame_Update("Auctionator_RecommendPerStack_Price", round(newBuyoutPrice))
 			
 			MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
-			MoneyInputFrame_SetCopper(StartPrice,  newStartPrice)
+			MoneyInputFrame_SetCopper(StartPrice, newStartPrice)
 			
 			if selectedAuctionatorEntry.stackSize == auctionatorEntries[currentAuctionItemName][1].stackSize and selectedAuctionatorEntry.buyoutPrice == auctionatorEntries[currentAuctionItemName][1].buyoutPrice then
 				Auctionator_Recommend_Basis_Text:SetText("(based on cheapest)")
@@ -515,9 +514,7 @@ function Auctionator_OnNewAuctionUpdate()
 		return
 	end
 	
-	if not Auctionator_Scan_State_Idle() then
-		Auctionator_Scan_Abort()
-	end
+	Auctionator_Scan_Abort()
 	
 	currentAuctionItemName, currentAuctionItemTexture, currentAuctionItemStackSize = GetAuctionSellItemInfo()
 	
@@ -556,14 +553,7 @@ function Auctionator_OnUpdate()
 		return
 	end
 	
-	if Auctionator_Scan_State_Prequery() and GetTime() - timeOfLastUpdate > 0.5 then
-	
-		timeOfLastUpdate = GetTime()
 
-		if CanSendAuctionQuery() then
-			Auctionator_Scan_Query()
-		end
-	end
 	
 	if forceRefresh then
 		Auctionator_OnNewAuctionUpdate()
@@ -605,6 +595,7 @@ function Auctionator_ScrollbarUpdate()
 			local auctionatorEntry = auctionatorEntries[currentAuctionItemName][dataOffset]
 
 			local lineEntry_avail	= getglobal("AuctionatorEntry"..line.."_Availability")
+			local lineEntry_comm	= getglobal("AuctionatorEntry"..line.."_Comment")
 			local lineEntry_stack	= getglobal("AuctionatorEntry"..line.."_StackPrice")
 
 			if selectedAuctionatorEntry and auctionatorEntry.itemPrice == selectedAuctionatorEntry.itemPrice and auctionatorEntry.stackSize == selectedAuctionatorEntry.stackSize then
@@ -619,10 +610,14 @@ function Auctionator_ScrollbarUpdate()
 				lineEntry_avail:SetTextColor(1.0, 1.0, 1.0)
 			end
 
-			-- if		auctionatorEntry.numYours == 0 then			lineEntry_comm:SetText("")
-			-- elseif	auctionatorEntry.numYours == auctionatorEntry.count then	lineEntry_comm:SetText("yours")
-			-- else										lineEntry_comm:SetText("yours: "..auctionatorEntry.numYours)
-			-- end
+			if auctionatorEntry.numYours == 0 then
+				lineEntry_comm:SetText("")
+			elseif
+				auctionatorEntry.numYours == auctionatorEntry.count then
+				lineEntry_comm:SetText("yours")
+			else
+				lineEntry_comm:SetText("yours: "..auctionatorEntry.numYours)
+			end
 						
 			local tx = string.format("%i %s of %i", auctionatorEntry.count, pluralizeIf("stack", auctionatorEntry.count), auctionatorEntry.stackSize)
 
