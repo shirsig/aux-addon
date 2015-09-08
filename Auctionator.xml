@@ -3,7 +3,7 @@
 	<Script file="Auctionator.lua"/> 
   
 	<!-- Frame to handle all core events --> 
-	<Frame name="Auctionator_Core"> 
+	<Frame name="Auctionator_Core">
       <Scripts> 
 			<OnLoad> 
 				this:RegisterEvent("VARIABLES_LOADED")

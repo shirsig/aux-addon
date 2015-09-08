@@ -151,23 +151,19 @@ end
 
 function Auctionator_ContainerFrameItemButton_OnClick(button)
 	
-	if (not AUCTIONATOR_ENABLE_ALT
-		or not AuctionFrame:IsShown()
-		or not IsAltKeyDown())
-	then
-		return Auctionator_Orig_ContainerFrameItemButton_OnClick(button)
-	end
+	local origResult = Auctionator_Orig_ContainerFrameItemButton_OnClick(button)
 
-	ClickAuctionSellItemButton()
-	ClearCursor()
+	if AUCTIONATOR_ENABLE_ALT and AuctionFrame:IsShown() and IsAltKeyDown() and button == "LeftButton" then
 	
-	if PanelTemplates_GetSelectedTab(AuctionFrame) ~= AUCTIONATOR_TAB_INDEX then
-		AuctionFrameTab_OnClick(AUCTIONATOR_TAB_INDEX)
+		ClickAuctionSellItemButton()
+		ClearCursor()
+		
+		if PanelTemplates_GetSelectedTab(AuctionFrame) ~= AUCTIONATOR_TAB_INDEX then
+			AuctionFrameTab_OnClick(AUCTIONATOR_TAB_INDEX)
+		end
 	end
 	
-	PickupContainerItem(this:GetParent():GetID(), this:GetID())
-	ClickAuctionSellItemButton()
-
+	return origResult
 end
 
 -----------------------------------------
@@ -176,7 +172,7 @@ function Auctionator_AuctionFrameAuctions_Update()
 	
 	Auctionator_Orig_AuctionFrameAuctions_Update()
 
-	if PanelTemplates_GetSelectedTab(AuctionFrame) == AUCTIONATOR_TAB_INDEX  and	AuctionFrame:IsShown() then
+	if PanelTemplates_GetSelectedTab(AuctionFrame) == AUCTIONATOR_TAB_INDEX and AuctionFrame:IsShown() then
 		Auctionator_HideElems(auctionsTabElements)
 	end	
 end

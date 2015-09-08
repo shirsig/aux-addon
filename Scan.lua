@@ -17,26 +17,6 @@ local submitQuery, processQueryResults
 
 -----------------------------------------
 
-local eventFrame = CreateFrame("Frame")
-eventFrame:SetScript("OnUpdate", function()
-	if state == STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
-	
-		timeOfLastUpdate = GetTime()
-
-		if CanSendAuctionQuery() then
-			submitQuery()
-		end
-	end
-end)
-eventFrame:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
-eventFrame:SetScript("OnEvent", function(event)
-	if state == STATE_POSTQUERY then
-		processQueryResults()
-	end
-end)
-
------------------------------------------
-
 function Auctionator_Scan_Idle()
 	return state == STATE_IDLE
 end
@@ -175,3 +155,23 @@ function processQueryResults()
 		Auctionator_Scan_Complete()
 	end
 end
+
+-----------------------------------------
+
+local eventFrame = CreateFrame("Frame")
+eventFrame:SetScript("OnUpdate", function()
+	if state == STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
+	
+		timeOfLastUpdate = GetTime()
+
+		if CanSendAuctionQuery() then
+			submitQuery()
+		end
+	end
+end)
+eventFrame:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
+eventFrame:SetScript("OnEvent", function(event)
+	if state == STATE_POSTQUERY then
+		processQueryResults()
+	end
+end)
