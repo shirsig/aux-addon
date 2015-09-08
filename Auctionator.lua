@@ -182,19 +182,23 @@ end
 
 function Auctionator_ContainerFrameItemButton_OnClick(button)
 	
-	local origResult = Auctionator_Orig_ContainerFrameItemButton_OnClick(button)
+	if AuctionFrameBrowse:IsVisible() and IsShiftKeyDown() and not ChatFrameEditBox:IsVisible() and button == "LeftButton" then
+		local itemLink = GetContainerItemLink(this:GetParent():GetID(), this:GetID())
+		local itemName = string.gsub(itemLink, "^.-%[(.*)%].*", "%1")
+		BrowseName:SetText(itemName)
+	else
+		Auctionator_Orig_ContainerFrameItemButton_OnClick(button)
 
-	if AUCTIONATOR_ENABLE_ALT and AuctionFrame:IsShown() and IsAltKeyDown() and button == "LeftButton" then
-	
-		ClickAuctionSellItemButton()
-		ClearCursor()
+		if AUCTIONATOR_ENABLE_ALT and AuctionFrame:IsShown() and IsAltKeyDown() and button == "LeftButton" then
 		
-		if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Auctionator.tabs.sell.index then
-			AuctionFrameTab_OnClick(Auctionator.tabs.sell.index)
+			ClickAuctionSellItemButton()
+			ClearCursor()
+			
+			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Auctionator.tabs.sell.index then
+				AuctionFrameTab_OnClick(Auctionator.tabs.sell.index)
+			end
 		end
 	end
-	
-	return origResult
 end
 
 -----------------------------------------
@@ -548,8 +552,6 @@ function Auctionator_OnUpdate()
 	if not AuctionatorMessage then
 		return
 	end
-	
-
 	
 	if forceRefresh then
 		Auctionator_OnNewAuctionUpdate()
