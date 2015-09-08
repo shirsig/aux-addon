@@ -111,7 +111,6 @@ end
 
 function submitQuery()
 	if state == STATE_PREQUERY then
-		
 		QueryAuctionItems(
 			currentQuery.name,
 			currentQuery.minLevel,
@@ -132,52 +131,49 @@ end
 
 function processQueryResults()
 	
-	if state == STATE_POSTQUERY then
-	
+	-- SortAuctionItems("list", "buyout")
+	-- if IsAuctionSortReversed("list", "buyout") then
 		-- SortAuctionItems("list", "buyout")
-		-- if IsAuctionSortReversed("list", "buyout") then
-			-- SortAuctionItems("list", "buyout")
-		-- end
-		
-		local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
+	-- end
+	
+	local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
 
-		if totalAuctions >= NUM_AUCTION_ITEMS_PER_PAGE then
-			Auctionator_SetMessage("Scanning auctions: page "..currentPage.." ...")
-		end
-				
-		for i = 1, numBatchAuctions do
-		
-			local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
-			local duration = GetAuctionItemTimeLeft("list", i)
-
-			local scanDatum = {		
-					name			= name,
-					texture			= texture,
-					stackSize		= count,
-					quality			= quality,
-					canUse			= canUse,
-					level			= level,
-					minBid			= minBid,
-					minIncrement	= minIncrement,
-					buyoutPrice		= buyoutPrice,
-					bidAmount		= bidAmount,
-					highBidder		= highBidder,
-					owner			= owner,
-					duration		= duration
-			}
+	if totalAuctions >= NUM_AUCTION_ITEMS_PER_PAGE then
+		Auctionator_SetMessage("Scanning auctions: page "..currentPage.." ...")
+	end
 			
-			if not currentQuery.exactMatch or (currentQuery.name == scanDatum.name and scanDatum.buyoutPrice > 0) then -- TODO separate option for buyout price
-				tinsert(scanData, scanDatum)
-				if currentQuery.onReadDatum then
-					currentQuery.onReadDatum(scanDatum)
-				end
+	for i = 1, numBatchAuctions do
+	
+		local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
+		local duration = GetAuctionItemTimeLeft("list", i)
+
+		local scanDatum = {		
+				name			= name,
+				texture			= texture,
+				stackSize		= count,
+				quality			= quality,
+				canUse			= canUse,
+				level			= level,
+				minBid			= minBid,
+				minIncrement	= minIncrement,
+				buyoutPrice		= buyoutPrice,
+				bidAmount		= bidAmount,
+				highBidder		= highBidder,
+				owner			= owner,
+				duration		= duration
+		}
+		
+		if not currentQuery.exactMatch or (currentQuery.name == scanDatum.name and scanDatum.buyoutPrice > 0) then -- TODO separate option for buyout price
+			tinsert(scanData, scanDatum)
+			if currentQuery.onReadDatum then
+				currentQuery.onReadDatum(scanDatum)
 			end
 		end
+	end
 
-		if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
-			state = STATE_PREQUERY	
-		else
-			Auctionator_Scan_Complete()
-		end
+	if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
+		state = STATE_PREQUERY	
+	else
+		Auctionator_Scan_Complete()
 	end
 end
