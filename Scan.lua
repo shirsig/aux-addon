@@ -1,7 +1,21 @@
+local STATE_IDLE = 0
+local STATE_PREQUERY = 1
+local STATE_POSTQUERY = 2
+
+local NUM_AUCTION_ITEMS_PER_PAGE = 50
+
+local currentQuery
+local currentPage
+local state = STATE_IDLE
+
+local scanData
+
 local timeOfLastUpdate = GetTime()
 
 -- forward declaration of local functions
 local submitQuery, processQueryResults
+
+-----------------------------------------
 
 local eventFrame = CreateFrame("Frame")
 eventFrame:SetScript("OnUpdate", function()
@@ -20,20 +34,6 @@ eventFrame:SetScript("OnEvent", function(event)
 		processQueryResults()
 	end
 end)
-
------------------------------------------
-
-local STATE_IDLE = 0
-local STATE_PREQUERY = 1
-local STATE_POSTQUERY = 2
-
-local NUM_AUCTION_ITEMS_PER_PAGE = 50
-
-local currentQuery
-local currentPage
-local state = STATE_IDLE
-
-local scanData
 
 -----------------------------------------
 
@@ -110,21 +110,19 @@ end
 -----------------------------------------
 
 function submitQuery()
-	if state == STATE_PREQUERY then
-		QueryAuctionItems(
-			currentQuery.name,
-			currentQuery.minLevel,
-			currentQuery.maxLevel,
-			currentQuery.invTypeIndex,
-			currentQuery.classIndex,
-			currentQuery.subclassIndex,
-			currentPage,
-			currentQuery.isUsable,
-			currentQuery.qualityIndex
-		)
-		state = STATE_POSTQUERY
-		currentPage = currentPage + 1
-	end
+	QueryAuctionItems(
+		currentQuery.name,
+		currentQuery.minLevel,
+		currentQuery.maxLevel,
+		currentQuery.invTypeIndex,
+		currentQuery.classIndex,
+		currentQuery.subclassIndex,
+		currentPage,
+		currentQuery.isUsable,
+		currentQuery.qualityIndex
+	)
+	state = STATE_POSTQUERY
+	currentPage = currentPage + 1
 end
 
 -----------------------------------------
