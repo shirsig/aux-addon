@@ -17,7 +17,7 @@ local submitQuery, processQueryResults
 
 -----------------------------------------
 
-function Auctionator_Scan_Idle()
+function Auctionator_Scan_IsIdle()
 	return state == STATE_IDLE
 end
 

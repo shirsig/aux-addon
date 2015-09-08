@@ -408,7 +408,6 @@ function Auctionator_SelectAuctionatorEntry()
 			bestPriceOurStackSize = bestPrice[currentAuctionItemStackSize]
 		end
 	end
-	Auctionator_UpdateRecommendation()
 end
 
 -----------------------------------------
@@ -508,15 +507,16 @@ function Auctionator_OnNewAuctionUpdate()
 	currentAuctionItemName, currentAuctionItemTexture, currentAuctionItemStackSize = GetAuctionSellItemInfo()
 	
 	if currentAuctionItemName and not auctionatorEntries[currentAuctionItemName] then
-		Auctionator_Refresh()
+		Auctionator_RefreshEntries()
 	end
 	
 	Auctionator_SelectAuctionatorEntry()
+	Auctionator_UpdateRecommendation()
 end
 
 -----------------------------------------
 
-function Auctionator_Refresh()
+function Auctionator_RefreshEntries()
 	auctionatorEntries[currentAuctionItemName] = nil
 	selectedAuctionatorEntry = nil
 	
@@ -533,6 +533,7 @@ function Auctionator_Refresh()
 		onComplete = function(data)
 			processScanResults(data, currentAuctionItemName)
 			Auctionator_SelectAuctionatorEntry()
+			Auctionator_UpdateRecommendation()
 		end
 	})	
 end
@@ -624,8 +625,9 @@ end
 
 function Auctionator_RefreshButtonOnClick()
 	Auctionator_Scan_Abort()
-	Auctionator_Refresh()
+	Auctionator_RefreshEntries()
 	Auctionator_SelectAuctionatorEntry()
+	Auctionator_UpdateRecommendation()
 end
 
 -----------------------------------------
