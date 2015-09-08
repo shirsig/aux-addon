@@ -1,0 +1,94 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+	<Script file="Buy.lua"/> 
+	
+	<Frame name="Auctionator_Buy_Template" virtual="true" hidden="true">
+		<Size>
+			<AbsDimension x="550" y="447"/>
+		</Size>
+		<Anchors>
+			<Anchor point="TOPLEFT">
+				<Offset>
+					<AbsDimension x="210" y="0"/>
+				</Offset>
+			</Anchor>
+		</Anchors>	
+
+		<Layers>
+			<Layer level="BACKGROUND">
+				
+				<FontString inherits="GameFontNormal" text="Advanced Search">
+					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-100" y="-18"/></Offset></Anchor></Anchors>
+				</FontString>
+
+				<FontString name="Auctionator_Buy_SearchBox_Label" inherits="GameFontNormalSmall" text="Search For">
+					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="40" y="-50"/></Offset></Anchor></Anchors>
+				</FontString>
+
+			</Layer>
+
+		</Layers>
+
+		<Frames>		
+			
+            <EditBox name="AuctionatorBuySearchBox" autoFocus="false" inherits="InputBoxTemplate">
+				<Size><AbsDimension x="240" y="20"/></Size>
+				<Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_SearchBox_Label" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="2" y="-4"/></Offset></Anchor></Anchors>
+			</EditBox> 
+            
+            <Button name="AuctionatorBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
+				<Size><AbsDimension x="80" y="22"/></Size>
+				<Anchors><Anchor point="RIGHT" relativeTo="Auctionator_Buy_SearchBox" relativePoint="RIGHT"><Offset><AbsDimension x="90" y="3" /></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnClick>
+						AuctionatorBuySearchButton_Onclick()
+					</OnClick>
+				</Scripts>
+			</Button>
+            
+            
+
+			<Button name="Auctionator_Buy_RefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
+				<Size><AbsDimension x="126" y="22"/>	</Size>
+				<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="-14" y="-199"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnClick>
+						<!-- Auctionator_RefreshButtonOnClick() -->
+					</OnClick>
+				</Scripts>
+			</Button>
+			
+			<ScrollFrame name="Auctionator_Buy_ScrollFrame" inherits="FauxScrollFrameTemplate">
+				<Size><AbsDimension x="588" y="194"/></Size>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-213"/></Offset></Anchor></Anchors>
+
+				<Scripts>
+					<OnVerticalScroll>
+						<!--FauxScrollFrame_OnVerticalScroll(16, Auctionator_ScrollbarUpdate)-->
+					</OnVerticalScroll>
+					<OnShow>
+						<!--Auctionator_ScrollbarUpdate();-->
+					</OnShow>
+				</Scripts>
+			</ScrollFrame>
+
+            <Button name="Auctionator_Buy_Entry1" inherits="AuctionatorEntryTemplate">
+            <Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_ScrollFrame" relativePoint="TOPLEFT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor></Anchors>
+            </Button>
+            <Button name="Auctionator_Buy_Entry2"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry1"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry3"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry2"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry4"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry3"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry5"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry4"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry6"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry5"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry7"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry6"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry8"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry7"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry9"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry10" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry11" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry12" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry13" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry14" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="Auctionator_Buy_Entry15" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Buy_Entry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>  
+		</Frames>
+	</Frame>
+</Ui>

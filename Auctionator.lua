@@ -31,9 +31,6 @@ local Auctionator_Orig_ContainerFrameItemButton_OnClick
 local Auctionator_Orig_AuctionFrameAuctions_Update
 local Auctionator_Orig_AuctionsCreateAuctionButton_OnClick
 
-local forceRefresh = false
-
--- local searchResults = {}
 local selectedAuctionatorEntry
 
 local currentAuctionItemName = nil
@@ -282,12 +279,6 @@ end
 
 function Auctionator_SetupHookFunctions()
 	
-	-- Auctionator_Orig_AuctionFrameBrowse_Update = AuctionFrameBrowse_Update
-	-- AuctionFrameBrowse_Update = Auctionator_AuctionFrameBrowse_Update
-	
-	-- Auctionator_Orig_AuctionFrameBrowse_Scan = AuctionFrameBrowse_Scan
-	-- AuctionFrameBrowse_Scan = Auctionator_AuctionFrameBrowse_Scan
-	
 	Auctionator_Orig_BrowseButton_OnClick = BrowseButton_OnClick
 	BrowseButton_OnClick = Auctionator_BrowseButton_OnClick
 	
@@ -516,28 +507,8 @@ function Auctionator_OnNewAuctionUpdate()
 	
 	currentAuctionItemName, currentAuctionItemTexture, currentAuctionItemStackSize = GetAuctionSellItemInfo()
 	
-	if currentAuctionItemName and (forceRefresh or not auctionatorEntries[currentAuctionItemName]) then
-
-		forceRefresh = false
-
-		auctionatorEntries[currentAuctionItemName] = nil
-		selectedAuctionatorEntry = nil
-		
-		local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName)
-	
-		local currentAuctionClass		= ItemType2AuctionClass(sType)
-		local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
-		
-		Auctionator_Scan_Start(Auctionator_Scan_CreateQuery{
-			name = currentAuctionItemName,
-			exactMatch = true,
-			classIndex = currentAuctionClass,
-			subclassIndex = currentAuctionSubclass,
-			onComplete = function(data)
-				processScanResults(data, currentAuctionItemName)
-				Auctionator_SelectAuctionatorEntry()
-			end
-		})		
+	if currentAuctionItemName and not auctionatorEntries[currentAuctionItemName] then
+		Auctionator_Refresh()
 	end
 	
 	Auctionator_SelectAuctionatorEntry()
@@ -545,15 +516,25 @@ end
 
 -----------------------------------------
 
-function Auctionator_OnUpdate()
+function Auctionator_Refresh()
+	auctionatorEntries[currentAuctionItemName] = nil
+	selectedAuctionatorEntry = nil
 	
-	if not AuctionatorMessage then
-		return
-	end
+	local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName)
+
+	local currentAuctionClass		= ItemType2AuctionClass(sType)
+	local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
 	
-	if forceRefresh then
-		Auctionator_OnNewAuctionUpdate()
-	end
+	Auctionator_Scan_Start(Auctionator_Scan_CreateQuery{
+		name = currentAuctionItemName,
+		exactMatch = true,
+		classIndex = currentAuctionClass,
+		subclassIndex = currentAuctionSubclass,
+		onComplete = function(data)
+			processScanResults(data, currentAuctionItemName)
+			Auctionator_SelectAuctionatorEntry()
+		end
+	})	
 end
 	
 -----------------------------------------
@@ -642,7 +623,9 @@ function Auctionator_EntryOnClick()
 end
 
 function Auctionator_RefreshButtonOnClick()
-	forceRefresh = true
+	Auctionator_Scan_Abort()
+	Auctionator_Refresh()
+	Auctionator_SelectAuctionatorEntry()
 end
 
 -----------------------------------------
@@ -812,172 +795,3 @@ function SubType2AuctionSubclass(auctionClass, itemSubtype)
 		end
 	end
 end
-
------------------------------------------
-
--- These functions were meant to be used for a search sorted by buyout price but that actually seems impossible to implement nicely with the vanilla interface
-
--- function Auctionator_AuctionFrameBrowse_Update()
-	-- local numBatchAuctions = getn(searchResults)
-	-- local totalAuctions = numBatchAuctions
-	-- local button, buttonName, iconTexture, itemName, color, itemCount, moneyFrame, buyoutMoneyFrame, buyoutText, buttonHighlight
-	-- local offset = FauxScrollFrame_GetOffset(BrowseScrollFrame)
-	-- local index
-	-- local isLastSlotEmpty
-	-- local name, texture, count, quality, canUse, minBid, minIncrement, buyoutPrice, duration, bidAmount, highBidder
-	-- BrowseBidButton:Disable()
-	-- BrowseBuyoutButton:Disable()
-	-- -- Update sort arrows
-	-- SortButton_UpdateArrow(BrowseQualitySort, "list", "quality")
-	-- SortButton_UpdateArrow(BrowseLevelSort, "list", "level")
-	-- SortButton_UpdateArrow(BrowseDurationSort, "list", "duration")
-	-- SortButton_UpdateArrow(BrowseHighBidderSort, "list", "status")
-	-- SortButton_UpdateArrow(BrowseCurrentBidSort, "list", "bid")
-
-	-- -- Show the no results text if no items found
-	-- if numBatchAuctions == 0 then
-		-- BrowseNoResultsText:Show()
-	-- else
-		-- BrowseNoResultsText:Hide()
-	-- end
-
-	-- for i=1, NUM_BROWSE_TO_DISPLAY do
-		-- index = offset + i
-		-- button = getglobal("BrowseButton"..i)
-		-- -- Show or hide auction buttons
-		-- if index > numBatchAuctions then
-			-- button:Hide()
-			-- -- If the last button is empty then set isLastSlotEmpty var
-			-- if i == NUM_BROWSE_TO_DISPLAY then
-				-- isLastSlotEmpty = 1
-			-- end
-		-- else
-			-- button:Show()
-
-			-- buttonName = "BrowseButton"..i
-			-- local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder =  GetAuctionItemInfo("list", index);
-			-- -- duration = GetAuctionItemTimeLeft("list", offset + i)
-			-- -- Resize button if there isn't a scrollbar
-			-- buttonHighlight = getglobal("BrowseButton"..i.."Highlight")
-			-- if numBatchAuctions < NUM_BROWSE_TO_DISPLAY then
-				-- button:SetWidth(557)
-				-- buttonHighlight:SetWidth(523)
-				-- BrowseCurrentBidSort:SetWidth(173)
-			-- else
-				-- button:SetWidth(532)
-				-- buttonHighlight:SetWidth(502)
-				-- BrowseCurrentBidSort:SetWidth(157)
-			-- end
-			-- -- Set name and quality color
-			-- color = ITEM_QUALITY_COLORS[searchResults[i].quality]
-			-- itemName = getglobal(buttonName.."Name")
-			-- itemName:SetText(searchResults[i].name)
-			-- itemName:SetVertexColor(color.r, color.g, color.b)
-			-- -- Set level
-			-- if searchResults[i].level > UnitLevel("player") then
-				-- getglobal(buttonName.."Level"):SetText(RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE)
-			-- else
-				-- getglobal(buttonName.."Level"):SetText(searchResults[i].level)
-			-- end
-			-- -- Set high bidder
-			-- getglobal(buttonName.."HighBidder"):SetText(searchResults[i].highBidder)
-			-- -- Set closing time
-			-- getglobal(buttonName.."ClosingTimeText"):SetText(AuctionFrame_GetTimeLeftText(searchResults[i].duration))
-			-- getglobal(buttonName.."ClosingTime").tooltip = AuctionFrame_GetTimeLeftTooltipText(searchResults[i].duration)
-			-- -- Set item texture, count, and usability
-			-- iconTexture = getglobal(buttonName.."ItemIconTexture")
-			-- iconTexture:SetTexture(searchResults[i].texture)
-			-- if not searchResults[i].canUse then
-				-- iconTexture:SetVertexColor(1.0, 0.1, 0.1)
-			-- else
-				-- iconTexture:SetVertexColor(1.0, 1.0, 1.0)
-			-- end
-			-- itemCount = getglobal(buttonName.."ItemCount")
-			-- if searchResults[i].stackSize > 1 then
-				-- itemCount:SetText(searchResults[i].stackSize)
-				-- itemCount:Show()
-			-- else
-				-- itemCount:Hide()
-			-- end
-			-- -- Set high bid
-			-- moneyFrame = getglobal(buttonName.."MoneyFrame")
-			-- buyoutMoneyFrame = getglobal(buttonName.."BuyoutMoneyFrame")
-			-- buyoutText = getglobal(buttonName.."BuyoutText")
-			-- -- If not bidAmount set the bid amount to the min bid
-			-- if searchResults[i].bidAmount == 0 then
-				-- MoneyFrame_Update(moneyFrame:GetName(), searchResults[i].minBid)
-			-- else
-				-- MoneyFrame_Update(moneyFrame:GetName(), searchResults[i].bidAmount)
-			-- end
-			
-			-- if searchResults[i].buyoutPrice > 0 then
-				-- moneyFrame:SetPoint("RIGHT", buttonName, "RIGHT", 10, 10)
-				-- MoneyFrame_Update(buyoutMoneyFrame:GetName(), searchResults[i].buyoutPrice)
-				-- buyoutMoneyFrame:Show()
-				-- buyoutText:Show()
-			-- else
-				-- moneyFrame:SetPoint("RIGHT", buttonName, "RIGHT", 10, 3)
-				-- buyoutMoneyFrame:Hide()
-				-- buyoutText:Hide()
-			-- end
-			-- -- Set high bidder
-			-- local highBidder = searchResults[i].highBidder
-			-- if not highBidder then
-				-- highBidder = RED_FONT_COLOR_CODE..NO_BIDS..FONT_COLOR_CODE_CLOSE
-			-- end
-			-- getglobal(buttonName.."HighBidder"):SetText(highBidder)
-			-- -- Set highlight
-			-- if GetSelectedAuctionItem("list") and (offset + i) == GetSelectedAuctionItem("list") then
-				-- button:LockHighlight()
-				-- if highBidder ~= UnitName("player") then
-					-- BrowseBidButton:Enable()
-				-- end
-				
-				-- if searchResults[i].buyoutPrice > 0 and searchResults[i].buyoutPrice >= searchResults[i].minBid then
-					-- BrowseBuyoutButton:Enable()
-					-- AuctionFrame.buyoutPrice = searchResults[i].buyoutPrice
-				-- else
-					-- AuctionFrame.buyoutPrice = nil
-				-- end
-				-- -- Set bid
-				-- local bidAmount = searchResults[i].bidAmount
-				-- if bidAmount > 0 then
-					-- bidAmount = bidAmount + searchResults[i].minIncrement
-					-- MoneyInputFrame_SetCopper(BrowseBidPrice, bidAmount)
-				-- else
-					-- MoneyInputFrame_SetCopper(BrowseBidPrice, searchResults[i].minBid)
-				-- end
-				
-			-- else
-				-- button:UnlockHighlight()
-			-- end
-		-- end
-	-- end
-	
-	-- BrowsePrevPageButton:Hide()
-	-- BrowseNextPageButton:Hide()
-	-- BrowseScanCountText:Hide()
-	-- FauxScrollFrame_Update(BrowseScrollFrame, numBatchAuctions, NUM_BROWSE_TO_DISPLAY, AUCTIONS_BUTTON_HEIGHT)
--- end
-
------------------------------------------
-
--- function Auctionator_AuctionFrameBrowse_Scan()
-	
-	-- Auctionator_Scan_Start(Auctionator_Scan_CreateQuery{
-		-- name = BrowseName:GetText(),
-		-- exactMatch = false,
-		-- minLevel = BrowseMinLevel:GetText(),
-		-- maxLevel = BrowseMaxLevel:GetText(),
-		-- invTypeIndex = AuctionFrameBrowse.selectedInvtypeIndex,
-		-- classIndex = AuctionFrameBrowse.selectedClassIndex,
-		-- subclassIndex = AuctionFrameBrowse.selectedSubclassIndex,
-		-- isUsable = IsUsableCheckButton:GetChecked(),
-		-- qualityIndex = UIDropDownMenu_GetSelectedValue(BrowseDropDown),
-		-- onComplete = function(data)
-			-- table.sort(data, function(a,b) return a.buyoutPrice < b.buyoutPrice end)
-			-- scanData = data
-		-- end
-	-- })
-	
--- end
