@@ -4,6 +4,9 @@ local selectedEntries = {}
 local searchQuery
 
 function AuctionatorBuySearchButton_OnClick()
+	entries = nil
+	selectedEntries = {}
+	Auctionator_Buy_ScrollbarUpdate()
 	searchQuery = Auctionator_Scan_CreateQuery{
 		name = AuctionatorBuySearchBox:GetText(),
 		exactMatch = true
@@ -36,20 +39,49 @@ end
 -----------------------------------------
 
 function AuctionatorBuyBuySelectedButton_OnClick()
+
+	AuctionatorBuySearchButton:Disable()
+	AuctionatorBuyBuySelectedButton:Disable()
+	
 	local selection = condensedSelection(selectedEntries)
+	local selectedCount = Auctionator_SetSize(selectedEntries)
+	local purchasedCount = 0
+	entries = nil
+	selectedEntries = {}
+	
+	Auctionator_Buy_ScrollbarUpdate()					
+	
 	Auctionator_Scan_Start{
 			query = searchQuery,
 			onReadDatum = function(datum)
 				local key = "_"..datum.stackSize.."_"..datum.buyoutPrice
 				if selection[key] then
-					-- Auctionator_Log("match: "..key)
+				
 					PlaceAuctionBid("list", datum.pageIndex, datum.buyoutPrice)
+					purchasedCount = purchasedCount + 1
+					Auctionator_Log(string.format("[Auctionator] Auction purchased", purchasedCount, selectedCount))
 					if selection[key] > 1 then
 						selection[key] = selection[key] - 1
 					else
 						selection[key] = nil
 					end
+					
+					return false
+				else
+					return true
 				end
+			end,
+			onComplete = function(data)
+				Auctionator_Log(string.format("[Auctionator] Final report: %i out of %i auctions purchased", purchasedCount, selectedCount))
+				processScanResults(data)
+				Auctionator_Buy_ScrollbarUpdate()
+				AuctionatorBuySearchButton:Enable()
+				AuctionatorBuyBuySelectedButton:Enable()
+			end,
+			onAbort = function()
+				Auctionator_Log(string.format("[Auctionator] Final report: %i out of %i auctions purchased", purchasedCount, selectedCount))
+				AuctionatorBuySearchButton:Enable()
+				AuctionatorBuyBuySelectedButton:Enable()
 			end
 	}
 end
@@ -96,6 +128,11 @@ end
 -----------------------------------------
 
 function Auctionator_Buy_ScrollbarUpdate()
+	if entries and getn(entries) == 0 then
+		Auctionator_SetMessage("No auctions were found")
+	else
+		AuctionatorBuyMessage:Hide()
+	end
 
 	local line -- 1 through 15 of our window to scroll
 	local dataOffset -- an index into our data calculated from the scroll offset

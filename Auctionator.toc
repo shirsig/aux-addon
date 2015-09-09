@@ -5,7 +5,7 @@
 ## SavedVariables: auctionatorEntries
 Core.xml
 Scan.xml
-Auctionator.xml
+Sell.xml
 Buy.xml
 Options.xml
 About.xml

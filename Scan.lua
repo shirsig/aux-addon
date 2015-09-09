@@ -143,9 +143,13 @@ function processQueryResults()
 				pageIndex		= i
 		}
 		
-		tinsert(scanData, scanDatum)
 		if currentJob.onReadDatum then
-			currentJob.onReadDatum(scanDatum)
+			local keepDatum = currentJob.onReadDatum(scanDatum)
+			if keepDatum then
+				tinsert(scanData, scanDatum)
+			end
+		else
+			tinsert(scanData, scanDatum)
 		end
 	end
 

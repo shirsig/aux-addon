@@ -90,6 +90,10 @@
 					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-100" y="-18"/></Offset></Anchor></Anchors>
 				</FontString>
 
+				<FontString name="AuctionatorBuyMessage" inherits="GameFontNormal">
+					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-60" y="-200"/></Offset></Anchor></Anchors>
+				</FontString>
+				
 				<FontString name="AuctionatorBuySearchBoxLabel" inherits="GameFontNormalSmall" text="Search For">
 					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-50" y="-50"/></Offset></Anchor></Anchors>
 				</FontString>
@@ -129,6 +133,11 @@
             <EditBox name="AuctionatorBuySearchBox" autoFocus="false" inherits="InputBoxTemplate">
 				<Size><AbsDimension x="240" y="20"/></Size>
 				<Anchors><Anchor point="LEFT" relativeTo="AuctionatorBuySearchBoxLabel" relativePoint="RIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnEnterPressed>
+						this:ClearFocus();
+					</OnEnterPressed>
+				</Scripts>
 			</EditBox> 
             
             <Button name="AuctionatorBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">

@@ -6,7 +6,7 @@ local val2gsc
 
 function Auctionator_Log(msg)
 	if DEFAULT_CHAT_FRAME then
-		DEFAULT_CHAT_FRAME:AddMessage(msg)
+		DEFAULT_CHAT_FRAME:AddMessage(msg, 0, 1, 0)
 	end
 end
 
@@ -41,10 +41,18 @@ function Auctionator_SetContains(set, key)
     return set[key] ~= nil
 end
 
+function Auctionator_SetSize(set)
+    local size = 0
+	for _,_ in pairs(set) do
+		size = size + 1
+	end
+	return size
+end
+
 -----------------------------------------
 
 function Auctionator_OnLoad()
-	Auctionator_Log("Auctionator Loaded")
+	Auctionator_Log("[Auctionator] Loaded")
 	AuctionatorLoaded = true
 end
 
