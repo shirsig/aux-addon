@@ -180,8 +180,8 @@ function Auctionator_Buy_ScrollbarUpdate()
 			local lineEntry_stackSize = getglobal("AuctionatorBuyEntry"..line.."_StackSize")
 			
 			local color = "ffffffff"
-			if Auctionator.qualityColor(entry.quality) then
-				color = Auctionator.qualityColor(entry.quality)
+			if Auctionator_QualityColor(entry.quality) then
+				color = Auctionator_QualityColor(entry.quality)
 			end
 			
 			lineEntry_name:SetText("\124c" .. color ..  entry.name .. "\124r")

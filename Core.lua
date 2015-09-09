@@ -5,7 +5,6 @@ AUCTIONATOR_ENABLE_ALT = true
 AUCTIONATOR_OPEN_FIRST = false
 AUCTIONATOR_INSTANT_BUYOUT = false
 
--- global settings
 Auctionator = {
 	loaded = false,
 	orig = {},
@@ -17,25 +16,14 @@ Auctionator = {
         buy = {
             index = 5
         }
-    },
-	qualityColor = function(code)
-		if code == 0 then
-			return "ff9d9d9d" -- poor, gray
-		elseif code == 1 then
-			return "ffffffff" -- common, white
-		elseif code == 2 then
-			return "ff1eff00" -- uncommon, green
-		elseif code == 3 then -- rare, blue
-			return "ff0070dd"
-		elseif code == 4 then
-			return "ffa335ee" -- epic, purple
-		elseif code == 5 then
-			return "ffff8000" -- legendary, orange
-		end
-	end
+    }
 }
 
+-----------------------------------------
+
 local relevel
+
+-----------------------------------------
 
 function Auctionator_OnLoad()
 	Auctionator_Log("Auctionator v"..AuctionatorVersion.." loaded")
@@ -377,5 +365,23 @@ function Auctionator_ContainerFrameItemButton_OnClick(button)
 				AuctionFrameTab_OnClick(Auctionator.tabs.sell.index)
 			end
 		end
+	end
+end
+
+-----------------------------------------
+
+function Auctionator_QualityColor(code)
+	if code == 0 then
+		return "ff9d9d9d" -- poor, gray
+	elseif code == 1 then
+		return "ffffffff" -- common, white
+	elseif code == 2 then
+		return "ff1eff00" -- uncommon, green
+	elseif code == 3 then -- rare, blue
+		return "ff0070dd"
+	elseif code == 4 then
+		return "ffa335ee" -- epic, purple
+	elseif code == 5 then
+		return "ffff8000" -- legendary, orange
 	end
 end
