@@ -62,7 +62,6 @@ function Auctionator_Scan_Start(job)
 	end
 	
 	currentJob = job
-	currentPage = 0
 	scanData = {}
 	state = STATE_PREQUERY
 end
@@ -103,7 +102,7 @@ function submitQuery()
 		currentJob.query.qualityIndex
 	)
 	state = STATE_POSTQUERY
-	currentPage = currentPage + 1
+	currentPage = currentPage and currentPage + 1 or 1
 end
 
 -----------------------------------------
@@ -117,9 +116,7 @@ function processQueryResults()
 	
 	local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
 
-	if totalAuctions >= NUM_AUCTION_ITEMS_PER_PAGE then
-		Auctionator_SetMessage("Scanning auctions: page "..currentPage.." ...")
-	end
+	Auctionator_SetMessage("Scanning auctions: page "..currentPage.." ...")
 			
 	for i = 1, numBatchAuctions do
 	
@@ -154,7 +151,7 @@ function processQueryResults()
 		end
 	end
 
-	if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
+	if totalAuctions > (currentPage - 1) * NUM_AUCTION_ITEMS_PER_PAGE + numBatchAuctions then			
 		state = STATE_PREQUERY	
 	else
 		Auctionator_Scan_Complete()
