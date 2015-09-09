@@ -17,7 +17,15 @@ Auctionator = {
         buy = {
             index = 5
         }
-    }
+    },
+	item_colors = {
+		"ff9d9d9d", -- poor, gray
+		"ffffffff", -- common, white
+		"ff1eff00", -- uncommon, green
+		"ff0070dd", -- rare, blue
+		"ffa335ee", -- epic, purple
+		"ffff8000", -- legendary, orange
+	}
 }
 
 -----------------------------------------
