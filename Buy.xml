@@ -141,7 +141,7 @@
 				<Scripts>
 					<OnEnterPressed>
 						this:ClearFocus()
-                        AuctionatorBuySearchButton_OnClick()
+						AuctionatorBuySearchButton_OnClick()
 					</OnEnterPressed>
 				</Scripts>
 			</EditBox> 
