@@ -6,7 +6,7 @@ local val2gsc
 
 function Auctionator_Log(msg)
 	if DEFAULT_CHAT_FRAME then
-		DEFAULT_CHAT_FRAME:AddMessage(msg, 0, 1, 0)
+		DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
 	end
 end
 

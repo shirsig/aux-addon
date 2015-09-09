@@ -25,7 +25,7 @@ end
 function condensedSelection()
 	local selection = {}
 	for entry,_ in pairs(selectedEntries) do
-		local key = "_"..entry.stackSize.."_"..entry.buyoutPrice
+		local key = entry.name.."_"..entry.stackSize.."_"..entry.buyoutPrice
 				
 		if selection[key] then
 			selection[key] = selection[key] + 1
@@ -54,7 +54,7 @@ function AuctionatorBuyBuySelectedButton_OnClick()
 	Auctionator_Scan_Start{
 			query = searchQuery,
 			onReadDatum = function(datum)
-				local key = "_"..datum.stackSize.."_"..datum.buyoutPrice
+				local key = datum.name.."_"..datum.stackSize.."_"..datum.buyoutPrice
 				if selection[key] then
 				
 					PlaceAuctionBid("list", datum.pageIndex, datum.buyoutPrice)
@@ -76,12 +76,10 @@ function AuctionatorBuyBuySelectedButton_OnClick()
 				processScanResults(data)
 				Auctionator_Buy_ScrollbarUpdate()
 				AuctionatorBuySearchButton:Enable()
-				AuctionatorBuyBuySelectedButton:Enable()
 			end,
 			onAbort = function()
 				Auctionator_Log(string.format("[Auctionator] Final report: %i out of %i auctions purchased", purchasedCount, selectedCount))
 				AuctionatorBuySearchButton:Enable()
-				AuctionatorBuyBuySelectedButton:Enable()
 			end
 	}
 end
@@ -132,6 +130,12 @@ function Auctionator_Buy_ScrollbarUpdate()
 		Auctionator_SetMessage("No auctions were found")
 	else
 		AuctionatorBuyMessage:Hide()
+	end
+	
+	if Auctionator_SetSize(selectedEntries) > 0 then
+		AuctionatorBuyBuySelectedButton:Enable()
+	else
+		AuctionatorBuyBuySelectedButton:Disable()
 	end
 
 	local line -- 1 through 15 of our window to scroll
