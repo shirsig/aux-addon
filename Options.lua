@@ -1,10 +1,29 @@
-local AuctionatorVersion = "1.1.0-Vanilla"
-local AuctionatorAuthor  = "Zirco; Backport by Nimeral; Reworked by Simon Hirsig"
-
 local BoolToString, BoolToNum, NumToBool
 
 function Auctionator_ShowDescriptionFrame()
 	AuctionatorDescriptionFrame:Show()
+	
+	AuctionatorDescriptionHTML:SetText("<html><body>"
+			.."<h1>What is Auctionator?</h1><br/>"
+			.."<p>"
+			.."Figuring out a good buyout price when posting auctions can be tedious and time-consuming.  If you're like most people, you first browse the current "
+			.."auctions to get a sense of how much your item is currently selling for.  Then you undercut the lowest price by a bit.  If you're creating multiple auctions "
+			.."you're bouncing back and forth between the Browse tab and the Auctions tab, doing lots of division in "
+			.."your head, and doing lots of clicking and typing."
+			.."</p><br/><h1>How it works</h1><br/><p>"
+			.."Auctionator makes this whole process easy and streamlined.  When you select an item to auction, Auctionator displays a summary of all the current auctions for "
+			.."that item sorted by per-item price.  Auctionator also calculates a recommended buyout price based on the cheapest per-item price for your item.  If you're "
+			.."selling a stack rather than a single item, Auctionator bases its recommended buyout price on the cheapest stack of the same size."
+			.."</p><br/><p>"
+			.."If you don't like Auctionator's recommendation, you can click on any line in the summary and Auctionator will recalculate the recommended buyout price based "
+			.."on that auction.  Of course, you can always override Auctionator's recommendation by just typing in your own buyout price."
+			.."</p><br/><p>"
+			.."With Auctionator, creating an auction is usually just a matter of picking an item to auction and clicking the Create Auction button."
+			.."</p>"
+			.."</body></html>")
+			
+	AuctionatorDescriptionHTML:SetSpacing(3)
+	
 	AuctionatorAuthorText:SetText("Author: "..AuctionatorAuthor)
 end
 
@@ -16,29 +35,9 @@ function Auctionator_ShowOptionsFrame()
 	AuctionatorOptionsFrame:SetBackdropColor(0,0,0,100)
 	
 	AuctionatorConfigFrameTitle:SetText("Auctionator Options for "..UnitName("player"))
-	
-	local expText = "<html><body>"
-					.."<h1>What is Auctionator?</h1><br/>"
-					.."<p>"
-					.."Figuring out a good buyout price when posting auctions can be tedious and time-consuming.  If you're like most people, you first browse the current "
-					.."auctions to get a sense of how much your item is currently selling for.  Then you undercut the lowest price by a bit.  If you're creating multiple auctions "
-					.."you're bouncing back and forth between the Browse tab and the Auctions tab, doing lots of division in "
-					.."your head, and doing lots of clicking and typing."
-					.."</p><br/><h1>How it works</h1><br/><p>"
-					.."Auctionator makes this whole process easy and streamlined.  When you select an item to auction, Auctionator displays a summary of all the current auctions for "
-					.."that item sorted by per-item price.  Auctionator also calculates a recommended buyout price based on the cheapest per-item price for your item.  If you're "
-					.."selling a stack rather than a single item, Auctionator bases its recommended buyout price on the cheapest stack of the same size."
-					.."</p><br/><p>"
-					.."If you don't like Auctionator's recommendation, you can click on any line in the summary and Auctionator will recalculate the recommended buyout price based "
-					.."on that auction.  Of course, you can always override Auctionator's recommendation by just typing in your own buyout price."
-					.."</p><br/><p>"
-					.."With Auctionator, creating an auction is usually just a matter of picking an item to auction and clicking the Create Auction button."
-					.."</p>"
-					.."</body></html>"
 
 	AuctionatorExplanation:SetText("Auctionator is an addon designed to make it easier and faster to setup your auctions at the auction house.")
-	AuctionatorDescriptionHTML:SetText(expText)
-	AuctionatorDescriptionHTML:SetSpacing(3)
+
 
 	AuctionatorVersionText:SetText("Version: "..AuctionatorVersion)
 	

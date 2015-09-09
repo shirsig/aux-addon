@@ -1,3 +1,6 @@
+AuctionatorVersion = "1.2.0-Vanilla"
+AuctionatorAuthor = "Zirco; Backport by Nimeral; Reworked by Simon Hirsig"
+
 AuctionatorLoaded = false
 
 local val2gsc
@@ -52,7 +55,7 @@ end
 -----------------------------------------
 
 function Auctionator_OnLoad()
-	Auctionator_Log("[Auctionator] Loaded")
+	Auctionator_Log("Auctionator v"..AuctionatorVersion.." loaded")
 	AuctionatorLoaded = true
 end
 

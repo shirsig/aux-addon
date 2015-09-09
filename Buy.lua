@@ -1,4 +1,4 @@
-local processScanResults
+local processScanResults, createOrder, updateOrder
 local entries
 local selectedEntries = {}
 local searchQuery
@@ -22,7 +22,7 @@ end
 
 -----------------------------------------
 
-function condensedSelection()
+function createOrder()
 	local selection = {}
 	for entry,_ in pairs(selectedEntries) do
 		local key = entry.name.."_"..entry.stackSize.."_"..entry.buyoutPrice
@@ -39,13 +39,14 @@ end
 -----------------------------------------
 
 function AuctionatorBuyBuySelectedButton_OnClick()
-
+	
 	AuctionatorBuySearchButton:Disable()
 	AuctionatorBuyBuySelectedButton:Disable()
 	
-	local selection = condensedSelection(selectedEntries)
-	local selectedCount = Auctionator_SetSize(selectedEntries)
+	local order = createOrder(selectedEntries)
+	local orderedCount = Auctionator_SetSize(selectedEntries)
 	local purchasedCount = 0
+
 	entries = nil
 	selectedEntries = {}
 	
@@ -55,15 +56,19 @@ function AuctionatorBuyBuySelectedButton_OnClick()
 			query = searchQuery,
 			onReadDatum = function(datum)
 				local key = datum.name.."_"..datum.stackSize.."_"..datum.buyoutPrice
-				if selection[key] then
+				if order[key] then
 				
-					PlaceAuctionBid("list", datum.pageIndex, datum.buyoutPrice)
-					purchasedCount = purchasedCount + 1
-					Auctionator_Log(string.format("[Auctionator] Auction purchased", purchasedCount, selectedCount))
-					if selection[key] > 1 then
-						selection[key] = selection[key] - 1
+					if GetMoney() >= datum.buyoutPrice then
+						PlaceAuctionBid("list", datum.pageIndex, datum.buyoutPrice)
+						purchasedCount = purchasedCount + 1
 					else
-						selection[key] = nil
+						
+					end
+					
+					if order[key] > 1 then
+						order[key] = order[key] - 1
+					else
+						order[key] = nil
 					end
 					
 					return false
@@ -72,14 +77,14 @@ function AuctionatorBuyBuySelectedButton_OnClick()
 				end
 			end,
 			onComplete = function(data)
-				Auctionator_Log(string.format("[Auctionator] Final report: %i out of %i auctions purchased", purchasedCount, selectedCount))
 				processScanResults(data)
 				Auctionator_Buy_ScrollbarUpdate()
 				AuctionatorBuySearchButton:Enable()
+				Auctionator_Buy_ShowReport(false, orderedCount, purchasedCount)
 			end,
 			onAbort = function()
-				Auctionator_Log(string.format("[Auctionator] Final report: %i out of %i auctions purchased", purchasedCount, selectedCount))
 				AuctionatorBuySearchButton:Enable()
+				Auctionator_Buy_ShowReport(false, orderedCount, purchasedCount)
 			end
 	}
 end
@@ -132,14 +137,17 @@ function Auctionator_Buy_ScrollbarUpdate()
 		AuctionatorBuyMessage:Hide()
 	end
 	
-	if Auctionator_SetSize(selectedEntries) > 0 then
+	local total = 0
+	for entry, _ in selectedEntries do
+		total = total + entry.buyoutPrice
+	end	
+	MoneyFrame_Update("AuctionatorBuyTotal", Auctionator_Round(total))
+	
+	if Auctionator_SetSize(selectedEntries) > 0 and GetMoney() >= total then
 		AuctionatorBuyBuySelectedButton:Enable()
 	else
 		AuctionatorBuyBuySelectedButton:Disable()
 	end
-
-	local line -- 1 through 15 of our window to scroll
-	local dataOffset -- an index into our data calculated from the scroll offset
 	
 	local numrows
 	if not entries then
@@ -149,10 +157,10 @@ function Auctionator_Buy_ScrollbarUpdate()
 	end
 	
 	FauxScrollFrame_Update(AuctionatorBuyScrollFrame, numrows, 19, 16);
-
+	
 	for line = 1,19 do
 
-		dataOffset = line + FauxScrollFrame_GetOffset(AuctionatorBuyScrollFrame)
+		local dataOffset = line + FauxScrollFrame_GetOffset(AuctionatorBuyScrollFrame)
 		local lineEntry = getglobal("AuctionatorBuyEntry"..line)
 		
 		if numrows <= 19 then
@@ -187,5 +195,21 @@ function Auctionator_Buy_ScrollbarUpdate()
 		else
 			lineEntry:Hide()
 		end
+	end
+	
+	function Auctionator_Buy_ShowReport(completed, orderedCount, purchasedCount)
+		AuctionatorBuyReport:Show()
+		
+		AuctionatorBuyReportHTML:SetText("<html><body>"
+				.."<h1>Auctionator Buy Report</h1><br/>"
+				.."<h1>Status:"..(completed and "Completed" or "Aborted").."</h1><br/>"
+				.."<p>"
+				..string.format("%i out of the %i ordered auctions have been purchased", purchasedCount, orderedCount)
+				.."</p>"
+				.."</body></html>")
+			
+		AuctionatorBuyReportHTML:SetSpacing(3)
+	
+		AuctionatorBuyAuthorText:SetText("Author: "..AuctionatorAuthor)
 	end
 end

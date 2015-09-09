@@ -23,7 +23,7 @@ end
 
 -----------------------------------------
 
-function Auctionator_Scan_Complete()	
+function Auctionator_Scan_Complete()
 	if state ~= STATE_IDLE then
 		if currentJob.onComplete then
 			currentJob.onComplete(scanData)
@@ -39,21 +39,22 @@ end
 -----------------------------------------
 
 function Auctionator_Scan_Abort()
-
-	if currentJob and currentJob.onAbort then
-		currentJob.onAbort()
+	if state ~= STATE_IDLE then
+		if currentJob and currentJob.onAbort then
+			currentJob.onAbort()
+		end
+		
+		currentJob = nil
+		currentPage = nil
+		scanData = nil
+		state = STATE_IDLE
 	end
-	
-	currentJob = nil
-	currentPage = nil
-	scanData = nil
-	state = STATE_IDLE
 end
 
 -----------------------------------------
 
 function Auctionator_Scan_Start(job)
-	
+
 	Auctionator_SetMessage("Scanning auctions ...")
 
 	if state ~= STATE_IDLE then

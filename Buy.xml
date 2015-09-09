@@ -72,16 +72,12 @@
 		</Scripts>
 	</Button>
 	
-	<Frame name="Auctionator_Buy_Template" virtual="true" hidden="true">
+	<Frame name="AuctionatorBuyTemplate" virtual="true" hidden="true">
 		<Size>
-			<AbsDimension x="550" y="447"/>
+			<AbsDimension x="694" y="447"/>
 		</Size>
 		<Anchors>
-			<Anchor point="TOPLEFT">
-				<Offset>
-					<AbsDimension x="210" y="0"/>
-				</Offset>
-			</Anchor>
+			<Anchor point="TOPLEFT"/>
 		</Anchors>	
 
 		<Layers>
@@ -91,20 +87,29 @@
 				</FontString>
 
 				<FontString name="AuctionatorBuyMessage" inherits="GameFontNormal">
-					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-60" y="-200"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="70" y="-120"/></Offset></Anchor></Anchors>
 				</FontString>
 				
-				<FontString name="AuctionatorBuySearchBoxLabel" inherits="GameFontNormalSmall" text="Search For">
-					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-50" y="-50"/></Offset></Anchor></Anchors>
+				<FontString name="AuctionatorBuySearchBoxLabel" inherits="GameFontHighlightSmall" text="Search For">
+					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="160" y="-50"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
 			<Layer level="ARTWORK">
+				<FontString name="AuctionatorBuyTotalLabel" inherits="GameFontHighlightSmall" text="Total">
+					<Anchors>
+						<Anchor point="BOTTOM">
+							<Offset>
+								<AbsDimension x="70" y="22"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
 				<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
 					<Size><AbsDimension x="802" y="64"/></Size>
 					<Anchors>
 						<Anchor point="TOPLEFT">
 							<Offset>
-								<AbsDimension x="-190" y="-52"/>
+								<AbsDimension x="20" y="-52"/>
 							</Offset>
 						</Anchor>
 					</Anchors>
@@ -135,7 +140,7 @@
 				<Anchors><Anchor point="LEFT" relativeTo="AuctionatorBuySearchBoxLabel" relativePoint="RIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnEnterPressed>
-						this:ClearFocus();
+						this:ClearFocus()
 					</OnEnterPressed>
 				</Scripts>
 			</EditBox> 
@@ -151,8 +156,14 @@
 			</Button>
             
 			<Button name="AuctionatorBuyBuySelectedButton" inherits="UIPanelButtonTemplate" text="Buy Selected Auctions">
-				<Size><AbsDimension x="166" y="22"/>	</Size>
-				<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="-14" y="-199"/></Offset></Anchor></Anchors>
+				<Size><AbsDimension x="166" y="22"/></Size>
+				<Anchors>
+					<Anchor point="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="51" y="14"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
 				<Scripts>
 					<OnClick>
 						AuctionatorBuyBuySelectedButton_OnClick()
@@ -160,9 +171,35 @@
 				</Scripts>
 			</Button>
 			
+			<Frame name="AuctionatorBuyTotal" inherits="SmallMoneyFrameTemplate">
+				<Anchors>
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuctionatorBuyTotalLabel">
+						<Offset>
+							<AbsDimension x="10" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						SmallMoneyFrame_OnLoad()
+						MoneyFrame_SetType("STATIC")
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			
+<!-- 			<Frame name="BidBidPrice" inherits="MoneyInputFrameTemplate">
+				<Anchors>
+					<Anchor point="BOTTOM">
+						<Offset>
+							<AbsDimension x="-15" y="18"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+			</Frame> -->
+		
 			<ScrollFrame name="AuctionatorBuyScrollFrame" inherits="FauxScrollFrameTemplate">
 				<Size><AbsDimension x="785" y="309"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-197" y="-98"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="13" y="-98"/></Offset></Anchor></Anchors>
 
 				<Scripts>
 					<OnVerticalScroll>
@@ -195,6 +232,52 @@
             <Button name="AuctionatorBuyEntry17" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry16" relativePoint="BOTTOMLEFT"/></Anchors></Button>
             <Button name="AuctionatorBuyEntry18" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry17" relativePoint="BOTTOMLEFT"/></Anchors></Button>
             <Button name="AuctionatorBuyEntry19" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry18" relativePoint="BOTTOMLEFT"/></Anchors></Button>		
+		</Frames>
+	</Frame>
+	
+	<Frame name="AuctionatorBuyReport" frameStrata="FULLSCREEN_DIALOG"  toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
+		<Size><AbsDimension x="300" y="300" /></Size>		
+		<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-90"/></Offset></Anchor></Anchors>
+
+		<Backdrop bgFile="Interface\CharacterFrame\UI-Party-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+			<BackgroundInsets><AbsInset left="11" right="12" top="12" bottom="11"/></BackgroundInsets>
+			<TileSize><AbsValue val="32"/></TileSize>
+			<EdgeSize><AbsValue val="32"/></EdgeSize>
+		</Backdrop>
+
+		<Layers>
+			<Layer level="BACKGROUND">
+				<FontString name="AuctionatorBuyAuthorText" inherits="GameFontDisableSmall" justifyH="LEFT" justifyV="TOP">
+					<Anchors>
+						<Anchor point="BOTTOMLEFT">
+							<Offset><AbsDimension x="30" y="20"/></Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+
+		<Frames>
+
+			<SimpleHTML name="AuctionatorBuyReportHTML">
+				<Size><AbsDimension x="420" y="420" /></Size>		
+				<Anchors>
+					<Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor>
+				</Anchors>
+				<FontString inherits="GameFontHighlightSmall"/>
+				<FontStringHeader1 inherits="GameFontNormal"/>
+			</SimpleHTML>
+
+			<Button inherits="UIPanelButtonTemplate" text="Close">
+				<Size><AbsDimension x="100" y="22"/>	</Size>
+				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnClick>
+						AuctionatorBuyReport:Hide()
+					</OnClick>
+				</Scripts>
+			</Button>
+
 		</Frames>
 	</Frame>
 </Ui>

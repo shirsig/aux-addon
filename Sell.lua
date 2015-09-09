@@ -58,21 +58,21 @@ end
 
 function Auctionator_AddPanels()
 	
-	local sellFrame = CreateFrame("Frame", "Auctionator_Sell_Panel", AuctionFrame, "Auctionator_Sell_Template")
+	local sellFrame = CreateFrame("Frame", "AuctionatorSellPanel", AuctionFrame, "AuctionatorSellTemplate")
 	sellFrame:SetParent("AuctionFrame")
-	sellFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT", 210, 0)
+	sellFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
 	relevel(sellFrame)
 	sellFrame:Hide()
     
-    local buyFrame = CreateFrame("Frame", "Auctionator_Buy_Panel", AuctionFrame, "Auctionator_Buy_Template")
+    local buyFrame = CreateFrame("Frame", "AuctionatorBuyPanel", AuctionFrame, "AuctionatorBuyTemplate")
 	buyFrame:SetParent("AuctionFrame")
-	buyFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT", 210, 0)
+	buyFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
 	relevel(buyFrame)
 	buyFrame:Hide()
 	
 	local optionsFrame = CreateFrame("Frame", "AuctionatorOptionsButtonPanel", AuctionFrame, "AuctionatorOptionsButtonTemplate")
 	optionsFrame:SetParent("AuctionFrame")
-	optionsFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT", 210, 0)
+	optionsFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
 	relevel(optionsFrame)
 	optionsFrame:Hide()
 end
@@ -137,9 +137,15 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 		index = this:GetID()
 	end
 	
-	Auctionator_Scan_Abort()
-	Auctionator_Sell_Panel:Hide()
-    Auctionator_Buy_Panel:Hide()
+	if not Auctionator_Scan_IsIdle() then
+		Auctionator_Scan_Abort()
+	end
+	AuctionatorSellPanel:Hide()
+    AuctionatorBuyPanel:Hide()
+
+	if index == 2 then		
+		Auctionator_ShowElems(defaultBidsTabElements)
+	end
 	
 	if index == 3 then		
 		Auctionator_ShowElems(defaultAuctionTabElements)
@@ -152,7 +158,7 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 		
 		Auctionator_HideElems(defaultAuctionTabElements)
 		
-		Auctionator_Sell_Panel:Show()
+		AuctionatorSellPanel:Show()
 		AuctionFrame:EnableMouse(false)
 		
 		Auctionator_OnNewAuctionUpdate()
@@ -163,7 +169,7 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 		
 		Auctionator_HideElems(defaultBidsTabElements)
 		
-		Auctionator_Buy_Panel:Show()
+		AuctionatorBuyPanel:Show()
 		AuctionFrame:EnableMouse(false)
 		
 		Auctionator_Buy_ScrollbarUpdate()
@@ -498,11 +504,15 @@ end
 
 function Auctionator_OnAuctionHouseClosed()
 
+	if not Auctionator_Scan_IsIdle() then
+		Auctionator_Scan_Abort()
+	end
+	
 	AuctionatorOptionsButtonPanel:Hide()
 	AuctionatorOptionsFrame:Hide()
 	AuctionatorDescriptionFrame:Hide()
-	Auctionator_Sell_Panel:Hide()
-    Auctionator_Buy_Panel:Hide()
+	AuctionatorSellPanel:Hide()
+    AuctionatorBuyPanel:Hide()
 	
 end
 
@@ -514,7 +524,9 @@ function Auctionator_OnNewAuctionUpdate()
 		return
 	end
 	
-	Auctionator_Scan_Abort()
+	if not Auctionator_Scan_IsIdle() then
+		Auctionator_Scan_Abort()
+	end
 	
 	currentAuctionItemName, currentAuctionItemTexture, currentAuctionItemStackSize = GetAuctionSellItemInfo()
 	
@@ -555,9 +567,6 @@ end
 
 function Auctionator_ScrollbarUpdate()
 
-	local line -- 1 through 12 of our window to scroll
-	local dataOffset -- an index into our data calculated from the scroll offset
-	
 	local numrows
 	if not currentAuctionItemName or not auctionatorEntries[currentAuctionItemName] then
 		numrows = 0
@@ -569,8 +578,7 @@ function Auctionator_ScrollbarUpdate()
 
 	for line = 1,12 do
 
-		dataOffset = line + FauxScrollFrame_GetOffset(AuctionatorScrollFrame)
-		
+		local dataOffset = line + FauxScrollFrame_GetOffset(AuctionatorScrollFrame)	
 		local lineEntry = getglobal("AuctionatorEntry"..line)
 		
 		if numrows <= 12 then
@@ -636,7 +644,9 @@ function Auctionator_EntryOnClick()
 end
 
 function Auctionator_RefreshButtonOnClick()
-	Auctionator_Scan_Abort()
+	if not Auctionator_Scan_IsIdle() then
+		Auctionator_Scan_Abort()
+	end
 	Auctionator_RefreshEntries()
 	Auctionator_SelectAuctionatorEntry()
 	Auctionator_UpdateRecommendation()
