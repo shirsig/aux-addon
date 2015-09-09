@@ -1,61 +1,97 @@
 local processScanResults
-local processedData
+local entries
+local selectedEntries = {}
+local searchQuery
 
 function AuctionatorBuySearchButton_OnClick()
-	
-	Auctionator_Scan_Start(Auctionator_Scan_CreateQuery{
+	searchQuery = Auctionator_Scan_CreateQuery{
 		name = AuctionatorBuySearchBox:GetText(),
-		exactMatch = true,
-		onComplete = function(data)
-			processScanResults(data)
-			Auctionator_Buy_ScrollbarUpdate()
+		exactMatch = true
+	}
+	Auctionator_Scan_Start{
+			query = searchQuery,
+			onComplete = function(data)
+				processScanResults(data)
+				Auctionator_Buy_ScrollbarUpdate()
+			end
+	}
+end
+
+-----------------------------------------
+
+function condensedSelection()
+	local selection = {}
+	for entry,_ in pairs(selectedEntries) do
+		local key = "_"..entry.stackSize.."_"..entry.buyoutPrice
+				
+		if selection[key] then
+			selection[key] = selection[key] + 1
+		else			
+			selection[key] = 1
 		end
-	})
-	
+	end
+	return selection;
+end
+
+-----------------------------------------
+
+function AuctionatorBuyBuySelectedButton_OnClick()
+	local selection = condensedSelection(selectedEntries)
+	Auctionator_Scan_Start{
+			query = searchQuery,
+			onReadDatum = function(datum)
+				local key = "_"..datum.stackSize.."_"..datum.buyoutPrice
+				if selection[key] then
+					-- Auctionator_Log("match: "..key)
+					PlaceAuctionBid("list", datum.pageIndex, datum.buyoutPrice)
+					if selection[key] > 1 then
+						selection[key] = selection[key] - 1
+					else
+						selection[key] = nil
+					end
+				end
+			end
+	}
 end
 
 -----------------------------------------
 
 function AuctionatorBuyEntry_OnClick()
+	local entryIndex = this:GetID()
 
+	local entry = entries[entryIndex]
+
+	if Auctionator_SetContains(selectedEntries, entry) then
+		Auctionator_RemoveFromSet(selectedEntries, entry)
+	else
+		Auctionator_AddToSet(selectedEntries, entry)
+	end
+	
+	Auctionator_Buy_ScrollbarUpdate()
+
+	PlaySound("igMainMenuOptionCheckBoxOn")
 end
 
 -----------------------------------------
 
 function processScanResults(rawData)
 
-	processedData = {}
-	
-	----- Condense the scan rawData into a table that has only a single entry per stacksize/price combo
-	
-	local condData = {}
+	entries = {}
 
 	for _,rawDatum in ipairs(rawData) do
-	
-		local key = "_"..rawDatum.stackSize.."_"..rawDatum.buyoutPrice
-				
-		if condData[key] then
-			condData[key].count = condData[key].count + 1
-		else			
-			condData[key] = {
+		
+		if rawDatum.buyoutPrice > 0 then
+			tinsert(entries, {
 					stackSize 	= rawDatum.stackSize,
 					buyoutPrice	= rawDatum.buyoutPrice,
 					itemPrice		= rawDatum.buyoutPrice / rawDatum.stackSize,
 					count			= 1,
 					numYours		= rawDatum.owner == UnitName("player") and 1 or 0
-			}
+			})
 		end
 	end
-
-	----- create a table of these entries sorted by itemPrice
 	
-	local n = 1
-	for _,condDatum in pairs(condData) do
-		processedData[n] = condDatum
-		n = n + 1
-	end
-	
-	table.sort(processedData, function(a,b) return a.itemPrice < b.itemPrice end)
+	table.sort(entries, function(a,b) return a.itemPrice < b.itemPrice end)
 end
 
 -----------------------------------------
@@ -66,10 +102,10 @@ function Auctionator_Buy_ScrollbarUpdate()
 	local dataOffset -- an index into our data calculated from the scroll offset
 	
 	local numrows
-	if not processedData then
+	if not entries then
 		numrows = 0
 	else
-		numrows = getn(processedData)
+		numrows = getn(entries)
 	end
 	
 	FauxScrollFrame_Update(AuctionatorBuyScrollFrame, numrows, 12, 16);
@@ -87,35 +123,35 @@ function Auctionator_Buy_ScrollbarUpdate()
 		
 		lineEntry:SetID(dataOffset)
 		
-		if dataOffset <= numrows and processedData[dataOffset] then
+		if dataOffset <= numrows and entries[dataOffset] then
 			
-			local auctionatorEntry = processedData[dataOffset]
+			local entry = entries[dataOffset]
 
 			local lineEntry_avail	= getglobal("AuctionatorBuyEntry"..line.."_Availability")
 			local lineEntry_comm	= getglobal("AuctionatorBuyEntry"..line.."_Comment")
 			local lineEntry_stack	= getglobal("AuctionatorBuyEntry"..line.."_StackPrice")
 
-			if selectedAuctionatorEntry and auctionatorEntry.itemPrice == selectedAuctionatorEntry.itemPrice and auctionatorEntry.stackSize == selectedAuctionatorEntry.stackSize then
+			if Auctionator_SetContains(selectedEntries, entry) then
 				lineEntry:LockHighlight()
 			else
 				lineEntry:UnlockHighlight()
 			end
 
-			if auctionatorEntry.numYours == 0 then
+			if entry.numYours == 0 then
 				lineEntry_comm:SetText("")
 			elseif
-				auctionatorEntry.numYours == auctionatorEntry.count then
+				entry.numYours == entry.count then
 				lineEntry_comm:SetText("yours")
 			else
-				lineEntry_comm:SetText("yours: "..auctionatorEntry.numYours)
+				lineEntry_comm:SetText("yours: "..entry.numYours)
 			end
 						
-			local tx = string.format("%i %s of %i", auctionatorEntry.count, Auctionator_PluralizeIf("stack", auctionatorEntry.count), auctionatorEntry.stackSize)
+			local tx = string.format("%i %s of %i", entry.count, Auctionator_PluralizeIf("stack", entry.count), entry.stackSize)
 
-			MoneyFrame_Update("AuctionatorBuyEntry"..line.."_PerItem_Price", Auctionator_Round(auctionatorEntry.buyoutPrice/auctionatorEntry.stackSize))
+			MoneyFrame_Update("AuctionatorBuyEntry"..line.."_PerItem_Price", Auctionator_Round(entry.buyoutPrice/entry.stackSize))
 
 			lineEntry_avail:SetText(tx)
-			lineEntry_stack:SetText(Auctionator_PriceToString(auctionatorEntry.buyoutPrice))
+			lineEntry_stack:SetText(Auctionator_PriceToString(entry.buyoutPrice))
 
 			lineEntry:Show()
 		else

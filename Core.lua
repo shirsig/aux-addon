@@ -74,6 +74,20 @@ end
 
 -----------------------------------------
 
+function Auctionator_AddToSet(set, key)
+    set[key] = true
+end
+
+function Auctionator_RemoveFromSet(set, key)
+    set[key] = nil
+end
+
+function Auctionator_SetContains(set, key)
+    return set[key] ~= nil
+end
+
+-----------------------------------------
+
 function Auctionator_OnLoad()
 	Auctionator_Log("Auctionator Loaded")
 	AuctionatorLoaded = true

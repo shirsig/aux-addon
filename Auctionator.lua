@@ -165,10 +165,18 @@ end
 
 function Auctionator_ContainerFrameItemButton_OnClick(button)
 	
-	if AuctionFrameBrowse:IsVisible() and IsShiftKeyDown() and not ChatFrameEditBox:IsVisible() and button == "LeftButton" then
+	if button == "LeftButton"
+			and IsShiftKeyDown()
+			and not ChatFrameEditBox:IsVisible()
+			and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index)
+	then
 		local itemLink = GetContainerItemLink(this:GetParent():GetID(), this:GetID())
 		local itemName = string.gsub(itemLink, "^.-%[(.*)%].*", "%1")
-		BrowseName:SetText(itemName)
+		if PanelTemplates_GetSelectedTab(AuctionFrame) == 1 then
+			BrowseName:SetText(itemName)
+		elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index then
+			AuctionatorBuySearchBox:SetText(itemName)
+		end
 	else
 		Auctionator_Orig_ContainerFrameItemButton_OnClick(button)
 
@@ -513,17 +521,18 @@ function Auctionator_RefreshEntries()
 	local currentAuctionClass		= ItemType2AuctionClass(sType)
 	local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
 	
-	Auctionator_Scan_Start(Auctionator_Scan_CreateQuery{
-		name = currentAuctionItemName,
-		exactMatch = true,
-		classIndex = currentAuctionClass,
-		subclassIndex = currentAuctionSubclass,
-		onComplete = function(data)
-			processScanResults(data, currentAuctionItemName)
-			Auctionator_SelectAuctionatorEntry()
-			Auctionator_UpdateRecommendation()
-		end
-	})	
+	Auctionator_Scan_Start{
+			query = Auctionator_Scan_CreateQuery{
+					name = currentAuctionItemName,
+					classIndex = currentAuctionClass,
+					subclassIndex = currentAuctionSubclass
+			},
+			onComplete = function(data)
+				processScanResults(data, currentAuctionItemName)
+				Auctionator_SelectAuctionatorEntry()
+				Auctionator_UpdateRecommendation()
+			end
+	}	
 end
 	
 -----------------------------------------
@@ -642,19 +651,20 @@ function processScanResults(rawData, auctionItemName)
 	local condData = {}
 
 	for _,rawDatum in ipairs(rawData) do
-	
-		local key = "_"..rawDatum.stackSize.."_"..rawDatum.buyoutPrice
-				
-		if condData[key] then
-			condData[key].count = condData[key].count + 1
-		else			
-			condData[key] = {
-					stackSize 	= rawDatum.stackSize,
-					buyoutPrice	= rawDatum.buyoutPrice,
-					itemPrice		= rawDatum.buyoutPrice / rawDatum.stackSize,
-					count			= 1,
-					numYours		= rawDatum.owner == UnitName("player") and 1 or 0
-			}
+		if auctionItemName == rawDatum.name and rawDatum.buyoutPrice > 0 then
+			local key = "_"..rawDatum.stackSize.."_"..rawDatum.buyoutPrice
+					
+			if condData[key] then
+				condData[key].count = condData[key].count + 1
+			else			
+				condData[key] = {
+						stackSize 	= rawDatum.stackSize,
+						buyoutPrice	= rawDatum.buyoutPrice,
+						itemPrice		= rawDatum.buyoutPrice / rawDatum.stackSize,
+						count			= 1,
+						numYours		= rawDatum.owner == UnitName("player") and 1 or 0
+				}
+			end
 		end
 	end
 

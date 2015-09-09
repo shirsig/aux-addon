@@ -110,15 +110,15 @@
 				</Scripts>
 			</Button>
             
-<!-- 			<Button name="AuctionatorBuyRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
+			<Button name="AuctionatorBuyBuySelectedButton" inherits="UIPanelButtonTemplate" text="Buy Selected">
 				<Size><AbsDimension x="126" y="22"/>	</Size>
 				<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="-14" y="-199"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						AuctionatorBuyRefreshButton_OnClick()
+						AuctionatorBuyBuySelectedButton_OnClick()
 					</OnClick>
 				</Scripts>
-			</Button> -->
+			</Button>
 			
 			<ScrollFrame name="AuctionatorBuyScrollFrame" inherits="FauxScrollFrameTemplate">
 				<Size><AbsDimension x="588" y="194"/></Size>
