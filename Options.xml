@@ -69,7 +69,7 @@
 			
 			
 			<Frame>
-				<Size><AbsDimension y="30" /></Size>		
+				<Size><AbsDimension y="35" /></Size>		
 				<Anchors>
 					<Anchor point="TOP" relativeTo="AuctionatorAboutTitleText" relativePoint="BOTTOM"><Offset><AbsDimension y="-5"/></Offset></Anchor>
 					<Anchor point="LEFT"><Offset><AbsDimension x="30"/></Offset></Anchor>
@@ -139,7 +139,7 @@
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="BACKGROUND">
-								<FontString inherits="GameFontHighlight" text="Enable alt-key shortcut">
+								<FontString inherits="GameFontHighlight" text="Enable ALT-key shortcut">
 									<Anchors>
 										<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuctionatorOption_Enable_Alt">
 											<Offset><AbsDimension x="8" y="1"/></Offset>
@@ -183,7 +183,7 @@
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="BACKGROUND">
-								<FontString inherits="GameFontHighlight" text="Automatically open Auctionator panel">
+								<FontString inherits="GameFontHighlight" text="Automatically open Auctionator Sell panel">
 									<Anchors>
 										<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuctionatorOption_Open_First">
 											<Offset><AbsDimension x="8" y="1"/></Offset>

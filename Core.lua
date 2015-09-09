@@ -1,5 +1,5 @@
 AuctionatorVersion = "1.2.0-Vanilla"
-AuctionatorAuthor = "Zirco; Backport by Nimeral; Reworked by Simon Hirsig"
+AuctionatorAuthors = "Zirco (Original); Nimeral (Backport); shirsig, Zerf (Update)"
 
 AuctionatorLoaded = false
 
