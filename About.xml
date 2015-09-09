@@ -1,6 +1,4 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
-
-	<Script file="Auctionator.lua"/> 
 	
 	<Frame name="AuctionatorDescriptionFrame" frameStrata="HIGH" toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
 		<Size><AbsDimension x="480" y="480" /></Size>		
