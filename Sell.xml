@@ -6,14 +6,10 @@
 	<Frame>
       <Scripts> 
 			<OnLoad> 
-				this:RegisterEvent("VARIABLES_LOADED")
-				this:RegisterEvent("ADDON_LOADED")
 				this:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
-				this:RegisterEvent("AUCTION_HOUSE_SHOW")
-				this:RegisterEvent("AUCTION_HOUSE_CLOSED")
 			</OnLoad>
 			<OnEvent> 
-				Auctionator_EventHandler()
+				Auctionator_Sell_OnEvent()
 			</OnEvent> 
 		</Scripts> 
 	</Frame> 

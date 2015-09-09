@@ -7,9 +7,12 @@
       <Scripts> 
 			<OnLoad> 
 				this:RegisterEvent("VARIABLES_LOADED")
+				this:RegisterEvent("ADDON_LOADED")
+				this:RegisterEvent("AUCTION_HOUSE_SHOW")
+				this:RegisterEvent("AUCTION_HOUSE_CLOSED")
 			</OnLoad>
 			<OnEvent> 
-				Auctionator_Core_OnEvent()
+				Auctionator_OnEvent()
 			</OnEvent> 
 		</Scripts> 
 	</Frame>

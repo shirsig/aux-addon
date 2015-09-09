@@ -1,42 +1,8 @@
-local sellTabElements = {}
-local defaultAuctionTabElements = {}
-local defaultBidsTabElements = {}
-
-AUCTIONATOR_ENABLE_ALT = true
-AUCTIONATOR_OPEN_FIRST = false
-AUCTIONATOR_INSTANT_BUYOUT = false
-
-auctionatorEntries = {}
-
--- global settings
-Auctionator = {
-    tabs = {
-        sell = {
-            index = 4
-        },
-        buy = {
-            index = 5
-        }
-    },
-	item_colors = {
-		"ff9d9d9d", -- poor, gray
-		"ffffffff", -- common, white
-		"ff1eff00", -- uncommon, green
-		"ff0070dd", -- rare, blue
-		"ffa335ee", -- epic, purple
-		"ffff8000", -- legendary, orange
-	}
-}
+auctionatorEntries = {} -- persisted
 
 -----------------------------------------
 
-local Auctionator_Orig_AuctionFrameBrowse_Update
-local Auctionator_Orig_AuctionFrameBrowse_Scan
-local Auctionator_Orig_AuctionFrameTab_OnClick
-local Auctionator_Orig_ContainerFrameItemButton_OnClick
-local Auctionator_Orig_AuctionFrameAuctions_Update
-local Auctionator_Orig_AuctionsCreateAuctionButton_OnClick
-
+local bestPriceOurStackSize
 local selectedAuctionatorEntry
 
 local currentAuctionItemName = nil
@@ -48,142 +14,13 @@ local lastItemPosted = nil
 
 -----------------------------------------
 
-local processScanResults, relevel, undercut
-local ItemType2AuctionClass, SubType2AuctionSubclass
+local processScanResults, undercut, ItemType2AuctionClass, SubType2AuctionSubclass
 
 -----------------------------------------
 
-function Auctionator_EventHandler()
-
-	if event == "ADDON_LOADED"				then	Auctionator_OnAddonLoaded() 		end
-	if event == "AUCTION_OWNED_LIST_UPDATE"	then	Auctionator_OnAuctionOwnedUpdate() 	end
-	if event == "AUCTION_HOUSE_SHOW"		then	Auctionator_OnAuctionHouseShow() 	end
-	if event == "AUCTION_HOUSE_CLOSED"		then	Auctionator_OnAuctionHouseClosed() 	end
-
-end
-
------------------------------------------
-
-function Auctionator_AddPanels()
-	
-	local sellFrame = CreateFrame("Frame", "AuctionatorSellPanel", AuctionFrame, "AuctionatorSellTemplate")
-	sellFrame:SetParent("AuctionFrame")
-	sellFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
-	relevel(sellFrame)
-	sellFrame:Hide()
-    
-    local buyFrame = CreateFrame("Frame", "AuctionatorBuyPanel", AuctionFrame, "AuctionatorBuyTemplate")
-	buyFrame:SetParent("AuctionFrame")
-	buyFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
-	relevel(buyFrame)
-	buyFrame:Hide()
-	
-	local optionsFrame = CreateFrame("Frame", "AuctionatorOptionsButtonPanel", AuctionFrame, "AuctionatorOptionsButtonTemplate")
-	optionsFrame:SetParent("AuctionFrame")
-	optionsFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
-	relevel(optionsFrame)
-	optionsFrame:Hide()
-end
-
------------------------------------------
-
-function Auctionator_OnAddonLoaded()
-
-	if string.lower(arg1) == "blizzard_auctionui" then
-		Auctionator_AddTabs()
-		Auctionator_AddPanels()
-		
-		Auctionator_SetupHookFunctions()
-		
-		defaultAuctionTabElements[1] = AuctionsTitle
-		defaultAuctionTabElements[2] = AuctionsScrollFrame
-		defaultAuctionTabElements[3] = AuctionsButton1
-		defaultAuctionTabElements[4] = AuctionsButton2
-		defaultAuctionTabElements[5] = AuctionsButton3
-		defaultAuctionTabElements[6] = AuctionsButton4
-		defaultAuctionTabElements[7] = AuctionsButton5
-		defaultAuctionTabElements[8] = AuctionsButton6
-		defaultAuctionTabElements[9] = AuctionsButton7
-		defaultAuctionTabElements[10] = AuctionsButton8
-		defaultAuctionTabElements[11] = AuctionsButton9
-		defaultAuctionTabElements[12] = AuctionsQualitySort
-		defaultAuctionTabElements[13] = AuctionsDurationSort
-		defaultAuctionTabElements[14] = AuctionsHighBidderSort
-		defaultAuctionTabElements[15] = AuctionsBidSort
-		defaultAuctionTabElements[16] = AuctionsCancelAuctionButton
-		--defaultAuctionTabElements[17] = AuctionFrameAuctions
-		--defaultAuctionTabElements[18] = AuctionFrame
-        
-		defaultBidsTabElements[1] = BidTitle
-		defaultBidsTabElements[2] = BidScrollFrame
-        defaultBidsTabElements[3] = BidQualitySort
-		defaultBidsTabElements[4] = BidLevelSort
-		defaultBidsTabElements[5] = BidDurationSort
-		defaultBidsTabElements[6] = BidBuyoutSort
-		defaultBidsTabElements[7] = BidStatusSort
-		defaultBidsTabElements[8] = BidBidSort
-		defaultBidsTabElements[9] = BidBidButton
-		defaultBidsTabElements[10] = BidBuyoutButton
-		defaultBidsTabElements[11] = BidBidPrice
-		defaultBidsTabElements[12] = BidBidText
-
-		sellTabElements[1] = getglobal("Auctionator_Recommend_Text")
-		sellTabElements[2] = getglobal("Auctionator_RecommendPerItem_Text")
-		sellTabElements[3] = getglobal("Auctionator_RecommendPerItem_Price")
-		sellTabElements[4] = getglobal("Auctionator_RecommendPerStack_Text")
-		sellTabElements[5] = getglobal("Auctionator_RecommendPerStack_Price")
-		sellTabElements[6] = getglobal("Auctionator_Recommend_Basis_Text")
-		sellTabElements[7] = getglobal("Auctionator_RecommendItem_Tex")
-	end
-end
-
------------------------------------------
-
-function Auctionator_AuctionFrameTab_OnClick(index)
-	
-	if not index then
-		index = this:GetID()
-	end
-	
-	if not Auctionator_Scan_IsIdle() then
-		Auctionator_Scan_Abort()
-	end
-	AuctionatorSellPanel:Hide()
-    AuctionatorBuyPanel:Hide()
-
-	if index == 2 then		
-		Auctionator_ShowElems(defaultBidsTabElements)
-	end
-	
-	if index == 3 then		
-		Auctionator_ShowElems(defaultAuctionTabElements)
-	end
-	
-	if index == Auctionator.tabs.sell.index then
-		AuctionFrameTab_OnClick(3)
-		
-		PanelTemplates_SetTab(AuctionFrame, Auctionator.tabs.sell.index)
-		
-		Auctionator_HideElems(defaultAuctionTabElements)
-		
-		AuctionatorSellPanel:Show()
-		AuctionFrame:EnableMouse(false)
-		
-		Auctionator_OnNewAuctionUpdate()
-    elseif index == Auctionator.tabs.buy.index then
-        AuctionFrameTab_OnClick(2)
-		
-		PanelTemplates_SetTab(AuctionFrame, Auctionator.tabs.buy.index)
-		
-		Auctionator_HideElems(defaultBidsTabElements)
-		
-		AuctionatorBuyPanel:Show()
-		AuctionFrame:EnableMouse(false)
-		
-		Auctionator_Buy_ScrollbarUpdate()
-    else
-        Auctionator_Orig_AuctionFrameTab_OnClick(index)
-		lastItemPosted = nil
+function Auctionator_Sell_OnEvent()
+	if event == "AUCTION_OWNED_LIST_UPDATE" then
+		Auctionator_OnAuctionOwnedUpdate()
 	end
 end
 
@@ -206,7 +43,7 @@ function Auctionator_ContainerFrameItemButton_OnClick(button)
 			end
 		end
 	else
-		Auctionator_Orig_ContainerFrameItemButton_OnClick(button)
+		Auctionator.orig.ContainerFrameItemButton_OnClick(button)
 
 		if AUCTIONATOR_ENABLE_ALT and AuctionFrame:IsShown() and IsAltKeyDown() and button == "LeftButton" then
 		
@@ -224,10 +61,10 @@ end
 
 function Auctionator_AuctionFrameAuctions_Update()
 	
-	Auctionator_Orig_AuctionFrameAuctions_Update()
+	Auctionator.orig.AuctionFrameAuctions_Update()
 
 	if PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.sell.index and AuctionFrame:IsShown() then
-		Auctionator_HideElems(defaultAuctionTabElements)
+		Auctionator_HideElems(Auctionator.tabs.sell.hiddenElements)
 	end	
 end
 
@@ -245,7 +82,7 @@ function Auctionator_AuctionsCreateAuctionButton_OnClick()
 
 	end
 	
-	Auctionator_Orig_AuctionsCreateAuctionButton_OnClick()
+	Auctionator.orig.AuctionsCreateAuctionButton_OnClick()
 
 end
 
@@ -270,7 +107,7 @@ end
 -----------------------------------------
 
 function Auctionator_AuctionSellItemButton_OnEvent()
-	Auctionator_Orig_AuctionSellItemButton_OnEvent()
+	Auctionator.orig.AuctionSellItemButton_OnEvent()
 	Auctionator_OnNewAuctionUpdate()
 end
 
@@ -278,7 +115,7 @@ end
 
 function Auctionator_BrowseButton_OnClick(button)
 	if arg1 == "LeftButton" then
-		Auctionator_Orig_BrowseButton_OnClick(button)
+		Auctionator.orig.BrowseButton_OnClick(button)
 	end
 end
 
@@ -303,7 +140,7 @@ end
 
 function Auctionator_SetupHookFunctions()
 	
-	Auctionator_Orig_BrowseButton_OnClick = BrowseButton_OnClick
+	Auctionator.orig.BrowseButton_OnClick = BrowseButton_OnClick
 	BrowseButton_OnClick = Auctionator_BrowseButton_OnClick
 	
 	BrowseButton1:RegisterForClicks("LeftButtonUp", "RightButtonDown")
@@ -323,87 +160,32 @@ function Auctionator_SetupHookFunctions()
 	BrowseButton8:RegisterForClicks("LeftButtonUp", "RightButtonDown")
 	BrowseButton8:SetScript("OnMouseDown", Auctionator_BrowseButton_OnMouseDown)
 
-	Auctionator_Orig_AuctionSellItemButton_OnEvent = AuctionSellItemButton_OnEvent
+	Auctionator.orig.AuctionSellItemButton_OnEvent = AuctionSellItemButton_OnEvent
 	AuctionSellItemButton_OnEvent = Auctionator_AuctionSellItemButton_OnEvent
 	
-	Auctionator_Orig_AuctionFrameTab_OnClick = AuctionFrameTab_OnClick
+	Auctionator.orig.AuctionFrameTab_OnClick = AuctionFrameTab_OnClick
 	AuctionFrameTab_OnClick = Auctionator_AuctionFrameTab_OnClick
 	
-	Auctionator_Orig_ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
+	Auctionator.orig.ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
 	ContainerFrameItemButton_OnClick = Auctionator_ContainerFrameItemButton_OnClick
 	
-	Auctionator_Orig_AuctionFrameAuctions_Update = AuctionFrameAuctions_Update
+	Auctionator.orig.AuctionFrameAuctions_Update = AuctionFrameAuctions_Update
 	AuctionFrameAuctions_Update = Auctionator_AuctionFrameAuctions_Update
 	
-	Auctionator_Orig_AuctionsCreateAuctionButton_OnClick = AuctionsCreateAuctionButton_OnClick
+	Auctionator.orig.AuctionsCreateAuctionButton_OnClick = AuctionsCreateAuctionButton_OnClick
 	AuctionsCreateAuctionButton_OnClick = Auctionator_AuctionsCreateAuctionButton_OnClick
 	
 end
 
 -----------------------------------------
 
-function Auctionator_AddTabs()
-	
-	Auctionator.tabs.sell.index = AuctionFrame.numTabs + 1
-    Auctionator.tabs.buy.index = AuctionFrame.numTabs + 2
-
-	local sellTabName = "AuctionFrameTab"..Auctionator.tabs.sell.index
-    local buyTabName = "AuctionFrameTab"..Auctionator.tabs.buy.index
-
-	local sellTab = CreateFrame("Button", sellTabName, AuctionFrame, "AuctionTabTemplate")
-    local buyTab = CreateFrame("Button", buyTabName, AuctionFrame, "AuctionTabTemplate")
-
-	setglobal(sellTabName, sellTab)
-    setglobal(buyTabName, buyTab)
-    
-	sellTab:SetID(Auctionator.tabs.sell.index)
-	sellTab:SetText("Sell")
-	sellTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..AuctionFrame.numTabs), "RIGHT", -8, 0)
-    
-    buyTab:SetID(Auctionator.tabs.buy.index)
-	buyTab:SetText("Buy")
-	buyTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..Auctionator.tabs.sell.index), "RIGHT", -8, 0)
-	
-	PanelTemplates_SetNumTabs(AuctionFrame, Auctionator.tabs.buy.index)
-    PanelTemplates_EnableTab(AuctionFrame, Auctionator.tabs.sell.index)
-	PanelTemplates_EnableTab(AuctionFrame, Auctionator.tabs.buy.index)
-end
-
------------------------------------------
-
-function Auctionator_HideElems(tt)
-
-	if not tt then
-		return;
-	end
-	
-	for i,x in ipairs(tt) do
-		x:Hide()
-	end
-end
-
------------------------------------------
-
-function Auctionator_ShowElems(tt)
-
-	for i,x in ipairs(tt) do
-		x:Show()
-	end
-end
-
------------------------------------------
-
 function Auctionator_SetMessage(msg)
-	Auctionator_HideElems(sellTabElements)
+	Auctionator_HideElems(Auctionator.tabs.sell.shownElements)
 	AuctionatorMessage:SetText(msg)
 	AuctionatorMessage:Show()
 	AuctionatorBuyMessage:SetText(msg) -- TODO doesn't belong here
 	AuctionatorBuyMessage:Show()
 end
-
------------------------------------------
-
-local bestPriceOurStackSize;
 
 -----------------------------------------
 
@@ -456,7 +238,7 @@ function Auctionator_UpdateRecommendation()
 			local newStartPrice = newBuyoutPrice * 0.95 
 			
 			AuctionatorMessage:Hide()	
-			Auctionator_ShowElems(sellTabElements)
+			Auctionator_ShowElems(Auctionator.tabs.sell.shownElements)
 			
 			Auctionator_Recommend_Text:SetText("Recommended Buyout Price")
 			Auctionator_RecommendPerStack_Text:SetText("for your stack of "..currentAuctionItemStackSize)
@@ -489,39 +271,11 @@ function Auctionator_UpdateRecommendation()
 		elseif auctionatorEntries[currentAuctionItemName] then
 			Auctionator_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
 		else 
-			Auctionator_HideElems(sellTabElements)
+			Auctionator_HideElems(Auctionator.tabs.sell.shownElements)
 		end
 	end
 	
 	Auctionator_ScrollbarUpdate()
-end
-
------------------------------------------
-
-function Auctionator_OnAuctionHouseShow()
-
-	AuctionatorOptionsButtonPanel:Show()
-
-	if AUCTIONATOR_OPEN_FIRST then
-		AuctionFrameTab_OnClick(Auctionator.tabs.sell.index)
-	end
-
-end
-
------------------------------------------
-
-function Auctionator_OnAuctionHouseClosed()
-
-	if not Auctionator_Scan_IsIdle() then
-		Auctionator_Scan_Abort()
-	end
-	
-	AuctionatorOptionsButtonPanel:Hide()
-	AuctionatorOptionsFrame:Hide()
-	AuctionatorDescriptionFrame:Hide()
-	AuctionatorSellPanel:Hide()
-    AuctionatorBuyPanel:Hide()
-	
 end
 
 -----------------------------------------
@@ -710,17 +464,6 @@ function processScanResults(rawData, auctionItemName)
 	end
 	
 	table.sort(auctionatorEntries[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
-end
-
------------------------------------------
-
-function relevel(frame)
-	local myLevel = frame:GetFrameLevel() + 1
-	local children = { frame:GetChildren() }
-	for _,child in pairs(children) do
-		child:SetFrameLevel(myLevel)
-		relevel(child)
-	end
 end
 
 -----------------------------------------
