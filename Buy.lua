@@ -23,17 +23,17 @@ end
 -----------------------------------------
 
 function createOrder()
-	local selection = {}
+	local order = {}
 	for entry,_ in pairs(selectedEntries) do
 		local key = entry.name.."_"..entry.stackSize.."_"..entry.buyoutPrice
 				
-		if selection[key] then
-			selection[key] = selection[key] + 1
+		if order[key] then
+			order[key] = order[key] + 1
 		else			
-			selection[key] = 1
+			order[key] = 1
 		end
 	end
-	return selection;
+	return order
 end
 
 -----------------------------------------
