@@ -1,6 +1,6 @@
-local recommendationElements = {}
+local sellTabElements = {}
 local defaultAuctionTabElements = {}
-local defaultBrowseTabElements = {}
+local defaultBidsTabElements = {}
 
 AUCTIONATOR_ENABLE_ALT = true
 AUCTIONATOR_OPEN_FIRST = false
@@ -87,33 +87,45 @@ function Auctionator_OnAddonLoaded()
 		
 		Auctionator_SetupHookFunctions()
 		
-		defaultAuctionTabElements[1]  = AuctionsScrollFrame
-		defaultAuctionTabElements[2]  = AuctionsButton1
-		defaultAuctionTabElements[3]  = AuctionsButton2
-		defaultAuctionTabElements[4]  = AuctionsButton3
-		defaultAuctionTabElements[5]  = AuctionsButton4
-		defaultAuctionTabElements[6]  = AuctionsButton5
-		defaultAuctionTabElements[7]  = AuctionsButton6
-		defaultAuctionTabElements[8]  = AuctionsButton7
-		defaultAuctionTabElements[9]  = AuctionsButton8
-		defaultAuctionTabElements[10] = AuctionsButton9
-		defaultAuctionTabElements[11] = AuctionsQualitySort
-		defaultAuctionTabElements[12] = AuctionsDurationSort
-		defaultAuctionTabElements[13] = AuctionsHighBidderSort
-		defaultAuctionTabElements[14] = AuctionsBidSort
-		defaultAuctionTabElements[15] = AuctionsCancelAuctionButton
-		--defaultAuctionTabElements[16] = AuctionFrameAuctions
-		--defaultAuctionTabElements[16] = AuctionFrame
+		defaultAuctionTabElements[1] = AuctionsTitle
+		defaultAuctionTabElements[2] = AuctionsScrollFrame
+		defaultAuctionTabElements[3] = AuctionsButton1
+		defaultAuctionTabElements[4] = AuctionsButton2
+		defaultAuctionTabElements[5] = AuctionsButton3
+		defaultAuctionTabElements[6] = AuctionsButton4
+		defaultAuctionTabElements[7] = AuctionsButton5
+		defaultAuctionTabElements[8] = AuctionsButton6
+		defaultAuctionTabElements[9] = AuctionsButton7
+		defaultAuctionTabElements[10] = AuctionsButton8
+		defaultAuctionTabElements[11] = AuctionsButton9
+		defaultAuctionTabElements[12] = AuctionsQualitySort
+		defaultAuctionTabElements[13] = AuctionsDurationSort
+		defaultAuctionTabElements[14] = AuctionsHighBidderSort
+		defaultAuctionTabElements[15] = AuctionsBidSort
+		defaultAuctionTabElements[16] = AuctionsCancelAuctionButton
+		--defaultAuctionTabElements[17] = AuctionFrameAuctions
+		--defaultAuctionTabElements[18] = AuctionFrame
         
-        defaultBrowseTabElements[1] = AuctionFrameBrowse
+		defaultBidsTabElements[1] = BidTitle
+		defaultBidsTabElements[2] = BidScrollFrame
+        defaultBidsTabElements[3] = BidQualitySort
+		defaultBidsTabElements[4] = BidLevelSort
+		defaultBidsTabElements[5] = BidDurationSort
+		defaultBidsTabElements[6] = BidBuyoutSort
+		defaultBidsTabElements[7] = BidStatusSort
+		defaultBidsTabElements[8] = BidBidSort
+		defaultBidsTabElements[9] = BidBidButton
+		defaultBidsTabElements[10] = BidBuyoutButton
+		defaultBidsTabElements[11] = BidBidPrice
+		defaultBidsTabElements[12] = BidBidText
 
-		recommendationElements[1] = getglobal("Auctionator_Recommend_Text")
-		recommendationElements[2] = getglobal("Auctionator_RecommendPerItem_Text")
-		recommendationElements[3] = getglobal("Auctionator_RecommendPerItem_Price")
-		recommendationElements[4] = getglobal("Auctionator_RecommendPerStack_Text")
-		recommendationElements[5] = getglobal("Auctionator_RecommendPerStack_Price")
-		recommendationElements[6] = getglobal("Auctionator_Recommend_Basis_Text")
-		recommendationElements[7] = getglobal("Auctionator_RecommendItem_Tex")
+		sellTabElements[1] = getglobal("Auctionator_Recommend_Text")
+		sellTabElements[2] = getglobal("Auctionator_RecommendPerItem_Text")
+		sellTabElements[3] = getglobal("Auctionator_RecommendPerItem_Price")
+		sellTabElements[4] = getglobal("Auctionator_RecommendPerStack_Text")
+		sellTabElements[5] = getglobal("Auctionator_RecommendPerStack_Price")
+		sellTabElements[6] = getglobal("Auctionator_Recommend_Basis_Text")
+		sellTabElements[7] = getglobal("Auctionator_RecommendItem_Tex")
 	end
 end
 
@@ -145,11 +157,11 @@ function Auctionator_AuctionFrameTab_OnClick(index)
 		
 		Auctionator_OnNewAuctionUpdate()
     elseif index == Auctionator.tabs.buy.index then
-        AuctionFrameTab_OnClick(1)
+        AuctionFrameTab_OnClick(2)
 		
 		PanelTemplates_SetTab(AuctionFrame, Auctionator.tabs.buy.index)
 		
-		Auctionator_HideElems(defaultBrowseTabElements)
+		Auctionator_HideElems(defaultBidsTabElements)
 		
 		Auctionator_Buy_Panel:Show()
 		AuctionFrame:EnableMouse(false)
@@ -329,12 +341,12 @@ function Auctionator_AddTabs()
     setglobal(buyTabName, buyTab)
     
 	sellTab:SetID(Auctionator.tabs.sell.index)
-	sellTab:SetText("Auctionator")
+	sellTab:SetText("Sell")
 	sellTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..AuctionFrame.numTabs), "RIGHT", -8, 0)
     
     buyTab:SetID(Auctionator.tabs.buy.index)
 	buyTab:SetText("Buy")
-	-- buyTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..Auctionator.tabs.sell.index), "RIGHT", -8, 0)
+	buyTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..Auctionator.tabs.sell.index), "RIGHT", -8, 0)
 	
 	PanelTemplates_SetNumTabs(AuctionFrame, Auctionator.tabs.buy.index)
     PanelTemplates_EnableTab(AuctionFrame, Auctionator.tabs.sell.index)
@@ -366,7 +378,7 @@ end
 -----------------------------------------
 
 function Auctionator_SetMessage(msg)
-	Auctionator_HideElems(recommendationElements)
+	Auctionator_HideElems(sellTabElements)
 	AuctionatorMessage:SetText(msg)
 	AuctionatorMessage:Show()
 end
@@ -426,7 +438,7 @@ function Auctionator_UpdateRecommendation()
 			local newStartPrice = newBuyoutPrice * 0.95 
 			
 			AuctionatorMessage:Hide()	
-			Auctionator_ShowElems(recommendationElements)
+			Auctionator_ShowElems(sellTabElements)
 			
 			Auctionator_Recommend_Text:SetText("Recommended Buyout Price")
 			Auctionator_RecommendPerStack_Text:SetText("for your stack of "..currentAuctionItemStackSize)
@@ -459,7 +471,7 @@ function Auctionator_UpdateRecommendation()
 		elseif auctionatorEntries[currentAuctionItemName] then
 			Auctionator_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
 		else 
-			Auctionator_HideElems(recommendationElements)
+			Auctionator_HideElems(sellTabElements)
 		end
 	end
 	

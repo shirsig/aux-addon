@@ -107,17 +107,17 @@ function Auctionator_Buy_ScrollbarUpdate()
 		numrows = getn(entries)
 	end
 	
-	FauxScrollFrame_Update(AuctionatorBuyScrollFrame, numrows, 17, 16);
+	FauxScrollFrame_Update(AuctionatorBuyScrollFrame, numrows, 19, 16);
 
-	for line = 1,17 do
+	for line = 1,19 do
 
 		dataOffset = line + FauxScrollFrame_GetOffset(AuctionatorBuyScrollFrame)
 		local lineEntry = getglobal("AuctionatorBuyEntry"..line)
 		
-		if numrows <= 17 then
-			lineEntry:SetWidth(632)
+		if numrows <= 19 then
+			lineEntry:SetWidth(800)
 		else
-			lineEntry:SetWidth(514)
+			lineEntry:SetWidth(782)
 		end
 		
 		lineEntry:SetID(dataOffset)
