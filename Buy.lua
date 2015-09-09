@@ -80,7 +80,7 @@ function AuctionatorBuyBuySelectedButton_OnClick()
 				processScanResults(data)
 				Auctionator_Buy_ScrollbarUpdate()
 				AuctionatorBuySearchButton:Enable()
-				Auctionator_Buy_ShowReport(false, orderedCount, purchasedCount)
+				Auctionator_Buy_ShowReport(true, orderedCount, purchasedCount)
 			end,
 			onAbort = function()
 				AuctionatorBuySearchButton:Enable()
@@ -202,14 +202,12 @@ function Auctionator_Buy_ScrollbarUpdate()
 		
 		AuctionatorBuyReportHTML:SetText("<html><body>"
 				.."<h1>Auctionator Buy Report</h1><br/>"
-				.."<h1>Status:"..(completed and "Completed" or "Aborted").."</h1><br/>"
+				.."<h1>Status: "..(completed and "Completed" or "Aborted").."</h1><br/>"
 				.."<p>"
 				..string.format("%i out of the %i ordered auctions have been purchased", purchasedCount, orderedCount)
 				.."</p>"
 				.."</body></html>")
 			
 		AuctionatorBuyReportHTML:SetSpacing(3)
-	
-		AuctionatorBuyAuthorText:SetText("Author: "..AuctionatorAuthor)
 	end
 end
