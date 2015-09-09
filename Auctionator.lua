@@ -183,11 +183,13 @@ function Auctionator_ContainerFrameItemButton_OnClick(button)
 			and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index)
 	then
 		local itemLink = GetContainerItemLink(this:GetParent():GetID(), this:GetID())
+		if itemLink then
 		local itemName = string.gsub(itemLink, "^.-%[(.*)%].*", "%1")
-		if PanelTemplates_GetSelectedTab(AuctionFrame) == 1 then
-			BrowseName:SetText(itemName)
-		elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index then
-			AuctionatorBuySearchBox:SetText(itemName)
+			if PanelTemplates_GetSelectedTab(AuctionFrame) == 1 then
+				BrowseName:SetText(itemName)
+			elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index then
+				AuctionatorBuySearchBox:SetText(itemName)
+			end
 		end
 	else
 		Auctionator_Orig_ContainerFrameItemButton_OnClick(button)
