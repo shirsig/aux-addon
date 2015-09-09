@@ -121,6 +121,7 @@ function processScanResults(rawData)
 					stackSize	= rawDatum.stackSize,
 					buyoutPrice	= rawDatum.buyoutPrice,
 					itemPrice	= rawDatum.buyoutPrice / rawDatum.stackSize,
+					quality		= rawDatum.quality,
 			})
 		end
 	end
@@ -177,8 +178,11 @@ function Auctionator_Buy_ScrollbarUpdate()
 
 			local lineEntry_name = getglobal("AuctionatorBuyEntry"..line.."_Name")
 			local lineEntry_stackSize = getglobal("AuctionatorBuyEntry"..line.."_StackSize")
-
-			lineEntry_name:SetText(entry.name)
+			
+			local color = "ffffffff"
+			if(type(Auctionator.item_colors[entry.quality+1]) == "string") then color = Auctionator.item_colors[entry.quality+1]; end
+			
+			lineEntry_name:SetText("\124c" .. color ..  entry.name .. "\124r")
 
 			if Auctionator_SetContains(selectedEntries, entry) then
 				lineEntry:LockHighlight()
