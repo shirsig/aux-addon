@@ -26,43 +26,8 @@ end
 
 -----------------------------------------
 
-function Auctionator_ContainerFrameItemButton_OnClick(button)
-	
-	if button == "LeftButton"
-			and IsShiftKeyDown()
-			and not ChatFrameEditBox:IsVisible()
-			and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index)
-	then
-		local itemLink = GetContainerItemLink(this:GetParent():GetID(), this:GetID())
-		if itemLink then
-		local itemName = string.gsub(itemLink, "^.-%[(.*)%].*", "%1")
-			if PanelTemplates_GetSelectedTab(AuctionFrame) == 1 then
-				BrowseName:SetText(itemName)
-			elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index then
-				AuctionatorBuySearchBox:SetText(itemName)
-			end
-		end
-	else
-		Auctionator.orig.ContainerFrameItemButton_OnClick(button)
-
-		if AUCTIONATOR_ENABLE_ALT and AuctionFrame:IsShown() and IsAltKeyDown() and button == "LeftButton" then
-		
-			ClickAuctionSellItemButton()
-			ClearCursor()
-			
-			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Auctionator.tabs.sell.index then
-				AuctionFrameTab_OnClick(Auctionator.tabs.sell.index)
-			end
-		end
-	end
-end
-
------------------------------------------
-
 function Auctionator_AuctionFrameAuctions_Update()
-	
 	Auctionator.orig.AuctionFrameAuctions_Update()
-
 	if PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.sell.index and AuctionFrame:IsShown() then
 		Auctionator_HideElems(Auctionator.tabs.sell.hiddenElements)
 	end	
@@ -73,25 +38,18 @@ end
 -- that we can note the auction values
 -----------------------------------------
 
-function Auctionator_AuctionsCreateAuctionButton_OnClick()
-	
-	if PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.sell.index  and AuctionFrame:IsShown() then
-		
+function Auctionator_AuctionsCreateAuctionButton_OnClick()	
+	if PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.sell.index  and AuctionFrame:IsShown() then	
 		lastBuyoutPrice = MoneyInputFrame_GetCopper(BuyoutPrice)
 		lastItemPosted = currentAuctionItemName
-
 	end
-	
 	Auctionator.orig.AuctionsCreateAuctionButton_OnClick()
-
 end
 
 -----------------------------------------
 
 function Auctionator_OnAuctionOwnedUpdate()
-
-	if lastItemPosted then
-	
+	if lastItemPosted then	
 		Auctionator_Recommend_Text:SetText("Auction Created for "..lastItemPosted)
 
 		MoneyFrame_Update("Auctionator_RecommendPerStack_Price", lastBuyoutPrice)
@@ -109,31 +67,6 @@ end
 function Auctionator_AuctionSellItemButton_OnEvent()
 	Auctionator.orig.AuctionSellItemButton_OnEvent()
 	Auctionator_OnNewAuctionUpdate()
-end
-
------------------------------------------
-
-function Auctionator_BrowseButton_OnClick(button)
-	if arg1 == "LeftButton" then
-		Auctionator.orig.BrowseButton_OnClick(button)
-	end
-end
-
------------------------------------------
-
-function Auctionator_BrowseButton_OnMouseDown()
-	if arg1 == "RightButton" and AUCTIONATOR_INSTANT_BUYOUT then
-		local index = this:GetID() + FauxScrollFrame_GetOffset(BrowseScrollFrame)
-	
-		SetSelectedAuctionItem("list", index)
-		
-		local _, _, _, _, _, _, _, _, buyoutPrice = GetAuctionItemInfo("list", index)
-		if buyoutPrice > 0 then
-			PlaceAuctionBid("list", index, buyoutPrice)
-		end
-		
-		AuctionFrameBrowse_Update()
-	end
 end
 
 -----------------------------------------
@@ -223,10 +156,10 @@ end
 function Auctionator_UpdateRecommendation()
 
 	if not currentAuctionItemName then
-		AuctionatorRefreshButton:Disable()
+		AuctionatorSellRefreshButton:Disable()
 		Auctionator_SetMessage("Drag an item to the Auction Item area\n\nto see recommended pricing information")
 	else
-		AuctionatorRefreshButton:Enable()	
+		AuctionatorSellRefreshButton:Enable()	
 		
 		if selectedAuctionatorEntry then
 			local newBuyoutPrice = selectedAuctionatorEntry.itemPrice * currentAuctionItemStackSize
@@ -341,7 +274,7 @@ function Auctionator_ScrollbarUpdate()
 	for line = 1,12 do
 
 		local dataOffset = line + FauxScrollFrame_GetOffset(AuctionatorScrollFrame)	
-		local lineEntry = getglobal("AuctionatorEntry"..line)
+		local lineEntry = getglobal("AuctionatorSellEntry"..line)
 		
 		if numrows <= 12 then
 			lineEntry:SetWidth(603)
@@ -353,38 +286,38 @@ function Auctionator_ScrollbarUpdate()
 		
 		if currentAuctionItemName and dataOffset <= numrows and auctionatorEntries[currentAuctionItemName] then
 			
-			local auctionatorEntry = auctionatorEntries[currentAuctionItemName][dataOffset]
+			local entry = auctionatorEntries[currentAuctionItemName][dataOffset]
 
-			local lineEntry_avail	= getglobal("AuctionatorEntry"..line.."_Availability")
-			local lineEntry_comm	= getglobal("AuctionatorEntry"..line.."_Comment")
-			local lineEntry_stack	= getglobal("AuctionatorEntry"..line.."_StackPrice")
+			local lineEntry_avail	= getglobal("AuctionatorSellEntry"..line.."_Availability")
+			local lineEntry_comm	= getglobal("AuctionatorSellEntry"..line.."_Comment")
+			local lineEntry_stack	= getglobal("AuctionatorSellEntry"..line.."_StackPrice")
 
-			if selectedAuctionatorEntry and auctionatorEntry.itemPrice == selectedAuctionatorEntry.itemPrice and auctionatorEntry.stackSize == selectedAuctionatorEntry.stackSize then
+			if selectedAuctionatorEntry and entry.itemPrice == selectedAuctionatorEntry.itemPrice and entry.stackSize == selectedAuctionatorEntry.stackSize then
 				lineEntry:LockHighlight()
 			else
 				lineEntry:UnlockHighlight()
 			end
 
-			if auctionatorEntry.stackSize == currentAuctionItemStackSize then
+			if entry.stackSize == currentAuctionItemStackSize then
 				lineEntry_avail:SetTextColor(0.2, 0.9, 0.2)
 			else
 				lineEntry_avail:SetTextColor(1.0, 1.0, 1.0)
 			end
 
-			if auctionatorEntry.numYours == 0 then
+			if entry.numYours == 0 then
 				lineEntry_comm:SetText("")
 			elseif
-				auctionatorEntry.numYours == auctionatorEntry.count then
+				entry.numYours == entry.count then
 				lineEntry_comm:SetText("yours")
 			else
-				lineEntry_comm:SetText("yours: "..auctionatorEntry.numYours)
+				lineEntry_comm:SetText("yours: "..entry.numYours)
 			end
 						
-			local tx = string.format("%i %s of %i", auctionatorEntry.count, Auctionator_PluralizeIf("stack", auctionatorEntry.count), auctionatorEntry.stackSize)
+			local tx = string.format("%i %s of %i", entry.count, Auctionator_PluralizeIf("stack", entry.count), entry.stackSize)
 			lineEntry_avail:SetText(tx)
 
-			MoneyFrame_Update("AuctionatorEntry"..line.."_UnitPrice", Auctionator_Round(auctionatorEntry.buyoutPrice/auctionatorEntry.stackSize))
-			MoneyFrame_Update("AuctionatorEntry"..line.."_TotalPrice", Auctionator_Round(auctionatorEntry.buyoutPrice))
+			MoneyFrame_Update("AuctionatorSellEntry"..line.."_UnitPrice", Auctionator_Round(entry.buyoutPrice/entry.stackSize))
+			MoneyFrame_Update("AuctionatorSellEntry"..line.."_TotalPrice", Auctionator_Round(entry.buyoutPrice))
 
 			lineEntry:Show()
 		else
@@ -395,7 +328,7 @@ end
 
 -----------------------------------------
 
-function Auctionator_EntryOnClick()
+function AuctionatorSellEntry_OnClick()
 	local entryIndex = this:GetID()
 
 	selectedAuctionatorEntry = auctionatorEntries[currentAuctionItemName][entryIndex]
@@ -405,7 +338,9 @@ function Auctionator_EntryOnClick()
 	PlaySound("igMainMenuOptionCheckBoxOn")
 end
 
-function Auctionator_RefreshButtonOnClick()
+-----------------------------------------
+
+function AuctionatorSellRefreshButton_OnClick()
 	if not Auctionator_Scan_IsIdle() then
 		Auctionator_Scan_Abort()
 	end
@@ -485,13 +420,15 @@ function ItemType2AuctionClass(itemType)
 				end
 			end
 		end
-	else Auctionator_Log("Can't GetAuctionItemClasses") end
+	else
+		Auctionator_Log("Can't GetAuctionItemClasses")
+	end
 end
 
 -----------------------------------------
 
 function SubType2AuctionSubclass(auctionClass, itemSubtype)
-	local itemClasses = { GetAuctionItemSubClasses(auctionClass.number) };
+	local itemClasses = { GetAuctionItemSubClasses(auctionClass.number) }
 	if itemClasses.n > 0 then
 	local itemClass
 		for x, itemClass in pairs(itemClasses) do

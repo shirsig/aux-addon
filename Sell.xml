@@ -14,7 +14,7 @@
 		</Scripts> 
 	</Frame> 
 
-	<Button name="AuctionatorEntryTemplate" virtual="true" hidden="true">
+	<Button name="AuctionatorSellEntryTemplate" virtual="true" hidden="true">
 		<Size><AbsDimension y="16" /></Size>		
 		<Frames>
 			<Frame>
@@ -80,7 +80,7 @@
 		</HighlightTexture>
 		<Scripts>
 			<OnClick>
-				Auctionator_EntryOnClick()
+				AuctionatorSellEntry_OnClick()
 			</OnClick>
 		</Scripts>
 	</Button>
@@ -256,7 +256,7 @@
 				</Frames>
 			</Frame>
 
-			<Button name="AuctionatorRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
+			<Button name="AuctionatorSellRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
 				<Size><AbsDimension x="126" y="22"/></Size>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
@@ -267,7 +267,7 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						Auctionator_RefreshButtonOnClick()
+						AuctionatorSellRefreshButton_OnClick()
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -286,20 +286,20 @@
 				</Scripts>
 			</ScrollFrame>
 
-			<Button name="AuctionatorEntry1" inherits="AuctionatorEntryTemplate">
+			<Button name="AuctionatorSellEntry1" inherits="AuctionatorSellEntryTemplate">
 			<Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorScrollFrame" relativePoint="TOPLEFT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor></Anchors>
 			</Button>
-			<Button name="AuctionatorEntry2"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry1"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry3"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry2"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry4"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry3"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry5"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry4"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry6"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry5"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry7"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry6"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry8"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry7"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry9"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry10" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry11" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry12" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>   
+			<Button name="AuctionatorSellEntry2"  inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry1"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorSellEntry3"  inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry2"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorSellEntry4"  inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry3"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorSellEntry5"  inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry4"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorSellEntry6"  inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry5"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorSellEntry7"  inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry6"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorSellEntry8"  inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry7"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorSellEntry9"  inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorSellEntry10" inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorSellEntry11" inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			<Button name="AuctionatorSellEntry12" inherits="AuctionatorSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorSellEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>   
 		</Frames>
 	</Frame>
 </Ui>

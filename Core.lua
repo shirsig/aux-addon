@@ -18,14 +18,21 @@ Auctionator = {
             index = 5
         }
     },
-	item_colors = {
-		"ff9d9d9d", -- poor, gray
-		"ffffffff", -- common, white
-		"ff1eff00", -- uncommon, green
-		"ff0070dd", -- rare, blue
-		"ffa335ee", -- epic, purple
-		"ffff8000", -- legendary, orange
-	}
+	qualityColor = function(code)
+		if code == 0 then
+			return "ff9d9d9d" -- poor, gray
+		elseif code == 1 then
+			return "ffffffff" -- common, white
+		elseif code == 2 then
+			return "ff1eff00" -- uncommon, green
+		elseif code == 3 then -- rare, blue
+			return "ff0070dd"
+		elseif code == 4 then
+			return "ffa335ee" -- epic, purple
+		elseif code == 5 then
+			return "ffff8000" -- legendary, orange
+		end
+	end
 }
 
 local relevel
@@ -312,5 +319,63 @@ function relevel(frame)
 	for _,child in pairs(children) do
 		child:SetFrameLevel(myLevel)
 		relevel(child)
+	end
+end
+
+-----------------------------------------
+
+function Auctionator_BrowseButton_OnClick(button)
+	if arg1 == "LeftButton" then -- because we additionally registered right clicks we only let left ones pass here
+		Auctionator.orig.BrowseButton_OnClick(button)
+	end
+end
+
+-----------------------------------------
+
+function Auctionator_BrowseButton_OnMouseDown()
+	if arg1 == "RightButton" and AUCTIONATOR_INSTANT_BUYOUT then
+		local index = this:GetID() + FauxScrollFrame_GetOffset(BrowseScrollFrame)
+	
+		SetSelectedAuctionItem("list", index)
+		
+		local _, _, _, _, _, _, _, _, buyoutPrice = GetAuctionItemInfo("list", index)
+		if buyoutPrice > 0 then
+			PlaceAuctionBid("list", index, buyoutPrice)
+		end
+		
+		AuctionFrameBrowse_Update()
+	end
+end
+
+-----------------------------------------
+
+function Auctionator_ContainerFrameItemButton_OnClick(button)
+	
+	if button == "LeftButton"
+			and IsShiftKeyDown()
+			and not ChatFrameEditBox:IsVisible()
+			and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index)
+	then
+		local itemLink = GetContainerItemLink(this:GetParent():GetID(), this:GetID())
+		if itemLink then
+		local itemName = string.gsub(itemLink, "^.-%[(.*)%].*", "%1")
+			if PanelTemplates_GetSelectedTab(AuctionFrame) == 1 then
+				BrowseName:SetText(itemName)
+			elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index then
+				AuctionatorBuySearchBox:SetText(itemName)
+			end
+		end
+	else
+		Auctionator.orig.ContainerFrameItemButton_OnClick(button)
+
+		if AUCTIONATOR_ENABLE_ALT and AuctionFrame:IsShown() and IsAltKeyDown() and button == "LeftButton" then
+		
+			ClickAuctionSellItemButton()
+			ClearCursor()
+			
+			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Auctionator.tabs.sell.index then
+				AuctionFrameTab_OnClick(Auctionator.tabs.sell.index)
+			end
+		end
 	end
 end
