@@ -595,11 +595,10 @@ function Auctionator_ScrollbarUpdate()
 			end
 						
 			local tx = string.format("%i %s of %i", auctionatorEntry.count, Auctionator_PluralizeIf("stack", auctionatorEntry.count), auctionatorEntry.stackSize)
-
-			MoneyFrame_Update("AuctionatorEntry"..line.."_PerItem_Price", Auctionator_Round(auctionatorEntry.buyoutPrice/auctionatorEntry.stackSize))
-
 			lineEntry_avail:SetText(tx)
-			lineEntry_stack:SetText(Auctionator_PriceToString(auctionatorEntry.buyoutPrice))
+
+			MoneyFrame_Update("AuctionatorEntry"..line.."_UnitPrice", Auctionator_Round(auctionatorEntry.buyoutPrice/auctionatorEntry.stackSize))
+			MoneyFrame_Update("AuctionatorEntry"..line.."_TotalPrice", Auctionator_Round(auctionatorEntry.buyoutPrice))
 
 			lineEntry:Show()
 		else

@@ -3,14 +3,25 @@
 	<Script file="Buy.lua"/> 
 	
 	<Button name="AuctionatorBuyEntryTemplate" virtual="true" hidden="true">
-		<Size><AbsDimension x="603" y="16" /></Size>		
+		<Size><AbsDimension y="16"/></Size>		
 		<Frames>
 			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="22" y="0"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="25" y="-3"/></Offset></Anchor></Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="$parent_Name" inherits="GameFontHighlightSmall">
+							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+			</Frame>
+			
+			<Frame>
+				<Size><AbsDimension x="120" y="16" /></Size>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="245" y="0"/></Offset></Anchor></Anchors>
 				<Frames>
-					<Frame name="$parent_PerItem_Price" inherits="SmallMoneyFrameTemplate">
-						
+					<Frame name="$parent_UnitPrice" inherits="SmallMoneyFrameTemplate">
 						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnLoad>
@@ -23,24 +34,12 @@
 			</Frame>
 			
 			<Frame>
-				<Size><AbsDimension x="100" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="170" y="-3"/></Offset></Anchor></Anchors>
+				<Size><AbsDimension x="50" y="16" /></Size>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="385" y="-3"/></Offset></Anchor></Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<FontString name="$parent_Availability" inherits="GameFontHighlightSmall">
+						<FontString name="$parent_StackSize" inherits="GameFontHighlightSmall">
 							<Anchors><Anchor point="TOPRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Frame>
-			
-			<Frame>
-				<Size><AbsDimension x="100" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="320" y="-3"/></Offset></Anchor></Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_Comment" inherits="GameFontHighlightSmall">
-							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						</FontString>
 					</Layer>
 				</Layers>
@@ -48,14 +47,18 @@
 			
 			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="440" y="-3"/></Offset></Anchor></Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_StackPrice" inherits="GameFontHighlightSmall">
-							<Anchors><Anchor point="TOPRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="490" y="0"/></Offset></Anchor></Anchors>
+				<Frames>
+					<Frame name="$parent_TotalPrice" inherits="SmallMoneyFrameTemplate">
+						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnLoad>
+								SmallMoneyFrame_OnLoad()
+								MoneyFrame_SetType("STATIC")
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
 			</Frame>
 		</Frames>
 
@@ -83,13 +86,41 @@
 
 		<Layers>
 			<Layer level="BACKGROUND">
-				
 				<FontString inherits="GameFontNormal" text="Advanced Search">
 					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-100" y="-18"/></Offset></Anchor></Anchors>
 				</FontString>
 
 				<FontString name="AuctionatorBuySearchBoxLabel" inherits="GameFontNormalSmall" text="Search For">
 					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="40" y="-50"/></Offset></Anchor></Anchors>
+				</FontString>
+			</Layer>
+			<Layer level="ARTWORK">
+				<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
+					<Size><AbsDimension x="634" y="64"/></Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="-22" y="-82"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
+				</Texture>
+
+				<FontString inherits="GameFontHighlightSmall" text="Name">
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="25" y="1"/></Offset></Anchor></Anchors>
+				</FontString>
+				
+				<FontString inherits="GameFontHighlightSmall" text="Unit Price">
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="302" y="1"/></Offset></Anchor></Anchors>
+				</FontString>
+
+				<FontString inherits="GameFontHighlightSmall" text="Stack Size">
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="409" y="1"/></Offset></Anchor></Anchors>
+				</FontString>
+
+				<FontString inherits="GameFontHighlightSmall" text="Total Price">
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="544" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
@@ -121,8 +152,8 @@
 			</Button>
 			
 			<ScrollFrame name="AuctionatorBuyScrollFrame" inherits="FauxScrollFrameTemplate">
-				<Size><AbsDimension x="588" y="194"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-213"/></Offset></Anchor></Anchors>
+				<Size><AbsDimension x="617" y="279"/></Size>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-29" y="-128"/></Offset></Anchor></Anchors>
 
 				<Scripts>
 					<OnVerticalScroll>
@@ -150,7 +181,9 @@
             <Button name="AuctionatorBuyEntry12" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
             <Button name="AuctionatorBuyEntry13" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
             <Button name="AuctionatorBuyEntry14" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry15" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>  
+            <Button name="AuctionatorBuyEntry15" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuctionatorBuyEntry16" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry15" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuctionatorBuyEntry17" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry16" relativePoint="BOTTOMLEFT"/></Anchors></Button>			
 		</Frames>
 	</Frame>
 </Ui>

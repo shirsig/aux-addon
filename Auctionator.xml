@@ -19,13 +19,13 @@
 	</Frame> 
 
 	<Button name="AuctionatorEntryTemplate" virtual="true" hidden="true">
-		<Size><AbsDimension x="603" y="16" /></Size>		
+		<Size><AbsDimension y="16" /></Size>		
 		<Frames>
 			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
 				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="22" y="0"/></Offset></Anchor></Anchors>
 				<Frames>
-					<Frame name="$parent_PerItem_Price" inherits="SmallMoneyFrameTemplate">
+					<Frame name="$parent_UnitPrice" inherits="SmallMoneyFrameTemplate">
 						
 						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
@@ -64,14 +64,18 @@
 			
 			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="440" y="-3"/></Offset></Anchor></Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_StackPrice" inherits="GameFontHighlightSmall">
-							<Anchors><Anchor point="TOPRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="440" y="0"/></Offset></Anchor></Anchors>
+				<Frames>
+					<Frame name="$parent_TotalPrice" inherits="SmallMoneyFrameTemplate">
+						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnLoad>
+								SmallMoneyFrame_OnLoad()
+								MoneyFrame_SetType("STATIC")
+							</OnLoad>
+						</Scripts>
+					</Frame>
+				</Frames>
 			</Frame>
 		</Frames>
 
@@ -99,7 +103,6 @@
 
 		<Layers>
 			<Layer level="BACKGROUND">
-				
 				<FontString name="AuctionatorTitle" inherits="GameFontNormal">
 					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="2" y="-58"/></Offset></Anchor></Anchors>
 				</FontString>
@@ -124,7 +127,6 @@
 					<Anchors><Anchor point="TOPLEFT" relativeTo="Auctionator_Recommend_Text"><Offset><AbsDimension x="152" y="-51"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
-
 			<Layer level="ARTWORK">
 				<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
 					<Size><AbsDimension x="606" y="64"/></Size>
@@ -138,7 +140,7 @@
 					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
 				</Texture>
 
-				<FontString inherits="GameFontHighlightSmall" text="Item Price">
+				<FontString inherits="GameFontHighlightSmall" text="Unit Price">
 					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="70" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 
@@ -296,10 +298,7 @@
 			<Button name="AuctionatorEntry9"  inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			<Button name="AuctionatorEntry10" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			<Button name="AuctionatorEntry11" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry12" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry13" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry14" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuctionatorEntry15" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>	   
+			<Button name="AuctionatorEntry12" inherits="AuctionatorEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>   
 		</Frames>
 	</Frame>
 </Ui>
