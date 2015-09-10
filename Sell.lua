@@ -382,7 +382,7 @@ function processScanResults(rawData, auctionItemName)
 				condData[key] = {
 						stackSize 	= rawDatum.count,
 						buyoutPrice	= rawDatum.buyoutPrice,
-						itemPrice		= rawDatum.buyoutPrice / rawDatum.stackSize,
+						itemPrice		= rawDatum.buyoutPrice / rawDatum.count,
 						count			= 1,
 						numYours		= rawDatum.owner == UnitName("player") and 1 or 0
 				}
