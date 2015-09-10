@@ -1,4 +1,4 @@
-auxEntries = {} -- persisted
+auxSellEntries = {} -- persisted
 
 -----------------------------------------
 
@@ -124,7 +124,7 @@ end
 
 function Aux_SelectAuxEntry()
 	
-	if not currentAuctionItemName or not auxEntries[currentAuctionItemName] then
+	if not currentAuctionItemName or not auxSellEntries[currentAuctionItemName] then
 		selectedAuxEntry = nil
 	else
 		local bestPrice	= {} -- a table with one entry per stacksize that is the cheapest auction for that particular stacksize
@@ -132,7 +132,7 @@ function Aux_SelectAuxEntry()
 
 		----- find the best price per stacksize and overall -----
 		
-		for _,auxEntry in ipairs(auxEntries[currentAuctionItemName]) do
+		for _,auxEntry in ipairs(auxSellEntries[currentAuctionItemName]) do
 			if not bestPrice[auxEntry.stackSize] or bestPrice[auxEntry.stackSize].itemPrice >= auxEntry.itemPrice then
 				bestPrice[auxEntry.stackSize] = auxEntry
 			end
@@ -194,14 +194,14 @@ function Aux_UpdateRecommendation()
 			MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
 			MoneyInputFrame_SetCopper(StartPrice, newStartPrice)
 			
-			if selectedAuxEntry.stackSize == auxEntries[currentAuctionItemName][1].stackSize and selectedAuxEntry.buyoutPrice == auxEntries[currentAuctionItemName][1].buyoutPrice then
+			if selectedAuxEntry.stackSize == auxSellEntries[currentAuctionItemName][1].stackSize and selectedAuxEntry.buyoutPrice == auxSellEntries[currentAuctionItemName][1].buyoutPrice then
 				Aux_Recommend_Basis_Text:SetText("(based on cheapest)")
 			elseif bestPriceOurStackSize and selectedAuxEntry.stackSize == bestPriceOurStackSize.stackSize and selectedAuxEntry.buyoutPrice == bestPriceOurStackSize.buyoutPrice then
 				Aux_Recommend_Basis_Text:SetText("(based on cheapest stack of the same size)")
 			else
 				Aux_Recommend_Basis_Text:SetText("(based on auction selected below)")
 			end
-		elseif auxEntries[currentAuctionItemName] then
+		elseif auxSellEntries[currentAuctionItemName] then
 			Aux_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
 		else 
 			Aux_HideElems(Aux.tabs.sell.shownElements)
@@ -225,7 +225,7 @@ function Aux_OnNewAuctionUpdate()
 	
 	currentAuctionItemName, currentAuctionItemTexture, currentAuctionItemStackSize = GetAuctionSellItemInfo()
 	
-	if currentAuctionItemName and not auxEntries[currentAuctionItemName] then
+	if currentAuctionItemName and not auxSellEntries[currentAuctionItemName] then
 		Aux_RefreshEntries()
 	end
 	
@@ -236,7 +236,7 @@ end
 -----------------------------------------
 
 function Aux_RefreshEntries()
-	auxEntries[currentAuctionItemName] = nil
+	auxSellEntries[currentAuctionItemName] = nil
 	selectedAuxEntry = nil
 	
 	local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName)
@@ -263,10 +263,10 @@ end
 function Aux_ScrollbarUpdate()
 
 	local numrows
-	if not currentAuctionItemName or not auxEntries[currentAuctionItemName] then
+	if not currentAuctionItemName or not auxSellEntries[currentAuctionItemName] then
 		numrows = 0
 	else
-		numrows = getn(auxEntries[currentAuctionItemName])
+		numrows = getn(auxSellEntries[currentAuctionItemName])
 	end
 	
 	FauxScrollFrame_Update(AuxScrollFrame, numrows, 12, 16);
@@ -284,9 +284,9 @@ function Aux_ScrollbarUpdate()
 		
 		lineEntry:SetID(dataOffset)
 		
-		if currentAuctionItemName and dataOffset <= numrows and auxEntries[currentAuctionItemName] then
+		if currentAuctionItemName and dataOffset <= numrows and auxSellEntries[currentAuctionItemName] then
 			
-			local entry = auxEntries[currentAuctionItemName][dataOffset]
+			local entry = auxSellEntries[currentAuctionItemName][dataOffset]
 
 			local lineEntry_avail	= getglobal("AuxSellEntry"..line.."_Availability")
 			local lineEntry_comm	= getglobal("AuxSellEntry"..line.."_Comment")
@@ -331,7 +331,7 @@ end
 function AuxSellEntry_OnClick()
 	local entryIndex = this:GetID()
 
-	selectedAuxEntry = auxEntries[currentAuctionItemName][entryIndex]
+	selectedAuxEntry = auxSellEntries[currentAuctionItemName][entryIndex]
 
 	Aux_UpdateRecommendation()
 
@@ -366,7 +366,7 @@ end
 
 function processScanResults(rawData, auctionItemName)
 
-	auxEntries[auctionItemName] = {}
+	auxSellEntries[auctionItemName] = {}
 	
 	----- Condense the scan rawData into a table that has only a single entry per stacksize/price combo
 	
@@ -394,11 +394,11 @@ function processScanResults(rawData, auctionItemName)
 	
 	local n = 1
 	for _,condDatum in pairs(condData) do
-		auxEntries[auctionItemName][n] = condDatum
+		auxSellEntries[auctionItemName][n] = condDatum
 		n = n + 1
 	end
 	
-	table.sort(auxEntries[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
+	table.sort(auxSellEntries[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
 end
 
 -----------------------------------------

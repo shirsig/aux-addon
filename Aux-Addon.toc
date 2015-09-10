@@ -2,10 +2,10 @@
 ## Title: Aux
 ## Notes: A lightweight addon designed to help manage auctions
 ## SavedVariablesPerCharacter: AUCTIONATOR_ENABLE_ALT, AUCTIONATOR_OPEN_FIRST, AUCTIONATOR_INSTANT_BUYOUT
-## SavedVariables: auxEntries
-Core.xml
-Scan.xml
-Sell.xml
-Buy.xml
-Options.xml
-About.xml
+## SavedVariables: auxSellEntries
+core.xml
+scan.xml
+sell.xml
+buy.xml
+options.xml
+about.xml
