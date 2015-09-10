@@ -2,7 +2,7 @@
 
 	<Script file="Buy.lua"/> 
 	
-	<Button name="AuctionatorBuyEntryTemplate" virtual="true" hidden="true">
+	<Button name="AuxBuyEntryTemplate" virtual="true" hidden="true">
 		<Size><AbsDimension y="16"/></Size>		
 		<Frames>
 			<Frame>
@@ -67,12 +67,12 @@
 		</HighlightTexture>
 		<Scripts>
 			<OnClick>
-				AuctionatorBuyEntry_OnClick()
+				AuxBuyEntry_OnClick()
 			</OnClick>
 		</Scripts>
 	</Button>
 	
-	<Frame name="AuctionatorBuyTemplate" virtual="true" hidden="true">
+	<Frame name="AuxBuyTemplate" virtual="true" hidden="true">
 		<Size>
 			<AbsDimension x="694" y="447"/>
 		</Size>
@@ -82,20 +82,20 @@
 
 		<Layers>
 			<Layer level="BACKGROUND">
-				<FontString inherits="GameFontNormal" text="Auctionator Buy">
+				<FontString inherits="GameFontNormal" text="Aux Buy">
 					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="20" y="-18"/></Offset></Anchor></Anchors>
 				</FontString>
 
-				<FontString name="AuctionatorBuyMessage" inherits="GameFontNormal">
+				<FontString name="AuxBuyMessage" inherits="GameFontNormal">
 					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="70" y="-120"/></Offset></Anchor></Anchors>
 				</FontString>
 				
-				<FontString name="AuctionatorBuySearchBoxLabel" inherits="GameFontHighlightSmall" text="Search For">
+				<FontString name="AuxBuySearchBoxLabel" inherits="GameFontHighlightSmall" text="Search For">
 					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="160" y="-50"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
 			<Layer level="ARTWORK">
-				<FontString name="AuctionatorBuyTotalLabel" inherits="GameFontHighlightSmall" text="Total">
+				<FontString name="AuxBuyTotalLabel" inherits="GameFontHighlightSmall" text="Total">
 					<Anchors>
 						<Anchor point="BOTTOM">
 							<Offset>
@@ -135,28 +135,28 @@
 		</Layers>
 
 		<Frames>		
-            <EditBox name="AuctionatorBuySearchBox" autoFocus="false" inherits="InputBoxTemplate">
+            <EditBox name="AuxBuySearchBox" autoFocus="false" inherits="InputBoxTemplate">
 				<Size><AbsDimension x="240" y="20"/></Size>
-				<Anchors><Anchor point="LEFT" relativeTo="AuctionatorBuySearchBoxLabel" relativePoint="RIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="LEFT" relativeTo="AuxBuySearchBoxLabel" relativePoint="RIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnEnterPressed>
 						this:ClearFocus()
-						AuctionatorBuySearchButton_OnClick()
+						AuxBuySearchButton_OnClick()
 					</OnEnterPressed>
 				</Scripts>
 			</EditBox> 
             
-            <Button name="AuctionatorBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
+            <Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
 				<Size><AbsDimension x="80" y="22"/></Size>
-				<Anchors><Anchor point="LEFT" relativeTo="AuctionatorBuySearchBox" relativePoint="RIGHT"><Offset><AbsDimension x="10" y="1" /></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="LEFT" relativeTo="AuxBuySearchBox" relativePoint="RIGHT"><Offset><AbsDimension x="10" y="1" /></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						AuctionatorBuySearchButton_OnClick()
+						AuxBuySearchButton_OnClick()
 					</OnClick>
 				</Scripts>
 			</Button>
             
-			<Button name="AuctionatorBuyBuySelectedButton" inherits="UIPanelButtonTemplate" text="Buy Selected Auctions">
+			<Button name="AuxBuyBuySelectedButton" inherits="UIPanelButtonTemplate" text="Buy Selected Auctions">
 				<Size><AbsDimension x="166" y="22"/></Size>
 				<Anchors>
 					<Anchor point="BOTTOMRIGHT">
@@ -167,14 +167,14 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						AuctionatorBuyBuySelectedButton_OnClick()
+						AuxBuyBuySelectedButton_OnClick()
 					</OnClick>
 				</Scripts>
 			</Button>
 			
-			<Frame name="AuctionatorBuyTotal" inherits="SmallMoneyFrameTemplate">
+			<Frame name="AuxBuyTotal" inherits="SmallMoneyFrameTemplate">
 				<Anchors>
-					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuctionatorBuyTotalLabel">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxBuyTotalLabel">
 						<Offset>
 							<AbsDimension x="10" y="0"/>
 						</Offset>
@@ -198,45 +198,45 @@
 				</Anchors>
 			</Frame> -->
 		
-			<ScrollFrame name="AuctionatorBuyScrollFrame" inherits="FauxScrollFrameTemplate">
+			<ScrollFrame name="AuxBuyScrollFrame" inherits="FauxScrollFrameTemplate">
 				<Size><AbsDimension x="785" y="309"/></Size>
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="13" y="-98"/></Offset></Anchor></Anchors>
 
 				<Scripts>
 					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(16, Auctionator_Buy_ScrollbarUpdate)
+						FauxScrollFrame_OnVerticalScroll(16, Aux_Buy_ScrollbarUpdate)
 					</OnVerticalScroll>
 					<OnShow>
-						<!--Auctionator_ScrollbarUpdate();-->
+						<!--Aux_ScrollbarUpdate();-->
 					</OnShow>
 				</Scripts>
 			</ScrollFrame>
 
-            <Button name="AuctionatorBuyEntry1" inherits="AuctionatorBuyEntryTemplate">
-            <Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyScrollFrame" relativePoint="TOPLEFT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor></Anchors>
+            <Button name="AuxBuyEntry1" inherits="AuxBuyEntryTemplate">
+            <Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyScrollFrame" relativePoint="TOPLEFT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor></Anchors>
             </Button>
-            <Button name="AuctionatorBuyEntry2"  inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry1"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry3"  inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry2"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry4"  inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry3"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry5"  inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry4"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry6"  inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry5"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry7"  inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry6"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry8"  inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry7"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry9"  inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry10" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry11" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry12" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry13" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry14" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry15" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry16" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry15" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry17" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry16" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry18" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry17" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuctionatorBuyEntry19" inherits="AuctionatorBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuctionatorBuyEntry18" relativePoint="BOTTOMLEFT"/></Anchors></Button>		
+            <Button name="AuxBuyEntry2"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry1"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry3"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry2"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry4"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry3"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry5"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry4"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry6"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry5"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry7"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry6"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry8"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry7"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry9"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry10" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry11" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry12" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry13" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry14" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry15" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry16" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry15" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry17" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry16" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry18" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry17" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+            <Button name="AuxBuyEntry19" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry18" relativePoint="BOTTOMLEFT"/></Anchors></Button>		
 		</Frames>
 	</Frame>
 	
-	<Frame name="AuctionatorBuyReport" frameStrata="FULLSCREEN_DIALOG"  toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
+	<Frame name="AuxBuyReport" frameStrata="FULLSCREEN_DIALOG"  toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
 		<Size><AbsDimension x="400" y="180" /></Size>		
 		<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-90"/></Offset></Anchor></Anchors>
 
@@ -247,7 +247,7 @@
 		</Backdrop>
 
 		<Frames>
-			<SimpleHTML name="AuctionatorBuyReportHTML">
+			<SimpleHTML name="AuxBuyReportHTML">
 				<Size><AbsDimension x="420" y="420" /></Size>		
 				<Anchors>
 					<Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor>
@@ -261,7 +261,7 @@
 				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						AuctionatorBuyReport:Hide()
+						AuxBuyReport:Hide()
 					</OnClick>
 				</Scripts>
 			</Button>

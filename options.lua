@@ -1,88 +1,88 @@
 local BoolToString, BoolToNum, NumToBool
 
-function Auctionator_ShowDescriptionFrame()
-	AuctionatorDescriptionFrame:Show()
+function Aux_ShowDescriptionFrame()
+	AuxDescriptionFrame:Show()
 	
-	AuctionatorDescriptionHTML:SetText("<html><body>"
-			.."<h1>What is Auctionator?</h1><br/>"
+	AuxDescriptionHTML:SetText("<html><body>"
+			.."<h1>What is Aux?</h1><br/>"
 			.."<p>"
 			.."Figuring out a good buyout price when posting auctions can be tedious and time-consuming.  If you're like most people, you first browse the current "
 			.."auctions to get a sense of how much your item is currently selling for.  Then you undercut the lowest price by a bit. If you're creating multiple auctions "
 			.."you're bouncing back and forth between the Browse tab and the Auctions tab, doing lots of division in "
 			.."your head, and doing lots of clicking and typing."
 			.."</p><br/><h1>How it works</h1><br/><p>"
-			.."The Auctionator Sell panel makes this whole process easy and streamlined.  When you select an item to auction, Auctionator displays a summary of all the current auctions for "
-			.."that item sorted by per-item price. Auctionator also calculates a recommended buyout price based on the cheapest per-item price for your item. If you're "
-			.."selling a stack rather than a single item, Auctionator bases its recommended buyout price on the cheapest stack of the same size."
+			.."The Aux Sell panel makes this whole process easy and streamlined.  When you select an item to auction, Aux displays a summary of all the current auctions for "
+			.."that item sorted by per-item price. Aux also calculates a recommended buyout price based on the cheapest per-item price for your item. If you're "
+			.."selling a stack rather than a single item, Aux bases its recommended buyout price on the cheapest stack of the same size."
 			.."</p><br/><p>"
-			.."If you don't like Auctionator's recommendation, you can click on any line in the summary and Auctionator will recalculate the recommended buyout price based "
-			.."on that auction.  Of course, you can always override Auctionator's recommendation by just typing in your own buyout price."
+			.."If you don't like Aux's recommendation, you can click on any line in the summary and Aux will recalculate the recommended buyout price based "
+			.."on that auction.  Of course, you can always override Aux's recommendation by just typing in your own buyout price."
 			.."</p><br/><p>"
-			.."With Auctionator, creating an auction is usually just a matter of picking an item to auction and clicking the Create Auction button."
+			.."With Aux, creating an auction is usually just a matter of picking an item to auction and clicking the Create Auction button."
 			.."</p><br/><p>"
-			.."Additionally the Auctionator Buy panel lets you make mass purchases from a list of items sorted by unit price."
+			.."Additionally the Aux Buy panel lets you make mass purchases from a list of items sorted by unit price."
 			.."</p>"
 			.."</body></html>")
 			
-	AuctionatorDescriptionHTML:SetSpacing(3)
+	AuxDescriptionHTML:SetSpacing(3)
 	
-	AuctionatorAuthorText:SetText("Authors: "..AuctionatorAuthors)
+	AuxAuthorText:SetText("Authors: "..AuxAuthors)
 end
 
 -----------------------------------------
 
-function Auctionator_ShowOptionsFrame()
+function Aux_ShowOptionsFrame()
 
-	AuctionatorOptionsFrame:Show()
-	AuctionatorOptionsFrame:SetBackdropColor(0,0,0,100)
+	AuxOptionsFrame:Show()
+	AuxOptionsFrame:SetBackdropColor(0,0,0,100)
 	
-	AuctionatorConfigFrameTitle:SetText("Auctionator Options for "..UnitName("player"))
+	AuxConfigFrameTitle:SetText("Aux Options for "..UnitName("player"))
 
-	AuctionatorExplanation:SetText("Auctionator is an addon designed to make it easier and faster to setup your auctions and find the best deals at the auction house.")
+	AuxExplanation:SetText("Aux is an addon designed to make it easier and faster to setup your auctions and find the best deals at the auction house.")
 
 
-	AuctionatorVersionText:SetText("Version: "..AuctionatorVersion)
+	AuxVersionText:SetText("Version: "..AuxVersion)
 	
-	AuctionatorOption_Enable_Alt:SetChecked(AUCTIONATOR_ENABLE_ALT)
-	AuctionatorOption_Open_First:SetChecked(AUCTIONATOR_OPEN_FIRST)
-	AuctionatorOption_Instant_Buyout:SetChecked(AUCTIONATOR_INSTANT_BUYOUT)
+	AuxOption_Enable_Alt:SetChecked(AUCTIONATOR_ENABLE_ALT)
+	AuxOption_Open_First:SetChecked(AUCTIONATOR_OPEN_FIRST)
+	AuxOption_Instant_Buyout:SetChecked(AUCTIONATOR_INSTANT_BUYOUT)
 end
 
 -----------------------------------------
 
-function AuctionatorOptionsSave()
+function AuxOptionsSave()
 
-	AUCTIONATOR_ENABLE_ALT = AuctionatorOption_Enable_Alt:GetChecked()
-	AUCTIONATOR_OPEN_FIRST = AuctionatorOption_Open_First:GetChecked()
-	AUCTIONATOR_INSTANT_BUYOUT = AuctionatorOption_Instant_Buyout:GetChecked()
+	AUCTIONATOR_ENABLE_ALT = AuxOption_Enable_Alt:GetChecked()
+	AUCTIONATOR_OPEN_FIRST = AuxOption_Open_First:GetChecked()
+	AUCTIONATOR_INSTANT_BUYOUT = AuxOption_Instant_Buyout:GetChecked()
 	
 end
 
 -----------------------------------------
 
-function Auctionator_ShowTooltip_EnableAlt()
+function Aux_ShowTooltip_EnableAlt()
 
 	GameTooltip:SetOwner(this, "ANCHOR_BOTTOM")
 	GameTooltip:SetText("Enable ALT-key shortcut", 0.9, 1.0, 1.0)
-	GameTooltip:AddLine("If this option is checked, holding the Alt key down while clicking an item in your bags will switch to the Auctionator Sell panel, place the item in the Auction Item area, and suggest a price.", 0.5, 0.5, 1.0, 1)
+	GameTooltip:AddLine("If this option is checked, holding the Alt key down while clicking an item in your bags will switch to the Aux Sell panel, place the item in the Auction Item area, and suggest a price.", 0.5, 0.5, 1.0, 1)
 	GameTooltip:Show()
 
 end
 
 -----------------------------------------
 
-function Auctionator_ShowTooltip_OpenFirst()
+function Aux_ShowTooltip_OpenFirst()
 
 	GameTooltip:SetOwner(this, "ANCHOR_BOTTOM")
-	GameTooltip:SetText("Automatically open Auctionator Sell panel", 0.9, 1.0, 1.0)
-	GameTooltip:AddLine("If this option is checked, the Auctionator Sell panel will display first whenever you open the Auction House window.", 0.5, 0.5, 1.0, 1)
+	GameTooltip:SetText("Automatically open Aux Sell panel", 0.9, 1.0, 1.0)
+	GameTooltip:AddLine("If this option is checked, the Aux Sell panel will display first whenever you open the Auction House window.", 0.5, 0.5, 1.0, 1)
 	GameTooltip:Show()
 
 end
 
 -----------------------------------------
 
-function Auctionator_ShowTooltip_InstantBuyout()
+function Aux_ShowTooltip_InstantBuyout()
 
 	GameTooltip:SetOwner(this, "ANCHOR_BOTTOM")
 	GameTooltip:SetText("Enable right-click instant buyout", 0.9, 1.0, 1.0)

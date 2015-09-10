@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 	
-	<Frame name="AuctionatorDescriptionFrame" frameStrata="HIGH" toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
+	<Frame name="AuxDescriptionFrame" frameStrata="HIGH" toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
 		<Size><AbsDimension x="520" y="480" /></Size>		
 		<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-90"/></Offset></Anchor></Anchors>
 
@@ -12,7 +12,7 @@
 
 		<Layers>
 			<Layer level="BACKGROUND">
-				<FontString name="AuctionatorAuthorText" inherits="GameFontDisableSmall" justifyH="LEFT" justifyV="TOP">
+				<FontString name="AuxAuthorText" inherits="GameFontDisableSmall" justifyH="LEFT" justifyV="TOP">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT">
 							<Offset><AbsDimension x="30" y="20"/></Offset>
@@ -24,7 +24,7 @@
 
 		<Frames>
 
-			<SimpleHTML name="AuctionatorDescriptionHTML">
+			<SimpleHTML name="AuxDescriptionHTML">
 				<Size><AbsDimension x="460" y="420" /></Size>		
 				<Anchors>
 					<Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor>
@@ -38,7 +38,7 @@
 				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						AuctionatorDescriptionFrame:Hide()
+						AuxDescriptionFrame:Hide()
 					</OnClick>
 				</Scripts>
 			</Button>

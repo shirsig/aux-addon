@@ -12,7 +12,7 @@
 				this:RegisterEvent("AUCTION_HOUSE_CLOSED")
 			</OnLoad>
 			<OnEvent> 
-				Auctionator_OnEvent()
+				Aux_OnEvent()
 			</OnEvent> 
 		</Scripts> 
 	</Frame>

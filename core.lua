@@ -1,11 +1,11 @@
-AuctionatorVersion = "1.2.0-Vanilla"
-AuctionatorAuthors = "Zirco (Original); Nimeral (Backport); shirsig, Zerf (Update)"
+AuxVersion = "1.2.0-Vanilla"
+AuxAuthors = "Zirco (Original); Nimeral (Backport); shirsig, Zerf (Update)"
 
 AUCTIONATOR_ENABLE_ALT = true
 AUCTIONATOR_OPEN_FIRST = false
 AUCTIONATOR_INSTANT_BUYOUT = false
 
-Auctionator = {
+Aux = {
 	loaded = false,
 	orig = {},
 	elements = {},
@@ -25,36 +25,36 @@ local relevel
 
 -----------------------------------------
 
-function Auctionator_OnLoad()
-	Auctionator_Log("Auctionator v"..AuctionatorVersion.." loaded")
-	Auctionator.loaded = true
+function Aux_OnLoad()
+	Aux_Log("Aux v"..AuxVersion.." loaded")
+	Aux.loaded = true
 end
 
 -----------------------------------------
 
-function Auctionator_OnEvent()
+function Aux_OnEvent()
 	if event == "VARIABLES_LOADED" then
-		Auctionator_OnLoad()
+		Aux_OnLoad()
 	elseif event == "ADDON_LOADED" then
-		Auctionator_OnAddonLoaded()
+		Aux_OnAddonLoaded()
 	elseif event == "AUCTION_HOUSE_SHOW" then
-		Auctionator_OnAuctionHouseShow()
+		Aux_OnAuctionHouseShow()
 	elseif event == "AUCTION_HOUSE_CLOSED" then
-		Auctionator_OnAuctionHouseClosed()
+		Aux_OnAuctionHouseClosed()
 	end
 end
 
 -----------------------------------------
 
-function Auctionator_OnAddonLoaded()
+function Aux_OnAddonLoaded()
 
 	if string.lower(arg1) == "blizzard_auctionui" then
-		Auctionator_AddTabs()
-		Auctionator_AddPanels()
+		Aux_AddTabs()
+		Aux_AddPanels()
 		
-		Auctionator_SetupHookFunctions()
+		Aux_SetupHookFunctions()
 		
-		Auctionator.tabs.sell.hiddenElements = {
+		Aux.tabs.sell.hiddenElements = {
 				AuctionsTitle,
 				AuctionsScrollFrame,
 				AuctionsButton1,
@@ -73,7 +73,7 @@ function Auctionator_OnAddonLoaded()
 				AuctionsCancelAuctionButton
 		}
         
-		Auctionator.tabs.buy.hiddenElements = {
+		Aux.tabs.buy.hiddenElements = {
 				BidTitle,
 				BidScrollFrame,
 				BidQualitySort,
@@ -88,99 +88,99 @@ function Auctionator_OnAddonLoaded()
 				BidBidText
 		}
 
-		Auctionator.tabs.sell.shownElements = {
-				getglobal("Auctionator_Recommend_Text"),
-				getglobal("Auctionator_RecommendPerItem_Text"),
-				getglobal("Auctionator_RecommendPerItem_Price"),
-				getglobal("Auctionator_RecommendPerStack_Text"),
-				getglobal("Auctionator_RecommendPerStack_Price"),
-				getglobal("Auctionator_Recommend_Basis_Text"),
-				getglobal("Auctionator_RecommendItem_Tex")
+		Aux.tabs.sell.shownElements = {
+				getglobal("Aux_Recommend_Text"),
+				getglobal("Aux_RecommendPerItem_Text"),
+				getglobal("Aux_RecommendPerItem_Price"),
+				getglobal("Aux_RecommendPerStack_Text"),
+				getglobal("Aux_RecommendPerStack_Price"),
+				getglobal("Aux_Recommend_Basis_Text"),
+				getglobal("Aux_RecommendItem_Tex")
 		}
 	end
 end
 
 -----------------------------------------
 
-function Auctionator_OnAuctionHouseShow()
+function Aux_OnAuctionHouseShow()
 
-	AuctionatorOptionsButtonPanel:Show()
+	AuxOptionsButtonPanel:Show()
 
 	if AUCTIONATOR_OPEN_FIRST then
-		AuctionFrameTab_OnClick(Auctionator.tabs.sell.index)
+		AuctionFrameTab_OnClick(Aux.tabs.sell.index)
 	end
 
 end
 
 -----------------------------------------
 
-function Auctionator_OnAuctionHouseClosed()
+function Aux_OnAuctionHouseClosed()
 
-	if not Auctionator_Scan_IsIdle() then
-		Auctionator_Scan_Abort()
+	if not Aux_Scan_IsIdle() then
+		Aux_Scan_Abort()
 	end
 	
-	AuctionatorOptionsButtonPanel:Hide()
-	AuctionatorOptionsFrame:Hide()
-	AuctionatorDescriptionFrame:Hide()
-	AuctionatorSellPanel:Hide()
-    AuctionatorBuyPanel:Hide()
+	AuxOptionsButtonPanel:Hide()
+	AuxOptionsFrame:Hide()
+	AuxDescriptionFrame:Hide()
+	AuxSellPanel:Hide()
+    AuxBuyPanel:Hide()
 	
 end
 
 -----------------------------------------
 
-function Auctionator_AuctionFrameTab_OnClick(index)
+function Aux_AuctionFrameTab_OnClick(index)
 	
 	if not index then
 		index = this:GetID()
 	end
 	
-	if not Auctionator_Scan_IsIdle() then
-		Auctionator_Scan_Abort()
+	if not Aux_Scan_IsIdle() then
+		Aux_Scan_Abort()
 	end
-	AuctionatorSellPanel:Hide()
-    AuctionatorBuyPanel:Hide()
+	AuxSellPanel:Hide()
+    AuxBuyPanel:Hide()
 
 	if index == 2 then		
-		Auctionator_ShowElems(Auctionator.tabs.buy.hiddenElements)
+		Aux_ShowElems(Aux.tabs.buy.hiddenElements)
 	end
 	
 	if index == 3 then		
-		Auctionator_ShowElems(Auctionator.tabs.sell.hiddenElements)
+		Aux_ShowElems(Aux.tabs.sell.hiddenElements)
 	end
 	
-	if index == Auctionator.tabs.sell.index then
+	if index == Aux.tabs.sell.index then
 		AuctionFrameTab_OnClick(3)
 		
-		PanelTemplates_SetTab(AuctionFrame, Auctionator.tabs.sell.index)
+		PanelTemplates_SetTab(AuctionFrame, Aux.tabs.sell.index)
 		
-		Auctionator_HideElems(Auctionator.tabs.sell.hiddenElements)
+		Aux_HideElems(Aux.tabs.sell.hiddenElements)
 		
-		AuctionatorSellPanel:Show()
+		AuxSellPanel:Show()
 		AuctionFrame:EnableMouse(false)
 		
-		Auctionator_OnNewAuctionUpdate()
-    elseif index == Auctionator.tabs.buy.index then
+		Aux_OnNewAuctionUpdate()
+    elseif index == Aux.tabs.buy.index then
         AuctionFrameTab_OnClick(2)
 		
-		PanelTemplates_SetTab(AuctionFrame, Auctionator.tabs.buy.index)
+		PanelTemplates_SetTab(AuctionFrame, Aux.tabs.buy.index)
 		
-		Auctionator_HideElems(Auctionator.tabs.buy.hiddenElements)
+		Aux_HideElems(Aux.tabs.buy.hiddenElements)
 		
-		AuctionatorBuyPanel:Show()
+		AuxBuyPanel:Show()
 		AuctionFrame:EnableMouse(false)
 		
-		Auctionator_Buy_ScrollbarUpdate()
+		Aux_Buy_ScrollbarUpdate()
     else
-        Auctionator.orig.AuctionFrameTab_OnClick(index)
+        Aux.orig.AuctionFrameTab_OnClick(index)
 		lastItemPosted = nil
 	end
 end
 
 -----------------------------------------
 
-function Auctionator_Log(msg)
+function Aux_Log(msg)
 	if DEFAULT_CHAT_FRAME then
 		DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
 	end
@@ -188,21 +188,21 @@ end
 
 -----------------------------------------
 
-function Auctionator_AddPanels()
+function Aux_AddPanels()
 	
-	local sellFrame = CreateFrame("Frame", "AuctionatorSellPanel", AuctionFrame, "AuctionatorSellTemplate")
+	local sellFrame = CreateFrame("Frame", "AuxSellPanel", AuctionFrame, "AuxSellTemplate")
 	sellFrame:SetParent("AuctionFrame")
 	sellFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
 	relevel(sellFrame)
 	sellFrame:Hide()
     
-    local buyFrame = CreateFrame("Frame", "AuctionatorBuyPanel", AuctionFrame, "AuctionatorBuyTemplate")
+    local buyFrame = CreateFrame("Frame", "AuxBuyPanel", AuctionFrame, "AuxBuyTemplate")
 	buyFrame:SetParent("AuctionFrame")
 	buyFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
 	relevel(buyFrame)
 	buyFrame:Hide()
 	
-	local optionsFrame = CreateFrame("Frame", "AuctionatorOptionsButtonPanel", AuctionFrame, "AuctionatorOptionsButtonTemplate")
+	local optionsFrame = CreateFrame("Frame", "AuxOptionsButtonPanel", AuctionFrame, "AuxOptionsButtonTemplate")
 	optionsFrame:SetParent("AuctionFrame")
 	optionsFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
 	relevel(optionsFrame)
@@ -211,13 +211,13 @@ end
 
 -----------------------------------------
 
-function Auctionator_AddTabs()
+function Aux_AddTabs()
 	
-	Auctionator.tabs.sell.index = AuctionFrame.numTabs + 1
-    Auctionator.tabs.buy.index = AuctionFrame.numTabs + 2
+	Aux.tabs.sell.index = AuctionFrame.numTabs + 1
+    Aux.tabs.buy.index = AuctionFrame.numTabs + 2
 
-	local sellTabName = "AuctionFrameTab"..Auctionator.tabs.sell.index
-    local buyTabName = "AuctionFrameTab"..Auctionator.tabs.buy.index
+	local sellTabName = "AuctionFrameTab"..Aux.tabs.sell.index
+    local buyTabName = "AuctionFrameTab"..Aux.tabs.buy.index
 
 	local sellTab = CreateFrame("Button", sellTabName, AuctionFrame, "AuctionTabTemplate")
     local buyTab = CreateFrame("Button", buyTabName, AuctionFrame, "AuctionTabTemplate")
@@ -225,22 +225,22 @@ function Auctionator_AddTabs()
 	setglobal(sellTabName, sellTab)
     setglobal(buyTabName, buyTab)
     
-	sellTab:SetID(Auctionator.tabs.sell.index)
+	sellTab:SetID(Aux.tabs.sell.index)
 	sellTab:SetText("Sell")
 	sellTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..AuctionFrame.numTabs), "RIGHT", -8, 0)
     
-    buyTab:SetID(Auctionator.tabs.buy.index)
+    buyTab:SetID(Aux.tabs.buy.index)
 	buyTab:SetText("Buy")
-	buyTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..Auctionator.tabs.sell.index), "RIGHT", -8, 0)
+	buyTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..Aux.tabs.sell.index), "RIGHT", -8, 0)
 	
-	PanelTemplates_SetNumTabs(AuctionFrame, Auctionator.tabs.buy.index)
-    PanelTemplates_EnableTab(AuctionFrame, Auctionator.tabs.sell.index)
-	PanelTemplates_EnableTab(AuctionFrame, Auctionator.tabs.buy.index)
+	PanelTemplates_SetNumTabs(AuctionFrame, Aux.tabs.buy.index)
+    PanelTemplates_EnableTab(AuctionFrame, Aux.tabs.sell.index)
+	PanelTemplates_EnableTab(AuctionFrame, Aux.tabs.buy.index)
 end
 
 -----------------------------------------
 
-function Auctionator_HideElems(tt)
+function Aux_HideElems(tt)
 
 	if not tt then
 		return;
@@ -253,7 +253,7 @@ end
 
 -----------------------------------------
 
-function Auctionator_ShowElems(tt)
+function Aux_ShowElems(tt)
 
 	for i,x in ipairs(tt) do
 		x:Show()
@@ -262,7 +262,7 @@ end
 
 -----------------------------------------
 
-function Auctionator_PluralizeIf(word, count)
+function Aux_PluralizeIf(word, count)
 
 	if count and count == 1 then
 		return word
@@ -273,25 +273,25 @@ end
 
 -----------------------------------------
 
-function Auctionator_Round(v)
+function Aux_Round(v)
 	return math.floor(v + 0.5)
 end
 
 -----------------------------------------
 
-function Auctionator_AddToSet(set, key)
+function Aux_AddToSet(set, key)
     set[key] = true
 end
 
-function Auctionator_RemoveFromSet(set, key)
+function Aux_RemoveFromSet(set, key)
     set[key] = nil
 end
 
-function Auctionator_SetContains(set, key)
+function Aux_SetContains(set, key)
     return set[key] ~= nil
 end
 
-function Auctionator_SetSize(set)
+function Aux_SetSize(set)
     local size = 0
 	for _,_ in pairs(set) do
 		size = size + 1
@@ -312,15 +312,15 @@ end
 
 -----------------------------------------
 
-function Auctionator_BrowseButton_OnClick(button)
+function Aux_BrowseButton_OnClick(button)
 	if arg1 == "LeftButton" then -- because we additionally registered right clicks we only let left ones pass here
-		Auctionator.orig.BrowseButton_OnClick(button)
+		Aux.orig.BrowseButton_OnClick(button)
 	end
 end
 
 -----------------------------------------
 
-function Auctionator_BrowseButton_OnMouseDown()
+function Aux_BrowseButton_OnMouseDown()
 	if arg1 == "RightButton" and AUCTIONATOR_INSTANT_BUYOUT then
 		local index = this:GetID() + FauxScrollFrame_GetOffset(BrowseScrollFrame)
 	
@@ -337,32 +337,32 @@ end
 
 -----------------------------------------
 
-function Auctionator_ContainerFrameItemButton_OnClick(button)
+function Aux_ContainerFrameItemButton_OnClick(button)
 	
 	if button == "LeftButton"
 			and IsShiftKeyDown()
 			and not ChatFrameEditBox:IsVisible()
-			and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index)
+			and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index)
 	then
 		local itemLink = GetContainerItemLink(this:GetParent():GetID(), this:GetID())
 		if itemLink then
 		local itemName = string.gsub(itemLink, "^.-%[(.*)%].*", "%1")
 			if PanelTemplates_GetSelectedTab(AuctionFrame) == 1 then
 				BrowseName:SetText(itemName)
-			elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Auctionator.tabs.buy.index then
-				AuctionatorBuySearchBox:SetText(itemName)
+			elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index then
+				AuxBuySearchBox:SetText(itemName)
 			end
 		end
 	else
-		Auctionator.orig.ContainerFrameItemButton_OnClick(button)
+		Aux.orig.ContainerFrameItemButton_OnClick(button)
 
 		if AUCTIONATOR_ENABLE_ALT and AuctionFrame:IsShown() and IsAltKeyDown() and button == "LeftButton" then
 		
 			ClickAuctionSellItemButton()
 			ClearCursor()
 			
-			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Auctionator.tabs.sell.index then
-				AuctionFrameTab_OnClick(Auctionator.tabs.sell.index)
+			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Aux.tabs.sell.index then
+				AuctionFrameTab_OnClick(Aux.tabs.sell.index)
 			end
 		end
 	end
@@ -370,7 +370,7 @@ end
 
 -----------------------------------------
 
-function Auctionator_QualityColor(code)
+function Aux_QualityColor(code)
 	if code == 0 then
 		return "ff9d9d9d" -- poor, gray
 	elseif code == 1 then

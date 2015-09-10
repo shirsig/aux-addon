@@ -9,12 +9,12 @@
 				this:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
 			</OnLoad>
 			<OnEvent> 
-				Auctionator_Scan_OnEvent()
+				Aux_Scan_OnEvent()
 			</OnEvent>
 			<OnUpdate>
-				Auctionator_Scan_OnUpdate()
+				Aux_Scan_OnUpdate()
 			</OnUpdate>
 		</Scripts> 
 	</Frame>
-	<GameTooltip name="AuctionatorScanTooltip" inherits="GameTooltipTemplate"/>
+	<GameTooltip name="AuxScanTooltip" inherits="GameTooltipTemplate"/>
 </Ui>

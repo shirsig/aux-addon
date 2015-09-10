@@ -18,13 +18,13 @@ local submitQuery, processQueryResults
 
 -----------------------------------------
 
-function Auctionator_Scan_IsIdle()
+function Aux_Scan_IsIdle()
 	return state == STATE_IDLE
 end
 
 -----------------------------------------
 
-function Auctionator_Scan_Complete()
+function Aux_Scan_Complete()
 	if state ~= STATE_IDLE then
 		if currentJob.onComplete then
 			currentJob.onComplete(scanData)
@@ -39,7 +39,7 @@ end
 
 -----------------------------------------
 
-function Auctionator_Scan_Abort()
+function Aux_Scan_Abort()
 	if state ~= STATE_IDLE then
 		if currentJob and currentJob.onAbort then
 			currentJob.onAbort()
@@ -54,12 +54,12 @@ end
 
 -----------------------------------------
 
-function Auctionator_Scan_Start(job)
+function Aux_Scan_Start(job)
 
-	Auctionator_SetMessage("Scanning auctions ...")
+	Aux_SetMessage("Scanning auctions ...")
 
 	if state ~= STATE_IDLE then
-		Auctionator_Scan_Abort()
+		Aux_Scan_Abort()
 	end
 	
 	currentJob = job
@@ -69,7 +69,7 @@ end
 
 -----------------------------------------
 
-function Auctionator_Scan_CreateQuery(parameterMap)
+function Aux_Scan_CreateQuery(parameterMap)
 	local query = {
 		name = nil,
 		minLevel = "",
@@ -117,16 +117,16 @@ function processQueryResults()
 	
 	local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
 
-	Auctionator_SetMessage("Scanning auctions: page "..currentPage.." ...")
+	Aux_SetMessage("Scanning auctions: page "..currentPage.." ...")
 			
 	for i = 1, numBatchAuctions do
 	
 		local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
 		local duration = GetAuctionItemTimeLeft("list", i)
-		AuctionatorScanTooltip:SetOwner(UIParent, "ANCHOR_NONE");
-		AuctionatorScanTooltip:SetAuctionItem("list", i)
-		AuctionatorScanTooltip:Show()
-		local chargesLabel = getglobal("AuctionatorScanTooltipTextLeft"..4):GetText()
+		AuxScanTooltip:SetOwner(UIParent, "ANCHOR_NONE");
+		AuxScanTooltip:SetAuctionItem("list", i)
+		AuxScanTooltip:Show()
+		local chargesLabel = getglobal("AuxScanTooltipTextLeft"..4):GetText()
 		local chargesString = gsub(chargesLabel and chargesLabel or "", "(%d+) Charges", "%1")
 		local charges = tonumber(chargesString)
 
@@ -161,13 +161,13 @@ function processQueryResults()
 	if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
 		state = STATE_PREQUERY
 	else
-		Auctionator_Scan_Complete()
+		Aux_Scan_Complete()
 	end
 end
 
 -----------------------------------------
 
-function Auctionator_Scan_OnEvent()
+function Aux_Scan_OnEvent()
 	if event == "AUCTION_ITEM_LIST_UPDATE" then
 		if state == STATE_POSTQUERY then
 			state = STATE_PROCESSING
@@ -178,7 +178,7 @@ end
 
 -----------------------------------------
 
-function Auctionator_Scan_OnUpdate()
+function Aux_Scan_OnUpdate()
 	if state == STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
 	
 		timeOfLastUpdate = GetTime()

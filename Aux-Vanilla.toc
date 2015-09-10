@@ -1,8 +1,8 @@
 ## Interface: 11200
-## Title: Auctionator
+## Title: Aux
 ## Notes: A lightweight addon designed to help manage auctions
 ## SavedVariablesPerCharacter: AUCTIONATOR_ENABLE_ALT, AUCTIONATOR_OPEN_FIRST, AUCTIONATOR_INSTANT_BUYOUT
-## SavedVariables: auctionatorEntries
+## SavedVariables: auxEntries
 Core.xml
 Scan.xml
 Sell.xml
