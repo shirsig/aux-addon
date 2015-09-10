@@ -15,8 +15,8 @@
 		</Anchors>
 		<Frames>
 			<Button name="AuxOptionsButton" inherits="UIPanelButtonTemplate" text="Aux">
-				<Size><AbsDimension x="126" y="22"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="682" y="-12"/></Offset></Anchor></Anchors>
+				<Size><AbsDimension x="50" y="22"/></Size>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="758" y="-12"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
 						Aux_ShowOptionsFrame()
@@ -39,7 +39,7 @@
 		<Layers>
 			<Layer level="ARTWORK">
 				<Texture name="AuxConfigFrameHeader" file="Interface\DialogFrame\UI-DialogBox-Header">
-					<Size x="256" y="64"/>
+					<Size x="120" y="64"/>
 					<Anchors><Anchor point="TOP"><Offset x="0" y="12"/></Anchor></Anchors>
 				</Texture>
 				<FontString inherits="GameFontNormal" text="Aux">
