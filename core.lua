@@ -1,4 +1,4 @@
-AuxVersion = "1.2.0-Vanilla"
+AuxVersion = "1.0.0"
 AuxAuthors = "Zirco (Original); Nimeral (Backport); shirsig, Zerf (Update)"
 
 AUCTIONATOR_ENABLE_ALT = true
