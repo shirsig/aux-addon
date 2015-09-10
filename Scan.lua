@@ -126,7 +126,7 @@ function processQueryResults()
 		AuctionatorScanTooltip:SetAuctionItem("list", i)
 		AuctionatorScanTooltip:Show()
 		local chargesLabel = getglobal("AuctionatorScanTooltipTextLeft"..4):GetText()
-		local chargesString = gsub(chargesLabel and chargesLabel or "","%D", "")
+		local chargesString = gsub(chargesLabel and chargesLabel or "", "(%d+) Charges", "%1")
 		local charges = tonumber(chargesString)
 
 		local scanDatum = {
