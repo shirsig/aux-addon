@@ -55,25 +55,27 @@ function AuxBuyBuySelectedButton_OnClick()
 	Aux_Scan_Start{
 			query = searchQuery,
 			onReadDatum = function(datum)
-				local key = datum.name.."_"..datum.stackSize.."_"..datum.buyoutPrice
-				if order[key] then
-				
-					if GetMoney() >= datum.buyoutPrice then
-						PlaceAuctionBid("list", datum.pageIndex, datum.buyoutPrice)
-						purchasedCount = purchasedCount + 1
-					else
+				if datum.name and datum.count and datum.buyoutPrice then
+					local key = datum.name.."_"..datum.count.."_"..datum.buyoutPrice
+					if order[key] then
+					
+						if GetMoney() >= datum.buyoutPrice then
+							PlaceAuctionBid("list", datum.pageIndex, datum.buyoutPrice)
+							purchasedCount = purchasedCount + 1
+						else
+							
+						end
 						
-					end
-					
-					if order[key] > 1 then
-						order[key] = order[key] - 1
+						if order[key] > 1 then
+							order[key] = order[key] - 1
+						else
+							order[key] = nil
+						end
+						
+						return false
 					else
-						order[key] = nil
+						return true
 					end
-					
-					return false
-				else
-					return true
 				end
 			end,
 			onComplete = function(data)
