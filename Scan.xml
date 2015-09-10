@@ -16,4 +16,5 @@
 			</OnUpdate>
 		</Scripts> 
 	</Frame>
+	<GameTooltip name="AuctionatorScanTooltip" inherits="GameTooltipTemplate"/>
 </Ui>

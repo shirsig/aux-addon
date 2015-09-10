@@ -118,9 +118,9 @@ function processScanResults(rawData)
 		if rawDatum.buyoutPrice > 0 and rawDatum.owner ~= UnitName("player") then
 			tinsert(entries, {
 					name		= rawDatum.name,
-					stackSize	= rawDatum.stackSize,
+					stackSize	= rawDatum.count,
 					buyoutPrice	= rawDatum.buyoutPrice,
-					itemPrice	= rawDatum.buyoutPrice / rawDatum.stackSize,
+					itemPrice	= rawDatum.buyoutPrice / rawDatum.count,
 					quality		= rawDatum.quality,
 			})
 		end

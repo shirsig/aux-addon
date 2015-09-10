@@ -122,11 +122,17 @@ function processQueryResults()
 	
 		local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
 		local duration = GetAuctionItemTimeLeft("list", i)
+		AuctionatorScanTooltip:SetOwner(UIParent, "ANCHOR_NONE");
+		AuctionatorScanTooltip:SetAuctionItem("list", i)
+		AuctionatorScanTooltip:Show()
+		local chargesLabel = getglobal("AuctionatorScanTooltipTextLeft"..4):GetText()
+		local chargesString = gsub(chargesLabel and chargesLabel or "","%D", "")
+		local charges = tonumber(chargesString)
 
-		local scanDatum = {		
+		local scanDatum = {
 				name			= name,
 				texture			= texture,
-				stackSize		= count,
+				count			= charges and charges or count,
 				quality			= quality,
 				canUse			= canUse,
 				level			= level,

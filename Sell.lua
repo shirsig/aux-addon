@@ -380,7 +380,7 @@ function processScanResults(rawData, auctionItemName)
 				condData[key].count = condData[key].count + 1
 			else			
 				condData[key] = {
-						stackSize 	= rawDatum.stackSize,
+						stackSize 	= rawDatum.count,
 						buyoutPrice	= rawDatum.buyoutPrice,
 						itemPrice		= rawDatum.buyoutPrice / rawDatum.stackSize,
 						count			= 1,

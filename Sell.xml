@@ -36,11 +36,11 @@
 			
 			<Frame>
 				<Size><AbsDimension x="100" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="170" y="-3"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="250" y="-3"/></Offset></Anchor></Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
 						<FontString name="$parent_Availability" inherits="GameFontHighlightSmall">
-							<Anchors><Anchor point="TOPRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						</FontString>
 					</Layer>
 				</Layers>
@@ -141,7 +141,7 @@
 				</FontString>
 
 				<FontString inherits="GameFontHighlightSmall" text="Stacks">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="220" y="1"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="253" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 
 				<FontString inherits="GameFontHighlightSmall" text="">

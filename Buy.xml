@@ -117,7 +117,7 @@
 				</Texture>
 
 				<FontString inherits="GameFontHighlightSmall" text="Name">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="25" y="1"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="27" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 				
 				<FontString inherits="GameFontHighlightSmall" text="Unit Price">
