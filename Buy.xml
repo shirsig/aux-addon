@@ -83,7 +83,7 @@
 		<Layers>
 			<Layer level="BACKGROUND">
 				<FontString inherits="GameFontNormal" text="Auctionator Buy">
-					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="-100" y="-18"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="20" y="-18"/></Offset></Anchor></Anchors>
 				</FontString>
 
 				<FontString name="AuctionatorBuyMessage" inherits="GameFontNormal">
