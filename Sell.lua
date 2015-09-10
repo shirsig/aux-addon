@@ -374,7 +374,7 @@ function processScanResults(rawData, auctionItemName)
 
 	for _,rawDatum in ipairs(rawData) do
 		if auctionItemName == rawDatum.name and rawDatum.buyoutPrice > 0 then
-			local key = "_"..rawDatum.stackSize.."_"..rawDatum.buyoutPrice
+			local key = "_"..rawDatum.count.."_"..rawDatum.buyoutPrice
 					
 			if condData[key] then
 				condData[key].count = condData[key].count + 1
