@@ -1,5 +1,5 @@
 AuxVersion = "1.0.0"
-AuxAuthors = "Zirco (Original); Nimeral (Backport); shirsig, Zerf (Update)"
+AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport);"
 
 AUCTIONATOR_ENABLE_ALT = true
 AUCTIONATOR_OPEN_FIRST = false
