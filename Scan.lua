@@ -109,63 +109,59 @@ end
 -----------------------------------------
 
 function processQueryResults()
-	
-	if not state == STATE_PROCESSING then -- doesn't avoid race conditions completely
-		state = STATE_PROCESSING
 		
+	-- SortAuctionItems("list", "buyout")
+	-- if IsAuctionSortReversed("list", "buyout") then
 		-- SortAuctionItems("list", "buyout")
-		-- if IsAuctionSortReversed("list", "buyout") then
-			-- SortAuctionItems("list", "buyout")
-		-- end
-		
-		local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
+	-- end
+	
+	local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
 
-		Auctionator_SetMessage("Scanning auctions: page "..currentPage.." ...")
-				
-		for i = 1, numBatchAuctions do
-		
-			local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
-			local duration = GetAuctionItemTimeLeft("list", i)
-			AuctionatorScanTooltip:SetOwner(UIParent, "ANCHOR_NONE");
-			AuctionatorScanTooltip:SetAuctionItem("list", i)
-			AuctionatorScanTooltip:Show()
-			local chargesLabel = getglobal("AuctionatorScanTooltipTextLeft"..4):GetText()
-			local chargesString = gsub(chargesLabel and chargesLabel or "", "(%d+) Charges", "%1")
-			local charges = tonumber(chargesString)
-
-			local scanDatum = {
-					name			= name,
-					texture			= texture,
-					count			= charges and charges or count,
-					quality			= quality,
-					canUse			= canUse,
-					level			= level,
-					minBid			= minBid,
-					minIncrement	= minIncrement,
-					buyoutPrice		= buyoutPrice,
-					bidAmount		= bidAmount,
-					highBidder		= highBidder,
-					owner			= owner,
-					duration		= duration,
-					page			= currentPage,
-					pageIndex		= i
-			}
+	Auctionator_SetMessage("Scanning auctions: page "..currentPage.." ...")
 			
-			if currentJob.onReadDatum then
-				local keepDatum = currentJob.onReadDatum(scanDatum)
-				if keepDatum then
-					tinsert(scanData, scanDatum)
-				end
-			else
+	for i = 1, numBatchAuctions do
+	
+		local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
+		local duration = GetAuctionItemTimeLeft("list", i)
+		AuctionatorScanTooltip:SetOwner(UIParent, "ANCHOR_NONE");
+		AuctionatorScanTooltip:SetAuctionItem("list", i)
+		AuctionatorScanTooltip:Show()
+		local chargesLabel = getglobal("AuctionatorScanTooltipTextLeft"..4):GetText()
+		local chargesString = gsub(chargesLabel and chargesLabel or "", "(%d+) Charges", "%1")
+		local charges = tonumber(chargesString)
+
+		local scanDatum = {
+				name			= name,
+				texture			= texture,
+				count			= charges and charges or count,
+				quality			= quality,
+				canUse			= canUse,
+				level			= level,
+				minBid			= minBid,
+				minIncrement	= minIncrement,
+				buyoutPrice		= buyoutPrice,
+				bidAmount		= bidAmount,
+				highBidder		= highBidder,
+				owner			= owner,
+				duration		= duration,
+				page			= currentPage,
+				pageIndex		= i
+		}
+		
+		if currentJob.onReadDatum then
+			local keepDatum = currentJob.onReadDatum(scanDatum)
+			if keepDatum then
 				tinsert(scanData, scanDatum)
 			end
-		end
-
-		if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
-			state = STATE_PREQUERY
 		else
-			Auctionator_Scan_Complete()
+			tinsert(scanData, scanDatum)
 		end
+	end
+
+	if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
+		state = STATE_PREQUERY
+	else
+		Auctionator_Scan_Complete()
 	end
 end
 
@@ -174,6 +170,7 @@ end
 function Auctionator_Scan_OnEvent()
 	if event == "AUCTION_ITEM_LIST_UPDATE" then
 		if state == STATE_POSTQUERY then
+			state = STATE_PROCESSING
 			processQueryResults()
 		end
 	end
