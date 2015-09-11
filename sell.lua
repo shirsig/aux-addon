@@ -224,6 +224,12 @@ function Aux_OnNewAuctionUpdate()
 	end
 	
 	currentAuctionItemName, currentAuctionItemTexture, currentAuctionItemStackSize = GetAuctionSellItemInfo()
+
+	AuxScanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+	AuxScanTooltip:SetAuctionSellItem()
+	AuxScanTooltip:Show()
+	local tooltip = Aux_Scan_ExtractTooltip()
+	currentAuctionItemStackSize = Aux_Scan_ItemCharges(tooltip) or currentAuctionItemStackSize
 	
 	if currentAuctionItemName and not auxSellEntries[currentAuctionItemName] then
 		Aux_RefreshEntries()

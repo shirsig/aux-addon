@@ -108,6 +108,35 @@ end
 
 -----------------------------------------
 
+function Aux_Scan_ExtractTooltip()
+	local tooltip = {}
+	for j=1, 30 do -- conveniently ignores nils
+		local leftEntry = getglobal('AuxScanTooltipTextLeft'..j):GetText()
+		if leftEntry then
+			tinsert(tooltip, leftEntry)
+		end
+		local rightEntry = getglobal('AuxScanTooltipTextRight'..j):GetText()
+		if rightEntry then
+			tinsert(tooltip, rightEntry)
+		end
+	end
+	return tooltip
+end
+
+-----------------------------------------
+
+function Aux_Scan_ItemCharges(tooltip)
+	for _, entry in ipairs(tooltip) do
+		local chargesString = gsub(entry, "(%d+) Charges", "%1")
+		local charges = tonumber(chargesString)
+		if charges then
+			return charges
+		end
+	end
+end	
+
+-----------------------------------------
+
 function processQueryResults()
 		
 	-- SortAuctionItems("list", "buyout")
@@ -126,14 +155,14 @@ function processQueryResults()
 		AuxScanTooltip:SetOwner(UIParent, "ANCHOR_NONE");
 		AuxScanTooltip:SetAuctionItem("list", i)
 		AuxScanTooltip:Show()
-		local chargesLabel = getglobal("AuxScanTooltipTextLeft"..4):GetText()
-		local chargesString = gsub(chargesLabel and chargesLabel or "", "(%d+) Charges", "%1")
-		local charges = tonumber(chargesString)
+		local tooltip = Aux_Scan_ExtractTooltip()
+		-- for _, x in ipairs(tooltip) do Aux_Log(x) end
+		count = Aux_Scan_ItemCharges(tooltip) or count
 
 		local scanDatum = {
 				name			= name,
 				texture			= texture,
-				count			= charges and charges or count,
+				count			= count,
 				quality			= quality,
 				canUse			= canUse,
 				level			= level,
