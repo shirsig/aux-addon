@@ -89,13 +89,13 @@ function Aux_OnAddonLoaded()
 		}
 
 		Aux.tabs.sell.recommendationElements = {
-				Aux_Recommend_Text,
-				Aux_RecommendPerItem_Text,
-				Aux_RecommendPerItem_Price,
-				Aux_RecommendPerStack_Text,
-				Aux_RecommendPerStack_Price,
-				Aux_Recommend_Basis_Text,
-				Aux_RecommendItem_Tex,
+				AuxRecommendText,
+				AuxRecommendPerItemText,
+				AuxRecommendPerItemPrice,
+				AuxRecommendPerStackText,
+				AuxRecommendPerStackPrice,
+				AuxRecommendBasisText,
+				AuxRecommendItemTex,
 		}
 	end
 end

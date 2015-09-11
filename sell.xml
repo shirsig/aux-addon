@@ -107,20 +107,24 @@
 					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="170" y="-100"/></Offset></Anchor></Anchors>
 				</FontString>
 
-				<FontString name="Aux_Recommend_Text" inherits="GameFontNormal" text="Recommended buyout price">
+				<FontString name="AuxRecommendText" inherits="GameFontNormal" text="Recommended buyout price">
 					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="287" y="-98"/></Offset></Anchor></Anchors>
 				</FontString>
 
-				<FontString name="Aux_Recommend_Basis_Text" inherits="GameFontHighlightSmall" text="based on">
-					<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="Aux_Recommend_Text"><Offset><AbsDimension x="20" y="-2"/></Offset></Anchor></Anchors>
+				<FontString name="AuxRecommendBasisText" inherits="GameFontHighlightSmall" text="based on">
+					<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="20" y="-2"/></Offset></Anchor></Anchors>
 				</FontString>
 
-				<FontString name="Aux_RecommendPerStack_Text" inherits="GameFontHighlightSmall" text="per stack">
-					<Anchors><Anchor point="TOPLEFT" relativeTo="Aux_Recommend_Text"><Offset><AbsDimension x="152" y="-28"/></Offset></Anchor></Anchors>
+				<FontString name="AuxRecommendPerStackText" inherits="GameFontHighlightSmall" text="per stack">
+					<Anchors><Anchor point="TOPLEFT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="152" y="-28"/></Offset></Anchor></Anchors>
 				</FontString>
-
-				<FontString name="Aux_RecommendPerItem_Text" inherits="GameFontHighlightSmall" text="per item">
-					<Anchors><Anchor point="TOPLEFT" relativeTo="Aux_Recommend_Text"><Offset><AbsDimension x="152" y="-51"/></Offset></Anchor></Anchors>
+				
+				<FontString name="AuxRecommendPerItemText" inherits="GameFontHighlightSmall" text="per item">
+					<Anchors><Anchor point="TOPLEFT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="152" y="-51"/></Offset></Anchor></Anchors>
+				</FontString>
+				
+				<FontString name="AuxRecommendLastRefreshText" inherits="GameFontRedLarge">
+					<Anchors><Anchor point="TOPLEFT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="340" y="-20"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
 			<Layer level="ARTWORK">
@@ -206,7 +210,7 @@
 				</Frames>		
 			</Button>
 
-			<Button name="Aux_RecommendItem_Tex">
+			<Button name="AuxRecommendItemTex">
 				<Size><AbsDimension x="37" y="37"/></Size>
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="234" y="-87"/></Offset></Anchor></Anchors>
 				<Layers>
@@ -227,12 +231,12 @@
 			<Frame>
 				<Size><AbsDimension x="120" y="20"/></Size>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="Aux_Recommend_Text">
+					<Anchor point="TOPLEFT" relativeTo="AuxRecommendText">
 						<Offset><AbsDimension x="32" y="-24"/></Offset>
 					</Anchor>
 				</Anchors>
 				<Frames>
-					<Frame name="Aux_RecommendPerStack_Price" inherits="SmallMoneyFrameTemplate">
+					<Frame name="AuxRecommendPerStackPrice" inherits="SmallMoneyFrameTemplate">
 						<Size><AbsDimension x="120" y="16" /></Size>
 						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Scripts><OnLoad>AuxMoneyFrame_OnLoad()</OnLoad></Scripts>
@@ -243,12 +247,12 @@
 			<Frame>
 				<Size><AbsDimension x="120" y="20"/></Size>
 				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="Aux_Recommend_Text">
+					<Anchor point="TOPLEFT" relativeTo="AuxRecommendText">
 						<Offset><AbsDimension x="32" y="-46"/></Offset>
 					</Anchor>
 				</Anchors>
 				<Frames>
-					<Frame name="Aux_RecommendPerItem_Price" inherits="SmallMoneyFrameTemplate">
+					<Frame name="AuxRecommendPerItemPrice" inherits="SmallMoneyFrameTemplate">
 						<Size><AbsDimension x="120" y="16" /></Size>
 						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Scripts><OnLoad>AuxMoneyFrame_OnLoad()</OnLoad></Scripts>

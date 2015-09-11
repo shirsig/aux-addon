@@ -50,14 +50,14 @@ end
 
 function Aux_OnAuctionOwnedUpdate()
 	if lastItemPosted then	
-		Aux_Recommend_Text:SetText("Auction Created for "..lastItemPosted)
+		AuxRecommendText:SetText("Auction Created for "..lastItemPosted)
 
-		MoneyFrame_Update("Aux_RecommendPerStack_Price", lastBuyoutPrice)
+		MoneyFrame_Update("AuxRecommendPerStackPrice", lastBuyoutPrice)
 
-		Aux_RecommendPerStack_Price:Show()
-		Aux_RecommendPerItem_Price:Hide()
-		Aux_RecommendPerItem_Text:Hide()
-		Aux_Recommend_Basis_Text:Hide()
+		AuxRecommendPerStackPrice:Show()
+		AuxRecommendPerItemPrice:Hide()
+		AuxRecommendPerItemText:Hide()
+		AuxRecommendBasisText:Hide()
 	end
 	
 end
@@ -121,6 +121,12 @@ function Aux_UpdateRecommendation()
 		AuxSellRefreshButton:Enable()	
 		
 		if selectedAuxEntry then
+			if auxSellEntries[currentAuctionItemName].created and GetTime() - auxSellEntries[currentAuctionItemName].created > 1800 then
+				AuxRecommendLastRefreshText:SetText("STALE DATA") -- data older than half an hour marked as stale
+			else
+				AuxRecommendLastRefreshText:SetText("")
+			end
+		
 			local newBuyoutPrice = selectedAuxEntry.itemPrice * currentAuctionItemStackSize
 
 			if selectedAuxEntry.numYours < selectedAuxEntry.count then
@@ -132,33 +138,33 @@ function Aux_UpdateRecommendation()
 			AuxMessage:Hide()	
 			Aux_ShowElems(Aux.tabs.sell.recommendationElements)
 			
-			Aux_Recommend_Text:SetText("Recommended Buyout Price")
-			Aux_RecommendPerStack_Text:SetText("for your stack of "..currentAuctionItemStackSize)
+			AuxRecommendText:SetText("Recommended Buyout Price")
+			AuxRecommendPerStackText:SetText("for your stack of "..currentAuctionItemStackSize)
 			
 			if currentAuctionItemTexture then
-				Aux_RecommendItem_Tex:SetNormalTexture(currentAuctionItemTexture)
+				AuxRecommendItemTex:SetNormalTexture(currentAuctionItemTexture)
 				if currentAuctionItemStackSize > 1 then
-					Aux_RecommendItem_TexCount:SetText(currentAuctionItemStackSize)
-					Aux_RecommendItem_TexCount:Show()
+					AuxRecommendItemTexCount:SetText(currentAuctionItemStackSize)
+					AuxRecommendItemTexCount:Show()
 				else
-					Aux_RecommendItem_TexCount:Hide()
+					AuxRecommendItemTexCount:Hide()
 				end
 			else
-				Aux_RecommendItem_Tex:Hide()
+				AuxRecommendItemTex:Hide()
 			end
 			
-			MoneyFrame_Update("Aux_RecommendPerItem_Price",  Aux_Round(newBuyoutPrice / currentAuctionItemStackSize))
-			MoneyFrame_Update("Aux_RecommendPerStack_Price", Aux_Round(newBuyoutPrice))
+			MoneyFrame_Update("AuxRecommendPerItemPrice",  Aux_Round(newBuyoutPrice / currentAuctionItemStackSize))
+			MoneyFrame_Update("AuxRecommendPerStackPrice", Aux_Round(newBuyoutPrice))
 			
 			MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
 			MoneyInputFrame_SetCopper(StartPrice, newStartPrice)
 			
 			if selectedAuxEntry.stackSize == auxSellEntries[currentAuctionItemName][1].stackSize and selectedAuxEntry.buyoutPrice == auxSellEntries[currentAuctionItemName][1].buyoutPrice then
-				Aux_Recommend_Basis_Text:SetText("(based on cheapest)")
+				AuxRecommendBasisText:SetText("(based on cheapest)")
 			elseif bestPriceOurStackSize and selectedAuxEntry.stackSize == bestPriceOurStackSize.stackSize and selectedAuxEntry.buyoutPrice == bestPriceOurStackSize.buyoutPrice then
-				Aux_Recommend_Basis_Text:SetText("(based on cheapest stack of the same size)")
+				AuxRecommendBasisText:SetText("(based on cheapest stack of the same size)")
 			else
-				Aux_Recommend_Basis_Text:SetText("(based on auction selected below)")
+				AuxRecommendBasisText:SetText("(based on auction selected below)")
 			end
 		elseif auxSellEntries[currentAuctionItemName] then
 			Aux_SetMessage("No auctions were found for \n\n"..currentAuctionItemName)
@@ -341,7 +347,7 @@ end
 
 function processScanResults(rawData, auctionItemName)
 
-	auxSellEntries[auctionItemName] = {}
+	auxSellEntries[auctionItemName] = { created=GetTime() }
 	
 	----- Condense the scan rawData into a table that has only a single entry per stacksize/price combo
 	
