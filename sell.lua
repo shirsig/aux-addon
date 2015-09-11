@@ -385,15 +385,23 @@ function processScanResults(rawData, auctionItemName)
 	for _,rawDatum in ipairs(rawData) do
 		if auctionItemName == rawDatum.name and rawDatum.buyoutPrice > 0 then
 			local key = "_"..rawDatum.count.."_"..rawDatum.buyoutPrice
-							
-			condData[key] = {
+			
+			if not condData[key] then
+				condData[key] = {
 					stackSize 	= rawDatum.count,
 					buyoutPrice	= rawDatum.buyoutPrice,
-					itemPrice		= rawDatum.buyoutPrice / rawDatum.count,
-					maxTimeLeft		= condData[key] and math.max(condData[key].maxTimeLeft, rawDatum.duration) or rawDatum.duration,
-					count			= condData[key] and condData[key].count + 1 or 1,
-					numYours		= rawDatum.owner == UnitName("player") and 1 or 0
+					itemPrice	= rawDatum.buyoutPrice / rawDatum.count,
+					maxTimeLeft	= rawDatum.duration,
+					count		= 1,
+					numYours	= rawDatum.owner == UnitName("player") and 1 or 0
 			}
+			else
+				condData[key].maxTimeLeft = math.max(condData[key].maxTimeLeft, rawDatum.duration)
+				condData[key].count = condData[key].count + 1
+				if rawDatum.owner == UnitName("player") then
+					condData[key].numYours = condData[key].numYours + 1
+				end
+			end
 		end
 	end
 
