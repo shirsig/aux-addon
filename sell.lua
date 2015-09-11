@@ -71,49 +71,8 @@ end
 
 -----------------------------------------
 
-function Aux_SetupHookFunctions()
-	
-	Aux.orig.BrowseButton_OnClick = BrowseButton_OnClick
-	BrowseButton_OnClick = Aux_BrowseButton_OnClick
-	
-	BrowseButton1:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	BrowseButton1:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
-	BrowseButton2:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	BrowseButton2:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
-	BrowseButton3:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	BrowseButton3:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
-	BrowseButton4:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	BrowseButton4:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
-	BrowseButton5:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	BrowseButton5:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
-	BrowseButton6:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	BrowseButton6:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
-	BrowseButton7:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	BrowseButton7:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
-	BrowseButton8:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	BrowseButton8:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
-
-	Aux.orig.AuctionSellItemButton_OnEvent = AuctionSellItemButton_OnEvent
-	AuctionSellItemButton_OnEvent = Aux_AuctionSellItemButton_OnEvent
-	
-	Aux.orig.AuctionFrameTab_OnClick = AuctionFrameTab_OnClick
-	AuctionFrameTab_OnClick = Aux_AuctionFrameTab_OnClick
-	
-	Aux.orig.ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
-	ContainerFrameItemButton_OnClick = Aux_ContainerFrameItemButton_OnClick
-	
-	Aux.orig.AuctionFrameAuctions_Update = AuctionFrameAuctions_Update
-	AuctionFrameAuctions_Update = Aux_AuctionFrameAuctions_Update
-	
-	Aux.orig.AuctionsCreateAuctionButton_OnClick = AuctionsCreateAuctionButton_OnClick
-	AuctionsCreateAuctionButton_OnClick = Aux_AuctionsCreateAuctionButton_OnClick
-	
-end
-
------------------------------------------
-
 function Aux_SetMessage(msg)
-	Aux_HideElems(Aux.tabs.sell.shownElements)
+	Aux_HideElems(Aux.tabs.sell.recommendationElements)
 	AuxMessage:SetText(msg)
 	AuxMessage:Show()
 	AuxBuyMessage:SetText(msg) -- TODO doesn't belong here
@@ -171,7 +130,7 @@ function Aux_UpdateRecommendation()
 			local newStartPrice = newBuyoutPrice * 0.95 
 			
 			AuxMessage:Hide()	
-			Aux_ShowElems(Aux.tabs.sell.shownElements)
+			Aux_ShowElems(Aux.tabs.sell.recommendationElements)
 			
 			Aux_Recommend_Text:SetText("Recommended Buyout Price")
 			Aux_RecommendPerStack_Text:SetText("for your stack of "..currentAuctionItemStackSize)

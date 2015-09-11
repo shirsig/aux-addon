@@ -88,16 +88,57 @@ function Aux_OnAddonLoaded()
 				BidBidText
 		}
 
-		Aux.tabs.sell.shownElements = {
-				getglobal("Aux_Recommend_Text"),
-				getglobal("Aux_RecommendPerItem_Text"),
-				getglobal("Aux_RecommendPerItem_Price"),
-				getglobal("Aux_RecommendPerStack_Text"),
-				getglobal("Aux_RecommendPerStack_Price"),
-				getglobal("Aux_Recommend_Basis_Text"),
-				getglobal("Aux_RecommendItem_Tex")
+		Aux.tabs.sell.recommendationElements = {
+				Aux_Recommend_Text,
+				Aux_RecommendPerItem_Text,
+				Aux_RecommendPerItem_Price,
+				Aux_RecommendPerStack_Text,
+				Aux_RecommendPerStack_Price,
+				Aux_Recommend_Basis_Text,
+				Aux_RecommendItem_Tex,
 		}
 	end
+end
+
+-----------------------------------------
+
+function Aux_SetupHookFunctions()
+	
+	Aux.orig.BrowseButton_OnClick = BrowseButton_OnClick
+	BrowseButton_OnClick = Aux_BrowseButton_OnClick
+	
+	BrowseButton1:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	BrowseButton1:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
+	BrowseButton2:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	BrowseButton2:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
+	BrowseButton3:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	BrowseButton3:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
+	BrowseButton4:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	BrowseButton4:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
+	BrowseButton5:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	BrowseButton5:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
+	BrowseButton6:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	BrowseButton6:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
+	BrowseButton7:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	BrowseButton7:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
+	BrowseButton8:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	BrowseButton8:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
+
+	Aux.orig.AuctionSellItemButton_OnEvent = AuctionSellItemButton_OnEvent
+	AuctionSellItemButton_OnEvent = Aux_AuctionSellItemButton_OnEvent
+	
+	Aux.orig.AuctionFrameTab_OnClick = AuctionFrameTab_OnClick
+	AuctionFrameTab_OnClick = Aux_AuctionFrameTab_OnClick
+	
+	Aux.orig.ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
+	ContainerFrameItemButton_OnClick = Aux_ContainerFrameItemButton_OnClick
+	
+	Aux.orig.AuctionFrameAuctions_Update = AuctionFrameAuctions_Update
+	AuctionFrameAuctions_Update = Aux_AuctionFrameAuctions_Update
+	
+	Aux.orig.AuctionsCreateAuctionButton_OnClick = AuctionsCreateAuctionButton_OnClick
+	AuctionsCreateAuctionButton_OnClick = Aux_AuctionsCreateAuctionButton_OnClick
+	
 end
 
 -----------------------------------------
@@ -342,6 +383,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 	if button == "LeftButton"
 			and IsShiftKeyDown()
 			and not ChatFrameEditBox:IsVisible()
+			and AuctionFrame:IsVisible()
 			and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index)
 	then
 		local itemLink = GetContainerItemLink(this:GetParent():GetID(), this:GetID())
