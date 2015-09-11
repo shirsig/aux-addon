@@ -113,6 +113,7 @@ end
 -----------------------------------------
 
 function Aux_UpdateRecommendation()
+	AuxRecommendLastRefreshText:Hide()
 
 	if not currentAuctionItemName then
 		AuxSellRefreshButton:Disable()
@@ -123,8 +124,7 @@ function Aux_UpdateRecommendation()
 		if selectedAuxEntry then
 			if not auxSellEntries[currentAuctionItemName].created or GetTime() - auxSellEntries[currentAuctionItemName].created > 1800 then
 				AuxRecommendLastRefreshText:SetText("STALE DATA") -- data older than half an hour marked as stale
-			else
-				AuxRecommendLastRefreshText:SetText("")
+				AuxRecommendLastRefreshText:Show()
 			end
 		
 			local newBuyoutPrice = selectedAuxEntry.itemPrice * currentAuctionItemStackSize
