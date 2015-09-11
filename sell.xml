@@ -35,11 +35,11 @@
 			</Frame>
 			
 			<Frame>
-				<Size><AbsDimension x="100" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="250" y="-3"/></Offset></Anchor></Anchors>
+				<Size><AbsDimension x="100" y="16"/></Size>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="185" y="-3"/></Offset></Anchor></Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<FontString name="$parent_Availability" inherits="GameFontHighlightSmall">
+						<FontString name="$parent_Stacks" inherits="GameFontHighlightSmall">
 							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						</FontString>
 					</Layer>
@@ -47,11 +47,11 @@
 			</Frame>
 			
 			<Frame>
-				<Size><AbsDimension x="100" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="320" y="-3"/></Offset></Anchor></Anchors>
+				<Size><AbsDimension x="100" y="16"/></Size>
+				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="340" y="-3"/></Offset></Anchor></Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
-						<FontString name="$parent_Comment" inherits="GameFontHighlightSmall">
+						<FontString name="$parent_Time" inherits="GameFontHighlightSmall">
 							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						</FontString>
 					</Layer>
@@ -59,7 +59,7 @@
 			</Frame>
 			
 			<Frame>
-				<Size><AbsDimension x="120" y="16" /></Size>
+				<Size><AbsDimension x="120" y="16"/></Size>
 				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="440" y="0"/></Offset></Anchor></Anchors>
 				<Frames>
 					<Frame name="$parent_TotalPrice" inherits="SmallMoneyFrameTemplate">
@@ -141,11 +141,11 @@
 				</FontString>
 
 				<FontString inherits="GameFontHighlightSmall" text="Stacks">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="253" y="1"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="189" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 
-				<FontString inherits="GameFontHighlightSmall" text="">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="325" y="1"/></Offset></Anchor></Anchors>
+				<FontString inherits="GameFontHighlightSmall" text="Max Time Left">
+					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="341" y="1"/></Offset></Anchor></Anchors>
 				</FontString>
 
 				<FontString inherits="GameFontHighlightSmall" text="Total Price">

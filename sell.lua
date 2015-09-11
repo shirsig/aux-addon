@@ -288,33 +288,43 @@ function Aux_ScrollbarUpdate()
 			
 			local entry = auxSellEntries[currentAuctionItemName][dataOffset]
 
-			local lineEntry_avail	= getglobal("AuxSellEntry"..line.."_Availability")
-			local lineEntry_comm	= getglobal("AuxSellEntry"..line.."_Comment")
-			local lineEntry_stack	= getglobal("AuxSellEntry"..line.."_StackPrice")
-
 			if selectedAuxEntry and entry.itemPrice == selectedAuxEntry.itemPrice and entry.stackSize == selectedAuxEntry.stackSize then
 				lineEntry:LockHighlight()
 			else
 				lineEntry:UnlockHighlight()
 			end
 
+			local lineEntry_stacks	= getglobal("AuxSellEntry"..line.."_Stacks")
+			local lineEntry_time	= getglobal("AuxSellEntry"..line.."_Time")
+			
+			if entry.maxTimeLeft == 1 then
+				lineEntry_time:SetText("Short")
+			elseif entry.maxTimeLeft == 2 then
+				lineEntry_time:SetText("Medium")			
+			elseif entry.maxTimeLeft == 3 then
+				lineEntry_time:SetText("Long")
+			elseif entry.maxTimeLeft == 4 then
+				lineEntry_time:SetText("Very Long")
+			end
+			
 			if entry.stackSize == currentAuctionItemStackSize then
-				lineEntry_avail:SetTextColor(0.2, 0.9, 0.2)
+				lineEntry_stacks:SetTextColor(0.2, 0.9, 0.2)
 			else
-				lineEntry_avail:SetTextColor(1.0, 1.0, 1.0)
+				lineEntry_stacks:SetTextColor(1.0, 1.0, 1.0)
 			end
 
+			local own
 			if entry.numYours == 0 then
-				lineEntry_comm:SetText("")
+				own = ""
 			elseif
 				entry.numYours == entry.count then
-				lineEntry_comm:SetText("yours")
+				own = "(yours)"
 			else
-				lineEntry_comm:SetText("yours: "..entry.numYours)
+				own = "(yours: "..entry.numYours..")"
 			end
 						
-			local tx = string.format("%i %s of %i", entry.count, Aux_PluralizeIf("stack", entry.count), entry.stackSize)
-			lineEntry_avail:SetText(tx)
+			local tx = string.format("%i %s of %i %s", entry.count, Aux_PluralizeIf("stack", entry.count), entry.stackSize, own)
+			lineEntry_stacks:SetText(tx)
 
 			MoneyFrame_Update("AuxSellEntry"..line.."_UnitPrice", Aux_Round(entry.buyoutPrice/entry.stackSize))
 			MoneyFrame_Update("AuxSellEntry"..line.."_TotalPrice", Aux_Round(entry.buyoutPrice))
@@ -375,18 +385,15 @@ function processScanResults(rawData, auctionItemName)
 	for _,rawDatum in ipairs(rawData) do
 		if auctionItemName == rawDatum.name and rawDatum.buyoutPrice > 0 then
 			local key = "_"..rawDatum.count.."_"..rawDatum.buyoutPrice
-					
-			if condData[key] then
-				condData[key].count = condData[key].count + 1
-			else			
-				condData[key] = {
-						stackSize 	= rawDatum.count,
-						buyoutPrice	= rawDatum.buyoutPrice,
-						itemPrice		= rawDatum.buyoutPrice / rawDatum.count,
-						count			= 1,
-						numYours		= rawDatum.owner == UnitName("player") and 1 or 0
-				}
-			end
+							
+			condData[key] = {
+					stackSize 	= rawDatum.count,
+					buyoutPrice	= rawDatum.buyoutPrice,
+					itemPrice		= rawDatum.buyoutPrice / rawDatum.count,
+					maxTimeLeft		= condData[key] and math.max(condData[key].maxTimeLeft, rawDatum.duration) or rawDatum.duration,
+					count			= condData[key] and condData[key].count + 1 or 1,
+					numYours		= rawDatum.owner == UnitName("player") and 1 or 0
+			}
 		end
 	end
 
