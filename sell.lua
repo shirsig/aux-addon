@@ -3,7 +3,6 @@ auxSellEntries = {} -- persisted
 -----------------------------------------
 
 local bestPriceOurStackSize
-local selectedAuxEntry
 
 local currentAuctionItemName = nil
 local currentAuctionItemTexture = nil
@@ -83,9 +82,7 @@ end
 
 function Aux_SelectAuxEntry()
 	
-	if not currentAuctionItemName or not auxSellEntries[currentAuctionItemName] then
-		selectedAuxEntry = nil
-	else
+	if currentAuctionItemName and auxSellEntries[currentAuctionItemName] and not auxSellEntries[currentAuctionItemName].selected then
 		local bestPrice	= {} -- a table with one entry per stacksize that is the cheapest auction for that particular stacksize
 		local absoluteBest -- the overall cheapest auction
 
@@ -101,10 +98,10 @@ function Aux_SelectAuxEntry()
 			end	
 		end
 		
-		selectedAuxEntry = absoluteBest
+		auxSellEntries[currentAuctionItemName].selected = absoluteBest
 
 		if bestPrice[currentAuctionItemStackSize] then
-			selectedAuxEntry = bestPrice[currentAuctionItemStackSize]
+			auxSellEntries[currentAuctionItemName].selected = bestPrice[currentAuctionItemStackSize]
 			bestPriceOurStackSize = bestPrice[currentAuctionItemStackSize]
 		end
 	end
@@ -121,15 +118,15 @@ function Aux_UpdateRecommendation()
 	else
 		AuxSellRefreshButton:Enable()	
 		
-		if selectedAuxEntry then
+		if auxSellEntries[currentAuctionItemName] and auxSellEntries[currentAuctionItemName].selected then
 			if not auxSellEntries[currentAuctionItemName].created or GetTime() - auxSellEntries[currentAuctionItemName].created > 1800 then
 				AuxRecommendLastRefreshText:SetText("STALE DATA") -- data older than half an hour marked as stale
 				AuxRecommendLastRefreshText:Show()
 			end
 		
-			local newBuyoutPrice = selectedAuxEntry.itemPrice * currentAuctionItemStackSize
+			local newBuyoutPrice = auxSellEntries[currentAuctionItemName].selected.itemPrice * currentAuctionItemStackSize
 
-			if selectedAuxEntry.numYours < selectedAuxEntry.count then
+			if auxSellEntries[currentAuctionItemName].selected.numYours < auxSellEntries[currentAuctionItemName].selected.count then
 				newBuyoutPrice = undercut(newBuyoutPrice)
 			end
 			
@@ -159,9 +156,9 @@ function Aux_UpdateRecommendation()
 			MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
 			MoneyInputFrame_SetCopper(StartPrice, newStartPrice)
 			
-			if selectedAuxEntry.stackSize == auxSellEntries[currentAuctionItemName][1].stackSize and selectedAuxEntry.buyoutPrice == auxSellEntries[currentAuctionItemName][1].buyoutPrice then
+			if auxSellEntries[currentAuctionItemName].selected.stackSize == auxSellEntries[currentAuctionItemName][1].stackSize and auxSellEntries[currentAuctionItemName].selected.buyoutPrice == auxSellEntries[currentAuctionItemName][1].buyoutPrice then
 				AuxRecommendBasisText:SetText("(based on cheapest)")
-			elseif bestPriceOurStackSize and selectedAuxEntry.stackSize == bestPriceOurStackSize.stackSize and selectedAuxEntry.buyoutPrice == bestPriceOurStackSize.buyoutPrice then
+			elseif bestPriceOurStackSize and auxSellEntries[currentAuctionItemName].selected.stackSize == bestPriceOurStackSize.stackSize and auxSellEntries[currentAuctionItemName].selected.buyoutPrice == bestPriceOurStackSize.buyoutPrice then
 				AuxRecommendBasisText:SetText("(based on cheapest stack of the same size)")
 			else
 				AuxRecommendBasisText:SetText("(based on auction selected below)")
@@ -208,7 +205,6 @@ end
 
 function Aux_RefreshEntries()
 	auxSellEntries[currentAuctionItemName] = nil
-	selectedAuxEntry = nil
 	
 	local sName, sLink, iRarity, iLevel, iMinLevel, sType, sSubType, iStackCount = GetItemInfo(currentAuctionItemName)
 
@@ -259,7 +255,7 @@ function Aux_ScrollbarUpdate()
 			
 			local entry = auxSellEntries[currentAuctionItemName][dataOffset]
 
-			if selectedAuxEntry and entry.itemPrice == selectedAuxEntry.itemPrice and entry.stackSize == selectedAuxEntry.stackSize then
+			if auxSellEntries[currentAuctionItemName].selected and entry.itemPrice == auxSellEntries[currentAuctionItemName].selected.itemPrice and entry.stackSize == auxSellEntries[currentAuctionItemName].selected.stackSize then
 				lineEntry:LockHighlight()
 			else
 				lineEntry:UnlockHighlight()
@@ -312,7 +308,7 @@ end
 function AuxSellEntry_OnClick()
 	local entryIndex = this:GetID()
 
-	selectedAuxEntry = auxSellEntries[currentAuctionItemName][entryIndex]
+	auxSellEntries[currentAuctionItemName].selected = auxSellEntries[currentAuctionItemName][entryIndex]
 
 	Aux_UpdateRecommendation()
 
