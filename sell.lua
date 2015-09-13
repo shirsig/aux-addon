@@ -107,7 +107,7 @@ function Aux_UpdateRecommendation()
 		AuxSellRefreshButton:Enable()	
 		
 		if auxSellEntries[currentAuctionItem.name] and auxSellEntries[currentAuctionItem.name].selected then
-			if not auxSellEntries[currentAuctionItem.name].created or GetTime() - auxSellEntries[currentAuctionItem.name].created > 5 then
+			if not auxSellEntries[currentAuctionItem.name].created or GetTime() - auxSellEntries[currentAuctionItem.name].created > 1800 then
 				AuxRecommendStaleText:SetText("STALE DATA") -- data older than half an hour marked as stale
 				AuxRecommendStaleText:Show()
 			end
