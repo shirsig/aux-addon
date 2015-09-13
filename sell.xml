@@ -4,13 +4,7 @@
   
 	<!-- Frame to handle all core events --> 
 	<Frame>
-      <Scripts> 
-			<OnLoad> 
-				this:RegisterEvent("AUCTION_OWNED_LIST_UPDATE")
-			</OnLoad>
-			<OnEvent> 
-				Aux_Sell_OnEvent()
-			</OnEvent> 
+		<Scripts> 
 		</Scripts> 
 	</Frame> 
 
@@ -123,8 +117,8 @@
 					<Anchors><Anchor point="TOPLEFT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="152" y="-51"/></Offset></Anchor></Anchors>
 				</FontString>
 				
-				<FontString name="AuxRecommendLastRefreshText" inherits="GameFontRedLarge">
-					<Anchors><Anchor point="TOPLEFT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="340" y="-20"/></Offset></Anchor></Anchors>
+				<FontString name="AuxRecommendStaleText" inherits="GameFontRedLarge">
+					<Anchors><Anchor point="TOPLEFT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="430" y="-65"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
 			<Layer level="ARTWORK">

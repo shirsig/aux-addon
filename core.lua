@@ -1,4 +1,4 @@
-AuxVersion = "1.0.0"
+AuxVersion = "1.1.1"
 AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport);"
 
 AUCTIONATOR_ENABLE_ALT = true
@@ -136,9 +136,8 @@ function Aux_SetupHookFunctions()
 	Aux.orig.AuctionFrameAuctions_Update = AuctionFrameAuctions_Update
 	AuctionFrameAuctions_Update = Aux_AuctionFrameAuctions_Update
 	
-	Aux.orig.AuctionsCreateAuctionButton_OnClick = AuctionsCreateAuctionButton_OnClick
-	AuctionsCreateAuctionButton_OnClick = Aux_AuctionsCreateAuctionButton_OnClick
-	
+	Aux.orig.AuctionsCreateAuctionButton_OnClick = AuctionsCreateAuctionButton:GetScript('OnClick')
+	AuctionsCreateAuctionButton:SetScript('OnClick', Aux_AuctionsCreateAuctionButton_OnClick)
 end
 
 -----------------------------------------
