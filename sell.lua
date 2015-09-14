@@ -175,6 +175,8 @@ function Aux_OnNewAuctionUpdate()
 	end
 	
 	local auctionItemName, auctionItemTexture, auctionItemStackSize = GetAuctionSellItemInfo()
+	
+	Aux_Scan_ClearTooltip()
 	AuxScanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
 	AuxScanTooltip:SetAuctionSellItem()
 	AuxScanTooltip:Show()

@@ -108,9 +108,18 @@ end
 
 -----------------------------------------
 
+function Aux_Scan_ClearTooltip()
+	for j=1, 30 do
+		leftEntry = getglobal('AuxScanTooltipTextLeft'..j):SetText()
+		rightEntry = getglobal('AuxScanTooltipTextRight'..j):SetText()
+	end
+end
+
+-----------------------------------------
+
 function Aux_Scan_ExtractTooltip()
 	local tooltip = {}
-	for j=1, 30 do -- conveniently ignores nils
+	for j=1, 30 do
 		local leftEntry = getglobal('AuxScanTooltipTextLeft'..j):GetText()
 		if leftEntry then
 			tinsert(tooltip, leftEntry)
@@ -152,6 +161,7 @@ function processQueryResults()
 	
 		local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
 		local duration = GetAuctionItemTimeLeft("list", i)
+		Aux_Scan_ClearTooltip()
 		AuxScanTooltip:SetOwner(UIParent, "ANCHOR_NONE");
 		AuxScanTooltip:SetAuctionItem("list", i)
 		AuxScanTooltip:Show()
