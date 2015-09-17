@@ -13,11 +13,49 @@ local processScanResults, undercut, ItemType2AuctionClass, SubType2AuctionSubcla
 
 -----------------------------------------
 
+function Aux_Sell_OnOpen()
+end
+
+-----------------------------------------
+
+function Aux_Sell_AuctionFrameAuctions_OnShow()
+	Aux.orig.AuctionFrameAuctions_OnShow()
+	Aux_Sell_SetAuctionDuration(AUX_AUCTION_DURATION)
+end
+
+-----------------------------------------
+
+function Aux_Sell_SetAuctionDuration(duration)
+	if duration == 'short' then
+		Aux_Sell_AuctionsRadioButton_OnClick(1)
+	elseif duration == 'medium' then
+		Aux_Sell_AuctionsRadioButton_OnClick(2)
+	elseif duration == 'long' then
+		Aux_Sell_AuctionsRadioButton_OnClick(3)
+	end
+end
+
+-----------------------------------------
+
+function Aux_Sell_AuctionsRadioButton_OnClick(index)
+	if index == 1 then
+		AUX_AUCTION_DURATION = 'short'
+	elseif index == 2 then
+		AUX_AUCTION_DURATION = 'medium'
+	elseif index == 3 then
+		AUX_AUCTION_DURATION = 'long'
+	end
+	
+	return Aux.orig.AuctionsRadioButton_OnClick(index)
+end
+
+-----------------------------------------
+
 function Aux_AuctionFrameAuctions_Update()
 	Aux.orig.AuctionFrameAuctions_Update()
 	if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.sell.index and AuctionFrame:IsShown() then
 		Aux_HideElems(Aux.tabs.sell.hiddenElements)
-	end	
+	end
 end
 
 -----------------------------------------

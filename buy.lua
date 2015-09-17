@@ -3,6 +3,17 @@ local entries
 local selectedEntries = {}
 local searchQuery
 
+-----------------------------------------
+
+function Aux_AuctionFrameBids_Update()
+	Aux.orig.AuctionFrameBids_Update()
+	if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index and AuctionFrame:IsShown() then
+		Aux_HideElems(Aux.tabs.buy.hiddenElements)
+	end
+end
+
+-----------------------------------------
+
 function AuxBuySearchButton_OnClick()
 	entries = nil
 	selectedEntries = {}

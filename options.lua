@@ -1,3 +1,9 @@
+AUX_ENABLE_ALT = true
+AUX_OPEN_FIRST = false
+AUX_INSTANT_BUYOUT = false
+
+AUX_AUCTION_DURATION = 'long'
+
 local BoolToString, BoolToNum, NumToBool
 
 function Aux_ShowDescriptionFrame()
@@ -33,18 +39,18 @@ function Aux_ShowOptionsFrame()
 
 	AuxVersionText:SetText("Version: "..AuxVersion)
 	
-	AuxOption_Enable_Alt:SetChecked(AUCTIONATOR_ENABLE_ALT)
-	AuxOption_Open_First:SetChecked(AUCTIONATOR_OPEN_FIRST)
-	AuxOption_Instant_Buyout:SetChecked(AUCTIONATOR_INSTANT_BUYOUT)
+	AuxOption_Enable_Alt:SetChecked(AUX_ENABLE_ALT)
+	AuxOption_Open_First:SetChecked(AUX_OPEN_FIRST)
+	AuxOption_Instant_Buyout:SetChecked(AUX_INSTANT_BUYOUT)
 end
 
 -----------------------------------------
 
 function AuxOptionsSave()
 
-	AUCTIONATOR_ENABLE_ALT = AuxOption_Enable_Alt:GetChecked()
-	AUCTIONATOR_OPEN_FIRST = AuxOption_Open_First:GetChecked()
-	AUCTIONATOR_INSTANT_BUYOUT = AuxOption_Instant_Buyout:GetChecked()
+	AUX_ENABLE_ALT = AuxOption_Enable_Alt:GetChecked()
+	AUX_OPEN_FIRST = AuxOption_Open_First:GetChecked()
+	AUX_INSTANT_BUYOUT = AuxOption_Instant_Buyout:GetChecked()
 	
 end
 

@@ -1,9 +1,5 @@
 AuxVersion = "1.1.1"
-AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport);"
-
-AUCTIONATOR_ENABLE_ALT = true
-AUCTIONATOR_OPEN_FIRST = false
-AUCTIONATOR_INSTANT_BUYOUT = false
+AuxAuthors = "shirsig; Zerf; Zirco (AUX); Nimeral (AUX backport)"
 
 Aux = {
 	loaded = false,
@@ -104,6 +100,12 @@ end
 
 function Aux_SetupHookFunctions()
 	
+	Aux.orig.AuctionFrameAuctions_OnShow = AuctionFrameAuctions_OnShow
+	AuctionFrameAuctions_OnShow = Aux_Sell_AuctionFrameAuctions_OnShow
+	
+	Aux.orig.AuctionsRadioButton_OnClick = AuctionsRadioButton_OnClick
+	AuctionsRadioButton_OnClick = Aux_Sell_AuctionsRadioButton_OnClick
+	
 	Aux.orig.BrowseButton_OnClick = BrowseButton_OnClick
 	BrowseButton_OnClick = Aux_BrowseButton_OnClick
 	
@@ -133,6 +135,9 @@ function Aux_SetupHookFunctions()
 	Aux.orig.ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
 	ContainerFrameItemButton_OnClick = Aux_ContainerFrameItemButton_OnClick
 	
+	Aux.orig.AuctionFrameBids_Update = AuctionFrameBids_Update
+	AuctionFrameBids_Update = Aux_AuctionFrameBids_Update
+	
 	Aux.orig.AuctionFrameAuctions_Update = AuctionFrameAuctions_Update
 	AuctionFrameAuctions_Update = Aux_AuctionFrameAuctions_Update
 	
@@ -146,7 +151,7 @@ function Aux_OnAuctionHouseShow()
 
 	AuxOptionsButtonPanel:Show()
 
-	if AUCTIONATOR_OPEN_FIRST then
+	if AUX_OPEN_FIRST then
 		AuctionFrameTab_OnClick(Aux.tabs.sell.index)
 	end
 
@@ -192,6 +197,7 @@ function Aux_AuctionFrameTab_OnClick(index)
 	
 	if index == Aux.tabs.sell.index then
 		AuctionFrameTab_OnClick(3)
+		Aux_Sell_OnOpen()
 		
 		PanelTemplates_SetTab(AuctionFrame, Aux.tabs.sell.index)
 		
@@ -361,7 +367,7 @@ end
 -----------------------------------------
 
 function Aux_BrowseButton_OnMouseDown()
-	if arg1 == "RightButton" and AUCTIONATOR_INSTANT_BUYOUT then
+	if arg1 == "RightButton" and AUX_INSTANT_BUYOUT then
 		local index = this:GetID() + FauxScrollFrame_GetOffset(BrowseScrollFrame)
 	
 		SetSelectedAuctionItem("list", index)
@@ -397,7 +403,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 	else
 		Aux.orig.ContainerFrameItemButton_OnClick(button)
 
-		if AUCTIONATOR_ENABLE_ALT and AuctionFrame:IsShown() and IsAltKeyDown() and button == "LeftButton" then
+		if AUX_ENABLE_ALT and AuctionFrame:IsShown() and IsAltKeyDown() and button == "LeftButton" then
 		
 			ClickAuctionSellItemButton()
 			ClearCursor()
