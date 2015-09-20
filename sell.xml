@@ -297,7 +297,104 @@
 			<Button name="AuxSellEntry9"  inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			<Button name="AuxSellEntry10" inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			<Button name="AuxSellEntry11" inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry12" inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>   
+			<Button name="AuxSellEntry12" inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			
+			<frame name="AuxSellQuantity">
+				<Size>
+					<AbsDimension x="1" y="1"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="150" y="-202"/>
+						</Offset>
+					</Anchor>
+				</Anchors>	
+				<layers>
+					<layer level="BACKGROUND">
+						<FontString name="AuxSellStackSizeText" inherits="GameFontHighlightSmall" text="Stack Size">
+							<Anchors>
+								<Anchor point="TOP" relativePoint="BOTTOM">
+									<Offset>
+										<AbsDimension x="0" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+						<FontString name="AuxSellStackCountText" inherits="GameFontHighlightSmall" text="Stacks">
+							<Anchors>
+								<Anchor point="TOP" relativePoint="BOTTOM">
+									<Offset>
+										<AbsDimension x="0" y="-33"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</layer>
+				</layers>
+				<frames>
+					<EditBox name="AuxSellStackSize" letters="3" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
+						<Size>
+							<AbsDimension x="30" y="16"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="AuxSellStackSizeText">
+								<Offset>
+									<AbsDimension x="0" y="-3"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnTextChanged>
+								Aux_Sell_QuantityUpdate()
+							</OnTextChanged>
+							<OnTabPressed>
+		<!-- 						if (IsShiftKeyDown()) then
+									getglobal(this:GetParent():GetName().."BuyoutPriceCopper"):SetFocus();
+								else
+									getglobal(this:GetParent():GetName().."StackCount"):SetFocus();
+								end -->
+							</OnTabPressed>
+							<OnEditFocusLost>
+								this:HighlightText(0, 0)
+							</OnEditFocusLost>
+							<OnEditFocusGained>
+								this:HighlightText()
+							</OnEditFocusGained>
+						</Scripts>
+					</EditBox>
+					<EditBox name="AuxSellStackCount" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
+						<Size>
+							<AbsDimension x="22" y="16"/>
+						</Size>
+						<Anchors>
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="AuxSellStackCountText">
+								<Offset>
+									<AbsDimension x="0" y="-3"/>
+								</Offset>
+							</Anchor>
+						</Anchors>
+						<Scripts>
+							<OnTextChanged>
+								Aux_Sell_QuantityUpdate()
+							</OnTextChanged>
+							<OnTabPressed>
+		<!-- 						if (IsShiftKeyDown()) then
+									getglobal(this:GetParent():GetName().."StackSize"):SetFocus();
+								else
+									getglobal(this:GetParent():GetName().."StartPriceGold"):SetFocus();
+								end -->
+							</OnTabPressed>
+							<OnEditFocusLost>
+								this:HighlightText(0, 0)
+							</OnEditFocusLost>
+							<OnEditFocusGained>
+								this:HighlightText()
+							</OnEditFocusGained>
+						</Scripts>
+					</EditBox>
+				</frames>
+			</frame>
 		</Frames>
 	</Frame>
 </Ui>

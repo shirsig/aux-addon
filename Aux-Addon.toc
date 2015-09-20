@@ -9,3 +9,4 @@ sell.xml
 buy.xml
 options.xml
 about.xml
+post.lua
