@@ -160,6 +160,8 @@ function processQueryResults()
 	for i = 1, numBatchAuctions do
 	
 		local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
+		local itemLink = GetAuctionItemLink("list", i)
+		
 		local duration = GetAuctionItemTimeLeft("list", i)
 		Aux_Scan_ClearTooltip()
 		AuxScanTooltip:SetOwner(UIParent, "ANCHOR_NONE");
@@ -183,6 +185,7 @@ function processQueryResults()
 				highBidder		= highBidder,
 				owner			= owner,
 				duration		= duration,
+				itemLink		= itemLink,
 				page			= currentPage,
 				pageIndex		= i
 		}
