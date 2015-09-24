@@ -66,6 +66,12 @@
 			<TexCoords left="0" right="1.0" top="0.0" bottom="0.6"/>
 		</HighlightTexture>
 		<Scripts>
+			<OnEnter>
+				AuxBuyEntry_OnEnter();
+			</OnEnter>
+			<OnLeave>
+				GameTooltip:Hide();
+			</OnLeave>
 			<OnClick>
 				AuxBuyEntry_OnClick()
 			</OnClick>
