@@ -47,7 +47,7 @@ function find_empty_slot()
 	end
 end
 
-function find_charge_item_slot(name, charges)
+function find_charges_item_slot(name, charges)
 	for slot in item_slots(name) do
 		if item_charges(slot) == charges then
 			return slot
@@ -189,7 +189,7 @@ function Aux.stack.start(name, size, callback)
 	if not target_slot then
 		Aux.stack.stop()
 	elseif item_charges(target_slot) then
-		state.target_slot = find_charges_item(name, size)
+		state.target_slot = find_charges_item_slot(name, size)
 		Aux.stack.stop()
 	end
 end
