@@ -47,6 +47,14 @@ function find_empty_slot()
 	end
 end
 
+function find_charge_item_slot(name, charges)
+	for slot in item_slots(name) do
+		if item_charges(slot) == charges then
+			return slot
+		end
+	end
+end
+
 function locked(slot)
 	local _, _, locked = GetContainerItemInfo(slog.bag, slot.bag_slot)
 	return locked
@@ -87,6 +95,15 @@ end
 function stack_size(slot)
 	local _, item_count = GetContainerItemInfo(slot.bag, slot.bag_slot)
 	return item_count or 0
+end
+
+function item_charges(slot)
+	Aux_Scan_ClearTooltip()
+	AuxScanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+	AuxScanTooltip:SetBagItem(slot.bag, slot.bag_slot)
+	AuxScanTooltip:Show()
+	local tooltip = Aux_Scan_ExtractTooltip()
+	return Aux_Scan_ItemCharges(tooltip)
 end
 
 function Aux.stack.onupdate()
@@ -137,7 +154,7 @@ end
 function Aux.stack.stop()
 	if state then
 		local slot
-		if state.target_slot and stack_size(state.target_slot) == state.target_size then
+		if state.target_slot and (stack_size(state.target_slot) == state.target_size or item_charges(state.target_slot) == state.target_size) then
 			slot = state.target_slot
 		end
 		local callback = state.callback
@@ -169,7 +186,10 @@ function Aux.stack.start(name, size, callback)
 		processing = 0,
 	}
 	
-	if not state.target_slot then
+	if not target_slot then
+		Aux.stack.stop()
+	elseif item_charges(target_slot) then
+		state.target_slot = find_charges_item(name, size)
 		Aux.stack.stop()
 	end
 end

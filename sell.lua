@@ -87,8 +87,8 @@ function Aux_AuctionsCreateAuctionButton_OnClick()
 					if existingEntry.buyoutPrice == buyoutPrice and existingEntry.stackSize == stackSize then
 						existingEntry.count = existingEntry.count + posted
 						existingEntry.numYours = existingEntry.numYours + posted
-						existingEntry.duration = max(existingEntry.duration, duration)
-						newEntry = existingEntry
+						existingEntry.maxTimeLeft = max(existingEntry.maxTimeLeft, duration)
+						entry = existingEntry
 					end
 				end
 				if not entry then
@@ -101,6 +101,7 @@ function Aux_AuctionsCreateAuctionButton_OnClick()
 						numYours	= posted,
 					}
 					tinsert(auxSellEntries[name], entry)
+					table.sort(auxSellEntries[name], function(a,b) return a.itemPrice < b.itemPrice end)
 				end
 				auxSellEntries[name].selected = entry
 				Aux_UpdateRecommendation()
