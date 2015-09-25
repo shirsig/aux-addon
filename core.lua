@@ -1,6 +1,8 @@
 AuxVersion = "1.1.2"
 AuxAuthors = "shirsig; Zerf; Zirco (AUX); Nimeral (AUX backport)"
 
+local lastRightClickAction = GetTime()
+
 Aux = {
 	loaded = false,
 	orig = {},
@@ -117,6 +119,25 @@ function Aux_SetupHookFunctions()
 	
 	Aux.orig.BrowseButton_OnClick = BrowseButton_OnClick
 	BrowseButton_OnClick = Aux_BrowseButton_OnClick
+
+	AuctionsButton1:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	AuctionsButton1:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
+	AuctionsButton2:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	AuctionsButton2:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
+	AuctionsButton3:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	AuctionsButton3:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
+	AuctionsButton4:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	AuctionsButton4:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
+	AuctionsButton5:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	AuctionsButton5:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
+	AuctionsButton6:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	AuctionsButton6:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
+	AuctionsButton7:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	AuctionsButton7:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
+	AuctionsButton8:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	AuctionsButton8:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
+	AuctionsButton9:RegisterForClicks("LeftButtonUp", "RightButtonDown")
+	AuctionsButton9:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
 	
 	BrowseButton1:RegisterForClicks("LeftButtonUp", "RightButtonDown")
 	BrowseButton1:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
@@ -170,6 +191,8 @@ end
 
 function Aux_OnAuctionHouseClosed()
 
+	Aux.post.stop()
+	Aux.stack.stop()
 	if not Aux_Scan_IsIdle() then
 		Aux_Scan_Abort()
 	end
@@ -190,6 +213,8 @@ function Aux_AuctionFrameTab_OnClick(index)
 		index = this:GetID()
 	end
 	
+	Aux.post.stop()
+	Aux.stack.stop()
 	if not Aux_Scan_IsIdle() then
 		Aux_Scan_Abort()
 	end
@@ -375,8 +400,16 @@ end
 
 -----------------------------------------
 
+function Aux_AuctionsButton_OnClick(button)
+	if arg1 == "LeftButton" then -- because we additionally registered right clicks we only let left ones pass here
+		Aux.orig.BrowseButton_OnClick(button)
+	end
+end
+
+-----------------------------------------
+
 function Aux_BrowseButton_OnMouseDown()
-	if arg1 == "RightButton" and AUX_INSTANT_BUYOUT then
+	if arg1 == "RightButton" and AUX_INSTANT_BUYOUT and GetTime() - lastRightClickAction > 0.5 then
 		local index = this:GetID() + FauxScrollFrame_GetOffset(BrowseScrollFrame)
 	
 		SetSelectedAuctionItem("list", index)
@@ -387,6 +420,22 @@ function Aux_BrowseButton_OnMouseDown()
 		end
 		
 		AuctionFrameBrowse_Update()
+		lastRightClickAction = GetTime()
+	end
+end
+
+-----------------------------------------
+
+function Aux_AuctionsButton_OnMouseDown()
+	if arg1 == "RightButton" and GetTime() - lastRightClickAction > 0.5 then
+		local index = this:GetID() + FauxScrollFrame_GetOffset(AuctionsScrollFrame)
+	
+		SetSelectedAuctionItem("owner", index)
+		
+		CancelAuction(index)
+		
+		AuctionFrameAuctions_Update()
+		lastRightClickAction = GetTime()
 	end
 end
 

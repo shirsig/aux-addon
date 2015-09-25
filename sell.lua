@@ -63,9 +63,51 @@ end
 -----------------------------------------
 
 function Aux_AuctionsCreateAuctionButton_OnClick()
-	for i=1, currentAuction.stackCount do
-		local slot = createStack(currentAuction.name, currentAuction.stackCount)
-		postAuction(slot)
+	if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.sell.index then	
+		local name, stackSize, buyoutPrice = currentAuction.name, currentAuction.stackSize, MoneyInputFrame_GetCopper(BuyoutPrice)
+		local duration
+		if AuctionFrameAuctions.duration == 120 then
+			duration = 2
+		elseif AuctionFrameAuctions.duration == 480 then
+			duration = 3
+		elseif AuctionFrameAuctions.duration == 1440 then
+			duration = 4
+		end
+		
+		Aux.post.start(
+			currentAuction.name,
+			currentAuction.stackSize,
+			AuctionFrameAuctions.duration,
+			MoneyInputFrame_GetCopper(StartPrice),
+			MoneyInputFrame_GetCopper(BuyoutPrice),
+			currentAuction.stackCount,
+			function(posted)
+				local entry
+				for _, existingEntry in ipairs(auxSellEntries[name]) do
+					if existingEntry.buyoutPrice == buyoutPrice and existingEntry.stackSize == stackSize then
+						existingEntry.count = existingEntry.count + posted
+						existingEntry.numYours = existingEntry.numYours + posted
+						existingEntry.duration = max(existingEntry.duration, duration)
+						newEntry = existingEntry
+					end
+				end
+				if not entry then
+					entry = {
+						stackSize 	= stackSize,
+						buyoutPrice	= buyoutPrice,
+						itemPrice	= buyoutPrice / stackSize,
+						maxTimeLeft	= duration,
+						count		= posted,
+						numYours	= posted,
+					}
+					tinsert(auxSellEntries[name], entry)
+				end
+				auxSellEntries[name].selected = entry
+				Aux_UpdateRecommendation()
+			end
+		)
+	else
+		Aux.orig.AuctionsCreateAuctionButton_OnClick()
 	end
 end
 
@@ -122,9 +164,15 @@ function Aux_UpdateRecommendation()
 
 	if not currentAuction then
 		AuxSellRefreshButton:Disable()
+		
+		Aux_Sell_SetStackSize(0)
+		Aux_Sell_SetStackCount(0)
 		Aux_SetMessage("Drag an item to the Auction Item area\n\nto see recommended pricing information")
 	else
 		AuxSellRefreshButton:Enable()	
+		
+		Aux_Sell_SetStackSize(currentAuction.stackSize)
+		Aux_Sell_SetStackCount(currentAuction.stackCount)
 		
 		if auxSellEntries[currentAuction.name] and auxSellEntries[currentAuction.name].selected then
 			if not auxSellEntries[currentAuction.name].created or GetTime() - auxSellEntries[currentAuction.name].created > 1800 then
@@ -259,7 +307,7 @@ function Aux_RefreshEntries()
 	if currentAuction then
 		auxSellEntries[currentAuction.name] = nil
 		
-		local _, _, _, _, _, sType, sSubType, _ = GetItemInfo(currentAuction.name)
+		local _, _, _, _, _, sType, sSubType = GetItemInfo(currentAuction.name)
 
 		local currentAuctionClass		= ItemType2AuctionClass(sType)
 		local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
@@ -290,9 +338,9 @@ function Aux_ScrollbarUpdate()
 		numrows = getn(auxSellEntries[currentAuction.name])
 	end
 	
-	FauxScrollFrame_Update(AuxScrollFrame, numrows, 12, 16);
+	FauxScrollFrame_Update(AuxScrollFrame, numrows, 12, 16)
 
-	for line = 1,12 do
+	for line = 1, 12 do
 
 		local dataOffset = line + FauxScrollFrame_GetOffset(AuxScrollFrame)	
 		local lineEntry = getglobal("AuxSellEntry"..line)
@@ -403,7 +451,7 @@ function processScanResults(rawData, auctionItemName)
 	
 	local condData = {}
 
-	for _,rawDatum in ipairs(rawData) do
+	for _, rawDatum in ipairs(rawData) do
 		if auctionItemName == rawDatum.name and rawDatum.buyoutPrice > 0 then
 			local key = "_"..rawDatum.count.."_"..rawDatum.buyoutPrice
 			
@@ -429,7 +477,7 @@ function processScanResults(rawData, auctionItemName)
 	----- create a table of these entries sorted by itemPrice
 	
 	local n = 1
-	for _,condDatum in pairs(condData) do
+	for _, condDatum in pairs(condData) do
 		auxSellEntries[auctionItemName][n] = condDatum
 		n = n + 1
 	end
