@@ -82,29 +82,32 @@ function Aux_AuctionsCreateAuctionButton_OnClick()
 			MoneyInputFrame_GetCopper(BuyoutPrice),
 			currentAuction.stackCount,
 			function(posted)
-				local entry
-				for _, existingEntry in ipairs(auxSellEntries[name]) do
-					if existingEntry.buyoutPrice == buyoutPrice and existingEntry.stackSize == stackSize then
-						existingEntry.count = existingEntry.count + posted
-						existingEntry.numYours = existingEntry.numYours + posted
-						existingEntry.maxTimeLeft = max(existingEntry.maxTimeLeft, duration)
-						entry = existingEntry
+				if posted > 0 then
+					auxSellEntries[name] = auxSellEntries[name] or { created=GetTime() }
+					local entry
+					for _, existingEntry in ipairs(auxSellEntries[name]) do
+						if existingEntry.buyoutPrice == buyoutPrice and existingEntry.stackSize == stackSize then
+							existingEntry.count = existingEntry.count + posted
+							existingEntry.numYours = existingEntry.numYours + posted
+							existingEntry.maxTimeLeft = max(existingEntry.maxTimeLeft, duration)
+							entry = existingEntry
+						end
 					end
+					if not entry then
+						entry = {
+							stackSize 	= stackSize,
+							buyoutPrice	= buyoutPrice,
+							itemPrice	= buyoutPrice / stackSize,
+							maxTimeLeft	= duration,
+							count		= posted,
+							numYours	= posted,
+						}
+						tinsert(auxSellEntries[name], entry)
+						table.sort(auxSellEntries[name], function(a,b) return a.itemPrice < b.itemPrice end)
+					end
+					auxSellEntries[name].selected = entry
+					Aux_UpdateRecommendation()
 				end
-				if not entry then
-					entry = {
-						stackSize 	= stackSize,
-						buyoutPrice	= buyoutPrice,
-						itemPrice	= buyoutPrice / stackSize,
-						maxTimeLeft	= duration,
-						count		= posted,
-						numYours	= posted,
-					}
-					tinsert(auxSellEntries[name], entry)
-					table.sort(auxSellEntries[name], function(a,b) return a.itemPrice < b.itemPrice end)
-				end
-				auxSellEntries[name].selected = entry
-				Aux_UpdateRecommendation()
 			end
 		)
 	else
@@ -183,7 +186,7 @@ function Aux_UpdateRecommendation()
 		
 			local newBuyoutPrice = auxSellEntries[currentAuction.name].selected.itemPrice * currentAuction.stackSize
 
-			if auxSellEntries[currentAuction.name].selected.numYours < auxSellEntries[currentAuction.name].selected.count then
+			if auxSellEntries[currentAuction.name].selected.numYours == 0 then
 				newBuyoutPrice = undercut(newBuyoutPrice)
 			end
 			
