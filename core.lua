@@ -1,5 +1,5 @@
-AuxVersion = "1.1.2"
-AuxAuthors = "shirsig; Zerf; Zirco (AUX); Nimeral (AUX backport)"
+AuxVersion = "1.2.0"
+AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)"
 
 local lastRightClickAction = GetTime()
 
@@ -157,7 +157,7 @@ function Aux_SetupHookFunctions()
 	BrowseButton8:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
 
 	Aux.orig.AuctionSellItemButton_OnEvent = AuctionSellItemButton_OnEvent
-	AuctionSellItemButton_OnEvent = Aux_AuctionSellItemButton_OnEvent
+	AuctionSellItemButton_OnEvent = Aux.sell.AuctionSellItemButton_OnEvent
 	
 	Aux.orig.AuctionFrameTab_OnClick = AuctionFrameTab_OnClick
 	AuctionFrameTab_OnClick = Aux_AuctionFrameTab_OnClick
@@ -172,7 +172,7 @@ function Aux_SetupHookFunctions()
 	AuctionFrameAuctions_Update = Aux_AuctionFrameAuctions_Update
 	
 	Aux.orig.AuctionsCreateAuctionButton_OnClick = AuctionsCreateAuctionButton:GetScript('OnClick')
-	AuctionsCreateAuctionButton:SetScript('OnClick', Aux_AuctionsCreateAuctionButton_OnClick)
+	AuctionsCreateAuctionButton:SetScript('OnClick', Aux.sell.AuctionsCreateAuctionButton_OnClick)
 end
 
 -----------------------------------------
@@ -193,8 +193,8 @@ function Aux_OnAuctionHouseClosed()
 
 	Aux.post.stop()
 	Aux.stack.stop()
-	if not Aux_Scan_IsIdle() then
-		Aux_Scan_Abort()
+	if not Aux.scan.idle() then
+		Aux.scan.abort()
 	end
 	
 	AuxOptionsButtonPanel:Hide()
@@ -215,8 +215,8 @@ function Aux_AuctionFrameTab_OnClick(index)
 	
 	Aux.post.stop()
 	Aux.stack.stop()
-	if not Aux_Scan_IsIdle() then
-		Aux_Scan_Abort()
+	if not Aux.scan.idle() then
+		Aux.scan.abort()
 	end
 	AuxSellPanel:Hide()
     AuxBuyPanel:Hide()
@@ -231,7 +231,7 @@ function Aux_AuctionFrameTab_OnClick(index)
 	
 	if index == Aux.tabs.sell.index then
 		AuctionFrameTab_OnClick(3)
-		Aux_Sell_OnOpen()
+		Aux.sell.on_open()
 		
 		PanelTemplates_SetTab(AuctionFrame, Aux.tabs.sell.index)
 		

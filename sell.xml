@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="Sell.lua"/> 
+	<Script file="sell.lua"/> 
   
 	<!-- Frame to handle all core events --> 
 	<Frame>

@@ -1,3 +1,5 @@
+Aux.sell = {}
+
 auxSellEntries = {} -- persisted
 
 -----------------------------------------
@@ -8,11 +10,11 @@ local currentAuction
 
 -----------------------------------------
 
-local processScanResults, undercut, ItemType2AuctionClass, SubType2AuctionSubclass
+local record_auction, undercut, ItemType2AuctionClass, SubType2AuctionSubclass
 
 -----------------------------------------
 
-function Aux_Sell_OnOpen()
+function Aux.sell.on_open()
 end
 
 -----------------------------------------
@@ -62,9 +64,9 @@ end
 -- that we can note the auction values
 -----------------------------------------
 
-function Aux_AuctionsCreateAuctionButton_OnClick()
+function Aux.sell.AuctionsCreateAuctionButton_OnClick()
 	if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.sell.index then	
-		local name, stackSize, buyoutPrice = currentAuction.name, currentAuction.stackSize, MoneyInputFrame_GetCopper(BuyoutPrice)
+		local name, stack_size, buyout_price = currentAuction.name, currentAuction.stackSize, MoneyInputFrame_GetCopper(BuyoutPrice)
 		local duration
 		if AuctionFrameAuctions.duration == 120 then
 			duration = 2
@@ -82,32 +84,11 @@ function Aux_AuctionsCreateAuctionButton_OnClick()
 			MoneyInputFrame_GetCopper(BuyoutPrice),
 			currentAuction.stackCount,
 			function(posted)
-				if posted > 0 and buyoutPrice > 0 then
-					auxSellEntries[name] = auxSellEntries[name] or { created=GetTime() }
-					local entry
-					for _, existingEntry in ipairs(auxSellEntries[name]) do
-						if existingEntry.buyoutPrice == buyoutPrice and existingEntry.stackSize == stackSize then
-							existingEntry.count = existingEntry.count + posted
-							existingEntry.numYours = existingEntry.numYours + posted
-							existingEntry.maxTimeLeft = max(existingEntry.maxTimeLeft, duration)
-							entry = existingEntry
-						end
-					end
-					if not entry then
-						entry = {
-							stackSize 	= stackSize,
-							buyoutPrice	= buyoutPrice,
-							itemPrice	= buyoutPrice / stackSize,
-							maxTimeLeft	= duration,
-							count		= posted,
-							numYours	= posted,
-						}
-						tinsert(auxSellEntries[name], entry)
-						table.sort(auxSellEntries[name], function(a,b) return a.itemPrice < b.itemPrice end)
-					end
-					auxSellEntries[name].selected = entry
-					Aux_UpdateRecommendation()
+				for i = 1, posted do
+					record_auction(name, stack_size, buyout_price, duration, UnitName("player"))
 				end
+				auxSellEntries[name].selected = entry
+				Aux_UpdateRecommendation()
 			end
 		)
 	else
@@ -117,19 +98,17 @@ end
 
 -----------------------------------------
 
-function Aux_AuctionSellItemButton_OnEvent()
+function Aux.sell.AuctionSellItemButton_OnEvent()
 	Aux.orig.AuctionSellItemButton_OnEvent()
 	Aux_OnNewAuctionUpdate()
 end
 
 -----------------------------------------
 
-function Aux_SetMessage(msg)
+function Aux.sell.set_message(msg)
 	Aux_HideElems(Aux.tabs.sell.recommendationElements)
 	AuxMessage:SetText(msg)
 	AuxMessage:Show()
-	AuxBuyMessage:SetText(msg) -- TODO doesn't belong here
-	AuxBuyMessage:Show()
 end
 
 -----------------------------------------
@@ -171,7 +150,7 @@ function Aux_UpdateRecommendation()
 		
 		Aux_Sell_SetStackSize(0)
 		Aux_Sell_SetStackCount(0)
-		Aux_SetMessage("Drag an item to the Auction Item area\n\nto see recommended pricing information")
+		Aux.sell.set_message("Drag an item to the Auction Item area\n\nto see recommended pricing information")
 	else
 		AuxSellRefreshButton:Enable()	
 		
@@ -224,7 +203,7 @@ function Aux_UpdateRecommendation()
 				AuxRecommendBasisText:SetText("(based on auction selected below)")
 			end
 		elseif auxSellEntries[currentAuction.name] then
-			Aux_SetMessage("No auctions were found for \n\n"..currentAuction.name)
+			Aux.sell.set_message("No auctions were found for \n\n"..currentAuction.name)
 			auxSellEntries[currentAuction.name] = nil
 		else 
 			Aux_HideElems(Aux.tabs.sell.shownElements)
@@ -278,22 +257,16 @@ function Aux_OnNewAuctionUpdate()
 		return
 	end
 	
-	if not Aux_Scan_IsIdle() then
-		Aux_Scan_Abort()
+	if not Aux.scan.idle() then
+		Aux.scan.abort()
 	end
 	
 	local auctionItemName, auctionItemTexture, auctionItemStackSize = GetAuctionSellItemInfo()
-	
-	Aux_Scan_ClearTooltip()
-	AuxScanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
-	AuxScanTooltip:SetAuctionSellItem()
-	AuxScanTooltip:Show()
-	local tooltip = Aux_Scan_ExtractTooltip()
 
 	currentAuction = auctionItemName and {
 		name = auctionItemName,
 		texture = auctionItemTexture,
-		stackSize = Aux_Scan_ItemCharges(tooltip) or auctionItemStackSize,
+		stackSize = Aux.info.auction_sell_item().charges or auctionItemStackSize,
 		stackCount = 1,
 	}
 	
@@ -316,17 +289,27 @@ function Aux_RefreshEntries()
 		local currentAuctionClass		= ItemType2AuctionClass(sType)
 		local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
 		
-		Aux_Scan_Start{
-				query = Aux_Scan_CreateQuery{
+		Aux.sell.set_message('Scanning auctions ...')
+		Aux.scan.start{
+				query = Aux.scan.create_query{
 						name = currentAuction.name,
 						classIndex = currentAuctionClass,
 						subclassIndex = currentAuctionSubclass
 				},
-				onComplete = function(data)
-					processScanResults(data, currentAuction.name)
+				on_start_page = function(i)
+					Aux.sell.set_message('Scanning auctions: page ' .. i .. ' ...')
+				end,
+				on_read_auction = function(i)
+					local auction_item = Aux.info.auction_item(i)
+					if auction_item.name == currentAuction.name then
+						local stack_size = auction_item.charges and auction_item.charges or auction_item.count
+						record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.duration, auction_item.owner)
+					end
+				end,
+				on_complete = function()
 					Aux_SelectAuxEntry()
 					Aux_UpdateRecommendation()
-				end
+				end,
 		}
 	end
 end
@@ -424,8 +407,8 @@ end
 -----------------------------------------
 
 function AuxSellRefreshButton_OnClick()
-	if not Aux_Scan_IsIdle() then
-		Aux_Scan_Abort()
+	if not Aux.scan.idle() then
+		Aux.scan.abort()
 	end
 	Aux_RefreshEntries()
 	Aux_SelectAuxEntry()
@@ -447,46 +430,32 @@ end
 
 --*****************************************************************]]
 
-function processScanResults(rawData, auctionItemName)
-
-	auxSellEntries[auctionItemName] = { created=GetTime() }
-	
-	----- Condense the scan rawData into a table that has only a single entry per stacksize/price combo
-	
-	local condData = {}
-
-	for _, rawDatum in ipairs(rawData) do
-		if auctionItemName == rawDatum.name and rawDatum.buyoutPrice > 0 then
-			local key = "_"..rawDatum.count.."_"..rawDatum.buyoutPrice
-			
-			if not condData[key] then
-				condData[key] = {
-					stackSize 	= rawDatum.count,
-					buyoutPrice	= rawDatum.buyoutPrice,
-					itemPrice	= rawDatum.buyoutPrice / rawDatum.count,
-					maxTimeLeft	= rawDatum.duration,
-					count		= 1,
-					numYours	= rawDatum.owner == UnitName("player") and 1 or 0
-			}
-			else
-				condData[key].maxTimeLeft = math.max(condData[key].maxTimeLeft, rawDatum.duration)
-				condData[key].count = condData[key].count + 1
-				if rawDatum.owner == UnitName("player") then
-					condData[key].numYours = condData[key].numYours + 1
-				end
+function record_auction(name, stack_size, buyout_price, duration, owner)
+	if buyout_price > 0 then
+		auxSellEntries[name] = auxSellEntries[name] or { created = GetTime() }
+		local entry
+		for _, existingEntry in ipairs(auxSellEntries[name]) do
+			if existingEntry.buyoutPrice == buyout_price and existingEntry.stackSize == stack_size then
+				entry = existingEntry
 			end
 		end
+		if entry then
+			entry.count = entry.count + 1
+			entry.numYours = entry.numYours + (owner == UnitName("player") and 1 or 0)
+			entry.maxTimeLeft = max(entry.maxTimeLeft, duration)
+		else
+			entry = {
+				stackSize 	= stack_size,
+				buyoutPrice	= buyout_price,
+				itemPrice	= buyout_price / stack_size,
+				maxTimeLeft	= duration,
+				count		= 1,
+				numYours	= owner == UnitName("player") and 1 or 0,
+			}
+			tinsert(auxSellEntries[name], entry)
+			table.sort(auxSellEntries[name], function(a,b) return a.itemPrice < b.itemPrice end)
+		end
 	end
-
-	----- create a table of these entries sorted by itemPrice
-	
-	local n = 1
-	for _, condDatum in pairs(condData) do
-		auxSellEntries[auctionItemName][n] = condDatum
-		n = n + 1
-	end
-	
-	table.sort(auxSellEntries[auctionItemName], function(a,b) return a.itemPrice < b.itemPrice end)
 end
 
 -----------------------------------------

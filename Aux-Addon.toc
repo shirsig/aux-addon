@@ -4,10 +4,16 @@
 ## SavedVariablesPerCharacter: AUX_ENABLE_ALT, AUX_OPEN_FIRST, AUX_INSTANT_BUYOUT, AUX_AUCTION_DURATION
 ## SavedVariables: auxSellEntries
 core.xml
+
 sell.xml
 buy.xml
+
 scan.xml
 stack.xml
 post.xml
+info.xml
+util.lua
+
 options.xml
 about.xml
+

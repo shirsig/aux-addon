@@ -1,4 +1,6 @@
-local processScanResults, createOrder, updateOrder
+Aux.buy = {}
+
+local record_auction, createOrder, updateOrder
 local entries
 local selectedEntries = {}
 local searchQuery
@@ -18,14 +20,22 @@ function AuxBuySearchButton_OnClick()
 	entries = nil
 	selectedEntries = {}
 	Aux_Buy_ScrollbarUpdate()
-	searchQuery = Aux_Scan_CreateQuery{
+	searchQuery = Aux.scan.create_query{
 		name = AuxBuySearchBox:GetText(),
 		exactMatch = true
 	}
-	Aux_Scan_Start{
+	Aux.buy.set_message('Scanning auctions ...')
+	Aux.scan.start{
 			query = searchQuery,
-			onComplete = function(data)
-				processScanResults(data)
+			on_start_page = function(i)
+				Aux.buy.set_message('Scanning auctions: page ' .. i .. ' ...')
+			end,
+			on_read_auction = function(i)
+				local auction_item = Aux.info.auction_item(i)
+				local stack_size = auction_item.charges and auction_item.charges or auction_item.count
+				record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
+			end,
+			on_complete = function()
 				Aux_Buy_ScrollbarUpdate()
 			end
 	}
@@ -49,6 +59,13 @@ end
 
 -----------------------------------------
 
+function Aux.buy.set_message(msg)
+	AuxBuyMessage:SetText(msg)
+	AuxBuyMessage:Show()
+end
+
+-----------------------------------------
+
 function AuxBuyBuySelectedButton_OnClick()
 	
 	AuxBuySearchButton:Disable()
@@ -63,18 +80,22 @@ function AuxBuyBuySelectedButton_OnClick()
 	
 	Aux_Buy_ScrollbarUpdate()					
 	
-	Aux_Scan_Start{
+	Aux.buy.set_message('Scanning auctions ...')
+	Aux.scan.start{
 			query = searchQuery,
-			onReadDatum = function(datum)
-				if datum.name and datum.count and datum.buyoutPrice then
-					local key = datum.name.."_"..datum.count.."_"..datum.buyoutPrice
+			on_start_page = function(i)
+				Aux.buy.set_message('Scanning auctions: page ' .. i .. ' ...')
+			end,
+			on_read_auction = function(i)
+				local auction_item = Aux.info.auction_item(i)
+
+				if auction_item.name and auction_item.count and auction_item.buyout_price then
+					local key = auction_item.name.."_"..auction_item.count.."_"..auction_item.buyout_price
 					if order[key] then
 					
-						if GetMoney() >= datum.buyoutPrice then
-							PlaceAuctionBid("list", datum.pageIndex, datum.buyoutPrice)
+						if GetMoney() >= auction_item.buyout_price then
+							PlaceAuctionBid("list", i, auction_item.buyout_price)
 							purchasedCount = purchasedCount + 1
-						else
-							
 						end
 						
 						if order[key] > 1 then
@@ -82,20 +103,18 @@ function AuxBuyBuySelectedButton_OnClick()
 						else
 							order[key] = nil
 						end
-						
-						return false
 					else
-						return true
+						local stack_size = auction_item.charges and auction_item.charges or auction_item.count
+						record_auction(auction_item.name, stack_size, auction_item.charges, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
 					end
 				end
 			end,
-			onComplete = function(data)
-				processScanResults(data)
+			on_complete = function()
 				Aux_Buy_ScrollbarUpdate()
 				AuxBuySearchButton:Enable()
 				Aux_Buy_ShowReport(true, orderedCount, purchasedCount)
 			end,
-			onAbort = function()
+			on_abort = function()
 				AuxBuySearchButton:Enable()
 				Aux_Buy_ShowReport(false, orderedCount, purchasedCount)
 			end
@@ -138,22 +157,18 @@ end
 
 -----------------------------------------
 
-function processScanResults(rawData)
-
-	entries = {}
-
-	for _,rawDatum in ipairs(rawData) do
-		
-		if rawDatum.buyoutPrice > 0 and rawDatum.owner ~= UnitName("player") then
-			tinsert(entries, {
-					name		= rawDatum.name,
-					stackSize	= rawDatum.count,
-					buyoutPrice	= rawDatum.buyoutPrice,
-					itemPrice	= rawDatum.buyoutPrice / rawDatum.count,
-					quality		= rawDatum.quality,
-					itemLink	= rawDatum.itemLink,
-			})
-		end
+function record_auction(name, stack_size, buyout_price, quality, owner, itemlink)
+	entries = entries or {}
+	
+	if buyout_price > 0 and owner ~= UnitName("player") then
+		tinsert(entries, {
+				name		= name,
+				stackSize	= stack_size,
+				buyoutPrice	= buyout_price,
+				itemPrice	= buyout_price / stack_size,
+				quality		= quality,
+				itemLink	= itemlink,
+		})
 	end
 	
 	table.sort(entries, function(a,b) return a.itemPrice < b.itemPrice end)
@@ -163,7 +178,7 @@ end
 
 function Aux_Buy_ScrollbarUpdate()
 	if entries and getn(entries) == 0 then
-		Aux_SetMessage("No auctions were found")
+		Aux.sell.set_message("No auctions were found")
 	else
 		AuxBuyMessage:Hide()
 	end

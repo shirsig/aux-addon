@@ -98,12 +98,7 @@ function stack_size(slot)
 end
 
 function item_charges(slot)
-	Aux_Scan_ClearTooltip()
-	AuxScanTooltip:SetOwner(UIParent, "ANCHOR_NONE")
-	AuxScanTooltip:SetBagItem(slot.bag, slot.bag_slot)
-	AuxScanTooltip:Show()
-	local tooltip = Aux_Scan_ExtractTooltip()
-	return Aux_Scan_ItemCharges(tooltip)
+	return Aux.info.container_item(slot.bag, slot.bag_slot).charges
 end
 
 function Aux.stack.onupdate()

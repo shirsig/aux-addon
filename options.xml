@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="Options.lua"/> 
+	<Script file="options.lua"/> 
 	
 	<Frame name="AuxOptionsButtonTemplate" virtual="true" hidden="true">
 		<Size>

@@ -1,3 +1,5 @@
+Aux.scan = {}
+
 local STATE_IDLE = 0
 local STATE_PREQUERY = 1
 local STATE_POSTQUERY = 2
@@ -9,8 +11,6 @@ local currentJob
 local currentPage
 local state = STATE_IDLE
 
-local scanData
-
 local timeOfLastUpdate = GetTime()
 
 -- forward declaration of local functions
@@ -18,58 +18,77 @@ local submitQuery, processQueryResults
 
 -----------------------------------------
 
-function Aux_Scan_IsIdle()
+function Aux.scan.on_event()
+	if event == "AUCTION_ITEM_LIST_UPDATE" then
+		if state == STATE_POSTQUERY then
+			state = STATE_PROCESSING
+			processQueryResults()
+		end
+	end
+end
+
+-----------------------------------------
+
+function Aux.scan.on_update()
+	if state == STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
+	
+		timeOfLastUpdate = GetTime()
+
+		if CanSendAuctionQuery() then
+			submitQuery()
+		end
+	end
+end
+
+-----------------------------------------
+
+function Aux.scan.idle()
 	return state == STATE_IDLE
 end
 
 -----------------------------------------
 
-function Aux_Scan_Complete()
+function Aux.scan.complete()
 	if state ~= STATE_IDLE then
-		if currentJob.onComplete then
-			currentJob.onComplete(scanData)
+		if currentJob.on_complete then
+			currentJob.on_complete()
 		end
 		
 		currentJob = nil
 		currentPage = nil
-		scanData = nil
 		state = STATE_IDLE
 	end
 end
 
 -----------------------------------------
 
-function Aux_Scan_Abort()
+function Aux.scan.abort()
 	if state ~= STATE_IDLE then
-		if currentJob and currentJob.onAbort then
-			currentJob.onAbort()
+		if currentJob and currentJob.on_abort then
+			currentJob.on_abort()
 		end
 		
 		currentJob = nil
 		currentPage = nil
-		scanData = nil
 		state = STATE_IDLE
 	end
 end
 
 -----------------------------------------
 
-function Aux_Scan_Start(job)
-
-	Aux_SetMessage("Scanning auctions ...")
+function Aux.scan.start(job)
 
 	if state ~= STATE_IDLE then
-		Aux_Scan_Abort()
+		Aux.scan.abort()
 	end
 	
 	currentJob = job
-	scanData = {}
 	state = STATE_PREQUERY
 end
 
 -----------------------------------------
 
-function Aux_Scan_CreateQuery(parameterMap)
+function Aux.scan.create_query(parameterMap)
 	local query = {
 		name = nil,
 		minLevel = "",
@@ -108,125 +127,23 @@ end
 
 -----------------------------------------
 
-function Aux_Scan_ClearTooltip()
-	for j=1, 30 do
-		leftEntry = getglobal('AuxScanTooltipTextLeft'..j):SetText()
-		rightEntry = getglobal('AuxScanTooltipTextRight'..j):SetText()
-	end
-end
-
------------------------------------------
-
-function Aux_Scan_ExtractTooltip()
-	local tooltip = {}
-	for j=1, 30 do
-		local leftEntry = getglobal('AuxScanTooltipTextLeft'..j):GetText()
-		if leftEntry then
-			tinsert(tooltip, leftEntry)
-		end
-		local rightEntry = getglobal('AuxScanTooltipTextRight'..j):GetText()
-		if rightEntry then
-			tinsert(tooltip, rightEntry)
-		end
-	end
-	return tooltip
-end
-
------------------------------------------
-
-function Aux_Scan_ItemCharges(tooltip)
-	for _, entry in ipairs(tooltip) do
-		local chargesString = gsub(entry, "(%d+) Charges", "%1")
-		local charges = tonumber(chargesString)
-		if charges then
-			return charges
-		end
-	end
-end	
-
------------------------------------------
-
 function processQueryResults()
-		
-	-- SortAuctionItems("list", "buyout")
-	-- if IsAuctionSortReversed("list", "buyout") then
-		-- SortAuctionItems("list", "buyout")
-	-- end
 	
 	local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
 
-	Aux_SetMessage("Scanning auctions: page "..currentPage.." ...")
+	if currentJob.on_start_page then
+		currentJob.on_start_page(currentPage)
+	end
 			
-	for i = 1, numBatchAuctions do
-	
-		local name, texture, count, quality, canUse, level, minBid, minIncrement, buyoutPrice, bidAmount, highBidder, owner = GetAuctionItemInfo("list", i)
-		local itemLink = GetAuctionItemLink("list", i)
-		
-		local duration = GetAuctionItemTimeLeft("list", i)
-		Aux_Scan_ClearTooltip()
-		AuxScanTooltip:SetOwner(UIParent, "ANCHOR_NONE");
-		AuxScanTooltip:SetAuctionItem("list", i)
-		AuxScanTooltip:Show()
-		local tooltip = Aux_Scan_ExtractTooltip()
-		-- for _, x in ipairs(tooltip) do Aux_Log(x) end
-		count = Aux_Scan_ItemCharges(tooltip) or count
-
-		local scanDatum = {
-				name			= name,
-				texture			= texture,
-				count			= count,
-				quality			= quality,
-				canUse			= canUse,
-				level			= level,
-				minBid			= minBid,
-				minIncrement	= minIncrement,
-				buyoutPrice		= buyoutPrice,
-				bidAmount		= bidAmount,
-				highBidder		= highBidder,
-				owner			= owner,
-				duration		= duration,
-				itemLink		= itemLink,
-				page			= currentPage,
-				pageIndex		= i
-		}
-		
-		if currentJob.onReadDatum then
-			local keepDatum = currentJob.onReadDatum(scanDatum)
-			if keepDatum then
-				tinsert(scanData, scanDatum)
-			end
-		else
-			tinsert(scanData, scanDatum)
+	for i = 1, numBatchAuctions do	
+		if currentJob.on_read_auction then
+			currentJob.on_read_auction(i)
 		end
 	end
 
 	if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
 		state = STATE_PREQUERY
 	else
-		Aux_Scan_Complete()
-	end
-end
-
------------------------------------------
-
-function Aux_Scan_OnEvent()
-	if event == "AUCTION_ITEM_LIST_UPDATE" then
-		if state == STATE_POSTQUERY then
-			state = STATE_PROCESSING
-			processQueryResults()
-		end
-	end
-end
-
------------------------------------------
-
-function Aux_Scan_OnUpdate()
-	if state == STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
-	
-		timeOfLastUpdate = GetTime()
-
-		if CanSendAuctionQuery() then
-			submitQuery()
-		end
+		Aux.scan.complete()
 	end
 end

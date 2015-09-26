@@ -1,0 +1,6 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+	<Script file="info.lua"/>
+  
+	<GameTooltip name="AuxInfoTooltip" inherits="GameTooltipTemplate"/>
+</Ui>

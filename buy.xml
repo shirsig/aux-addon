@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="Buy.lua"/> 
+	<Script file="buy.lua"/> 
 	
 	<Button name="AuxBuyEntryTemplate" virtual="true" hidden="true">
 		<Size><AbsDimension y="16"/></Size>		

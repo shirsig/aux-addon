@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="Scan.lua"/>
+	<Script file="scan.lua"/>
   
 	<!-- Frame to handle all core events --> 
 	<Frame>
@@ -9,12 +9,11 @@
 				this:RegisterEvent("AUCTION_ITEM_LIST_UPDATE")
 			</OnLoad>
 			<OnEvent> 
-				Aux_Scan_OnEvent()
+				Aux.scan.on_event()
 			</OnEvent>
 			<OnUpdate>
-				Aux_Scan_OnUpdate()
+				Aux.scan.on_update()
 			</OnUpdate>
 		</Scripts> 
 	</Frame>
-	<GameTooltip name="AuxScanTooltip" inherits="GameTooltipTemplate"/>
 </Ui>
