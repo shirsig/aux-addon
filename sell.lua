@@ -82,7 +82,7 @@ function Aux_AuctionsCreateAuctionButton_OnClick()
 			MoneyInputFrame_GetCopper(BuyoutPrice),
 			currentAuction.stackCount,
 			function(posted)
-				if posted > 0 then
+				if posted > 0 and buyoutPrice > 0 then
 					auxSellEntries[name] = auxSellEntries[name] or { created=GetTime() }
 					local entry
 					for _, existingEntry in ipairs(auxSellEntries[name]) do
