@@ -175,7 +175,7 @@ function Aux_UpdateRecommendation()
 				newBuyoutPrice = undercut(newBuyoutPrice)
 			end
 			
-			local newStartPrice = newBuyoutPrice * 0.95 
+			local newStartPrice = newBuyoutPrice * 0.95
 			
 			AuxMessage:Hide()	
 			Aux_ShowElems(Aux.tabs.sell.recommendationElements)
@@ -198,8 +198,8 @@ function Aux_UpdateRecommendation()
 			MoneyFrame_Update("AuxRecommendPerItemPrice",  Aux_Round(newBuyoutPrice / currentAuction.stackSize))
 			MoneyFrame_Update("AuxRecommendPerStackPrice", Aux_Round(newBuyoutPrice))
 			
-			MoneyInputFrame_SetCopper(BuyoutPrice, newBuyoutPrice)
-			MoneyInputFrame_SetCopper(StartPrice, newStartPrice)
+			MoneyInputFrame_SetCopper(BuyoutPrice, Aux_Round(newBuyoutPrice))
+			MoneyInputFrame_SetCopper(StartPrice, Aux_Round(newStartPrice))
 			
 			if auxSellEntries[currentAuction.name].selected.stackSize == auxSellEntries[currentAuction.name][1].stackSize and auxSellEntries[currentAuction.name].selected.buyoutPrice == auxSellEntries[currentAuction.name][1].buyoutPrice then
 				AuxRecommendBasisText:SetText("(based on cheapest)")
