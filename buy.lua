@@ -274,26 +274,24 @@ function Aux_Buy_ScrollbarUpdate()
 				[[
 				<html>
 				<body>
-					<h1>Aux Buy Report</h1><br/>
-					<h1>Exit status: %s</h1><br/>
+					<h1>Aux Buy Report%s</h1>
+					<br/>
 					<p>
-						%i out of %i ordered auctions for %s purchased
-					</p>
-					<p>
+						%i out of %i ordered auctions of %s purchased
+						<br/><br/>
 						Total units purchased: %i
-					</p>
-					<p>
-						Total expense: %i
+						<br/>
+						Total expense: %s
 					</p>
 				</body>
 				</html>
 				]],
-				completed and 'Completed' or 'Aborted',
+				completed and '' or ' (Aborted)',
 				progress.auctions,
 				ordered_count,
 				item_name,
 				progress.units,
-				progress.expense
+				Aux.util.format_money(progress.expense)
 		))
 			
 		AuxBuyReportHTML:SetSpacing(3)

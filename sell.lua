@@ -516,17 +516,22 @@ function report(item_name, stack_size, buyout_price, posted)
 			[[
 			<html>
 			<body>
-				<h1>Aux Sell Report</h1><br/>
+				<h1>Aux Sell Report</h1>
+				<br/>
 				<p>
-					%i %i-stacks of %s posted for %i each
+					%i auctions of %s posted
+					<br/><br/>
+					Stack size: %i
+					<br/>
+					Stack price: %s
 				</p>
 			</body>
 			</html>
 			]],
 			posted,
-			stack_size,
 			item_name,
-			buyout_price
+			stack_size,
+			Aux.util.format_money(buyout_price)
 	))
 		
 	AuxBuyReportHTML:SetSpacing(3)
