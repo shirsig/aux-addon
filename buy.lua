@@ -269,7 +269,6 @@ function Aux_Buy_ScrollbarUpdate()
 	end
 	
 	function report(completed, item_name, ordered_count, progress)
-		AuxBuyReport:Show()
 		
 		AuxBuyReportHTML:SetText(string.format(
 				[[
@@ -297,5 +296,7 @@ function Aux_Buy_ScrollbarUpdate()
 		))
 			
 		AuxBuyReportHTML:SetSpacing(3)
+		
+		AuxBuyReport:Show()
 	end
 end

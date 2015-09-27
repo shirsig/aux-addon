@@ -10,7 +10,7 @@ local currentAuction
 
 -----------------------------------------
 
-local record_auction, undercut, ItemType2AuctionClass, SubType2AuctionSubclass, set_message
+local record_auction, undercut, ItemType2AuctionClass, SubType2AuctionSubclass, set_message, report
 
 -----------------------------------------
 
@@ -94,7 +94,7 @@ function Aux.sell.AuctionsCreateAuctionButton_OnClick()
 						end
 					end
 				end
-				Aux_UpdateRecommendation()
+				report(name, stack_size, buyout_price, posted)
 			end
 		)
 	else
@@ -507,4 +507,29 @@ function SubType2AuctionSubclass(auctionClass, itemSubtype)
 			end
 		end
 	end
+end
+
+-----------------------------------------
+
+function report(item_name, stack_size, buyout_price, posted)
+	AuxBuyReportHTML:SetText(string.format(
+			[[
+			<html>
+			<body>
+				<h1>Aux Sell Report</h1><br/>
+				<p>
+					%i %i-stacks of %s posted for %i each
+				</p>
+			</body>
+			</html>
+			]],
+			posted,
+			stack_size,
+			item_name,
+			buyout_price
+	))
+		
+	AuxBuyReportHTML:SetSpacing(3)
+	
+	AuxBuyReport:Show()
 end
