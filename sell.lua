@@ -10,7 +10,7 @@ local currentAuction
 
 -----------------------------------------
 
-local record_auction, undercut, ItemType2AuctionClass, SubType2AuctionSubclass, set_message, report
+local record_auction, undercut, item_class_index, item_subclass_index, set_message, report
 
 -----------------------------------------
 
@@ -295,15 +295,15 @@ function Aux_RefreshEntries()
 		
 		local _, _, _, _, _, sType, sSubType = GetItemInfo(name)
 
-		local currentAuctionClass		= ItemType2AuctionClass(sType)
-		local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
+		local class_index -- = item_class_index(sType)
+		local subclass_index -- = item_subclass_index(class_index, sSubType)
 
 		set_message('Scanning auctions ...')
 		Aux.scan.start{
 				query = Aux.scan.create_query{
 						name = name,
-						classIndex = currentAuctionClass,
-						subclassIndex = currentAuctionSubclass
+						classIndex = class_index,
+						subclassIndex = subclass_index,
 				},
 				on_start_page = function(i)
 					set_message('Scanning auctions: page ' .. i .. ' ...')
@@ -479,32 +479,20 @@ end
 
 -----------------------------------------
 
-function ItemType2AuctionClass(itemType)
-	local itemClasses = { GetAuctionItemClasses() }
-	if itemClasses then
-		if getn(itemClasses) > 0 then
-		local itemClass
-			for x, itemClass in pairs(itemClasses) do
-				if itemClass == itemType then
-					return x
-				end
-			end
+function item_class_index(item_class)
+	for i, class in pairs(GetAuctionItemClasses()) do
+		if class == item_class then
+			return i
 		end
-	else
-		Aux_Log("Can't GetAuctionItemClasses")
 	end
 end
 
 -----------------------------------------
 
-function SubType2AuctionSubclass(auctionClass, itemSubtype)
-	local itemClasses = { GetAuctionItemSubClasses(auctionClass.number) }
-	if itemClasses.n > 0 then
-	local itemClass
-		for x, itemClass in pairs(itemClasses) do
-			if itemClass == itemSubtype then
-				return x
-			end
+function item_subclass_index(class_index, item_subclass)
+	for i, subclass in pairs(GetAuctionItemSubClasses(class_index)) do
+		if subclass == item_subclass then
+			return i
 		end
 	end
 end
