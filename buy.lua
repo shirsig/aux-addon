@@ -1,9 +1,9 @@
 Aux.buy = {}
 
-local record_auction, createOrder, updateOrder
+local record_auction, createOrder, updateOrder, set_message, report
 local entries
 local selectedEntries = {}
-local searchQuery
+local search_query
 
 -----------------------------------------
 
@@ -17,23 +17,27 @@ end
 -----------------------------------------
 
 function AuxBuySearchButton_OnClick()
+
 	entries = nil
 	selectedEntries = {}
+	
 	Aux_Buy_ScrollbarUpdate()
-	searchQuery = Aux.scan.create_query{
+	
+	search_query = Aux.scan.create_query{
 		name = AuxBuySearchBox:GetText(),
 		exactMatch = true,
 	}
-	Aux.buy.set_message('Scanning auctions ...')
+	
+	set_message('Scanning auctions ...')
 	Aux.scan.start{
-			query = searchQuery,
+			query = search_query,
 			on_start_page = function(i)
-				Aux.buy.set_message('Scanning auctions: page ' .. i .. ' ...')
+				set_message('Scanning auctions: page ' .. i .. ' ...')
 			end,
 			on_read_auction = function(i)
 				local auction_item = Aux.info.auction_item(i)
 				local stack_size = auction_item.charges or auction_item.count
-				if auction_item.name == searchQuery.name then
+				if auction_item.name == search_query.name then
 					record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
 				end
 			end,
@@ -65,7 +69,7 @@ end
 
 -----------------------------------------
 
-function Aux.buy.set_message(msg)
+function set_message(msg)
 	AuxBuyMessage:SetText(msg)
 	AuxBuyMessage:Show()
 end
@@ -74,23 +78,27 @@ end
 
 function AuxBuyBuySelectedButton_OnClick()
 	
-	AuxBuySearchButton:Disable()
-	AuxBuyBuySelectedButton:Disable()
-	
 	local order = createOrder(selectedEntries)
 	local orderedCount = Aux_SetSize(selectedEntries)
-	local purchasedCount = 0
-
+	
 	entries = nil
 	selectedEntries = {}
 	
-	Aux_Buy_ScrollbarUpdate()					
+	Aux_Buy_ScrollbarUpdate()	
+	AuxBuySearchButton:Disable()
+	AuxBuyBuySelectedButton:Disable()
 	
-	Aux.buy.set_message('Scanning auctions ...')
+	local progress = {
+		auctions = 0,
+		units = 0,
+		expense = 0,
+	}				
+	
+	set_message('Scanning auctions ...')
 	Aux.scan.start{
-			query = searchQuery,
+			query = search_query,
 			on_start_page = function(i)
-				Aux.buy.set_message('Scanning auctions: page ' .. i .. ' ...')
+				set_message('Scanning auctions: page ' .. i .. ' ...')
 			end,
 			on_read_auction = function(i)
 				local auction_item = Aux.info.auction_item(i)
@@ -101,7 +109,9 @@ function AuxBuyBuySelectedButton_OnClick()
 					
 						if GetMoney() >= auction_item.buyout_price then
 							PlaceAuctionBid("list", i, auction_item.buyout_price)
-							purchasedCount = purchasedCount + 1
+							progress.auctions = progress.auctions + 1
+							progress.units = progress.units + auction_item.count
+							progress.expense = progress.expense + auction_item.buyout_price
 						end
 						
 						if order[key] > 1 then
@@ -111,7 +121,7 @@ function AuxBuyBuySelectedButton_OnClick()
 						end
 					else
 						local stack_size = auction_item.charges or auction_item.count
-						if auction_item.name == searchQuery.name then
+						if auction_item.name == search_query.name then
 							record_auction(auction_item.name, stack_size, auction_item.charges, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
 						end
 					end
@@ -121,12 +131,12 @@ function AuxBuyBuySelectedButton_OnClick()
 				entries = entries or {}
 				Aux_Buy_ScrollbarUpdate()
 				AuxBuySearchButton:Enable()
-				Aux_Buy_ShowReport(true, orderedCount, purchasedCount)
+				report(true, search_query.name, orderedCount, progress)
 			end,
 			on_abort = function()
 				entries = nil
 				AuxBuySearchButton:Enable()
-				Aux_Buy_ShowReport(false, orderedCount, purchasedCount)
+				report(false, search_query.name, orderedCount, progress)
 			end
 	}
 end
@@ -188,7 +198,7 @@ end
 
 function Aux_Buy_ScrollbarUpdate()
 	if entries and getn(entries) == 0 then
-		Aux.buy.set_message("No auctions were found")
+		set_message("No auctions were found")
 	else
 		AuxBuyMessage:Hide()
 	end
@@ -258,16 +268,33 @@ function Aux_Buy_ScrollbarUpdate()
 		end
 	end
 	
-	function Aux_Buy_ShowReport(completed, orderedCount, purchasedCount)
+	function report(completed, item_name, ordered_count, progress)
 		AuxBuyReport:Show()
 		
-		AuxBuyReportHTML:SetText("<html><body>"
-				.."<h1>Aux Buy Report</h1><br/>"
-				.."<h1>Status: "..(completed and "Completed" or "Aborted").."</h1><br/>"
-				.."<p>"
-				..string.format("%i out of the %i ordered auctions have been purchased", purchasedCount, orderedCount)
-				.."</p>"
-				.."</body></html>")
+		AuxBuyReportHTML:SetText(string.format(
+				[[
+				<html>
+				<body>
+					<h1>Aux Buy Report</h1><br/>
+					<h1>Exit status: %s</h1><br/>
+					<p>
+						%i out of %i ordered auctions for %s purchased
+					</p>
+					<p>
+						Total units purchased: %i
+					</p>
+					<p>
+						Total expense: %i
+					</p>
+				</body>
+				</html>
+				]],
+				completed and 'Completed' or 'Aborted',
+				progress.auctions,
+				ordered_count,
+				progress.units,
+				progress.expense
+		))
 			
 		AuxBuyReportHTML:SetSpacing(3)
 	end

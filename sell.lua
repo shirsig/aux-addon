@@ -10,7 +10,7 @@ local currentAuction
 
 -----------------------------------------
 
-local record_auction, undercut, ItemType2AuctionClass, SubType2AuctionSubclass
+local record_auction, undercut, ItemType2AuctionClass, SubType2AuctionSubclass, set_message
 
 -----------------------------------------
 
@@ -111,7 +111,7 @@ end
 
 -----------------------------------------
 
-function Aux.sell.set_message(msg)
+function set_message(msg)
 	Aux_HideElems(Aux.tabs.sell.recommendationElements)
 	AuxMessage:SetText(msg)
 	AuxMessage:Show()
@@ -156,7 +156,7 @@ function Aux_UpdateRecommendation()
 		
 		Aux_Sell_SetStackSize(0)
 		Aux_Sell_SetStackCount(0)
-		Aux.sell.set_message("Drag an item to the Auction Item area\n\nto see recommended pricing information")
+		set_message("Drag an item to the Auction Item area\n\nto see recommended pricing information")
 	else
 		AuxSellRefreshButton:Enable()	
 		
@@ -209,7 +209,7 @@ function Aux_UpdateRecommendation()
 				AuxRecommendBasisText:SetText("(based on auction selected below)")
 			end
 		elseif auxSellEntries[currentAuction.name] then
-			Aux.sell.set_message("No auctions were found for \n\n"..currentAuction.name)
+			set_message("No auctions were found for \n\n"..currentAuction.name)
 			auxSellEntries[currentAuction.name] = nil
 		else 
 			Aux_HideElems(Aux.tabs.sell.shownElements)
@@ -298,7 +298,7 @@ function Aux_RefreshEntries()
 		local currentAuctionClass		= ItemType2AuctionClass(sType)
 		local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
 
-		Aux.sell.set_message('Scanning auctions ...')
+		set_message('Scanning auctions ...')
 		Aux.scan.start{
 				query = Aux.scan.create_query{
 						name = name,
@@ -306,7 +306,7 @@ function Aux_RefreshEntries()
 						subclassIndex = currentAuctionSubclass
 				},
 				on_start_page = function(i)
-					Aux.sell.set_message('Scanning auctions: page ' .. i .. ' ...')
+					set_message('Scanning auctions: page ' .. i .. ' ...')
 				end,
 				on_read_auction = function(i)
 					local auction_item = Aux.info.auction_item(i)
