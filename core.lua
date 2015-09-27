@@ -181,8 +181,10 @@ function Aux_OnAuctionHouseShow()
 
 	AuxOptionsButtonPanel:Show()
 
-	if AUX_OPEN_FIRST then
+	if AUX_OPEN_SELL then
 		AuctionFrameTab_OnClick(Aux.tabs.sell.index)
+	elseif AUX_OPEN_BUY then
+		AuctionFrameTab_OnClick(Aux.tabs.buy.index)
 	end
 
 end
@@ -442,34 +444,42 @@ end
 -----------------------------------------
 
 function Aux_ContainerFrameItemButton_OnClick(button)
+	local bag, slot = this:GetParent():GetID(), this:GetID()
+	local container_item = Aux.info.container_item(bag, slot)
 	
-	if button == "LeftButton"
-			and IsShiftKeyDown()
-			and not ChatFrameEditBox:IsVisible()
-			and AuctionFrame:IsVisible()
-			and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index)
-	then
-		local container_item = Aux.info.container_item(this:GetParent():GetID(), this:GetID())
-		if container_item then
+	if AuctionFrame:IsVisible() and button == "LeftButton" and container_item then
+	
+		if IsShiftKeyDown()
+				and not ChatFrameEditBox:IsVisible()
+				and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index)
+		then
 			if PanelTemplates_GetSelectedTab(AuctionFrame) == 1 then
 				BrowseName:SetText(container_item.name)
 			elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index then
 				AuxBuySearchBox:SetText(container_item.name)
 			end
-		end
-	else
-		Aux.orig.ContainerFrameItemButton_OnClick(button)
-
-		if AUX_ENABLE_ALT and AuctionFrame:IsShown() and IsAltKeyDown() and button == "LeftButton" then
-		
-			ClickAuctionSellItemButton()
+			return
+		elseif AUX_SELL_SHORTCUT and IsAltKeyDown()then
 			ClearCursor()
-			
+			PickupContainerItem(bag, slot)
+			ClickAuctionSellItemButton()
+			ClearCursor()		
 			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Aux.tabs.sell.index then
 				AuctionFrameTab_OnClick(Aux.tabs.sell.index)
+			end			
+			return
+		elseif AUX_BUY_SHORTCUT and IsControlKeyDown() and not ChatFrameEditBox:IsVisible() then
+			local container_item = Aux.info.container_item(this:GetParent():GetID(), this:GetID())
+			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Aux.tabs.buy.index then
+				local container_item = Aux.info.container_item(this:GetParent():GetID(), this:GetID())
+				AuctionFrameTab_OnClick(Aux.tabs.buy.index)
 			end
+			AuxBuySearchBox:SetText(container_item.name)
+			AuxBuySearchButton_OnClick()
+			return
 		end
 	end
+	return Aux.orig.ContainerFrameItemButton_OnClick(button)
 end
 
 -----------------------------------------

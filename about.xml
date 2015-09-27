@@ -12,7 +12,7 @@
 
 		<Layers>
 			<Layer level="BACKGROUND">
-				<FontString name="AuxAuthorText" inherits="GameFontDisableSmall" justifyH="LEFT" justifyV="TOP">
+				<FontString name="AuxOptionsAuthorText" inherits="GameFontDisableSmall" justifyH="LEFT" justifyV="TOP">
 					<Anchors>
 						<Anchor point="BOTTOMLEFT">
 							<Offset><AbsDimension x="30" y="20"/></Offset>
