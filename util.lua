@@ -7,3 +7,6 @@ function Aux.util.iter(array)
 		return value
 	end
 end
+
+function Aux.util.dummy()
+end

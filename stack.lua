@@ -1,6 +1,4 @@
-Aux.stack = {
-	orig = {},
-}
+Aux.stack = {}
 
 local state
 
@@ -71,8 +69,8 @@ function move_item(from_slot, to_slot, amount)
 		state.processing = 3
 
 		ClearCursor()
-		Aux.stack.orig.SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
-		Aux.stack.orig.PickupContainerItem(to_slot.bag, to_slot.bag_slot)
+		SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
+		PickupContainerItem(to_slot.bag, to_slot.bag_slot)
 		ClearCursor()
 	end
 end
@@ -155,8 +153,6 @@ function Aux.stack.stop()
 		local callback = state.callback
 		
 		state = nil
-		PickupContainerItem = Aux.stack.orig.PickupContainerItem
-		SplitContainerItem = Aux.stack.orig.SplitContainerItem
 		
 		if callback then
 			callback(slot)
@@ -166,9 +162,6 @@ end
 
 function Aux.stack.start(name, size, callback)
 	Aux.stack.stop()
-	
-	PickupContainerItem = function() end
-	SplitContainerItem = function() end
 	
 	local slots = item_slots(name)
 	local target_slot = slots()

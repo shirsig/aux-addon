@@ -1,4 +1,6 @@
-Aux.post = {}
+Aux.post = {
+	orig = {}
+}
 
 local state
 
@@ -39,8 +41,6 @@ function Aux.post.stop()
 		local posted = state.posted
 
 		state = nil
-		PickupContainerItem = Aux.stack.orig.PickupContainerItem
-		SplitContainerItem = Aux.stack.orig.SplitContainerItem
 		
 		if callback then
 			callback(posted)
@@ -66,9 +66,6 @@ function Aux.post.start(name, stack_size, duration, bid, buyout, count, callback
 	ClearCursor()
 	ClickAuctionSellItemButton()
 	ClearCursor()
-	
-	PickupContainerItem = function() end
-	SplitContainerItem = function() end
 	
 	state = {
 		name = name,

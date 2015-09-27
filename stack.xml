@@ -4,8 +4,6 @@
 	<Frame>
       <Scripts> 
 			<OnLoad>
-				Aux.stack.orig.PickupContainerItem = PickupContainerItem
-				Aux.stack.orig.SplitContainerItem = SplitContainerItem
 				this:RegisterEvent('ITEM_LOCK_CHANGED')
 			</OnLoad>
 			<OnEvent> 
