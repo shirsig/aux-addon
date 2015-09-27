@@ -262,11 +262,12 @@ function Aux_OnNewAuctionUpdate()
 	end
 	
 	local auctionItemName, auctionItemTexture, auctionItemStackSize = GetAuctionSellItemInfo()
+	local auction_sell_item = Aux.info.auction_sell_item()
 
-	currentAuction = auctionItemName and {
-		name = auctionItemName,
-		texture = auctionItemTexture,
-		stackSize = Aux.info.auction_sell_item().charges or auctionItemStackSize,
+	currentAuction = auction_sell_item.name and {
+		name = auction_sell_item.name,
+		texture = auction_sell_item.texture,
+		stackSize = auction_sell_item.charges or auction_sell_item.count,
 		stackCount = 1,
 	}
 	
@@ -282,17 +283,19 @@ end
 
 function Aux_RefreshEntries()
 	if currentAuction then
-		auxSellEntries[currentAuction.name] = nil
+		local name = currentAuction.name
 		
-		local _, _, _, _, _, sType, sSubType = GetItemInfo(currentAuction.name)
+		auxSellEntries[name] = nil
+		
+		local _, _, _, _, _, sType, sSubType = GetItemInfo(name)
 
 		local currentAuctionClass		= ItemType2AuctionClass(sType)
 		local currentAuctionSubclass	= nil -- SubType2AuctionSubclass(currentAuctionClass, sSubType)
-		
+
 		Aux.sell.set_message('Scanning auctions ...')
 		Aux.scan.start{
 				query = Aux.scan.create_query{
-						name = currentAuction.name,
+						name = name,
 						classIndex = currentAuctionClass,
 						subclassIndex = currentAuctionSubclass
 				},
@@ -301,12 +304,16 @@ function Aux_RefreshEntries()
 				end,
 				on_read_auction = function(i)
 					local auction_item = Aux.info.auction_item(i)
-					if auction_item.name == currentAuction.name then
-						local stack_size = auction_item.charges and auction_item.charges or auction_item.count
+					if auction_item.name == name then
+						local stack_size = auction_item.charges or auction_item.count
 						record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.duration, auction_item.owner)
 					end
 				end,
+				on_abort = function()
+					auxSellEntries[name] = nil
+				end,
 				on_complete = function()
+					auxSellEntries[name] = auxSellEntries[name] or { created = GetTime() }
 					Aux_SelectAuxEntry()
 					Aux_UpdateRecommendation()
 				end,

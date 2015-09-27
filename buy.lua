@@ -32,7 +32,7 @@ function AuxBuySearchButton_OnClick()
 			end,
 			on_read_auction = function(i)
 				local auction_item = Aux.info.auction_item(i)
-				local stack_size = auction_item.charges and auction_item.charges or auction_item.count
+				local stack_size = auction_item.charges or auction_item.count
 				record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
 			end,
 			on_complete = function()
@@ -104,7 +104,7 @@ function AuxBuyBuySelectedButton_OnClick()
 							order[key] = nil
 						end
 					else
-						local stack_size = auction_item.charges and auction_item.charges or auction_item.count
+						local stack_size = auction_item.charges or auction_item.count
 						record_auction(auction_item.name, stack_size, auction_item.charges, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
 					end
 				end

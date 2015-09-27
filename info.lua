@@ -4,6 +4,11 @@ local itemlink_item, item_id, item_charges
 
 function Aux.info.container_item(bag, slot)
 	local itemlink = GetContainerItemLink(bag, slot)
+	
+	if not itemlink then
+		return
+	end
+	
 	local container_item = itemlink_item(itemlink)
 	
 	local texture, count, locked, quality, readable, lootable, itemlink = GetContainerItemInfo(bag, slot)

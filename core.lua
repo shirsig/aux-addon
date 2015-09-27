@@ -414,9 +414,9 @@ function Aux_BrowseButton_OnMouseDown()
 	
 		SetSelectedAuctionItem("list", index)
 		
-		local _, _, _, _, _, _, _, _, buyoutPrice = GetAuctionItemInfo("list", index)
-		if buyoutPrice > 0 then
-			PlaceAuctionBid("list", index, buyoutPrice)
+		local auction_item = Aux.info.auction_item(index)
+		if auction_item.buyout_price > 0 then
+			PlaceAuctionBid("list", index, auction_item.buyout_price)
 		end
 		
 		AuctionFrameBrowse_Update()
@@ -449,13 +449,12 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 			and AuctionFrame:IsVisible()
 			and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index)
 	then
-		local itemLink = GetContainerItemLink(this:GetParent():GetID(), this:GetID())
-		if itemLink then
-		local itemName = string.gsub(itemLink, "^.-%[(.*)%].*", "%1")
+		local container_item = Aux.info.container_item(this:GetParent():GetID(), this:GetID())
+		if container_item then
 			if PanelTemplates_GetSelectedTab(AuctionFrame) == 1 then
-				BrowseName:SetText(itemName)
+				BrowseName:SetText(container_item.name)
 			elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index then
-				AuxBuySearchBox:SetText(itemName)
+				AuxBuySearchBox:SetText(container_item.name)
 			end
 		end
 	else
