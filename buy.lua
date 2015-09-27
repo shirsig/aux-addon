@@ -122,7 +122,7 @@ function AuxBuyBuySelectedButton_OnClick()
 					else
 						local stack_size = auction_item.charges or auction_item.count
 						if auction_item.name == search_query.name then
-							record_auction(auction_item.name, stack_size, auction_item.charges, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
+							record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
 						end
 					end
 				end
@@ -291,6 +291,7 @@ function Aux_Buy_ScrollbarUpdate()
 				completed and 'Completed' or 'Aborted',
 				progress.auctions,
 				ordered_count,
+				item_name,
 				progress.units,
 				progress.expense
 		))
