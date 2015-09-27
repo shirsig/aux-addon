@@ -36,7 +36,11 @@ function AuxBuySearchButton_OnClick()
 				record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
 			end,
 			on_complete = function()
+				entries = entries or {}
 				Aux_Buy_ScrollbarUpdate()
+			end,
+			on_abort = function()
+				entries = nil
 			end
 	}
 end
@@ -110,11 +114,13 @@ function AuxBuyBuySelectedButton_OnClick()
 				end
 			end,
 			on_complete = function()
+				entries = entries or {}
 				Aux_Buy_ScrollbarUpdate()
 				AuxBuySearchButton:Enable()
 				Aux_Buy_ShowReport(true, orderedCount, purchasedCount)
 			end,
 			on_abort = function()
+				entries = nil
 				AuxBuySearchButton:Enable()
 				Aux_Buy_ShowReport(false, orderedCount, purchasedCount)
 			end
@@ -178,7 +184,7 @@ end
 
 function Aux_Buy_ScrollbarUpdate()
 	if entries and getn(entries) == 0 then
-		Aux.sell.set_message("No auctions were found")
+		Aux.buy.set_message("No auctions were found")
 	else
 		AuxBuyMessage:Hide()
 	end

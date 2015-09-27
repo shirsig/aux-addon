@@ -77,17 +77,23 @@ function Aux.sell.AuctionsCreateAuctionButton_OnClick()
 		end
 		
 		Aux.post.start(
-			currentAuction.name,
-			currentAuction.stackSize,
+			name,
+			stack_size,
 			AuctionFrameAuctions.duration,
 			MoneyInputFrame_GetCopper(StartPrice),
-			MoneyInputFrame_GetCopper(BuyoutPrice),
+			buyout_price,
 			currentAuction.stackCount,
 			function(posted)
 				for i = 1, posted do
 					record_auction(name, stack_size, buyout_price, duration, UnitName("player"))
 				end
-				auxSellEntries[name].selected = entry
+				if auxSellEntries[name] then
+					for _, entry in ipairs(auxSellEntries[name]) do
+						if entry.buyout_price == buyout_price and entry.stack_size == stack_size then
+							auxSellEntries[name].selected = entry
+						end
+					end
+				end
 				Aux_UpdateRecommendation()
 			end
 		)
