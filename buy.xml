@@ -145,6 +145,9 @@
 				<Size><AbsDimension x="240" y="20"/></Size>
 				<Anchors><Anchor point="LEFT" relativeTo="AuxBuySearchBoxLabel" relativePoint="RIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
+					<OnChar>
+						Aux.util.item_name_autocomplete()
+					</OnChar>
 					<OnEnterPressed>
 						this:ClearFocus()
 						AuxBuySearchButton_OnClick()

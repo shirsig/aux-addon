@@ -1,4 +1,4 @@
-AuxVersion = "1.2.0"
+AuxVersion = "1.3.0"
 AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)"
 
 local lastRightClickAction = GetTime()
@@ -111,6 +111,7 @@ end
 
 function Aux_SetupHookFunctions()
 	
+	BrowseName:SetScript('OnChar', Aux.util.item_name_autocomplete)
 	Aux.orig.AuctionFrameAuctions_OnShow = AuctionFrameAuctions_OnShow
 	AuctionFrameAuctions_OnShow = Aux_Sell_AuctionFrameAuctions_OnShow
 	
