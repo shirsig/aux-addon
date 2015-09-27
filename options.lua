@@ -10,9 +10,9 @@ AUX_AUCTION_DURATION = 'long'
 
 function Aux.options.show_description()
 
-	AuxDescriptionFrame:Show()
+	AuxAboutFrame:Show()
 	
-	AuxDescriptionHTML:SetText("<html><body>"
+	AuxAboutDescriptionHTML:SetText("<html><body>"
 			.."<h1>What is Aux?</h1><br/>"
 			.."<p>"
 			.."Aux adds two tabs to the traditional auction house layout, Aux Sell and  Aux Buy, which make selling and buying respectively a much more streamlined experience by automating a lot of the annoying little tasks involved in managing your auctions and providing you with much better information to base decisions on."
@@ -22,8 +22,8 @@ function Aux.options.show_description()
 			.."The Aux Buy panel makes a multi-page search for you and lists all items with the most relevant information sorted by unit price. From that list you can select all the auctions you want to buy and after your confirmation Aux then makes another multi-page search, picking up all the selected auctions in the process. At the end you're presented with a report about what has been purchased."
 			.."</p>"
 			.."</body></html>")			
-	AuxDescriptionHTML:SetSpacing(3)
-	AuxOptionsAuthorText:SetText("Authors: "..AuxAuthors)
+	AuxAboutDescriptionHTML:SetSpacing(3)
+	AuxAboutAuthorText:SetText("Authors: "..AuxAuthors)
 	
 end
 
