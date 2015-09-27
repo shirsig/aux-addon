@@ -201,7 +201,7 @@ function Aux_OnAuctionHouseClosed()
 	
 	AuxOptionsButtonPanel:Hide()
 	AuxOptionsFrame:Hide()
-	AuxDescriptionFrame:Hide()
+	AuxAboutFrame:Hide()
 	AuxSellPanel:Hide()
     AuxBuyPanel:Hide()
 	
