@@ -12,7 +12,7 @@ function Aux.util.item_name_autocomplete()
 	local text = this:GetText()
 	local textlen = strlen(text)
 	local name
-	for item_id=1,40000 do
+	for item_id=1,30000 do
 		name = GetItemInfo(item_id)
 		if name and strfind(strupper(name), '^' .. strupper(text)) then
 			this:SetText(name)
