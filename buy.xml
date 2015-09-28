@@ -95,10 +95,6 @@
 				<FontString name="AuxBuyMessage" inherits="GameFontNormal">
 					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="70" y="-120"/></Offset></Anchor></Anchors>
 				</FontString>
-				
-				<FontString name="AuxBuySearchBoxLabel" inherits="GameFontHighlightSmall" text="Search For">
-					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="160" y="-50"/></Offset></Anchor></Anchors>
-				</FontString>
 			</Layer>
 			<Layer level="ARTWORK">
 				<FontString name="AuxBuyTotalLabel" inherits="GameFontHighlightSmall" text="Total">
@@ -140,30 +136,75 @@
 			</Layer>
 		</Layers>
 
-		<Frames>		
-            <EditBox name="AuxBuySearchBox" autoFocus="false" inherits="InputBoxTemplate">
-				<Size><AbsDimension x="240" y="20"/></Size>
-				<Anchors><Anchor point="LEFT" relativeTo="AuxBuySearchBoxLabel" relativePoint="RIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnChar>
-						Aux.util.item_name_autocomplete()
-					</OnChar>
-					<OnEnterPressed>
-						this:ClearFocus()
-						AuxBuySearchButton_OnClick()
-					</OnEnterPressed>
-				</Scripts>
-			</EditBox> 
-            
-            <Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
-				<Size><AbsDimension x="80" y="22"/></Size>
-				<Anchors><Anchor point="LEFT" relativeTo="AuxBuySearchBox" relativePoint="RIGHT"><Offset><AbsDimension x="10" y="1" /></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnClick>
-						AuxBuySearchButton_OnClick()
-					</OnClick>
-				</Scripts>
-			</Button>
+		<Frames>
+			<Frame name="AuxBuyFilters">
+				<Size><AbsDimension x="1" y="1"/></Size>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="80" y="-55"/></Offset></Anchor></Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="AuxBuySearchBoxLabel" inherits="GameFontHighlightSmall" text="Name">
+							<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="0" y="1" /></Offset></Anchor></Anchors>
+						</FontString>
+						
+						<FontString name="AuxBuyExactLabel" inherits="GameFontHighlightSmall" text="Exact">
+							<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="240" y="1" /></Offset></Anchor></Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Frames>
+					<EditBox name="AuxBuySearchBox" autoFocus="false" inherits="InputBoxTemplate">
+						<Size><AbsDimension x="180" y="20"/></Size>
+						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="50" y="0"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnChar>
+								Aux.util.item_name_autocomplete()
+							</OnChar>
+							<OnEnterPressed>
+								this:ClearFocus()
+								AuxBuySearchButton_OnClick()
+							</OnEnterPressed>
+						</Scripts>
+					</EditBox>
+					<CheckButton name="AuxBuyExactCheckButton" inherits="UICheckButtonTemplate" checked="true">
+						<Size><AbsDimension x="24" y="24"/></Size>
+						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="270" y="1" /></Offset></Anchor></Anchors>
+					</CheckButton>
+							
+					<Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
+						<Size><AbsDimension x="80" y="22"/></Size>
+						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="300" y="1" /></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnClick>
+								AuxBuySearchButton_OnClick()
+							</OnClick>
+						</Scripts>
+					</Button>
+					
+					<Frame name="AuxBuyCategoryDropDown" inherits="UIDropDownMenuTemplate">
+						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="380" y="1" /></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
+							</OnLoad>
+							<OnShow>
+								UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
+							</OnShow>
+						</Scripts>
+					</Frame>
+					
+			<!-- 		<Frame name="AuxBuySlotDropDown" inherits="UIDropDownMenuTemplate">
+						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="500" y="1" /></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnLoad>
+								UIDropDownMenu_Initialize(this, AuxBuySlotDropDown_Initialize)
+							</OnLoad>
+							<OnShow>
+								UIDropDownMenu_Initialize(this, AuxBuySlotDropDown_Initialize)
+							</OnShow>
+						</Scripts>
+					</Frame> -->
+				</Frames>
+			</Frame>		
             
 			<Button name="AuxBuyBuySelectedButton" inherits="UIPanelButtonTemplate" text="Buy Selected Auctions">
 				<Size><AbsDimension x="166" y="22"/></Size>
@@ -196,16 +237,6 @@
 					</OnLoad>
 				</Scripts>
 			</Frame>
-			
-<!-- 			<Frame name="BidBidPrice" inherits="MoneyInputFrameTemplate">
-				<Anchors>
-					<Anchor point="BOTTOM">
-						<Offset>
-							<AbsDimension x="-15" y="18"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-			</Frame> -->
 		
 			<ScrollFrame name="AuxBuyScrollFrame" inherits="FauxScrollFrameTemplate">
 				<Size><AbsDimension x="785" y="309"/></Size>

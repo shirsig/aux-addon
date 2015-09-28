@@ -23,9 +23,13 @@ function AuxBuySearchButton_OnClick()
 	
 	Aux_Buy_ScrollbarUpdate()
 	
+	local category = UIDropDownMenu_GetSelectedValue(AuxBuyCategoryDropDown)
+	
 	search_query = Aux.scan.create_query{
 		name = AuxBuySearchBox:GetText(),
-		exactMatch = true,
+		invTypeIndex = category and category.type,
+		classIndex = category and category.class,	
+		subclassIndex = category and category.subclass,
 	}
 	
 	set_message('Scanning auctions ...')
@@ -41,7 +45,7 @@ function AuxBuySearchButton_OnClick()
 				end
 				
 				local stack_size = auction_item.charges or auction_item.count
-				if auction_item.name == search_query.name then
+				if auction_item.name == search_query.name or name == '' or not AuxBuyExactCheckButton:GetChecked() then
 					record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
 				end
 			end,
@@ -278,35 +282,117 @@ function Aux_Buy_ScrollbarUpdate()
 			lineEntry:Hide()
 		end
 	end
+end
+
+-----------------------------------------
+
+function report(completed, item_name, ordered_count, progress)
 	
-	function report(completed, item_name, ordered_count, progress)
-		
-		AuxBuyReportHTML:SetText(string.format(
-				[[
-				<html>
-				<body>
-					<h1>Aux Buy Report%s</h1>
+	AuxBuyReportHTML:SetText(string.format(
+			[[
+			<html>
+			<body>
+				<h1>Aux Buy Report%s</h1>
+				<br/>
+				<p>
+					%i out of %i ordered auctions of %s purchased
+					<br/><br/>
+					Total units purchased: %i
 					<br/>
-					<p>
-						%i out of %i ordered auctions of %s purchased
-						<br/><br/>
-						Total units purchased: %i
-						<br/>
-						Total expense: %s
-					</p>
-				</body>
-				</html>
-				]],
-				completed and '' or ' (Aborted)',
-				progress.auctions,
-				ordered_count,
-				item_name,
-				progress.units,
-				Aux.util.format_money(progress.expense)
-		))
-			
-		AuxBuyReportHTML:SetSpacing(3)
+					Total expense: %s
+				</p>
+			</body>
+			</html>
+			]],
+			completed and '' or ' (Aborted)',
+			progress.auctions,
+			ordered_count,
+			item_name,
+			progress.units,
+			Aux.util.format_money(progress.expense)
+	))
 		
-		AuxBuyReport:Show()
+	AuxBuyReportHTML:SetSpacing(3)
+	
+	AuxBuyReport:Show()
+end
+
+-----------------------------------------
+
+function AuxBuyCategoryDropDown_Initialize(arg1)
+	local level = arg1 or 1
+	
+	if level == 1 then
+		local value = {}
+		UIDropDownMenu_AddButton({
+			text= 'All',
+			value = value,
+			func = AuxBuyCategoryDropDown_OnClick('All', value),
+		}, 1)
+		
+		for i, class in pairs({ GetAuctionItemClasses() }) do
+			local value = { class = i }
+			UIDropDownMenu_AddButton({
+				hasArrow = GetAuctionItemSubClasses(value.class),
+				text = class,
+				value = value,
+				func = AuxBuyCategoryDropDown_OnClick(class, value),
+			}, 1)
+		end
 	end
+	
+	if level == 2 then
+		local menu_value = UIDROPDOWNMENU_MENU_VALUE
+		for i, subclass in pairs({ GetAuctionItemSubClasses(menu_value.class) }) do
+			local value = { class = menu_value.class, subclass = i }
+			UIDropDownMenu_AddButton({
+				hasArrow = GetAuctionInvTypes(value.class, value.subclass),
+				text = subclass,
+				value = value,
+				func = AuxBuyCategoryDropDown_OnClick(subclass, value),
+			}, 2)
+		end
+	end
+	
+	if level == 3 then
+		local menu_value = UIDROPDOWNMENU_MENU_VALUE
+		for i, type in pairs({ GetAuctionInvTypes(menu_value.class, menu_value.subclass) }) do
+			local type_name = getglobal(type)
+			local value = { class = menu_value.class, subclass = menu_value.subclass, type = i }
+			UIDropDownMenu_AddButton({
+				text = type_name,
+				value = value,
+				func = AuxBuyCategoryDropDown_OnClick(type_name, value),
+			}, 3)
+		end
+	end
+end
+
+function AuxBuyCategoryDropDown_OnClick(text, value)
+	return function()
+		UIDropDownMenu_SetSelectedValue(AuxBuyCategoryDropDown, value)
+		UIDropDownMenu_SetText(text, AuxBuyCategoryDropDown) -- shouldn't be necessary ...
+		CloseDropDownMenus(1) -- nor this
+	end
+end
+
+function AuxBuySlotDropDown_Initialize(arg1)
+
+	UIDropDownMenu_AddButton{
+		text= 'All',
+		value = value,
+		func = AuxBuySlotDropDown_OnClick('All', value),
+	}
+	
+	-- for i, type in pairs({ GetAuctionInvTypes() }) do
+		-- UIDropDownMenu_AddButton{
+			-- text = class,
+			-- value = i,
+			-- func = AuxBuySlotDropDown_OnClick(),
+		-- }
+	-- end
+end
+
+function AuxBuySlotDropDown_OnClick()
+	UIDropDownMenu_SetSelectedValue(AuxBuySlotDropDown, this.value)
 end

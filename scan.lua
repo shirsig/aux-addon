@@ -15,15 +15,15 @@ local submit_query, process_query_results
 
 function Aux.scan.on_event()
 	if event == "AUCTION_ITEM_LIST_UPDATE" and current_job and not page_state then
+		page_state = {} -- careful, race conditions
 		local count, total_count = GetNumAuctionItems("list")
+		page_state.index = 1
+		page_state.count = count
+		page_state.total_count = total_count
+		
 		if current_job.on_start_page then
 			current_job.on_start_page(current_page)
 		end
-		page_state = {
-			index = 1,
-			count = count,
-			total_count = total_count,
-		}
 	end
 end
 
