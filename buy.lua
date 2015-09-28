@@ -179,13 +179,13 @@ function AuxBuyEntry_OnEnter()
 	local entry = entries[entryIndex]
 
 	local found, _, itemString = string.find(entry.itemLink, "^|%x+|H(.+)|h%[.+%]")
-	if(found) then
-		GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
-		GameTooltip:SetHyperlink(itemString);
-		GameTooltip:Show();
+	if found then
+		GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+		GameTooltip:SetHyperlink(itemString)
+		GameTooltip:Show()
 		
 		if(EnhTooltip ~= nil) then
-			EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.itemLink, entry.quality, entry.stackSize);
+			EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.itemLink, entry.quality, entry.stackSize)
 		end
 	end
 end

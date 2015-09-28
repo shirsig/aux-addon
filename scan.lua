@@ -31,6 +31,7 @@ end
 
 function Aux.scan.on_update()
 	if page_state then
+
 		if page_state.index <= page_state.count and current_job.on_read_auction then		
 			current_job.on_read_auction(page_state.index)
 		end
@@ -45,7 +46,7 @@ function Aux.scan.on_update()
 		end
 		
 		if page_state then
-			page_state.index = page_state.index + 1
+			page_state.index = min(page_state.index + 1, page_state.count)
 		end
 		
 	elseif current_job and GetTime() - last_query_request > 0.5 then
