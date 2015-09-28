@@ -32,10 +32,14 @@ function AuxBuySearchButton_OnClick()
 	Aux.scan.start{
 			query = search_query,
 			on_start_page = function(i)
-				set_message('Scanning auctions: page ' .. i .. ' ...')
+				set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
 			end,
 			on_read_auction = function(i)
 				local auction_item = Aux.info.auction_item(i)
+				if not auction_item then
+					return
+				end
+				
 				local stack_size = auction_item.charges or auction_item.count
 				if auction_item.name == search_query.name then
 					record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
@@ -98,32 +102,39 @@ function AuxBuyBuySelectedButton_OnClick()
 	Aux.scan.start{
 			query = search_query,
 			on_start_page = function(i)
-				set_message('Scanning auctions: page ' .. i .. ' ...')
+				set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
 			end,
 			on_read_auction = function(i)
 				local auction_item = Aux.info.auction_item(i)
+				
+				if not auction_item then
+					return
+				end
+				
+				local stack_size = auction_item.charges or auction_item.count
+				
+				if not auction_item.name or not stack_size or not auction_item.buyout_price then
+					return
+				end
 
-				if auction_item.name and auction_item.count and auction_item.buyout_price then
-					local key = auction_item.name.."_"..auction_item.count.."_"..auction_item.buyout_price
-					if order[key] then
+				local key = auction_item.name.."_"..stack_size.."_"..auction_item.buyout_price
+				if order[key] then
+				
+					if GetMoney() >= auction_item.buyout_price then
+						PlaceAuctionBid("list", i, auction_item.buyout_price)
+						progress.auctions = progress.auctions + 1
+						progress.units = progress.units + stack_size
+						progress.expense = progress.expense + auction_item.buyout_price
+					end
 					
-						if GetMoney() >= auction_item.buyout_price then
-							PlaceAuctionBid("list", i, auction_item.buyout_price)
-							progress.auctions = progress.auctions + 1
-							progress.units = progress.units + auction_item.count
-							progress.expense = progress.expense + auction_item.buyout_price
-						end
-						
-						if order[key] > 1 then
-							order[key] = order[key] - 1
-						else
-							order[key] = nil
-						end
+					if order[key] > 1 then
+						order[key] = order[key] - 1
 					else
-						local stack_size = auction_item.charges or auction_item.count
-						if auction_item.name == search_query.name then
-							record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
-						end
+						order[key] = nil
+					end
+				else
+					if auction_item.name == search_query.name then
+						record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
 					end
 				end
 			end,

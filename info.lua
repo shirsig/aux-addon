@@ -47,6 +47,11 @@ end
 
 function Aux.info.auction_item(index)
 	local itemlink = GetAuctionItemLink("list", index)
+	
+	if not itemlink then
+		return
+	end
+	
 	local auction_item = itemlink_item(itemlink)
 	
 	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, bid_amount, high_bidder, owner, sale_status, id, has_all_info = GetAuctionItemInfo("list", index)

@@ -306,11 +306,11 @@ function Aux_RefreshEntries()
 						subclassIndex = subclass_index,
 				},
 				on_start_page = function(i)
-					set_message('Scanning auctions: page ' .. i .. ' ...')
+					set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
 				end,
 				on_read_auction = function(i)
 					local auction_item = Aux.info.auction_item(i)
-					if auction_item.name == name then
+					if auction_item and auction_item.name == name then
 						local stack_size = auction_item.charges or auction_item.count
 						record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.duration, auction_item.owner)
 					end

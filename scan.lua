@@ -1,41 +1,58 @@
 Aux.scan = {}
 
-local STATE_IDLE = 0
-local STATE_PREQUERY = 1
-local STATE_POSTQUERY = 2
-local STATE_PROCESSING = 3 -- doesn't avoid race conditions completely!
-
 local NUM_AUCTION_ITEMS_PER_PAGE = 50
 
-local currentJob
-local currentPage
-local state = STATE_IDLE
+local current_job
+local current_page
+local page_state
 
-local timeOfLastUpdate = GetTime()
+local last_query_request = GetTime()
 
 -- forward declaration of local functions
-local submitQuery, processQueryResults
+local submit_query, process_query_results
 
 -----------------------------------------
 
 function Aux.scan.on_event()
-	if event == "AUCTION_ITEM_LIST_UPDATE" then
-		if state == STATE_POSTQUERY then
-			state = STATE_PROCESSING
-			processQueryResults()
+	if event == "AUCTION_ITEM_LIST_UPDATE" and current_job and not page_state then
+		local count, total_count = GetNumAuctionItems("list")
+		if current_job.on_start_page then
+			current_job.on_start_page(current_page)
 		end
+		page_state = {
+			index = 1,
+			count = count,
+			total_count = total_count,
+		}
 	end
 end
 
 -----------------------------------------
 
 function Aux.scan.on_update()
-	if state == STATE_PREQUERY and GetTime() - timeOfLastUpdate > 0.5 then
-	
-		timeOfLastUpdate = GetTime()
+	if page_state then
+		if page_state.index <= page_state.count and current_job.on_read_auction then		
+			current_job.on_read_auction(page_state.index)
+		end
+		
+		if page_state.index == page_state.count then
+			if page_state.index == NUM_AUCTION_ITEMS_PER_PAGE then
+				page_state = nil
+				current_page = current_page + 1
+			else
+				Aux.scan.complete()
+			end
+		end
+		
+		if page_state then
+			page_state.index = page_state.index + 1
+		end
+		
+	elseif current_job and GetTime() - last_query_request > 0.5 then
+		last_query_request = GetTime()
 
 		if CanSendAuctionQuery() then
-			submitQuery()
+			submit_query()
 		end
 	end
 end
@@ -43,47 +60,40 @@ end
 -----------------------------------------
 
 function Aux.scan.idle()
-	return state == STATE_IDLE
+	return not current_job
 end
 
 -----------------------------------------
 
 function Aux.scan.complete()
-	if state ~= STATE_IDLE then
-		if currentJob.on_complete then
-			currentJob.on_complete()
-		end
-		
-		currentJob = nil
-		currentPage = nil
-		state = STATE_IDLE
+	if current_job and current_job.on_complete then
+		current_job.on_complete()
 	end
+	
+	current_job = nil
+	current_page = nil
+	page_state = nil
 end
 
 -----------------------------------------
 
 function Aux.scan.abort()
-	if state ~= STATE_IDLE then
-		if currentJob and currentJob.on_abort then
-			currentJob.on_abort()
-		end
-		
-		currentJob = nil
-		currentPage = nil
-		state = STATE_IDLE
+	if current_job and current_job.on_abort then
+		current_job.on_abort()
 	end
+	
+	current_job = nil
+	current_page = nil
+	page_state = nil
 end
 
 -----------------------------------------
 
 function Aux.scan.start(job)
-
-	if state ~= STATE_IDLE then
-		Aux.scan.abort()
-	end
+	Aux.scan.abort()
 	
-	currentJob = job
-	state = STATE_PREQUERY
+	current_job = job
+	current_page = 0
 end
 
 -----------------------------------------
@@ -109,41 +119,16 @@ end
 
 -----------------------------------------
 
-function submitQuery()
+function submit_query()
 	QueryAuctionItems(
-		currentJob.query.name,
-		currentJob.query.minLevel,
-		currentJob.query.maxLevel,
-		currentJob.query.invTypeIndex,
-		currentJob.query.classIndex,
-		currentJob.query.subclassIndex,
-		currentPage,
-		currentJob.query.isUsable,
-		currentJob.query.qualityIndex
+		current_job.query.name,
+		current_job.query.minLevel,
+		current_job.query.maxLevel,
+		current_job.query.invTypeIndex,
+		current_job.query.classIndex,
+		current_job.query.subclassIndex,
+		current_page,
+		current_job.query.isUsable,
+		current_job.query.qualityIndex
 	)
-	state = STATE_POSTQUERY
-	currentPage = currentPage and currentPage + 1 or 1
-end
-
------------------------------------------
-
-function processQueryResults()
-	
-	local numBatchAuctions, totalAuctions = GetNumAuctionItems("list")
-
-	if currentJob.on_start_page then
-		currentJob.on_start_page(currentPage)
-	end
-			
-	for i = 1, numBatchAuctions do	
-		if currentJob.on_read_auction then
-			currentJob.on_read_auction(i)
-		end
-	end
-
-	if numBatchAuctions == NUM_AUCTION_ITEMS_PER_PAGE then			
-		state = STATE_PREQUERY
-	else
-		Aux.scan.complete()
-	end
 end
