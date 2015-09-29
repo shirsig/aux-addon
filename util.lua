@@ -40,3 +40,47 @@ function Aux.util.format_money(val)
 			
 	return g_string .. s_string .. c_string
 end
+
+function Aux.util.set_add(set, key)
+    set[key] = true
+end
+
+function Aux.util.set_remove(set, key)
+    set[key] = nil
+end
+
+function Aux.util.set_contains(set, key)
+    return set[key] ~= nil
+end
+
+function Aux.util.set_size(set)
+    local size = 0
+	for _,_ in pairs(set) do
+		size = size + 1
+	end
+	return size
+end
+
+function Aux.util.set_to_array(set)
+	local array = {}
+	for element, _ in pairs(set) do
+		tinsert(array, element)
+	end
+	return array
+end
+
+function Aux.util.any(xs, p)
+	holds = false
+	for _, x in ipairs(xs) do
+		holds = holds or p(x)
+	end
+	return holds
+end
+
+function Aux.util.all(xs, p)
+	holds = true
+	for _, x in ipairs(xs) do
+		holds = holds and p(x)
+	end
+	return holds
+end

@@ -67,10 +67,10 @@
 		</HighlightTexture>
 		<Scripts>
 			<OnEnter>
-				AuxBuyEntry_OnEnter();
+				AuxBuyEntry_OnEnter()
 			</OnEnter>
 			<OnLeave>
-				GameTooltip:Hide();
+				GameTooltip:Hide()
 			</OnLeave>
 			<OnClick>
 				AuxBuyEntry_OnClick()
@@ -139,22 +139,22 @@
 		<Frames>
 			<Frame name="AuxBuyFilters">
 				<Size><AbsDimension x="1" y="1"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="80" y="-55"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="80" y="-45"/></Offset></Anchor></Anchors>
 				<Layers>
 					<Layer level="BACKGROUND">
 						<FontString name="AuxBuySearchBoxLabel" inherits="GameFontHighlightSmall" text="Name">
-							<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="0" y="1" /></Offset></Anchor></Anchors>
+							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0" /></Offset></Anchor></Anchors>
 						</FontString>
 						
 						<FontString name="AuxBuyExactLabel" inherits="GameFontHighlightSmall" text="Exact">
-							<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="240" y="1" /></Offset></Anchor></Anchors>
+							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="225" y="0" /></Offset></Anchor></Anchors>
 						</FontString>
 					</Layer>
 				</Layers>
 				<Frames>
 					<EditBox name="AuxBuySearchBox" autoFocus="false" inherits="InputBoxTemplate">
-						<Size><AbsDimension x="180" y="20"/></Size>
-						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="50" y="0"/></Offset></Anchor></Anchors>
+						<Size><AbsDimension x="180" y="22"/></Size>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="40" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnChar>
 								Aux.util.item_name_autocomplete()
@@ -165,23 +165,14 @@
 							</OnEnterPressed>
 						</Scripts>
 					</EditBox>
-					<CheckButton name="AuxBuyExactCheckButton" inherits="UICheckButtonTemplate" checked="true">
-						<Size><AbsDimension x="24" y="24"/></Size>
-						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="270" y="1" /></Offset></Anchor></Anchors>
-					</CheckButton>
-							
-					<Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
-						<Size><AbsDimension x="80" y="22"/></Size>
-						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="300" y="1" /></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnClick>
-								AuxBuySearchButton_OnClick()
-							</OnClick>
-						</Scripts>
-					</Button>
 					
+					<CheckButton name="AuxBuyExactCheckButton" inherits="UICheckButtonTemplate" checked="true">
+						<Size><AbsDimension x="22" y="22"/></Size>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="255" y="0" /></Offset></Anchor></Anchors>
+					</CheckButton>
+												
 					<Frame name="AuxBuyCategoryDropDown" inherits="UIDropDownMenuTemplate">
-						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="380" y="1" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="270" y="3" /></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnLoad>
 								UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
@@ -191,6 +182,61 @@
 							</OnShow>
 						</Scripts>
 					</Frame>
+					
+					<EditBox name="AuxBuyTooltipEdit" autoFocus="false" inherits="InputBoxTemplate">
+						<Size><AbsDimension x="130" y="22"/></Size>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="430" y="0"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnEnterPressed>
+								AuxBuyTooltipAddButton_OnClick(this)
+							</OnEnterPressed>
+						</Scripts>
+					</EditBox>
+					
+					<Frame name="AuxBuyTooltipDropDown" inherits="UIDropDownMenuTemplate">
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="413" y="0"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnLoad>
+								getglobal(this:GetName().."Left"):Hide()
+								getglobal(this:GetName().."Middle"):Hide()
+								getglobal(this:GetName().."Right"):Hide()
+								getglobal(this:GetName().."Text"):Hide()
+								getglobal(this:GetName().."Button"):SetScript("OnClick", Aux.buy.toggle_tooltip_dropdown)
+								UIDropDownMenu_SetWidth(115)
+								UIDropDownMenu_Initialize(this, AuxBuyTooltipDropDown_Initialize)
+							</OnLoad>
+						</Scripts>
+					</Frame>
+					
+					<Button name="AuxBuyTooltipAddButton" inherits="UIPanelButtonTemplate" text="+">
+						<Size><AbsDimension x="22" y="22"/></Size>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="578" y="0"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnClick>
+								AuxBuyTooltipAddButton_OnClick(this)
+							</OnClick>
+						</Scripts>
+					</Button>
+					
+					<Button name="AuxBuyTooltipRemoveButton" inherits="UIPanelButtonTemplate" text="-">
+						<Size><AbsDimension x="22" y="22"/></Size>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="600" y="0"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnClick>
+								AuxBuyTooltipRemoveButton_OnClick(this)
+							</OnClick>
+						</Scripts>
+					</Button>
+									
+					<Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
+						<Size><AbsDimension x="80" y="22"/></Size>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="653" y="0" /></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnClick>
+								AuxBuySearchButton_OnClick()
+							</OnClick>
+						</Scripts>
+					</Button>
 					
 			<!-- 		<Frame name="AuxBuySlotDropDown" inherits="UIDropDownMenuTemplate">
 						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="500" y="1" /></Offset></Anchor></Anchors>

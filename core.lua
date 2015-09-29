@@ -362,28 +362,6 @@ end
 
 -----------------------------------------
 
-function Aux_AddToSet(set, key)
-    set[key] = true
-end
-
-function Aux_RemoveFromSet(set, key)
-    set[key] = nil
-end
-
-function Aux_SetContains(set, key)
-    return set[key] ~= nil
-end
-
-function Aux_SetSize(set)
-    local size = 0
-	for _,_ in pairs(set) do
-		size = size + 1
-	end
-	return size
-end
-
------------------------------------------
-
 function relevel(frame)
 	local myLevel = frame:GetFrameLevel() + 1
 	local children = { frame:GetChildren() }

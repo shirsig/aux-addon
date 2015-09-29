@@ -1,9 +1,10 @@
 Aux.buy = {}
 
-local record_auction, createOrder, updateOrder, set_message, report
+local record_auction, createOrder, updateOrder, set_message, report, tooltip_match
 local entries
 local selectedEntries = {}
 local search_query
+local tooltip_patterns = {}
 
 -----------------------------------------
 
@@ -43,9 +44,8 @@ function AuxBuySearchButton_OnClick()
 				if not auction_item then
 					return
 				end
-				
 				local stack_size = auction_item.charges or auction_item.count
-				if auction_item.name == search_query.name or name == '' or not AuxBuyExactCheckButton:GetChecked() then
+				if (auction_item.name == search_query.name or search_query.name == '' or not AuxBuyExactCheckButton:GetChecked()) and tooltip_match(Aux.util.set_to_array(tooltip_patterns), auction_item.tooltip) then
 					record_auction(auction_item.name, auction_item.tooltip, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.hyperlink, auction_item.itemstring)
 				end
 			end,
@@ -87,7 +87,7 @@ end
 function AuxBuyBuySelectedButton_OnClick()
 	
 	local order = createOrder(selectedEntries)
-	local orderedCount = Aux_SetSize(selectedEntries)
+	local orderedCount = Aux.util.set_size(selectedEntries)
 	
 	entries = nil
 	selectedEntries = {}
@@ -162,10 +162,10 @@ function AuxBuyEntry_OnClick()
 	local i = this:GetID()
 	local entry = entries[i]
 
-	if Aux_SetContains(selectedEntries, entry) then
-		Aux_RemoveFromSet(selectedEntries, entry)
+	if Aux.util.set_contains(selectedEntries, entry) then
+		Aux.util.set_remove(selectedEntries, entry)
 	else
-		Aux_AddToSet(selectedEntries, entry)
+		Aux.util.set_add(selectedEntries, entry)
 	end
 	
 	Aux_Buy_ScrollbarUpdate()
@@ -220,7 +220,7 @@ function Aux_Buy_ScrollbarUpdate()
 	end	
 	MoneyFrame_Update("AuxBuyTotal", Aux_Round(total))
 	
-	if Aux_SetSize(selectedEntries) > 0 and GetMoney() >= total then
+	if Aux.util.set_size(selectedEntries) > 0 and GetMoney() >= total then
 		AuxBuyBuySelectedButton:Enable()
 	else
 		AuxBuyBuySelectedButton:Disable()
@@ -262,7 +262,7 @@ function Aux_Buy_ScrollbarUpdate()
 			
 			lineEntry_name:SetText("\124c" .. color ..  entry.name .. "\124r")
 
-			if Aux_SetContains(selectedEntries, entry) then
+			if Aux.util.set_contains(selectedEntries, entry) then
 				lineEntry:LockHighlight()
 			else
 				lineEntry:UnlockHighlight()
@@ -278,6 +278,18 @@ function Aux_Buy_ScrollbarUpdate()
 			lineEntry:Hide()
 		end
 	end
+end
+
+-----------------------------------------
+
+function tooltip_match(patterns, tooltip)	
+	return Aux.util.all(patterns, function(pattern)
+		return Aux.util.any(tooltip, function(line)
+			local left_match = line[1].text and strfind(strupper(line[1].text), strupper(pattern), 1, true)
+			local right_match = line[2].text and strfind(strupper(line[2].text), strupper(pattern), 1, true)
+			return left_match or right_match
+		end)
+	end)
 end
 
 -----------------------------------------
@@ -391,4 +403,44 @@ end
 
 function AuxBuySlotDropDown_OnClick()
 	UIDropDownMenu_SetSelectedValue(AuxBuySlotDropDown, this.value)
+end
+
+
+function AuxBuyTooltipAddButton_OnClick()
+	local pattern = AuxBuyTooltipEdit:GetText()
+	if pattern ~= '' then
+		Aux.util.set_add(tooltip_patterns, pattern)
+	end
+	AuxBuyTooltipEdit:SetText('')
+	if DropDownList1:IsVisible() then
+		Aux.buy.toggle_tooltip_dropdown()
+	end
+	Aux.buy.toggle_tooltip_dropdown()
+end
+
+function AuxBuyTooltipRemoveButton_OnClick()
+	Aux.util.set_remove(tooltip_patterns, AuxBuyTooltipEdit:GetText())
+	AuxBuyTooltipEdit:SetText('')
+	if DropDownList1:IsVisible() then
+		Aux.buy.toggle_tooltip_dropdown()
+	end
+	Aux.buy.toggle_tooltip_dropdown()
+end
+
+function AuxBuyTooltipDropDown_Initialize()
+	for pattern, _ in tooltip_patterns do
+		UIDropDownMenu_AddButton{
+			text = pattern,
+			value = pattern,
+			func = AuxBuyTooltipDropDown_OnClick,
+		}
+	end
+end
+
+function AuxBuyTooltipDropDown_OnClick()
+	AuxBuyTooltipEdit:SetText(this.value)
+end
+
+function Aux.buy.toggle_tooltip_dropdown()
+	ToggleDropDownMenu(1, nil, AuxBuyTooltipDropDown, AuxBuyTooltipEdit, -12, 4)
 end
