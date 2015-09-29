@@ -76,10 +76,22 @@ function Aux.info.auction_item(index)
 	return auction_item
 end
 
+function Aux.info.set_game_tooltip(owner, tooltip)
+	GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+	for i, line in ipairs(tooltip) do
+		snipe.log(line[1].text)
+		getglobal('GameTooltipTextLeft'..i):SetText(line[1].text)
+		getglobal('GameTooltipTextLeft'..i):SetTextColor(line[1].color[1], line[1].color[2], line[1].color[3], line[1].color[4])
+		getglobal('GameTooltipTextRight'..i):SetText(line[2].text)
+		getglobal('GameTooltipTextRight'..i):SetTextColor(line[2].color[1], line[2].color[2], line[2].color[3], line[2].color[4])
+	end
+	GameTooltip:Show()
+end
+
 function Aux.info.tooltip(setter)
-	for j = 1, 30 do
-		leftEntry = getglobal('AuxInfoTooltipTextLeft'..j):SetText()
-		rightEntry = getglobal('AuxInfoTooltipTextRight'..j):SetText()
+	for i = 1, 30 do
+		getglobal('AuxInfoTooltipTextLeft'..i):SetText()
+		getglobal('AuxInfoTooltipTextRight'..i):SetText()
 	end
 	
 	AuxInfoTooltip:SetOwner(UIParent, "ANCHOR_NONE")
@@ -87,29 +99,30 @@ function Aux.info.tooltip(setter)
 	AuxInfoTooltip:Show()
 	
 	local tooltip = {}
-	for j = 1, 30 do
-		local leftEntry = getglobal('AuxInfoTooltipTextLeft'..j):GetText()
-		if leftEntry then
-			tinsert(tooltip, leftEntry)
-		end
-		local rightEntry = getglobal('AuxInfoTooltipTextRight'..j):GetText()
-		if rightEntry then
-			tinsert(tooltip, rightEntry)
-		end
+	for i = 1, 30 do
+		local left_text = getglobal('AuxInfoTooltipTextLeft'..i):GetText()
+		local left_color = { getglobal('AuxInfoTooltipTextLeft'..i):GetTextColor() }
+		local right_text = getglobal('AuxInfoTooltipTextRight'..i):GetText()
+		local right_color = { getglobal('AuxInfoTooltipTextRight'..i):GetTextColor() }
+		
+		tinsert(tooltip, {{ text=left_text, color=left_color }, { text=right_text, color=right_color }})
 	end
 	
-	for j = 1, 30 do
-		leftEntry = getglobal('AuxInfoTooltipTextLeft'..j):SetText()
-		rightEntry = getglobal('AuxInfoTooltipTextRight'..j):SetText()
+	for i = 1, 30 do
+		getglobal('AuxInfoTooltipTextLeft'..i):SetText()
+		getglobal('AuxInfoTooltipTextRight'..i):SetText()
 	end
 	
 	return tooltip
 end
 
 function item_charges(tooltip)
-	for _, entry in ipairs(tooltip) do
-		local _, _, charges_string = strfind(entry, "(%d+) Charges")
-		local charges = tonumber(charges_string)
+	for _, line in ipairs(tooltip) do
+		local left_text = line[1].text or ''
+		local right_text = line[2].text or ''
+		local _, _, left_charges_string = strfind(left_text, "^(%d+) Charges")
+		local _, _, right_charges_string = strfind(right_text, "^(%d+) Charges$")
+		local charges = tonumber(left_charges_string) or tonumber(right_charges_string)
 		if charges then
 			return charges
 		end

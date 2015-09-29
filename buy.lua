@@ -159,9 +159,8 @@ end
 -----------------------------------------
 
 function AuxBuyEntry_OnClick()
-	local entryIndex = this:GetID()
-
-	local entry = entries[entryIndex]
+	local i = this:GetID()
+	local entry = entries[i]
 
 	if Aux_SetContains(selectedEntries, entry) then
 		Aux_RemoveFromSet(selectedEntries, entry)
@@ -175,13 +174,14 @@ function AuxBuyEntry_OnClick()
 end
 
 function AuxBuyEntry_OnEnter()
-	local entryIndex = this:GetID()
-	local entry = entries[entryIndex]
+	local i = this:GetID()
+	local entry = entries[i]
 
-	local _, _, itemString = strfind(entry.hyperlink, "^|%x+|H(.+)|h%[.+%]")
-	if itemString then
+	-- Aux.info.set_game_tooltip(this, entry.tooltip)
+	local _, _, item_string = strfind(entry.hyperlink, "^|%x+|H(.+)|h%[.+%]")
+	if item_string then
 		GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
-		GameTooltip:SetHyperlink(itemString)
+		GameTooltip:SetHyperlink(item_string)
 		GameTooltip:Show()
 		
 		if(EnhTooltip ~= nil) then
