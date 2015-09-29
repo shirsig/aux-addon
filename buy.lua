@@ -46,7 +46,7 @@ function AuxBuySearchButton_OnClick()
 				
 				local stack_size = auction_item.charges or auction_item.count
 				if auction_item.name == search_query.name or name == '' or not AuxBuyExactCheckButton:GetChecked() then
-					record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
+					record_auction(auction_item.name, auction_item.tooltip, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.hyperlink)
 				end
 			end,
 			on_complete = function()
@@ -64,7 +64,7 @@ end
 function createOrder()
 	local order = {}
 	for entry,_ in pairs(selectedEntries) do
-		local key = entry.name.."_"..entry.stackSize.."_"..entry.buyoutPrice
+		local key = Aux.auction_key(entry.tooltip, entry.stackSize, entry.buyoutPrice)
 				
 		if order[key] then
 			order[key] = order[key] + 1
@@ -121,7 +121,7 @@ function AuxBuyBuySelectedButton_OnClick()
 					return
 				end
 
-				local key = auction_item.name.."_"..stack_size.."_"..auction_item.buyout_price
+				local key = Aux.auction_key(auction_item.tooltip, stack_size, auction_item.buyout_price)
 				if order[key] then
 				
 					if GetMoney() >= auction_item.buyout_price then
@@ -138,7 +138,7 @@ function AuxBuyBuySelectedButton_OnClick()
 					end
 				else
 					if auction_item.name == search_query.name then
-						record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.itemlink)
+						record_auction(auction_item.name, auction_item.tooltip, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.hyperlink)
 					end
 				end
 			end,
@@ -178,31 +178,32 @@ function AuxBuyEntry_OnEnter()
 	local entryIndex = this:GetID()
 	local entry = entries[entryIndex]
 
-	local found, _, itemString = string.find(entry.itemLink, "^|%x+|H(.+)|h%[.+%]")
-	if found then
+	local _, _, itemString = strfind(entry.hyperlink, "^|%x+|H(.+)|h%[.+%]")
+	if itemString then
 		GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
 		GameTooltip:SetHyperlink(itemString)
 		GameTooltip:Show()
 		
 		if(EnhTooltip ~= nil) then
-			EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.itemLink, entry.quality, entry.stackSize)
+			EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.hyperlink, entry.quality, entry.stackSize)
 		end
 	end
 end
 
 -----------------------------------------
 
-function record_auction(name, stack_size, buyout_price, quality, owner, itemlink)
+function record_auction(name, tooltip, stack_size, buyout_price, quality, owner, hyperlink)
 	entries = entries or {}
 	
 	if buyout_price > 0 and owner ~= UnitName("player") then
 		tinsert(entries, {
 				name		= name,
+				tooltip		= tooltip,
 				stackSize	= stack_size,
 				buyoutPrice	= buyout_price,
 				itemPrice	= buyout_price / stack_size,
 				quality		= quality,
-				itemLink	= itemlink,
+				hyperlink	= hyperlink,
 		})
 	end
 	

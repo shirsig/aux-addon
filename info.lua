@@ -1,23 +1,23 @@
 Aux.info = {}
 
-local itemlink_item, item_id, item_charges
+local hyperlink_item, item_id, item_charges
 
 function Aux.info.container_item(bag, slot)
-	local itemlink = GetContainerItemLink(bag, slot)
+	local hyperlink = GetContainerItemLink(bag, slot)
 	
-	if not itemlink then
+	if not hyperlink then
 		return
 	end
 	
-	local container_item = itemlink_item(itemlink)
+	local container_item = hyperlink_item(hyperlink)
 	
-	local texture, count, locked, quality, readable, lootable, itemlink = GetContainerItemInfo(bag, slot)
+	local texture, count, locked, quality, readable, lootable, hyperlink = GetContainerItemInfo(bag, slot)
 	container_item.texture = texture
 	container_item.count = count
 	container_item.locked = locked
 	container_item.readable = readable
 	container_item.lootable = lootable
-	container_item.itemlink = itemlink
+	container_item.hyperlink = hyperlink
 	
 	container_item.tooltip = Aux.info.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
 	container_item.charges = item_charges(container_item.tooltip)
@@ -46,13 +46,13 @@ function Aux.info.auction_sell_item()
 end
 
 function Aux.info.auction_item(index)
-	local itemlink = GetAuctionItemLink("list", index)
+	local hyperlink = GetAuctionItemLink("list", index)
 	
-	if not itemlink then
+	if not hyperlink then
 		return
 	end
 	
-	local auction_item = itemlink_item(itemlink)
+	local auction_item = hyperlink_item(hyperlink)
 	
 	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, bid_amount, high_bidder, owner, sale_status, id, has_all_info = GetAuctionItemInfo("list", index)
 	local duration = GetAuctionItemTimeLeft("list", index)
@@ -108,7 +108,7 @@ end
 
 function item_charges(tooltip)
 	for _, entry in ipairs(tooltip) do
-		local charges_string = gsub(entry, "(%d+) Charges", "%1")
+		local _, _, charges_string = strfind(entry, "(%d+) Charges")
 		local charges = tonumber(charges_string)
 		if charges then
 			return charges
@@ -116,16 +116,16 @@ function item_charges(tooltip)
 	end
 end	
 
-function item_id(itemlink)
-	local id_string = string.gsub(itemlink, "^.-:(%d*).*", "%1")
+function item_id(hyperlink)
+	local _, _, id_string = strfind(hyperlink, "^.-:(%d*).*")
 	return tonumber(id_string)	
 end
 
-function itemlink_item(itemlink)
-	local name, link, quality, level, type, subtype, max_stack = GetItemInfo(item_id(itemlink))
+function hyperlink_item(hyperlink)
+	local name, link, quality, level, type, subtype, max_stack = GetItemInfo(item_id(hyperlink))
 	return {
 		name = name,
-		itemlink = itemlink,
+		hyperlink = link,
 		quality = quality,
 		level = level,
 		type = type,

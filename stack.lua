@@ -76,16 +76,17 @@ function move_item(from_slot, to_slot, amount)
 end
 
 function item_name(slot)
-	local itemLink = GetContainerItemLink(slot.bag, slot.bag_slot)
-	if itemLink then
-		return string.gsub(itemLink, "^.-%[(.*)%].*", "%1")
+	local hyperlink = GetContainerItemLink(slot.bag, slot.bag_slot)
+	if hyperlink then
+		local _, _, item_name = strfind(hyperlink, "^.-%[(.*)%].*")
+		return item_name
 	end		
 end
 
 function item_id(slot)
-	local itemLink = GetContainerItemLink(slot.bag, slot.bag_slot)
-	if itemLink then
-		local id_string = string.gsub(itemLink, "^.-:(%d*).*", "%1")
+	local hyperlink = GetContainerItemLink(slot.bag, slot.bag_slot)
+	if hyperlink then
+		local _, _, id_string = strfind(hyperlink, "^.-:(%d*).*")
 		return tonumber(id_string)
 	end		
 end

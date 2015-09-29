@@ -500,3 +500,13 @@ function Aux_QualityColor(code)
 		return "ffff8000" -- legendary, orange
 	end
 end
+
+-----------------------------------------
+
+function Aux.auction_key(tooltip, stack_size, buyout_price)
+	local key = ''
+	for i, entry in ipairs(tooltip) do
+		key = key .. (i == 1 and '' or '_')
+	end
+	return key .. '_' .. stack_size .. '_' .. buyout_price
+end
