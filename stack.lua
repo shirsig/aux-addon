@@ -2,7 +2,7 @@ Aux.stack = {}
 
 local state
 
-local DELAY = 1
+local last_move = GetTime()
 
 local inventory, item_slots, find_empty_slot, locked, same_slot, move_item, item_name, stack_size
 
@@ -63,13 +63,16 @@ function same_slot(slot1, slot2)
 end
 
 function move_item(from_slot, to_slot, amount)
-	if stack_size(to_slot) < max_stack(from_slot) then
+	if stack_size(to_slot) < max_stack(from_slot) and GetTime() - last_move > 0.3 then
+		last_move = GetTime()
+		
 		amount = min(max_stack(from_slot) - stack_size(to_slot), amount)
 		
 		state.processing = 3
 
 		ClearCursor()
 		SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
+				snipe.log('a'..amount..'s'..stack_size(to_slot))
 		PickupContainerItem(to_slot.bag, to_slot.bag_slot)
 		ClearCursor()
 	end
