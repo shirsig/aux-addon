@@ -78,12 +78,8 @@ end
 
 function Aux.info.set_game_tooltip(owner, tooltip)
 	GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
-	for i, line in ipairs(tooltip) do
-		snipe.log(line[1].text)
-		getglobal('GameTooltipTextLeft'..i):SetText(line[1].text)
-		getglobal('GameTooltipTextLeft'..i):SetTextColor(line[1].color[1], line[1].color[2], line[1].color[3], line[1].color[4])
-		getglobal('GameTooltipTextRight'..i):SetText(line[2].text)
-		getglobal('GameTooltipTextRight'..i):SetTextColor(line[2].color[1], line[2].color[2], line[2].color[3], line[2].color[4])
+	for _, line in ipairs(tooltip) do
+		GameTooltip:AddDoubleLine(line[1].text, line[2].text, line[1].r, line[1].b, line[1].g, line[2].r, line[2].b, line[2].g, true)
 	end
 	GameTooltip:Show()
 end
@@ -100,12 +96,15 @@ function Aux.info.tooltip(setter)
 	
 	local tooltip = {}
 	for i = 1, 30 do
-		local left_text = getglobal('AuxInfoTooltipTextLeft'..i):GetText()
-		local left_color = { getglobal('AuxInfoTooltipTextLeft'..i):GetTextColor() }
-		local right_text = getglobal('AuxInfoTooltipTextRight'..i):GetText()
-		local right_color = { getglobal('AuxInfoTooltipTextRight'..i):GetTextColor() }
+		local left, right = {}, {}
 		
-		tinsert(tooltip, {{ text=left_text, color=left_color }, { text=right_text, color=right_color }})
+		left.text = getglobal('AuxInfoTooltipTextLeft'..i):GetText()
+		left.r, left.b, left.g = getglobal('AuxInfoTooltipTextLeft'..i):GetTextColor()
+		
+		right.text = getglobal('AuxInfoTooltipTextRight'..i):GetText()
+		right.r, right.b, right.g = getglobal('AuxInfoTooltipTextRight'..i):GetTextColor()
+		
+		tinsert(tooltip, {left, right})
 	end
 	
 	for i = 1, 30 do
@@ -118,10 +117,8 @@ end
 
 function item_charges(tooltip)
 	for _, line in ipairs(tooltip) do
-		local left_text = line[1].text or ''
-		local right_text = line[2].text or ''
-		local _, _, left_charges_string = strfind(left_text, "^(%d+) Charges")
-		local _, _, right_charges_string = strfind(right_text, "^(%d+) Charges$")
+		local _, _, left_charges_string = strfind(line[1].text or '', "^(%d+) Charges")
+		local _, _, right_charges_string = strfind(line[2].text or '', "^(%d+) Charges$")
 		local charges = tonumber(left_charges_string) or tonumber(right_charges_string)
 		if charges then
 			return charges
@@ -135,10 +132,11 @@ function item_id(hyperlink)
 end
 
 function hyperlink_item(hyperlink)
-	local name, link, quality, level, type, subtype, max_stack = GetItemInfo(item_id(hyperlink))
+	local name, itemstring, quality, level, type, subtype, max_stack = GetItemInfo(item_id(hyperlink))
 	return {
 		name = name,
-		hyperlink = link,
+		hyperlink = hyperlink,
+		itemstring = itemstring,
 		quality = quality,
 		level = level,
 		type = type,

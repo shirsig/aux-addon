@@ -46,7 +46,7 @@ function AuxBuySearchButton_OnClick()
 				
 				local stack_size = auction_item.charges or auction_item.count
 				if auction_item.name == search_query.name or name == '' or not AuxBuyExactCheckButton:GetChecked() then
-					record_auction(auction_item.name, auction_item.tooltip, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.hyperlink)
+					record_auction(auction_item.name, auction_item.tooltip, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.hyperlink, auction_item.itemstring)
 				end
 			end,
 			on_complete = function()
@@ -138,7 +138,7 @@ function AuxBuyBuySelectedButton_OnClick()
 					end
 				else
 					if auction_item.name == search_query.name then
-						record_auction(auction_item.name, auction_item.tooltip, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.hyperlink)
+						record_auction(auction_item.name, auction_item.tooltip, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.hyperlink, auction_item.itemstring)
 					end
 				end
 			end,
@@ -176,23 +176,17 @@ end
 function AuxBuyEntry_OnEnter()
 	local i = this:GetID()
 	local entry = entries[i]
-
-	-- Aux.info.set_game_tooltip(this, entry.tooltip)
-	local _, _, item_string = strfind(entry.hyperlink, "^|%x+|H(.+)|h%[.+%]")
-	if item_string then
-		GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
-		GameTooltip:SetHyperlink(item_string)
-		GameTooltip:Show()
-		
-		if(EnhTooltip ~= nil) then
-			EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.hyperlink, entry.quality, entry.stackSize)
-		end
+	
+	Aux.info.set_game_tooltip(this, entry.tooltip)
+	
+	if(EnhTooltip ~= nil) then
+		EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.hyperlink, entry.quality, entry.stackSize)
 	end
 end
 
 -----------------------------------------
 
-function record_auction(name, tooltip, stack_size, buyout_price, quality, owner, hyperlink)
+function record_auction(name, tooltip, stack_size, buyout_price, quality, owner, hyperlink, itemstring)
 	entries = entries or {}
 	
 	if buyout_price > 0 and owner ~= UnitName("player") then
@@ -204,6 +198,7 @@ function record_auction(name, tooltip, stack_size, buyout_price, quality, owner,
 				itemPrice	= buyout_price / stack_size,
 				quality		= quality,
 				hyperlink	= hyperlink,
+				itemstring = itemstring,
 		})
 	end
 	
