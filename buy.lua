@@ -388,7 +388,7 @@ function AuxBuyCategoryDropDown_OnClick()
 	CloseDropDownMenus(1)
 end
 
-function AuxBuySlotDropDown_Initialize(arg1)
+function AuxBuySlotDropDown_Initialize()
 
 	UIDropDownMenu_AddButton{
 		text= 'All',
