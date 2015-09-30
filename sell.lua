@@ -302,8 +302,8 @@ function Aux_RefreshEntries()
 		Aux.scan.start{
 				query = Aux.scan.create_query{
 						name = name,
-						classIndex = class_index,
-						subclassIndex = subclass_index,
+						class = class_index,
+						subclass = subclass_index,
 				},
 				on_start_page = function(i)
 					set_message('Scanning auctions: page ' .. i + 1 .. ' ...')

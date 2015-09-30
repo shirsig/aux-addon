@@ -28,9 +28,9 @@ function AuxBuySearchButton_OnClick()
 	
 	search_query = Aux.scan.create_query{
 		name = AuxBuySearchBox:GetText(),
-		invTypeIndex = category and category.type,
-		classIndex = category and category.class,	
-		subclassIndex = category and category.subclass,
+		slot = category and category.slot,
+		class = category and category.class,	
+		subclass = category and category.subclass,
 	}
 	
 	set_message('Scanning auctions ...')
@@ -135,10 +135,6 @@ function AuxBuyBuySelectedButton_OnClick()
 						order[key] = order[key] - 1
 					else
 						order[key] = nil
-					end
-				else
-					if auction_item.name == search_query.name then
-						record_auction(auction_item.name, auction_item.tooltip, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.hyperlink, auction_item.itemstring)
 					end
 				end
 			end,
@@ -364,13 +360,13 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 	
 	if level == 3 then
 		local menu_value = UIDROPDOWNMENU_MENU_VALUE
-		for i, type in pairs({ GetAuctionInvTypes(menu_value.class, menu_value.subclass) }) do
-			local type_name = getglobal(type)
-			local value = { class = menu_value.class, subclass = menu_value.subclass, type = i }
+		for i, slot in pairs({ GetAuctionInvTypes(menu_value.class, menu_value.subclass) }) do
+			local slot_name = getglobal(slot)
+			local value = { class = menu_value.class, subclass = menu_value.subclass, slot = i }
 			UIDropDownMenu_AddButton({
-				text = type_name,
+				text = slot_name,
 				value = value,
-				func = AuxBuyCategoryDropDown_OnClick(type_name, value),
+				func = AuxBuyCategoryDropDown_OnClick(slot_name, value),
 			}, 3)
 		end
 	end

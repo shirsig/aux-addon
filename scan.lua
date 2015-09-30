@@ -101,37 +101,16 @@ end
 
 -----------------------------------------
 
-function Aux.scan.create_query(parameterMap)
-	local query = {
-		name = nil,
-		minLevel = "",
-		maxLevel = "",
-		invTypeIndex = nil,
-		classIndex = nil,
-		subclassIndex = nil,
-		isUsable = nil,
-		qualityIndex = nil
-	}
-	
-	for k,v in pairs(parameterMap) do
-		query[k] = v
-	end
-	
-	return query
-end
-
------------------------------------------
-
 function submit_query()
 	QueryAuctionItems(
 		current_job.query.name,
-		current_job.query.minLevel,
-		current_job.query.maxLevel,
-		current_job.query.invTypeIndex,
-		current_job.query.classIndex,
-		current_job.query.subclassIndex,
+		current_job.query.min_level,
+		current_job.query.max_level,
+		current_job.query.slot,
+		current_job.query.class,
+		current_job.query.subclass,
 		current_page,
-		current_job.query.isUsable,
-		current_job.query.qualityIndex
+		current_job.query.usable,
+		current_job.query.quality
 	)
 end
