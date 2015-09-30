@@ -331,7 +331,7 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 		UIDropDownMenu_AddButton({
 			text= 'All',
 			value = value,
-			func = AuxBuyCategoryDropDown_OnClick('All', value),
+			func = AuxBuyCategoryDropDown_OnClick,
 		}, 1)
 		
 		for i, class in pairs({ GetAuctionItemClasses() }) do
@@ -373,7 +373,7 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 end
 
 function AuxBuyCategoryDropDown_OnClick()
-	local qualified_name = ({ GetAuctionItemClasses() })[this.value.class]
+	local qualified_name = ({ GetAuctionItemClasses() })[this.value.class] or 'All'
 	if this.value.subclass then
 		local subclass_name = ({ GetAuctionItemSubclasses(this.value.class) })[this.value.subclass]
 		qualified_name = qualified_name .. ' - ' .. subclass_name
