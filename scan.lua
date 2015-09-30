@@ -1,6 +1,6 @@
 Aux.scan = {}
 
-local NUM_AUCTION_ITEMS_PER_PAGE = 50
+Aux.scan.MAX_AUCTIONS_PER_PAGE = 50
 
 local current_job
 local current_page
@@ -8,54 +8,66 @@ local page_state
 
 local last_queried = GetTime()
 
-local timeout
+local processing
 
 -- forward declaration of local functions
-local submit_query, process_query_results
+local submit_query, start_processing_page
 
 -----------------------------------------
 
 function Aux.scan.on_event()
-	if event == "AUCTION_ITEM_LIST_UPDATE" and current_job and not page_state and not timeout then
-		timeout = true
-		page_state = {} -- careful, race conditions
-		local count, total_count = GetNumAuctionItems("list")
-		page_state.index = 1
-		page_state.count = count
-		page_state.total_count = total_count
-		
-		if current_job.on_start_page then
-			current_job.on_start_page(current_page)
-		end
+	if event == "AUCTION_ITEM_LIST_UPDATE" and current_job and not page_state and not processing then
+		processing = true -- careful, race conditions
+		start_processing_page()
+	end
+end
+
+-----------------------------------------
+
+function start_processing_page()
+	page_state = {}
+	local count, total_count = GetNumAuctionItems("list")
+	page_state.index = 1
+	page_state.count = count
+	page_state.total_count = total_count
+	
+	if current_job.on_start_page then
+		current_job.on_start_page(current_page)
 	end
 end
 
 -----------------------------------------
 
 function Aux.scan.on_update()
-	if current_job and CanSendAuctionQuery() then
-		timeout = false
-	end
-	
 	if page_state then
 		if page_state.index <= page_state.count and current_job.on_read_auction then		
 			current_job.on_read_auction(page_state.index)
 		end
 		
 		if page_state.index == page_state.count then
-			if page_state.index == NUM_AUCTION_ITEMS_PER_PAGE then
+			current_page = current_job.next_page and current_job.next_page(current_page, page_state.count, page_state.total_count)
+			if current_page then
 				page_state = nil
-				current_page = current_page + 1
 			else
 				Aux.scan.complete()
 			end
 		end
 		
+		-- if page_state.index == page_state.count then
+			-- if page_state.index == MAX_AUCTIONS_PER_PAGE then
+				-- page_state = nil
+				-- current_page = current_page + 1
+			-- else
+				-- Aux.scan.complete()
+			-- end
+		-- end
+		
 		if page_state then
 			page_state.index = min(page_state.index + 1, page_state.count)
 		end
 		
-	elseif current_job and not timeout then
+	elseif current_job and CanSendAuctionQuery() then
+		processing = false
 		submit_query()
 	end
 end
@@ -96,7 +108,11 @@ function Aux.scan.start(job)
 	Aux.scan.abort()
 	
 	current_job = job
-	current_page = 0
+	current_page = job.start_page
+	
+	if not current_page then
+		start_processing_page()
+	end
 end
 
 -----------------------------------------

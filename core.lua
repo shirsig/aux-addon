@@ -24,7 +24,7 @@ local relevel
 -----------------------------------------
 
 function Aux_OnLoad()
-	Aux_Log("Aux v"..AuxVersion.." loaded")
+	Aux.log("Aux v"..AuxVersion.." loaded")
 	Aux.loaded = true
 end
 
@@ -263,7 +263,7 @@ end
 
 -----------------------------------------
 
-function Aux_Log(msg)
+function Aux.log(msg)
 	if DEFAULT_CHAT_FRAME then
 		DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
 	end
@@ -454,7 +454,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 				AuctionFrameTab_OnClick(Aux.tabs.buy.index)
 			end
 			AuxBuySearchBox:SetText(container_item.name)
-			AuxBuySearchButton_OnClick()
+			Aux.buy.SearchButton_onclick()
 			return
 		end
 	end

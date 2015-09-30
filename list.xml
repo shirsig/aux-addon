@@ -1,0 +1,439 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+	<Script file="list.lua"/>
+
+<!-- 	<Button name="ListItemTemplate" hidden="true" virtual="true">
+		<Size>
+			<AbsDimension x="605" y="16"/>
+		</Size>
+		<Layers>
+			<Layer level="BORDER">
+				<FontString name="$parentColumn1" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="100" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT">
+							<Offset>
+								<AbsDimension x="10" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentColumn2" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="100" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentColumn1" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="20" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentColumn3" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="100" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentColumn2" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="20" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentColumn4" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="100" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="20" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentColumn5" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
+					<Size>
+						<AbsDimension x="100" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="20" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+				<FontString name="$parentColumn6" inherits="GameFontHighlight" wraponspaces="false" justifyH="RIGHT">
+					<Size>
+						<AbsDimension x="100" y="16"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT">
+							<Offset>
+								<AbsDimension x="20" y="0"/>
+							</Offset>
+						</Anchor>
+					</Anchors>
+				</FontString>
+			</Layer>
+		</Layers>
+		<Frames>
+			<Frame name="$parentColumn3MoneyFrame" inherits="SmallMoneyFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="10" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						SmallMoneyFrame_OnLoad();
+						MoneyFrame_SetType("AUCTIONEER");
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentColumn4MoneyFrame" inherits="SmallMoneyFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="10" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						SmallMoneyFrame_OnLoad();
+						MoneyFrame_SetType("AUCTIONEER");
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentColumn5MoneyFrame" inherits="SmallMoneyFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="10" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						SmallMoneyFrame_OnLoad();
+						MoneyFrame_SetType("AUCTIONEER");
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentColumn6MoneyFrame" inherits="SmallMoneyFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPRIGHT" relativeTo="$parentColumn6" relativePoint="TOPRIGHT">
+						<Offset>
+							<AbsDimension x="10" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						SmallMoneyFrame_OnLoad();
+						MoneyFrame_SetType("AUCTIONEER");
+					</OnLoad>
+				</Scripts>
+			</Frame>
+		</Frames>
+	</Button> -->
+
+	<Button name="ListSortButtonTemplate" virtual="true">
+		<Layers>
+			<Layer level="BACKGROUND">
+				<Texture name="$parentLeft" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="5" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPLEFT"/>
+					</Anchors>
+					<TexCoords left="0" right="0.078125" top="0" bottom="0.59375"/>
+				</Texture>
+				<Texture name="$parentRight" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="4" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="TOPRIGHT"/>
+					</Anchors>
+					<TexCoords left="0.90625" right="0.96875" top="0" bottom="0.59375"/>
+				</Texture>
+				<Texture name="$parentMiddle" file="Interface\FriendsFrame\WhoFrame-ColumnTabs">
+					<Size>
+						<AbsDimension x="10" y="24"/>
+					</Size>
+					<Anchors>
+						<Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"/>
+						<Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"/>
+					</Anchors>
+					<TexCoords left="0.078125" right="0.90625" top="0" bottom="0.59375"/>
+				</Texture>
+			</Layer>
+		</Layers>
+		<NormalText name="$parentText" inherits="GameFontHighlightSmall">
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="8" y="0"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</NormalText>
+		<NormalTexture name="$parentArrow" hidden="true" file="Interface\Buttons\UI-SortArrow">
+			<Size>
+				<AbsDimension x="9" y="8"/>
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT" relativeTo="$parentText" relativePoint="RIGHT">
+					<Offset>
+						<AbsDimension x="3" y="-2"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+			<TexCoords left="0" right="0.5625" top="0" bottom="1.0"/>
+		</NormalTexture>
+		<HighlightTexture file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD">
+			<Size>
+				<AbsDimension x="5" y="24"/>
+			</Size>
+			<Anchors>
+				<Anchor point="LEFT">
+					<Offset>
+						<AbsDimension x="0" y="0"/>
+					</Offset>
+				</Anchor>
+				<Anchor point="RIGHT">
+					<Offset>
+						<AbsDimension x="4" y="0"/>
+					</Offset>
+				</Anchor>
+			</Anchors>
+		</HighlightTexture>
+	</Button>
+
+	<Frame name="ListTemplate" virtual="true">
+		<Frames>
+			<Button name="$parentColumn1Sort" inherits="ListSortButtonTemplate">
+				<Size><AbsDimension x="134" y="24"/></Size>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnClick>
+						Aux.list.sort(this:GetParent(), 1)
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parentColumn1DropDown" inherits="UIDropDownMenuTemplate" id="1"><Anchors><Anchor point="LEFT" relativeTo="$parentColumn1Sort" relativePoint="LEFT"><Offset><AbsDimension x="-14" y="-3"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnLoad>
+						Aux.list.dropdown_onload()
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Button name="$parentColumn2Sort" inherits="ListSortButtonTemplate">
+				<Size><AbsDimension x="44" y="24"/></Size>
+				<Anchors><Anchor point="LEFT" relativeTo="$parentColumn1Sort" relativePoint="RIGHT"><Offset><AbsDimension x="-2" y="0"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnClick>
+						Aux.list.sort(this:GetParent(), 2)
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parentColumn2DropDown" inherits="UIDropDownMenuTemplate" id="2">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn2Sort" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-14" y="-3"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						Aux.list.dropdown_onload()
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Button name="$parentColumn3Sort" inherits="ListSortButtonTemplate">
+				<Size>
+					<AbsDimension x="174" y="24"/>
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn2Sort" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-2" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						Aux.list.sort(this:GetParent(), 3)
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parentColumn3DropDown" inherits="UIDropDownMenuTemplate" id="3">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn3Sort" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-14" y="-3"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						Aux.list.dropdown_onload()
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Button name="$parentColumn4Sort" inherits="ListSortButtonTemplate">
+				<Size>
+					<AbsDimension x="174" y="24"/>
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn3Sort" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-2" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						Aux.list.sort(this:GetParent(), 4)
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parentColumn4DropDown" inherits="UIDropDownMenuTemplate" id="4">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn4Sort" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-15" y="-3"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						Aux.list.dropdown_onload()
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Button name="$parentColumn5Sort" inherits="ListSortButtonTemplate">
+				<Size>
+					<AbsDimension x="174" y="24"/>
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn4Sort" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-2" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						Aux.list.sort(this:GetParent(), 5)
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parentColumn5DropDown" inherits="UIDropDownMenuTemplate" id="5">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn5Sort" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-14" y="-3"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						Aux.list.dropdown_onload()
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Button name="$parentColumn6Sort" inherits="ListSortButtonTemplate">
+				<Size>
+					<AbsDimension x="174" y="24"/>
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn5Sort" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-2" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						Aux.list.sort(this:GetParent(), 6)
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parentColumn6DropDown" inherits="UIDropDownMenuTemplate" id="6">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn6Sort" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-14" y="-3"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						Aux.list.dropdown_onload()
+					</OnLoad>
+				</Scripts>
+			</Frame>
+<!-- 			<ScrollFrame name="$parentScrollFrame" inherits="FauxScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="2" y="-28"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+							<Size>
+								<AbsDimension x="31" y="256"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="-2" y="5"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0" right="0.484375" top="0" bottom="1.0"/>
+						</Texture>
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+							<Size>
+								<AbsDimension x="31" y="106"/>
+							</Size>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="-2" y="-2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.515625" right="1.0" top="0" bottom="0.4140625"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnVerticalScroll>
+						FauxScrollFrame_OnVerticalScroll(16, ListTemplateScrollFrame_Update)
+					</OnVerticalScroll>
+				</Scripts>
+			</ScrollFrame> -->
+		</Frames>
+	</Frame>
+</Ui>

@@ -300,11 +300,12 @@ function Aux_RefreshEntries()
 
 		set_message('Scanning auctions ...')
 		Aux.scan.start{
-				query = Aux.scan.create_query{
+				query = {
 						name = name,
 						class = class_index,
 						subclass = subclass_index,
 				},
+				start_page = 0,
 				on_start_page = function(i)
 					set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
 				end,
@@ -322,6 +323,11 @@ function Aux_RefreshEntries()
 					auxSellEntries[name] = auxSellEntries[name] or { created = GetTime() }
 					Aux_SelectAuxEntry()
 					Aux_UpdateRecommendation()
+				end,
+				next_page = function(page, auctions)
+					if auctions == Aux.scan.MAX_AUCTIONS_PER_PAGE then
+						return page + 1
+					end
 				end,
 		}
 	end

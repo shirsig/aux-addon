@@ -1,10 +1,11 @@
 Aux.buy = {}
 
-local record_auction, createOrder, updateOrder, set_message, report, tooltip_match
+local record_auction, set_message, report, tooltip_match
 local entries
 local selectedEntries = {}
 local search_query
 local tooltip_patterns = {}
+local current_page
 
 -----------------------------------------
 
@@ -17,8 +18,17 @@ end
 
 -----------------------------------------
 
-function AuxBuySearchButton_OnClick()
+function Aux.buy.StopButton_onclick()
+	Aux.scan.abort()
+end
 
+-----------------------------------------
+
+function Aux.buy.SearchButton_onclick()
+
+	AuxBuySearchButton:Hide()
+	AuxBuyStopButton:Show()
+	
 	entries = nil
 	selectedEntries = {}
 	
@@ -26,7 +36,7 @@ function AuxBuySearchButton_OnClick()
 	
 	local category = UIDropDownMenu_GetSelectedValue(AuxBuyCategoryDropDown)
 	
-	search_query = Aux.scan.create_query{
+	search_query = {
 		name = AuxBuySearchBox:GetText(),
 		slot = category and category.slot,
 		class = category and category.class,	
@@ -36,7 +46,9 @@ function AuxBuySearchButton_OnClick()
 	set_message('Scanning auctions ...')
 	Aux.scan.start{
 			query = search_query,
+			start_page = 0,
 			on_start_page = function(i)
+				current_page = i
 				set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
 			end,
 			on_read_auction = function(i)
@@ -46,33 +58,37 @@ function AuxBuySearchButton_OnClick()
 				end
 				local stack_size = auction_item.charges or auction_item.count
 				if (auction_item.name == search_query.name or search_query.name == '' or not AuxBuyExactCheckButton:GetChecked()) and tooltip_match(Aux.util.set_to_array(tooltip_patterns), auction_item.tooltip) then
-					record_auction(auction_item.name, auction_item.tooltip, stack_size, auction_item.buyout_price, auction_item.quality, auction_item.owner, auction_item.hyperlink, auction_item.itemstring)
+					record_auction(
+						auction_item.name,
+						auction_item.tooltip,
+						stack_size,
+						auction_item.buyout_price,
+						auction_item.quality,
+						auction_item.owner,
+						auction_item.hyperlink,
+						auction_item.itemstring,
+						current_page
+				)
 				end
 			end,
 			on_complete = function()
 				entries = entries or {}
+				AuxBuyStopButton:Hide()
+				AuxBuySearchButton:Show()
 				Aux_Buy_ScrollbarUpdate()
 			end,
 			on_abort = function()
-				entries = nil
-			end
+				entries = entries or {}
+				AuxBuyStopButton:Hide()
+				AuxBuySearchButton:Show()
+				Aux_Buy_ScrollbarUpdate()
+			end,
+			next_page = function(page, auctions)
+				if auctions == Aux.scan.MAX_AUCTIONS_PER_PAGE then
+					return page + 1
+				end
+			end,
 	}
-end
-
------------------------------------------
-
-function createOrder()
-	local order = {}
-	for entry,_ in pairs(selectedEntries) do
-		local key = Aux.auction_key(entry.tooltip, entry.stackSize, entry.buyoutPrice)
-				
-		if order[key] then
-			order[key] = order[key] + 1
-		else			
-			order[key] = 1
-		end
-	end
-	return order
 end
 
 -----------------------------------------
@@ -85,71 +101,77 @@ end
 -----------------------------------------
 
 function AuxBuyBuySelectedButton_OnClick()
-	
-	local order = createOrder(selectedEntries)
-	local orderedCount = Aux.util.set_size(selectedEntries)
-	
-	entries = nil
-	selectedEntries = {}
-	
-	Aux_Buy_ScrollbarUpdate()	
-	AuxBuySearchButton:Disable()
-	AuxBuyBuySelectedButton:Disable()
-	
-	local progress = {
-		auctions = 0,
-		units = 0,
-		expense = 0,
-	}				
-	
-	set_message('Scanning auctions ...')
-	Aux.scan.start{
-			query = search_query,
-			on_start_page = function(i)
-				set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
-			end,
-			on_read_auction = function(i)
-				local auction_item = Aux.info.auction_item(i)
-				
-				if not auction_item then
-					return
-				end
-				
-				local stack_size = auction_item.charges or auction_item.count
-				
-				if not auction_item.name or not stack_size or not auction_item.buyout_price then
-					return
-				end
 
-				local key = Aux.auction_key(auction_item.tooltip, stack_size, auction_item.buyout_price)
-				if order[key] then
+	-- local order = createOrder(selectedEntries)
+	-- local orderedCount = Aux.util.set_size(selectedEntries)
+	
+	-- entries = nil
+	-- selectedEntries = {}
+	
+	-- Aux_Buy_ScrollbarUpdate()	
+	-- AuxBuySearchButton:Disable()
+	-- AuxBuyBuySelectedButton:Disable()
+	
+	-- local progress = {
+		-- auctions = 0,
+		-- units = 0,
+		-- expense = 0,
+	-- }				
+	
+	-- set_message('Scanning auctions ...')
+	-- Aux.scan.start{
+			-- query = search_query,
+			-- start_page = 0,
+			-- on_start_page = function(i)
+				-- set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
+			-- end,
+			-- on_read_auction = function(i)
+				-- local auction_item = Aux.info.auction_item(i)
 				
-					if GetMoney() >= auction_item.buyout_price then
-						PlaceAuctionBid("list", i, auction_item.buyout_price)
-						progress.auctions = progress.auctions + 1
-						progress.units = progress.units + stack_size
-						progress.expense = progress.expense + auction_item.buyout_price
-					end
+				-- if not auction_item then
+					-- return
+				-- end
+				
+				-- local stack_size = auction_item.charges or auction_item.count
+				
+				-- if not auction_item.name or not stack_size or not auction_item.buyout_price then
+					-- return
+				-- end
+
+				-- local key = Aux.auction_key(auction_item.tooltip, stack_size, auction_item.buyout_price)
+				-- if order[key] then
+				
+					-- if GetMoney() >= auction_item.buyout_price then
+						-- PlaceAuctionBid("list", i, auction_item.buyout_price)
+						-- progress.auctions = progress.auctions + 1
+						-- progress.units = progress.units + stack_size
+						-- progress.expense = progress.expense + auction_item.buyout_price
+					-- end
 					
-					if order[key] > 1 then
-						order[key] = order[key] - 1
-					else
-						order[key] = nil
-					end
-				end
-			end,
-			on_complete = function()
-				entries = entries or {}
-				Aux_Buy_ScrollbarUpdate()
-				AuxBuySearchButton:Enable()
-				report(true, search_query.name, orderedCount, progress)
-			end,
-			on_abort = function()
-				entries = nil
-				AuxBuySearchButton:Enable()
-				report(false, search_query.name, orderedCount, progress)
-			end
-	}
+					-- if order[key] > 1 then
+						-- order[key] = order[key] - 1
+					-- else
+						-- order[key] = nil
+					-- end
+				-- end
+			-- end,
+			-- on_complete = function()
+				-- entries = entries or {}
+				-- Aux_Buy_ScrollbarUpdate()
+				-- AuxBuySearchButton:Enable()
+				-- report(true, search_query.name, orderedCount, progress)
+			-- end,
+			-- on_abort = function()
+				-- entries = nil
+				-- AuxBuySearchButton:Enable()
+				-- report(false, search_query.name, orderedCount, progress)
+			-- end,
+			-- next_page = function(page, auctions)
+				-- if auctions == Aux.scan.MAX_AUCTIONS_PER_PAGE then
+					-- return page + 1
+				-- end
+			-- end,
+	-- }
 end
 
 -----------------------------------------
@@ -158,15 +180,58 @@ function AuxBuyEntry_OnClick()
 	local i = this:GetID()
 	local entry = entries[i]
 
-	if Aux.util.set_contains(selectedEntries, entry) then
-		Aux.util.set_remove(selectedEntries, entry)
-	else
-		Aux.util.set_add(selectedEntries, entry)
-	end
+	-- if Aux.util.set_contains(selectedEntries, entry) then
+		-- Aux.util.set_remove(selectedEntries, entry)
+	-- else
+		-- Aux.util.set_add(selectedEntries, entry)
+	-- end
 	
-	Aux_Buy_ScrollbarUpdate()
+	-- Aux_Buy_ScrollbarUpdate()
 
-	PlaySound("igMainMenuOptionCheckBoxOn")
+	-- PlaySound("igMainMenuOptionCheckBoxOn")
+	
+	local found
+	local order_key = Aux.auction_key(entry.tooltip, entry.stack_size, entry.buyout_price)
+	
+	Aux.log('starting' .. entry.page .. ' - ' .. current_page)
+	Aux.scan.start{
+		query = search_query,
+		start_page = entry.page ~= current_page and entry.page,
+		on_read_auction = function(i)
+			local auction_item = Aux.info.auction_item(i)
+			
+			if not auction_item then
+				return
+			end
+			
+			local stack_size = auction_item.charges or auction_item.count
+			
+			if not auction_item.tooltip or not stack_size or not auction_item.buyout_price then
+				return
+			end
+
+			local key = Aux.auction_key(auction_item.tooltip, stack_size, auction_item.buyout_price)
+			if key == order_key then
+				found = true
+				Aux.log('found')
+				if GetMoney() >= auction_item.buyout_price then
+			
+					PlaceAuctionBid("list", i, auction_item.buyout_price)
+					
+					-- TODO remove
+				end
+			end
+		end,
+		on_complete = function()
+			if not found then
+				-- TODO remove
+			end
+			Aux_Buy_ScrollbarUpdate()
+		end,
+		on_abort = function()
+			Aux_Buy_ScrollbarUpdate()
+		end,
+	}
 end
 
 function AuxBuyEntry_OnEnter()
@@ -176,29 +241,30 @@ function AuxBuyEntry_OnEnter()
 	Aux.info.set_game_tooltip(this, entry.tooltip)
 	
 	if(EnhTooltip ~= nil) then
-		EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.hyperlink, entry.quality, entry.stackSize)
+		EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.hyperlink, entry.quality, entry.stack_size)
 	end
 end
 
 -----------------------------------------
 
-function record_auction(name, tooltip, stack_size, buyout_price, quality, owner, hyperlink, itemstring)
+function record_auction(name, tooltip, stack_size, buyout_price, quality, owner, hyperlink, itemstring, page)
 	entries = entries or {}
 	
 	if buyout_price > 0 and owner ~= UnitName("player") then
 		tinsert(entries, {
 				name		= name,
 				tooltip		= tooltip,
-				stackSize	= stack_size,
-				buyoutPrice	= buyout_price,
-				itemPrice	= buyout_price / stack_size,
+				stack_size	= stack_size,
+				buyout_price	= buyout_price,
+				item_price	= buyout_price / stack_size,
 				quality		= quality,
 				hyperlink	= hyperlink,
 				itemstring = itemstring,
+				page = current_page,
 		})
 	end
 	
-	table.sort(entries, function(a,b) return a.itemPrice < b.itemPrice end)
+	table.sort(entries, function(a,b) return a.item_price < b.item_price end)
 end
 
 -----------------------------------------
@@ -208,18 +274,6 @@ function Aux_Buy_ScrollbarUpdate()
 		set_message("No auctions were found")
 	else
 		AuxBuyMessage:Hide()
-	end
-	
-	local total = 0
-	for entry, _ in selectedEntries do
-		total = total + entry.buyoutPrice
-	end	
-	MoneyFrame_Update("AuxBuyTotal", Aux_Round(total))
-	
-	if Aux.util.set_size(selectedEntries) > 0 and GetMoney() >= total then
-		AuxBuyBuySelectedButton:Enable()
-	else
-		AuxBuyBuySelectedButton:Disable()
 	end
 	
 	local numrows
@@ -249,7 +303,7 @@ function Aux_Buy_ScrollbarUpdate()
 			local entry = entries[dataOffset]
 
 			local lineEntry_name = getglobal("AuxBuyEntry"..line.."_Name")
-			local lineEntry_stackSize = getglobal("AuxBuyEntry"..line.."_StackSize")
+			local lineEntry_stack_size = getglobal("AuxBuyEntry"..line.."_StackSize")
 			
 			local color = "ffffffff"
 			if Aux_QualityColor(entry.quality) then
@@ -264,10 +318,10 @@ function Aux_Buy_ScrollbarUpdate()
 				lineEntry:UnlockHighlight()
 			end
 
-			lineEntry_stackSize:SetText(entry.stackSize)
+			lineEntry_stack_size:SetText(entry.stack_size)
 			
-			MoneyFrame_Update("AuxBuyEntry"..line.."_UnitPrice", Aux_Round(entry.buyoutPrice/entry.stackSize))
-			MoneyFrame_Update("AuxBuyEntry"..line.."_TotalPrice", Aux_Round(entry.buyoutPrice))
+			MoneyFrame_Update("AuxBuyEntry"..line.."_UnitPrice", Aux_Round(entry.buyout_price/entry.stack_size))
+			MoneyFrame_Update("AuxBuyEntry"..line.."_TotalPrice", Aux_Round(entry.buyout_price))
 
 			lineEntry:Show()
 		else
@@ -375,7 +429,7 @@ end
 function AuxBuyCategoryDropDown_OnClick()
 	local qualified_name = ({ GetAuctionItemClasses() })[this.value.class] or 'All'
 	if this.value.subclass then
-		local subclass_name = ({ GetAuctionItemSubclasses(this.value.class) })[this.value.subclass]
+		local subclass_name = ({ GetAuctionItemSubClasses(this.value.class) })[this.value.subclass]
 		qualified_name = qualified_name .. ' - ' .. subclass_name
 		if this.value.slot then
 			local slot_name = getglobal(({ GetAuctionInvTypes(this.value.class, this.value.subclass) })[this.value.slot])
@@ -442,7 +496,7 @@ function AuxBuyTooltipDropDown_Initialize()
 end
 
 function AuxBuyTooltipDropDown_OnClick()
-	AuxBuyTooltipEdit:SetText(this.value)
+	Aux.util.set_remove(tooltip_patterns, this.value)
 end
 
 function Aux.buy.toggle_tooltip_dropdown()

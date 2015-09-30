@@ -17,3 +17,5 @@ util.lua
 options.xml
 about.xml
 
+list.xml
+
