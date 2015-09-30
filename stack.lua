@@ -108,7 +108,14 @@ function Aux.stack.onupdate()
 		local next_slot = state.other_slots()
 		local empty_slot = find_empty_slot()
 
-		if next_slot then
+		if empty_slot and stack_size(state.target_slot) > state.target_size then
+			move_item(
+				state.target_slot,
+				empty_slot,
+				stack_size(state.target_slot) - state.target_size
+			)
+			return
+		elseif next_slot then
 			if stack_size(state.target_slot) < state.target_size then
 				move_item(
 					next_slot,
@@ -124,13 +131,6 @@ function Aux.stack.onupdate()
 				)
 				return
 			end
-		elseif empty_slot and stack_size(state.target_slot) > state.target_size then
-			move_item(
-				state.target_slot,
-				empty_slot,
-				stack_size(state.target_slot) - state.target_size
-			)
-			return
 		end
 		
 		Aux.stack.stop()
