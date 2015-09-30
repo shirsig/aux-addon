@@ -141,7 +141,7 @@
 				<Size><AbsDimension x="1" y="1"/></Size>
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="80" y="-46"/></Offset></Anchor></Anchors>
 				<Frames>
-					<EditBox name="AuxBuySearchBox" autoFocus="false" inherits="InputBoxTemplate">
+					<EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="InputBoxTemplate">
 						<Size><AbsDimension x="180" y="22"/></Size>
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Layers>
@@ -230,7 +230,7 @@
 						</Layers>
 					</CheckButton>					
 					
-					<EditBox name="AuxBuyTooltipEdit" autoFocus="false" inherits="InputBoxTemplate">
+					<EditBox name="AuxBuyTooltipInputBox" autoFocus="false" inherits="InputBoxTemplate">
 						<Size><AbsDimension x="145" y="22"/></Size>
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="557" y="0"/></Offset></Anchor></Anchors>
 						<Layers>
@@ -248,7 +248,7 @@
 						</Layers>						
 						<Scripts>
 							<OnEnterPressed>
-								AuxBuyTooltipAddButton_OnClick(this)
+								AuxBuyTooltipButton_OnClick(this)
 							</OnEnterPressed>
 						</Scripts>
 					</EditBox>
@@ -267,12 +267,12 @@
 						</Scripts>
 					</Frame>
 					
-					<Button name="AuxBuyTooltipAddButton" inherits="UIPanelButtonTemplate" text="+">
+					<Button name="AuxBuyTooltipButton" inherits="UIPanelButtonTemplate" text="+">
 						<Size><AbsDimension x="22" y="22"/></Size>
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="720" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>
-								AuxBuyTooltipAddButton_OnClick(this)
+								AuxBuyTooltipButton_OnClick(this)
 							</OnClick>
 						</Scripts>
 					</Button>

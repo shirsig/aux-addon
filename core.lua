@@ -435,7 +435,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 			if PanelTemplates_GetSelectedTab(AuctionFrame) == 1 then
 				BrowseName:SetText(container_item.name)
 			elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index then
-				AuxBuySearchBox:SetText(container_item.name)
+				AuxBuyNameInputBox:SetText(container_item.name)
 			end
 			return
 		elseif AUX_SELL_SHORTCUT and IsAltKeyDown()then
@@ -453,7 +453,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 				local container_item = Aux.info.container_item(this:GetParent():GetID(), this:GetID())
 				AuctionFrameTab_OnClick(Aux.tabs.buy.index)
 			end
-			AuxBuySearchBox:SetText(container_item.name)
+			AuxBuyNameInputBox:SetText(container_item.name)
 			Aux.buy.SearchButton_onclick()
 			return
 		end

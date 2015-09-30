@@ -39,34 +39,25 @@ end
 -----------------------------------------
 
 function Aux.scan.on_update()
+
+	if page_state and page_state.index <= page_state.count and current_job.on_read_auction then		
+		current_job.on_read_auction(page_state.index)
+	end
+		
+	if page_state and page_state.index == page_state.count then
+		current_page = current_job.next_page and current_job.next_page(current_page, page_state.count, page_state.total_count)
+		if current_page then
+			page_state = nil
+		else
+			Aux.scan.complete()
+		end
+	end
+		
 	if page_state then
-		if page_state.index <= page_state.count and current_job.on_read_auction then		
-			current_job.on_read_auction(page_state.index)
-		end
+		page_state.index = min(page_state.index + 1, page_state.count)
+	end
 		
-		if page_state.index == page_state.count then
-			current_page = current_job.next_page and current_job.next_page(current_page, page_state.count, page_state.total_count)
-			if current_page then
-				page_state = nil
-			else
-				Aux.scan.complete()
-			end
-		end
-		
-		-- if page_state.index == page_state.count then
-			-- if page_state.index == MAX_AUCTIONS_PER_PAGE then
-				-- page_state = nil
-				-- current_page = current_page + 1
-			-- else
-				-- Aux.scan.complete()
-			-- end
-		-- end
-		
-		if page_state then
-			page_state.index = min(page_state.index + 1, page_state.count)
-		end
-		
-	elseif current_job and CanSendAuctionQuery() then
+	if not page_state and current_job and CanSendAuctionQuery() then
 		processing = false
 		submit_query()
 	end

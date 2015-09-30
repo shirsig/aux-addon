@@ -63,7 +63,7 @@ function same_slot(slot1, slot2)
 end
 
 function move_item(from_slot, to_slot, amount)
-	if stack_size(to_slot) < max_stack(from_slot) and GetTime() - last_move > 0.3 then
+	if stack_size(to_slot) < max_stack(from_slot) then
 		last_move = GetTime()
 		
 		amount = min(max_stack(from_slot) - stack_size(to_slot), amount)
@@ -72,7 +72,6 @@ function move_item(from_slot, to_slot, amount)
 
 		ClearCursor()
 		SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
-				snipe.log('a'..amount..'s'..stack_size(to_slot))
 		PickupContainerItem(to_slot.bag, to_slot.bag_slot)
 		ClearCursor()
 	end
@@ -104,8 +103,7 @@ function item_charges(slot)
 end
 
 function Aux.stack.onupdate()
-	if state and state.processing <= 0 then
-		local next_slot = state.other_slots()
+	if state and state.processing <= 0 and GetTime() - last_move > 0.3 then
 		local empty_slot = find_empty_slot()
 
 		if empty_slot and stack_size(state.target_slot) > state.target_size then
@@ -115,21 +113,24 @@ function Aux.stack.onupdate()
 				stack_size(state.target_slot) - state.target_size
 			)
 			return
-		elseif next_slot then
-			if stack_size(state.target_slot) < state.target_size then
-				move_item(
-					next_slot,
-					state.target_slot,
-					state.target_size - stack_size(state.target_slot)
-				)
-				return
-			elseif stack_size(state.target_slot) > state.target_size then
-				move_item(
-					state.target_slot,
-					next_slot,
-					stack_size(state.target_slot) - state.target_size
-				)
-				return
+		else
+			local next_slot = state.other_slots()
+			if next_slot then
+				if stack_size(state.target_slot) < state.target_size then
+					move_item(
+						next_slot,
+						state.target_slot,
+						state.target_size - stack_size(state.target_slot)
+					)
+					return
+				elseif stack_size(state.target_slot) > state.target_size then
+					move_item(
+						state.target_slot,
+						next_slot,
+						stack_size(state.target_slot) - state.target_size
+					)
+					return
+				end
 			end
 		end
 		
