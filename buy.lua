@@ -340,7 +340,7 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 				hasArrow = GetAuctionItemSubClasses(value.class),
 				text = class,
 				value = value,
-				func = AuxBuyCategoryDropDown_OnClick(class, value),
+				func = AuxBuyCategoryDropDown_OnClick,
 			}, 1)
 		end
 	end
@@ -353,7 +353,7 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 				hasArrow = GetAuctionInvTypes(value.class, value.subclass),
 				text = subclass,
 				value = value,
-				func = AuxBuyCategoryDropDown_OnClick(subclass, value),
+				func = AuxBuyCategoryDropDown_OnClick,
 			}, 2)
 		end
 	end
@@ -366,18 +366,26 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 			UIDropDownMenu_AddButton({
 				text = slot_name,
 				value = value,
-				func = AuxBuyCategoryDropDown_OnClick(slot_name, value),
+				func = AuxBuyCategoryDropDown_OnClick,
 			}, 3)
 		end
 	end
 end
 
-function AuxBuyCategoryDropDown_OnClick(text, value)
-	return function()
-		UIDropDownMenu_SetSelectedValue(AuxBuyCategoryDropDown, value)
-		UIDropDownMenu_SetText(text, AuxBuyCategoryDropDown) -- shouldn't be necessary ...
-		CloseDropDownMenus(1) -- nor this
+function AuxBuyCategoryDropDown_OnClick()
+	local qualified_name = ({ GetAuctionItemClasses() })[this.value.class]
+	if this.value.subclass then
+		local subclass_name = ({ GetAuctionItemSubclasses(this.value.class) })[this.value.subclass]
+		qualified_name = qualified_name .. ' - ' .. subclass_name
+		if this.value.slot then
+			local slot_name = getglobal(({ GetAuctionInvTypes(this.value.class, this.value.subclass) })[this.value.slot])
+			qualified_name = qualified_name .. ' - ' .. slot_name
+		end
 	end
+
+	UIDropDownMenu_SetSelectedValue(AuxBuyCategoryDropDown, this.value)
+	UIDropDownMenu_SetText(qualified_name, AuxBuyCategoryDropDown)
+	CloseDropDownMenus(1)
 end
 
 function AuxBuySlotDropDown_Initialize(arg1)
