@@ -6,7 +6,9 @@ local current_job
 local current_page
 local page_state
 
-local last_query_request = GetTime()
+local last_queried = GetTime()
+
+local timeout
 
 -- forward declaration of local functions
 local submit_query, process_query_results
@@ -14,7 +16,8 @@ local submit_query, process_query_results
 -----------------------------------------
 
 function Aux.scan.on_event()
-	if event == "AUCTION_ITEM_LIST_UPDATE" and current_job and not page_state then
+	if event == "AUCTION_ITEM_LIST_UPDATE" and current_job and not page_state and not timeout then
+		timeout = true
 		page_state = {} -- careful, race conditions
 		local count, total_count = GetNumAuctionItems("list")
 		page_state.index = 1
@@ -30,8 +33,11 @@ end
 -----------------------------------------
 
 function Aux.scan.on_update()
+	if current_job and CanSendAuctionQuery() then
+		timeout = false
+	end
+	
 	if page_state then
-
 		if page_state.index <= page_state.count and current_job.on_read_auction then		
 			current_job.on_read_auction(page_state.index)
 		end
@@ -49,12 +55,8 @@ function Aux.scan.on_update()
 			page_state.index = min(page_state.index + 1, page_state.count)
 		end
 		
-	elseif current_job and GetTime() - last_query_request > 0.5 then
-		last_query_request = GetTime()
-
-		if CanSendAuctionQuery() then
-			submit_query()
-		end
+	elseif current_job and not timeout then
+		submit_query()
 	end
 end
 
