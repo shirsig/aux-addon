@@ -42,6 +42,10 @@ end
 
 function Aux.buy.SearchButton_onclick()
 
+	if not AuxBuySearchButton:IsVisible() then
+		return
+	end
+	
 	AuxBuySearchButton:Hide()
 	AuxBuyStopButton:Show()
 	

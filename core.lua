@@ -446,10 +446,8 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 				AuctionFrameTab_OnClick(Aux.tabs.sell.index)
 			end			
 			return
-		elseif AUX_BUY_SHORTCUT and IsControlKeyDown() and not ChatFrameEditBox:IsVisible() then
-			local container_item = Aux.info.container_item(this:GetParent():GetID(), this:GetID())
+		elseif AUX_BUY_SHORTCUT and IsControlKeyDown() then
 			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Aux.tabs.buy.index then
-				local container_item = Aux.info.container_item(this:GetParent():GetID(), this:GetID())
 				AuctionFrameTab_OnClick(Aux.tabs.buy.index)
 			end
 			AuxBuyNameInputBox:SetText(container_item.name)
