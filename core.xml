@@ -2,7 +2,6 @@
 
 	<Script file="core.lua"/> 
   
-	<!-- Frame to handle all core events --> 
 	<Frame>
       <Scripts> 
 			<OnLoad> 

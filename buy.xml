@@ -2,6 +2,14 @@
 
 	<Script file="buy.lua"/> 
 
+	<Frame>
+      <Scripts> 
+			<OnUpdate> 
+				Aux.buy.onupdate()
+			</OnUpdate> 
+		</Scripts> 
+	</Frame>
+	
 	<Button name="AuxBuyEntryTemplate" virtual="true" hidden="true">
 		<Size><AbsDimension y="16"/></Size>		
 		<Frames>
@@ -128,7 +136,7 @@
 		</Layers>
 
 		<Frames>
-			<Frame name="AuxBuyList" inherits="ListTemplate">
+<!-- 			<Frame name="AuxBuyList" inherits="ListTemplate">
 				<Size><AbsDimension x="610" y="334"/></Size>
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="187" y="-77"/></Offset></Anchor></Anchors>
 				<Scripts>
@@ -136,7 +144,7 @@
 						Aux.list.initialize(this, {{ width=50, logicalColumns={1,2,3} }, { width=50, logicalColumns={1,2,3} }})
 					</OnLoad>
 				</Scripts>
-			</Frame>
+			</Frame> -->
 			<Frame name="AuxBuyFilters">
 				<Size><AbsDimension x="1" y="1"/></Size>
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="80" y="-46"/></Offset></Anchor></Anchors>
@@ -357,7 +365,52 @@
             <Button name="AuxBuyEntry16" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry15" relativePoint="BOTTOMLEFT"/></Anchors></Button>
             <Button name="AuxBuyEntry17" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry16" relativePoint="BOTTOMLEFT"/></Anchors></Button>
             <Button name="AuxBuyEntry18" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry17" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry19" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry18" relativePoint="BOTTOMLEFT"/></Anchors></Button>		
+            <Button name="AuxBuyEntry19" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry18" relativePoint="BOTTOMLEFT"/></Anchors></Button>
+			
+			<Frame name="AuxBuyBuyoutDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" enableMouse="true" hidden="true" movable="true">
+				<Size><AbsDimension x="260" y="160" /></Size>		
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-150"/></Offset></Anchor></Anchors>
+
+				<Scripts>
+					<OnLoad>this:RegisterForDrag("LeftButton")</OnLoad>
+					<OnDragStart>this:StartMoving()</OnDragStart>
+					<OnDragStop>this:StopMovingOrSizing()</OnDragStop>
+				</Scripts>
+				<Backdrop bgFile="Interface\CharacterFrame\UI-Party-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+					<BackgroundInsets><AbsInset left="11" right="12" top="12" bottom="11"/></BackgroundInsets>
+					<TileSize><AbsValue val="32"/></TileSize>
+					<EdgeSize><AbsValue val="32"/></EdgeSize>
+				</Backdrop>
+
+				<Frames>
+					<SimpleHTML name="$parentHTML">
+						<Size><AbsDimension x="420" y="420" /></Size>		
+						<Anchors>
+							<Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor>
+						</Anchors>
+						<FontString inherits="GameFontHighlightSmall"/>
+						<FontStringHeader1 inherits="GameFontNormal"/>
+					</SimpleHTML>
+					<Button name="$parentBuyButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
+						<Size><AbsDimension x="100" y="22"/>	</Size>
+						<Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="20" y="15"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnClick>
+								Aux.buy.buyout_dialog_buy()
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
+						<Size><AbsDimension x="100" y="22"/>	</Size>
+						<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnClick>
+								Aux.buy.buyout_dialog_cancel()
+							</OnClick>
+						</Scripts>
+					</Button>
+				</Frames>
+			</Frame>
 		</Frames>
 	</Frame>
 	

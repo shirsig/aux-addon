@@ -196,9 +196,8 @@ function Aux_OnAuctionHouseClosed()
 
 	Aux.post.stop()
 	Aux.stack.stop()
-	if not Aux.scan.idle() then
-		Aux.scan.abort()
-	end
+	Aux.buy.exit()
+	Aux.scan.abort()
 	
 	AuxOptionsButtonPanel:Hide()
 	AuxOptionsFrame:Hide()
@@ -218,9 +217,9 @@ function Aux_AuctionFrameTab_OnClick(index)
 	
 	Aux.post.stop()
 	Aux.stack.stop()
-	if not Aux.scan.idle() then
-		Aux.scan.abort()
-	end
+	Aux.buy.exit()
+	Aux.scan.abort()
+
 	AuxSellPanel:Hide()
     AuxBuyPanel:Hide()
 

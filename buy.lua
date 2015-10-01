@@ -6,6 +6,14 @@ local selectedEntries = {}
 local search_query
 local tooltip_patterns = {}
 local current_page
+local refresh
+
+
+function Aux.buy.exit()
+
+	Aux.buy.buyout_dialog_cancel()
+	current_page = nil
+end
 
 -----------------------------------------
 
@@ -14,6 +22,14 @@ function Aux_AuctionFrameBids_Update()
 	if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index and AuctionFrame:IsShown() then
 		Aux_HideElems(Aux.tabs.buy.hiddenElements)
 	end
+end
+
+-----------------------------------------
+
+function Aux.buy.buyout_dialog_cancel()
+	Aux.scan.abort()
+	AuxBuyBuyoutDialog:Hide()
+	AuxBuySearchButton:Enable()
 end
 
 -----------------------------------------
@@ -32,7 +48,7 @@ function Aux.buy.SearchButton_onclick()
 	entries = nil
 	selectedEntries = {}
 	
-	Aux_Buy_ScrollbarUpdate()
+	refresh = true
 	
 	local category = UIDropDownMenu_GetSelectedValue(AuxBuyCategoryDropDown)
 	local tooltip_patterns = Aux.util.set_to_array(tooltip_patterns)
@@ -77,13 +93,13 @@ function Aux.buy.SearchButton_onclick()
 				entries = entries or {}
 				AuxBuyStopButton:Hide()
 				AuxBuySearchButton:Show()
-				Aux_Buy_ScrollbarUpdate()
+				refresh = true
 			end,
 			on_abort = function()
 				entries = entries or {}
 				AuxBuyStopButton:Hide()
 				AuxBuySearchButton:Show()
-				Aux_Buy_ScrollbarUpdate()
+				refresh = true
 			end,
 			next_page = function(page, auctions)
 				if auctions == Aux.scan.MAX_AUCTIONS_PER_PAGE then
@@ -103,10 +119,38 @@ end
 -----------------------------------------
 
 function AuxBuyEntry_OnClick()
+	local express_mode = IsControlKeyDown()
+	
 	AuxBuySearchButton:Disable()
 	
-	local i = this:GetID()
-	local entry = entries[i]
+	local entry_index = this:GetID()
+	local entry = entries[entry_index]
+	
+	if not express_mode then
+		AuxBuyBuyoutDialogBuyButton:Disable()
+		AuxBuyBuyoutDialogHTML:SetText(string.format(
+			[[
+			<html>
+			<body>
+				<h1>%s</h1>
+				<br/>
+				<p>
+					Stack Size: %i
+					<br/><br/>
+					Buyout Price: %s
+					<br/><br/>
+					Unit Price: %s
+				</p>
+			</body>
+			</html>
+			]],
+			entry.name,
+			entry.stack_size,
+			Aux.util.format_money(entry.buyout_price),
+			Aux.util.format_money(entry.item_price)
+		))
+		AuxBuyBuyoutDialog:Show()
+	end
 
 	PlaySound("igMainMenuOptionCheckBoxOn")
 	
@@ -132,25 +176,47 @@ function AuxBuyEntry_OnClick()
 			local key = Aux.auction_key(auction_item.tooltip, stack_size, auction_item.buyout_price)
 			if key == order_key then
 				found = true
-				if GetMoney() >= auction_item.buyout_price then
 			
-					PlaceAuctionBid("list", i, auction_item.buyout_price)
-					tremove(entries,i)
+				if express_mode then			
+					if GetMoney() >= auction_item.buyout_price then
+						tremove(entries, entry_index)
+						refresh = true
+					end
+					
+					PlaceAuctionBid("list", i, auction_item.buyout_price)				
 					
 					Aux.scan.abort()
+				else
+					Aux.buy.buyout_dialog_buy = function()						
+						if GetMoney() >= auction_item.buyout_price then
+							tremove(entries, entry_index)
+							refresh = true
+						end
+						
+						PlaceAuctionBid("list", i, auction_item.buyout_price)
+					
+						Aux.scan.abort()
+						AuxBuySearchButton:Enable()
+						AuxBuyBuyoutDialog:Hide()
+					end
+					AuxBuyBuyoutDialogBuyButton:Enable()
 				end
 			end
 		end,
 		on_complete = function()
 			if not found then
-				tremove(entries,i)
+				tremove(entries, entry_index)
+				refresh = true
+				Aux.buy.buyout_dialog_cancel()
 			end
-			AuxBuySearchButton:Enable()
-			Aux_Buy_ScrollbarUpdate()
+			if express_mode then
+				AuxBuySearchButton:Enable()
+			end
 		end,
 		on_abort = function()
-			AuxBuySearchButton:Enable()
-			Aux_Buy_ScrollbarUpdate()
+			if express_mode then
+				AuxBuySearchButton:Enable()
+			end
 		end,
 	}
 end
@@ -173,19 +239,28 @@ function record_auction(name, tooltip, stack_size, buyout_price, quality, owner,
 	
 	if buyout_price > 0 and owner ~= UnitName("player") then
 		tinsert(entries, {
-				name		= name,
-				tooltip		= tooltip,
-				stack_size	= stack_size,
-				buyout_price	= buyout_price,
-				item_price	= buyout_price / stack_size,
-				quality		= quality,
-				hyperlink	= hyperlink,
+				name = name,
+				tooltip = tooltip,
+				stack_size = stack_size,
+				buyout_price = buyout_price,
+				item_price = buyout_price / stack_size,
+				quality = quality,
+				hyperlink = hyperlink,
 				itemstring = itemstring,
 				page = current_page,
 		})
 	end
 	
 	table.sort(entries, function(a,b) return a.item_price < b.item_price end)
+end
+
+-----------------------------------------
+
+function Aux.buy.onupdate()
+	if refresh then
+		refresh = false
+		Aux_Buy_ScrollbarUpdate()
+	end
 end
 
 -----------------------------------------
@@ -261,39 +336,6 @@ function tooltip_match(patterns, tooltip)
 			return left_match or right_match
 		end)
 	end)
-end
-
------------------------------------------
-
-function report(completed, item_name, ordered_count, progress)
-	
-	AuxBuyReportHTML:SetText(string.format(
-			[[
-			<html>
-			<body>
-				<h1>Aux Buy Report%s</h1>
-				<br/>
-				<p>
-					%i out of %i ordered auctions of %s purchased
-					<br/><br/>
-					Total units purchased: %i
-					<br/>
-					Total expense: %s
-				</p>
-			</body>
-			</html>
-			]],
-			completed and '' or ' (Aborted)',
-			progress.auctions,
-			ordered_count,
-			item_name,
-			progress.units,
-			Aux.util.format_money(progress.expense)
-	))
-		
-	AuxBuyReportHTML:SetSpacing(3)
-	
-	AuxBuyReport:Show()
 end
 
 -----------------------------------------
