@@ -2,27 +2,81 @@ Aux.scan = {}
 
 Aux.scan.MAX_AUCTIONS_PER_PAGE = 50
 
+local ready
+local continuation
+
 local current_job
 local current_page
-local page_state
 
-local last_queried = GetTime()
-
-local processing
+local wait, wait_for_results, wait_after, wait_for_function, wait_until_can_query, scan, scan_page, ready -- TODO
 
 -- forward declaration of local functions
 local submit_query, start_processing_page
 
------------------------------------------
 
 function Aux.scan.on_event()
-	if event == "AUCTION_ITEM_LIST_UPDATE" and current_job and not page_state and not processing then
-		processing = true -- careful, race conditions
-		start_processing_page()
+	if current_job and ready and ready(event) then
+		resume = nil
+		continuation()
 	end
 end
 
------------------------------------------
+function Aux.scan.on_update()
+	if current_job and ready and ready() then
+		resume = nil
+		continuation()
+	end
+end
+
+function Aux.scan.start(job)
+	Aux.scan.abort()
+	
+	scan(job)
+end
+
+function wait(timeout)
+	local start_time = GetTime()
+	resume = function()
+		return GetTime() - start_time >= timeout
+	end
+end
+
+function wait_after()
+	local last
+	return function wait(timeout)
+		resume = function()
+			return GetTime() - last >= timeout
+		end
+		coroutine:yield()
+	end,
+	function()
+		last = GetTime()
+	end
+end
+
+function wait_for_results(k)
+	continuation = k
+	local start_time = GetTime()
+	resume = function(event)
+		return event == "AUCTION_ITEM_LIST_UPDATE"
+	end
+end
+
+function wait_for_function(f, args, k)
+	if not f then k() end
+	local done
+	tinsert(args, function() done = true end, 1)
+	f(unpack(args))
+	resume = function(event)
+		return done
+	end
+end
+
+function wait_until(p)
+	resume = function()
+		return p()
+	end
+end
 
 function start_processing_page()
 	page_state = {}
@@ -32,44 +86,10 @@ function start_processing_page()
 	page_state.total_count = total_count
 	
 	if current_job.on_start_page then
-		current_job.on_start_page(current_page)
+		wait_for_function(current_job.on_start_page, {current_page})
 	end
 end
 
------------------------------------------
-
-function Aux.scan.on_update()
-
-	if page_state and page_state.index <= page_state.count and current_job.on_read_auction then		
-		current_job.on_read_auction(page_state.index)
-	end
-		
-	if page_state and page_state.index == page_state.count then
-		current_page = current_job.next_page and current_job.next_page(current_page, page_state.count, page_state.total_count)
-		if current_page then
-			page_state = nil
-		else
-			Aux.scan.complete()
-		end
-	end
-		
-	if page_state then
-		page_state.index = min(page_state.index + 1, page_state.count)
-	end
-		
-	if not page_state and current_job and CanSendAuctionQuery() then
-		processing = false
-		submit_query()
-	end
-end
-
------------------------------------------
-
-function Aux.scan.idle()
-	return not current_job
-end
-
------------------------------------------
 
 function Aux.scan.complete()
 	if current_job and current_job.on_complete then
@@ -78,10 +98,8 @@ function Aux.scan.complete()
 	
 	current_job = nil
 	current_page = nil
-	page_state = nil
 end
 
------------------------------------------
 
 function Aux.scan.abort()
 	if current_job and current_job.on_abort then
@@ -90,25 +108,55 @@ function Aux.scan.abort()
 	
 	current_job = nil
 	current_page = nil
-	page_state = nil
 end
 
------------------------------------------
 
-function Aux.scan.start(job)
-	Aux.scan.abort()
+function scan()
+
+	scan_page(current_page, function()
 	
-	current_job = job
-	current_page = job.start_page
-	
-	if not current_page then
-		start_processing_page()
+	current_page = current_job.next_page and current_job.next_page(current_page)
+	if current_page then
+		return Aux.scan.complete()
+	else
+		return scan()
 	end
+	
+	end)
 end
 
------------------------------------------
+function scan_page(page, k)
+	wait_for_function(current_job.on_start_page, {current_page}, function()
+	
+	submit_query(function()
+	
+	wait_for_results(function()
+	
+	local count, total_count = GetNumAuctionItems("list")
+	
+	scan_auctions(count, k)
+	
+	end)end)end)
+end
 
-function submit_query()
+function scan_auctions(count, k)
+	scan_auctions_helper(1, count, k)
+end
+
+function scan_auctions_helper(i, n, k)
+	wait_for_function(current_job.on_read_auction, {current_page}, function()
+	
+	if i == n then
+		return k()
+	else
+		return scan_auctions_helper(i + 1, n, k)
+	end
+	
+	end)
+end
+
+function submit_query(k)
+	wait_until(CanSendAuctionQuery, function()
 	QueryAuctionItems(
 		current_job.query.name,
 		current_job.query.min_level,
@@ -120,4 +168,7 @@ function submit_query()
 		current_job.query.usable,
 		current_job.query.quality
 	)
+	
+	return k()
+	end)
 end
