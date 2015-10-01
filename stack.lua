@@ -4,6 +4,8 @@ local state
 
 local last_move = GetTime()
 
+local DELAY = 0
+
 local inventory, item_slots, find_empty_slot, locked, same_slot, move_item, item_name, stack_size
 
 -- returns iterator for inventory slots
@@ -68,12 +70,18 @@ function move_item(from_slot, to_slot, amount)
 		
 		amount = min(max_stack(from_slot) - stack_size(to_slot), amount)
 		
-		state.processing = 3
+		if stack_size(to_slot) == 0 then
+			state.processing = 4
+		else
+			state.processing = 3
+		end
+		if CursorHasItem() then
+			state.processing = state.processing + 1
+			ClearCursor()
+		end
 
-		ClearCursor()
 		SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
 		PickupContainerItem(to_slot.bag, to_slot.bag_slot)
-		ClearCursor()
 	end
 end
 
@@ -103,7 +111,7 @@ function item_charges(slot)
 end
 
 function Aux.stack.onupdate()
-	if state and state.processing <= 0 and GetTime() - last_move > 0.3 then
+	if state and state.processing <= 0 and GetTime() - last_move > DELAY then
 		local empty_slot = find_empty_slot()
 
 		if empty_slot and stack_size(state.target_slot) > state.target_size then
