@@ -6,6 +6,10 @@ local state
 
 local post_auction
 
+local DELAY = 0.5
+
+local last_posted = GetTime()
+
 function Aux.post.onupdate()
 	if state then
 		if state.auctioning then
@@ -21,7 +25,7 @@ function Aux.post.onupdate()
 					state.name,
 					state.stack_size,
 					function(slot)
-						if slot then
+						if state and slot then
 							post_auction(slot)
 						else
 							Aux.post.stop()
