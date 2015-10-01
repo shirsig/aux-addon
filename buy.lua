@@ -63,17 +63,16 @@ function Aux.buy.SearchButton_onclick()
 	
 	set_message('Scanning auctions ...')
 	Aux.scan.start{
-			query = search_query,
-			start_page = 0,
-			on_start_page = function(i)
-				current_page = i
-				set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
-			end,
-			on_read_auction = function(i)
-				local auction_item = Aux.info.auction_item(i)
-				if not auction_item then
-					return
-				end
+		query = search_query,
+		page = 0,
+		on_start_page = function(k, i)
+			current_page = i
+			set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
+			k()
+		end,
+		on_read_auction = function(k, i)
+			local auction_item = Aux.info.auction_item(i)
+			if auction_item then
 				local stack_size = auction_item.charges or auction_item.count
 				if (auction_item.name == search_query.name or search_query.name == '' or not AuxBuyExactCheckButton:GetChecked()) and tooltip_match(tooltip_patterns, auction_item.tooltip) then
 					record_auction(
@@ -88,24 +87,27 @@ function Aux.buy.SearchButton_onclick()
 						current_page
 				)
 				end
-			end,
-			on_complete = function()
-				entries = entries or {}
-				AuxBuyStopButton:Hide()
-				AuxBuySearchButton:Show()
-				refresh = true
-			end,
-			on_abort = function()
-				entries = entries or {}
-				AuxBuyStopButton:Hide()
-				AuxBuySearchButton:Show()
-				refresh = true
-			end,
-			next_page = function(page, auctions)
-				if auctions == Aux.scan.MAX_AUCTIONS_PER_PAGE then
-					return page + 1
-				end
-			end,
+			end
+			k()
+		end,
+		on_complete = function()
+			entries = entries or {}
+			AuxBuyStopButton:Hide()
+			AuxBuySearchButton:Show()
+			refresh = true
+		end,
+		on_abort = function()
+			entries = entries or {}
+			AuxBuyStopButton:Hide()
+			AuxBuySearchButton:Show()
+			refresh = true
+		end,
+		next_page = function(page, total_pages)
+			local last_page = max(total_pages - 1, 0)
+			if page < last_page then
+				return page + 1
+			end
+		end,
 	}
 end
 
@@ -159,17 +161,23 @@ function AuxBuyEntry_OnClick()
 	
 	Aux.scan.start{
 		query = search_query,
-		start_page = entry.page ~= current_page and entry.page,
-		on_read_auction = function(i)
+		page = entry.page ~= current_page and entry.page,
+		on_start_page = function(k, page)
+			current_page = page
+			k()
+		end,
+		on_read_auction = function(k, i)
 			local auction_item = Aux.info.auction_item(i)
 			
 			if not auction_item then
+				k()
 				return
 			end
 			
 			local stack_size = auction_item.charges or auction_item.count
 			
 			if not auction_item.tooltip or not stack_size or not auction_item.buyout_price then
+				k()
 				return
 			end
 
@@ -202,6 +210,7 @@ function AuxBuyEntry_OnClick()
 					AuxBuyBuyoutDialogBuyButton:Enable()
 				end
 			end
+			k()
 		end,
 		on_complete = function()
 			if not found then

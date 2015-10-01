@@ -263,9 +263,8 @@ function Aux_OnNewAuctionUpdate()
 		return
 	end
 	
-	if not Aux.scan.idle() then
-		Aux.scan.abort()
-	end
+	Aux.scan.abort()
+
 	
 	local auctionItemName, auctionItemTexture, auctionItemStackSize = GetAuctionSellItemInfo()
 	local auction_sell_item = Aux.info.auction_sell_item()
@@ -300,35 +299,38 @@ function Aux_RefreshEntries()
 
 		set_message('Scanning auctions ...')
 		Aux.scan.start{
-				query = {
-						name = name,
-						class = class_index,
-						subclass = subclass_index,
-				},
-				start_page = 0,
-				on_start_page = function(i)
-					set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
-				end,
-				on_read_auction = function(i)
-					local auction_item = Aux.info.auction_item(i)
-					if auction_item and auction_item.name == name then
-						local stack_size = auction_item.charges or auction_item.count
-						record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.duration, auction_item.owner)
-					end
-				end,
-				on_abort = function()
-					auxSellEntries[name] = nil
-				end,
-				on_complete = function()
-					auxSellEntries[name] = auxSellEntries[name] or { created = GetTime() }
-					Aux_SelectAuxEntry()
-					Aux_UpdateRecommendation()
-				end,
-				next_page = function(page, auctions)
-					if auctions == Aux.scan.MAX_AUCTIONS_PER_PAGE then
-						return page + 1
-					end
-				end,
+			query = {
+				name = name,
+				class = class_index,
+				subclass = subclass_index,
+			},
+			page = 0,
+			on_start_page = function(k, i)
+				set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
+				k()
+			end,
+			on_read_auction = function(k, i)
+				local auction_item = Aux.info.auction_item(i)
+				if auction_item and auction_item.name == name then
+					local stack_size = auction_item.charges or auction_item.count
+					record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.duration, auction_item.owner)
+				end
+				k()
+			end,
+			on_abort = function()
+				auxSellEntries[name] = nil
+			end,
+			on_complete = function()
+				auxSellEntries[name] = auxSellEntries[name] or { created = GetTime() }
+				Aux_SelectAuxEntry()
+				Aux_UpdateRecommendation()
+			end,
+			next_page = function(page, total_pages)
+				local last_page = max(total_pages - 1, 0)
+				if page < last_page then
+					return page + 1
+				end
+			end,
 		}
 	end
 end
@@ -426,9 +428,7 @@ end
 -----------------------------------------
 
 function AuxSellRefreshButton_OnClick()
-	if not Aux.scan.idle() then
-		Aux.scan.abort()
-	end
+	Aux.scan.abort()
 	Aux_RefreshEntries()
 	Aux_SelectAuxEntry()
 	Aux_UpdateRecommendation()
