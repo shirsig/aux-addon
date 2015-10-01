@@ -7,17 +7,10 @@ local AUCTIONS_PER_PAGE = 50
 local state, abort, new_job
 
 -- forward declaration of local functions
-local wait, wait_after, wait_for_function, wait_until, wait_for_event
+local wait, wait_after, wait_for_function, wait_until, listen_for_event
 local scan, scan_auctions, scan_auctions_helper, submit_query
 
 
-
-function Aux.scan.on_event()
-	if state and state.ready and state.ready(event) then
-		state.ready = nil
-		state.continuation()
-	end
-end
 
 function Aux.scan.on_update()
 	if abort then
@@ -58,23 +51,31 @@ function wait(timeout, k)
 	end
 end
 
-function wait_after()
-	local last
+function wait_from()
+	local from
 	return function()
-		last = GetTime()
+		from = GetTime()
 	end,
 	function(timeout, k)
 		state.continuation = k
 		state.ready = function()
-			return GetTime() - last >= timeout
+			return from and GetTime() - from >= timeout
 		end
 	end
 end
 
-function wait_for_event(e, k)
-	state.continuation = k
-	state.ready = function(event)
-		return event == e
+function listen_for_event(e)
+	local occurred
+	Aux.scan.on_event = function()
+		if event == e then
+			occurred = true
+		end
+	end
+	return function(k)
+		state.continuation = k
+		state.ready = function()
+			return occurred
+		end
 	end
 end
 
@@ -146,6 +147,7 @@ end
 function submit_query(k)
 	if state.page then
 		wait_until(CanSendAuctionQuery, function() --;
+		local wait_for_event = listen_for_event('AUCTION_ITEM_LIST_UPDATE')
 		QueryAuctionItems(
 			state.job.query.name,
 			state.job.query.min_level,
@@ -157,9 +159,9 @@ function submit_query(k)
 			state.job.query.usable,
 			state.job.query.quality
 		)
-		wait_for_event('AUCTION_ITEM_LIST_UPDATE', function() --;
-			return k()
-		end)end)
+		wait_for_event(k)
+		
+		end)
 	else
 		k()
 	end
