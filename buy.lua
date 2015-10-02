@@ -1,6 +1,6 @@
 Aux.buy = {}
 
-local record_auction, set_message, report, tooltip_match, show_buyout_dialog, show_bid_dialog
+local process_auction, set_message, report, tooltip_match, show_buyout_dialog, show_bid_dialog
 local entries
 local selectedEntries = {}
 local search_query
@@ -77,19 +77,8 @@ function Aux.buy.SearchButton_onclick()
 		on_read_auction = function(k, i)
 			local auction_item = Aux.info.auction_item(i)
 			if auction_item then
-				local stack_size = auction_item.charges or auction_item.count
 				if (auction_item.name == search_query.name or search_query.name == '' or not AuxBuyExactCheckButton:GetChecked()) and tooltip_match(tooltip_patterns, auction_item.tooltip) then
-					record_auction(
-						auction_item.name,
-						auction_item.tooltip,
-						stack_size,
-						auction_item.buyout_price,
-						auction_item.quality,
-						auction_item.owner,
-						auction_item.hyperlink,
-						auction_item.itemstring,
-						current_page
-				)
+					process_auction(auction_item, current_page)
 				end
 			end
 			k()
@@ -138,11 +127,11 @@ function show_buyout_dialog(hyperlink, stack_size, buyout_price)
 			hyperlink,
 			stack_size
 	))
-	--MoneyFrame_Update('AuxBuyBuyoutDialogBuyoutPrice', Aux_Round(buyout_price))
+	MoneyFrame_Update('AuxBuyBuyoutDialogBuyoutPrice', buyout_price)
 	AuxBuyBuyoutDialog:Show()
 end
 
-function show_bid_dialog(hyperlink, stack_size, bid)
+function show_bid_dialog(hyperlink, stack_size, highest_bid, min_increment)
 	AuxBuyBidDialogBidButton:Disable()
 	AuxBuyBidDialogHTML:SetFontObject('h1', GameFontWhite)
 	AuxBuyBidDialogHTML:SetScript('OnHyperlinkClick', function() SetItemRef(arg1) end)
@@ -158,7 +147,8 @@ function show_bid_dialog(hyperlink, stack_size, bid)
 			stack_size
 	))
 	AuxBuyBidDialog:Show()
-	MoneyInputFrame_SetCopper(AuxBuyBidDialogBid, 5)
+	MoneyFrame_Update('AuxBuyBuyoutDialogBuyoutPrice', buyout_price)
+	MoneyInputFrame_SetCopper(AuxBuyBidDialogBid, highest_bid + min_increment)
 end
 
 function AuxBuyEntry_OnClick()
@@ -266,24 +256,23 @@ end
 
 -----------------------------------------
 
-function record_auction(name, tooltip, stack_size, buyout_price, quality, owner, hyperlink, itemstring, page)
+function process_auction(auction_item, current_page)
 	entries = entries or {}
 	
-	if buyout_price > 0 and owner ~= UnitName("player") then
+	local stack_size = auction_item.charges or auction_item.count
+	if auction_item.buyout_price > 0 and auction_item.owner ~= UnitName("player") then
 		tinsert(entries, {
-				name = name,
-				tooltip = tooltip,
+				name = auction_item.name,
+				tooltip = auction_item.tooltip,
 				stack_size = stack_size,
-				buyout_price = buyout_price,
-				item_price = buyout_price / stack_size,
-				quality = quality,
-				hyperlink = hyperlink,
-				itemstring = itemstring,
+				buyout_price = auction_item.buyout_price,
+				unit_price = Aux_Round(auction_item.buyout_price / stack_size),
+				quality = auction_item.quality,
+				hyperlink = auction_item.hyperlink,
+				itemstring = auction_item.itemstring,
 				page = current_page,
 		})
 	end
-	
-	table.sort(entries, function(a,b) return a.item_price < b.item_price end)
 end
 
 -----------------------------------------
@@ -298,6 +287,10 @@ end
 -----------------------------------------
 
 function Aux_Buy_ScrollbarUpdate()
+	if entries then
+		table.sort(entries, function(a,b) return a.unit_price < b.unit_price end)
+	end
+	
 	if entries and getn(entries) == 0 then
 		set_message("No auctions were found")
 	else

@@ -373,7 +373,7 @@
             <Button name="AuxBuyEntry19" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry18" relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			
 			<Frame name="AuxBuyBuyoutDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" enableMouse="true" hidden="true" movable="true">
-				<Size><AbsDimension x="260" y="160" /></Size>		
+				<Size><AbsDimension x="230" y="140" /></Size>		
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-150"/></Offset></Anchor></Anchors>
 				
 				<Scripts>
@@ -388,30 +388,21 @@
 				</Backdrop>			
 				<Frames>
 					<SimpleHTML name="$parentHTML">
-						<Size><AbsDimension x="260" y="160" /></Size>		
+						<Size><AbsDimension x="200" y="110" /></Size>		
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
 						<FontStringHeader1 inherits="GameFontNormalWhite"/>
 					</SimpleHTML>			
-					<Frame>
-					<Frame>
-						<Size><AbsDimension x="120" y="16" /></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-70"/></Offset></Anchor></Anchors>
-						<Frames>
-							<Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
-								<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-								<Scripts>
-									<OnLoad>
-										SmallMoneyFrame_OnLoad()
-										MoneyFrame_SetType("STATIC")
-										snipe.log('kek'..this:GetName())
-									</OnLoad>
-								</Scripts>
-							</Frame>
-						</Frames>
-					</Frame>
-					</Frame>
+					<Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-60"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnLoad>
+								SmallMoneyFrame_OnLoad()
+								MoneyFrame_SetType("STATIC")
+							</OnLoad>
+						</Scripts>
+					</Frame>	
 					<Button name="$parentBuyButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
-						<Size><AbsDimension x="100" y="22"/>	</Size>
+						<Size><AbsDimension x="85" y="22"/>	</Size>
 						<Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="20" y="15"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>
@@ -420,7 +411,7 @@
 						</Scripts>
 					</Button>
 					<Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
-						<Size><AbsDimension x="100" y="22"/>	</Size>
+						<Size><AbsDimension x="85" y="22"/>	</Size>
 						<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>
@@ -433,8 +424,8 @@
 			
 			<Frame name="AuxBuyBidDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" enableMouse="true" hidden="true" movable="true">
 			
-				<Size><AbsDimension x="260" y="160" /></Size>		
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-150"/></Offset></Anchor></Anchors>
+				<Size><AbsDimension x="230" y="170" /></Size>		
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-135"/></Offset></Anchor></Anchors>
 
 				<Scripts>
 					<OnLoad>this:RegisterForDrag("LeftButton")</OnLoad>
@@ -449,14 +440,23 @@
 
 				<Frames>
 					<SimpleHTML name="$parentHTML">
-						<Size><AbsDimension x="260" y="160" /></Size>		
+						<Size><AbsDimension x="200" y="110" /></Size>		
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
 					</SimpleHTML>
+					<Frame name="$parentHighestBid" inherits="SmallMoneyFrameTemplate">
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-60"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnLoad>
+								SmallMoneyFrame_OnLoad()
+								MoneyFrame_SetType("STATIC")
+							</OnLoad>
+						</Scripts>
+					</Frame>
 					<Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-70"/></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="35" y="-88"/></Offset></Anchor></Anchors>
 					</Frame>
 					<Button name="$parentBidButton" inherits="UIPanelButtonTemplate" text="Bid" disabled="true">
-						<Size><AbsDimension x="100" y="22"/>	</Size>
+						<Size><AbsDimension x="85" y="22"/>	</Size>
 						<Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="20" y="15"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>
@@ -465,7 +465,7 @@
 						</Scripts>
 					</Button>
 					<Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
-						<Size><AbsDimension x="100" y="22"/>	</Size>
+						<Size><AbsDimension x="85" y="22"/>	</Size>
 						<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>
