@@ -395,6 +395,35 @@
 					</EditBox>
 				</frames>
 			</frame>
+			<Frame name="AuxBuyReport" frameStrata="FULLSCREEN_DIALOG" toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
+				<Size><AbsDimension x="400" y="180" /></Size>		
+				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-90"/></Offset></Anchor></Anchors>
+
+				<Backdrop bgFile="Interface\CharacterFrame\UI-Party-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+					<BackgroundInsets><AbsInset left="11" right="12" top="12" bottom="11"/></BackgroundInsets>
+					<TileSize><AbsValue val="32"/></TileSize>
+					<EdgeSize><AbsValue val="32"/></EdgeSize>
+				</Backdrop>
+
+				<Frames>
+					<SimpleHTML name="AuxBuyReportHTML">
+						<Size><AbsDimension x="420" y="420" /></Size>		
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
+						<FontString inherits="GameFontHighlightSmall"/>
+						<FontStringHeader1 inherits="GameFontNormal"/>
+					</SimpleHTML>
+
+					<Button inherits="UIPanelButtonTemplate" text="Close">
+						<Size><AbsDimension x="100" y="22"/>	</Size>
+						<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnClick>
+								AuxBuyReport:Hide()
+							</OnClick>
+						</Scripts>
+					</Button>
+				</Frames>
+			</Frame>
 		</Frames>
 	</Frame>
 </Ui>

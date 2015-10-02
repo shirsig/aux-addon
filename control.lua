@@ -31,7 +31,7 @@ function Aux.control.event_listener(event, action) -- async!
 	
 	function self:start(self)
 		Aux.util.set_add(event_listeners, listener)
-		if not Aux.util.any(event_listeners, function(l) l.event == event end then
+		if not Aux.util.any(event_listeners, function(l) return l.event == event end) then
 			AuxControlFrame:RegisterEvent(event)
 		end
 		return self
@@ -39,7 +39,7 @@ function Aux.control.event_listener(event, action) -- async!
 	
 	function self:stop(self)
 		Aux.util.set_remove(event_listeners, listener)
-		if not Aux.util.any(event_listeners, function(l) l.event == event end then
+		if not Aux.util.any(event_listeners, function(l) return l.event == event end) then
 			AuxControlFrame:UnregisterEvent(event)
 		end
 		return self
@@ -78,7 +78,7 @@ function Aux.control.on_next_update(callback)
 	listener:set_action(function()
 		listener:stop()
 		callback()
-	end
+	end)
 	
 	listener:start()
 end
@@ -104,7 +104,7 @@ function Aux.control.on_next_event(event, callback)
 	listener:set_action(function()
 		listener:stop()
 		ok = true
-	end
+	end)
 	
 	listener:start()
 	
