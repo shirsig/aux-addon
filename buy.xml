@@ -374,8 +374,7 @@
 			
 			<Frame name="AuxBuyBuyoutDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" enableMouse="true" hidden="true" movable="true">
 				<Size><AbsDimension x="230" y="140" /></Size>		
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-150"/></Offset></Anchor></Anchors>
-				
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-150"/></Offset></Anchor></Anchors>				
 				<Scripts>
 					<OnLoad>this:RegisterForDrag("LeftButton")</OnLoad>
 					<OnDragStart>this:StartMoving()</OnDragStart>
@@ -388,7 +387,7 @@
 				</Backdrop>			
 				<Frames>
 					<SimpleHTML name="$parentHTML">
-						<Size><AbsDimension x="200" y="110" /></Size>		
+						<Size><AbsDimension x="200" y="1" /></Size>		
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
 						<FontStringHeader1 inherits="GameFontNormalWhite"/>
 					</SimpleHTML>			
@@ -426,7 +425,6 @@
 			
 				<Size><AbsDimension x="230" y="170" /></Size>		
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-135"/></Offset></Anchor></Anchors>
-
 				<Scripts>
 					<OnLoad>this:RegisterForDrag("LeftButton")</OnLoad>
 					<OnDragStart>this:StartMoving()</OnDragStart>
@@ -440,7 +438,7 @@
 
 				<Frames>
 					<SimpleHTML name="$parentHTML">
-						<Size><AbsDimension x="200" y="110" /></Size>		
+						<Size><AbsDimension x="200" y="1" /></Size>		
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
 					</SimpleHTML>
 					<Frame name="$parentHighestBid" inherits="SmallMoneyFrameTemplate">

@@ -506,7 +506,7 @@ end
 -----------------------------------------
 
 function report(item_name, stack_size, buyout_price, posted)
-	AuxBuyReportHTML:SetText(string.format(
+	AuxSellReportHTML:SetText(string.format(
 			[[
 			<html>
 			<body>
@@ -528,7 +528,7 @@ function report(item_name, stack_size, buyout_price, posted)
 			Aux.util.format_money(buyout_price)
 	))
 		
-	AuxBuyReportHTML:SetSpacing(3)
+	AuxSellReportHTML:SetSpacing(3)
 	
-	AuxBuyReport:Show()
+	AuxSellReport:Show()
 end

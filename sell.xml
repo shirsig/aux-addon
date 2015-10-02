@@ -395,7 +395,7 @@
 					</EditBox>
 				</frames>
 			</frame>
-			<Frame name="AuxBuyReport" frameStrata="FULLSCREEN_DIALOG" toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
+			<Frame name="AuxSellReport" frameStrata="FULLSCREEN_DIALOG" toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
 				<Size><AbsDimension x="400" y="180" /></Size>		
 				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-90"/></Offset></Anchor></Anchors>
 
@@ -406,8 +406,8 @@
 				</Backdrop>
 
 				<Frames>
-					<SimpleHTML name="AuxBuyReportHTML">
-						<Size><AbsDimension x="420" y="420" /></Size>		
+					<SimpleHTML name="AuxSellReportHTML">
+						<Size><AbsDimension x="420" y="1" /></Size>		
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
 						<FontString inherits="GameFontHighlightSmall"/>
 						<FontStringHeader1 inherits="GameFontNormal"/>
@@ -418,7 +418,7 @@
 						<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>
-								AuxBuyReport:Hide()
+								AuxSellReport:Hide()
 							</OnClick>
 						</Scripts>
 					</Button>

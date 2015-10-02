@@ -84,3 +84,13 @@ function Aux.util.all(xs, p)
 	end
 	return holds
 end
+
+function Aux.util.set_filter(set, p)
+	filtered = {}
+	for x, _ in pairs(set) do
+		if p(x) then
+			Aux.util.set_add(filtered, x)
+		end
+	end
+	return filtered
+end

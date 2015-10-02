@@ -2,7 +2,7 @@
 
 	<Script file="control.lua"/> 
   
-	<Frame>
+	<Frame name="AuxControlFrame">
       <Scripts> 
 			<OnEvent> 
 				Aux.control.on_event()
