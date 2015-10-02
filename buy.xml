@@ -12,6 +12,11 @@
 	
 	<Button name="AuxBuyEntryTemplate" virtual="true" hidden="true">
 		<Size><AbsDimension y="16"/></Size>		
+		<Scripts>
+			<OnLoad>
+				this:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+			</OnLoad>
+		</Scripts>
 		<Frames>
 			<Frame>
 				<Size><AbsDimension x="120" y="16" /></Size>
@@ -370,7 +375,7 @@
 			<Frame name="AuxBuyBuyoutDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" enableMouse="true" hidden="true" movable="true">
 				<Size><AbsDimension x="260" y="160" /></Size>		
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-150"/></Offset></Anchor></Anchors>
-
+				
 				<Scripts>
 					<OnLoad>this:RegisterForDrag("LeftButton")</OnLoad>
 					<OnDragStart>this:StartMoving()</OnDragStart>
@@ -380,17 +385,31 @@
 					<BackgroundInsets><AbsInset left="11" right="12" top="12" bottom="11"/></BackgroundInsets>
 					<TileSize><AbsValue val="32"/></TileSize>
 					<EdgeSize><AbsValue val="32"/></EdgeSize>
-				</Backdrop>
-
+				</Backdrop>			
 				<Frames>
 					<SimpleHTML name="$parentHTML">
-						<Size><AbsDimension x="420" y="420" /></Size>		
-						<Anchors>
-							<Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor>
-						</Anchors>
-						<FontString inherits="GameFontHighlightSmall"/>
-						<FontStringHeader1 inherits="GameFontNormal"/>
-					</SimpleHTML>
+						<Size><AbsDimension x="260" y="160" /></Size>		
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
+						<FontStringHeader1 inherits="GameFontNormalWhite"/>
+					</SimpleHTML>			
+					<Frame>
+					<Frame>
+						<Size><AbsDimension x="120" y="16" /></Size>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-70"/></Offset></Anchor></Anchors>
+						<Frames>
+							<Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
+								<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+								<Scripts>
+									<OnLoad>
+										SmallMoneyFrame_OnLoad()
+										MoneyFrame_SetType("STATIC")
+										snipe.log('kek'..this:GetName())
+									</OnLoad>
+								</Scripts>
+							</Frame>
+						</Frames>
+					</Frame>
+					</Frame>
 					<Button name="$parentBuyButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
 						<Size><AbsDimension x="100" y="22"/>	</Size>
 						<Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="20" y="15"/></Offset></Anchor></Anchors>
@@ -406,6 +425,51 @@
 						<Scripts>
 							<OnClick>
 								Aux.buy.buyout_dialog_cancel()
+							</OnClick>
+						</Scripts>
+					</Button>
+				</Frames>
+			</Frame>
+			
+			<Frame name="AuxBuyBidDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" enableMouse="true" hidden="true" movable="true">
+			
+				<Size><AbsDimension x="260" y="160" /></Size>		
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-150"/></Offset></Anchor></Anchors>
+
+				<Scripts>
+					<OnLoad>this:RegisterForDrag("LeftButton")</OnLoad>
+					<OnDragStart>this:StartMoving()</OnDragStart>
+					<OnDragStop>this:StopMovingOrSizing()</OnDragStop>
+				</Scripts>
+				<Backdrop bgFile="Interface\CharacterFrame\UI-Party-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+					<BackgroundInsets><AbsInset left="11" right="12" top="12" bottom="11"/></BackgroundInsets>
+					<TileSize><AbsValue val="32"/></TileSize>
+					<EdgeSize><AbsValue val="32"/></EdgeSize>
+				</Backdrop>
+
+				<Frames>
+					<SimpleHTML name="$parentHTML">
+						<Size><AbsDimension x="260" y="160" /></Size>		
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
+					</SimpleHTML>
+					<Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-70"/></Offset></Anchor></Anchors>
+					</Frame>
+					<Button name="$parentBidButton" inherits="UIPanelButtonTemplate" text="Bid" disabled="true">
+						<Size><AbsDimension x="100" y="22"/>	</Size>
+						<Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="20" y="15"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnClick>
+								Aux.buy.bid_dialog_bid()
+							</OnClick>
+						</Scripts>
+					</Button>
+					<Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
+						<Size><AbsDimension x="100" y="22"/>	</Size>
+						<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnClick>
+								Aux.buy.bid_dialog_cancel()
 							</OnClick>
 						</Scripts>
 					</Button>
@@ -427,11 +491,7 @@
 		<Frames>
 			<SimpleHTML name="AuxBuyReportHTML">
 				<Size><AbsDimension x="420" y="420" /></Size>		
-				<Anchors>
-					<Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor>
-				</Anchors>
-				<FontString inherits="GameFontHighlightSmall"/>
-				<FontStringHeader1 inherits="GameFontNormal"/>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
 			</SimpleHTML>
 
 			<Button inherits="UIPanelButtonTemplate" text="Close">

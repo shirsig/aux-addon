@@ -1,6 +1,6 @@
 Aux.buy = {}
 
-local record_auction, set_message, report, tooltip_match
+local record_auction, set_message, report, tooltip_match, show_buyout_dialog, show_bid_dialog
 local entries
 local selectedEntries = {}
 local search_query
@@ -123,6 +123,43 @@ function set_message(msg)
 end
 
 -----------------------------------------
+function show_buyout_dialog(hyperlink, stack_size, buyout_price)
+	AuxBuyBuyoutDialogBuyButton:Disable()
+	AuxBuyBuyoutDialogHTML:SetFontObject('h1', GameFontWhite)
+	AuxBuyBuyoutDialogHTML:SetScript('OnHyperlinkClick', function() SetItemRef(arg1) end)
+	AuxBuyBuyoutDialogHTML:SetText(string.format(
+			[[
+			<html>
+			<body>
+				<h1>%s x %i</h1>
+			</body>
+			</html>
+			]],
+			hyperlink,
+			stack_size
+	))
+	--MoneyFrame_Update('AuxBuyBuyoutDialogBuyoutPrice', Aux_Round(buyout_price))
+	AuxBuyBuyoutDialog:Show()
+end
+
+function show_bid_dialog(hyperlink, stack_size, bid)
+	AuxBuyBidDialogBidButton:Disable()
+	AuxBuyBidDialogHTML:SetFontObject('h1', GameFontWhite)
+	AuxBuyBidDialogHTML:SetScript('OnHyperlinkClick', function() SetItemRef(arg1) end)
+	AuxBuyBidDialogHTML:SetText(string.format(
+			[[
+			<html>
+			<body>
+				<h1>%s x %i</h1>
+			</body>
+			</html>
+			]],
+			hyperlink,
+			stack_size
+	))
+	AuxBuyBidDialog:Show()
+	MoneyInputFrame_SetCopper(AuxBuyBidDialogBid, 5)
+end
 
 function AuxBuyEntry_OnClick()
 	local express_mode = IsControlKeyDown()
@@ -133,29 +170,11 @@ function AuxBuyEntry_OnClick()
 	local entry = entries[entry_index]
 	
 	if not express_mode then
-		AuxBuyBuyoutDialogBuyButton:Disable()
-		AuxBuyBuyoutDialogHTML:SetText(string.format(
-			[[
-			<html>
-			<body>
-				<h1>%s</h1>
-				<br/>
-				<p>
-					Stack Size: %i
-					<br/><br/>
-					Buyout Price: %s
-					<br/><br/>
-					Unit Price: %s
-				</p>
-			</body>
-			</html>
-			]],
-			entry.name,
-			entry.stack_size,
-			Aux.util.format_money(entry.buyout_price),
-			Aux.util.format_money(entry.item_price)
-		))
-		AuxBuyBuyoutDialog:Show()
+		if arg1 == "LeftButton" then
+			show_buyout_dialog(entry.hyperlink, entry.stack_size, entry.buyout_price)
+		elseif arg1 == "RightButton" then
+			show_bid_dialog(entry.hyperlink, entry.stack_size, entry.buyout_price)
+		end
 	end
 
 	PlaySound("igMainMenuOptionCheckBoxOn")
