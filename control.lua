@@ -18,9 +18,12 @@ function Aux.control.on_update()
 	end
 end
 
-function Aux.control.event_listener(event, action)
-	local listener = { event=event, action=action }
+
+
+function Aux.control.event_listener(event, action) -- async!
 	local self = {}
+	
+	local listener = { event=event, action=action }
 	
 	function self:set_action(self, action)
 		listener.action = action
@@ -46,9 +49,9 @@ function Aux.control.event_listener(event, action)
 end
 
 function Aux.control.update_listener(action)
-	local listener = { action=action }
-	
 	local self = {}
+	
+	local listener = { action=action }
 
 	function self:set_action(self, action)
 		listener.action = action
@@ -67,52 +70,67 @@ function Aux.control.update_listener(action)
 	return self
 end
 
-function Aux.control.on_next_event(event, action)
-	local listener = Aux.control.event_listener(event)
-	listener.set_action(function()
-		listener.stop()
-		action()
-	end
-	listener.start()
-end
 
-function Aux.control.on_next_update(action)
+
+function Aux.control.on_next_update(callback)
 	local listener = Aux.control.update_listener()
-	listener.set_action(function()
-		listener.stop()
-		action()
+	
+	listener:set_action(function()
+		listener:stop()
+		callback()
 	end
-	listener.start()
+	
+	listener:start()
 end
 
-function Aux.control.controller()
-	local state
+function Aux.control.as_soon_as(p, callback)
+	local listener = Aux.control.update_listener()	
+	
+	listener:set_action(function()
+		if p() then
+			callback()
+			listener:stop()
+		end
+	end)
+	
+	listener:start()
+end
+
+function Aux.control.on_next_event(event, callback)
+	local ok
+	
+	local listener = Aux.control.event_listener(event)
+	
+	listener:set_action(function()
+		listener:stop()
+		ok = true
+	end
+	
+	listener:start()
+	
+	Aux.control.as_soon_as(function() return ok end, callback)
+end
+
+
+
+function Aux.control.timer()
 	local self = {}
 	
-	local listener = Aux.control.update_listener(function()
-		if state then
-			local continue, continuation = state.continue, state.continuation
-			if continue() then
-				state = nil
-				continuation()
-			end
-		end
-	end)()
+	local t_0
 	
-	function self:cleanup(self)
-		listener.stop()
+	function self:start(self)
+		t_0 = GetTime()
 	end
 	
-	function self:wait(self, p, k)
-		state = {
-			continuation = k
-			continue = p
-		}
-	end
-	
-	function self:wait_for_event(self, event, k)
-		self:wait(function()
+	function self:after(self, t, callback)
+		Aux.util.as_soon_as(function() return t_0 and GetTime() - t_0 > t end, callback)
 	end
 	
 	return self
+end
+
+function Aux.control.after_time(t, callback)
+	local timer = Aux.control.timer()
+	timer:start()
+	timer:after(t, callback)
 end
