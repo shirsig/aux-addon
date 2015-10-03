@@ -128,10 +128,12 @@ function show_dialog(buyout_mode, hyperlink, stack_size, amount)
 			stack_size
 	))
 	if buyout_mode then
+		AuxBuyDialogActionButton:SetText('Buy')
 		MoneyFrame_Update('AuxBuyDialogBuyoutPrice', amount)
 		AuxBuyDialogBid:Hide()
 		AuxBuyDialogBuyoutPrice:Show()
 	else
+		AuxBuyDialogActionButton:SetText('Bid')
 		MoneyInputFrame_SetCopper(AuxBuyDialogBid, amount)
 		AuxBuyDialogBuyoutPrice:Hide()
 		AuxBuyDialogBid:Show()
@@ -141,11 +143,11 @@ end
 
 -----------------------------------------
 
-function AuxBuyEntry_OnClick(i)
+function AuxBuyEntry_OnClick(entry_index)
 	local express_mode = IsAltKeyDown()
 	local buyout_mode = arg1 == "LeftButton"
 	
-	local entry = entries[i]
+	local entry = entries[entry_index]
 	
 	if IsControlKeyDown() then 
 		DressUpItemLink(entry.hyperlink)
@@ -242,8 +244,8 @@ function AuxBuyEntry_OnClick(i)
 	}
 end
 
-function AuxBuyEntry_OnEnter(i)
-	local entry = entries[i]
+function AuxBuyEntry_OnEnter(entry_index)
+	local entry = entries[entry_index]
 	
 	Aux.info.set_game_tooltip(this, entry.tooltip)
 	

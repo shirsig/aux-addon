@@ -95,9 +95,8 @@ end
 
 function Aux.list.row_comparator(list_frame)
 	return function(row1, row2)
-		for index, sort_info in ipairs(list_frame.sort_order) do
-			local physical_column = list_frame.physical_columns[sort_info.column_index]
-			local logical_column = physical_column.logical_column
+		for _, sort_info in ipairs(list_frame.sort_order) do
+			local logical_column = sort_info.logical_column
 			if logical_column.comparator then
 				local ordering = logical_column.comparator(row1, row2)
 				if ordering ~= Aux.util.EQ then
@@ -120,13 +119,19 @@ function Aux.list.initialize(frame, physical_columns, logical_columns)
 	frame.logical_columns = logical_columns
 
 	frame.sort_order = {}
+	for i, logical_column in logical_columns do
+		if i ~= BUYOUT_UNIT then 
+			tinsert(frame.sort_order, { logical_column = logical_column, sort_ascending = true })
+		end
+	end
+	tinsert(frame.sort_order, 1, { logical_column = logical_columns[BUYOUT_UNIT], sort_ascending = true })
+	
 	for i = 1, MAX_COLUMNS do
 		local button = getglobal(frame:GetName().."Column"..i.."Sort")
 		local dropdown = getglobal(frame:GetName().."Column"..i.."DropDown")
 		if (i <= table.getn(physical_columns)) then
 			local physical_column = physical_columns[i]
 			local logical_column = physical_column.logical_column
-			table.insert(frame.sort_order, { column_index = i, sort_ascending = true})
 			getglobal(button:GetName().."Arrow"):Hide()
 			getglobal(button:GetName().."Text"):SetText(logical_column.title)
 			button:Show()
@@ -138,8 +143,6 @@ function Aux.list.initialize(frame, physical_columns, logical_columns)
 			dropdown:Hide()
 		end
 	end
-	getglobal(frame:GetName().."Column1SortArrow"):Show()
-	getglobal(frame:GetName().."Column1SortArrow"):SetTexCoord(0, 0.5625, 0, 1.0)
 end
 
 -------------------------------------------------------------------------------
@@ -176,58 +179,53 @@ end
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
-function ListTemplate_SelectRow(frame, row)
-	if frame.selectedRow ~= row then
-		local scrollFrame = getglobal(frame:GetName().."ScrollFrame")
-		local firstVisibleRow = FauxScrollFrame_GetOffset(scrollFrame) + 1
-		local lastVisibleRow = firstVisibleRow + frame.lines - 1
+-- function ListTemplate_SelectRow(frame, row)
+	-- if frame.selectedRow ~= row then
+		-- local scrollFrame = getglobal(frame:GetName().."ScrollFrame")
+		-- local firstVisibleRow = FauxScrollFrame_GetOffset(scrollFrame) + 1
+		-- local lastVisibleRow = firstVisibleRow + frame.lines - 1
 
-		-- Deselect the previous row
-		if frame.selectedRow and firstVisibleRow <= frame.selectedRow and frame.selectedRow <= lastVisibleRow then
-			local line = frame.selectedRow - firstVisibleRow + 1
-			local item = getglobal(frame:GetName().."Item"..line)
-			item:UnlockHighlight()
-		end
+		-- -- Deselect the previous row
+		-- if frame.selectedRow and firstVisibleRow <= frame.selectedRow and frame.selectedRow <= lastVisibleRow then
+			-- local line = frame.selectedRow - firstVisibleRow + 1
+			-- local item = getglobal(frame:GetName().."Item"..line)
+			-- item:UnlockHighlight()
+		-- end
 
-		-- Update the selected item
-		frame.selectedRow = row
+		-- -- Update the selected item
+		-- frame.selectedRow = row
 
-		-- Select the new row
-		if frame.selectedRow and firstVisibleRow <= frame.selectedRow and frame.selectedRow <= lastVisibleRow then
-			local line = frame.selectedRow - firstVisibleRow + 1
-			local item = getglobal(frame:GetName().."Item"..line)
-			item:LockHighlight()
-		end
-	end
-end
+		-- -- Select the new row
+		-- if frame.selectedRow and firstVisibleRow <= frame.selectedRow and frame.selectedRow <= lastVisibleRow then
+			-- local line = frame.selectedRow - firstVisibleRow + 1
+			-- local item = getglobal(frame:GetName().."Item"..line)
+			-- item:LockHighlight()
+		-- end
+	-- end
+-- end
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
-function Aux.list.sort(frame, i)
+function Aux.list.sort(frame, physical_column_index)
 
-	if frame.sort_order[1].column_index == i then
+	local physical_column = frame.physical_columns[physical_column_index]
+	local logical_column = physical_column.logical_column
+			
+	if frame.sort_order[1].logical_column == logical_column then
 		frame.sort_order[1].sort_ascending = not frame.sort_order[1].sort_ascending
 	else
-		getglobal(frame:GetName().."Column"..frame.sort_order[1].column_index.."SortArrow"):Hide()
-		for index, value in ipairs(frame.sort_order) do
-			if value.column_index == i then
-				local temp = value
+		for index, sort_info in ipairs(frame.sort_order) do
+			if sort_info.logical_column == logical_column then
+				local temp = sort_info
 				table.remove(frame.sort_order, index)
 				table.insert(frame.sort_order, 1, temp)
 				break
 			end
 		end
 		frame.sort_order[1].sort_ascending = true
-		getglobal(frame:GetName().."Column"..frame.sort_order[1].column_index.."SortArrow"):Show()
 	end
 	
 	Aux.util.merge_sort(frame.content, Aux.list.row_comparator(frame))
-
-	if frame.sort_order[1].sort_ascending then
-		getglobal(frame:GetName().."Column"..frame.sort_order[1].column_index.."SortArrow"):SetTexCoord(0, 0.5625, 0, 1.0)
-	else
-		getglobal(frame:GetName().."Column"..frame.sort_order[1].column_index.."SortArrow"):SetTexCoord(0, 0.5625, 1.0, 0)
-	end
 
 	Aux.list.scroll_frame_update(getglobal(frame:GetName().."ScrollFrame"))
 end
@@ -244,7 +242,7 @@ function Aux.list.scroll_frame_update(frame)
 		local row_index = line + FauxScrollFrame_GetOffset(frame)
 		if row_index <= table.getn(content) then
 			for column_index = 1, MAX_COLUMNS do
-
+				
 				local text = getglobal(parent:GetName().."Item"..line.."Column"..column_index)
 				-- text:Hide() TODO
 				text:SetText()
@@ -256,7 +254,20 @@ function Aux.list.scroll_frame_update(frame)
 					local physical_column = parent.physical_columns[column_index]
 					local logical_column = physical_column.logical_column
 					local value = logical_column.getter(content[row_index])
-
+					
+					local arrow = getglobal(parent:GetName().."Column"..column_index.."SortArrow")
+					local sort_info = parent.sort_order[1]
+					if sort_info.logical_column == logical_column then
+						if sort_info.sort_ascending then
+							arrow:SetTexCoord(0, 0.5625, 0, 1.0)
+						else
+							arrow:SetTexCoord(0, 0.5625, 1.0, 0)
+						end
+						arrow:Show()
+					else
+						arrow:Hide()
+					end
+				
 					if value then
 						if text and (logical_column.type == "DATE" or logical_column.type == "NUMBER" or logical_column.type == "STRING") then
 							text:SetText(value)
@@ -295,13 +306,12 @@ function Aux.list.scroll_frame_update(frame)
 					end
 				end
 			end
-
-			-- Update the row highlight
-			if parent.selectedRow and parent.selectedRow == row_index then
-				item:LockHighlight()
-			else
-				item:UnlockHighlight()
-			end
+			-- -- Update the row highlight
+			-- if parent.selectedRow and parent.selectedRow == row_index then
+				-- item:LockHighlight()
+			-- else
+				-- item:UnlockHighlight()
+			-- end
 			item:Show()
 		else
 			item:Hide()
