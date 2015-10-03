@@ -1,6 +1,6 @@
 Aux.buy = {}
 
-local process_auction, set_message, report, tooltip_match, show_buyout_dialog, show_bid_dialog
+local process_auction, set_message, report, tooltip_match, show_dialog
 local entries
 local selectedEntries = {}
 local search_query
@@ -10,15 +10,14 @@ local refresh
 
 
 function Aux.buy.exit()
-
-	Aux.buy.buyout_dialog_cancel()
+	Aux.buy.dialog_cancel()
 	current_page = nil
 end
 
 -----------------------------------------
 
-function Aux_AuctionFrameBids_Update()
-	Aux.orig.AuctionFrameBids_Update()
+function Aux_AuctionFrameBid_Update()
+	Aux.orig.AuctionFrameBid_Update()
 	if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index and AuctionFrame:IsShown() then
 		Aux_HideElems(Aux.tabs.buy.hiddenElements)
 	end
@@ -26,9 +25,9 @@ end
 
 -----------------------------------------
 
-function Aux.buy.buyout_dialog_cancel()
+function Aux.buy.dialog_cancel()
 	Aux.scan.abort()
-	AuxBuyBuyoutDialog:Hide()
+	AuxBuyDialog:Hide()
 	AuxBuySearchButton:Enable()
 end
 
@@ -112,11 +111,12 @@ function set_message(msg)
 end
 
 -----------------------------------------
-function show_buyout_dialog(hyperlink, stack_size, buyout_price)
-	AuxBuyBuyoutDialogBuyButton:Disable()
-	AuxBuyBuyoutDialogHTML:SetFontObject('h1', GameFontWhite)
-	AuxBuyBuyoutDialogHTML:SetScript('OnHyperlinkClick', function() SetItemRef(arg1) end)
-	AuxBuyBuyoutDialogHTML:SetText(string.format(
+
+function show_dialog(buyout_mode, hyperlink, stack_size, amount)
+	AuxBuyDialogActionButton:Disable()
+	AuxBuyDialogHTML:SetFontObject('h1', GameFontWhite)
+	AuxBuyDialogHTML:SetScript('OnHyperlinkClick', function() SetItemRef(arg1) end)
+	AuxBuyDialogHTML:SetText(string.format(
 			[[
 			<html>
 			<body>
@@ -127,109 +127,108 @@ function show_buyout_dialog(hyperlink, stack_size, buyout_price)
 			hyperlink,
 			stack_size
 	))
-	MoneyFrame_Update('AuxBuyBuyoutDialogBuyoutPrice', buyout_price)
-	AuxBuyBuyoutDialog:Show()
+	if buyout_mode then
+		MoneyFrame_Update('AuxBuyDialogBuyoutPrice', amount)
+		AuxBuyDialogBid:Hide()
+		AuxBuyDialogBuyoutPrice:Show()
+	else
+		MoneyInputFrame_SetCopper(AuxBuyDialogBid, amount)
+		AuxBuyDialogBuyoutPrice:Hide()
+		AuxBuyDialogBid:Show()
+	end
+	AuxBuyDialog:Show()
 end
 
-function show_bid_dialog(hyperlink, stack_size, highest_bid, min_increment)
-	AuxBuyBidDialogBidButton:Disable()
-	AuxBuyBidDialogHTML:SetFontObject('h1', GameFontWhite)
-	AuxBuyBidDialogHTML:SetScript('OnHyperlinkClick', function() SetItemRef(arg1) end)
-	AuxBuyBidDialogHTML:SetText(string.format(
-			[[
-			<html>
-			<body>
-				<h1>%s x %i</h1>
-			</body>
-			</html>
-			]],
-			hyperlink,
-			stack_size
-	))
-	AuxBuyBidDialog:Show()
-	MoneyFrame_Update('AuxBuyBuyoutDialogBuyoutPrice', buyout_price)
-	MoneyInputFrame_SetCopper(AuxBuyBidDialogBid, highest_bid + min_increment)
-end
+-----------------------------------------
 
-function AuxBuyEntry_OnClick()
-	local express_mode = IsControlKeyDown()
+function AuxBuyEntry_OnClick(i)
+	local express_mode = IsAltKeyDown()
+	local buyout_mode = arg1 == "LeftButton"
+	
+	local entry = entries[i]
+	
+	if IsControlKeyDown() then 
+		DressUpItemLink(entry.hyperlink)
+		return
+	end
 	
 	AuxBuySearchButton:Disable()
 	
-	local entry_index = this:GetID()
-	local entry = entries[entry_index]
+	local amount
+	if buyout_mode then
+		amount = entry.buyout_price
+	else
+		amount = entry.bid
+	end
 	
 	if not express_mode then
-		if arg1 == "LeftButton" then
-			show_buyout_dialog(entry.hyperlink, entry.stack_size, entry.buyout_price)
-		elseif arg1 == "RightButton" then
-			show_bid_dialog(entry.hyperlink, entry.stack_size, entry.buyout_price)
-		end
+		show_dialog(buyout_mode, entry.hyperlink, entry.stack_size, amount)
 	end
 
 	PlaySound("igMainMenuOptionCheckBoxOn")
 	
 	local found
-	local order_key = Aux.auction_key(entry.tooltip, entry.stack_size, entry.buyout_price)
+	local order_key = Aux.auction_key(entry.tooltip, entry.stack_size, entry.bid, entry.buyout_price)
 	
 	Aux.scan.start{
 		query = search_query,
 		page = entry.page ~= current_page and entry.page,
-		on_start_page = function(k, page)
+		on_start_page = function(ok, page)
 			current_page = page
-			k()
+			ok()
 		end,
-		on_read_auction = function(k, i)
+		on_read_auction = function(ok, i)
 			local auction_item = Aux.info.auction_item(i)
 			
 			if not auction_item then
-				k()
+				ok()
 				return
 			end
 			
 			local stack_size = auction_item.charges or auction_item.count
+			local bid = auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid + auction_item.min_increment
 			
 			if not auction_item.tooltip or not stack_size or not auction_item.buyout_price then
-				k()
+				ok()
 				return
 			end
 
-			local key = Aux.auction_key(auction_item.tooltip, stack_size, auction_item.buyout_price)
+			local key = Aux.auction_key(auction_item.tooltip, stack_size, bid, auction_item.buyout_price)
 			if key == order_key then
 				found = true
-			
-				if express_mode then			
-					if GetMoney() >= auction_item.buyout_price then
+				
+				if express_mode then
+					if GetMoney() >= amount then
 						tremove(entries, entry_index)
 						refresh = true
 					end
 					
-					PlaceAuctionBid("list", i, auction_item.buyout_price)				
+					PlaceAuctionBid("list", i, amount)				
 					
 					Aux.scan.abort()
 				else
-					Aux.buy.buyout_dialog_buy = function()						
-						if GetMoney() >= auction_item.buyout_price then
+					Aux.buy.dialog_action = function()						
+						if GetMoney() >= amount then
 							tremove(entries, entry_index)
 							refresh = true
 						end
 						
-						PlaceAuctionBid("list", i, auction_item.buyout_price)
+						PlaceAuctionBid("list", i, amount)
 					
 						Aux.scan.abort()
 						AuxBuySearchButton:Enable()
-						AuxBuyBuyoutDialog:Hide()
+						AuxBuyDialog:Hide()
 					end
-					AuxBuyBuyoutDialogBuyButton:Enable()
+					AuxBuyDialogActionButton:Enable()
 				end
 			end
-			k()
+			ok()
 		end,
 		on_complete = function()
 			if not found then
 				tremove(entries, entry_index)
 				refresh = true
-				Aux.buy.buyout_dialog_cancel()
+				Aux.buy.dialog_cancel()
 			end
 			if express_mode then
 				AuxBuySearchButton:Enable()
@@ -243,8 +242,7 @@ function AuxBuyEntry_OnClick()
 	}
 end
 
-function AuxBuyEntry_OnEnter()
-	local i = this:GetID()
+function AuxBuyEntry_OnEnter(i)
 	local entry = entries[i]
 	
 	Aux.info.set_game_tooltip(this, entry.tooltip)
@@ -260,17 +258,25 @@ function process_auction(auction_item, current_page)
 	entries = entries or {}
 	
 	local stack_size = auction_item.charges or auction_item.count
-	if auction_item.buyout_price > 0 and auction_item.owner ~= UnitName("player") then
+	local bid = auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid + auction_item.min_increment
+	local buyout_price = auction_item.buyout_price > 0 and auction_item.buyout_price or nil
+	local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price / stack_size)
+	
+	if auction_item.owner ~= UnitName("player") then
 		tinsert(entries, {
 				name = auction_item.name,
 				tooltip = auction_item.tooltip,
 				stack_size = stack_size,
-				buyout_price = auction_item.buyout_price,
-				unit_price = Aux_Round(auction_item.buyout_price / stack_size),
+				buyout_price = buyout_price,
+				buyout_price_per_unit = buyout_price_per_unit,
 				quality = auction_item.quality,
 				hyperlink = auction_item.hyperlink,
 				itemstring = auction_item.itemstring,
 				page = current_page,
+				bid = bid,
+				bid_per_unit = Aux_Round(bid / stack_size),
+				owner = auction_item.owner,
+				duration = auction_item.duration,
 		})
 	end
 end
@@ -287,67 +293,16 @@ end
 -----------------------------------------
 
 function Aux_Buy_ScrollbarUpdate()
-	if entries then
-		table.sort(entries, function(a,b) return a.unit_price < b.unit_price end)
-	end
+	Aux.list.populate(AuxBuyList, entries or {})
+	
+	-- if entries then
+		-- table.sort(entries, function(a,b) return a.buyout_price_per_unit < b.buyout_price_per_unit end)
+	-- end
 	
 	if entries and getn(entries) == 0 then
 		set_message("No auctions were found")
 	else
 		AuxBuyMessage:Hide()
-	end
-	
-	local numrows
-	if not entries then
-		numrows = 0
-	else
-		numrows = getn(entries)
-	end
-	
-	FauxScrollFrame_Update(AuxBuyScrollFrame, numrows, 19, 16);
-	
-	for line = 1,19 do
-
-		local dataOffset = line + FauxScrollFrame_GetOffset(AuxBuyScrollFrame)
-		local lineEntry = getglobal("AuxBuyEntry"..line)
-		
-		if numrows <= 19 then
-			lineEntry:SetWidth(800)
-		else
-			lineEntry:SetWidth(782)
-		end
-		
-		lineEntry:SetID(dataOffset)
-		
-		if dataOffset <= numrows and entries[dataOffset] then
-			
-			local entry = entries[dataOffset]
-
-			local lineEntry_name = getglobal("AuxBuyEntry"..line.."_Name")
-			local lineEntry_stack_size = getglobal("AuxBuyEntry"..line.."_StackSize")
-			
-			local color = "ffffffff"
-			if Aux_QualityColor(entry.quality) then
-				color = Aux_QualityColor(entry.quality)
-			end
-			
-			lineEntry_name:SetText("\124c" .. color ..  entry.name .. "\124r")
-
-			if Aux.util.set_contains(selectedEntries, entry) then
-				lineEntry:LockHighlight()
-			else
-				lineEntry:UnlockHighlight()
-			end
-
-			lineEntry_stack_size:SetText(entry.stack_size)
-			
-			MoneyFrame_Update("AuxBuyEntry"..line.."_UnitPrice", Aux_Round(entry.buyout_price/entry.stack_size))
-			MoneyFrame_Update("AuxBuyEntry"..line.."_TotalPrice", Aux_Round(entry.buyout_price))
-
-			lineEntry:Show()
-		else
-			lineEntry:Hide()
-		end
 	end
 end
 

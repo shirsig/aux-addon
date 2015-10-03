@@ -26,7 +26,7 @@ function Aux.info.container_item(bag, slot)
 end
 
 function Aux.info.auction_sell_item()
-	local name, texture, count, quality, usable, price, unit_price, max_stack, total_count = GetAuctionSellItemInfo()
+	local name, texture, count, quality, usable, price, buyout_price_per_unit, max_stack, total_count = GetAuctionSellItemInfo()
 	auction_sell_item = {
 		name = name,
 		texture = texture,
@@ -34,7 +34,7 @@ function Aux.info.auction_sell_item()
 		quality = quality,
 		usable = usable,
 		price = price,
-		unit_price = unit_price,
+		buyout_price_per_unit = buyout_price_per_unit,
 		max_stack = max_stack,
 		total_count = total_count,
 	}
@@ -54,7 +54,7 @@ function Aux.info.auction_item(index)
 	
 	local auction_item = hyperlink_item(hyperlink)
 	
-	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, bid_amount, high_bidder, owner, sale_status, id, has_all_info = GetAuctionItemInfo("list", index)
+	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status, id, has_all_info = GetAuctionItemInfo("list", index)
 	local duration = GetAuctionItemTimeLeft("list", index)
 	
 	auction_item.texture = texture
@@ -62,7 +62,7 @@ function Aux.info.auction_item(index)
 	auction_item.min_bid = min_bid
 	auction_item.min_increment = min_increment
 	auction_item.buyout_price = buyout_price
-	auction_item.bid_amount = bid_amount
+	auction_item.current_bid = current_bid
 	auction_item.high_bidder = high_bidder
 	auction_item.owner = owner
 	auction_item.sale_status = sale_status

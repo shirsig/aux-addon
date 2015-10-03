@@ -10,95 +10,48 @@
 		</Scripts> 
 	</Frame>
 	
-	<Button name="AuxBuyEntryTemplate" virtual="true" hidden="true">
-		<Size><AbsDimension y="16"/></Size>		
+	<Button name="SearchListItemTemplate" inherits="ListItemTemplate" virtual="true">
 		<Scripts>
+			local scrollFrame
+			local index
 			<OnLoad>
 				this:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			</OnLoad>
-		</Scripts>
-		<Frames>
-			<Frame>
-				<Size><AbsDimension x="120" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="25" y="-3"/></Offset></Anchor></Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_Name" inherits="GameFontHighlightSmall">
-							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Frame>
-			
-			<Frame>
-				<Size><AbsDimension x="120" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="300" y="0"/></Offset></Anchor></Anchors>
-				<Frames>
-					<Frame name="$parent_UnitPrice" inherits="SmallMoneyFrameTemplate">
-						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnLoad>
-								SmallMoneyFrame_OnLoad()
-								MoneyFrame_SetType("STATIC")
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames>
-			</Frame>
-			
-			<Frame>
-				<Size><AbsDimension x="50" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="485" y="-3"/></Offset></Anchor></Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_StackSize" inherits="GameFontHighlightSmall">
-							<Anchors><Anchor point="TOPRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Frame>
-			
-			<Frame>
-				<Size><AbsDimension x="120" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="620" y="0"/></Offset></Anchor></Anchors>
-				<Frames>
-					<Frame name="$parent_TotalPrice" inherits="SmallMoneyFrameTemplate">
-						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnLoad>
-								SmallMoneyFrame_OnLoad()
-								MoneyFrame_SetType("STATIC")
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames>
-			</Frame>
-		</Frames>
-
-		<HighlightTexture file="Interface\HelpFrame\HelpFrameButton-Highlight" alphaMode="ADD">
-			<TexCoords left="0" right="1.0" top="0.0" bottom="0.6"/>
-		</HighlightTexture>
-		<Scripts>
 			<OnEnter>
-				AuxBuyEntry_OnEnter()
+				scrollFrame = getglobal(this:GetParent():GetName().."ScrollFrame")
+				index = this:GetID() + FauxScrollFrame_GetOffset(scrollFrame)
+				AuxBuyEntry_OnEnter(index)
 			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide()
+				ResetCursor()
+				scrollFrame = nil
+				index = nil
 			</OnLeave>
 			<OnClick>
-				AuxBuyEntry_OnClick()
+				AuxBuyEntry_OnClick(index)
 			</OnClick>
+			<OnUpdate>
+				if index then
+					if IsControlKeyDown() then
+						ShowInspectCursor()
+					elseif IsAltKeyDown() then
+						SetCursor("BUY_CURSOR")
+					else
+						ResetCursor()
+					end
+				end
+			</OnUpdate>
 		</Scripts>
+		<HighlightTexture name="$parentHighlight" file="Interface\HelpFrame\HelpFrameButton-Highlight" alphaMode="ADD">
+			<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor><Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+			<TexCoords left="0" right="1.0" top="0" bottom="0.578125"/>
+		</HighlightTexture>
 	</Button>
 	
 	<Frame name="AuxBuyTemplate" virtual="true" hidden="true">
-		<Size>
-			<AbsDimension x="694" y="447"/>
-		</Size>
-		<Anchors>
-			<Anchor point="TOPLEFT"/>
-		</Anchors>	
-
+		<Size><AbsDimension x="694" y="447"/></Size>
+		<Anchors><Anchor point="TOPLEFT"/></Anchors>	
 		<Layers>
 			<Layer level="BACKGROUND">
 				<FontString inherits="GameFontNormal" text="Aux Buy">
@@ -109,47 +62,77 @@
 					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="70" y="-120"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
-			<Layer level="ARTWORK">
-				<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-					<Size><AbsDimension x="802" y="64"/></Size>
-					<Anchors>
-						<Anchor point="TOPLEFT">
-							<Offset>
-								<AbsDimension x="20" y="-52"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
-				</Texture>
-
-				<FontString inherits="GameFontHighlightSmall" text="Name">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="27" y="1"/></Offset></Anchor></Anchors>
-				</FontString>
-				
-				<FontString inherits="GameFontHighlightSmall" text="Unit Price">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="358" y="1"/></Offset></Anchor></Anchors>
-				</FontString>
-
-				<FontString inherits="GameFontHighlightSmall" text="Stack Size">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="509" y="1"/></Offset></Anchor></Anchors>
-				</FontString>
-
-				<FontString inherits="GameFontHighlightSmall" text="Total Price">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="675" y="1"/></Offset></Anchor></Anchors>
-				</FontString>
-			</Layer>
 		</Layers>
-
 		<Frames>
-<!-- 			<Frame name="AuxBuyList" inherits="ListTemplate">
-				<Size><AbsDimension x="610" y="334"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="187" y="-77"/></Offset></Anchor></Anchors>
+			<Frame name="AuxBuyList" inherits="ListTemplate">
+				<Size><AbsDimension x="781" y="334"/></Size>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="18" y="-70"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
-						Aux.list.initialize(this, {{ width=50, logicalColumns={1,2,3} }, { width=50, logicalColumns={1,2,3} }})
+						Aux.list.on_load(this)
 					</OnLoad>
 				</Scripts>
-			</Frame> -->
+				<Frames>
+					<Button name="$parentItem1" inherits="SearchListItemTemplate" id="1">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn1Sort" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="4" y="-4"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem2" inherits="SearchListItemTemplate" id="2">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem1" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem3" inherits="SearchListItemTemplate" id="3">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem2" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem4" inherits="SearchListItemTemplate" id="4">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem3" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem5" inherits="SearchListItemTemplate" id="5">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem4" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem6" inherits="SearchListItemTemplate" id="6">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem5" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem7" inherits="SearchListItemTemplate" id="7">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem6" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem8" inherits="SearchListItemTemplate" id="8">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem7" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem9" inherits="SearchListItemTemplate" id="9">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem8" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem10" inherits="SearchListItemTemplate" id="10">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem9" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem11" inherits="SearchListItemTemplate" id="11">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem10" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem12" inherits="SearchListItemTemplate" id="12">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem11" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem13" inherits="SearchListItemTemplate" id="13">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem12" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem14" inherits="SearchListItemTemplate" id="14">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem13" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem15" inherits="SearchListItemTemplate" id="15">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem14" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem16" inherits="SearchListItemTemplate" id="16">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem15" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem17" inherits="SearchListItemTemplate" id="17">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem16" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem18" inherits="SearchListItemTemplate" id="18">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem17" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+					<Button name="$parentItem19" inherits="SearchListItemTemplate" id="19">
+						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem18" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+					</Button>
+				</Frames>
+			</Frame>
+			
 			<Frame name="AuxBuyFilters">
 				<Size><AbsDimension x="1" y="1"/></Size>
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="80" y="-46"/></Offset></Anchor></Anchors>
@@ -335,44 +318,8 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-		
-			<ScrollFrame name="AuxBuyScrollFrame" inherits="FauxScrollFrameTemplate">
-				<Size><AbsDimension x="785" y="309"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="13" y="-98"/></Offset></Anchor></Anchors>
-
-				<Scripts>
-					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(16, Aux_Buy_ScrollbarUpdate)
-					</OnVerticalScroll>
-					<OnShow>
-						<!--Aux_ScrollbarUpdate();-->
-					</OnShow>
-				</Scripts>
-			</ScrollFrame>
-
-            <Button name="AuxBuyEntry1" inherits="AuxBuyEntryTemplate">
-            <Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyScrollFrame" relativePoint="TOPLEFT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor></Anchors>
-            </Button>
-            <Button name="AuxBuyEntry2"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry1"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry3"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry2"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry4"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry3"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry5"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry4"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry6"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry5"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry7"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry6"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry8"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry7"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry9"  inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry10" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry11" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry12" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry13" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry12" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry14" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry13" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry15" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry14" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry16" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry15" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry17" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry16" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry18" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry17" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-            <Button name="AuxBuyEntry19" inherits="AuxBuyEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxBuyEntry18" relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			
-			<Frame name="AuxBuyBuyoutDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" enableMouse="true" hidden="true" movable="true">
+			<Frame name="AuxBuyDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" enableMouse="true" hidden="true" movable="true">
 				<Size><AbsDimension x="230" y="140" /></Size>		
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-150"/></Offset></Anchor></Anchors>				
 				<Scripts>
@@ -390,7 +337,10 @@
 						<Size><AbsDimension x="200" y="1" /></Size>		
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
 						<FontStringHeader1 inherits="GameFontNormalWhite"/>
-					</SimpleHTML>			
+					</SimpleHTML>
+					<Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="35" y="-60"/></Offset></Anchor></Anchors>
+					</Frame>					
 					<Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-60"/></Offset></Anchor></Anchors>
 						<Scripts>
@@ -400,12 +350,12 @@
 							</OnLoad>
 						</Scripts>
 					</Frame>	
-					<Button name="$parentBuyButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
+					<Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
 						<Size><AbsDimension x="85" y="22"/>	</Size>
 						<Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="20" y="15"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>
-								Aux.buy.buyout_dialog_buy()
+								Aux.buy.dialog_action()
 							</OnClick>
 						</Scripts>
 					</Button>
@@ -414,60 +364,7 @@
 						<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>
-								Aux.buy.buyout_dialog_cancel()
-							</OnClick>
-						</Scripts>
-					</Button>
-				</Frames>
-			</Frame>
-			
-			<Frame name="AuxBuyBidDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" enableMouse="true" hidden="true" movable="true">
-			
-				<Size><AbsDimension x="230" y="170" /></Size>		
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-135"/></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnLoad>this:RegisterForDrag("LeftButton")</OnLoad>
-					<OnDragStart>this:StartMoving()</OnDragStart>
-					<OnDragStop>this:StopMovingOrSizing()</OnDragStop>
-				</Scripts>
-				<Backdrop bgFile="Interface\CharacterFrame\UI-Party-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-					<BackgroundInsets><AbsInset left="11" right="12" top="12" bottom="11"/></BackgroundInsets>
-					<TileSize><AbsValue val="32"/></TileSize>
-					<EdgeSize><AbsValue val="32"/></EdgeSize>
-				</Backdrop>
-
-				<Frames>
-					<SimpleHTML name="$parentHTML">
-						<Size><AbsDimension x="200" y="1" /></Size>		
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
-					</SimpleHTML>
-					<Frame name="$parentHighestBid" inherits="SmallMoneyFrameTemplate">
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-60"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnLoad>
-								SmallMoneyFrame_OnLoad()
-								MoneyFrame_SetType("STATIC")
-							</OnLoad>
-						</Scripts>
-					</Frame>
-					<Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="35" y="-88"/></Offset></Anchor></Anchors>
-					</Frame>
-					<Button name="$parentBidButton" inherits="UIPanelButtonTemplate" text="Bid" disabled="true">
-						<Size><AbsDimension x="85" y="22"/>	</Size>
-						<Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="20" y="15"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnClick>
-								Aux.buy.bid_dialog_bid()
-							</OnClick>
-						</Scripts>
-					</Button>
-					<Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
-						<Size><AbsDimension x="85" y="22"/>	</Size>
-						<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnClick>
-								Aux.buy.bid_dialog_cancel()
+								Aux.buy.dialog_cancel()
 							</OnClick>
 						</Scripts>
 					</Button>
