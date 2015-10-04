@@ -326,20 +326,56 @@
 						</Scripts>
 					</EditBox>
 					
-					<Frame name="AuxBuyTooltipDropDown" inherits="UIDropDownMenuTemplate">
+					<Frame name="AuxBuyTooltipDropDown" inherits="UIDropDownMenuTemplate" hidden="true">
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="555" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnLoad>
-								getglobal(this:GetName().."Left"):Hide()
-								getglobal(this:GetName().."Middle"):Hide()
-								getglobal(this:GetName().."Right"):Hide()
-								getglobal(this:GetName().."Text"):Hide()
-								getglobal(this:GetName().."Button"):SetScript("OnClick", Aux.buy.toggle_tooltip_dropdown)
 								UIDropDownMenu_Initialize(this, AuxBuyTooltipDropDown_Initialize)
 							</OnLoad>
 						</Scripts>
 					</Frame>
-					
+					<Button name="AuxBuyTooltipArrow">
+						<Size><AbsDimension x="24" y="24"/></Size>
+						<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxBuyTooltipInputBox"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor></Anchors>
+						<Scripts>
+							<OnClick>
+								Aux.buy.toggle_tooltip_dropdown()
+								PlaySound("igMainMenuOptionCheckBoxOn")
+							</OnClick>
+						</Scripts>
+						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
+							<Size>
+								<AbsDimension x="24" y="24"/>
+							</Size>
+							<Anchors>
+								<Anchor point="RIGHT"/>
+							</Anchors>
+						</NormalTexture>
+						<PushedTexture name="$parentPushedTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down">
+							<Size>
+								<AbsDimension x="24" y="24"/>
+							</Size>
+							<Anchors>
+								<Anchor point="RIGHT"/>
+							</Anchors>
+						</PushedTexture>
+						<DisabledTexture name="$parentDisabledTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled">
+							<Size>
+								<AbsDimension x="24" y="24"/>
+							</Size>
+							<Anchors>
+								<Anchor point="RIGHT"/>
+							</Anchors>
+						</DisabledTexture>
+						<HighlightTexture name="$parentHighlightTexture" file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
+							<Size>
+								<AbsDimension x="24" y="24"/>
+							</Size>
+							<Anchors>
+								<Anchor point="RIGHT"/>
+							</Anchors>
+						</HighlightTexture>
+					</Button>					
 					<Button name="AuxBuyTooltipButton" inherits="UIPanelButtonTemplate" text="+">
 						<Size><AbsDimension x="22" y="22"/></Size>
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="720" y="0"/></Offset></Anchor></Anchors>

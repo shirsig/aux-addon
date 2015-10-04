@@ -415,7 +415,6 @@ function AuxBuySlotDropDown_OnClick()
 	UIDropDownMenu_SetSelectedValue(AuxBuySlotDropDown, this.value)
 end
 
-
 function AuxBuyTooltipButton_OnClick()
 	local pattern = AuxBuyTooltipInputBox:GetText()
 	if pattern ~= '' then
