@@ -149,6 +149,10 @@ function AuxBuyEntry_OnClick(entry_index)
 	
 	local entry = entries[entry_index]
 	
+	if buyout_mode and not entry.buyout_price then
+		return
+	end
+	
 	if IsControlKeyDown() then 
 		DressUpItemLink(entry.hyperlink)
 		return
@@ -170,32 +174,34 @@ function AuxBuyEntry_OnClick(entry_index)
 	PlaySound("igMainMenuOptionCheckBoxOn")
 	
 	local found
-	local order_key = Aux.auction_key(entry.tooltip, entry.stack_size, entry.bid, entry.buyout_price)
+	local order_key = Aux.auction_key(entry.tooltip, entry.stack_size, amount)
 	
 	Aux.scan.start{
 		query = search_query,
 		page = entry.page ~= current_page and entry.page,
 		on_start_page = function(ok, page)
 			current_page = page
-			ok()
+			return ok()
 		end,
 		on_read_auction = function(ok, i)
 			local auction_item = Aux.info.auction_item(i)
 			
 			if not auction_item then
-				ok()
-				return
+				return ok()
 			end
 			
 			local stack_size = auction_item.charges or auction_item.count
-			local bid = auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid + auction_item.min_increment
-			
-			if not auction_item.tooltip or not stack_size or not auction_item.buyout_price then
-				ok()
-				return
-			end
+			local bid = (auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid) + auction_item.min_increment
 
-			local key = Aux.auction_key(auction_item.tooltip, stack_size, bid, auction_item.buyout_price)
+			local auction_amount
+			if buyout_mode then
+				auction_amount = auction_item.buyout_price
+			else
+				auction_amount = bid
+			end
+			
+			local key = Aux.auction_key(auction_item.tooltip, stack_size, auction_amount)
+			
 			if key == order_key then
 				found = true
 				
@@ -224,7 +230,7 @@ function AuxBuyEntry_OnClick(entry_index)
 					AuxBuyDialogActionButton:Enable()
 				end
 			end
-			ok()
+			return ok()
 		end,
 		on_complete = function()
 			if not found then

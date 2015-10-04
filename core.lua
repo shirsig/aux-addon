@@ -478,7 +478,7 @@ end
 
 -----------------------------------------
 
-function Aux.auction_key(tooltip, stack_size, bid, buyout_price)
+function Aux.auction_key(tooltip, stack_size, amount)
 	local key = ''
 	for i, line in ipairs(tooltip) do
 		local left_text = line[1].text
@@ -490,5 +490,5 @@ function Aux.auction_key(tooltip, stack_size, bid, buyout_price)
 			key = key .. right_text .. '_'
 		end
 	end
-	return key .. stack_size .. '_' .. bid .. '_' .. buyout_price
+	return key .. (stack_size or '0') .. '_' .. (amount or '0')
 end
