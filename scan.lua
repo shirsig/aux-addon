@@ -73,8 +73,6 @@ end
 
 
 function scan()
-
-	wait_for_callback(state.job.on_start_page, {state.page}, function() --;
 	
 	submit_query(function() --;
 		
@@ -95,7 +93,7 @@ function scan()
 		state = nil
 	end
 	
-	end)end)end)
+	end)end)
 end
 
 function scan_auctions(count, k)
@@ -116,6 +114,7 @@ end
 
 function submit_query(k)
 	if state.page then
+		wait_for_callback(state.job.on_start_page, {state.page}, function() --;
 		controller().wait(CanSendAuctionQuery, function() --;
 		wait_for_results(k)
 		QueryAuctionItems(
@@ -129,7 +128,7 @@ function submit_query(k)
 			state.job.query.usable,
 			state.job.query.quality
 		)
-		end)
+		end)end)
 	else
 		return k()
 	end

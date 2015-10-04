@@ -68,10 +68,10 @@ function Aux.buy.SearchButton_onclick()
 	Aux.scan.start{
 		query = search_query,
 		page = 0,
-		on_start_page = function(k, i)
-			current_page = i
-			set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
-			k()
+		on_start_page = function(k, page)
+			current_page = page
+			set_message('Scanning auctions: page ' .. page + 1 .. ' ...')
+			return k()
 		end,
 		on_read_auction = function(k, i)
 			local auction_item = Aux.info.auction_item(i)
@@ -80,7 +80,7 @@ function Aux.buy.SearchButton_onclick()
 					process_auction(auction_item, current_page)
 				end
 			end
-			k()
+			return k()
 		end,
 		on_complete = function()
 			entries = entries or {}
