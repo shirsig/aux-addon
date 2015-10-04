@@ -2,149 +2,93 @@
 
 	<Script file="list.lua"/>
 
-<!-- 	<Button name="ListItemTemplate" hidden="true" virtual="true">
-		<Size>
-			<AbsDimension x="605" y="16"/>
-		</Size>
+	<Button name="ListItemTemplate" hidden="false" virtual="true">
+		<Size><AbsDimension x="776" y="16"/></Size>
 		<Layers>
 			<Layer level="BORDER">
 				<FontString name="$parentColumn1" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
-					<Size>
-						<AbsDimension x="100" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT">
-							<Offset>
-								<AbsDimension x="10" y="0"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
+					<Size><AbsDimension x="100" y="16"/></Size>
+					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 				<FontString name="$parentColumn2" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
-					<Size>
-						<AbsDimension x="100" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentColumn1" relativePoint="TOPRIGHT">
-							<Offset>
-								<AbsDimension x="20" y="0"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
+					<Size><AbsDimension x="100" y="16"/></Size>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn1" relativePoint="TOPRIGHT"><Offset><AbsDimension x="20" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 				<FontString name="$parentColumn3" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
-					<Size>
-						<AbsDimension x="100" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentColumn2" relativePoint="TOPRIGHT">
-							<Offset>
-								<AbsDimension x="20" y="0"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
+					<Size><AbsDimension x="100" y="16"/></Size>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn2" relativePoint="TOPRIGHT"><Offset><AbsDimension x="20" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 				<FontString name="$parentColumn4" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
-					<Size>
-						<AbsDimension x="100" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT">
-							<Offset>
-								<AbsDimension x="20" y="0"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
+					<Size><AbsDimension x="100" y="16"/></Size>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT"><Offset><AbsDimension x="20" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 				<FontString name="$parentColumn5" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
-					<Size>
-						<AbsDimension x="100" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT">
-							<Offset>
-								<AbsDimension x="20" y="0"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
+					<Size><AbsDimension x="100" y="16"/></Size>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT"><Offset><AbsDimension x="20" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 				<FontString name="$parentColumn6" inherits="GameFontHighlight" wraponspaces="false" justifyH="RIGHT">
-					<Size>
-						<AbsDimension x="100" y="16"/>
-					</Size>
-					<Anchors>
-						<Anchor point="TOPLEFT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT">
-							<Offset>
-								<AbsDimension x="20" y="0"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
+					<Size><AbsDimension x="100" y="16"/></Size>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT"><Offset><AbsDimension x="20" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame name="$parentColumn3MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors>
-					<Anchor point="TOPRIGHT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT">
-						<Offset>
-							<AbsDimension x="10" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
+			<Frame name="$parentColumn1MoneyFrame" inherits="SmallMoneyFrameTemplate">
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn1" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
-						SmallMoneyFrame_OnLoad();
-						MoneyFrame_SetType("AUCTIONEER");
+						SmallMoneyFrame_OnLoad()
+						MoneyFrame_SetType("AUX_LIST")
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentColumn2MoneyFrame" inherits="SmallMoneyFrameTemplate">
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn2" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnLoad>
+						SmallMoneyFrame_OnLoad()
+						MoneyFrame_SetType("AUX_LIST")
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Frame name="$parentColumn3MoneyFrame" inherits="SmallMoneyFrameTemplate">
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnLoad>
+						SmallMoneyFrame_OnLoad()
+						MoneyFrame_SetType("AUX_LIST")
 					</OnLoad>
 				</Scripts>
 			</Frame>
 			<Frame name="$parentColumn4MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors>
-					<Anchor point="TOPRIGHT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT">
-						<Offset>
-							<AbsDimension x="10" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
-						SmallMoneyFrame_OnLoad();
-						MoneyFrame_SetType("AUCTIONEER");
+						SmallMoneyFrame_OnLoad()
+						MoneyFrame_SetType("AUX_LIST")
 					</OnLoad>
 				</Scripts>
 			</Frame>
 			<Frame name="$parentColumn5MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors>
-					<Anchor point="TOPRIGHT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT">
-						<Offset>
-							<AbsDimension x="10" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
-						SmallMoneyFrame_OnLoad();
-						MoneyFrame_SetType("AUCTIONEER");
+						SmallMoneyFrame_OnLoad()
+						MoneyFrame_SetType("AUX_LIST")
 					</OnLoad>
 				</Scripts>
 			</Frame>
 			<Frame name="$parentColumn6MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors>
-					<Anchor point="TOPRIGHT" relativeTo="$parentColumn6" relativePoint="TOPRIGHT">
-						<Offset>
-							<AbsDimension x="10" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn6" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
-						SmallMoneyFrame_OnLoad();
-						MoneyFrame_SetType("AUCTIONEER");
+						SmallMoneyFrame_OnLoad()
+						MoneyFrame_SetType("AUX_LIST")
 					</OnLoad>
 				</Scripts>
 			</Frame>
 		</Frames>
-	</Button> -->
+	</Button>
 
 	<Button name="ListSortButtonTemplate" virtual="true">
 		<Layers>
@@ -234,7 +178,7 @@
 			<Frame name="$parentColumn1DropDown" inherits="UIDropDownMenuTemplate" id="1"><Anchors><Anchor point="LEFT" relativeTo="$parentColumn1Sort" relativePoint="LEFT"><Offset><AbsDimension x="-14" y="-3"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
-						Aux.list.dropdown_onload()
+						Aux.list.dropdown_on_load()
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -248,30 +192,15 @@
 				</Scripts>
 			</Button>
 			<Frame name="$parentColumn2DropDown" inherits="UIDropDownMenuTemplate" id="2">
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentColumn2Sort" relativePoint="LEFT">
-						<Offset>
-							<AbsDimension x="-14" y="-3"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
+				<Anchors><Anchor point="LEFT" relativeTo="$parentColumn2Sort" relativePoint="LEFT"><Offset><AbsDimension x="-14" y="-3"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
-						Aux.list.dropdown_onload()
+						Aux.list.dropdown_on_load()
 					</OnLoad>
 				</Scripts>
 			</Frame>
 			<Button name="$parentColumn3Sort" inherits="ListSortButtonTemplate">
-				<Size>
-					<AbsDimension x="174" y="24"/>
-				</Size>
-				<Anchors>
-					<Anchor point="LEFT" relativeTo="$parentColumn2Sort" relativePoint="RIGHT">
-						<Offset>
-							<AbsDimension x="-2" y="0"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
+				<Size><AbsDimension x="174" y="24"/></Size><Anchors><Anchor point="LEFT" relativeTo="$parentColumn2Sort" relativePoint="RIGHT"><Offset><AbsDimension x="-2" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
 						Aux.list.sort(this:GetParent(), 3)
@@ -288,7 +217,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						Aux.list.dropdown_onload()
+						Aux.list.dropdown_on_load()
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -319,7 +248,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						Aux.list.dropdown_onload()
+						Aux.list.dropdown_on_load()
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -350,7 +279,7 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						Aux.list.dropdown_onload()
+						Aux.list.dropdown_on_load()
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -381,11 +310,11 @@
 				</Anchors>
 				<Scripts>
 					<OnLoad>
-						Aux.list.dropdown_onload()
+						Aux.list.dropdown_on_load()
 					</OnLoad>
 				</Scripts>
 			</Frame>
-<!-- 			<ScrollFrame name="$parentScrollFrame" inherits="FauxScrollFrameTemplate">
+			<ScrollFrame name="$parentScrollFrame" inherits="FauxScrollFrameTemplate">
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
@@ -430,10 +359,10 @@
 				</Layers>
 				<Scripts>
 					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(16, ListTemplateScrollFrame_Update)
+						FauxScrollFrame_OnVerticalScroll(16, Aux.list.scroll_frame_update)
 					</OnVerticalScroll>
 				</Scripts>
-			</ScrollFrame> -->
+			</ScrollFrame>
 		</Frames>
 	</Frame>
 </Ui>

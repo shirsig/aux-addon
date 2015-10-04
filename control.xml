@@ -1,0 +1,15 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+	<Script file="control.lua"/> 
+  
+	<Frame name="AuxControlFrame">
+      <Scripts> 
+			<OnEvent> 
+				Aux.control.on_event()
+			</OnEvent>
+			<OnUpdate>
+				Aux.control.on_update()
+			</OnUpdate>
+		</Scripts> 
+	</Frame>
+</Ui>

@@ -4,6 +4,7 @@
 ## SavedVariablesPerCharacter: AUX_SELL_SHORTCUT, AUX_BUY_SHORTCUT, AUX_OPEN_SELL, AUX_OPEN_BUY, AUX_INSTANT_BUYOUT, AUX_AUCTION_DURATION
 ## SavedVariables: auxSellEntries
 core.xml
+control.xml
 
 sell.xml
 buy.xml

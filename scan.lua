@@ -2,110 +2,77 @@ Aux.scan = {}
 
 local AUCTIONS_PER_PAGE = 50
 
-
+local controller = (function()
+	local controller
+	return function()
+		controller = controller or Aux.control.controller()
+		return controller
+	end
+end)()
 
 local state, abort, new_job
 
 -- forward declaration of local functions
-local wait, wait_after, wait_for_function, wait_until, listen_for_event
+local wait_for_callback, wait_for_results, wait_for_update
 local scan, scan_auctions, scan_auctions_helper, submit_query
 
 
 
-function Aux.scan.on_update()
-	if abort then
-		if state and state.job and state.job.on_abort then
-			state.job.on_abort()
-		end
-		state = nil
-		abort = false
-	elseif new_job then
-		state = {
-			job = new_job,
-			page = new_job.page
-		}
-		new_job = nil
-		scan()
-	elseif state and state.ready and state.ready() then
-		state.ready = nil
-		state.continuation()
-	end
-end
-
 function Aux.scan.start(job)
-	abort = true
-	new_job = job
+	Aux.scan.abort(function() --;
+	wait_for_update(function() --;
+		state = {
+			job = job,
+			page = job.page
+		}
+		return scan()
+	end)end)
 end
 
-function Aux.scan.abort()
-	abort = true
+function Aux.scan.abort(k)
+	wait_for_update(function() --;
+	if state and state.job and state.job.on_abort then
+		state.job.on_abort()
+	end
+	state = nil
+	
+	if k then
+		return k()
+	end
+	end)
 end
 
 
 
-function wait(timeout, k)
-	state.continuation = k
-	local start_time = GetTime()
-	state.ready = function()
-		return GetTime() - start_time >= timeout
-	end
+function wait_for_results(k)
+	local ok
+	Aux.control.on_next_event('AUCTION_ITEM_LIST_UPDATE', function()
+		ok = true
+	end)
+
+	return controller().wait(function() return ok end, k)
 end
 
-function wait_from()
-	local from
-	return function()
-		from = GetTime()
-	end,
-	function(timeout, k)
-		state.continuation = k
-		state.ready = function()
-			return from and GetTime() - from >= timeout
-		end
-	end
+function wait_for_update(k)
+	return controller().wait(function() return true end, k)
 end
 
-function listen_for_event(e)
-	local occurred
-	Aux.scan.on_event = function()
-		if event == e then
-			occurred = true
-		end
-	end
-	return function(k)
-		state.continuation = k
-		state.ready = function()
-			return occurred
-		end
-	end
-end
-
-function wait_for_function(f, args, k)
-	state.continuation = k
-	local complete
-	state.ready = function()
-		return complete
-	end
+function wait_for_callback(f, args, k)
+	local ok
 
 	if not f then
-		complete = true
+		ok = true
 	else
-		tinsert(args, 1, function() complete = true end)
+		tinsert(args, 1, function() ok = true end)
 		f(unpack(args))
 	end
-end
 
-function wait_until(p, k)
-	state.continuation = k
-	state.ready = function()
-		return p()
-	end
+	return controller().wait(function() return ok end, k)
 end
 
 
 
 function scan()
-
-	wait_for_function(state.job.on_start_page, {state.page}, function() --;
 	
 	submit_query(function() --;
 		
@@ -123,17 +90,18 @@ function scan()
 		if state.job.on_complete then
 			state.job.on_complete()
 		end
+		state = nil
 	end
 	
-	end)end)end)
+	end)end)
 end
 
 function scan_auctions(count, k)
-	scan_auctions_helper(1, count, k)
+	return scan_auctions_helper(1, count, k)
 end
 
 function scan_auctions_helper(i, n, k)
-	wait_for_function(state.job.on_read_auction, {i}, function() --;
+	wait_for_callback(state.job.on_read_auction, {i}, function() --;
 	
 	if i >= n then
 		return k()
@@ -146,8 +114,9 @@ end
 
 function submit_query(k)
 	if state.page then
-		wait_until(CanSendAuctionQuery, function() --;
-		local wait_for_event = listen_for_event('AUCTION_ITEM_LIST_UPDATE')
+		wait_for_callback(state.job.on_start_page, {state.page}, function() --;
+		controller().wait(CanSendAuctionQuery, function() --;
+		wait_for_results(k)
 		QueryAuctionItems(
 			state.job.query.name,
 			state.job.query.min_level,
@@ -159,10 +128,8 @@ function submit_query(k)
 			state.job.query.usable,
 			state.job.query.quality
 		)
-		wait_for_event(k)
-		
-		end)
+		end)end)
 	else
-		k()
+		return k()
 	end
 end

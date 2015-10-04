@@ -1,4 +1,4 @@
-AuxVersion = "1.3.0"
+AuxVersion = "1.4.1"
 AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)"
 
 local lastRightClickAction = GetTime()
@@ -172,8 +172,8 @@ function Aux_SetupHookFunctions()
 	Aux.orig.ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
 	ContainerFrameItemButton_OnClick = Aux_ContainerFrameItemButton_OnClick
 	
-	Aux.orig.AuctionFrameBids_Update = AuctionFrameBids_Update
-	AuctionFrameBids_Update = Aux_AuctionFrameBids_Update
+	Aux.orig.AuctionFrameBid_Update = AuctionFrameBid_Update
+	AuctionFrameBid_Update = Aux_AuctionFrameBid_Update
 	
 	Aux.orig.AuctionFrameAuctions_Update = AuctionFrameAuctions_Update
 	AuctionFrameAuctions_Update = Aux_AuctionFrameAuctions_Update
@@ -484,7 +484,7 @@ end
 
 -----------------------------------------
 
-function Aux.auction_key(tooltip, stack_size, buyout_price)
+function Aux.auction_key(tooltip, stack_size, amount)
 	local key = ''
 	for i, line in ipairs(tooltip) do
 		local left_text = line[1].text
@@ -496,5 +496,5 @@ function Aux.auction_key(tooltip, stack_size, buyout_price)
 			key = key .. right_text .. '_'
 		end
 	end
-	return key .. stack_size .. '_' .. buyout_price
+	return key .. (stack_size or '0') .. '_' .. (amount or '0')
 end
