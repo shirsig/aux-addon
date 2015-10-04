@@ -229,8 +229,9 @@ function AuxBuyEntry_OnClick(entry_index)
 					end
 					AuxBuyDialogActionButton:Enable()
 				end
+			else
+				return ok()
 			end
-			return ok()
 		end,
 		on_complete = function()
 			if not found then
