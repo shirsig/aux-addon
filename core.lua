@@ -14,7 +14,8 @@ Aux = {
         buy = {
             index = 5
         }
-    }
+    },
+	last_picked_up = {},
 }
 
 -----------------------------------------
@@ -53,6 +54,8 @@ function Aux_OnAddonLoaded()
 		Aux_SetupHookFunctions()
 		
 		Aux.tabs.sell.hiddenElements = {
+				AuctionsCreateAuctionButton,
+				AuctionsItemButton,
 				AuctionsTitle,
 				AuctionsScrollFrame,
 				AuctionsButton1,
@@ -157,6 +160,9 @@ function Aux_SetupHookFunctions()
 	BrowseButton8:RegisterForClicks("LeftButtonUp", "RightButtonDown")
 	BrowseButton8:SetScript("OnMouseDown", Aux_BrowseButton_OnMouseDown)
 
+	Aux.orig.PickupContainerItem = PickupContainerItem
+	PickupContainerItem = Aux.PickupContainerItem
+	
 	Aux.orig.AuctionSellItemButton_OnEvent = AuctionSellItemButton_OnEvent
 	AuctionSellItemButton_OnEvent = Aux.sell.AuctionSellItemButton_OnEvent
 	
@@ -171,9 +177,6 @@ function Aux_SetupHookFunctions()
 	
 	Aux.orig.AuctionFrameAuctions_Update = AuctionFrameAuctions_Update
 	AuctionFrameAuctions_Update = Aux_AuctionFrameAuctions_Update
-	
-	Aux.orig.AuctionsCreateAuctionButton_OnClick = AuctionsCreateAuctionButton:GetScript('OnClick')
-	AuctionsCreateAuctionButton:SetScript('OnClick', Aux.sell.AuctionsCreateAuctionButton_OnClick)
 end
 
 -----------------------------------------
@@ -242,7 +245,6 @@ function Aux_AuctionFrameTab_OnClick(index)
 		AuxSellPanel:Show()
 		AuctionFrame:EnableMouse(false)
 		
-		Aux_OnNewAuctionUpdate()
     elseif index == Aux.tabs.buy.index then
         AuctionFrameTab_OnClick(2)
 		
@@ -421,6 +423,13 @@ end
 
 -----------------------------------------
 
+function Aux.PickupContainerItem(bag, item)
+	Aux.last_picked_up = { bag=bag, slot=item }
+	return Aux.orig.PickupContainerItem(bag, item)
+end
+
+-----------------------------------------
+
 function Aux_ContainerFrameItemButton_OnClick(button)
 	local bag, slot = this:GetParent():GetID(), this:GetID()
 	local container_item = Aux.info.container_item(bag, slot)
@@ -438,10 +447,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 			end
 			return
 		elseif AUX_SELL_SHORTCUT and IsAltKeyDown()then
-			ClearCursor()
-			PickupContainerItem(bag, slot)
-			ClickAuctionSellItemButton()
-			ClearCursor()		
+			Aux.sell.update_auction(bag, slot)	
 			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Aux.tabs.sell.index then
 				AuctionFrameTab_OnClick(Aux.tabs.sell.index)
 			end			

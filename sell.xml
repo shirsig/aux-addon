@@ -152,7 +152,24 @@
 			</Layer>
 		</Layers>
 
-		<Frames>		
+		<Frames>
+			<Button name="AuxSellPostButton" inherits="UIPanelButtonTemplate" text="Post Auctions">
+				<Size>
+					<AbsDimension x="191" y="20"/>
+				</Size>
+				<Anchors>
+					<Anchor point="BOTTOMLEFT">
+						<Offset>
+							<AbsDimension x="18" y="39"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						Aux.sell.post_auctions()
+					</OnClick>
+				</Scripts>
+			</Button>		
 			<Button>
 				<Size><AbsDimension x="612" y="118"/></Size>
 				<Anchors>
@@ -172,13 +189,12 @@
 						end
 					</OnEvent>
 					<OnClick>
-						ClickAuctionSellItemButton()
-						ClearCursor()
-						AuctionsFrameAuctions_ValidateAuction()
+						Aux.sell.clear_auction()
+						-- AuctionsFrameAuctions_ValidateAuction() TODO
 					</OnClick>
 					<OnReceiveDrag>
-						ClickAuctionSellItemButton()
-						AuctionsFrameAuctions_ValidateAuction()
+						Aux.sell.update_auction(Aux.last_picked_up.bag, Aux.last_picked_up.slot)
+						ClearCursor()
 					</OnReceiveDrag>
 					<OnEnter>
 						Aux_Hilite1:Show()
@@ -276,10 +292,10 @@
 
 				<Scripts>
 					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(16, Aux_ScrollbarUpdate)
+						FauxScrollFrame_OnVerticalScroll(16, Aux.sell.scrollbar_update)
 					</OnVerticalScroll>
 					<OnShow>
-						<!--Aux_ScrollbarUpdate();-->
+						<!--Aux.sell.scrollbar_update();-->
 					</OnShow>
 				</Scripts>
 			</ScrollFrame>
