@@ -60,8 +60,24 @@ function Aux_AuctionFrameAuctions_Update()
 end
 
 -----------------------------------------
--- Intercept the Create Auction click so
--- that we can note the auction values
+--TODO
+function AuctionSellItemButton_OnEvent()
+	if ( event == "NEW_AUCTION_UPDATE") then
+		local name, texture, count, quality, canUse, price = GetAuctionSellItemInfo();
+		AuctionsItemButton:SetNormalTexture(texture);
+		AuctionsItemButtonName:SetText(name);
+		if ( count > 1 ) then
+			AuctionsItemButtonCount:SetText(count);
+			AuctionsItemButtonCount:Show();
+		else
+			AuctionsItemButtonCount:Hide();
+		end
+		MoneyInputFrame_SetCopper(StartPrice, max(100, floor(price * 1.5)));
+		UpdateDeposit();
+		MoneyInputFrame_SetCopper(BuyoutPrice, 0);
+	end
+end
+
 -----------------------------------------
 
 function Aux.sell.post_auctions()

@@ -151,8 +151,60 @@
 				</FontString>
 			</Layer>
 		</Layers>
-
 		<Frames>
+			<Button name="AuxSellItem">
+				<Size>
+					<AbsDimension x="37" y="37"/>
+				</Size>
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="28" y="-98"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="BACKGROUND">
+						<FontString name="$parentName" inherits="GameFontNormal">
+							<Size>
+								<AbsDimension x="124" y="30"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="5" y="0"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+					<Layer level="OVERLAY">
+						<FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT" hidden="true">
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="-5" y="2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnEnter>
+						GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
+						if GetAuctionSellItemInfo() then
+							GameTooltip:SetAuctionSellItem()
+						else
+							GameTooltip:SetText(AUCTION_ITEM_TEXT, 1.0, 1.0, 1.0)
+						end
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide()
+					</OnLeave>
+				</Scripts>
+				<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+			</Button>
 			<Button name="AuxSellPostButton" inherits="UIPanelButtonTemplate" text="Post Auctions">
 				<Size>
 					<AbsDimension x="191" y="20"/>
