@@ -60,7 +60,7 @@ local logical_columns = {
 	{
 		type = 'STRING',
 		title = 'Time Left',
-		comparator = function(row1, row2) return Aux.util.invert_order(Aux.util.compare(row1.duration, row2.duration, Aux.util.GT)) end,
+		comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
 		getter = function(row)
 			if row.duration == 1 then
 				return 'Short'
