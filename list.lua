@@ -238,10 +238,30 @@ function Aux.list.scroll_frame_update(frame)
 	local parent = frame:GetParent()
 	local content = parent.content
 	FauxScrollFrame_Update(frame, table.getn(content), parent.lines, parent.lineHeight)
+	
+	for column_index = 1, table.getn(parent.physical_columns) do
+		local arrow = getglobal(parent:GetName().."Column"..column_index.."SortArrow")
+		local sort_info = parent.sort_order[1]
+		local physical_column = parent.physical_columns[column_index]
+		local logical_column = physical_column.logical_column
+		
+		if sort_info.logical_column == logical_column then
+			if sort_info.sort_ascending then
+				arrow:SetTexCoord(0, 0.5625, 0, 1.0)
+			else
+				arrow:SetTexCoord(0, 0.5625, 1.0, 0)
+			end
+			arrow:Show()
+		else
+			arrow:Hide()
+		end
+	end
+	
 	for line = 1, parent.lines do
 		local item = getglobal(parent:GetName().."Item"..line)
 		local row_index = line + FauxScrollFrame_GetOffset(frame)
-		if row_index <= table.getn(content) then
+				
+		if row_index <= getn(content) then		
 			for column_index = 1, MAX_COLUMNS do
 				
 				local text = getglobal(parent:GetName().."Item"..line.."Column"..column_index)
@@ -256,19 +276,6 @@ function Aux.list.scroll_frame_update(frame)
 					local logical_column = physical_column.logical_column
 					local value = logical_column.getter(content[row_index])
 					
-					local arrow = getglobal(parent:GetName().."Column"..column_index.."SortArrow")
-					local sort_info = parent.sort_order[1]
-					if sort_info.logical_column == logical_column then
-						if sort_info.sort_ascending then
-							arrow:SetTexCoord(0, 0.5625, 0, 1.0)
-						else
-							arrow:SetTexCoord(0, 0.5625, 1.0, 0)
-						end
-						arrow:Show()
-					else
-						arrow:Hide()
-					end
-				
 					if value then
 						if text and (logical_column.type == "DATE" or logical_column.type == "NUMBER" or logical_column.type == "STRING") then
 							text:SetText(value)
