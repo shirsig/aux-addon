@@ -68,19 +68,19 @@ function Aux.buy.SearchButton_onclick()
 	Aux.scan.start{
 		query = search_query,
 		page = 0,
-		on_start_page = function(k, page)
+		on_start_page = function(ok, page, total_pages)
 			current_page = page
-			set_message('Scanning auctions: page ' .. page + 1 .. ' ...')
-			return k()
+			set_message('Scanning auctions: page ' .. page + 1 .. (total_pages and ' out of ' .. total_pages or '') .. ' ...')
+			return ok()
 		end,
-		on_read_auction = function(k, i)
+		on_read_auction = function(ok, i)
 			local auction_item = Aux.info.auction_item(i)
 			if auction_item then
 				if (auction_item.name == search_query.name or search_query.name == '' or not AuxBuyExactCheckButton:GetChecked()) and tooltip_match(tooltip_patterns, auction_item.tooltip) then
 					process_auction(auction_item, current_page)
 				end
 			end
-			return k()
+			return ok()
 		end,
 		on_complete = function()
 			entries = entries or {}

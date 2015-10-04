@@ -26,15 +26,15 @@ function Aux.info.container_item(bag, slot)
 end
 
 function Aux.info.auction_sell_item()
-	local name, texture, count, quality, usable, price, buyout_price_per_unit, max_stack, total_count = GetAuctionSellItemInfo()
+	local name, texture, count, quality, usable, vendor_price, vendor_price_per_unit, max_stack, total_count = GetAuctionSellItemInfo()
 	auction_sell_item = {
 		name = name,
 		texture = texture,
 		count = count,
 		quality = quality,
 		usable = usable,
-		price = price,
-		buyout_price_per_unit = buyout_price_per_unit,
+		vendor_price = vendor_price,
+		vendor_price_per_unit = vendor_price_per_unit,
 		max_stack = max_stack,
 		total_count = total_count,
 	}

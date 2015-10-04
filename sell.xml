@@ -190,20 +190,6 @@
 						</FontString>
 					</Layer>
 				</Layers>
-				<Scripts>
-					<OnEnter>
-						GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
-						if GetAuctionSellItemInfo() then
-							GameTooltip:SetAuctionSellItem()
-						else
-							GameTooltip:SetText(AUCTION_ITEM_TEXT, 1.0, 1.0, 1.0)
-						end
-					</OnEnter>
-					<OnLeave>
-						GameTooltip:Hide()
-					</OnLeave>
-				</Scripts>
-				<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 			</Button>
 			<Button name="AuxSellPostButton" inherits="UIPanelButtonTemplate" text="Post Auctions">
 				<Size>
@@ -241,11 +227,14 @@
 						end
 					</OnEvent>
 					<OnClick>
-						Aux.sell.clear_auction()
-						-- AuctionsFrameAuctions_ValidateAuction() TODO
+						if CursorHasItem() then
+							Aux.sell.set_auction(Aux.last_picked_up.bag, Aux.last_picked_up.slot)
+						else
+							Aux.sell.clear_auction()
+						end
 					</OnClick>
 					<OnReceiveDrag>
-						Aux.sell.update_auction(Aux.last_picked_up.bag, Aux.last_picked_up.slot)
+						Aux.sell.set_auction(Aux.last_picked_up.bag, Aux.last_picked_up.slot)
 						ClearCursor()
 					</OnReceiveDrag>
 					<OnEnter>

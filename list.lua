@@ -132,6 +132,7 @@ function Aux.list.initialize(frame, physical_columns, logical_columns)
 		if (i <= table.getn(physical_columns)) then
 			local physical_column = physical_columns[i]
 			local logical_column = physical_column.logical_column
+			UIDropDownMenu_SetSelectedID(dropdown, Aux.util.index_of(logical_column, logical_columns))
 			getglobal(button:GetName().."Arrow"):Hide()
 			getglobal(button:GetName().."Text"):SetText(logical_column.title)
 			button:Show()
@@ -325,7 +326,7 @@ end
 function Aux.list.dropdown_on_load()
 	getglobal(this:GetName().."Text"):Hide()
 	this.initialize = Aux.list.dropdown_initialize
-	-- UIDropDownMenu_SetSelectedID(this, 1) TODO
+	UIDropDownMenu_SetSelectedID(this, 1)
 end
 
 -------------------------------------------------------------------------------

@@ -164,3 +164,11 @@ function Aux.util.compare(a, b, nil_ordering)
 		return Aux.util.EQ
 	end
 end
+
+function Aux.util.index_of(value, array)
+	for i, item in ipairs(array) do
+		if item == value then
+			return i
+		end
+	end
+end

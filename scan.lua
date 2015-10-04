@@ -80,9 +80,9 @@ function scan()
 	
 	scan_auctions(count, function() --;
 	
-	local total_pages = math.ceil(total_count / AUCTIONS_PER_PAGE)
+	state.total_pages = math.ceil(total_count / AUCTIONS_PER_PAGE)
 	
-	state.page = state.job.next_page and state.job.next_page(state.page, total_pages)
+	state.page = state.job.next_page and state.job.next_page(state.page, state.total_pages)
 	
 	if state.page then
 		return scan()
@@ -114,7 +114,7 @@ end
 
 function submit_query(k)
 	if state.page then
-		wait_for_callback(state.job.on_start_page, {state.page}, function() --;
+		wait_for_callback(state.job.on_start_page, {state.page, state.total_pages}, function() --;
 		controller().wait(CanSendAuctionQuery, function() --;
 		wait_for_results(k)
 		QueryAuctionItems(

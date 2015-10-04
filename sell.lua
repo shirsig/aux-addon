@@ -60,29 +60,10 @@ function Aux_AuctionFrameAuctions_Update()
 end
 
 -----------------------------------------
---TODO
-function AuctionSellItemButton_OnEvent()
-	if ( event == "NEW_AUCTION_UPDATE") then
-		local name, texture, count, quality, canUse, price = GetAuctionSellItemInfo();
-		AuctionsItemButton:SetNormalTexture(texture);
-		AuctionsItemButtonName:SetText(name);
-		if ( count > 1 ) then
-			AuctionsItemButtonCount:SetText(count);
-			AuctionsItemButtonCount:Show();
-		else
-			AuctionsItemButtonCount:Hide();
-		end
-		MoneyInputFrame_SetCopper(StartPrice, max(100, floor(price * 1.5)));
-		UpdateDeposit();
-		MoneyInputFrame_SetCopper(BuyoutPrice, 0);
-	end
-end
-
------------------------------------------
 
 function Aux.sell.post_auctions()
-	if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.sell.index then	
-		local name, stack_size, buyout_price = current_auction.name, current_auction.stackSize, MoneyInputFrame_GetCopper(BuyoutPrice)
+	if current_auction and PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.sell.index then
+		local name, stack_size, buyout_price, stack_count = current_auction.name, current_auction.stackSize, MoneyInputFrame_GetCopper(BuyoutPrice), current_auction.stackCount
 		local duration
 		if AuctionFrameAuctions.duration == 120 then
 			duration = 2
@@ -98,7 +79,7 @@ function Aux.sell.post_auctions()
 			AuctionFrameAuctions.duration,
 			MoneyInputFrame_GetCopper(StartPrice),
 			buyout_price,
-			current_auction.stackCount,
+			stack_count,
 			function(posted)
 				for i = 1, posted do
 					record_auction(name, stack_size, buyout_price, duration, UnitName("player"))
@@ -170,10 +151,27 @@ function update_recommendation()
 	if not current_auction then
 		AuxSellRefreshButton:Disable()
 		
+		AuxSellItem:SetNormalTexture(nil)
+		AuxSellItemName:SetText()
+		AuxSellItemCount:SetText()
+
+		MoneyInputFrame_SetCopper(BuyoutPrice, 0)
+		MoneyInputFrame_SetCopper(StartPrice, 0)
+		
 		Aux_Sell_SetStackSize(0)
 		Aux_Sell_SetStackCount(0)
+		
 		set_message("Drag an item to the Auction Item area\n\nto see recommended pricing information")
 	else
+		AuxSellItem:SetNormalTexture(current_auction.texture)
+		AuxSellItemName:SetText(current_auction.name)
+		if current_auction.stackSize > 1 then
+			AuxSellItemCount:SetText(current_auction.stackSize)
+			AuxSellItemCount:Show()
+		else
+			AuxSellItemCount:Hide()
+		end
+		
 		AuxSellRefreshButton:Enable()	
 		
 		Aux_Sell_SetStackSize(current_auction.stackSize)
@@ -197,21 +195,18 @@ function update_recommendation()
 			Aux_ShowElems(Aux.tabs.sell.recommendationElements)
 			
 			AuxRecommendText:SetText("Recommended Buyout Price")
-			AuxRecommendPerStackText:SetText("for your stack of "..current_auction.stackSize)
+			AuxRecommendPerStackText:SetText("for a stack of "..current_auction.stackSize)
 			
-			if current_auction.texture then
-				AuxRecommendItemTex:SetNormalTexture(current_auction.texture)
-				if current_auction.stackSize > 1 then
-					AuxRecommendItemTexCount:SetText(current_auction.stackSize)
-					AuxRecommendItemTexCount:Show()
-				else
-					AuxRecommendItemTexCount:Hide()
-				end
+
+			AuxRecommendItemTex:SetNormalTexture(current_auction.texture)
+			if current_auction.stackSize > 1 then
+				AuxRecommendItemTexCount:SetText(current_auction.stackSize)
+				AuxRecommendItemTexCount:Show()
 			else
-				AuxRecommendItemTex:Hide()
+				AuxRecommendItemTexCount:Hide()
 			end
-			
-			MoneyFrame_Update("AuxRecommendPerItemPrice",  Aux_Round(newBuyoutPrice / current_auction.stackSize))
+
+			MoneyFrame_Update("AuxRecommendPerItemPrice",  Aux_Round(current_auction.stackSize > 0 and newBuyoutPrice / current_auction.stackSize or 0))
 			MoneyFrame_Update("AuxRecommendPerStackPrice", Aux_Round(newBuyoutPrice))
 			
 			MoneyInputFrame_SetCopper(BuyoutPrice, Aux_Round(newBuyoutPrice))
@@ -281,7 +276,7 @@ end
 
 -----------------------------------------
 
-function Aux.sell.update_auction(bag, slot)
+function Aux.sell.set_auction(bag, slot)
 
 	local container_item = Aux.info.container_item(bag, slot)
 	
@@ -289,13 +284,20 @@ function Aux.sell.update_auction(bag, slot)
 		
 		Aux.scan.abort()
 
-		-- local auction_sell_item = Aux.info.auction_sell_item()
+		ClearCursor()
+		PickupContainerItem(bag,slot)
+		ClickAuctionSellItemButton()
+		local auction_sell_item = Aux.info.auction_sell_item() -- TODO
+		ClickAuctionSellItemButton()
+		ClearCursor()
 
 		current_auction = container_item and {
 			name = container_item.name,
 			texture = container_item.texture,
 			stackSize = container_item.charges or container_item.count,
 			stackCount = 1,
+			class = container_item.type,
+			subclass = container_item.subtype,
 		}
 		
 		if current_auction and not auxSellEntries[current_auction.name] then
@@ -304,7 +306,6 @@ function Aux.sell.update_auction(bag, slot)
 			
 		select_entry()
 		update_recommendation()
-		
 	end
 end
 
@@ -312,14 +313,14 @@ end
 
 function refresh_entries()
 	if current_auction then
-		local name = current_auction.name
+		local name, class, subclass = current_auction.name, current_auction.class, current_auction.subclass
 		
 		auxSellEntries[name] = nil
 		
-		local _, _, _, _, _, sType, sSubType = GetItemInfo(name)
+		class, subclass = GetItemInfo(name)
 
-		local class_index -- = item_class_index(sType)
-		local subclass_index -- = item_subclass_index(class_index, sSubType)
+		local class_index = item_class_index(current_auction.class)
+		local subclass_index = item_subclass_index(class_index, current_auction.subclass)
 
 		set_message('Scanning auctions ...')
 		Aux.scan.start{
@@ -330,8 +331,8 @@ function refresh_entries()
 			},
 			page = 0,
 			on_start_page = function(k, i)
-				set_message('Scanning auctions: page ' .. i + 1 .. ' ...')
-				k()
+				set_message('Scanning auctions: page ' .. i + 1 .. (total_pages and ' out of ' .. total_pages or '') .. ' ...')
+				return k()
 			end,
 			on_read_auction = function(k, i)
 				local auction_item = Aux.info.auction_item(i)
@@ -339,7 +340,7 @@ function refresh_entries()
 					local stack_size = auction_item.charges or auction_item.count
 					record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.duration, auction_item.owner)
 				end
-				k()
+				return k()
 			end,
 			on_abort = function()
 				auxSellEntries[name] = nil
@@ -505,7 +506,7 @@ end
 -----------------------------------------
 
 function item_class_index(item_class)
-	for i, class in pairs(GetAuctionItemClasses()) do
+	for i, class in ipairs({ GetAuctionItemClasses() }) do
 		if class == item_class then
 			return i
 		end
@@ -515,7 +516,7 @@ end
 -----------------------------------------
 
 function item_subclass_index(class_index, item_subclass)
-	for i, subclass in pairs(GetAuctionItemSubClasses(class_index)) do
+	for i, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
 		if subclass == item_subclass then
 			return i
 		end

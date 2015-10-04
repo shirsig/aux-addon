@@ -447,7 +447,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 			end
 			return
 		elseif AUX_SELL_SHORTCUT and IsAltKeyDown()then
-			Aux.sell.update_auction(bag, slot)	
+			Aux.sell.set_auction(bag, slot)	
 			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Aux.tabs.sell.index then
 				AuctionFrameTab_OnClick(Aux.tabs.sell.index)
 			end			
