@@ -2,7 +2,7 @@
 
 	<Script file="list.lua"/>
 
-	<Button name="ListItemTemplate" hidden="true" virtual="true">
+	<Button name="ListItemTemplate" hidden="false" virtual="true">
 		<Size><AbsDimension x="776" y="16"/></Size>
 		<Layers>
 			<Layer level="BORDER">

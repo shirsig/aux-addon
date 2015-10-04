@@ -316,6 +316,7 @@ function Aux.list.scroll_frame_update(frame)
 		else
 			item:Hide()
 		end
+		AuxBuyListScrollFrame:Show()
 	end
 end
 

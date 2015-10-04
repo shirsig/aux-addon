@@ -66,70 +66,147 @@
 		<Frames>
 			<Frame name="AuxBuyList" inherits="ListTemplate">
 				<Size><AbsDimension x="781" y="334"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="18" y="-70"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="18" y="-74"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
 						Aux.list.on_load(this)
 					</OnLoad>
 				</Scripts>
 				<Frames>
+					<Frame>
+						<Size><AbsDimension x="40" y="43"/></Size>
+						<Anchors>
+							<Anchor point="TOPLEFT"><Offset><AbsDimension x="783" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/AuctionFrame/UI-AuctionFrame-FilterBg"></Backdrop>
+					</Frame>
 					<Button name="$parentItem1" inherits="SearchListItemTemplate" id="1">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn1Sort" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="4" y="-4"/></Offset></Anchor></Anchors>
 					</Button>
+					<Frame>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentItem1"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentItem1"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
+					</Frame>
 					<Button name="$parentItem2" inherits="SearchListItemTemplate" id="2">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem1" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
 					<Button name="$parentItem3" inherits="SearchListItemTemplate" id="3">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem2" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
+					<Frame>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentItem3"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentItem3"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
+					</Frame>
 					<Button name="$parentItem4" inherits="SearchListItemTemplate" id="4">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem3" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
 					<Button name="$parentItem5" inherits="SearchListItemTemplate" id="5">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem4" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
+					<Frame>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentItem5"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentItem5"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
+					</Frame>
 					<Button name="$parentItem6" inherits="SearchListItemTemplate" id="6">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem5" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
 					<Button name="$parentItem7" inherits="SearchListItemTemplate" id="7">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem6" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
+					<Frame>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentItem7"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentItem7"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
+					</Frame>
 					<Button name="$parentItem8" inherits="SearchListItemTemplate" id="8">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem7" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
 					<Button name="$parentItem9" inherits="SearchListItemTemplate" id="9">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem8" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
+					<Frame>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentItem9"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentItem9"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
+					</Frame>
 					<Button name="$parentItem10" inherits="SearchListItemTemplate" id="10">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem9" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
 					<Button name="$parentItem11" inherits="SearchListItemTemplate" id="11">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem10" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
+					<Frame>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentItem11"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentItem11"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
+					</Frame>
 					<Button name="$parentItem12" inherits="SearchListItemTemplate" id="12">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem11" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
 					<Button name="$parentItem13" inherits="SearchListItemTemplate" id="13">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem12" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
+					<Frame>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentItem13"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentItem13"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
+					</Frame>
 					<Button name="$parentItem14" inherits="SearchListItemTemplate" id="14">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem13" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
 					<Button name="$parentItem15" inherits="SearchListItemTemplate" id="15">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem14" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
+					<Frame>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentItem15"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentItem15"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
+					</Frame>
 					<Button name="$parentItem16" inherits="SearchListItemTemplate" id="16">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem15" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
 					<Button name="$parentItem17" inherits="SearchListItemTemplate" id="17">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem16" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
+					<Frame>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentItem17"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentItem17"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
+					</Frame>
 					<Button name="$parentItem18" inherits="SearchListItemTemplate" id="18">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem17" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
 					<Button name="$parentItem19" inherits="SearchListItemTemplate" id="19">
 						<Anchors><Anchor point="TOPLEFT" relativeTo="$parentItem18" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 					</Button>
+					<Frame>
+						<Anchors>
+							<Anchor point="TOPLEFT" relativeTo="$parentItem19"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$parentItem19"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
+					</Frame>
 				</Frames>
 			</Frame>
 			
