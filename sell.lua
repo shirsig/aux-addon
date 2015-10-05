@@ -47,7 +47,8 @@ function Aux_Sell_AuctionsRadioButton_OnClick(index)
 		AUX_AUCTION_DURATION = 'long'
 	end
 	
-	return Aux.orig.AuctionsRadioButton_OnClick(index)
+	Aux.orig.AuctionsRadioButton_OnClick(index)
+	update_recommendation()
 end
 
 -----------------------------------------
@@ -177,6 +178,8 @@ function update_recommendation()
 		Aux_Sell_SetStackSize(current_auction.stackSize)
 		Aux_Sell_SetStackCount(current_auction.stackCount)
 		
+		MoneyFrame_Update("AuctionsDepositMoneyFrame", current_auction.base_deposit * current_auction.stackCount * (current_auction.has_charges and 1 or current_auction.stackSize) * AuctionFrameAuctions.duration / 120)
+		
 		if auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected then
 			if not auxSellEntries[current_auction.name].created or GetTime() - auxSellEntries[current_auction.name].created > 1800 then
 				AuxRecommendStaleText:SetText("STALE DATA") -- data older than half an hour marked as stale
@@ -281,8 +284,6 @@ function Aux.sell.set_auction(bag, slot)
 	local container_item = Aux.info.container_item(bag, slot)
 	
 	if container_item then
-		
-		Aux.scan.abort()
 
 		ClearCursor()
 		PickupContainerItem(bag,slot)
@@ -291,21 +292,28 @@ function Aux.sell.set_auction(bag, slot)
 		ClickAuctionSellItemButton()
 		ClearCursor()
 
-		current_auction = container_item and {
-			name = container_item.name,
-			texture = container_item.texture,
-			stackSize = container_item.charges or container_item.count,
-			stackCount = 1,
-			class = container_item.type,
-			subclass = container_item.subtype,
-		}
+		if auction_sell_item then
 		
-		if current_auction and not auxSellEntries[current_auction.name] then
-			refresh_entries()
-		end
+			Aux.scan.abort()
+		
+			current_auction = {
+				name = container_item.name,
+				texture = container_item.texture,
+				stackSize = container_item.charges or container_item.count,
+				stackCount = 1,
+				class = container_item.type,
+				subclass = container_item.subtype,
+				base_deposit = auction_sell_item.base_deposit,
+				has_charges = container_item.charges ~= nil,
+			}
 			
-		select_entry()
-		update_recommendation()
+			if current_auction and not auxSellEntries[current_auction.name] then
+				refresh_entries()
+			end
+				
+			select_entry()
+			update_recommendation()
+		end
 	end
 end
 
