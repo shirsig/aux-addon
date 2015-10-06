@@ -231,12 +231,19 @@
 							</Layer>
 						</Layers>
 						<Scripts>
-							<OnChar>
-								Aux.util.item_name_autocomplete()
-							</OnChar>
+							<OnTextChanged>
+								Aux.completion.make_suggestions(this)
+							</OnTextChanged>
+							<OnTabPressed>
+								Aux.completion.highlight_next(this)
+							</OnTabPressed>
 							<OnEnterPressed>
-								this:ClearFocus()
-								Aux.buy.SearchButton_onclick()
+								if Aux.completion.highlighted() then
+									Aux.completion.select(this)
+								else
+									this:ClearFocus()
+									Aux.buy.SearchButton_onclick()
+								end
 							</OnEnterPressed>
 						</Scripts>
 					</EditBox>

@@ -114,7 +114,6 @@ end
 
 function Aux_SetupHookFunctions()
 	
-	BrowseName:SetScript('OnChar', Aux.util.item_name_autocomplete)
 	Aux.orig.AuctionFrameAuctions_OnShow = AuctionFrameAuctions_OnShow
 	AuctionFrameAuctions_OnShow = Aux_Sell_AuctionFrameAuctions_OnShow
 	

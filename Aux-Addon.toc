@@ -20,5 +20,5 @@ about.xml
 
 list.xml
 
-completion.lua
+completion.xml
 

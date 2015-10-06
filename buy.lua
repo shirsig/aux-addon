@@ -419,21 +419,12 @@ function AuxBuyTooltipButton_OnClick()
 	local pattern = AuxBuyTooltipInputBox:GetText()
 	if pattern ~= '' then
 		Aux.util.set_add(tooltip_patterns, pattern)
-	end
-	AuxBuyTooltipInputBox:SetText('')
-	if DropDownList1:IsVisible() then
+		if DropDownList1:IsVisible() then
+			Aux.buy.toggle_tooltip_dropdown()
+		end
 		Aux.buy.toggle_tooltip_dropdown()
 	end
-	Aux.buy.toggle_tooltip_dropdown()
-end
-
-function AuxBuyTooltipRemoveButton_OnClick()
-	Aux.util.set_remove(tooltip_patterns, AuxBuyTooltipInputBox:GetText())
 	AuxBuyTooltipInputBox:SetText('')
-	if DropDownList1:IsVisible() then
-		Aux.buy.toggle_tooltip_dropdown()
-	end
-	Aux.buy.toggle_tooltip_dropdown()
 end
 
 function AuxBuyTooltipDropDown_Initialize()
@@ -442,6 +433,7 @@ function AuxBuyTooltipDropDown_Initialize()
 			text = pattern,
 			value = pattern,
 			func = AuxBuyTooltipDropDown_OnClick,
+			notCheckable = true,
 		}
 	end
 end

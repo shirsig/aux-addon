@@ -1,0 +1,8 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+	<Script file="completion.lua"/>
+	
+	<Frame name="AuxCompletionDropDown" inherits="UIDropDownMenuTemplate" hidden="true">
+		<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="555" y="0"/></Offset></Anchor></Anchors>
+	</Frame>
+</Ui>

@@ -6,25 +6,14 @@ Aux.util.GT = {}
 
 local merge, copy_array
 
+function Aux.util.pass()
+end
+
 function Aux.util.iter(array)
 	local with_index = ipairs(array)
 	return function()
 		local _, value = with_index
 		return value
-	end
-end
-
-function Aux.util.item_name_autocomplete()
-	local text = this:GetText()
-	local textlen = strlen(text)
-	local name
-	for item_id=1,30000 do
-		name = GetItemInfo(item_id)
-		if name and strfind(strupper(name), '^' .. strupper(text)) then
-			this:SetText(name)
-			this:HighlightText(textlen, -1)
-			return
-		end
 	end
 end
 
@@ -91,14 +80,42 @@ function Aux.util.all(xs, p)
 	return holds
 end
 
-function Aux.util.set_filter(set, p)
-	filtered = {}
-	for x, _ in pairs(set) do
+function Aux.util.set_filter(xs, p)
+	ys = {}
+	for x, _ in pairs(xs) do
 		if p(x) then
-			Aux.util.set_add(filtered, x)
+			Aux.util.set_add(ys, x)
 		end
 	end
-	return filtered
+	return ys
+end
+
+function Aux.util.filter(xs, p)
+	ys = {}
+	for _, x in ipairs(xs) do
+		if p(x) then
+			tinsert(ys, x)
+		end
+	end
+	return ys
+end
+
+function Aux.util.map(xs, f)
+	ys = {}
+	for _, x in ipairs(xs) do
+		tinsert(ys, f(x))
+	end
+	return ys
+end
+
+function Aux.util.take(n, xs)
+	ys = {}
+	for i=1,n do
+		if xs[i] then
+			tinsert(ys, xs[i])
+		end
+	end
+	return ys
 end
 
 function Aux.util.merge_sort(A, comp)
