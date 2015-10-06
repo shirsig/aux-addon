@@ -28,7 +28,7 @@ function fuzzy(input)
 		if match[1] then
 			local rating = 1
 			for i=3,getn(match) do
-				rating = rating * max(strlen(match[i]), 1)
+				rating = rating * strlen(match[i]) + 1
 			end
 			return rating
 		end
