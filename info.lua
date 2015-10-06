@@ -28,23 +28,26 @@ end
 function Aux.info.auction_sell_item()
 	local name, texture, stack_size, quality, usable, vendor_price, vendor_price_per_unit, max_stack, total_count = GetAuctionSellItemInfo()
 	local base_deposit = CalculateAuctionDeposit(120) / stack_size
-	auction_sell_item = name and {
-		name = name,
-		texture = texture,
-		stack_size = stack_size,
-		quality = quality,
-		usable = usable,
-		vendor_price = vendor_price,
-		vendor_price_per_unit = vendor_price_per_unit,
-		max_stack = max_stack,
-		total_count = total_count,
-		base_deposit = base_deposit,
-	}
 	
-	auction_sell_item.tooltip = Aux.info.tooltip(function(tt) tt:SetAuctionSellItem() end)
-	auction_sell_item.charges = item_charges(auction_sell_item.tooltip)
-	
-	return auction_sell_item
+	if name then
+		auction_sell_item = {
+			name = name,
+			texture = texture,
+			stack_size = stack_size,
+			quality = quality,
+			usable = usable,
+			vendor_price = vendor_price,
+			vendor_price_per_unit = vendor_price_per_unit,
+			max_stack = max_stack,
+			total_count = total_count,
+			base_deposit = base_deposit,
+		}
+		
+		auction_sell_item.tooltip = Aux.info.tooltip(function(tt) tt:SetAuctionSellItem() end)
+		auction_sell_item.charges = item_charges(auction_sell_item.tooltip)
+		
+		return auction_sell_item
+	end
 end
 
 function Aux.info.auction_item(index)

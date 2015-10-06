@@ -20,3 +20,5 @@ about.xml
 
 list.xml
 
+completion.lua
+

@@ -289,6 +289,7 @@ function Aux.sell.set_auction(bag, slot)
 		PickupContainerItem(bag,slot)
 		ClickAuctionSellItemButton()
 		local auction_sell_item = Aux.info.auction_sell_item() -- TODO
+		ClearCursor()
 		ClickAuctionSellItemButton()
 		ClearCursor()
 
@@ -307,7 +308,7 @@ function Aux.sell.set_auction(bag, slot)
 				has_charges = container_item.charges ~= nil,
 			}
 			
-			if current_auction and not auxSellEntries[current_auction.name] then
+			if not auxSellEntries[current_auction.name] then
 				refresh_entries()
 			end
 				
