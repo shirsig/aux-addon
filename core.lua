@@ -445,7 +445,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Aux.tabs.buy.index then
 				AuctionFrameTab_OnClick(Aux.tabs.buy.index)
 			end
-			AuxBuyNameInputBox:SetText(container_item.name)
+			Aux.completion.set_quietly(AuxBuyNameInputBox, container_item.name)
 			Aux.buy.SearchButton_onclick()
 			return
 		end
