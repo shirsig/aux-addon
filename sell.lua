@@ -328,8 +328,8 @@ function refresh_entries()
 		
 		class, subclass = GetItemInfo(name)
 
-		local class_index = item_class_index(current_auction.class)
-		local subclass_index = item_subclass_index(class_index, current_auction.subclass)
+		-- local class_index = item_class_index(current_auction.class)
+		-- local subclass_index = item_subclass_index(class_index, current_auction.subclass)
 
 		set_message('Scanning auctions ...')
 		Aux.scan.start{
@@ -514,23 +514,23 @@ end
 
 -----------------------------------------
 
-function item_class_index(item_class)
-	for i, class in ipairs({ GetAuctionItemClasses() }) do
-		if class == item_class then
-			return i
-		end
-	end
-end
+-- function item_class_index(item_class)
+	-- for i, class in ipairs({ GetAuctionItemClasses() }) do
+		-- if class == item_class then
+			-- return i
+		-- end
+	-- end
+-- end
 
------------------------------------------
+-- -----------------------------------------
 
-function item_subclass_index(class_index, item_subclass)
-	for i, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
-		if subclass == item_subclass then
-			return i
-		end
-	end
-end
+-- function item_subclass_index(class_index, item_subclass)
+	-- for i, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
+		-- if subclass == item_subclass then
+			-- return i
+		-- end
+	-- end
+-- end
 
 -----------------------------------------
 
