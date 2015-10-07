@@ -12,7 +12,7 @@ Aux = {
             index = 4
         },
         buy = {
-            index = 5
+            index = 1
         }
     },
 	last_picked_up = {},
@@ -75,6 +75,7 @@ function Aux_OnAddonLoaded()
 		}
         
 		Aux.tabs.buy.hiddenElements = {
+				AuctionFrameBrowse,
 				BidTitle,
 				BidScrollFrame,
 				BidButton1,
@@ -187,7 +188,7 @@ function Aux_OnAuctionHouseShow()
 	if AUX_OPEN_SELL then
 		AuctionFrameTab_OnClick(Aux.tabs.sell.index)
 	elseif AUX_OPEN_BUY then
-		AuctionFrameTab_OnClick(Aux.tabs.buy.index)
+		-- AuctionFrameTab_OnClick(Aux.tabs.buy.index)
 	end
 
 end
@@ -297,28 +298,19 @@ end
 function Aux_AddTabs()
 	
 	Aux.tabs.sell.index = AuctionFrame.numTabs + 1
-    Aux.tabs.buy.index = AuctionFrame.numTabs + 2
 
 	local sellTabName = "AuctionFrameTab"..Aux.tabs.sell.index
-    local buyTabName = "AuctionFrameTab"..Aux.tabs.buy.index
 
 	local sellTab = CreateFrame("Button", sellTabName, AuctionFrame, "AuctionTabTemplate")
-    local buyTab = CreateFrame("Button", buyTabName, AuctionFrame, "AuctionTabTemplate")
 
 	setglobal(sellTabName, sellTab)
-    setglobal(buyTabName, buyTab)
     
 	sellTab:SetID(Aux.tabs.sell.index)
 	sellTab:SetText("Sell")
 	sellTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..AuctionFrame.numTabs), "RIGHT", -8, 0)
-    
-    buyTab:SetID(Aux.tabs.buy.index)
-	buyTab:SetText("Buy")
-	buyTab:SetPoint("LEFT", getglobal("AuctionFrameTab"..Aux.tabs.sell.index), "RIGHT", -8, 0)
 	
-	PanelTemplates_SetNumTabs(AuctionFrame, Aux.tabs.buy.index)
+	PanelTemplates_SetNumTabs(AuctionFrame, Aux.tabs.sell.index)
     PanelTemplates_EnableTab(AuctionFrame, Aux.tabs.sell.index)
-	PanelTemplates_EnableTab(AuctionFrame, Aux.tabs.buy.index)
 end
 
 -----------------------------------------

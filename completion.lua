@@ -23,12 +23,12 @@ function fuzzy(input)
 	for i=1,strlen(uppercase_input) do
 		pattern = pattern .. string.sub(uppercase_input, i, i) .. '(.*)'
 	end
-	return function(input)
-		local match = { string.find(strupper(input), pattern) }
+	return function(item_name)
+		local match = { string.find(strupper(item_name), pattern) }
 		if match[1] then
 			local rating = 1
 			for i=3,getn(match) do
-				rating = rating * strlen(match[i]) + 1
+				rating = rating * (strlen(match[i]) + 1)
 			end
 			return rating
 		end
