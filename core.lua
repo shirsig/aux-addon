@@ -431,10 +431,8 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 				and not ChatFrameEditBox:IsVisible()
 				and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index)
 		then
-			if PanelTemplates_GetSelectedTab(AuctionFrame) == 1 then
-				BrowseName:SetText(container_item.name)
-			elseif PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index then
-				AuxBuyNameInputBox:SetText(container_item.name)
+			if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index then
+				Aux.completion.set_quietly(AuxBuyNameInputBox, container_item.name)
 			end
 			return
 		elseif AUX_SELL_SHORTCUT and IsAltKeyDown()then
