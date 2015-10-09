@@ -339,8 +339,8 @@ function refresh_entries()
 				subclass = subclass_index,
 			},
 			page = 0,
-			on_start_page = function(k, i)
-				set_message('Scanning auctions: page ' .. i + 1 .. (total_pages and ' out of ' .. total_pages or '') .. ' ...')
+			on_start_page = function(k, page, total_pages)
+				set_message('Scanning auctions: page ' .. page + 1 .. (total_pages and ' out of ' .. total_pages or '') .. ' ...')
 				return k()
 			end,
 			on_read_auction = function(k, i)

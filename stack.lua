@@ -86,11 +86,8 @@ function move_item(from_slot, to_slot, amount)
 end
 
 function item_name(slot)
-	local hyperlink = GetContainerItemLink(slot.bag, slot.bag_slot)
-	if hyperlink then
-		local _, _, item_name = strfind(hyperlink, "^.-%[(.*)%].*")
-		return item_name
-	end		
+	local container_item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
+	return container_item_info and container_item_info.name
 end
 
 function item_id(slot)
