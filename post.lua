@@ -62,6 +62,7 @@ function post_auction(slot)
 	StartAuction(state.bid, state.buyout, state.duration)
 	state.auctioning = slot
 	state.stacking = false
+	 -- TODO CHAT_MSG_SYSTEM arg1
 end
 
 function Aux.post.start(name, stack_size, duration, bid, buyout, count, callback)

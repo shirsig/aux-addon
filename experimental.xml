@@ -210,43 +210,52 @@
 				</Frames>
 			</Frame>
 			
-			<Frame name="AuxBuyFilters">
-				<Size><AbsDimension x="1" y="1"/></Size>
+			<Frame name="$parentConfiguration">
+				<Size><AbsDimension x="300" y="700"/></Size>
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="80" y="-46"/></Offset></Anchor></Anchors>
+				<Backdrop bgFile="Interface/Tooltips/UI-Tooltip-Background"><Color r="1" g="1" b="1" a="0.2"/></Backdrop>
 				<Frames>
-					<EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="InputBoxTemplate">
-						<Size><AbsDimension x="180" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString inherits="GameFontHighlightSmall" text="Name">
-									<Anchors>
-										<Anchor point="TOPLEFT">
-											<Offset>
-												<AbsDimension x="-3" y="9"/>
-											</Offset>
-										</Anchor>
-									</Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnTextChanged>
-								Aux.completion.make_suggestions(this)
-							</OnTextChanged>
-							<OnTabPressed>
-								Aux.completion.highlight_next(this)
-							</OnTabPressed>
-							<OnEnterPressed>
-								if Aux.completion.highlighted() then
-									Aux.completion.select(this)
-								else
-									this:ClearFocus()
-									Aux.buy.SearchButton_onclick()
-								end
-							</OnEnterPressed>
-						</Scripts>
-					</EditBox>
+					<Frame name="$parentItem">
+						<Anchors>
+							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-100"/></Offset></Anchor>
+							<Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+						</Anchors>
+						<Frames>
+							<EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="InputBoxTemplate">
+								<Size><AbsDimension x="180" y="22"/></Size>
+								<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+								<Layers>
+									<Layer level="OVERLAY">
+										<FontString inherits="GameFontHighlightSmall" text="Name">
+											<Anchors>
+												<Anchor point="TOPLEFT">
+													<Offset>
+														<AbsDimension x="-3" y="9"/>
+													</Offset>
+												</Anchor>
+											</Anchors>
+										</FontString>
+									</Layer>
+								</Layers>
+								<Scripts>
+									<OnTextChanged>
+										Aux.completion.make_suggestions(this)
+									</OnTextChanged>
+									<OnTabPressed>
+										Aux.completion.highlight_next(this)
+									</OnTabPressed>
+									<OnEnterPressed>
+										if Aux.completion.highlighted() then
+											Aux.completion.select(this)
+										else
+											this:ClearFocus()
+											Aux.buy.SearchButton_onclick()
+										end
+									</OnEnterPressed>
+								</Scripts>
+							</EditBox>
+						</Frames>
+					</Frame>
 					
 					<CheckButton name="AuxBuyExactCheckButton" inherits="UICheckButtonTemplate" checked="true">
 						<Size><AbsDimension x="22" y="22"/></Size>
@@ -454,7 +463,7 @@
 				</Backdrop>			
 				<Frames>
 					<SimpleHTML name="$parentHTML">
-						<Size><AbsDimension x="170" y="1" wraponspaces="false" /></Size>		
+						<Size><AbsDimension x="200" y="1" /></Size>		
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
 						<FontStringHeader1 inherits="GameFontNormalWhite"/>
 					</SimpleHTML>

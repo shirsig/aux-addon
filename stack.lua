@@ -1,14 +1,21 @@
 Aux.stack = {}
 
+local controller = (function()
+	local controller
+	return function()
+		controller = controller or Aux.control.controller()
+		return controller
+	end
+end)()
+
 local state
 
-local last_move = GetTime()
+local inventory, item_slots, find_empty_slot, locked, same_slot, move_item, item_name, stack_size, wait_for_update
 
-local DELAY = 0
+function wait_for_update(k)
+	return controller().wait(function() return true end, k)
+end
 
-local inventory, item_slots, find_empty_slot, locked, same_slot, move_item, item_name, stack_size
-
--- returns iterator for inventory slots
 function inventory()
 	local inventory = {}
 	for bag = 0, 4 do
@@ -64,25 +71,16 @@ function same_slot(slot1, slot2)
 	return slot1.bag == slot2.bag and slot1.bag_slot == slot2.bag_slot
 end
 
-function move_item(from_slot, to_slot, amount)
-	if stack_size(to_slot) < max_stack(from_slot) then
-		last_move = GetTime()
+function move_item(from_slot, to_slot, amount, k)
+	local size_before = stack_size(to_slot)
 		
-		amount = min(max_stack(from_slot) - stack_size(to_slot), amount)
-		
-		if stack_size(to_slot) == 0 then
-			state.processing = 4
-		else
-			state.processing = 3
-		end
-		if CursorHasItem() then
-			state.processing = state.processing + 1
-			ClearCursor()
-		end
-
-		SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
-		PickupContainerItem(to_slot.bag, to_slot.bag_slot)
-	end
+	amount = min(max_stack(from_slot) - stack_size(to_slot), amount)
+	
+	ClearCursor()
+	SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
+	PickupContainerItem(to_slot.bag, to_slot.bag_slot)
+	
+	return controller().wait(function() return stack_size(to_slot) == size_before + amount end, k)
 end
 
 function item_name(slot)
@@ -107,40 +105,45 @@ function item_charges(slot)
 	return Aux.info.container_item(slot.bag, slot.bag_slot).charges
 end
 
-function Aux.stack.onupdate()
-	if state and state.processing <= 0 and GetTime() - last_move > DELAY then
-		local empty_slot = find_empty_slot()
+function process()
 
-		if empty_slot and stack_size(state.target_slot) > state.target_size then
-			move_item(
+	if stack_size(state.target_slot) > state.target_size then
+		local empty_slot = find_empty_slot()
+		
+		if empty_slot then
+			return move_item(
 				state.target_slot,
 				empty_slot,
-				stack_size(state.target_slot) - state.target_size
-			)
-			return
+				stack_size(state.target_slot) - state.target_size,
+				function()
+					return process()
+			end)
 		else
 			local next_slot = state.other_slots()
 			if next_slot then
-				if stack_size(state.target_slot) < state.target_size then
-					move_item(
-						next_slot,
-						state.target_slot,
-						state.target_size - stack_size(state.target_slot)
-					)
-					return
-				elseif stack_size(state.target_slot) > state.target_size then
-					move_item(
-						state.target_slot,
-						next_slot,
-						stack_size(state.target_slot) - state.target_size
-					)
-					return
-				end
+				return move_item(
+					state.target_slot,
+					next_slot,
+					stack_size(state.target_slot) - state.target_size,
+					function()
+						return process()
+				end)
 			end
 		end
-		
-		Aux.stack.stop()
+	elseif stack_size(state.target_slot) < state.target_size then
+		local next_slot = state.other_slots()
+		if next_slot then
+			return move_item(
+				next_slot,
+				state.target_slot,
+				state.target_size - stack_size(state.target_slot),
+				function()
+					return process()
+			end)
+		end
 	end
+		
+	return Aux.stack.stop()
 end
 
 function max_stack(slot)
@@ -148,13 +151,8 @@ function max_stack(slot)
 	return item_stack_count
 end
 
-function Aux.stack.item_lock_changed()
-	if state then
-		state.processing = state.processing - 1
-	end
-end
-
 function Aux.stack.stop()
+	wait_for_update(function()
 	if state then
 		local slot
 		if state.target_slot and (stack_size(state.target_slot) == state.target_size or item_charges(state.target_slot) == state.target_size) then
@@ -168,9 +166,12 @@ function Aux.stack.stop()
 			callback(slot)
 		end
 	end
+	end)
 end
 
 function Aux.stack.start(name, size, callback)
+	wait_for_update(function()
+	
 	Aux.stack.stop()
 	
 	local slots = item_slots(name)
@@ -181,7 +182,6 @@ function Aux.stack.start(name, size, callback)
 		target_slot = target_slot,
 		other_slots = slots,
 		callback = callback,
-		processing = 0,
 	}
 	
 	if not target_slot then
@@ -190,4 +190,7 @@ function Aux.stack.start(name, size, callback)
 		state.target_slot = find_charges_item_slot(name, size)
 		Aux.stack.stop()
 	end
+	
+	process()
+	end)
 end

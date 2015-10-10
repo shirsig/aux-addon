@@ -1,17 +1,3 @@
 <Ui xsi:schemaLocation='http://www.blizzard.com/wow/ui/'>
 	<Script file='stack.lua'/> 
-  
-	<Frame>
-      <Scripts> 
-			<OnLoad>
-				this:RegisterEvent('ITEM_LOCK_CHANGED')
-			</OnLoad>
-			<OnEvent> 
-				Aux.stack.item_lock_changed()
-			</OnEvent>
-			<OnUpdate>
-				Aux.stack.onupdate()
-			</OnUpdate>
-		</Scripts> 
-	</Frame>
 </Ui>
