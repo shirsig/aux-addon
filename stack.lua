@@ -10,7 +10,7 @@ end)()
 
 local state
 
-local inventory, item_slots, find_empty_slot, locked, same_slot, move_item, item_name, stack_size, stop
+local inventory, item_slots, find_empty_slot, locked, same_slot, move_item, item_name, stack_size, stop, process
 
 function inventory()
 	local inventory = {}

@@ -1,11 +1,3 @@
 <Ui xsi:schemaLocation='http://www.blizzard.com/wow/ui/'>
 	<Script file='post.lua'/> 
-  
-	<Frame>
-      <Scripts> 
-			<OnUpdate>
-				Aux.post.onupdate()
-			</OnUpdate>
-		</Scripts> 
-	</Frame>
 </Ui>
