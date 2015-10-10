@@ -10,11 +10,7 @@ end)()
 
 local state
 
-local inventory, item_slots, find_empty_slot, locked, same_slot, move_item, item_name, stack_size, wait_for_update
-
-function wait_for_update(k)
-	return controller().wait(function() return true end, k)
-end
+local inventory, item_slots, find_empty_slot, locked, same_slot, move_item, item_name, stack_size, stop
 
 function inventory()
 	local inventory = {}
@@ -143,7 +139,7 @@ function process()
 		end
 	end
 		
-	return Aux.stack.stop()
+	return stop()
 end
 
 function max_stack(slot)
@@ -151,8 +147,18 @@ function max_stack(slot)
 	return item_stack_count
 end
 
-function Aux.stack.stop()
-	wait_for_update(function()
+function Aux.stack.stop(k)
+	Aux.control.on_next_update(function()
+		stop()
+		
+		if k then
+			return k()
+		end
+	end)
+end
+
+function stop()
+	controller().reset()
 	if state then
 		local slot
 		if state.target_slot and (stack_size(state.target_slot) == state.target_size or item_charges(state.target_slot) == state.target_size) then
@@ -166,31 +172,28 @@ function Aux.stack.stop()
 			callback(slot)
 		end
 	end
-	end)
 end
 
 function Aux.stack.start(name, size, callback)
-	wait_for_update(function()
-	
-	Aux.stack.stop()
-	
-	local slots = item_slots(name)
-	local target_slot = slots()
-	
-	state = {
-		target_size = size,
-		target_slot = target_slot,
-		other_slots = slots,
-		callback = callback,
-	}
-	
-	if not target_slot then
-		Aux.stack.stop()
-	elseif item_charges(target_slot) then
-		state.target_slot = find_charges_item_slot(name, size)
-		Aux.stack.stop()
-	end
-	
-	process()
+	Aux.control.on_next_update(function()
+		stop()	
+		local slots = item_slots(name)
+		local target_slot = slots()
+		
+		state = {
+			target_size = size,
+			target_slot = target_slot,
+			other_slots = slots,
+			callback = callback,
+		}
+		
+		if not target_slot then
+			stop()
+		elseif item_charges(target_slot) then
+			state.target_slot = find_charges_item_slot(name, size)
+			stop()
+		end
+		
+		process()
 	end)
 end

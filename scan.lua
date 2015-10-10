@@ -12,37 +12,36 @@ end)()
 
 local state, abort, new_job
 
--- forward declaration of local functions
-local wait_for_callback, wait_for_results, wait_for_update
-local scan, scan_auctions, scan_auctions_helper, submit_query
-
-
+local scan, scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, abort
 
 function Aux.scan.start(job)
-	Aux.scan.abort(function() --;
-	wait_for_update(function() --;
+	Aux.control.on_next_update(function()
+		abort()
 		state = {
 			job = job,
 			page = job.page
 		}
 		return scan()
-	end)end)
+	end)
 end
 
 function Aux.scan.abort(k)
-	wait_for_update(function() --;
+	Aux.control.on_next_update(function()
+		abort()
+		
+		if k then
+			return k()
+		end
+	end)
+end
+
+function abort()
+	controller().reset()
 	if state and state.job and state.job.on_abort then
 		state.job.on_abort()
 	end
 	state = nil
-	
-	if k then
-		return k()
-	end
-	end)
 end
-
-
 
 function wait_for_results(k)
 	local ok
@@ -51,10 +50,6 @@ function wait_for_results(k)
 	end)
 
 	return controller().wait(function() return ok end, k)
-end
-
-function wait_for_update(k)
-	return controller().wait(function() return true end, k)
 end
 
 function wait_for_callback(f, args, k)
@@ -70,15 +65,13 @@ function wait_for_callback(f, args, k)
 	return controller().wait(function() return ok end, k)
 end
 
-
-
 function scan()
 	
-	submit_query(function() --;
+	submit_query(function()
 		
 	local count, total_count = GetNumAuctionItems("list")
 	
-	scan_auctions(count, function() --;
+	scan_auctions(count, function()
 	
 	state.total_pages = math.ceil(total_count / AUCTIONS_PER_PAGE)
 	
@@ -101,7 +94,7 @@ function scan_auctions(count, k)
 end
 
 function scan_auctions_helper(i, n, k)
-	wait_for_callback(state.job.on_read_auction, {i}, function() --;
+	wait_for_callback(state.job.on_read_auction, {i}, function()
 	
 	if i >= n then
 		return k()
@@ -114,8 +107,8 @@ end
 
 function submit_query(k)
 	if state.page then
-		wait_for_callback(state.job.on_start_page, {state.page, state.total_pages}, function() --;
-		controller().wait(CanSendAuctionQuery, function() --;
+		wait_for_callback(state.job.on_start_page, {state.page, state.total_pages}, function()
+		controller().wait(CanSendAuctionQuery, function()
 		wait_for_results(k)
 		QueryAuctionItems(
 			state.job.query.name,

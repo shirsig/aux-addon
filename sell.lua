@@ -295,25 +295,27 @@ function Aux.sell.set_auction(bag, slot)
 
 		if auction_sell_item then
 		
-			Aux.scan.abort()
+			Aux.scan.abort(function()
 		
-			current_auction = {
-				name = container_item.name,
-				texture = container_item.texture,
-				stackSize = container_item.charges or container_item.count,
-				stackCount = 1,
-				class = container_item.type,
-				subclass = container_item.subtype,
-				base_deposit = auction_sell_item.base_deposit,
-				has_charges = container_item.charges ~= nil,
-			}
-			
-			if not auxSellEntries[current_auction.name] then
-				refresh_entries()
-			end
+				current_auction = {
+					name = container_item.name,
+					texture = container_item.texture,
+					stackSize = container_item.charges or container_item.count,
+					stackCount = 1,
+					class = container_item.type,
+					subclass = container_item.subtype,
+					base_deposit = auction_sell_item.base_deposit,
+					has_charges = container_item.charges ~= nil,
+				}
 				
-			select_entry()
-			update_recommendation()
+				if not auxSellEntries[current_auction.name] then
+					refresh_entries()
+				end
+					
+				select_entry()
+				update_recommendation()
+				
+			end)
 		end
 	end
 end
@@ -462,10 +464,11 @@ end
 -----------------------------------------
 
 function AuxSellRefreshButton_OnClick()
-	Aux.scan.abort()
-	refresh_entries()
-	select_entry()
-	update_recommendation()
+	Aux.scan.abort(function()
+		refresh_entries()
+		select_entry()
+		update_recommendation()
+	end)
 end
 
 -----------------------------------------

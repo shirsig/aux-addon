@@ -84,12 +84,22 @@ function Aux.buy.SearchButton_onclick()
 		end,
 		on_complete = function()
 			entries = entries or {}
+			if getn(entries) == 0 then
+				set_message("No auctions were found")
+			else
+				AuxBuyMessage:Hide()
+			end
 			AuxBuyStopButton:Hide()
 			AuxBuySearchButton:Show()
 			refresh = true
 		end,
 		on_abort = function()
 			entries = entries or {}
+			if getn(entries) == 0 then
+				set_message("No auctions were found")
+			else
+				AuxBuyMessage:Hide()
+			end
 			AuxBuyStopButton:Hide()
 			AuxBuySearchButton:Show()
 			refresh = true
@@ -303,16 +313,6 @@ end
 
 function Aux_Buy_ScrollbarUpdate()
 	Aux.list.populate(AuxBuyList, entries or {})
-	
-	-- if entries then
-		-- table.sort(entries, function(a,b) return a.buyout_price_per_unit < b.buyout_price_per_unit end)
-	-- end
-	
-	if entries and getn(entries) == 0 then
-		set_message("No auctions were found")
-	else
-		AuxBuyMessage:Hide()
-	end
 end
 
 -----------------------------------------

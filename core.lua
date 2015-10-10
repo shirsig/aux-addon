@@ -206,7 +206,7 @@ function Aux_OnAuctionHouseClosed()
 	AuxOptionsFrame:Hide()
 	AuxAboutFrame:Hide()
 	AuxSellPanel:Hide()
-    AuxBuyPanel:Hide()
+	AuxBuyPanel:Hide()
 	
 end
 
@@ -224,7 +224,7 @@ function Aux_AuctionFrameTab_OnClick(index)
 	Aux.scan.abort()
 
 	AuxSellPanel:Hide()
-    AuxBuyPanel:Hide()
+	AuxBuyPanel:Hide()
 
 	if index == 2 then		
 		Aux_ShowElems(Aux.tabs.buy.hiddenElements)
@@ -245,8 +245,8 @@ function Aux_AuctionFrameTab_OnClick(index)
 		AuxSellPanel:Show()
 		AuctionFrame:EnableMouse(false)
 		
-    elseif index == Aux.tabs.buy.index then
-        AuctionFrameTab_OnClick(2)
+	elseif index == Aux.tabs.buy.index then
+		AuctionFrameTab_OnClick(2)
 		
 		PanelTemplates_SetTab(AuctionFrame, Aux.tabs.buy.index)
 		
@@ -256,8 +256,8 @@ function Aux_AuctionFrameTab_OnClick(index)
 		AuctionFrame:EnableMouse(false)
 		
 		Aux_Buy_ScrollbarUpdate()
-    else
-        Aux.orig.AuctionFrameTab_OnClick(index)
+	else
+		Aux.orig.AuctionFrameTab_OnClick(index)
 		lastItemPosted = nil
 	end
 end
