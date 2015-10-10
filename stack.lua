@@ -176,7 +176,8 @@ end
 
 function Aux.stack.start(name, size, callback)
 	Aux.control.on_next_update(function()
-		stop()	
+		stop()
+		
 		local slots = item_slots(name)
 		local target_slot = slots()
 		
@@ -188,12 +189,12 @@ function Aux.stack.start(name, size, callback)
 		}
 		
 		if not target_slot then
-			stop()
+			return stop()
 		elseif item_charges(target_slot) then
 			state.target_slot = find_charges_item_slot(name, size)
-			stop()
+			return stop()
+		else
+			return process()
 		end
-		
-		process()
 	end)
 end

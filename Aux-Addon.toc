@@ -5,20 +5,18 @@
 ## SavedVariables: auxSellEntries
 core.xml
 control.xml
+util.lua
 
 sell.xml
 buy.xml
 
-scan.xml
-stack.xml
-post.xml
+scan.lua
+stack.lua
+post.lua
 info.xml
-util.lua
+completion.xml
+list.xml
 
 options.xml
 about.xml
-
-list.xml
-
-completion.xml
 

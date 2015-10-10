@@ -32,14 +32,14 @@ function process()
 		if stack_slot then
 			post_auction(stack_slot, function()
 				state.posted = state.posted + 1
-				process()
+				return process()
 			end)
 		else
-			stop()
+			return stop()
 		end
 		end)
 	else
-		stop()
+		return stop()
 	end
 end
 
@@ -97,6 +97,6 @@ function Aux.post.start(name, stack_size, duration, bid, buyout, count, callback
 			callback = callback,
 		}
 		
-		process()
+		return process()
 	end)
 end
