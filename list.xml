@@ -3,38 +3,78 @@
 	<Script file="list.lua"/>
 
 	<Button name="ListItemTemplate" hidden="false" virtual="true">
-		<Size><AbsDimension x="776" y="16"/></Size>
+		<Size><AbsDimension x="615" y="16"/></Size>
 		<Layers>
 			<Layer level="BORDER">
-				<FontString name="$parentColumn1" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
+				<FontString name="$parentColumn1" inherits="GameFontHighlight" wraponspaces="false" justifyH="RIGHT">
 					<Size><AbsDimension x="100" y="16"/></Size>
-					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-2" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 				<FontString name="$parentColumn2" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
 					<Size><AbsDimension x="100" y="16"/></Size>
-					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn1" relativePoint="TOPRIGHT"><Offset><AbsDimension x="20" y="0"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn1" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
-				<FontString name="$parentColumn3" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
+				<FontString name="$parentColumn3" inherits="GameFontHighlight" wraponspaces="false" justifyH="CENTER">
 					<Size><AbsDimension x="100" y="16"/></Size>
-					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn2" relativePoint="TOPRIGHT"><Offset><AbsDimension x="20" y="0"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn2" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 				<FontString name="$parentColumn4" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
 					<Size><AbsDimension x="100" y="16"/></Size>
-					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT"><Offset><AbsDimension x="20" y="0"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 				<FontString name="$parentColumn5" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
 					<Size><AbsDimension x="100" y="16"/></Size>
-					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT"><Offset><AbsDimension x="20" y="0"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 				<FontString name="$parentColumn6" inherits="GameFontHighlight" wraponspaces="false" justifyH="RIGHT">
 					<Size><AbsDimension x="100" y="16"/></Size>
-					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT"><Offset><AbsDimension x="20" y="0"/></Offset></Anchor></Anchors>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
 		<Frames>
+			<Button name="$parentColumn2Item">
+				<Size><AbsDimension x="16" y="16"/></Size>
+				<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn2"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+				<Layers>
+					<Layer level="BORDER">
+						<Texture name="$parentIconTexture"/>
+						<FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT" hidden="true">
+							<Anchors>
+								<Anchor point="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="-5" y="2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+						<FontString name="$parentStock" inherits="NumberFontNormalYellow" justifyH="LEFT" hidden="true">
+							<Anchors>
+								<Anchor point="TOPLEFT">
+									<Offset>
+										<AbsDimension x="0" y="-2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+						</FontString>
+					</Layer>
+				</Layers>
+				<PushedTexture file="Interface\Buttons\UI-Quickslot-Depress"/>
+				<HighlightTexture file="Interface\Buttons\ButtonHilight-Square" alphaMode="ADD"/>
+				<Scripts>
+					<OnEnter>
+						Aux.buy.icon_on_enter()
+					</OnEnter>
+					<OnLeave>
+						GameTooltip:Hide()
+					</OnLeave>
+					<OnClick>
+						AuxBuyEntry_OnClick(this:GetParent())
+					</OnClick>
+				</Scripts>
+			</Button>
 			<Frame name="$parentColumn1MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn1" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn1" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
 						SmallMoneyFrame_OnLoad()
@@ -43,7 +83,7 @@
 				</Scripts>
 			</Frame>
 			<Frame name="$parentColumn2MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn2" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn2" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
 						SmallMoneyFrame_OnLoad()
@@ -52,7 +92,7 @@
 				</Scripts>
 			</Frame>
 			<Frame name="$parentColumn3MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
 						SmallMoneyFrame_OnLoad()
@@ -61,7 +101,7 @@
 				</Scripts>
 			</Frame>
 			<Frame name="$parentColumn4MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
 						SmallMoneyFrame_OnLoad()
@@ -70,7 +110,7 @@
 				</Scripts>
 			</Frame>
 			<Frame name="$parentColumn5MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
 						SmallMoneyFrame_OnLoad()
@@ -79,7 +119,7 @@
 				</Scripts>
 			</Frame>
 			<Frame name="$parentColumn6MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn6" relativePoint="TOPRIGHT"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn6" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
 						SmallMoneyFrame_OnLoad()
@@ -318,7 +358,7 @@
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="2" y="-28"/>
+							<AbsDimension x="0" y="-28"/>
 						</Offset>
 					</Anchor>
 					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">

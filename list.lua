@@ -2,7 +2,7 @@ Aux.list = {}
 
 local MAX_COLUMNS = 6
 
-local NAME, OWNER, BID, BID_UNIT, BUYOUT, BUYOUT_UNIT, QUANTITY = 1, 2, 3, 4, 5, 6, 7, 8
+local NAME, OWNER, BID, BID_UNIT, BUYOUT, BUYOUT_UNIT, QUANTITY, TIME_LEFT = 1, 2, 3, 4, 5, 6, 7, 8
 
 MoneyTypeInfo["AUX_LIST"] = {
 	UpdateFunc = function()
@@ -15,10 +15,11 @@ MoneyTypeInfo["AUX_LIST"] = {
 
 local logical_columns = {
 	{
-		type = 'STRING',
-		title = 'Name',
-		comparator = function(row1, row2) return Aux.util.compare(row1.name, row2.name, Aux.util.GT) end,
-		getter = function(row) return row.name end,
+		type = 'ITEM',
+		title = 'Auction Item',
+		texture = function(row) return row.texture end,
+		comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
+		getter = function(row) return '      ['..row.tooltip[1][1].text..']' end,
 		color = function(row) return ITEM_QUALITY_COLORS[row.quality] end,
 	},
 	{
@@ -53,37 +54,60 @@ local logical_columns = {
 	},
 	{
 		type = 'NUMBER',
-		title = 'Quantity',
+		title = '#',
 		comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
 		getter = function(row) return row.stack_size end,
 	},
 	{
 		type = 'STRING',
-		title = 'Time Left',
+		title = 'Left',
 		comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
 		getter = function(row)
 			if row.duration == 1 then
-				return 'Short'
+				return '30m'
 			elseif row.duration == 2 then
-				return 'Medium'			
+				return '2h'			
 			elseif row.duration == 3 then
-				return 'Long'
+				return '8h'
 			elseif row.duration == 4 then
-				return 'Very Long'
+				return '12h'
 			end
 		end,
 	},
 }
 
 local physical_columns = {
-	{ logical_column = logical_columns[NAME], width = 156 },
-	{ logical_column = logical_columns[OWNER], width = 156 },
-	{ logical_column = logical_columns[BUYOUT_UNIT], width = 156 },
-	{ logical_column = logical_columns[QUANTITY], width = 156 },
-	{ logical_column = logical_columns[BUYOUT], width = 156 },
+	{
+		logical_columns = { logical_columns[QUANTITY] },
+		logical_column = logical_columns[QUANTITY],
+		width = 30
+	},
+	{
+		logical_columns = { logical_columns[NAME] },
+		logical_column = logical_columns[NAME],
+		width = 180
+	},
+	{
+		logical_columns = { logical_columns[TIME_LEFT] },
+		logical_column = logical_columns[TIME_LEFT],
+		width = 40
+	},
+	{
+		logical_columns = { logical_columns[OWNER] },
+		logical_column = logical_columns[OWNER],
+		width = 90
+	},
+	{
+		logical_columns = { logical_columns[BID_UNIT], logical_columns[BUYOUT_UNIT] },
+		logical_column = logical_columns[BUYOUT_UNIT],
+		width = 140
+	},
+	{
+		logical_columns = { logical_columns[BID], logical_columns[BUYOUT] },
+		logical_column = logical_columns[BUYOUT],
+		width = 140
+	},
 }
-
-
 
 function Aux.list.on_load()
 	Aux.list.initialize(this, physical_columns, logical_columns)
@@ -120,11 +144,12 @@ function Aux.list.initialize(frame, physical_columns, logical_columns)
 
 	frame.sort_order = {}
 	for i, logical_column in logical_columns do
-		if i ~= BUYOUT_UNIT then 
+		if i ~= BUYOUT_UNIT and i ~= NAME then 
 			tinsert(frame.sort_order, { logical_column = logical_column, sort_ascending = true })
 		end
 	end
 	tinsert(frame.sort_order, 1, { logical_column = logical_columns[BUYOUT_UNIT], sort_ascending = true })
+	tinsert(frame.sort_order, 1, { logical_column = logical_columns[NAME], sort_ascending = true })
 	
 	for i = 1, MAX_COLUMNS do
 		local button = getglobal(frame:GetName().."Column"..i.."Sort")
@@ -136,7 +161,11 @@ function Aux.list.initialize(frame, physical_columns, logical_columns)
 			getglobal(button:GetName().."Arrow"):Hide()
 			getglobal(button:GetName().."Text"):SetText(logical_column.title)
 			button:Show()
-			dropdown:Show()
+			if (getn(physical_column.logical_columns) > 1) then
+				dropdown:Show();
+			else
+				dropdown:Hide();
+			end
 
 			Aux.list.set_column_width(frame, i, physical_column.width);
 		else
@@ -160,7 +189,7 @@ function Aux.list.set_column_width(frame, column_index, width)
 	for line = 1, frame.lines do
 		local text = getglobal(frame:GetName().."Item"..line.."Column"..column_index)
 		if text then
-			text:SetWidth(width - 20)
+			text:SetWidth(width - 3)
 		end
 	end
 end
@@ -264,20 +293,29 @@ function Aux.list.scroll_frame_update(frame)
 		if row_index <= getn(content) then		
 			for column_index = 1, MAX_COLUMNS do
 				
+				local item = getglobal(parent:GetName().."Item"..line.."Column"..column_index.."Item")
+				if item then
+					item:Hide()
+				end
+
 				local text = getglobal(parent:GetName().."Item"..line.."Column"..column_index)
 				-- text:Hide() TODO
 				text:SetText()
 
 				local moneyFrame = getglobal(parent:GetName().."Item"..line.."Column"..column_index.."MoneyFrame")
 				moneyFrame:Hide()
-
+				
 				if column_index <= table.getn(parent.physical_columns) then
 					local physical_column = parent.physical_columns[column_index]
 					local logical_column = physical_column.logical_column
 					local value = logical_column.getter(content[row_index])
 					
 					if value then
-						if text and (logical_column.type == "DATE" or logical_column.type == "NUMBER" or logical_column.type == "STRING") then
+						if item and logical_column.type == "ITEM" then
+							item:Show()
+							getglobal(item:GetName() .. 'IconTexture'):SetTexture(logical_column.texture(content[row_index]))
+						end
+						if text and (logical_column.type == "DATE" or logical_column.type == "NUMBER" or logical_column.type == "STRING" or logical_column.type == "ITEM") then
 							text:SetText(value)
 							if logical_column.color then
 								local color = logical_column.color(content[row_index])
@@ -290,11 +328,11 @@ function Aux.list.scroll_frame_update(frame)
 							else
 								text:SetAlpha(1.0)
 							end
-							if (logical_column.type == "NUMBER") then
-								text:SetJustifyH("RIGHT")
-							else
-								text:SetJustifyH("LEFT")
-							end
+							-- if (logical_column.type == "NUMBER") then
+								-- text:SetJustifyH("RIGHT")
+							-- else
+								-- text:SetJustifyH("LEFT")
+							-- end
 							text:Show()
 						elseif moneyFrame and logical_column.type == "MONEY" then
 							if value >= 0 then
@@ -341,13 +379,17 @@ end
 function Aux.list.dropdown_initialize()
 	local dropdown = this:GetParent()
 	local frame = dropdown:GetParent()
-
-	for _, logical_column in pairs(frame.logical_columns) do
-		UIDropDownMenu_AddButton({
-			text = logical_column.title,
-			owner = dropdown,
-			func = Aux.list.dropdown_item_onclick
-		})
+	
+	if frame.physical_columns then
+		local physical_column_index = dropdown:GetID()
+		local physical_column = frame.physical_columns[physical_column_index]
+		for _, logical_column in pairs(physical_column.logical_columns) do
+			UIDropDownMenu_AddButton({
+				text = logical_column.title,
+				owner = dropdown,
+				func = Aux.list.dropdown_item_onclick,
+			})
+		end
 	end
 end
 
@@ -358,9 +400,9 @@ function Aux.list.dropdown_item_onclick()
 	local physical_column_index = this.owner:GetID()
 	local dropdown = this.owner
 	local frame = dropdown:GetParent()
-	if (frame.physical_columns[physical_column_index].logical_column ~= frame.logical_columns[logical_column_index]) then
+	if frame.physical_columns[physical_column_index].logical_column ~= frame.logical_columns[logical_column_index] then
 
-		frame.physical_columns[physical_column_index].logical_column = frame.logical_columns[logical_column_index]
+		frame.physical_columns[physical_column_index].logical_column = frame.physical_columns[physical_column_index].logical_columns[logical_column_index]
 		getglobal(frame:GetName().."Column"..physical_column_index.."SortText"):SetText(frame.physical_columns[physical_column_index].logical_column.title)
 
 		Aux.util.merge_sort(frame.content, Aux.list.row_comparator(frame))

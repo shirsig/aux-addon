@@ -17,11 +17,6 @@
 			<OnLoad>
 				this:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 			</OnLoad>
-			<OnEnter>
-				scrollFrame = getglobal(this:GetParent():GetName().."ScrollFrame")
-				index = this:GetID() + FauxScrollFrame_GetOffset(scrollFrame)
-				AuxBuyEntry_OnEnter(index)
-			</OnEnter>
 			<OnLeave>
 				GameTooltip:Hide()
 				ResetCursor()
@@ -65,8 +60,8 @@
 		</Layers>
 		<Frames>
 			<Frame name="AuxBuyList" inherits="ListTemplate">
-				<Size><AbsDimension x="781" y="334"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="18" y="-74"/></Offset></Anchor></Anchors>
+				<Size><AbsDimension x="615" y="334"/></Size>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="187" y="-77"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
 						Aux.list.on_load(this)
@@ -212,10 +207,10 @@
 			
 			<Frame name="AuxBuyFilters">
 				<Size><AbsDimension x="1" y="1"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="80" y="-46"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="28" y="-112"/></Offset></Anchor></Anchors>
 				<Frames>
 					<EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="InputBoxTemplate">
-						<Size><AbsDimension x="180" y="22"/></Size>
+						<Size><AbsDimension x="120" y="22"/></Size>
 						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
@@ -250,7 +245,7 @@
 					
 					<CheckButton name="AuxBuyExactCheckButton" inherits="UICheckButtonTemplate" checked="true">
 						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="200" y="0" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="123" y="0" /></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Exact">
@@ -267,7 +262,7 @@
 					</CheckButton>
 												
 					<Frame name="AuxBuyCategoryDropDown" inherits="UIDropDownMenuTemplate">
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="235" y="3" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-23" y="-30" /></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Category">
@@ -284,7 +279,7 @@
 						<Scripts>
 							<OnLoad>
 								UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
-								UIDropDownMenu_SetWidth(200)
+								UIDropDownMenu_SetWidth(140)
 							</OnLoad>
 							<OnShow>
 								UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
@@ -294,7 +289,7 @@
 					
 					<CheckButton name="AuxBuyUsableCheckButton" inherits="UICheckButtonTemplate">
 						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="500" y="0" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-65" /></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Usable">
@@ -311,8 +306,8 @@
 					</CheckButton>					
 					
 					<EditBox name="AuxBuyTooltipInputBox" autoFocus="false" inherits="InputBoxTemplate">
-						<Size><AbsDimension x="145" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="557" y="0"/></Offset></Anchor></Anchors>
+						<Size><AbsDimension x="110" y="22"/></Size>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-94"/></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Tooltip">
@@ -334,7 +329,6 @@
 					</EditBox>
 					
 					<Frame name="AuxBuyTooltipDropDown" inherits="UIDropDownMenuTemplate" hidden="true">
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="555" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnLoad>
 								UIDropDownMenu_Initialize(this, AuxBuyTooltipDropDown_Initialize)
@@ -351,59 +345,42 @@
 							</OnClick>
 						</Scripts>
 						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
-							<Size>
-								<AbsDimension x="24" y="24"/>
-							</Size>
-							<Anchors>
-								<Anchor point="RIGHT"/>
-							</Anchors>
+							<Size><AbsDimension x="24" y="24"/></Size>
+							<Anchors><Anchor point="RIGHT"/></Anchors>
 						</NormalTexture>
 						<PushedTexture name="$parentPushedTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down">
-							<Size>
-								<AbsDimension x="24" y="24"/>
-							</Size>
-							<Anchors>
-								<Anchor point="RIGHT"/>
-							</Anchors>
+							<Size><AbsDimension x="24" y="24"/></Size>
+							<Anchors><Anchor point="RIGHT"/></Anchors>
 						</PushedTexture>
 						<DisabledTexture name="$parentDisabledTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled">
-							<Size>
-								<AbsDimension x="24" y="24"/>
-							</Size>
-							<Anchors>
-								<Anchor point="RIGHT"/>
-							</Anchors>
+							<Size><AbsDimension x="24" y="24"/></Size>
+							<Anchors><Anchor point="RIGHT"/></Anchors>
 						</DisabledTexture>
 						<HighlightTexture name="$parentHighlightTexture" file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
-							<Size>
-								<AbsDimension x="24" y="24"/>
-							</Size>
-							<Anchors>
-								<Anchor point="RIGHT"/>
-							</Anchors>
+							<Size><AbsDimension x="24" y="24"/></Size>
+							<Anchors><Anchor point="RIGHT"/></Anchors>
 						</HighlightTexture>
 					</Button>					
 					<Button name="AuxBuyTooltipButton" inherits="UIPanelButtonTemplate" text="+">
 						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="720" y="0"/></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="127" y="-94"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>
 								AuxBuyTooltipButton_OnClick(this)
 							</OnClick>
 						</Scripts>
 					</Button>
-					
-			<!-- 		<Frame name="AuxBuySlotDropDown" inherits="UIDropDownMenuTemplate">
-						<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="500" y="1" /></Offset></Anchor></Anchors>
+					<Frame name="AuxBuyQualityDropDown" inherits="UIDropDownMenuTemplate">
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-124" /></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnLoad>
-								UIDropDownMenu_Initialize(this, AuxBuySlotDropDown_Initialize)
+								UIDropDownMenu_Initialize(this, AuxBuyQualityDropDown_Initialize)
 							</OnLoad>
 							<OnShow>
-								UIDropDownMenu_Initialize(this, AuxBuySlotDropDown_Initialize)
+								UIDropDownMenu_Initialize(this, AuxBuyQualityDropDown_Initialize)
 							</OnShow>
 						</Scripts>
-					</Frame> -->
+					</Frame>
 				</Frames>
 			</Frame>		
             

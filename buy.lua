@@ -154,6 +154,9 @@ end
 -----------------------------------------
 
 function AuxBuyEntry_OnClick(entry_index)
+	local scroll_frame = getglobal(this:GetParent():GetName().."ScrollFrame")
+	local entry_index = this:GetID() + FauxScrollFrame_GetOffset(scroll_frame)
+	
 	local express_mode = IsAltKeyDown()
 	local buyout_mode = arg1 == "LeftButton"
 	
@@ -261,8 +264,10 @@ function AuxBuyEntry_OnClick(entry_index)
 	}
 end
 
-function AuxBuyEntry_OnEnter(entry_index)
-	local entry = entries[entry_index]
+function Aux.buy.icon_on_enter()
+	local scroll_frame = getglobal(this:GetParent():GetParent():GetName().."ScrollFrame")
+	local index = this:GetParent():GetID() + FauxScrollFrame_GetOffset(scroll_frame)
+	local entry = entries[index]
 	
 	Aux.info.set_game_tooltip(this, entry.tooltip)
 	
@@ -279,11 +284,12 @@ function process_auction(auction_item, current_page)
 	local stack_size = auction_item.charges or auction_item.count
 	local bid = auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid + auction_item.min_increment
 	local buyout_price = auction_item.buyout_price > 0 and auction_item.buyout_price or nil
-	local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price / stack_size)
+	local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price/stack_size)
 	
 	if auction_item.owner ~= UnitName("player") then
 		tinsert(entries, {
 				name = auction_item.name,
+				texture = auction_item.texture,
 				tooltip = auction_item.tooltip,
 				stack_size = stack_size,
 				buyout_price = buyout_price,
@@ -293,7 +299,7 @@ function process_auction(auction_item, current_page)
 				itemstring = auction_item.itemstring,
 				page = current_page,
 				bid = bid,
-				bid_per_unit = Aux_Round(bid / stack_size),
+				bid_per_unit = Aux_Round(bid/stack_size),
 				owner = auction_item.owner,
 				duration = auction_item.duration,
 		})
@@ -335,7 +341,7 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 	if level == 1 then
 		local value = {}
 		UIDropDownMenu_AddButton({
-			text= 'All',
+			text = ALL,
 			value = value,
 			func = AuxBuyCategoryDropDown_OnClick,
 		}, 1)
@@ -394,25 +400,24 @@ function AuxBuyCategoryDropDown_OnClick()
 	CloseDropDownMenus(1)
 end
 
-function AuxBuySlotDropDown_Initialize()
+function AuxBuyQualityDropDown_Initialize()
 
 	UIDropDownMenu_AddButton{
-		text= 'All',
-		value = value,
-		func = AuxBuySlotDropDown_OnClick('All', value),
+		text = ALL,
+		value = -1,
+		func = AuxBuyQualityDropDown_OnClick,
 	}
-	
-	-- for i, type in pairs({ GetAuctionInvTypes() }) do
-		-- UIDropDownMenu_AddButton{
-			-- text = class,
-			-- value = i,
-			-- func = AuxBuySlotDropDown_OnClick(),
-		-- }
-	-- end
+	for i=0,getn(ITEM_QUALITY_COLORS)-2 do
+		UIDropDownMenu_AddButton{
+			text = getglobal("ITEM_QUALITY"..i.."_DESC"),
+			value = i,
+			func = AuxBuyQualityDropDown_OnClick,
+		}
+	end
 end
 
-function AuxBuySlotDropDown_OnClick()
-	UIDropDownMenu_SetSelectedValue(AuxBuySlotDropDown, this.value)
+function AuxBuyQualityDropDown_OnClick()
+	UIDropDownMenu_SetSelectedValue(AuxBuyQualityDropDown, this.value)
 end
 
 function AuxBuyTooltipButton_OnClick()

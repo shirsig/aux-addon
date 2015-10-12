@@ -73,30 +73,9 @@ function Aux_OnAddonLoaded()
 				AuctionsBidSort,
 				AuctionsCancelAuctionButton
 		}
-        
+		
 		Aux.tabs.buy.hiddenElements = {
 				AuctionFrameBrowse,
-				BidTitle,
-				BidScrollFrame,
-				BidButton1,
-				BidButton2,
-				BidButton3,
-				BidButton4,
-				BidButton5,
-				BidButton6,
-				BidButton7,
-				BidButton8,
-				BidButton9,
-				BidQualitySort,
-				BidLevelSort,
-				BidDurationSort,
-				BidBuyoutSort,
-				BidStatusSort,
-				BidBidSort,
-				BidBidButton,
-				BidBuyoutButton,
-				BidBidPrice,
-				BidBidText
 		}
 
 		Aux.tabs.sell.recommendationElements = {
@@ -246,7 +225,7 @@ function Aux_AuctionFrameTab_OnClick(index)
 		AuctionFrame:EnableMouse(false)
 		
 	elseif index == Aux.tabs.buy.index then
-		AuctionFrameTab_OnClick(2)
+		Aux.orig.AuctionFrameTab_OnClick(1)
 		
 		PanelTemplates_SetTab(AuctionFrame, Aux.tabs.buy.index)
 		
