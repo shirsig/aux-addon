@@ -155,9 +155,7 @@ end
 -----------------------------------------
 
 function AuxBuyEntry_OnClick(entry_index)
-	local scroll_frame = getglobal(this:GetParent():GetName().."ScrollFrame")
-	local entry_index = this:GetID() + FauxScrollFrame_GetOffset(scroll_frame)
-	
+
 	local express_mode = IsAltKeyDown()
 	local buyout_mode = arg1 == "LeftButton"
 	
@@ -287,7 +285,7 @@ function process_auction(auction_item, current_page)
 	local buyout_price = auction_item.buyout_price > 0 and auction_item.buyout_price or nil
 	local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price/stack_size)
 	
-	if auction_item.owner ~= UnitName("player") then
+	if true then
 		tinsert(entries, {
 				name = auction_item.name,
 				level = auction_item.level,
@@ -320,7 +318,7 @@ end
 -----------------------------------------
 
 function Aux_Buy_ScrollbarUpdate()
-	Aux.list.populate(AuxBuyList, entries or {})
+	Aux.list.populate(AuxBuySheet, entries or {})
 end
 
 -----------------------------------------

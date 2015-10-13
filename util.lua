@@ -190,16 +190,24 @@ function Aux.util.index_of(value, array)
 	end
 end
 
-local GOLD = "ffd100"
-local SILVER = "e6e6e6"
-local COPPER = "c8602c"
+local GSC_GOLD = "ffd100"
+local GSC_SILVER = "e6e6e6"
+local GSC_COPPER = "c8602c"
+local GSC_RED = "ff0000"
 
-local GSC_3 = "|cff%s%d|cff000000.|cff%s%02d|cff000000.|cff%s%02d|r"
-local GSC_2 = "|cff%s%d|cff000000.|cff%s%02d|r"
-local GSC_1 = "|cff%s%d|r"
+local GSC_3 = "|cff"..GSC_GOLD.."%d|cff000000.|cff"..GSC_SILVER.."%02d|cff000000.|cff"..GSC_COPPER.."%02d|r"
+local GSC_2 = "|cff"..GSC_SILVER.."%d|cff000000.|cff"..GSC_COPPER.."%02d|r"
+local GSC_1 = "|cff"..GSC_COPPER.."%d|r"
 
-function Aux.util.coins(money)
+local GSC_3N = "|cff"..GSC_RED.."(|cff"..GSC_GOLD.."%d|cff000000.|cff"..GSC_SILVER.."%02d|cff000000.|cff"..GSC_COPPER.."%02d|cff"..GSC_RED..")|r"
+local GSC_2N = "|cff"..GSC_RED.."(|cff"..GSC_SILVER.."%d|cff000000.|cff"..GSC_COPPER.."%02d|cff"..GSC_RED..")|r"
+local GSC_1N = "|cff"..GSC_RED.."(|cff"..GSC_COPPER.."%d|cff"..GSC_RED..")|r"
+
+function Aux.util.money_string(money)
 	money = floor(tonumber(money) or 0)
+	local negative = money < 0
+	money = abs(money)
+
 	local g = floor(money / 10000)
 	money = money - g * 10000
 	local s = floor(money / 100)
@@ -207,10 +215,22 @@ function Aux.util.coins(money)
 	local c = money
 
 	if g > 0 then
-		return string.format(GSC_3, GOLD, g, SILVER, s, COPPER, c)
+		if negative then
+			return format(GSC_3N, g, s, c)
+		else
+			return format(GSC_3, g, s, c)
+		end
 	elseif s > 0 then
-		return string.format(GSC_2, SILVER, s, COPPER, c)
+		if negative then
+			return format(GSC_2N, s, c)
+		else
+			return format(GSC_2, s, c)
+		end
 	else
-		return string.format(GSC_1, COPPER, c)
+		if negative then
+			return format(GSC_1N, c)
+		else
+			return format(GSC_1, c)
+		end
 	end
 end
