@@ -14,11 +14,11 @@
 					<Size><AbsDimension x="100" y="16"/></Size>
 					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn1" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
-				<FontString name="$parentColumn3" inherits="GameFontHighlight" wraponspaces="false" justifyH="CENTER">
+				<FontString name="$parentColumn3" inherits="GameFontHighlight" wraponspaces="false" justifyH="RIGHT">
 					<Size><AbsDimension x="100" y="16"/></Size>
 					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn2" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
-				<FontString name="$parentColumn4" inherits="GameFontHighlight" wraponspaces="false" justifyH="LEFT">
+				<FontString name="$parentColumn4" inherits="GameFontHighlight" wraponspaces="false" justifyH="CENTER">
 					<Size><AbsDimension x="100" y="16"/></Size>
 					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
@@ -29,6 +29,10 @@
 				<FontString name="$parentColumn6" inherits="GameFontHighlight" wraponspaces="false" justifyH="RIGHT">
 					<Size><AbsDimension x="100" y="16"/></Size>
 					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
+				</FontString>
+				<FontString name="$parentColumn7" inherits="GameFontHighlight" wraponspaces="false" justifyH="RIGHT">
+					<Size><AbsDimension x="100" y="16"/></Size>
+					<Anchors><Anchor point="TOPLEFT" relativeTo="$parentColumn6" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
 				</FontString>
 			</Layer>
 		</Layers>
@@ -73,60 +77,6 @@
 					</OnClick>
 				</Scripts>
 			</Button>
-			<Frame name="$parentColumn1MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn1" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnLoad>
-						SmallMoneyFrame_OnLoad()
-						MoneyFrame_SetType("AUX_LIST")
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Frame name="$parentColumn2MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn2" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnLoad>
-						SmallMoneyFrame_OnLoad()
-						MoneyFrame_SetType("AUX_LIST")
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Frame name="$parentColumn3MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn3" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnLoad>
-						SmallMoneyFrame_OnLoad()
-						MoneyFrame_SetType("AUX_LIST")
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Frame name="$parentColumn4MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn4" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnLoad>
-						SmallMoneyFrame_OnLoad()
-						MoneyFrame_SetType("AUX_LIST")
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Frame name="$parentColumn5MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn5" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnLoad>
-						SmallMoneyFrame_OnLoad()
-						MoneyFrame_SetType("AUX_LIST")
-					</OnLoad>
-				</Scripts>
-			</Frame>
-			<Frame name="$parentColumn6MoneyFrame" inherits="SmallMoneyFrameTemplate">
-				<Anchors><Anchor point="TOPRIGHT" relativeTo="$parentColumn6" relativePoint="TOPRIGHT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnLoad>
-						SmallMoneyFrame_OnLoad()
-						MoneyFrame_SetType("AUX_LIST")
-					</OnLoad>
-				</Scripts>
-			</Frame>
 		</Frames>
 	</Button>
 
@@ -343,6 +293,37 @@
 			<Frame name="$parentColumn6DropDown" inherits="UIDropDownMenuTemplate" id="6">
 				<Anchors>
 					<Anchor point="LEFT" relativeTo="$parentColumn6Sort" relativePoint="LEFT">
+						<Offset>
+							<AbsDimension x="-14" y="-3"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnLoad>
+						Aux.list.dropdown_on_load()
+					</OnLoad>
+				</Scripts>
+			</Frame>
+			<Button name="$parentColumn7Sort" inherits="ListSortButtonTemplate">
+				<Size>
+					<AbsDimension x="174" y="24"/>
+				</Size>
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn6Sort" relativePoint="RIGHT">
+						<Offset>
+							<AbsDimension x="-2" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Scripts>
+					<OnClick>
+						Aux.list.sort(this:GetParent(), 6)
+					</OnClick>
+				</Scripts>
+			</Button>
+			<Frame name="$parentColumn7DropDown" inherits="UIDropDownMenuTemplate" id="7">
+				<Anchors>
+					<Anchor point="LEFT" relativeTo="$parentColumn7Sort" relativePoint="LEFT">
 						<Offset>
 							<AbsDimension x="-14" y="-3"/>
 						</Offset>

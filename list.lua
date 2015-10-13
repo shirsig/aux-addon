@@ -1,8 +1,8 @@
 Aux.list = {}
 
-local MAX_COLUMNS = 6
+local MAX_COLUMNS = 7
 
-local NAME, OWNER, BID, BID_UNIT, BUYOUT, BUYOUT_UNIT, QUANTITY, TIME_LEFT = 1, 2, 3, 4, 5, 6, 7, 8
+local NAME, LEVEL, OWNER, BID, BID_UNIT, BUYOUT, BUYOUT_UNIT, QUANTITY, TIME_LEFT = 1, 2, 3, 4, 5, 6, 7, 8, 9
 
 MoneyTypeInfo["AUX_LIST"] = {
 	UpdateFunc = function()
@@ -23,34 +23,40 @@ local logical_columns = {
 		color = function(row) return ITEM_QUALITY_COLORS[row.quality] end,
 	},
 	{
+		type = 'NUMBER',
+		title = 'Lvl',
+		comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
+		getter = function(row) return row.level end,
+	},
+	{
 		type = 'STRING',
 		title = 'Owner',
 		comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
 		getter = function(row) return row.owner end,
 	},
 	{
-		type = 'MONEY',
+		type = 'STRING',
 		title = 'Bid',
 		comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
-		getter = function(row) return row.bid end,
+		getter = function(row) return Aux.util.coins(row.bid) end,
 	},
 	{
-		type = 'MONEY',
+		type = 'STRING',
 		title = 'Bid (Unit)',
 		comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
-		getter = function(row) return row.bid_per_unit end,
+		getter = function(row) return Aux.util.coins(row.bid_per_unit) end,
 	},
 	{
-		type = 'MONEY',
+		type = 'STRING',
 		title = 'Buyout',
 		comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
-		getter = function(row) return row.buyout_price end,
+		getter = function(row) return Aux.util.coins(row.buyout_price) end,
 	},
 	{
-		type = 'MONEY',
+		type = 'STRING',
 		title = 'Buyout (Unit)',
 		comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
-		getter = function(row) return row.buyout_price_per_unit end,
+		getter = function(row) return Aux.util.coins(row.buyout_price_per_unit) end,
 	},
 	{
 		type = 'NUMBER',
@@ -70,7 +76,7 @@ local logical_columns = {
 			elseif row.duration == 3 then
 				return '8h'
 			elseif row.duration == 4 then
-				return '12h'
+				return '24h'
 			end
 		end,
 	},
@@ -88,9 +94,14 @@ local physical_columns = {
 		width = 180
 	},
 	{
+		logical_columns = { logical_columns[LEVEL] },
+		logical_column = logical_columns[LEVEL],
+		width = 40
+	},
+	{
 		logical_columns = { logical_columns[TIME_LEFT] },
 		logical_column = logical_columns[TIME_LEFT],
-		width = 40
+		width = 50
 	},
 	{
 		logical_columns = { logical_columns[OWNER] },
@@ -100,12 +111,12 @@ local physical_columns = {
 	{
 		logical_columns = { logical_columns[BID_UNIT], logical_columns[BUYOUT_UNIT] },
 		logical_column = logical_columns[BUYOUT_UNIT],
-		width = 140
+		width = 100
 	},
 	{
 		logical_columns = { logical_columns[BID], logical_columns[BUYOUT] },
 		logical_column = logical_columns[BUYOUT],
-		width = 140
+		width = 100
 	},
 }
 
@@ -301,9 +312,6 @@ function Aux.list.scroll_frame_update(frame)
 				local text = getglobal(parent:GetName().."Item"..line.."Column"..column_index)
 				-- text:Hide() TODO
 				text:SetText()
-
-				local moneyFrame = getglobal(parent:GetName().."Item"..line.."Column"..column_index.."MoneyFrame")
-				moneyFrame:Hide()
 				
 				if column_index <= table.getn(parent.physical_columns) then
 					local physical_column = parent.physical_columns[column_index]
@@ -334,20 +342,6 @@ function Aux.list.scroll_frame_update(frame)
 								-- text:SetJustifyH("LEFT")
 							-- end
 							text:Show()
-						elseif moneyFrame and logical_column.type == "MONEY" then
-							if value >= 0 then
-								MoneyFrame_Update(moneyFrame:GetName(), value)
-								SetMoneyFrameColor(moneyFrame:GetName(), 255, 255, 255)
-							else
-								MoneyFrame_Update(moneyFrame:GetName(), -value)
-								SetMoneyFrameColor(moneyFrame:GetName(), 255, 0, 0)
-							end
-							if logical_column.alphaFunc then
-								moneyFrame:SetAlpha(logical_column.alphaFunc(content[row_index]))
-							else
-								moneyFrame:SetAlpha(1.0)
-							end
-							moneyFrame:Show()
 						end
 					end
 				end

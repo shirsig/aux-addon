@@ -189,3 +189,28 @@ function Aux.util.index_of(value, array)
 		end
 	end
 end
+
+local GOLD = "ffd100"
+local SILVER = "e6e6e6"
+local COPPER = "c8602c"
+
+local GSC_3 = "|cff%s%d|cff000000.|cff%s%02d|cff000000.|cff%s%02d|r"
+local GSC_2 = "|cff%s%d|cff000000.|cff%s%02d|r"
+local GSC_1 = "|cff%s%d|r"
+
+function Aux.util.coins(money)
+	money = floor(tonumber(money) or 0)
+	local g = floor(money / 10000)
+	money = money - g * 10000
+	local s = floor(money / 100)
+	money = money - s * 100
+	local c = money
+
+	if g > 0 then
+		return string.format(GSC_3, GOLD, g, SILVER, s, COPPER, c)
+	elseif s > 0 then
+		return string.format(GSC_2, SILVER, s, COPPER, c)
+	else
+		return string.format(GSC_1, COPPER, c)
+	end
+end

@@ -61,6 +61,7 @@ function Aux.buy.SearchButton_onclick()
 		slot = category and category.slot,
 		class = category and category.class,	
 		subclass = category and category.subclass,
+		quality = UIDropDownMenu_GetSelectedValue(AuxBuyQualityDropDown),
 		usable = AuxBuyUsableCheckButton:GetChecked()
 	}
 	
@@ -289,6 +290,7 @@ function process_auction(auction_item, current_page)
 	if auction_item.owner ~= UnitName("player") then
 		tinsert(entries, {
 				name = auction_item.name,
+				level = auction_item.level,
 				texture = auction_item.texture,
 				tooltip = auction_item.tooltip,
 				stack_size = stack_size,
