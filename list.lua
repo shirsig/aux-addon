@@ -239,10 +239,24 @@ function Aux.sheet.initialize(frame)
 			title = 'Auction Item',
 			texture = function(row) return row.texture end,
 			comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
-			color = function(row) return ITEM_QUALITY_COLORS[row.quality] end,
-			cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
+			cell_initializer = function(cell)
+				local icon = CreateFrame('Button', nil, cell)
+				icon:SetPoint('LEFT', cell)
+				icon:SetWidth(12)
+				icon:SetHeight(12)
+				local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
+				text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
+				text:SetPoint('TOPRIGHT', cell)
+				text:SetPoint('BOTTOMRIGHT', cell)
+				text:SetJustifyV('TOP')
+				text:SetJustifyH('LEFT')
+				text:SetTextColor(0.8, 0.8, 0.8)
+				cell.text = text
+				cell.icon = icon
+			end,
 			cell_setter = function(cell, datum)
-				cell.text:SetText('      ['..datum.tooltip[1][1].text..']')
+				cell.icon:SetNormalTexture(datum.texture)
+				cell.text:SetText('['..datum.tooltip[1][1].text..']')
 				local color = ITEM_QUALITY_COLORS[datum.quality]
 				cell.text:SetTextColor(color.r, color.g, color.b)
 			end,
