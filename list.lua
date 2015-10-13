@@ -1,3 +1,10 @@
+Aux.sheet = {}
+
+local GSC_GOLD = 'ffd100'
+local GSC_SILVER = 'e6e6e6'
+local GSC_COPPER= 'c8602c'
+local GSC_RED = 'ff0000'
+
 Aux.list = {}
 
 local MAX_COLUMNS = 7
@@ -15,57 +22,57 @@ MoneyTypeInfo["AUX_LIST"] = {
 
 local logical_columns = {
 	{
-		type = 'ITEM',
 		title = 'Auction Item',
 		texture = function(row) return row.texture end,
 		comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
 		getter = function(row) return '      ['..row.tooltip[1][1].text..']' end,
 		color = function(row) return ITEM_QUALITY_COLORS[row.quality] end,
+		cell_initializer = Aux.sheet.default_cell_initializor('LEFT'),
+		cell_setter = function(cell) end,
 	},
 	{
-		type = 'NUMBER',
 		title = 'Lvl',
 		comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
 		getter = function(row) return row.level end,
+		cell_initializer = Aux.sheet.default_cell_initializor('RIGHT'),
 	},
 	{
-		type = 'STRING',
 		title = 'Owner',
 		comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
 		getter = function(row) return row.owner end,
+		cell_initializer = Aux.sheet.default_cell_initializor('LEFT'),
 	},
 	{
-		type = 'STRING',
 		title = 'Bid',
 		comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
 		getter = function(row) return Aux.util.coins(row.bid) end,
+		cell_initializer = Aux.sheet.default_cell_initializor('RIGHT'),
 	},
 	{
-		type = 'STRING',
 		title = 'Bid (Unit)',
 		comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
 		getter = function(row) return Aux.util.coins(row.bid_per_unit) end,
+		cell_initializer = Aux.sheet.default_cell_initializor('RIGHT'),
 	},
 	{
-		type = 'STRING',
 		title = 'Buyout',
 		comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
 		getter = function(row) return Aux.util.coins(row.buyout_price) end,
+		cell_initializer = Aux.sheet.default_cell_initializor('RIGHT'),
 	},
 	{
-		type = 'STRING',
 		title = 'Buyout (Unit)',
 		comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
 		getter = function(row) return Aux.util.coins(row.buyout_price_per_unit) end,
+		cell_initializer = Aux.sheet.default_cell_initializor('RIGHT'),
 	},
 	{
-		type = 'NUMBER',
 		title = '#',
 		comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
 		getter = function(row) return row.stack_size end,
+		cell_initializer = Aux.sheet.default_cell_initializor('RIGHT'),
 	},
 	{
-		type = 'STRING',
 		title = 'Left',
 		comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
 		getter = function(row)
@@ -79,6 +86,7 @@ local logical_columns = {
 				return '24h'
 			end
 		end,
+		cell_initializer = Aux.sheet.default_cell_initializor('CENTER'),
 	},
 }
 
@@ -128,6 +136,230 @@ end
 -- Aux.util.compare two rows
 -------------------------------------------------------------------------------
 
+function Aux.sheet.create(frame, physical_columns)
+	local sheet
+	local name = (frame:GetName() or '')..'ScrollSheet'
+	
+	local id = 1
+	while getglobal(name..id) do
+		id = id + 1
+	end
+	name = name..id
+	
+	local parent_height = frame:GetHeight()
+	local content = CreateFrame('Frame', name..'Content', frame)
+	content:SetHeight(parent_height - 30)
+	
+	local panel = CreateFrame('ScrollFrame', nil, 'FauxScrol
+	
+	
+local NUM_BUTTONS = 8
+local BUTTON_HEIGHT = 20
+
+local list = {} -- put contents of the scroll frame here, for example item names
+local buttons = {}
+
+local function update(self)
+	local numItems = #list
+	FauxScrollFrame_Update(self, numItems, NUM_BUTTONS, BUTTON_HEIGHT)
+	local offset = FauxScrollFrame_GetOffset(self)
+	for line = 1, NUM_BUTTONS do
+		local lineplusoffset = line + offset
+		local button = buttons[line]
+		if lineplusoffset > numItems then
+			button:Hide()
+		else
+			button:SetText(list[lineplusoffset])
+			button:Show()
+		end
+	end
+end
+
+local scrollFrame = CreateFrame("ScrollFrame", "MyFirstNotReallyScrollFrame", UIParent, "FauxScrollFrameTemplate")
+scrollFrame:SetScript("OnVerticalScroll", function(self, offset)
+	FauxScrollFrame_OnVerticalScroll(self, offset, BUTTON_HEIGHT, update)
+end)
+
+for i = 1, NUM_BUTTONS do
+	local button = CreateFrame("Button", nil, scrollFrame:GetParent())
+	if i == 1 then
+		button:SetPoint("TOP", scrollFrame)
+	else
+		button:SetPoint("TOP", buttons[i - 1], "BOTTOM")
+	end
+	button:SetSize(96, BUTTON_HEIGHT)
+	buttons[i] = button
+end
+
+<ScrollFrame name="$parentScrollFrame" inherits="FauxScrollFrameTemplate">
+				<Anchors>
+					<Anchor point="TOPLEFT">
+						<Offset>
+							<AbsDimension x="0" y="-28"/>
+						</Offset>
+					</Anchor>
+					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
+						<Offset>
+							<AbsDimension x="0" y="0"/>
+						</Offset>
+					</Anchor>
+				</Anchors>
+				<Layers>
+					<Layer level="ARTWORK">
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+							<Size>
+								<AbsDimension x="31" y="256"/>
+							</Size>
+							<Anchors>
+								<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
+									<Offset>
+										<AbsDimension x="-2" y="5"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0" right="0.484375" top="0" bottom="1.0"/>
+						</Texture>
+						<Texture file="Interface\PaperDollInfoFrame\UI-Character-ScrollBar">
+							<Size>
+								<AbsDimension x="31" y="106"/>
+							</Size>
+							<Anchors>
+								<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT">
+									<Offset>
+										<AbsDimension x="-2" y="-2"/>
+									</Offset>
+								</Anchor>
+							</Anchors>
+							<TexCoords left="0.515625" right="1.0" top="0" bottom="0.4140625"/>
+						</Texture>
+					</Layer>
+				</Layers>
+				<Scripts>
+					<OnVerticalScroll>
+						FauxScrollFrame_OnVerticalScroll(16, Aux.list.scroll_frame_update)
+					</OnVerticalScroll>
+				</Scripts>
+			</ScrollFrame>
+	
+	local total_width = 0
+	
+	local labels = {}
+	for i = 1,getn(physical_columns) do
+		local button = CreateFrame('Button', nil, content)
+		if i == 1 then
+			button:SetPoint('TOPLEFT', content, 'TOPLEFT', 5, 0)
+			total_width = total_width + 5
+		else
+			button:SetPoint('TOPLEFT', labels[i-1].button, 'TOPRIGHT', 3, 0)
+			total_width = total_width + 3
+		end
+		local label = content:CreateFontString(nil, 'OVERLAY', 'GameFontHighlight')
+		label:SetText(physical_columns[i].logical_column.title)
+		local column_width = physical_columns[i].width or 30
+		
+		total_width = total_width + column_width
+		button:SetWidth(column_width)
+		button:SetHeight(16)
+		button:SetID(i)
+		button:SetHighLightTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
+		-- button:SetScript('OnMouseDown', function() end)
+		
+		local texture = content:CreateTexture(nil, 'ARTWORK')
+		texture:SetTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
+		texture:SetTexCoord(0.1, 0.8, 0, 1)
+		texture:SetAllPoints(button)
+		button.texture = texture 
+		
+		local sort_texture = button:CreateTexture(nil, 'ARTWORK')
+		sort_texture:SetTexture('Interface\\Buttons\\UI-SortArrow')
+		sort_texture:SetPoint('TOPRIGHT, button, 'TOPRIGHT', 0, 0)
+		sort_texture:SetPoint('BOTTOM', button, 'BOTTOM', 0, 0)
+		sort_texture:SetWidth(12)
+		sort_texture:Hide()
+		button.sort_texture = sort_texture
+		
+		local background = content:CreateTexture(nil, 'ARTWORK')
+		background:SetTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
+		background:SetTextCoord(0.2, 0.9, 0, 0.9)
+		background:SetPoint('TOPLEFT', button, 'BOTTOMLEFT', 0, 0)
+		background:SetPoint('TOPRIGHT', button, 'BOTTOMRIGHT', 0, 0)
+		background:SetPoint('BOTTOM', content, 'BOTTOM', 0, 0)
+		background:SetAlpha(0.2)
+		
+		label:SetPoint('TOPLEFT', button, 'TOPLEFT', 0, 0)
+		label:SetPoint('BOTTOMRIGHT', button, 'BOTTOMRIGHT', 0, 0)
+		label:SetJustifyH('CENTER')
+		label:SetJustifyV('CENTER')
+		label:SetTextColor(0.8, 0.8, 0.8)
+		
+		label.button = button
+		label.texture = texture
+		label.sort_texture = sort_texture
+		label.background = background
+		labels[i] = label
+	end
+	total_width = total_width + 5
+	
+	local rows = {}
+	local row_index = 1
+	local max_height = content:GetHeight()
+	local total_height = 16
+	while total_height + 14 < max_height do
+		local row = {}
+		for i = 1,getn(physical_columns) do
+			local cell = CreateFrame('Frame', nil, content)
+			if row_index == 1 then
+				cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, 0)
+				cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, 0)
+			else
+				cell:SetPoint('TOPLEFT', rows[row_index-1][i], 'BOTTOMLEFT', 0, 0)
+				cell:SetPoint('TOPRIGHT', rows[row_index-1][i], 'BOTTOMRIGHT', 0, 0)				
+			end
+			
+			cell:SetHeight(14)
+			
+			physical_columns[i].logical_column.cell_initializer(cell)
+			
+			row[i] = cell
+		end
+		
+		local color_texture = content:CreateTexture()
+		color_texture:SetPoint('TOPLEFT', row[1], 'TOPLEFT', 0, 0)
+		color_texture:SetPoint('BOTTOMRIGHT', row[getn(physical_columns)], 'BOTTOMRIGHT', 0, 1)
+		color_texture:SetTexture(1, 1, 1)
+		row.color_texture = color_texture
+		
+		local highlight = content:CreateTexture()
+		highlight:SetPoint('TOPLEFT', row[1], 'TOPLEFT', 0, 0)
+		highlight:SetPoint('BOTTOMRIGHT', row[getn(physical_columns)], 'BOTTOMRIGHT', 0, 1)
+		highlight:SetAlpha(0)
+		highlight:SetTexture(0.8, 0.6, 0)
+		row.highlight = highlight
+		
+		rows[row_index] = row
+		row_index = row_index + 1
+		total_height = total_height + 14		
+	end
+	
+	content:SetWidth(total_width)
+	
+	sheet = {
+		name = name,
+		content = content,
+		panel = panel,
+		labels = labels,
+		rows = rows,
+		column_count = getn(labels),
+		physical_row_count = getn(rows),
+		data = {},
+		style = {},
+		sort = {},
+		logical_row_count = 0,
+	}
+	
+	return sheet
+end
+
 function Aux.list.row_comparator(list_frame)
 	return function(row1, row2)
 		for _, sort_info in ipairs(list_frame.sort_order) do
@@ -143,47 +375,60 @@ function Aux.list.row_comparator(list_frame)
 	end
 end
 
+function Aux.sheet.default_cell_initializer(alignment)
+	return function(cell_frame)
+		local text = cell_frame:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
+		text:SetAllPoints(cell_frame)
+		text:SetJustifyV('TOP')
+		text:SetJustifyH(alignment)
+		text:SetTextColor(0.8, 0.8, 0.8)
+	end
+end
+
 -------------------------------------------------------------------------------
 -- Initialize the list with the column information
 -------------------------------------------------------------------------------
 function Aux.list.initialize(frame, physical_columns, logical_columns)
-	frame.lines = 19
-	frame.lineHeight = 16
-	frame.content = {}
-	frame.physical_columns = physical_columns
-	frame.logical_columns = logical_columns
 
-	frame.sort_order = {}
-	for i, logical_column in logical_columns do
-		if i ~= BUYOUT_UNIT and i ~= NAME then 
-			tinsert(frame.sort_order, { logical_column = logical_column, sort_ascending = true })
-		end
-	end
-	tinsert(frame.sort_order, 1, { logical_column = logical_columns[BUYOUT_UNIT], sort_ascending = true })
-	tinsert(frame.sort_order, 1, { logical_column = logical_columns[NAME], sort_ascending = true })
 	
-	for i = 1, MAX_COLUMNS do
-		local button = getglobal(frame:GetName().."Column"..i.."Sort")
-		local dropdown = getglobal(frame:GetName().."Column"..i.."DropDown")
-		if (i <= table.getn(physical_columns)) then
-			local physical_column = physical_columns[i]
-			local logical_column = physical_column.logical_column
-			UIDropDownMenu_SetSelectedID(dropdown, Aux.util.index_of(logical_column, logical_columns))
-			getglobal(button:GetName().."Arrow"):Hide()
-			getglobal(button:GetName().."Text"):SetText(logical_column.title)
-			button:Show()
-			if (getn(physical_column.logical_columns) > 1) then
-				dropdown:Show();
-			else
-				dropdown:Hide();
-			end
+	Aux.sheet.create(frame, physical_columns)
+	--frame.lines = 19
+	--frame.lineHeight = 16
+	--frame.content = {}
+	--frame.physical_columns = physical_columns
+	--frame.logical_columns = logical_columns
 
-			Aux.list.set_column_width(frame, i, physical_column.width);
-		else
-			button:Hide()
-			dropdown:Hide()
-		end
-	end
+	--frame.sort_order = {}
+	--for i, logical_column in logical_columns do
+		--if i ~= BUYOUT_UNIT and i ~= NAME then 
+			--tinsert(frame.sort_order, { logical_column = logical_column, sort_ascending = true })
+		--end
+	--end
+	--tinsert(frame.sort_order, 1, { logical_column = logical_columns[BUYOUT_UNIT], sort_ascending = true })
+	--tinsert(frame.sort_order, 1, { logical_column = logical_columns[NAME], sort_ascending = true })
+	
+	--for i = 1, MAX_COLUMNS do
+		--local button = getglobal(frame:GetName().."Column"..i.."Sort")
+		--local dropdown = getglobal(frame:GetName().."Column"..i.."DropDown")
+		--if (i <= table.getn(physical_columns)) then
+			--local physical_column = physical_columns[i]
+			--local logical_column = physical_column.logical_column
+			--UIDropDownMenu_SetSelectedID(dropdown, Aux.util.index_of(logical_column, logical_columns))
+			--getglobal(button:GetName().."Arrow"):Hide()
+			--getglobal(button:GetName().."Text"):SetText(logical_column.title)
+			--button:Show()
+			--if (getn(physical_column.logical_columns) > 1) then
+				--dropdown:Show();
+			--else
+				--dropdown:Hide();
+			--end
+
+			--Aux.list.set_column_width(frame, i, physical_column.width);
+		--else
+			--button:Hide()
+			--dropdown:Hide()
+		--end
+	--end
 end
 
 -------------------------------------------------------------------------------
