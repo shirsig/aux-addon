@@ -74,6 +74,7 @@ function Aux.info.auction_item(index)
 	auction_item.id = id
 	auction_item.has_all_info = has_all_info
 	auction_item.duration = duration
+	auction_item.usable = usable
 	
 	auction_item.tooltip = Aux.info.tooltip(function(tt) tt:SetAuctionItem("list", index) end)
 	auction_item.charges = item_charges(auction_item.tooltip)
@@ -81,8 +82,8 @@ function Aux.info.auction_item(index)
 	return auction_item
 end
 
-function Aux.info.set_game_tooltip(owner, tooltip)
-	GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+function Aux.info.set_game_tooltip(owner, tooltip, anchor)
+	GameTooltip:SetOwner(owner, anchor)
 	for _, line in ipairs(tooltip) do
 		GameTooltip:AddDoubleLine(line[1].text, line[2].text, line[1].r, line[1].b, line[1].g, line[2].r, line[2].b, line[2].g, true)
 	end

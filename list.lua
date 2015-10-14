@@ -108,6 +108,7 @@ function Aux.sheet.create(frame, physical_columns, sort_order, on_cell_click, on
 		button:SetID(i)
 		button:SetHighlightTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
 		button:SetScript("OnMouseDown", function() Aux.list.sort(sheet, this:GetID()) end)
+		button:RegisterForClicks("LeftButtonDown", "RightButtonDown")
 		
 		local texture = content:CreateTexture(nil, 'ARTWORK')
 		texture:SetTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
@@ -154,7 +155,8 @@ function Aux.sheet.create(frame, physical_columns, sort_order, on_cell_click, on
 		for i = 1,getn(physical_columns) do
 			local cell = CreateFrame('Button', nil, content)
 			cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
-			cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))				
+			cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
+			cell:RegisterForClicks("LeftButtonDown", "RightButtonDown")			
 			
 			cell:SetHeight(14)
 			
@@ -241,9 +243,23 @@ function Aux.sheet.initialize(frame)
 			comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
 			cell_initializer = function(cell)
 				local icon = CreateFrame('Button', nil, cell)
+				local icon_texture = icon:CreateTexture(nil, 'BORDER')
+				icon_texture:SetAllPoints(icon)
+				icon.icon_texture = icon_texture
+				local normal_texture = icon:CreateTexture(nil)
+				normal_texture:SetPoint('CENTER', 0, 0)
+				normal_texture:SetWidth(22)
+				normal_texture:SetHeight(22)
+				normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
+				icon:SetNormalTexture(normal_texture)
 				icon:SetPoint('LEFT', cell)
 				icon:SetWidth(12)
 				icon:SetHeight(12)
+				icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
+				icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
+				icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
+				icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT') end)
+				icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
 				local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
 				text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
 				text:SetPoint('TOPRIGHT', cell)
@@ -255,7 +271,13 @@ function Aux.sheet.initialize(frame)
 				cell.icon = icon
 			end,
 			cell_setter = function(cell, datum)
-				cell.icon:SetNormalTexture(datum.texture)
+				cell.tooltip = datum.tooltip
+				cell.icon.icon_texture:SetTexture(datum.texture)
+				if not datum.usable then
+					cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
+				else
+					cell.icon.icon_texture:SetVertexColor(1.0, 1.0, 1.0)
+				end
 				cell.text:SetText('['..datum.tooltip[1][1].text..']')
 				local color = ITEM_QUALITY_COLORS[datum.quality]
 				cell.text:SetTextColor(color.r, color.g, color.b)
@@ -266,7 +288,14 @@ function Aux.sheet.initialize(frame)
 			comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
 			cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
 			cell_setter = function(cell, datum)
-				cell.text:SetText(max(1, datum.level))
+				local level = max(1, datum.level)
+				local text
+				if level > UnitLevel('player') then
+					text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
+				else
+					text = level
+				end
+				cell.text:SetText(text)
 			end,
 		},
 		{

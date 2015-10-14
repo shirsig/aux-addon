@@ -27,7 +27,7 @@ end
 
 function Aux.buy.dialog_cancel()
 	Aux.scan.abort()
-	AuxBuyDialog:Hide()
+	AuxBuyConfirmation:Hide()
 	AuxBuyList:Show()
 	AuxBuySearchButton:Enable()
 end
@@ -59,6 +59,8 @@ function Aux.buy.SearchButton_onclick()
 	
 	search_query = {
 		name = AuxBuyNameInputBox:GetText(),
+		min_level = AuxBuyMinLevel:GetText(),
+		max_level = AuxBuyMaxLevel:GetText(),
 		slot = category and category.slot,
 		class = category and category.class,	
 		subclass = category and category.subclass,
@@ -70,8 +72,10 @@ function Aux.buy.SearchButton_onclick()
 	Aux.scan.start{
 		query = search_query,
 		page = 0,
-		on_start_page = function(ok, page, total_pages)
+		on_page_update = function(page)
 			current_page = page
+		end,
+		on_start_page = function(ok, page, total_pages)
 			set_message('Scanning auctions: page ' .. page + 1 .. (total_pages and ' out of ' .. total_pages or '') .. ' ...')
 			return ok()
 		end,
@@ -124,34 +128,34 @@ end
 
 -----------------------------------------
 
-function show_dialog(buyout_mode, hyperlink, stack_size, amount)
-	AuxBuyDialogActionButton:Disable()
-	AuxBuyDialogHTML:SetFontObject('h1', GameFontWhite)
-	AuxBuyDialogHTML:SetScript('OnHyperlinkClick', function() SetItemRef(arg1) end)
-	AuxBuyDialogHTML:SetText(string.format(
-			[[
-			<html>
-			<body>
-				<h1>%s x %i</h1>
-			</body>
-			</html>
-			]],
-			hyperlink,
-			stack_size
-	))
-	if buyout_mode then
-		AuxBuyDialogActionButton:SetText('Buy')
-		MoneyFrame_Update('AuxBuyDialogBuyoutPrice', amount)
-		AuxBuyDialogBid:Hide()
-		AuxBuyDialogBuyoutPrice:Show()
+function show_dialog(buyout_mode, name, texture, quality, tooltip, stack_size, amount)
+	AuxBuyConfirmation.tooltip = tooltip
+	
+	AuxBuyConfirmationActionButton:Disable()
+	AuxBuyConfirmationItem:SetNormalTexture(texture)
+	AuxBuyConfirmationItemName:SetText(name)
+	local color = ITEM_QUALITY_COLORS[quality]
+	AuxBuyConfirmationItemName:SetTextColor(color.r, color.g, color.b)
+
+	if stack_size > 1 then
+		AuxBuyConfirmationItemCount:SetText(stack_size);
+		AuxBuyConfirmationItemCount:Show()
 	else
-		AuxBuyDialogActionButton:SetText('Bid')
-		MoneyInputFrame_SetCopper(AuxBuyDialogBid, amount)
-		AuxBuyDialogBuyoutPrice:Hide()
-		AuxBuyDialogBid:Show()
+		AuxBuyConfirmationItemCount:Hide()
+	end
+	if buyout_mode then
+		AuxBuyConfirmationActionButton:SetText('Buy')
+		MoneyFrame_Update('AuxBuyConfirmationBuyoutPrice', amount)
+		AuxBuyConfirmationBid:Hide()
+		AuxBuyConfirmationBuyoutPrice:Show()
+	else
+		AuxBuyConfirmationActionButton:SetText('Bid')
+		MoneyInputFrame_SetCopper(AuxBuyConfirmationBid, amount)
+		AuxBuyConfirmationBuyoutPrice:Hide()
+		AuxBuyConfirmationBid:Show()
 	end
 	AuxBuyList:Hide()
-	AuxBuyDialog:Show()
+	AuxBuyConfirmation:Show()
 end
 
 -----------------------------------------
@@ -182,7 +186,7 @@ function AuxBuyEntry_OnClick(entry_index)
 	end
 	
 	if not express_mode then
-		show_dialog(buyout_mode, entry.hyperlink, entry.stack_size, amount)
+		show_dialog(buyout_mode, entry.name, entry.texture, entry.quality, entry.tooltip, entry.stack_size, amount)
 	end
 
 	PlaySound("igMainMenuOptionCheckBoxOn")
@@ -193,9 +197,8 @@ function AuxBuyEntry_OnClick(entry_index)
 	Aux.scan.start{
 		query = search_query,
 		page = entry.page ~= current_page and entry.page,
-		on_start_page = function(ok, page)
+		on_page_update = function(page)
 			current_page = page
-			return ok()
 		end,
 		on_read_auction = function(ok, i)
 			local auction_item = Aux.info.auction_item(i)
@@ -239,9 +242,10 @@ function AuxBuyEntry_OnClick(entry_index)
 					
 						Aux.scan.abort()
 						AuxBuySearchButton:Enable()
-						AuxBuyDialog:Hide()
+						AuxBuyConfirmation:Hide()
+						AuxBuyList:Show()
 					end
-					AuxBuyDialogActionButton:Enable()
+					AuxBuyConfirmationActionButton:Enable()
 				end
 			else
 				return ok()
@@ -275,7 +279,7 @@ function Aux.buy.icon_on_enter()
 	local index = this:GetParent():GetID() + FauxScrollFrame_GetOffset(scroll_frame)
 	local entry = entries[index]
 	
-	Aux.info.set_game_tooltip(this, entry.tooltip)
+	Aux.info.set_game_tooltip(this, entry.tooltip, 'ANCHOR_RIGHT')
 	
 	if(EnhTooltip ~= nil) then
 		EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.hyperlink, entry.quality, entry.stack_size)
@@ -309,6 +313,7 @@ function process_auction(auction_item, current_page)
 				bid_per_unit = Aux_Round(bid/stack_size),
 				owner = auction_item.owner,
 				duration = auction_item.duration,
+				usable = auction_item.usable,
 		})
 	end
 end

@@ -276,6 +276,8 @@ end
 
 function Aux_AddTabs()
 	
+	AuctionFrameTab1:SetText('Buy')
+	
 	Aux.tabs.sell.index = AuctionFrame.numTabs + 1
 
 	local sellTabName = "AuctionFrameTab"..Aux.tabs.sell.index
