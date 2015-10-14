@@ -186,7 +186,7 @@ function AuxBuyEntry_OnClick(entry_index)
 	PlaySound("igMainMenuOptionCheckBoxOn")
 	
 	local found
-	local order_key = Aux.auction_key(entry.tooltip, entry.stack_size, amount)
+	local order_key = Aux.auction_key(entry.tooltip, entry.stack_size, amount) 
 	
 	Aux.scan.start{
 		query = search_query,
@@ -258,6 +258,11 @@ function AuxBuyEntry_OnClick(entry_index)
 		on_abort = function()
 			if express_mode then
 				AuxBuySearchButton:Enable()
+			end
+		end,
+		next_page = function(page, total_pages)
+			if not page or page == entry.page then
+				return entry.page - 1
 			end
 		end,
 	}
