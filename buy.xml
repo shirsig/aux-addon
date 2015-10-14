@@ -276,19 +276,9 @@
 				</Scripts>
 			</Button>
 			
-			<Frame name="AuxBuyDialog" frameStrata="FULLSCREEN_DIALOG" toplevel="true" enableMouse="true" hidden="true" movable="true">
+			<Frame name="AuxBuyDialog" hidden="true">
 				<Size><AbsDimension x="230" y="140" /></Size>		
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-150"/></Offset></Anchor></Anchors>				
-				<Scripts>
-					<OnLoad>this:RegisterForDrag("LeftButton")</OnLoad>
-					<OnDragStart>this:StartMoving()</OnDragStart>
-					<OnDragStop>this:StopMovingOrSizing()</OnDragStop>
-				</Scripts>
-				<Backdrop bgFile="Interface\CharacterFrame\UI-Party-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-					<BackgroundInsets><AbsInset left="11" right="12" top="12" bottom="11"/></BackgroundInsets>
-					<TileSize><AbsValue val="32"/></TileSize>
-					<EdgeSize><AbsValue val="32"/></EdgeSize>
-				</Backdrop>			
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="300" y="-150"/></Offset></Anchor></Anchors>					
 				<Frames>
 					<SimpleHTML name="$parentHTML">
 						<Size><AbsDimension x="170" y="1" wraponspaces="false" /></Size>		
@@ -317,7 +307,7 @@
 						</Scripts>
 					</Button>
 					<Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
-						<Size><AbsDimension x="85" y="22"/>	</Size>
+						<Size><AbsDimension x="85" y="22"/></Size>
 						<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>

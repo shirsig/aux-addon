@@ -28,6 +28,7 @@ end
 function Aux.buy.dialog_cancel()
 	Aux.scan.abort()
 	AuxBuyDialog:Hide()
+	AuxBuyList:Show()
 	AuxBuySearchButton:Enable()
 end
 
@@ -149,6 +150,7 @@ function show_dialog(buyout_mode, hyperlink, stack_size, amount)
 		AuxBuyDialogBuyoutPrice:Hide()
 		AuxBuyDialogBid:Show()
 	end
+	AuxBuyList:Hide()
 	AuxBuyDialog:Show()
 end
 
