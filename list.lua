@@ -266,7 +266,7 @@ function Aux.sheet.initialize(frame)
 			comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
 			cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
 			cell_setter = function(cell, datum)
-				cell.text:SetText(datum.level)
+				cell.text:SetText(max(1, datum.level))
 			end,
 		},
 		{
@@ -369,13 +369,13 @@ function Aux.sheet.initialize(frame)
 			width = 70
 		},
 		{
-			logical_columns = { logical_columns[BID], logical_columns[BUYOUT] },
-			logical_column = logical_columns[BID],
+			logical_columns = { logical_columns[BID_UNIT], logical_columns[BUYOUT_UNIT] },
+			logical_column = logical_columns[BUYOUT_UNIT],
 			width = 70
 		},
 		{
-			logical_columns = { logical_columns[BID_UNIT], logical_columns[BUYOUT_UNIT] },
-			logical_column = logical_columns[BUYOUT_UNIT],
+			logical_columns = { logical_columns[BID], logical_columns[BUYOUT] },
+			logical_column = logical_columns[BID],
 			width = 70
 		},
 		{

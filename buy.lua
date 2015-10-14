@@ -285,7 +285,7 @@ function process_auction(auction_item, current_page)
 	local buyout_price = auction_item.buyout_price > 0 and auction_item.buyout_price or nil
 	local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price/stack_size)
 	
-	if true then
+	if auction_item.owner ~= UnitName("player") then
 		tinsert(entries, {
 				name = auction_item.name,
 				level = auction_item.level,
