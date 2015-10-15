@@ -59,7 +59,7 @@ function Aux.info.auction_item(index)
 	
 	local auction_item = hyperlink_item(hyperlink)
 	
-	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status, id, has_all_info = GetAuctionItemInfo("list", index)
+	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status, id = GetAuctionItemInfo("list", index)
 	local duration = GetAuctionItemTimeLeft("list", index)
 	
 	auction_item.texture = texture
@@ -72,7 +72,6 @@ function Aux.info.auction_item(index)
 	auction_item.owner = owner
 	auction_item.sale_status = sale_status
 	auction_item.id = id
-	auction_item.has_all_info = has_all_info
 	auction_item.duration = duration
 	auction_item.usable = usable
 	

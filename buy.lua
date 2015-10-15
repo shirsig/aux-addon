@@ -224,7 +224,8 @@ function AuxBuyEntry_OnClick(entry_index)
 				
 				if express_mode then
 					if GetMoney() >= amount then
-						tremove(entries, entry_index)
+						-- tremove(entries, entry_index)
+						entry.dirty = true
 						refresh = true
 					end
 					
@@ -234,7 +235,8 @@ function AuxBuyEntry_OnClick(entry_index)
 				else
 					Aux.buy.dialog_action = function()						
 						if GetMoney() >= amount then
-							tremove(entries, entry_index)
+							-- tremove(entries, entry_index)
+							entry.dirty = true
 							refresh = true
 						end
 						
@@ -253,7 +255,8 @@ function AuxBuyEntry_OnClick(entry_index)
 		end,
 		on_complete = function()
 			if not found then
-				tremove(entries, entry_index)
+				-- tremove(entries, entry_index)
+				entry.dirty = true
 				refresh = true
 				Aux.buy.dialog_cancel()
 			end

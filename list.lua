@@ -234,6 +234,10 @@ function Aux.sheet.default_cell_initializer(alignment)
 	end
 end
 
+local function alpha_setter(cell, datum)
+	cell:SetAlpha(datum.dirty and 0.4 or 1)
+end
+
 function Aux.sheet.initialize(frame)
 
 	local logical_columns = {
@@ -281,6 +285,7 @@ function Aux.sheet.initialize(frame)
 				cell.text:SetText('['..datum.tooltip[1][1].text..']')
 				local color = ITEM_QUALITY_COLORS[datum.quality]
 				cell.text:SetTextColor(color.r, color.g, color.b)
+				alpha_setter(cell, datum)
 			end,
 		},
 		{
@@ -296,6 +301,7 @@ function Aux.sheet.initialize(frame)
 					text = level
 				end
 				cell.text:SetText(text)
+				alpha_setter(cell, datum)
 			end,
 		},
 		{
@@ -304,6 +310,7 @@ function Aux.sheet.initialize(frame)
 			cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
 			cell_setter = function(cell, datum)
 				cell.text:SetText(datum.owner)
+				alpha_setter(cell, datum)
 			end,
 		},
 		{
@@ -312,6 +319,7 @@ function Aux.sheet.initialize(frame)
 			cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
 			cell_setter = function(cell, datum)
 				cell.text:SetText(Aux.util.money_string(datum.bid))
+				alpha_setter(cell, datum)
 			end,
 		},
 		{
@@ -320,6 +328,7 @@ function Aux.sheet.initialize(frame)
 			cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
 			cell_setter = function(cell, datum)
 				cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
+				alpha_setter(cell, datum)
 			end,
 		},
 		{
@@ -328,6 +337,7 @@ function Aux.sheet.initialize(frame)
 			cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
 			cell_setter = function(cell, datum)
 				cell.text:SetText(Aux.util.money_string(datum.buyout_price))
+				alpha_setter(cell, datum)
 			end,
 		},
 		{
@@ -336,6 +346,7 @@ function Aux.sheet.initialize(frame)
 			cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
 			cell_setter = function(cell, datum)
 				cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
+				alpha_setter(cell, datum)
 			end,
 		},
 		{
@@ -344,6 +355,7 @@ function Aux.sheet.initialize(frame)
 			cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
 			cell_setter = function(cell, datum)
 				cell.text:SetText(datum.stack_size)
+				alpha_setter(cell, datum)
 			end,
 		},
 		{
@@ -362,6 +374,7 @@ function Aux.sheet.initialize(frame)
 					text = '24h'
 				end
 				cell.text:SetText(text)
+				alpha_setter(cell, datum)
 			end,
 		},
 	}

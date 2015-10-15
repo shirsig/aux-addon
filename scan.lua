@@ -52,6 +52,19 @@ function wait_for_results(k)
 	return controller().wait(function() return ok end, k)
 end
 
+function wait_for_complete_results(k)
+	return controller().wait(function()
+		local count, _ = GetNumAuctionItems("list")
+		for i=1,count do
+			local auction_item_info = Aux.info.auction_item(i)
+			if not auction_item_info.owner then
+				return false
+			end
+		end
+		return true
+	end, k)
+end
+
 function wait_for_callback(f, args, k)
 	local ok
 
@@ -110,10 +123,10 @@ function submit_query(k)
 		wait_for_callback(state.job.on_start_page, {state.page, state.total_pages}, function()
 		controller().wait(CanSendAuctionQuery, function()
 		wait_for_results(function()
-			if state.job.on_page_update then
-				state.job.on_page_update(state.page)
-			end
-			k()
+		if state.job.on_page_update then
+			state.job.on_page_update(state.page)
+		end
+		wait_for_complete_results(k)
 		end)
 		QueryAuctionItems(
 			state.job.query.name,
