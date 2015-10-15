@@ -91,19 +91,33 @@
 							</Layer>
 						</Layers>
 						<Scripts>
+							<OnLoad>
+								this.completor = Aux.completion.completor(this)
+							</OnLoad>
 							<OnTextChanged>
-								Aux.completion.make_suggestions(this)
+								this.completor.suggest()
 							</OnTextChanged>
 							<OnTabPressed>
-								Aux.completion.highlight_next(this)
+								if IsShiftKeyDown() then
+									this.completor.previous()
+								else
+									this.completor.next()
+								end
 							</OnTabPressed>
 							<OnEnterPressed>
-								if Aux.completion.highlighted() then
-									Aux.completion.close(this)
+								if this.completor.open() then
+									this.completor.close()
 								end
 								this:ClearFocus()
 								Aux.buy.SearchButton_onclick()
 							</OnEnterPressed>
+							<OnEscapePressed>
+								if this.completor.open() then
+									this.completor.close()
+								else
+									this:ClearFocus()
+								end
+							</OnEscapePressed>
 						</Scripts>
 					</EditBox>
 					
