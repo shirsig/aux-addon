@@ -87,6 +87,10 @@ function Aux.info.set_game_tooltip(owner, tooltip, anchor)
 		GameTooltip:AddDoubleLine(line[1].text, line[2].text, line[1].r, line[1].b, line[1].g, line[2].r, line[2].b, line[2].g, true)
 	end
 	GameTooltip:Show()
+	
+	-- if EnhTooltip and entry then
+		-- EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.hyperlink, entry.quality, entry.stack_size)
+	-- end
 end
 
 function Aux.info.tooltip(setter)

@@ -7,7 +7,11 @@ local leven, fuzzy, populate_dropdown, toggle_dropdown, suggestions, highlight
 local item_names = {}
 
 local current_suggestions = {}
-local selected_index
+local selected_index = 0
+
+local current_input
+
+local programmatically_set_input
 
 
 for item_id=1,30000 do
@@ -26,9 +30,10 @@ function fuzzy(input)
 	return function(item_name)
 		local match = { string.find(strupper(item_name), pattern) }
 		if match[1] then
-			local rating = 1
-			for i=3,getn(match) do
-				rating = rating * (strlen(match[i]) + 1)
+			local rating = 0
+			for i=4,getn(match)-1 do
+				if strlen(match[i]) == 0 then
+				rating = rating + 1
 			end
 			return rating
 		end
@@ -59,7 +64,8 @@ function suggestions(input)
 			else
 				if best[1].rating > rating then
 					best[1] = { name=name, rating=rating }
-					sort(best, function(a, b) return a.rating < b.rating end)
+					Aux.util.merge_sort(best, function(a, b) return Aux.util.compare(strlen(a), strlen(b)) end)
+					Aux.util.merge_sort(best, function(a, b) return Aux.util.compare(strlen(b.rating), strlen(a.rating)) end)
 				end
 			end
 		end
@@ -69,13 +75,22 @@ function suggestions(input)
 end
 
 function Aux.completion.make_suggestions(input_box)
-	selected_index = nil
-	update_highlighting()
+	
 	local input = input_box:GetText()
-	if input == '' then
+	if programmatically_set_input == input then
+		programmatically_set_input = nil
+		return
+	end
+	programmatically_set_input = nil
+	
+	current_input = input
+	selected_index = 0
+	update_highlighting()
+	
+	if current_input == '' then
 		current_suggestions = {}
 	else
-		current_suggestions = suggestions(input)
+		current_suggestions = suggestions(current_input)
 		UIDropDownMenu_Initialize(AuxCompletionDropDown, function() populate_dropdown(input_box, current_suggestions) end)
 	end
 	
@@ -87,25 +102,28 @@ end
 
 function Aux.completion.highlight_next(input_box)
 	if getn(current_suggestions) > 0 then
-		selected_index = selected_index and math.mod(selected_index, getn(current_suggestions)) + 1 or 1
+		selected_index = selected_index > 0 and math.mod(selected_index + 1, getn(current_suggestions) + 1) or 1
+		snipe.log(selected_index .. 'after')
+		snipe.log(current_input)
+		update_highlighting()
+		if selected_index == 0 then
+			Aux.completion.set_quietly(input_box, current_input)
+		else	
+			Aux.completion.set_quietly(input_box, current_suggestions[selected_index])
+		end
 	end
-	update_highlighting()
 end
 
 function Aux.completion.highlighted()
-	return selected_index ~= nil 
+	return selected_index ~= 0 
 end
 
-function Aux.completion.select(input_box)
-	Aux.completion.set_quietly(input_box, current_suggestions[selected_index])
-	selected_index = nil
-	update_highlighting()
+function Aux.completion.close()
 	CloseDropDownMenus(1)
 end
 
 function Aux.completion.set_quietly(edit_box, text)
-	local orig = edit_box:GetScript('OnTextChanged')
-	edit_box:SetScript('OnTextChanged', function() edit_box:SetScript('OnTextChanged', orig) end)
+	programmatically_set_input = text
 	edit_box:SetText(text)
 end
 

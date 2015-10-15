@@ -13,9 +13,9 @@ buy.xml
 scan.lua
 stack.lua
 post.lua
+list.lua
 info.xml
 completion.xml
-list.xml
 
 options.xml
 about.xml

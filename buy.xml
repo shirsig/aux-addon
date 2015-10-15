@@ -99,11 +99,10 @@
 							</OnTabPressed>
 							<OnEnterPressed>
 								if Aux.completion.highlighted() then
-									Aux.completion.select(this)
-								else
-									this:ClearFocus()
-									Aux.buy.SearchButton_onclick()
+									Aux.completion.close(this)
 								end
+								this:ClearFocus()
+								Aux.buy.SearchButton_onclick()
 							</OnEnterPressed>
 						</Scripts>
 					</EditBox>

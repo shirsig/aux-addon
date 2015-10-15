@@ -284,18 +284,6 @@ function AuxBuyEntry_OnClick(entry_index)
 	end	
 end
 
-function Aux.buy.icon_on_enter()
-	local scroll_frame = getglobal(this:GetParent():GetParent():GetName().."ScrollFrame")
-	local index = this:GetParent():GetID() + FauxScrollFrame_GetOffset(scroll_frame)
-	local entry = entries[index]
-	
-	Aux.info.set_game_tooltip(this, entry.tooltip, 'ANCHOR_RIGHT')
-	
-	if(EnhTooltip ~= nil) then
-		EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.hyperlink, entry.quality, entry.stack_size)
-	end
-end
-
 -----------------------------------------
 
 function process_auction(auction_item, current_page)

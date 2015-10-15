@@ -167,6 +167,7 @@ function Aux.util.invert_order(ordering)
 end
 
 function Aux.util.compare(a, b, nil_ordering)
+	nil_ordering = nil_ordering or Aux.util.EQ
 	if not a and b then
 		return nil_ordering
 	elseif a and not b then
