@@ -74,23 +74,29 @@ function Aux.info.auction_item(index)
 	auction_item.id = id
 	auction_item.duration = duration
 	auction_item.usable = usable
-	
 	auction_item.tooltip = Aux.info.tooltip(function(tt) tt:SetAuctionItem("list", index) end)
 	auction_item.charges = item_charges(auction_item.tooltip)
+	
+	auction_item.EnhTooltip_info = {
+		name = auction_item.name,
+		hyperlink = auction_item.hyperlink,
+		quality = auction_item.quality,
+		count = auction_item.count,
+	}
 	
 	return auction_item
 end
 
-function Aux.info.set_game_tooltip(owner, tooltip, anchor)
+function Aux.info.set_game_tooltip(owner, tooltip, anchor, EnhTooltip_info)
 	GameTooltip:SetOwner(owner, anchor)
 	for _, line in ipairs(tooltip) do
 		GameTooltip:AddDoubleLine(line[1].text, line[2].text, line[1].r, line[1].b, line[1].g, line[2].r, line[2].b, line[2].g, true)
 	end
 	GameTooltip:Show()
 	
-	-- if EnhTooltip and entry then
-		-- EnhTooltip.TooltipCall(GameTooltip, entry.name, entry.hyperlink, entry.quality, entry.stack_size)
-	-- end
+	if EnhTooltip and EnhTooltip_info then
+		EnhTooltip.TooltipCall(GameTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
+	end
 end
 
 function Aux.info.tooltip(setter)

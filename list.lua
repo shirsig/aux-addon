@@ -262,7 +262,7 @@ function Aux.sheet.initialize(frame)
 				icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
 				icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
 				icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
-				icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT') end)
+				icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT', cell.EnhTooltip_info) end)
 				icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
 				local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
 				text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
@@ -276,6 +276,7 @@ function Aux.sheet.initialize(frame)
 			end,
 			cell_setter = function(cell, datum)
 				cell.tooltip = datum.tooltip
+				cell.EnhTooltip_info = datum.EnhTooltip_info
 				cell.icon.icon_texture:SetTexture(datum.texture)
 				if not datum.usable then
 					cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)

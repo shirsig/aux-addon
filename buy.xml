@@ -347,7 +347,7 @@
 						</Layers>
 						<Scripts>
 							<OnEnter>
-								Aux.info.set_game_tooltip(this, this:GetParent().tooltip, 'ANCHOR_LEFT')
+								Aux.info.set_game_tooltip(this, this:GetParent().tooltip, 'ANCHOR_LEFT', this:GetParent().EnhTooltip_info)
 							</OnEnter>
 							<OnLeave>
 								GameTooltip:Hide()

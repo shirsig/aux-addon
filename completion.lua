@@ -33,7 +33,8 @@ function fuzzy(input)
 			local rating = 0
 			for i=4,getn(match)-1 do
 				if strlen(match[i]) == 0 then
-				rating = rating + 1
+					rating = rating + 1
+				end
 			end
 			return rating
 		end
@@ -53,24 +54,27 @@ end
 
 function suggestions(input)
 	local matcher = fuzzy(input)
+	function fuzzy_sort(array)
+		sort(array, function(a, b) return strlen(a.name) < strlen(b.name) end)
+		sort(array, function(a, b) return b.rating < a.rating end)
+		return array
+	end
 	
 	local best = {}
 	for _, name in ipairs(item_names) do
 		local rating = matcher(name)
 		if rating then
+			local candidate = { name=name, rating=rating }
 			if getn(best) < NUM_MATCHES then
-				tinsert(best, { name=name, rating=rating })
-				sort(best, function(a, b) return a.rating < b.rating end)
+				tinsert(best, candidate)
+				fuzzy_sort(best)
 			else
-				if best[1].rating > rating then
-					best[1] = { name=name, rating=rating }
-					Aux.util.merge_sort(best, function(a, b) return Aux.util.compare(strlen(a), strlen(b)) end)
-					Aux.util.merge_sort(best, function(a, b) return Aux.util.compare(strlen(b.rating), strlen(a.rating)) end)
-				end
+				best[getn(best)] = fuzzy_sort({ best[getn(best)], candidate })[1]
+				fuzzy_sort(best)
 			end
 		end
 	end
-	
+
 	return Aux.util.map(best, function(match) return match.name end)
 end
 
@@ -103,8 +107,6 @@ end
 function Aux.completion.highlight_next(input_box)
 	if getn(current_suggestions) > 0 then
 		selected_index = selected_index > 0 and math.mod(selected_index + 1, getn(current_suggestions) + 1) or 1
-		snipe.log(selected_index .. 'after')
-		snipe.log(current_input)
 		update_highlighting()
 		if selected_index == 0 then
 			Aux.completion.set_quietly(input_box, current_input)

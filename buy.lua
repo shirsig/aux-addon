@@ -128,17 +128,18 @@ end
 
 -----------------------------------------
 
-function show_dialog(buyout_mode, name, texture, quality, tooltip, stack_size, amount)
-	AuxBuyConfirmation.tooltip = tooltip
+function show_dialog(buyout_mode, entry, amount)
+	AuxBuyConfirmation.tooltip = entry.tooltip
+	AuxBuyConfirmation.EnhTooltip_info = entry.EnhTooltip_info
 	
 	AuxBuyConfirmationActionButton:Disable()
-	AuxBuyConfirmationItem:SetNormalTexture(texture)
-	AuxBuyConfirmationItemName:SetText(name)
-	local color = ITEM_QUALITY_COLORS[quality]
+	AuxBuyConfirmationItem:SetNormalTexture(entry.texture)
+	AuxBuyConfirmationItemName:SetText(entry.name)
+	local color = ITEM_QUALITY_COLORS[entry.quality]
 	AuxBuyConfirmationItemName:SetTextColor(color.r, color.g, color.b)
 
-	if stack_size > 1 then
-		AuxBuyConfirmationItemCount:SetText(stack_size);
+	if entry.stack_size > 1 then
+		AuxBuyConfirmationItemCount:SetText(entry.stack_size);
 		AuxBuyConfirmationItemCount:Show()
 	else
 		AuxBuyConfirmationItemCount:Hide()
@@ -182,7 +183,7 @@ function find_auction(entry, buyout_mode, express_mode)
 	end
 	
 	if not express_mode then
-		show_dialog(buyout_mode, entry.name, entry.texture, entry.quality, entry.tooltip, entry.stack_size, amount)
+		show_dialog(buyout_mode, entry, amount)
 	end
 
 	PlaySound('igMainMenuOptionCheckBoxOn')
@@ -312,7 +313,9 @@ function process_auction(auction_item, current_page)
 				owner = auction_item.owner,
 				duration = auction_item.duration,
 				usable = auction_item.usable,
-				high_bidder = auction_item.high_bidder
+				high_bidder = auction_item.high_bidder,
+				
+				EnhTooltip_info = auction_item.EnhTooltip_info,
 		})
 	end
 end
