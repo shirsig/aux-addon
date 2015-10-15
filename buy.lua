@@ -1,6 +1,6 @@
 Aux.buy = {}
 
-local process_auction, set_message, report, tooltip_match, show_dialog
+local process_auction, set_message, report, tooltip_match, show_dialog, find_auction
 local entries
 local selectedEntries = {}
 local search_query
@@ -158,23 +158,19 @@ function show_dialog(buyout_mode, name, texture, quality, tooltip, stack_size, a
 	AuxBuyConfirmation:Show()
 end
 
------------------------------------------
+function find_auction(entry, buyout_mode, express_mode)
 
-function AuxBuyEntry_OnClick(entry_index)
-
-	local express_mode = IsAltKeyDown()
-	local buyout_mode = arg1 == "LeftButton"
-	
-	local entry = entries[entry_index]
+	if entry.gone then
+		return
+	end
 	
 	if buyout_mode and not entry.buyout_price then
 		return
 	end
 	
-	if IsControlKeyDown() then 
-		DressUpItemLink(entry.hyperlink)
-		return
-	end
+	-- if not buyout_mode and entry.high_bidder == UnitName('player') then
+		-- return
+	-- end
 	
 	AuxBuySearchButton:Disable()
 	
@@ -189,7 +185,7 @@ function AuxBuyEntry_OnClick(entry_index)
 		show_dialog(buyout_mode, entry.name, entry.texture, entry.quality, entry.tooltip, entry.stack_size, amount)
 	end
 
-	PlaySound("igMainMenuOptionCheckBoxOn")
+	PlaySound('igMainMenuOptionCheckBoxOn')
 	
 	local found
 	local order_key = Aux.auction_key(entry.tooltip, entry.stack_size, amount) 
@@ -224,24 +220,22 @@ function AuxBuyEntry_OnClick(entry_index)
 				
 				if express_mode then
 					if GetMoney() >= amount then
-						-- tremove(entries, entry_index)
-						entry.dirty = true
+						PlaceAuctionBid("list", i, amount)
+						entry.gone = true
 						refresh = true
+					else
+						Aux.log('Not enough money.')
 					end
-					
-					PlaceAuctionBid("list", i, amount)				
-					
 					Aux.scan.abort()
 				else
 					Aux.buy.dialog_action = function()						
 						if GetMoney() >= amount then
-							-- tremove(entries, entry_index)
-							entry.dirty = true
+							PlaceAuctionBid("list", i, amount)
+							entry.gone = true
 							refresh = true
-						end
-						
-						PlaceAuctionBid("list", i, amount)
-					
+						else
+							Aux.log('Not enough money.')
+						end				
 						Aux.scan.abort()
 						AuxBuySearchButton:Enable()
 						AuxBuyConfirmation:Hide()
@@ -255,8 +249,7 @@ function AuxBuyEntry_OnClick(entry_index)
 		end,
 		on_complete = function()
 			if not found then
-				-- tremove(entries, entry_index)
-				entry.dirty = true
+				entry.gone = true
 				refresh = true
 				Aux.buy.dialog_cancel()
 			end
@@ -277,6 +270,20 @@ function AuxBuyEntry_OnClick(entry_index)
 	}
 end
 
+function AuxBuyEntry_OnClick(entry_index)
+
+	local express_mode = IsAltKeyDown()
+	local buyout_mode = arg1 == 'LeftButton'
+	
+	local entry = entries[entry_index]
+	
+	if IsControlKeyDown() then 
+		DressUpItemLink(entry.hyperlink)
+	else
+		find_auction(entry, buyout_mode, express_mode)
+	end	
+end
+
 function Aux.buy.icon_on_enter()
 	local scroll_frame = getglobal(this:GetParent():GetParent():GetName().."ScrollFrame")
 	local index = this:GetParent():GetID() + FauxScrollFrame_GetOffset(scroll_frame)
@@ -295,11 +302,11 @@ function process_auction(auction_item, current_page)
 	entries = entries or {}
 	
 	local stack_size = auction_item.charges or auction_item.count
-	local bid = auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid + auction_item.min_increment
+	local bid = (auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid) + auction_item.min_increment
 	local buyout_price = auction_item.buyout_price > 0 and auction_item.buyout_price or nil
 	local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price/stack_size)
 	
-	if auction_item.owner ~= UnitName("player") then
+	if auction_item.owner ~= UnitName('player') then
 		tinsert(entries, {
 				name = auction_item.name,
 				level = auction_item.level,
@@ -317,6 +324,7 @@ function process_auction(auction_item, current_page)
 				owner = auction_item.owner,
 				duration = auction_item.duration,
 				usable = auction_item.usable,
+				high_bidder = auction_item.high_bidder
 		})
 	end
 end

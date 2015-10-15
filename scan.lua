@@ -57,7 +57,7 @@ function wait_for_complete_results(k)
 		local count, _ = GetNumAuctionItems("list")
 		for i=1,count do
 			local auction_item_info = Aux.info.auction_item(i)
-			if not auction_item_info.owner then
+			if auction_item_info and not auction_item_info.owner then
 				return false
 			end
 		end

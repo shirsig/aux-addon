@@ -235,7 +235,7 @@ function Aux.sheet.default_cell_initializer(alignment)
 end
 
 local function alpha_setter(cell, datum)
-	cell:SetAlpha(datum.dirty and 0.4 or 1)
+	cell:SetAlpha(datum.gone and 0.4 or 1)
 end
 
 function Aux.sheet.initialize(frame)
