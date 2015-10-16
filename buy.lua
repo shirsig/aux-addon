@@ -75,18 +75,16 @@ function Aux.buy.SearchButton_onclick()
 		on_page_update = function(page)
 			current_page = page
 		end,
-		on_start_page = function(ok, page, total_pages)
+		on_start_page = function(page, total_pages)
 			set_message('Scanning auctions: page ' .. page + 1 .. (total_pages and ' out of ' .. total_pages or '') .. ' ...')
-			return ok()
 		end,
-		on_read_auction = function(ok, i)
+		on_read_auction = function(i)
 			local auction_item = Aux.info.auction_item(i)
 			if auction_item then
 				if (auction_item.name == search_query.name or search_query.name == '' or not AuxBuyExactCheckButton:GetChecked()) and tooltip_match(tooltip_patterns, auction_item.tooltip) then
 					process_auction(auction_item, current_page)
 				end
 			end
-			return ok()
 		end,
 		on_complete = function()
 			entries = entries or {}
@@ -197,11 +195,11 @@ function find_auction(entry, buyout_mode, express_mode)
 		on_page_update = function(page)
 			current_page = page
 		end,
-		on_read_auction = function(ok, i)
+		on_read_auction = function(i, ctrl)
 			local auction_item = Aux.info.auction_item(i)
 			
 			if not auction_item then
-				return ok()
+				return
 			end
 			
 			local stack_size = auction_item.charges or auction_item.count
@@ -217,6 +215,7 @@ function find_auction(entry, buyout_mode, express_mode)
 			local key = Aux.auction_key(auction_item.tooltip, stack_size, auction_amount)
 			
 			if key == order_key then
+				ctrl.suspend()
 				found = true
 				
 				if express_mode then
@@ -244,8 +243,6 @@ function find_auction(entry, buyout_mode, express_mode)
 					end
 					AuxBuyConfirmationActionButton:Enable()
 				end
-			else
-				return ok()
 			end
 		end,
 		on_complete = function()
