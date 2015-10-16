@@ -72,7 +72,10 @@ function Aux.buy.SearchButton_onclick()
 	Aux.scan.start{
 		query = search_query,
 		page = 0,
-		on_page_update = function(page)
+		on_submit_query = function()
+			current_page = nil
+		end,
+		on_page_loaded = function(page)
 			current_page = page
 		end,
 		on_start_page = function(ok, page, total_pages)
@@ -194,7 +197,10 @@ function find_auction(entry, buyout_mode, express_mode)
 	Aux.scan.start{
 		query = search_query,
 		page = entry.page ~= current_page and entry.page,
-		on_page_update = function(page)
+		on_submit_query = function()
+			current_page = nil
+		end,
+		on_page_loaded = function(page)
 			current_page = page
 		end,
 		on_read_auction = function(ok, i)

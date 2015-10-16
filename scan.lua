@@ -122,12 +122,16 @@ function submit_query(k)
 	if state.page then
 		wait_for_callback(state.job.on_start_page, {state.page, state.total_pages}, function()
 		controller().wait(CanSendAuctionQuery, function()
-		wait_for_results(function()
-		if state.job.on_page_update then
-			state.job.on_page_update(state.page)
+		if state.job.on_submit_query then
+			state.job.on_submit_query()
 		end
-		wait_for_complete_results(k)
-		end)
+		wait_for_results(function()
+		wait_for_complete_results(function()
+		if state.job.on_page_loaded then
+			state.job.on_page_loaded(state.page)
+		end
+		k()
+		end)end)
 		QueryAuctionItems(
 			state.job.query.name,
 			state.job.query.min_level,
