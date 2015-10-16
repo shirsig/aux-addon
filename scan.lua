@@ -66,16 +66,21 @@ function wait_for_complete_results(k)
 end
 
 function wait_for_callback(f, args, k)
-	local ok
+	local ok = true
 
-	if not f then
-		ok = true
-	else
-		tinsert(args, 1, function() ok = true end)
+	if f then
+		tinsert(args, {
+			suspend = function() ok = false end,
+			resume = function() ok = true end,
+		})
 		f(unpack(args))
 	end
 
-	return controller().wait(function() return ok end, k)
+	if ok then
+		return k()
+	else
+		return controller().wait(function() return ok end, k)
+	end
 end
 
 function scan()

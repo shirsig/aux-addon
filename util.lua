@@ -235,3 +235,17 @@ function Aux.util.money_string(money)
 		end
 	end
 end
+
+function Aux.util.group_by(tables, keys)
+	local groups = {}
+	Aux.util.map(tables, function(table)
+		for _, group in ipairs(groups) do
+			if Aux.util.all(keys, function(key) table[key] == group[1][key] end) then
+				tinsert(group, table)
+				return
+			end
+		end
+		tinsert(groups, { table })
+	end)
+	return groups
+end

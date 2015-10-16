@@ -341,17 +341,15 @@ function refresh_entries()
 				subclass = subclass_index,
 			},
 			page = 0,
-			on_start_page = function(k, page, total_pages)
+			on_start_page = function(page, total_pages)
 				set_message('Scanning auctions: page ' .. page + 1 .. (total_pages and ' out of ' .. total_pages or '') .. ' ...')
-				return k()
 			end,
-			on_read_auction = function(k, i)
+			on_read_auction = function(i)
 				local auction_item = Aux.info.auction_item(i)
 				if auction_item and auction_item.name == name then
 					local stack_size = auction_item.charges or auction_item.count
 					record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.duration, auction_item.owner)
 				end
-				return k()
 			end,
 			on_abort = function()
 				auxSellEntries[name] = nil
