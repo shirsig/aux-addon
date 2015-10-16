@@ -2,7 +2,7 @@ Aux.completion = {}
 
 local NUM_MATCHES = 5
 
-local fuzzy, make_suggestions
+local fuzzy, generate_suggestions
 
 local item_names = {}
 
@@ -76,7 +76,7 @@ function Aux.completion.completor(edit_box)
 				value = suggestion,
 				notCheckable = true,
 				func = function()
-					self:set_quietly(edit_box, this.value)
+					self.set_quietly(this.value)
 				end,
 			}
 		end

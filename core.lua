@@ -413,7 +413,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 				and (PanelTemplates_GetSelectedTab(AuctionFrame) == 1 or PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index)
 		then
 			if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index then
-				Aux.completion.set_quietly(AuxBuyNameInputBox, container_item.name)
+				AuxBuyNameInputBox.completor.set_quietly(container_item.name)
 			end
 			return
 		elseif AUX_SELL_SHORTCUT and IsAltKeyDown()then
@@ -426,7 +426,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Aux.tabs.buy.index then
 				AuctionFrameTab_OnClick(Aux.tabs.buy.index)
 			end
-			Aux.completion.set_quietly(AuxBuyNameInputBox, container_item.name)
+			AuxBuyNameInputBox.completor.set_quietly(container_item.name)
 			Aux.buy.SearchButton_onclick()
 			return
 		end

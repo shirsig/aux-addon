@@ -91,9 +91,9 @@
 							</Layer>
 						</Layers>
 						<Scripts>
-							<OnShow>
+							<OnLoad>
 								this.completor = Aux.completion.completor(this)
-							</OnShow>
+							</OnLoad>
 							<OnTextChanged>
 								this.completor.suggest()
 							</OnTextChanged>

@@ -131,12 +131,12 @@ function submit_query(k)
 			state.job.on_submit_query()
 		end
 		wait_for_results(function()
-		wait_for_complete_results(function()
+		--wait_for_complete_results(function()
 		if state.job.on_page_loaded then
 			state.job.on_page_loaded(state.page)
 		end
 		k()
-		end)end)
+		end)--end)
 		QueryAuctionItems(
 			state.job.query.name,
 			state.job.query.min_level,
