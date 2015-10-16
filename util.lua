@@ -240,7 +240,7 @@ function Aux.util.group_by(tables, keys)
 	local groups = {}
 	Aux.util.map(tables, function(table)
 		for _, group in ipairs(groups) do
-			if Aux.util.all(keys, function(key) table[key] == group[1][key] end) then
+			if Aux.util.all(keys, function(key) return table[key] == group[1][key] end) then
 				tinsert(group, table)
 				return
 			end

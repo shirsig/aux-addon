@@ -79,7 +79,7 @@ function Aux.buy.SearchButton_onclick()
 			current_page = page
 		end,
 		on_start_page = function(page, total_pages)
-			set_message('Scanning auctions: page ' .. page + 1 .. (total_pages and ' out of ' .. total_pages or '') .. ' ...')
+			set_message('Scanning auctions: page ' .. page + 1 .. (total_pages > 0 and ' out of ' .. total_pages or '') .. ' ...')
 		end,
 		on_read_auction = function(i)
 			local auction_item = Aux.info.auction_item(i)

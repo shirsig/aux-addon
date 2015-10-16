@@ -91,9 +91,9 @@
 							</Layer>
 						</Layers>
 						<Scripts>
-							<OnLoad>
+							<OnShow>
 								this.completor = Aux.completion.completor(this)
-							</OnLoad>
+							</OnShow>
 							<OnTextChanged>
 								this.completor.suggest()
 							</OnTextChanged>
@@ -105,9 +105,7 @@
 								end
 							</OnTabPressed>
 							<OnEnterPressed>
-								if this.completor.open() then
-									this.completor.close()
-								end
+								this.completor.close()
 								this:ClearFocus()
 								Aux.buy.SearchButton_onclick()
 							</OnEnterPressed>

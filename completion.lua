@@ -104,21 +104,21 @@ function Aux.completion.completor(edit_box)
 		end
 	end
 	
-	function self:close()
+	function self.close()
 		CloseDropDownMenus(1)
 	end
 
-	function self:set_quietly(text)
+	function self.set_quietly(text)
 		quietly_set_text = text
 		edit_box:SetText(text)
 	end
 	
-	function self:completed()
-		return index ~= 0 
+	function self.open()
+		local _, owner = DropDownList1:GetPoint()
+		return DropDownList1:IsVisible() and owner == edit_box
 	end
 	
-	function self:suggest()
-		
+	function self.suggest()
 		local new_input = edit_box:GetText()
 		if new_input == quietly_set_text then
 			quietly_set_text = nil
@@ -140,26 +140,28 @@ function Aux.completion.completor(edit_box)
 		update_dropdown()
 	end
 	
-	function self:next()
+	function self.next()
+		update_dropdown()
 		if getn(suggestions) > 0 then
 			index = index > 0 and math.mod(index + 1, getn(suggestions) + 1) or 1
-			self:update_highlighting()
+			update_highlighting()
 			if index == 0 then
-				self:set_quietly(input)
+				self.set_quietly(input)
 			else	
-				self:set_quietly(suggestions[index])
+				self.set_quietly(suggestions[index])
 			end
 		end
 	end
 	
 	function self.previous()
+		update_dropdown()
 		if getn(suggestions) > 0 then
 			index = index > 0 and index - 1 or getn(suggestions)
 			update_highlighting()
 			if index == 0 then
-				self:set_quietly(input)
+				self.set_quietly(input)
 			else	
-				self:set_quietly(suggestions[index])
+				self.set_quietly(suggestions[index])
 			end
 		end
 	end

@@ -12,7 +12,7 @@ end)()
 
 local state, abort, new_job
 
-local scan, scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, abort
+local scan, scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, wait_for_complete_results, abort
 
 function Aux.scan.start(job)
 	Aux.control.on_next_update(function()
@@ -125,7 +125,7 @@ end
 
 function submit_query(k)
 	if state.page then
-		wait_for_callback(state.job.on_start_page, {state.page, state.total_pages}, function()
+		wait_for_callback(state.job.on_start_page, {state.page, state.total_pages or 0}, function()
 		controller().wait(CanSendAuctionQuery, function()
 		if state.job.on_submit_query then
 			state.job.on_submit_query()
