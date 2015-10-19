@@ -7,15 +7,15 @@ core.xml
 control.xml
 util.lua
 
-sell.xml
-buy.xml
-
 scan.lua
 stack.lua
 post.lua
 list.lua
 info.xml
 completion.xml
+
+sell.xml
+buy.xml
 
 options.xml
 about.xml

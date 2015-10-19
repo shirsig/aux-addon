@@ -38,7 +38,7 @@ function Aux.info.auction_sell_item()
 			usable = usable,
 			vendor_price = vendor_price,
 			vendor_price_per_unit = vendor_price_per_unit,
-			max_stack = max_stack,
+			max_stack = max_stack, -- TODO not working??
 			total_count = total_count,
 			base_deposit = base_deposit,
 		}
@@ -97,6 +97,16 @@ function Aux.info.set_game_tooltip(owner, tooltip, anchor, EnhTooltip_info)
 	if EnhTooltip and EnhTooltip_info then
 		EnhTooltip.TooltipCall(GameTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
 	end
+end
+
+function Aux.info.tooltip_match(patterns, tooltip)
+    return Aux.util.all(patterns, function(pattern)
+        return Aux.util.any(tooltip, function(line)
+            local left_match = line[1].text and strfind(strupper(line[1].text), strupper(pattern), 1, true)
+            local right_match = line[2].text and strfind(strupper(line[2].text), strupper(pattern), 1, true)
+            return left_match or right_match
+        end)
+    end)
 end
 
 function Aux.info.tooltip(setter)

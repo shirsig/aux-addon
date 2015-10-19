@@ -355,55 +355,94 @@
 			<Button name="AuxSellEntry10" inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			<Button name="AuxSellEntry11" inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
 			<Button name="AuxSellEntry12" inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			
-			<frame name="AuxSellQuantity">
+
+			<frame name="AuxSellParameters">
 				<Size>
 					<AbsDimension x="1" y="1"/>
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="150" y="-202"/>
+							<AbsDimension x="28" y="-202"/>
 						</Offset>
 					</Anchor>
 				</Anchors>	
 				<layers>
 					<layer level="BACKGROUND">
-						<FontString name="AuxSellStackSizeText" inherits="GameFontHighlightSmall" text="Stack Size">
-							<Anchors>
-								<Anchor point="TOP" relativePoint="BOTTOM">
-									<Offset>
-										<AbsDimension x="0" y="0"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</FontString>
-						<FontString name="AuxSellStackCountText" inherits="GameFontHighlightSmall" text="Stacks">
-							<Anchors>
-								<Anchor point="TOP" relativePoint="BOTTOM">
-									<Offset>
-										<AbsDimension x="0" y="-33"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</FontString>
+                        <FontString name="$parentDurationText" inherits="GameFontHighlightSmall" text="Duration">
+                            <Anchors>
+                                <Anchor point="TOPLEFT">
+                                    <Offset>
+                                        <AbsDimension x="0" y="-60"/>
+                                    </Offset>
+                                </Anchor>
+                            </Anchors>
+                        </FontString>
 					</layer>
 				</layers>
 				<frames>
+                    <CheckButton name="$parentShortAuctionRadio" inherits="SendMailRadioButtonTemplate" id="1">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeTo="$parentDurationText" relativePoint="BOTTOMLEFT">
+                                <Offset>
+                                    <AbsDimension x="3" y="-4"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>getglobal(this:GetName().."Text"):SetText("2h");</OnLoad>
+                            <!--<OnClick>AuctionFramePo////st_DurationRadioButton_OnClick(this, this:GetID())</OnClick>-->
+                        </Scripts>
+                    </CheckButton>
+                    <CheckButton name="$parentMediumAuctionRadio" inherits="SendMailRadioButtonTemplate" id="2">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="$parentShortAuctionRadio" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="24" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>getglobal(this:GetName().."Text"):SetText("8h");</OnLoad>
+                            <!--<OnClick>AuctionFramePost_DurationRadioButton_OnClick(this, this:GetID())</OnClick>-->
+                        </Scripts>
+                    </CheckButton>
+                    <CheckButton name="$parentLongAuctionRadio" inherits="SendMailRadioButtonTemplate" id="3">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="$parentMediumAuctionRadio" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="24" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>getglobal(this:GetName().."Text"):SetText("24h");</OnLoad>
+                            <!--<OnClick>AuctionFramePost_DurationRadioButton_OnClick(this, this:GetID())</OnClick>-->
+                        </Scripts>
+                    </CheckButton>
+                    <Slider name="AuxSellStackSizeSlider" inherits="AuxSliderTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnValueChanged>
+                                Aux.sell.quantity_update()
+                            </OnValueChanged>
+                        </Scripts>
+                    </Slider>
+                    <Slider name="AuxSellStackCountSlider" inherits="AuxSliderTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-33"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnValueChanged>
+                                Aux.sell.quantity_update()
+                            </OnValueChanged>
+                        </Scripts>
+                    </Slider>
 					<EditBox name="AuxSellStackSize" letters="3" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
-						<Size>
-							<AbsDimension x="30" y="16"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="AuxSellStackSizeText">
-								<Offset>
-									<AbsDimension x="0" y="-3"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
+						<Size><AbsDimension x="30" y="16"/></Size>
+						<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxSellStackSizeSlider"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnTextChanged>
-								Aux_Sell_QuantityUpdate()
+                                AuxSellStackSizeSlider:SetValue(this:GetNumber())
+								Aux.sell.quantity_update()
 							</OnTextChanged>
 							<OnTabPressed>
 		<!-- 						if (IsShiftKeyDown()) then
@@ -421,19 +460,12 @@
 						</Scripts>
 					</EditBox>
 					<EditBox name="AuxSellStackCount" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
-						<Size>
-							<AbsDimension x="22" y="16"/>
-						</Size>
-						<Anchors>
-							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="AuxSellStackCountText">
-								<Offset>
-									<AbsDimension x="0" y="-3"/>
-								</Offset>
-							</Anchor>
-						</Anchors>
+						<Size><AbsDimension x="30" y="16"/></Size>
+						<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxSellStackCountSlider"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnTextChanged>
-								Aux_Sell_QuantityUpdate()
+                                AuxSellStackCountSlider:SetValue(this:GetNumber())
+                                Aux.sell.quantity_update()
 							</OnTextChanged>
 							<OnTabPressed>
 		<!-- 						if (IsShiftKeyDown()) then

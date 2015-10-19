@@ -21,7 +21,7 @@ function inventory()
 			end
 		end
 	end
-	
+
 	local i = 0
 	local n = getn(inventory)
 	return function()
@@ -143,8 +143,8 @@ function process()
 end
 
 function max_stack(slot)
-	local _, _, _, _, _, _, item_stack_count = GetItemInfo(item_id(slot))
-	return item_stack_count
+	local _, _, _, _, _, _, max_stack = GetItemInfo(item_id(slot))
+	return max_stack
 end
 
 function Aux.stack.stop(k)

@@ -10,11 +10,16 @@ local current_auction
 
 -----------------------------------------
 
-local record_auction, undercut, item_class_index, item_subclass_index, set_message, report, select_entry, update_recommendation, refresh_entries
+local record_auction, undercut, item_class_index, item_subclass_index, set_message, report, select_entry, update_recommendation, refresh_entries, availability
 
 -----------------------------------------
 
 function Aux.sell.on_open()
+    AuxSellStackSizeSlider:SetValueStep(1)
+    AuxSellStackSizeSliderText:SetText('Stack Size')
+
+    AuxSellStackCountSlider:SetValueStep(1)
+    AuxSellStackCountSliderText:SetText('Stack Count')
 end
 
 -----------------------------------------
@@ -64,7 +69,7 @@ end
 
 function Aux.sell.post_auctions()
 	if current_auction and PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.sell.index then
-		local name, stack_size, buyout_price, stack_count = current_auction.name, current_auction.stackSize, MoneyInputFrame_GetCopper(BuyoutPrice), current_auction.stackCount
+		local name, stack_size, buyout_price, stack_count = current_auction.name, AuxSellStackSize:GetNumber(), MoneyInputFrame_GetCopper(BuyoutPrice), AuxSellStackCount:GetNumber()
 		local duration
 		if AuctionFrameAuctions.duration == 120 then
 			duration = 2
@@ -137,9 +142,9 @@ function select_entry()
 		
 		auxSellEntries[current_auction.name].selected = absoluteBest
 
-		if bestPrice[current_auction.stackSize] then
-			auxSellEntries[current_auction.name].selected = bestPrice[current_auction.stackSize]
-			bestPriceOurStackSize = bestPrice[current_auction.stackSize]
+		if bestPrice[AuxSellStackSize:GetNumber()] then
+			auxSellEntries[current_auction.name].selected = bestPrice[AuxSellStackSize:GetNumber()]
+			bestPriceOurStackSize = bestPrice[AuxSellStackSize:GetNumber()]
 		end
 	end
 end
@@ -158,27 +163,29 @@ function update_recommendation()
 
 		MoneyInputFrame_SetCopper(BuyoutPrice, 0)
 		MoneyInputFrame_SetCopper(StartPrice, 0)
-		
-		Aux_Sell_SetStackSize(0)
-		Aux_Sell_SetStackCount(0)
+
+        AuxSellStackSizeSlider:SetMinMaxValues(0,0)
+        AuxSellStackSize:SetNumber(0)
+        AuxSellStackCountSlider:SetMinMaxValues(0,0)
+        AuxSellStackCount:SetNumber(0)
 		
 		set_message("Drag an item to the Auction Item area\n\nto see recommended pricing information")
-	else
+    else
+        AuxSellStackSize:SetNumber(AuxSellStackSizeSlider:GetValue())
+        AuxSellStackCount:SetNumber(AuxSellStackCountSlider:GetValue())
+
 		AuxSellItem:SetNormalTexture(current_auction.texture)
 		AuxSellItemName:SetText(current_auction.name)
-		if current_auction.stackSize > 1 then
-			AuxSellItemCount:SetText(current_auction.stackSize)
+		if AuxSellStackSize:GetNumber() > 1 then
+			AuxSellItemCount:SetText(AuxSellStackSize:GetNumber())
 			AuxSellItemCount:Show()
 		else
 			AuxSellItemCount:Hide()
 		end
 		
-		AuxSellRefreshButton:Enable()	
+		AuxSellRefreshButton:Enable()
 		
-		Aux_Sell_SetStackSize(current_auction.stackSize)
-		Aux_Sell_SetStackCount(current_auction.stackCount)
-		
-		MoneyFrame_Update("AuctionsDepositMoneyFrame", current_auction.base_deposit * current_auction.stackCount * (current_auction.has_charges and 1 or current_auction.stackSize) * AuctionFrameAuctions.duration / 120)
+		MoneyFrame_Update("AuctionsDepositMoneyFrame", current_auction.base_deposit * AuxSellStackCount:GetNumber() * (current_auction.has_charges and 1 or AuxSellStackSize:GetNumber()) * AuctionFrameAuctions.duration / 120)
 		
 		if auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected then
 			if not auxSellEntries[current_auction.name].created or GetTime() - auxSellEntries[current_auction.name].created > 1800 then
@@ -186,7 +193,7 @@ function update_recommendation()
 				AuxRecommendStaleText:Show()
 			end
 		
-			local newBuyoutPrice = auxSellEntries[current_auction.name].selected.itemPrice * current_auction.stackSize
+			local newBuyoutPrice = auxSellEntries[current_auction.name].selected.itemPrice * AuxSellStackSize:GetNumber()
 
 			if auxSellEntries[current_auction.name].selected.numYours == 0 then
 				newBuyoutPrice = undercut(newBuyoutPrice)
@@ -198,18 +205,18 @@ function update_recommendation()
 			Aux_ShowElems(Aux.tabs.sell.recommendationElements)
 			
 			AuxRecommendText:SetText("Recommended Buyout Price")
-			AuxRecommendPerStackText:SetText("for a stack of "..current_auction.stackSize)
+			AuxRecommendPerStackText:SetText("for a stack of "..AuxSellStackSize:GetNumber())
 			
 
 			AuxRecommendItemTex:SetNormalTexture(current_auction.texture)
-			if current_auction.stackSize > 1 then
-				AuxRecommendItemTexCount:SetText(current_auction.stackSize)
+			if AuxSellStackSize:GetNumber() > 1 then
+				AuxRecommendItemTexCount:SetText(AuxSellStackSize:GetNumber())
 				AuxRecommendItemTexCount:Show()
 			else
 				AuxRecommendItemTexCount:Hide()
 			end
 
-			MoneyFrame_Update("AuxRecommendPerItemPrice",  Aux_Round(current_auction.stackSize > 0 and newBuyoutPrice / current_auction.stackSize or 0))
+			MoneyFrame_Update("AuxRecommendPerItemPrice",  Aux_Round(AuxSellStackSize:GetNumber() > 0 and newBuyoutPrice / AuxSellStackSize:GetNumber() or 0))
 			MoneyFrame_Update("AuxRecommendPerStackPrice", Aux_Round(newBuyoutPrice))
 			
 			MoneyInputFrame_SetCopper(BuyoutPrice, Aux_Round(newBuyoutPrice))
@@ -233,39 +240,11 @@ function update_recommendation()
 	Aux.sell.scrollbar_update()
 end
 
------------------------------------------
-
-function Aux_Sell_GetStackSize()
-	return AuxSellStackSize:GetNumber()
-end
-
------------------------------------------
-
-function Aux_Sell_SetStackSize(stackSize)
-	return AuxSellStackSize:SetNumber(stackSize)
-end
-
------------------------------------------
-
-function Aux_Sell_GetStackCount()
-	return AuxSellStackCount:GetNumber()
-end
-
------------------------------------------
-
-function Aux_Sell_SetStackCount(stackCount)
-	return AuxSellStackCount:SetNumber(stackCount)
-end
-
------------------------------------------
-
-function Aux_Sell_QuantityUpdate()
-	if current_auction then
-		current_auction.stackSize = Aux_Sell_GetStackSize()
-		current_auction.stackCount = Aux_Sell_GetStackCount()
-	end
-	
-	select_entry()
+function Aux.sell.quantity_update()
+    if current_auction then
+        AuxSellStackCountSlider:SetMinMaxValues(1, current_auction.has_charges and current_auction.availability[current_auction.charges] or floor(current_auction.availability[0] / AuxSellStackSize:GetNumber()))
+    end
+    select_entry()
 	update_recommendation()
 end
 
@@ -288,7 +267,7 @@ function Aux.sell.set_auction(bag, slot)
 		ClearCursor()
 		PickupContainerItem(bag,slot)
 		ClickAuctionSellItemButton()
-		local auction_sell_item = Aux.info.auction_sell_item() -- TODO
+		local auction_sell_item = Aux.info.auction_sell_item()
 		ClearCursor()
 		ClickAuctionSellItemButton()
 		ClearCursor()
@@ -300,13 +279,17 @@ function Aux.sell.set_auction(bag, slot)
 				current_auction = {
 					name = container_item.name,
 					texture = container_item.texture,
-					stackSize = container_item.charges or container_item.count,
-					stackCount = 1,
 					class = container_item.type,
 					subclass = container_item.subtype,
 					base_deposit = auction_sell_item.base_deposit,
 					has_charges = container_item.charges ~= nil,
-				}
+                    availability = availability(container_item.name)
+                }
+
+                AuxSellStackSizeSlider:SetMinMaxValues(current_auction.charges or 1, current_auction.charges or current_auction.availability[0])
+                AuxSellStackSizeSlider:SetValue(container_item.charges or container_item.count)
+                AuxSellStackCountSlider:SetValue(1)
+                Aux.sell.quantity_update()
 				
 				if not auxSellEntries[current_auction.name] then
 					refresh_entries()
@@ -320,7 +303,21 @@ function Aux.sell.set_auction(bag, slot)
 	end
 end
 
------------------------------------------
+function availability(name)
+    local availability = {}
+    for bag = 0, 4 do
+        if GetBagName(bag) then
+            for slot = 1, GetContainerNumSlots(bag) do
+                local item_info = Aux.info.container_item(bag, slot)
+                if item_info and item_info.name == name then
+                    local charges_class = item_info.charges or 0
+                    availability[charges_class] = (availability[charges_class] or 0) + item_info.count
+                end
+            end
+        end
+    end
+    return availability
+end
 
 function refresh_entries()
 	if current_auction then
@@ -418,7 +415,7 @@ function Aux.sell.scrollbar_update()
 				lineEntry_time:SetText("Very Long")
 			end
 			
-			if entry.stackSize == current_auction.stackSize then
+			if entry.stackSize == AuxSellStackSize:GetNumber() then
 				lineEntry_stacks:SetTextColor(0.2, 0.9, 0.2)
 			else
 				lineEntry_stacks:SetTextColor(1.0, 1.0, 1.0)

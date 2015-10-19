@@ -3,8 +3,8 @@
 	<Script file="core.lua"/> 
   
 	<Frame>
-      <Scripts> 
-			<OnLoad> 
+      <Scripts>
+			<OnLoad>
 				this:RegisterEvent("VARIABLES_LOADED")
 				this:RegisterEvent("ADDON_LOADED")
 				this:RegisterEvent("AUCTION_HOUSE_SHOW")
@@ -13,6 +13,185 @@
 			<OnEvent> 
 				Aux_OnEvent()
 			</OnEvent> 
-		</Scripts> 
+		</Scripts>
 	</Frame>
+
+    <ScrollingMessageFrame name="AuxLogFrame" hidden="false">
+        <Size><AbsDimension x="300" y="60"/></Size>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentLeft" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
+                    <Size><AbsDimension x="10" y="60"/></Size>
+                    <Anchors><Anchor point="LEFT"><Offset><AbsDimension x="-3" y="-4"/></Offset></Anchor></Anchors>
+                    <TexCoords left="0" right="0.078125" top="0" bottom="1.0"/>
+                </Texture>
+                <Texture name="$parentRight" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
+                    <Size><AbsDimension x="10" y="60"/></Size>
+                    <Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="-4"/></Offset></Anchor>
+                    </Anchors>
+                    <TexCoords left="0.75" right="0.828125" top="0" bottom="1.0"/>
+                </Texture>
+                <Texture file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
+                    <Size><AbsDimension x="10" y="60"/></Size>
+                    <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        <Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                    </Anchors>
+                    <TexCoords left="0.078125" right="0.75" top="0" bottom="1.0"/>
+                </Texture>
+            </Layer>
+        </Layers>
+        <Frames>
+            <Button name="$parentBottomButton">
+                <Size>
+                    <AbsDimension x="22" y="22"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT">
+                        <Offset>
+                            <AbsDimension x="-3" y="-4"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Layers>
+                    <Layer level="OVERLAY">
+                        <Texture name="$parentFlash" file="Interface\ChatFrame\UI-ChatIcon-BlinkHilight" hidden="true"/>
+                    </Layer>
+                </Layers>
+                <Scripts>
+                    <OnClick>
+                        PlaySound("igChatBottom");
+                        this:GetParent():ScrollToBottom();
+                    </OnClick>
+                </Scripts>
+                <NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollEnd-Up"/>
+                <PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollEnd-Down"/>
+                <DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollEnd-Disabled"/>
+                <HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+            </Button>
+            <Button name="$parentDownButton">
+                <Size>
+                    <AbsDimension x="22" y="22"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="BOTTOM" relativeTo="$parentBottomButton" relativePoint="TOP">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        MessageFrameScrollButton_OnLoad();
+                    </OnLoad>
+                    <OnUpdate>
+                        MessageFrameScrollButton_OnUpdate(arg1);
+                    </OnUpdate>
+                    <OnClick>
+                        if ( this:GetButtonState() == "PUSHED" ) then
+                        this.clickDelay = MESSAGE_SCROLLBUTTON_INITIAL_DELAY;
+                        else
+                        PlaySound("igChatScrollDown");
+                        this:GetParent():ScrollDown();
+                        end
+                    </OnClick>
+                </Scripts>
+                <NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up"/>
+                <PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down"/>
+                <DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled"/>
+                <HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+            </Button>
+            <Button name="$parentUpButton">
+                <Size>
+                    <AbsDimension x="22" y="22"/>
+                </Size>
+                <Anchors>
+                    <Anchor point="BOTTOM" relativeTo="$parentDownButton" relativePoint="TOP"/>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        MessageFrameScrollButton_OnLoad();
+                    </OnLoad>
+                    <OnUpdate>
+                        MessageFrameScrollButton_OnUpdate(arg1);
+                    </OnUpdate>
+                    <OnClick>
+                        if ( this:GetButtonState() == "PUSHED" ) then
+                        this.clickDelay = MESSAGE_SCROLLBUTTON_INITIAL_DELAY;
+                        else
+                        PlaySound("igChatScrollUp");
+                        this:GetParent():ScrollUp();
+                        end
+                    </OnClick>
+                </Scripts>
+                <NormalTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up"/>
+                <PushedTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Down"/>
+                <DisabledTexture file="Interface\ChatFrame\UI-ChatIcon-ScrollUp-Disabled"/>
+                <HighlightTexture file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD"/>
+            </Button>
+        </Frames>
+        <Scripts>
+            <OnLoad>
+                Aux.log_frame_load()
+            </OnLoad>
+            <OnUpdate>
+                Aux.log_frame_update(arg1)
+            </OnUpdate>
+            <OnHyperlinkClick>
+                ChatFrame_OnHyperlinkShow(arg1)
+            </OnHyperlinkClick>
+            <OnHyperlinkLeave>
+                ChatFrame_OnHyperlinkHide()
+            </OnHyperlinkLeave>
+        </Scripts>
+        <FontString inherits="ChatFontNormal" justifyH="LEFT"/>
+    </ScrollingMessageFrame>
+    <Slider name="AuxSliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true">
+        <Size>
+            <AbsDimension x="128" y="17"/>
+        </Size>
+        <HitRectInsets>
+            <AbsInset left="0" right="0" top="-10" bottom="-10"/>
+        </HitRectInsets>
+        <Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
+            <EdgeSize>
+                <AbsValue val="8"/>
+            </EdgeSize>
+            <TileSize>
+                <AbsValue val="8"/>
+            </TileSize>
+            <BackgroundInsets>
+                <AbsInset left="3" right="3" top="6" bottom="6"/>
+            </BackgroundInsets>
+        </Backdrop>
+        <Layers>
+            <Layer level="ARTWORK">
+                <FontString name="$parentText" inherits="GameFontHighlightSmall">
+                    <Anchors>
+                        <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Scripts>
+            <OnEnter>
+                if ( this.tooltipText ) then
+                GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
+                GameTooltip:SetText(this.tooltipText, nil, nil, nil, nil, 1);
+                end
+                if ( this.tooltipRequirement ) then
+                GameTooltip:AddLine(this.tooltipRequirement, "", 1.0, 1.0, 1.0);
+                GameTooltip:Show();
+                end
+            </OnEnter>
+            <OnLeave>
+                GameTooltip:Hide();
+            </OnLeave>
+        </Scripts>
+        <ThumbTexture name="$parentThumb" file="Interface\Buttons\UI-SliderBar-Button-Horizontal">
+            <Size>
+                <AbsDimension x="32" y="32"/>
+            </Size>
+        </ThumbTexture>
+    </Slider>
 </Ui>

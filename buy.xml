@@ -66,12 +66,30 @@
 			</Layer>
 		</Layers>
 		<Frames>
-			<Frame name="AuxBuyList">
+            <Frame name="AuxBuyBuyList" hidden="true">
+                <Size><AbsDimension x="615" y="326"/></Size>
+                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="179" y="-94"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnLoad>
+                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, Aux.util.map(Aux.buy.modes[1].columns, function(column) return { column = column, sort_ascending = true } end), Aux.buy.modes[1].on_cell_click, Aux.buy.modes[1].on_cell_enter, Aux.buy.modes[1].on_cell_leave)
+                    </OnLoad>
+                </Scripts>
+            </Frame>
+            <Frame name="AuxBuySellList" hidden="true">
+                <Size><AbsDimension x="615" y="326"/></Size>
+                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="179" y="-94"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnLoad>
+                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[2].columns, Aux.util.map(Aux.buy.modes[2].columns, function(column) return { column = column, sort_ascending = true } end), Aux.buy.modes[2].on_cell_click, Aux.buy.modes[2].on_cell_enter, Aux.buy.modes[2].on_cell_leave)
+                    </OnLoad>
+                </Scripts>
+            </Frame>
+			<Frame name="AuxBuyFullList" hidden="true">
 				<Size><AbsDimension x="615" y="326"/></Size>
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="179" y="-94"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
-						AuxBuySheet = Aux.sheet.initialize(this)
+                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[3].columns, Aux.util.map(Aux.buy.modes[3].columns, function(column) return { column = column, sort_ascending = true } end), Aux.buy.modes[3].on_cell_click, Aux.buy.modes[3].on_cell_enter, Aux.buy.modes[3].on_cell_leave)
 					</OnLoad>
 				</Scripts>
 			</Frame>
@@ -80,9 +98,28 @@
 				<Size><AbsDimension x="1" y="1"/></Size>
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="28" y="-112"/></Offset></Anchor></Anchors>
 				<Frames>
+                    <Frame name="AuxBuyModeDropDown" inherits="UIDropDownMenuTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0" /></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)
+                            </OnLoad>
+                            <OnShow>
+                                UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)
+                            </OnShow>
+                        </Scripts>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                                <FontString inherits="GameFontHighlightSmall" text="Mode" justifyH="LEFT">
+                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="20" y="8"/></Offset></Anchor></Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                    </Frame>
+
 					<EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="InputBoxTemplate">
 						<Size><AbsDimension x="120" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-65"/></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Name" justifyH="LEFT">
@@ -121,7 +158,7 @@
 					
 					<CheckButton name="AuxBuyExactCheckButton" inherits="UICheckButtonTemplate" checked="true">
 						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="123" y="0" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="123" y="-65" /></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Exact" justifyH="LEFT">
@@ -152,7 +189,7 @@
 					</Frame>
 
 					<Frame name="AuxBuyQualityDropDown" inherits="UIDropDownMenuTemplate">
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-23" y="-65" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-23" y="-101" /></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnLoad>
 								UIDropDownMenu_Initialize(this, AuxBuyQualityDropDown_Initialize)
@@ -173,7 +210,7 @@
 					<EditBox name="AuxBuyMinLevel" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
 						<Size><AbsDimension x="30" y="22"/></Size>
 						<Anchors>
-							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-101"/></Offset></Anchor>
+							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-130"/></Offset></Anchor>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -189,7 +226,7 @@
 						</Layers>
 						<Scripts>
 							<OnEnterPressed>
-								this:ClearFocus();
+								this:ClearFocus()
 							</OnEnterPressed>
 						</Scripts>
 					</EditBox>
@@ -200,13 +237,13 @@
 						</Anchors>
 						<Scripts>
 							<OnEnterPressed>
-								this:ClearFocus();
+								this:ClearFocus()
 							</OnEnterPressed>
 						</Scripts>
 					</EditBox>
 					<CheckButton name="AuxBuyUsableCheckButton" inherits="UICheckButtonTemplate">
 						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="100" y="-101" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="100" y="-130" /></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Usable" justifyH="LEFT">
@@ -314,7 +351,7 @@
 				</Anchors>
 				<Scripts>
 					<OnClick>
-						HideUIPanel(this:GetParent():GetParent());
+						HideUIPanel(this:GetParent():GetParent())
 					</OnClick>
 				</Scripts>
 			</Button>
@@ -337,7 +374,8 @@
 									<Anchors><Anchor point="LEFT" relativePoint="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
 									<TexCoords left="0" right="0.078125" top="0" bottom="1.0"/>
 								</Texture>
-								<Texture name="$parentRight" file="Interface\AuctionFrame\UI-AuctionItemNameFrame"><Size><AbsDimension x="10" y="54"/></Size>
+								<Texture name="$parentRight" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
+                                    <Size><AbsDimension x="10" y="54"/></Size>
 									<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="204" y="0"/></Offset></Anchor>
 									</Anchors>
 									<TexCoords left="0.75" right="0.828125" top="0" bottom="1.0"/>

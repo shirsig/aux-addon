@@ -54,6 +54,10 @@ function Aux_OnAddonLoaded()
 		Aux_SetupHookFunctions()
 		
 		Aux.tabs.sell.hiddenElements = {
+                AuctionsDurationText,
+                AuctionsShortAuctionButton,
+                AuctionsMediumAuctionButton,
+                AuctionsLongAuctionButton,
 				AuctionsCreateAuctionButton,
 				AuctionsItemButton,
 				AuctionsTitle,
@@ -90,7 +94,53 @@ function Aux_OnAddonLoaded()
 	end
 end
 
------------------------------------------
+function Aux.log_frame_load()
+    this.flashTimer = 0
+end
+
+function Aux.log_frame_update(elapsedSec)
+    if not this:IsVisible() then
+        return
+    end
+
+    local flash = getglobal(this:GetName().."BottomButtonFlash")
+
+    if not flash then
+        return
+    end
+
+    if this:AtBottom() then
+        if flash:IsVisible() then
+            flash:Hide()
+        end
+        return
+    end
+
+    local flashTimer = this.flashTimer + elapsedSec
+    if flashTimer < CHAT_BUTTON_FLASH_TIME then
+        this.flashTimer = flashTimer
+        return
+    end
+
+    while flashTimer >= CHAT_BUTTON_FLASH_TIME do
+        flashTimer = flashTimer - CHAT_BUTTON_FLASH_TIME
+    end
+    this.flashTimer = flashTimer
+
+    if flash:IsVisible() then
+        flash:Hide()
+    else
+        flash:Show()
+    end
+end
+
+function Aux.log(msg)
+    local info = ChatTypeInfo["SYSTEM"]
+    AuxLogFrame:AddMessage(msg, 1, 1, 0)
+    if not AuxLogFrame:IsVisible() and DEFAULT_CHAT_FRAME then
+        DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
+    end
+end
 
 function Aux_SetupHookFunctions()
 	
@@ -189,8 +239,6 @@ function Aux_OnAuctionHouseClosed()
 	
 end
 
------------------------------------------
-
 function Aux_AuctionFrameTab_OnClick(index)
 	
 	if not index then
@@ -241,16 +289,6 @@ function Aux_AuctionFrameTab_OnClick(index)
 	end
 end
 
------------------------------------------
-
-function Aux.log(msg)
-	if DEFAULT_CHAT_FRAME then
-		DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
-	end
-end
-
------------------------------------------
-
 function Aux_AddPanels()
 	
 	local sellFrame = CreateFrame("Frame", "AuxSellPanel", AuctionFrame, "AuxSellTemplate")
@@ -262,8 +300,11 @@ function Aux_AddPanels()
     local buyFrame = CreateFrame("Frame", "AuxBuyPanel", AuctionFrame, "AuxBuyTemplate")
 	buyFrame:SetParent("AuctionFrame")
 	buyFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
+    AuxLogFrame:SetParent(buyFrame)
+    AuxLogFrame:SetPoint('TOP', buyFrame, 100, -38)
 	relevel(buyFrame)
 	buyFrame:Hide()
+    -- AuxLogFrame:SetFrameLevel(buyFrame:GetFrameLevel() + 1)
 	
 	local optionsFrame = CreateFrame("Frame", "AuxOptionsButtonPanel", AuctionFrame, "AuxOptionsButtonTemplate")
 	optionsFrame:SetParent("AuctionFrame")

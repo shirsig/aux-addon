@@ -1,6 +1,6 @@
 Aux.buy = {}
 
-local process_auction, set_message, report, tooltip_match, show_dialog, find_auction
+local process_auction, set_message, report, show_dialog, find_auction, hide_sheet, show_sheet, alpha_setter
 local entries
 local selectedEntries = {}
 local search_query
@@ -8,6 +8,498 @@ local tooltip_patterns = {}
 local current_page
 local refresh
 
+local function alpha_setter(cell, datum)
+    cell:SetAlpha(datum.gone and 0.4 or 1)
+end
+
+Aux.buy.modes = {
+	{
+		name = 'Buy',
+        on_cell_click = function (sheet, row_index, column_index)
+            local entry_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            AuxBuyEntry_OnClick(entry_index)
+        end,
+
+        on_cell_enter = function (sheet, row_index, column_index)
+            sheet.rows[row_index].highlight:SetAlpha(.5)
+        end,
+
+        on_cell_leave = function (sheet, row_index, column_index)
+            sheet.rows[row_index].highlight:SetAlpha(0)
+        end,
+        columns = {
+            {
+                title = '#',
+                width = 23,
+                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(datum.stack_size)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Auction Item',
+                width = 157,
+                comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
+                cell_initializer = function(cell)
+                    local icon = CreateFrame('Button', nil, cell)
+                    local icon_texture = icon:CreateTexture(nil, 'BORDER')
+                    icon_texture:SetAllPoints(icon)
+                    icon.icon_texture = icon_texture
+                    local normal_texture = icon:CreateTexture(nil)
+                    normal_texture:SetPoint('CENTER', 0, 0)
+                    normal_texture:SetWidth(22)
+                    normal_texture:SetHeight(22)
+                    normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
+                    icon:SetNormalTexture(normal_texture)
+                    icon:SetPoint('LEFT', cell)
+                    icon:SetWidth(12)
+                    icon:SetHeight(12)
+                    icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
+                    icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
+                    icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
+                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT', cell.EnhTooltip_info) end)
+                    icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
+                    local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
+                    text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
+                    text:SetPoint('TOPRIGHT', cell)
+                    text:SetPoint('BOTTOMRIGHT', cell)
+                    text:SetJustifyV('TOP')
+                    text:SetJustifyH('LEFT')
+                    text:SetTextColor(0.8, 0.8, 0.8)
+                    cell.text = text
+                    cell.icon = icon
+                end,
+                cell_setter = function(cell, datum)
+                    cell.tooltip = datum.tooltip
+                    cell.EnhTooltip_info = datum.EnhTooltip_info
+                    cell.icon.icon_texture:SetTexture(datum.texture)
+                    if not datum.usable then
+                        cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
+                    else
+                        cell.icon.icon_texture:SetVertexColor(1.0, 1.0, 1.0)
+                    end
+                    cell.text:SetText('['..datum.tooltip[1][1].text..']')
+                    local color = ITEM_QUALITY_COLORS[datum.quality]
+                    cell.text:SetTextColor(color.r, color.g, color.b)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Lvl',
+                width = 23,
+                comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    local level = max(1, datum.level)
+                    local text
+                    if level > UnitLevel('player') then
+                        text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
+                    else
+                        text = level
+                    end
+                    cell.text:SetText(text)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Left',
+                width = 30,
+                comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
+                cell_setter = function(cell, datum)
+                    local text
+                    if datum.duration == 1 then
+                        text = '30m'
+                    elseif datum.duration == 2 then
+                        text = '2h'
+                    elseif datum.duration == 3 then
+                        text = '8h'
+                    elseif datum.duration == 4 then
+                        text = '24h'
+                    end
+                    cell.text:SetText(text)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Owner',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(datum.owner)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Bid/ea',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Buy/ea',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Bid',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.bid))
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Buy',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.buyout_price))
+                    alpha_setter(cell, datum)
+                end,
+            },
+        },
+	},
+	{
+		name = 'Bid',
+        on_cell_click = function (sheet, row_index, column_index)
+            local entry_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            AuxBuyEntry_OnClick(entry_index)
+        end,
+
+        on_cell_enter = function (sheet, row_index, column_index)
+            sheet.rows[row_index].highlight:SetAlpha(.5)
+        end,
+
+        on_cell_leave = function (sheet, row_index, column_index)
+            sheet.rows[row_index].highlight:SetAlpha(0)
+        end,
+        columns = {
+            {
+                title = '#',
+                width = 23,
+                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(datum.stack_size)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Auction Item',
+                width = 157,
+                comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
+                cell_initializer = function(cell)
+                    local icon = CreateFrame('Button', nil, cell)
+                    local icon_texture = icon:CreateTexture(nil, 'BORDER')
+                    icon_texture:SetAllPoints(icon)
+                    icon.icon_texture = icon_texture
+                    local normal_texture = icon:CreateTexture(nil)
+                    normal_texture:SetPoint('CENTER', 0, 0)
+                    normal_texture:SetWidth(22)
+                    normal_texture:SetHeight(22)
+                    normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
+                    icon:SetNormalTexture(normal_texture)
+                    icon:SetPoint('LEFT', cell)
+                    icon:SetWidth(12)
+                    icon:SetHeight(12)
+                    icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
+                    icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
+                    icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
+                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT', cell.EnhTooltip_info) end)
+                    icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
+                    local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
+                    text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
+                    text:SetPoint('TOPRIGHT', cell)
+                    text:SetPoint('BOTTOMRIGHT', cell)
+                    text:SetJustifyV('TOP')
+                    text:SetJustifyH('LEFT')
+                    text:SetTextColor(0.8, 0.8, 0.8)
+                    cell.text = text
+                    cell.icon = icon
+                end,
+                cell_setter = function(cell, datum)
+                    cell.tooltip = datum.tooltip
+                    cell.EnhTooltip_info = datum.EnhTooltip_info
+                    cell.icon.icon_texture:SetTexture(datum.texture)
+                    if not datum.usable then
+                        cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
+                    else
+                        cell.icon.icon_texture:SetVertexColor(1.0, 1.0, 1.0)
+                    end
+                    cell.text:SetText('['..datum.tooltip[1][1].text..']')
+                    local color = ITEM_QUALITY_COLORS[datum.quality]
+                    cell.text:SetTextColor(color.r, color.g, color.b)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Lvl',
+                width = 23,
+                comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    local level = max(1, datum.level)
+                    local text
+                    if level > UnitLevel('player') then
+                        text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
+                    else
+                        text = level
+                    end
+                    cell.text:SetText(text)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Left',
+                width = 30,
+                comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
+                cell_setter = function(cell, datum)
+                    local text
+                    if datum.duration == 1 then
+                        text = '30m'
+                    elseif datum.duration == 2 then
+                        text = '2h'
+                    elseif datum.duration == 3 then
+                        text = '8h'
+                    elseif datum.duration == 4 then
+                        text = '24h'
+                    end
+                    cell.text:SetText(text)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Owner',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(datum.owner)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Bid/ea',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Buy/ea',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Bid',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.bid))
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Buy',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.buyout_price))
+                    alpha_setter(cell, datum)
+                end,
+            },
+        },
+	},
+	{
+		name = 'Full',
+        on_cell_click = function (sheet, row_index, column_index)
+            local entry_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            AuxBuyEntry_OnClick(entry_index)
+        end,
+
+        on_cell_enter = function (sheet, row_index, column_index)
+            sheet.rows[row_index].highlight:SetAlpha(.5)
+        end,
+
+        on_cell_leave = function (sheet, row_index, column_index)
+            sheet.rows[row_index].highlight:SetAlpha(0)
+        end,
+		columns = {
+            {
+                title = '#',
+                width = 23,
+                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(datum.stack_size)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Auction Item',
+                width = 157,
+                comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
+                cell_initializer = function(cell)
+                    local icon = CreateFrame('Button', nil, cell)
+                    local icon_texture = icon:CreateTexture(nil, 'BORDER')
+                    icon_texture:SetAllPoints(icon)
+                    icon.icon_texture = icon_texture
+                    local normal_texture = icon:CreateTexture(nil)
+                    normal_texture:SetPoint('CENTER', 0, 0)
+                    normal_texture:SetWidth(22)
+                    normal_texture:SetHeight(22)
+                    normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
+                    icon:SetNormalTexture(normal_texture)
+                    icon:SetPoint('LEFT', cell)
+                    icon:SetWidth(12)
+                    icon:SetHeight(12)
+                    icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
+                    icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
+                    icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
+                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT', cell.EnhTooltip_info) end)
+                    icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
+                    local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
+                    text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
+                    text:SetPoint('TOPRIGHT', cell)
+                    text:SetPoint('BOTTOMRIGHT', cell)
+                    text:SetJustifyV('TOP')
+                    text:SetJustifyH('LEFT')
+                    text:SetTextColor(0.8, 0.8, 0.8)
+                    cell.text = text
+                    cell.icon = icon
+                end,
+                cell_setter = function(cell, datum)
+                    cell.tooltip = datum.tooltip
+                    cell.EnhTooltip_info = datum.EnhTooltip_info
+                    cell.icon.icon_texture:SetTexture(datum.texture)
+                    if not datum.usable then
+                        cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
+                    else
+                        cell.icon.icon_texture:SetVertexColor(1.0, 1.0, 1.0)
+                    end
+                    cell.text:SetText('['..datum.tooltip[1][1].text..']')
+                    local color = ITEM_QUALITY_COLORS[datum.quality]
+                    cell.text:SetTextColor(color.r, color.g, color.b)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Lvl',
+                width = 23,
+                comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    local level = max(1, datum.level)
+                    local text
+                    if level > UnitLevel('player') then
+                        text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
+                    else
+                        text = level
+                    end
+                    cell.text:SetText(text)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Left',
+                width = 30,
+                comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
+                cell_setter = function(cell, datum)
+                    local text
+                    if datum.duration == 1 then
+                        text = '30m'
+                    elseif datum.duration == 2 then
+                        text = '2h'
+                    elseif datum.duration == 3 then
+                        text = '8h'
+                    elseif datum.duration == 4 then
+                        text = '24h'
+                    end
+                    cell.text:SetText(text)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Owner',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(datum.owner)
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Bid/ea',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Buy/ea',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Bid',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.bid))
+                    alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Buy',
+                width = 70,
+                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.buyout_price))
+                    alpha_setter(cell, datum)
+                end,
+            },
+        },
+	},
+}
 
 function Aux.buy.exit()
 	Aux.buy.dialog_cancel()
@@ -28,7 +520,7 @@ end
 function Aux.buy.dialog_cancel()
 	Aux.scan.abort()
 	AuxBuyConfirmation:Hide()
-	AuxBuyList:Show()
+	show_sheet()
 	AuxBuySearchButton:Enable()
 end
 
@@ -38,7 +530,15 @@ function Aux.buy.StopButton_onclick()
 	Aux.scan.abort()
 end
 
------------------------------------------
+function show_sheet()
+    -- TODO
+    AuxBuyFullList:Show()
+end
+
+function hide_sheet()
+    -- TODO
+    AuxBuyFullList:Hide()
+end
 
 function Aux.buy.SearchButton_onclick()
 
@@ -68,7 +568,7 @@ function Aux.buy.SearchButton_onclick()
 		usable = AuxBuyUsableCheckButton:GetChecked()
 	}
 	
-	set_message('Scanning auctions ...')
+	set_message('Starting scan')
 	Aux.scan.start{
 		query = search_query,
 		page = 0,
@@ -79,12 +579,12 @@ function Aux.buy.SearchButton_onclick()
 			current_page = page
 		end,
 		on_start_page = function(page, total_pages)
-			set_message('Scanning auctions: page ' .. page + 1 .. (total_pages > 0 and ' out of ' .. total_pages or '') .. ' ...')
+			set_message('Scanning page ' .. page + 1 .. (total_pages > 0 and ' out of ' .. total_pages or ''))
 		end,
 		on_read_auction = function(i)
 			local auction_item = Aux.info.auction_item(i)
 			if auction_item then
-				if (auction_item.name == search_query.name or search_query.name == '' or not AuxBuyExactCheckButton:GetChecked()) and tooltip_match(tooltip_patterns, auction_item.tooltip) then
+				if (auction_item.name == search_query.name or search_query.name == '' or not AuxBuyExactCheckButton:GetChecked()) and Aux.info.tooltip_match(tooltip_patterns, auction_item.tooltip) then
 					process_auction(auction_item, current_page)
 				end
 			end
@@ -123,8 +623,7 @@ end
 -----------------------------------------
 
 function set_message(msg)
-	AuxBuyMessage:SetText(msg)
-	AuxBuyMessage:Show()
+    Aux.log(msg)
 end
 
 -----------------------------------------
@@ -156,7 +655,7 @@ function show_dialog(buyout_mode, entry, amount)
 		AuxBuyConfirmationBuyoutPrice:Hide()
 		AuxBuyConfirmationBid:Show()
 	end
-	AuxBuyList:Hide()
+	hide_sheet()
 	AuxBuyConfirmation:Show()
 end
 
@@ -245,7 +744,7 @@ function find_auction(entry, buyout_mode, express_mode)
 						Aux.scan.abort()
 						AuxBuySearchButton:Enable()
 						AuxBuyConfirmation:Hide()
-						AuxBuyList:Show()
+						show_sheet()
 					end
 					AuxBuyConfirmationActionButton:Enable()
 				end
@@ -335,19 +834,7 @@ end
 -----------------------------------------
 
 function Aux_Buy_ScrollbarUpdate()
-	Aux.list.populate(AuxBuySheet, entries or {})
-end
-
------------------------------------------
-
-function tooltip_match(patterns, tooltip)	
-	return Aux.util.all(patterns, function(pattern)
-		return Aux.util.any(tooltip, function(line)
-			local left_match = line[1].text and strfind(strupper(line[1].text), strupper(pattern), 1, true)
-			local right_match = line[2].text and strfind(strupper(line[2].text), strupper(pattern), 1, true)
-			return left_match or right_match
-		end)
-	end)
+	Aux.list.populate(AuxBuyFullList.sheet, entries or {})
 end
 
 -----------------------------------------
@@ -466,4 +953,15 @@ end
 
 function Aux.buy.toggle_tooltip_dropdown()
 	ToggleDropDownMenu(1, nil, AuxBuyTooltipDropDown, AuxBuyTooltipInputBox, -12, 4)
+end
+
+function AuxBuyModeDropDown_Initialize()
+
+	for i, mode in ipairs(Aux.buy.modes) do
+		UIDropDownMenu_AddButton{
+			text = mode.name,
+			value = i,
+			func = AuxBuyQualityDropDown_OnClick,
+		}
+	end
 end
