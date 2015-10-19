@@ -468,7 +468,9 @@ function Aux.buy.exit()
 	current_page = nil
 end
 
------------------------------------------
+function Aux.buy.on_open()
+
+end
 
 function Aux_AuctionFrameBid_Update()
 	Aux.orig.AuctionFrameBid_Update()
@@ -497,7 +499,7 @@ function show_sheet()
 	AuxBuyBidList:Hide()
 	AuxBuyFullList:Hide()
 	
-    local mode = AuxBuyModeDropDown:GetValue()   
+    local mode = UIDropDownMenu_GetSelectedValue(AuxBuyModeDropDown)
     if mode == BUY then
 		AuxBuyBuyList:Show()
 	elseif mode == BID then
@@ -807,6 +809,7 @@ end
 -----------------------------------------
 
 function Aux_Buy_ScrollbarUpdate()
+    local mode = UIDropDownMenu_GetSelectedValue(AuxBuyModeDropDown)
     if mode == BUY then
 		Aux.list.populate(AuxBuyBuyList.sheet, auctions or {})
 	elseif mode == BID then
@@ -894,7 +897,7 @@ function AuxBuyQualityDropDown_Initialize()
 		UIDropDownMenu_AddButton{
 			text = getglobal("ITEM_QUALITY"..i.."_DESC"),
 			value = i,
-			func = function AuxBuyQualityDropDown_OnClick()
+			func = function()
 				UIDropDownMenu_SetSelectedValue(AuxBuyQualityDropDown, this.value)
 			end,
 		}
@@ -938,7 +941,7 @@ function AuxBuyModeDropDown_Initialize()
 		UIDropDownMenu_AddButton{
 			text = mode.name,
 			value = i,
-			func = function AuxBuyQualityDropDown_OnClick()
+			func = function()
 				UIDropDownMenu_SetSelectedValue(AuxBuyModeDropDown, this.value)
 			end,
 		}

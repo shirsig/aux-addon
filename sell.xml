@@ -358,12 +358,12 @@
 
 			<frame name="AuxSellParameters">
 				<Size>
-					<AbsDimension x="1" y="1"/>
+					<AbsDimension x="200" y="600"/>
 				</Size>
 				<Anchors>
 					<Anchor point="TOPLEFT">
 						<Offset>
-							<AbsDimension x="28" y="-202"/>
+							<AbsDimension x="28" y="-153"/>
 						</Offset>
 					</Anchor>
 				</Anchors>	
@@ -373,7 +373,7 @@
                             <Anchors>
                                 <Anchor point="TOPLEFT">
                                     <Offset>
-                                        <AbsDimension x="0" y="-60"/>
+                                        <AbsDimension x="0" y="-49"/>
                                     </Offset>
                                 </Anchor>
                             </Anchors>
@@ -381,45 +381,6 @@
 					</layer>
 				</layers>
 				<frames>
-                    <CheckButton name="$parentShortAuctionRadio" inherits="SendMailRadioButtonTemplate" id="1">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" relativeTo="$parentDurationText" relativePoint="BOTTOMLEFT">
-                                <Offset>
-                                    <AbsDimension x="3" y="-4"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>getglobal(this:GetName().."Text"):SetText("2h");</OnLoad>
-                            <!--<OnClick>AuctionFramePo////st_DurationRadioButton_OnClick(this, this:GetID())</OnClick>-->
-                        </Scripts>
-                    </CheckButton>
-                    <CheckButton name="$parentMediumAuctionRadio" inherits="SendMailRadioButtonTemplate" id="2">
-                        <Anchors>
-                            <Anchor point="LEFT" relativeTo="$parentShortAuctionRadio" relativePoint="RIGHT">
-                                <Offset>
-                                    <AbsDimension x="24" y="0"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>getglobal(this:GetName().."Text"):SetText("8h");</OnLoad>
-                            <!--<OnClick>AuctionFramePost_DurationRadioButton_OnClick(this, this:GetID())</OnClick>-->
-                        </Scripts>
-                    </CheckButton>
-                    <CheckButton name="$parentLongAuctionRadio" inherits="SendMailRadioButtonTemplate" id="3">
-                        <Anchors>
-                            <Anchor point="LEFT" relativeTo="$parentMediumAuctionRadio" relativePoint="RIGHT">
-                                <Offset>
-                                    <AbsDimension x="24" y="0"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>getglobal(this:GetName().."Text"):SetText("24h");</OnLoad>
-                            <!--<OnClick>AuctionFramePost_DurationRadioButton_OnClick(this, this:GetID())</OnClick>-->
-                        </Scripts>
-                    </CheckButton>
                     <Slider name="AuxSellStackSizeSlider" inherits="AuxSliderTemplate">
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                         <Scripts>
@@ -429,7 +390,7 @@
                         </Scripts>
                     </Slider>
                     <Slider name="AuxSellStackCountSlider" inherits="AuxSliderTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-33"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-30"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnValueChanged>
                                 Aux.sell.quantity_update()
@@ -459,7 +420,7 @@
 							</OnEditFocusGained>
 						</Scripts>
 					</EditBox>
-					<EditBox name="AuxSellStackCount" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
+					<EditBox name="AuxSellStackCount" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
 						<Size><AbsDimension x="30" y="16"/></Size>
 						<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxSellStackCountSlider"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
@@ -489,6 +450,78 @@
 							</OnEditFocusGained>
 						</Scripts>
 					</EditBox>
+                    <CheckButton name="$parentShortDurationRadio" inherits="SendMailRadioButtonTemplate">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativeTo="$parentDurationText" relativePoint="BOTTOMLEFT">
+                                <Offset>
+                                    <AbsDimension x="3" y="-4"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>getglobal(this:GetName().."Text"):SetText("2h");</OnLoad>
+                            <OnClick>Aux.sell.duration_radio_button_on_click(1)</OnClick>
+                        </Scripts>
+                    </CheckButton>
+                    <CheckButton name="$parentMediumDurationRadio" inherits="SendMailRadioButtonTemplate">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="$parentShortDurationRadio" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="44" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>getglobal(this:GetName().."Text"):SetText("8h");</OnLoad>
+                            <OnClick>Aux.sell.duration_radio_button_on_click(2)</OnClick>
+                        </Scripts>
+                    </CheckButton>
+                    <CheckButton name="$parentLongDurationRadio" inherits="SendMailRadioButtonTemplate">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="$parentMediumDurationRadio" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="44" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>getglobal(this:GetName().."Text"):SetText("24h");</OnLoad>
+                            <OnClick>Aux.sell.duration_radio_button_on_click(3)</OnClick>
+                        </Scripts>
+                    </CheckButton>
+                    <Frame name="$parentStartPrice" inherits="MoneyInputFrameTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="2" y="-94"/></Offset></Anchor></Anchors>
+                        <layers>
+                            <Layer level="ARTWORK">
+                                <FontString name="$parentText" inherits="GameFontHighlightSmall" text="STARTING_PRICE">
+                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="12"/></Offset></Anchor></Anchors>
+                                </FontString>
+                            </Layer>
+                        </layers>
+                        <Scripts>
+                            <OnLoad>
+                                MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.sell.validate_parameters)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                    <Frame name="$parentBuyoutPrice" inherits="MoneyInputFrameTemplate">
+                        <Anchors><Anchor point="TOPLEFT" relativeTo="AuctionsBuyoutText" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="2" y="-2"/></Offset></Anchor></Anchors>
+                        <layers>
+                            <Layer level="OVERLAY">
+                                <FontString name="$parentText" inherits="GameFontHighlightSmall" text="Buyout Price |cff808080(optional)|r">
+                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="12"/></Offset></Anchor></Anchors>
+                                </FontString>
+                                <FontString name="$parentErrorText" inherits="GameFontRedSmall" text="AUCTION_BUYOUT_ERROR">
+                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="23"/></Offset></Anchor></Anchors>
+                                </FontString>
+                            </Layer>
+                        </layers>
+                        <Scripts>
+                            <OnLoad>
+                                MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.sell.validate_parameters)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
 				</frames>
 			</frame>
 			<Frame name="AuxSellReport" frameStrata="FULLSCREEN_DIALOG" toplevel="true" parent="UIParent" enableMouse="true" hidden="true">

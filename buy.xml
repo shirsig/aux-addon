@@ -75,7 +75,7 @@
                     </OnLoad>
                 </Scripts>
             </Frame>
-            <Frame name="AuxBuySellList" hidden="true">
+            <Frame name="AuxBuyBidList" hidden="true">
                 <Size><AbsDimension x="615" y="326"/></Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="179" y="-94"/></Offset></Anchor></Anchors>
                 <Scripts>
@@ -103,6 +103,7 @@
                         <Scripts>
                             <OnLoad>
                                 UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)
+                                UIDropDownMenu_SetSelectedValue(this, 1)
                             </OnLoad>
                             <OnShow>
                                 UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)

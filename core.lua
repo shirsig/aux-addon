@@ -54,6 +54,10 @@ function Aux_OnAddonLoaded()
 		Aux_SetupHookFunctions()
 		
 		Aux.tabs.sell.hiddenElements = {
+                AuctionsPriceText,
+                StartPrice,
+                AuctionsBuyoutText,
+                BuyoutPrice,
                 AuctionsDurationText,
                 AuctionsShortAuctionButton,
                 AuctionsMediumAuctionButton,
