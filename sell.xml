@@ -441,7 +441,7 @@
 						<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxSellStackSizeSlider"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnTextChanged>
-                                AuxSellStackSizeSlider:SetValue(this:GetNumber())
+                                AuxSellStackSizeSlider:SetValue(this.charge_classes and this.charge_classes[this:GetNumber()] or this:GetNumber())
 								Aux.sell.quantity_update()
 							</OnTextChanged>
 							<OnTabPressed>
@@ -464,7 +464,14 @@
 						<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxSellStackCountSlider"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnTextChanged>
-                                AuxSellStackCountSlider:SetValue(this:GetNumber())
+								if AuxSellStackCountSlider.charge_classes then
+									local index = Aux.util.index_of(this:GetNumber(), AuxSellStackCountSlider.charge_classes)
+									if index then
+										AuxSellStackCountSlider:SetValue(index)
+									end
+								else
+									AuxSellStackCountSlider:SetValue(this:GetNumber())
+								end
                                 Aux.sell.quantity_update()
 							</OnTextChanged>
 							<OnTabPressed>

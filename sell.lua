@@ -10,7 +10,7 @@ local current_auction
 
 -----------------------------------------
 
-local record_auction, undercut, item_class_index, item_subclass_index, set_message, report, select_entry, update_recommendation, refresh_entries, availability
+local record_auction, undercut, item_class_index, item_subclass_index, set_message, report, select_entry, update_recommendation, refresh_entries, availability, charge_classes
 
 -----------------------------------------
 
@@ -242,7 +242,7 @@ end
 
 function Aux.sell.quantity_update()
     if current_auction then
-        AuxSellStackCountSlider:SetMinMaxValues(1, current_auction.has_charges and current_auction.availability[current_auction.charges] or floor(current_auction.availability[0] / AuxSellStackSize:GetNumber()))
+        AuxSellStackCountSlider:SetMinMaxValues(1, current_auction.has_charges and current_auction.availability[AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider.GetValue()]] or floor(current_auction.availability[0] / AuxSellStackSize:GetNumber()))
     end
     select_entry()
 	update_recommendation()
@@ -286,8 +286,9 @@ function Aux.sell.set_auction(bag, slot)
                     availability = availability(container_item.name)
                 }
 
-                AuxSellStackSizeSlider:SetMinMaxValues(current_auction.charges or 1, current_auction.charges or current_auction.availability[0])
-                AuxSellStackSizeSlider:SetValue(container_item.charges or container_item.count)
+				AuxSellStackSizeSlider.charge_classes = charge_classes(current_auction.availability)
+                AuxSellStackSizeSlider:SetMinMaxValues(1, current_auction.has_charges and getn(charge_classes(current_auction.availability)) or min(current_auction.max_stack, current_auction.availability[0]))
+                AuxSellStackSizeSlider:SetValue(current_auction.has_charges and Aux.util.index_of(container_item.charges, charge_classes(current_auction.availability)) or container_item.count)
                 AuxSellStackCountSlider:SetValue(1)
                 Aux.sell.quantity_update()
 				
@@ -303,6 +304,15 @@ function Aux.sell.set_auction(bag, slot)
 	end
 end
 
+function charge_classes(availability)
+	local charge_classes = {}
+	for charge_class, _ in availability do
+		tinsert(charge_classes, charge_class)
+	end
+	sort(charge_classes, function(c1, c2) return c1 < c2 end)
+	return charge_classes
+end
+
 function availability(name)
     local availability = {}
     for bag = 0, 4 do
@@ -310,8 +320,8 @@ function availability(name)
             for slot = 1, GetContainerNumSlots(bag) do
                 local item_info = Aux.info.container_item(bag, slot)
                 if item_info and item_info.name == name then
-                    local charges_class = item_info.charges or 0
-                    availability[charges_class] = (availability[charges_class] or 0) + item_info.count
+                    local charge_class = item_info.charges or 0
+                    availability[charge_class] = (availability[charge_class] or 0) + item_info.count
                 end
             end
         end
