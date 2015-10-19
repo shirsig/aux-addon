@@ -1,8 +1,8 @@
 Aux.buy = {}
 
 local process_auction, set_message, report, show_dialog, find_auction, hide_sheet, show_sheet, alpha_setter
-local entries
-local selectedEntries = {}
+local auctions
+local selectedAuctions = {}
 local search_query
 local tooltip_patterns = {}
 local current_page
@@ -12,8 +12,10 @@ local function alpha_setter(cell, datum)
     cell:SetAlpha(datum.gone and 0.4 or 1)
 end
 
+local BUY, BID, FULL = 1, 2, 3
+
 Aux.buy.modes = {
-	{
+	[BUY] = {
 		name = 'Buy',
         on_cell_click = function (sheet, row_index, column_index)
             local entry_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -134,18 +136,8 @@ Aux.buy.modes = {
                 end,
             },
             {
-                title = 'Bid/ea',
-                width = 70,
-                comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
-                    alpha_setter(cell, datum)
-                end,
-            },
-            {
                 title = 'Buy/ea',
-                width = 70,
+                width = 140,
                 comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
@@ -154,18 +146,8 @@ Aux.buy.modes = {
                 end,
             },
             {
-                title = 'Bid',
-                width = 70,
-                comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.bid))
-                    alpha_setter(cell, datum)
-                end,
-            },
-            {
                 title = 'Buy',
-                width = 70,
+                width = 140,
                 comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
@@ -175,7 +157,7 @@ Aux.buy.modes = {
             },
         },
 	},
-	{
+	[BID] = {
 		name = 'Bid',
         on_cell_click = function (sheet, row_index, column_index)
             local entry_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -297,7 +279,7 @@ Aux.buy.modes = {
             },
             {
                 title = 'Bid/ea',
-                width = 70,
+                width = 140,
                 comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
@@ -306,18 +288,8 @@ Aux.buy.modes = {
                 end,
             },
             {
-                title = 'Buy/ea',
-                width = 70,
-                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
-                    alpha_setter(cell, datum)
-                end,
-            },
-            {
                 title = 'Bid',
-                width = 70,
+                width = 140,
                 comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
@@ -325,19 +297,9 @@ Aux.buy.modes = {
                     alpha_setter(cell, datum)
                 end,
             },
-            {
-                title = 'Buy',
-                width = 70,
-                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.buyout_price))
-                    alpha_setter(cell, datum)
-                end,
-            },
         },
 	},
-	{
+	[FULL] = {
 		name = 'Full',
         on_cell_click = function (sheet, row_index, column_index)
             local entry_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -531,13 +493,24 @@ function Aux.buy.StopButton_onclick()
 end
 
 function show_sheet()
-    -- TODO
-    AuxBuyFullList:Show()
+	AuxBuyBuyList:Hide()
+	AuxBuyBidList:Hide()
+	AuxBuyFullList:Hide()
+	
+    local mode = AuxBuyModeDropDown:GetValue()   
+    if mode == BUY then
+		AuxBuyBuyList:Show()
+	elseif mode == BID then
+		AuxBuyBidList:Show()
+	elseif mode == FULL then
+		AuxBuyFullList:Show()
+	end
 end
 
 function hide_sheet()
-    -- TODO
-    AuxBuyFullList:Hide()
+	AuxBuyBuyList:Hide()
+	AuxBuyBidList:Hide()
+	AuxBuyFullList:Hide()
 end
 
 function Aux.buy.SearchButton_onclick()
@@ -549,8 +522,8 @@ function Aux.buy.SearchButton_onclick()
 	AuxBuySearchButton:Hide()
 	AuxBuyStopButton:Show()
 	
-	entries = nil
-	selectedEntries = {}
+	auctions = nil
+	selectedAuctions = {}
 	
 	refresh = true
 	
@@ -590,8 +563,8 @@ function Aux.buy.SearchButton_onclick()
 			end
 		end,
 		on_complete = function()
-			entries = entries or {}
-			if getn(entries) == 0 then
+			auctions = auctions or {}
+			if getn(auctions) == 0 then
 				set_message("No auctions were found")
 			else
 				AuxBuyMessage:Hide()
@@ -601,8 +574,8 @@ function Aux.buy.SearchButton_onclick()
 			refresh = true
 		end,
 		on_abort = function()
-			entries = entries or {}
-			if getn(entries) == 0 then
+			auctions = auctions or {}
+			if getn(auctions) == 0 then
 				set_message("No auctions were found")
 			else
 				AuxBuyMessage:Hide()
@@ -778,7 +751,7 @@ function AuxBuyEntry_OnClick(entry_index)
 	local express_mode = IsAltKeyDown()
 	local buyout_mode = arg1 == 'LeftButton'
 	
-	local entry = entries[entry_index]
+	local entry = auctions[entry_index]
 	
 	if IsControlKeyDown() then 
 		DressUpItemLink(entry.hyperlink)
@@ -790,7 +763,7 @@ end
 -----------------------------------------
 
 function process_auction(auction_item, current_page)
-	entries = entries or {}
+	auctions = auctions or {}
 	
 	local stack_size = auction_item.charges or auction_item.count
 	local bid = (auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid) + auction_item.min_increment
@@ -798,7 +771,7 @@ function process_auction(auction_item, current_page)
 	local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price/stack_size)
 	
 	if auction_item.owner ~= UnitName('player') then
-		tinsert(entries, {
+		tinsert(auctions, {
 				name = auction_item.name,
 				level = auction_item.level,
 				texture = auction_item.texture,
@@ -834,7 +807,13 @@ end
 -----------------------------------------
 
 function Aux_Buy_ScrollbarUpdate()
-	Aux.list.populate(AuxBuyFullList.sheet, entries or {})
+    if mode == BUY then
+		Aux.list.populate(AuxBuyBuyList.sheet, auctions or {})
+	elseif mode == BID then
+		Aux.list.populate(AuxBuyBidList.sheet, auctions or {})
+	elseif mode == FULL then
+		Aux.list.populate(AuxBuyFullList.sheet, auctions or {})
+	end
 end
 
 -----------------------------------------
@@ -915,13 +894,11 @@ function AuxBuyQualityDropDown_Initialize()
 		UIDropDownMenu_AddButton{
 			text = getglobal("ITEM_QUALITY"..i.."_DESC"),
 			value = i,
-			func = AuxBuyQualityDropDown_OnClick,
+			func = function AuxBuyQualityDropDown_OnClick()
+				UIDropDownMenu_SetSelectedValue(AuxBuyQualityDropDown, this.value)
+			end,
 		}
 	end
-end
-
-function AuxBuyQualityDropDown_OnClick()
-	UIDropDownMenu_SetSelectedValue(AuxBuyQualityDropDown, this.value)
 end
 
 function AuxBuyTooltipButton_OnClick()
@@ -961,7 +938,9 @@ function AuxBuyModeDropDown_Initialize()
 		UIDropDownMenu_AddButton{
 			text = mode.name,
 			value = i,
-			func = AuxBuyQualityDropDown_OnClick,
+			func = function AuxBuyQualityDropDown_OnClick()
+				UIDropDownMenu_SetSelectedValue(AuxBuyModeDropDown, this.value)
+			end,
 		}
 	end
 end
