@@ -216,7 +216,7 @@ function update_recommendation()
 		
 		AuxSellRefreshButton:Enable()
 		
-		MoneyFrame_Update("AuctionsDepositMoneyFrame", floor(current_auction.vendor_price_per_unit * current_auction.base_deposit * (current_auction.has_charges and 1 or get_stack_size_slider_value()) * AuxSellStackCountSlider:GetValue()) * AuctionFrameAuctions.duration / 120)
+		MoneyFrame_Update("AuctionsDepositMoneyFrame", floor(current_auction.vendor_price_per_unit * current_auction.deposit_factor * (current_auction.has_charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
 		
 		if auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected then
 			if not auxSellEntries[current_auction.name].created or GetTime() - auxSellEntries[current_auction.name].created > 1800 then

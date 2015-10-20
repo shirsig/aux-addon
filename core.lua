@@ -284,7 +284,7 @@ function Aux_AuctionFrameTab_OnClick(index)
 		AuxBuyPanel:Show()
 		AuctionFrame:EnableMouse(false)
 		
-		Aux_Buy_ScrollbarUpdate()
+		Aux.buy.on_open()
 	else
 		Aux.orig.AuctionFrameTab_OnClick(index)
 		lastItemPosted = nil

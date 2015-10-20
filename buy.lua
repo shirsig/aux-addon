@@ -500,8 +500,8 @@ function update_sheet()
 	
     local mode = UIDropDownMenu_GetSelectedValue(AuxBuyModeDropDown)
     if mode == BUYOUT then
-		local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.name ~= UnitName('player') and auction.buyout_price > 0 end) or {}
-		Aux.list.populate(AuxBuyBuyList.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price = a2.buyout_price end) or {})
+		local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.name ~= UnitName('player') and auction.buyout_price end) or {}
+		Aux.list.populate(AuxBuyBuyList.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price == a2.buyout_price end) or {})
 	elseif mode == BID then
 		local bid_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.name ~= UnitName('player') end) or {}
 		Aux.list.populate(AuxBuyBidList.sheet, bid_auctions)

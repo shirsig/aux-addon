@@ -1,4 +1,4 @@
-local TOOLTIP_LENGTH
+local TOOLTIP_LENGTH = 30
 
 Aux.info = {}
 
@@ -28,20 +28,21 @@ function Aux.info.container_item(bag, slot)
 end
 
 function Aux.info.auction_sell_item()
-	local name, texture, stack_size, quality, usable, vendor_price, vendor_price_per_unit, max_stack, total_count = GetAuctionSellItemInfo()
-	local deposit_factor = CalculateAuctionDeposit(120) / vendor_price
-	
+	local name, texture, stack_size, quality, usable, vendor_price = GetAuctionSellItemInfo()
+
 	if name then
+
+        local deposit_factor = CalculateAuctionDeposit(120) / vendor_price
+        local vendor_price_per_unit = vendor_price / stack_size
+
 		auction_sell_item = {
 			name = name,
 			texture = texture,
 			stack_size = stack_size,
 			quality = quality,
 			usable = usable,
+            vendor_price_per_unit = vendor_price_per_unit,
 			vendor_price = vendor_price,
-			vendor_price_per_unit = vendor_price_per_unit,
-			max_stack = max_stack, -- TODO not working??
-			total_count = total_count,
 			deposit_factor = deposit_factor,
 		}
 		
