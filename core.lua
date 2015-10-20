@@ -98,7 +98,16 @@ function Aux_OnAddonLoaded()
 	end
 end
 
+function Aux.log_scroll(direction)
+    if direction == 1 then
+        this:ScrollUp()
+    elseif direction == -1 then
+        this:ScrollDown()
+    end
+end
+
 function Aux.log_frame_load()
+    this:EnableMouseWheel()
     this.flashTimer = 0
 end
 
@@ -302,7 +311,7 @@ function Aux_AddPanels()
 	buyFrame:SetParent("AuctionFrame")
 	buyFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
     AuxLogFrame:SetParent(buyFrame)
-    AuxLogFrame:SetPoint('TOP', buyFrame, 100, -38)
+    AuxLogFrame:SetPoint('TOP', buyFrame, 100, -43)
 	relevel(buyFrame)
 	buyFrame:Hide()
     -- AuxLogFrame:SetFrameLevel(buyFrame:GetFrameLevel() + 1)
