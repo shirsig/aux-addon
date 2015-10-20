@@ -98,17 +98,9 @@ function Aux_OnAddonLoaded()
 	end
 end
 
-function Aux.log_scroll(direction)
-    if direction == 1 then
-        this:ScrollUp()
-    elseif direction == -1 then
-        this:ScrollDown()
-    end
-end
-
 function Aux.log_frame_load()
     this:EnableMouseWheel()
-    this.flashTimer = 0
+    -- this.flashTimer = 0 TODO remove
 end
 
 function Aux.log_frame_update(elapsedSec)

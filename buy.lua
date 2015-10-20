@@ -42,7 +42,7 @@ Aux.buy.modes = {
             },
             {
                 title = 'Auction Item',
-                width = 214,
+                width = 274,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].name, group2[1].name, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
@@ -106,8 +106,8 @@ Aux.buy.modes = {
                 end,
             },
             {
-                title = 'No',
-                width = 43,
+                title = 'Auctions',
+                width = 83,
                 comparator = function(group1, group2) return Aux.util.compare(getn(group1), getn(group2), Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
@@ -117,7 +117,7 @@ Aux.buy.modes = {
             },
             {
                 title = 'Buy/ea',
-                width = 140,
+                width = 90,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price_per_unit, group2[1].buyout_price_per_unit, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
@@ -127,7 +127,7 @@ Aux.buy.modes = {
             },
             {
                 title = 'Buy',
-                width = 140,
+                width = 90,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price, group2[1].buyout_price, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)

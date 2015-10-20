@@ -65,8 +65,15 @@
                 ChatFrame_OnHyperlinkHide()
             </OnHyperlinkLeave>
             <OnMouseWheel>
-                Aux.log_scroll(arg1)
+                if arg1 == 1 then
+                    this:ScrollUp()
+                elseif arg1 == -1 then
+                    this:ScrollDown()
+                end
             </OnMouseWheel>
+            <OnMouseUp>
+                this:ScrollToBottom()
+            </OnMouseUp>
         </Scripts>
         <FontString inherits="ChatFontNormal" justifyH="CENTER"/>
     </ScrollingMessageFrame>
