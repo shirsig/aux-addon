@@ -238,14 +238,17 @@ end
 
 function Aux.util.group_by(tables, keys)
 	local groups = {}
-	Aux.util.map(tables, function(table)
+	for _, table in ipairs(tables) do
+        local found_group
 		for _, group in ipairs(groups) do
 			if Aux.util.all(keys, function(key) return table[key] == group[1][key] end) then
 				tinsert(group, table)
-				return
+                found_group = true
 			end
-		end
-		tinsert(groups, { table })
-	end)
+        end
+        if not found_group then
+		    tinsert(groups, { table })
+        end
+	end
 	return groups
 end

@@ -151,9 +151,6 @@ function Aux_SetupHookFunctions()
 	Aux.orig.AuctionFrameAuctions_OnShow = AuctionFrameAuctions_OnShow
 	AuctionFrameAuctions_OnShow = Aux_Sell_AuctionFrameAuctions_OnShow
 	
-	Aux.orig.AuctionsRadioButton_OnClick = AuctionsRadioButton_OnClick
-	AuctionsRadioButton_OnClick = Aux_Sell_AuctionsRadioButton_OnClick
-	
 	Aux.orig.BrowseButton_OnClick = BrowseButton_OnClick
 	BrowseButton_OnClick = Aux_BrowseButton_OnClick
 

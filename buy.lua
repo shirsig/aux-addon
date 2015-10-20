@@ -33,17 +33,17 @@ Aux.buy.modes = {
             {
                 title = '#',
                 width = 23,
-                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                comparator = function(group1, group2) return Aux.util.compare(group1[1].stack_size, group2[1].stack_size, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.stack_size)
-                    alpha_setter(cell, datum)
+                cell_setter = function(cell, group)
+                    cell.text:SetText(group[1].stack_size)
+                    -- alpha_setter(cell, group)
                 end,
             },
             {
                 title = 'Auction Item',
-                width = 157,
-                comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
+                width = 214,
+                comparator = function(group1, group2) return Aux.util.compare(group1[1].name, group2[1].name, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
                     local icon_texture = icon:CreateTexture(nil, 'BORDER')
@@ -73,28 +73,28 @@ Aux.buy.modes = {
                     cell.text = text
                     cell.icon = icon
                 end,
-                cell_setter = function(cell, datum)
-                    cell.tooltip = datum.tooltip
-                    cell.EnhTooltip_info = datum.EnhTooltip_info
-                    cell.icon.icon_texture:SetTexture(datum.texture)
-                    if not datum.usable then
+                cell_setter = function(cell, group)
+                    cell.tooltip = group[1].tooltip
+                    cell.EnhTooltip_info = group[1].EnhTooltip_info
+                    cell.icon.icon_texture:SetTexture(group[1].texture)
+                    if not group[1].usable then
                         cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
                     else
                         cell.icon.icon_texture:SetVertexColor(1.0, 1.0, 1.0)
                     end
-                    cell.text:SetText('['..datum.tooltip[1][1].text..']')
-                    local color = ITEM_QUALITY_COLORS[datum.quality]
+                    cell.text:SetText('['..group[1].tooltip[1][1].text..']')
+                    local color = ITEM_QUALITY_COLORS[group[1].quality]
                     cell.text:SetTextColor(color.r, color.g, color.b)
-                    alpha_setter(cell, datum)
+                    -- alpha_setter(cell, group)
                 end,
             },
             {
                 title = 'Lvl',
                 width = 23,
-                comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
+                comparator = function(group1, group2) return Aux.util.compare(group1[1].level, group2[1].level, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    local level = max(1, datum.level)
+                cell_setter = function(cell, group)
+                    local level = max(1, group[1].level)
                     local text
                     if level > UnitLevel('player') then
                         text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
@@ -102,57 +102,37 @@ Aux.buy.modes = {
                         text = level
                     end
                     cell.text:SetText(text)
-                    alpha_setter(cell, datum)
+                    -- alpha_setter(cell, datum)
                 end,
             },
             {
-                title = 'Left',
-                width = 30,
-                comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                cell_setter = function(cell, datum)
-                    local text
-                    if datum.duration == 1 then
-                        text = '30m'
-                    elseif datum.duration == 2 then
-                        text = '2h'
-                    elseif datum.duration == 3 then
-                        text = '8h'
-                    elseif datum.duration == 4 then
-                        text = '24h'
-                    end
-                    cell.text:SetText(text)
-                    alpha_setter(cell, datum)
-                end,
-            },
-            {
-                title = 'Owner',
-                width = 70,
-                comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.owner)
-                    alpha_setter(cell, datum)
+                title = 'No',
+                width = 43,
+                comparator = function(group1, group2) return Aux.util.compare(getn(group1), getn(group2), Aux.util.LT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, group)
+                    cell.text:SetText(getn(group))
+                -- alpha_setter(cell, group)
                 end,
             },
             {
                 title = 'Buy/ea',
                 width = 140,
-                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
+                comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price_per_unit, group2[1].buyout_price_per_unit, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
-                    alpha_setter(cell, datum)
+                cell_setter = function(cell, group)
+                    cell.text:SetText(Aux.util.money_string(group[1].buyout_price_per_unit))
+                    -- alpha_setter(cell, group)
                 end,
             },
             {
                 title = 'Buy',
                 width = 140,
-                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
+                comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price, group2[1].buyout_price, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.buyout_price))
-                    alpha_setter(cell, datum)
+                cell_setter = function(cell, group)
+                    cell.text:SetText(Aux.util.money_string(group[1].buyout_price))
+                    -- alpha_setter(cell, group)
                 end,
             },
         },
@@ -811,7 +791,7 @@ end
 function Aux_Buy_ScrollbarUpdate()
     local mode = UIDropDownMenu_GetSelectedValue(AuxBuyModeDropDown)
     if mode == BUY then
-		Aux.list.populate(AuxBuyBuyList.sheet, auctions or {})
+		Aux.list.populate(AuxBuyBuyList.sheet, auctions and Aux.util.group_by(auctions, {'buyout_price', 'stack_size'}) or {})
 	elseif mode == BID then
 		Aux.list.populate(AuxBuyBidList.sheet, auctions or {})
 	elseif mode == FULL then
