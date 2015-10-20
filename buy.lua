@@ -1,6 +1,6 @@
 Aux.buy = {}
 
-local process_auction, set_message, report, show_dialog, find_auction, hide_sheet, show_sheet, alpha_setter
+local process_auction, set_message, report, show_dialog, find_auction, hide_sheet, update_sheet, auction_alpha_setter, group_alpha_setter
 local auctions
 local selectedAuctions = {}
 local search_query
@@ -8,8 +8,12 @@ local tooltip_patterns = {}
 local current_page
 local refresh
 
-local function alpha_setter(cell, datum)
-    cell:SetAlpha(datum.gone and 0.4 or 1)
+function auction_alpha_setter(cell, auction)
+    cell:SetAlpha(auction.gone and 0.4 or 1)
+end
+
+function group_alpha_setter(cell, group)
+    cell:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.4 or 1)
 end
 
 local BUYOUT, BID, FULL = 1, 2, 3
@@ -37,7 +41,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
                     cell.text:SetText(group[1].stack_size)
-                    -- alpha_setter(cell, group)
+                    group_alpha_setter(cell, group)
                 end,
             },
             {
@@ -85,7 +89,7 @@ Aux.buy.modes = {
                     cell.text:SetText('['..group[1].tooltip[1][1].text..']')
                     local color = ITEM_QUALITY_COLORS[group[1].quality]
                     cell.text:SetTextColor(color.r, color.g, color.b)
-                    -- alpha_setter(cell, group)
+                    group_alpha_setter(cell, group)
                 end,
             },
             {
@@ -102,17 +106,17 @@ Aux.buy.modes = {
                         text = level
                     end
                     cell.text:SetText(text)
-                    -- alpha_setter(cell, datum)
+                    group_alpha_setter(cell, group)
                 end,
             },
             {
                 title = 'Auctions',
                 width = 83,
-                comparator = function(group1, group2) return Aux.util.compare(getn(group1), getn(group2), Aux.util.LT) end,
+                comparator = function(group1, group2) return Aux.util.compare(getn(Aux.util.filter(group1, function(auction) return not auction.gone end)), getn(Aux.util.filter(group2, function(auction) return not auction.gone end)), Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
-                    cell.text:SetText(getn(group))
-                -- alpha_setter(cell, group)
+                    cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
+					group_alpha_setter(cell, group)
                 end,
             },
             {
@@ -122,7 +126,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
                     cell.text:SetText(Aux.util.money_string(group[1].buyout_price_per_unit))
-                    -- alpha_setter(cell, group)
+                    group_alpha_setter(cell, group)
                 end,
             },
             {
@@ -132,7 +136,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
                     cell.text:SetText(Aux.util.money_string(group[1].buyout_price))
-                    -- alpha_setter(cell, group)
+                    group_alpha_setter(cell, group)
                 end,
             },
         },
@@ -159,7 +163,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(datum.stack_size)
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -207,7 +211,7 @@ Aux.buy.modes = {
                     cell.text:SetText('['..datum.tooltip[1][1].text..']')
                     local color = ITEM_QUALITY_COLORS[datum.quality]
                     cell.text:SetTextColor(color.r, color.g, color.b)
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -224,7 +228,17 @@ Aux.buy.modes = {
                         text = level
                     end
                     cell.text:SetText(text)
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = '#',
+                width = 23,
+                comparator = function(row1, row2) return Aux.util.compare(row1.page, row2.page, Aux.util.LT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(datum.page)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -244,7 +258,7 @@ Aux.buy.modes = {
                         text = '24h'
                     end
                     cell.text:SetText(text)
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -254,7 +268,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(datum.owner)
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -264,7 +278,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -274,7 +288,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(Aux.util.money_string(datum.bid))
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
         },
@@ -301,7 +315,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(datum.stack_size)
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -349,7 +363,7 @@ Aux.buy.modes = {
                     cell.text:SetText('['..datum.tooltip[1][1].text..']')
                     local color = ITEM_QUALITY_COLORS[datum.quality]
                     cell.text:SetTextColor(color.r, color.g, color.b)
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -366,7 +380,7 @@ Aux.buy.modes = {
                         text = level
                     end
                     cell.text:SetText(text)
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -386,7 +400,7 @@ Aux.buy.modes = {
                         text = '24h'
                     end
                     cell.text:SetText(text)
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -396,7 +410,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(datum.owner)
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -406,7 +420,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -416,7 +430,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -426,7 +440,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(Aux.util.money_string(datum.bid))
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -436,7 +450,7 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(Aux.util.money_string(datum.buyout_price))
-                    alpha_setter(cell, datum)
+                    auction_alpha_setter(cell, datum)
                 end,
             },
         },
@@ -449,7 +463,7 @@ function Aux.buy.exit()
 end
 
 function Aux.buy.on_open()
-	show_sheet()
+	update_sheet()
 end
 
 function Aux_AuctionFrameBid_Update()
@@ -459,22 +473,18 @@ function Aux_AuctionFrameBid_Update()
 	end
 end
 
------------------------------------------
-
 function Aux.buy.dialog_cancel()
 	Aux.scan.abort()
 	AuxBuyConfirmation:Hide()
-	show_sheet()
+	update_sheet()
 	AuxBuySearchButton:Enable()
 end
-
------------------------------------------
 
 function Aux.buy.StopButton_onclick()
 	Aux.scan.abort()
 end
 
-function show_sheet()
+function update_sheet()
 	AuxBuyBuyList:Hide()
 	AuxBuyBidList:Hide()
 	AuxBuyFullList:Hide()
@@ -486,6 +496,17 @@ function show_sheet()
 		AuxBuyBidList:Show()
 	elseif mode == FULL then
 		AuxBuyFullList:Show()
+	end
+	
+    local mode = UIDropDownMenu_GetSelectedValue(AuxBuyModeDropDown)
+    if mode == BUYOUT then
+		local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.name ~= UnitName('player') and auction.buyout_price > 0 end) or {}
+		Aux.list.populate(AuxBuyBuyList.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price = a2.buyout_price end) or {})
+	elseif mode == BID then
+		local bid_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.name ~= UnitName('player') end) or {}
+		Aux.list.populate(AuxBuyBidList.sheet, bid_auctions)
+	elseif mode == FULL then
+		Aux.list.populate(AuxBuyFullList.sheet, auctions or {})
 	end
 end
 
@@ -575,13 +596,9 @@ function Aux.buy.SearchButton_onclick()
 	}
 end
 
------------------------------------------
-
 function set_message(msg)
     Aux.log(msg)
 end
-
------------------------------------------
 
 function show_dialog(buyout_mode, entry, amount)
 	AuxBuyConfirmation.tooltip = entry.tooltip
@@ -699,7 +716,7 @@ function find_auction(entry, buyout_mode, express_mode)
 						Aux.scan.abort()
 						AuxBuySearchButton:Enable()
 						AuxBuyConfirmation:Hide()
-						show_sheet()
+						update_sheet()
 					end
 					AuxBuyConfirmationActionButton:Enable()
 				end
@@ -742,8 +759,6 @@ function AuxBuyEntry_OnClick(entry_index)
 	end	
 end
 
------------------------------------------
-
 function process_auction(auction_item, current_page)
 	auctions = auctions or {}
 	
@@ -777,29 +792,12 @@ function process_auction(auction_item, current_page)
 	end
 end
 
------------------------------------------
-
 function Aux.buy.onupdate()
 	if refresh then
 		refresh = false
-		Aux_Buy_ScrollbarUpdate()
+		update_sheet()
 	end
 end
-
------------------------------------------
-
-function Aux_Buy_ScrollbarUpdate()
-    local mode = UIDropDownMenu_GetSelectedValue(AuxBuyModeDropDown)
-    if mode == BUYOUT then
-		Aux.list.populate(AuxBuyBuyList.sheet, auctions and Aux.util.group_by(auctions, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price = a2.buyout_price end) or {})
-	elseif mode == BID then
-		Aux.list.populate(AuxBuyBidList.sheet, auctions or {})
-	elseif mode == FULL then
-		Aux.list.populate(AuxBuyFullList.sheet, auctions or {})
-	end
-end
-
------------------------------------------
 
 function AuxBuyCategoryDropDown_Initialize(arg1)
 	local level = arg1 or 1
@@ -923,7 +921,7 @@ function AuxBuyModeDropDown_Initialize()
 			value = i,
 			func = function()
 				UIDropDownMenu_SetSelectedValue(AuxBuyModeDropDown, this.value)
-				show_sheet()
+				update_sheet()
 			end,
 		}
 	end
