@@ -12,11 +12,11 @@ local function alpha_setter(cell, datum)
     cell:SetAlpha(datum.gone and 0.4 or 1)
 end
 
-local BUY, BID, FULL = 1, 2, 3
+local BUYOUT, BID, FULL = 1, 2, 3
 
 Aux.buy.modes = {
-	[BUY] = {
-		name = 'Buy',
+	[BUYOUT] = {
+		name = 'Buyout',
         on_cell_click = function (sheet, row_index, column_index)
             local entry_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
             AuxBuyEntry_OnClick(entry_index)
@@ -449,7 +449,7 @@ function Aux.buy.exit()
 end
 
 function Aux.buy.on_open()
-
+	show_sheet()
 end
 
 function Aux_AuctionFrameBid_Update()
@@ -480,7 +480,7 @@ function show_sheet()
 	AuxBuyFullList:Hide()
 	
     local mode = UIDropDownMenu_GetSelectedValue(AuxBuyModeDropDown)
-    if mode == BUY then
+    if mode == BUYOUT then
 		AuxBuyBuyList:Show()
 	elseif mode == BID then
 		AuxBuyBidList:Show()
@@ -790,8 +790,8 @@ end
 
 function Aux_Buy_ScrollbarUpdate()
     local mode = UIDropDownMenu_GetSelectedValue(AuxBuyModeDropDown)
-    if mode == BUY then
-		Aux.list.populate(AuxBuyBuyList.sheet, auctions and Aux.util.group_by(auctions, {'buyout_price', 'stack_size'}) or {})
+    if mode == BUYOUT then
+		Aux.list.populate(AuxBuyBuyList.sheet, auctions and Aux.util.group_by(auctions, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price = a2.buyout_price end) or {})
 	elseif mode == BID then
 		Aux.list.populate(AuxBuyBidList.sheet, auctions or {})
 	elseif mode == FULL then
@@ -923,6 +923,7 @@ function AuxBuyModeDropDown_Initialize()
 			value = i,
 			func = function()
 				UIDropDownMenu_SetSelectedValue(AuxBuyModeDropDown, this.value)
+				show_sheet()
 			end,
 		}
 	end

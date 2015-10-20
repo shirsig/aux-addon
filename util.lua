@@ -236,12 +236,12 @@ function Aux.util.money_string(money)
 	end
 end
 
-function Aux.util.group_by(tables, keys)
+function Aux.util.group_by(tables, equal)
 	local groups = {}
 	for _, table in ipairs(tables) do
         local found_group
 		for _, group in ipairs(groups) do
-			if Aux.util.all(keys, function(key) return table[key] == group[1][key] end) then
+			if equal(table, group[1]) then
 				tinsert(group, table)
                 found_group = true
 			end

@@ -1,3 +1,5 @@
+local TOOLTIP_LENGTH
+
 Aux.info = {}
 
 local hyperlink_item, item_id, item_charges
@@ -110,7 +112,7 @@ function Aux.info.tooltip_match(patterns, tooltip)
 end
 
 function Aux.info.tooltip(setter)
-	for i = 1, 30 do
+	for i = 1, TOOLTIP_LENGTH do
 		getglobal('AuxInfoTooltipTextLeft'..i):SetText()
 		getglobal('AuxInfoTooltipTextRight'..i):SetText()
 	end
@@ -120,7 +122,7 @@ function Aux.info.tooltip(setter)
 	AuxInfoTooltip:Show()
 	
 	local tooltip = {}
-	for i = 1, 30 do
+	for i = 1, TOOLTIP_LENGTH do
 		local left, right = {}, {}
 		
 		left.text = getglobal('AuxInfoTooltipTextLeft'..i):GetText()
@@ -132,7 +134,7 @@ function Aux.info.tooltip(setter)
 		tinsert(tooltip, {left, right})
 	end
 	
-	for i = 1, 30 do
+	for i = 1, TOOLTIP_LENGTH do
 		getglobal('AuxInfoTooltipTextLeft'..i):SetText()
 		getglobal('AuxInfoTooltipTextRight'..i):SetText()
 	end
