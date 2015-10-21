@@ -83,7 +83,7 @@ function Aux_OnAddonLoaded()
 		}
 		
 		Aux.tabs.buy.hiddenElements = {
-				AuctionFrameBrowse,
+--				AuctionFrameBrowse,
 		}
 
 		Aux.tabs.sell.recommendationElements = {
@@ -299,13 +299,13 @@ function Aux_AddPanels()
 	relevel(sellFrame)
 	sellFrame:Hide()
     
-    local buyFrame = CreateFrame("Frame", "AuxBuyPanel", AuctionFrame, "AuxBuyTemplate")
-	buyFrame:SetParent("AuctionFrame")
-	buyFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
-    AuxLogFrame:SetParent(buyFrame)
-    AuxLogFrame:SetPoint('TOP', buyFrame, 100, -43)
-	relevel(buyFrame)
-	buyFrame:Hide()
+    --local buyFrame = CreateFrame("Frame", "AuxBuyPanel", AuctionFrame, "AuxBuyTemplate")
+	--buyFrame:SetParent("AuctionFrame")
+	--buyFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
+    --AuxLogFrame:SetParent(buyFrame)
+    --AuxLogFrame:SetPoint('TOP', buyFrame, 100, -43)
+	--relevel(buyFrame)
+	--buyFrame:Hide()
 	
 	local optionsFrame = CreateFrame("Frame", "AuxOptionsButtonPanel", AuctionFrame, "AuxOptionsButtonTemplate")
 	optionsFrame:SetParent("AuctionFrame")
