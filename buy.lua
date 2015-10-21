@@ -1,6 +1,6 @@
 Aux.buy = {}
 
-local process_auction, set_message, report, show_dialog, find_auction, hide_sheet, update_sheet, auction_alpha_setter, group_alpha_setter
+local create_auction_record, show_dialog, find_auction, hide_sheet, update_sheet, auction_alpha_setter, group_alpha_setter
 local auctions
 local selectedAuctions = {}
 local search_query
@@ -9,11 +9,11 @@ local current_page
 local refresh
 
 function auction_alpha_setter(cell, auction)
-    cell:SetAlpha(auction.gone and 0.4 or 1)
+    cell:SetAlpha(auction.gone and 0.3 or 1)
 end
 
 function group_alpha_setter(cell, group)
-    cell:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.4 or 1)
+    cell:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.3 or 1)
 end
 
 local BUYOUT, BID, FULL = 1, 2, 3
@@ -22,8 +22,8 @@ Aux.buy.modes = {
 	[BUYOUT] = {
 		name = 'Buyout',
         on_cell_click = function (sheet, row_index, column_index)
-            local entry_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            AuxBuyEntry_OnClick(entry_index)
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            AuxBuyEntry_OnClick(Aux.util.filter(sheet.data[data_index], function(auction) return not auction.gone end)[1] or sheet.data[data_index][1])
         end,
 
         on_cell_enter = function (sheet, row_index, column_index)
@@ -35,18 +35,18 @@ Aux.buy.modes = {
         end,
         columns = {
             {
-                title = '#',
-                width = 23,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].stack_size, group2[1].stack_size, Aux.util.LT) end,
+                title = 'Auctions',
+                width = 70,
+                comparator = function(group1, group2) return Aux.util.compare(getn(Aux.util.filter(group1, function(auction) return not auction.gone end)), getn(Aux.util.filter(group2, function(auction) return not auction.gone end)), Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
-                    cell.text:SetText(group[1].stack_size)
+                    cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
                     group_alpha_setter(cell, group)
                 end,
             },
             {
                 title = 'Auction Item',
-                width = 274,
+                width = 282,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].name, group2[1].name, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
@@ -93,35 +93,18 @@ Aux.buy.modes = {
                 end,
             },
             {
-                title = 'Lvl',
+                title = '#',
                 width = 23,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].level, group2[1].level, Aux.util.GT) end,
+                comparator = function(group1, group2) return Aux.util.compare(group1[1].stack_size, group2[1].stack_size, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
-                    local level = max(1, group[1].level)
-                    local text
-                    if level > UnitLevel('player') then
-                        text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
-                    else
-                        text = level
-                    end
-                    cell.text:SetText(text)
+                    cell.text:SetText(group[1].stack_size)
                     group_alpha_setter(cell, group)
                 end,
             },
             {
-                title = 'Auctions',
-                width = 83,
-                comparator = function(group1, group2) return Aux.util.compare(getn(Aux.util.filter(group1, function(auction) return not auction.gone end)), getn(Aux.util.filter(group2, function(auction) return not auction.gone end)), Aux.util.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, group)
-                    cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
-					group_alpha_setter(cell, group)
-                end,
-            },
-            {
                 title = 'Buy/ea',
-                width = 90,
+                width = 110,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price_per_unit, group2[1].buyout_price_per_unit, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
@@ -131,7 +114,7 @@ Aux.buy.modes = {
             },
             {
                 title = 'Buy',
-                width = 90,
+                width = 110,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price, group2[1].buyout_price, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
@@ -140,12 +123,13 @@ Aux.buy.modes = {
                 end,
             },
         },
+        sort_order = {{column = 2, order = 'ascending' }, {column = 4, order = 'ascending'}},
 	},
 	[BID] = {
 		name = 'Bid',
         on_cell_click = function (sheet, row_index, column_index)
-            local entry_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            AuxBuyEntry_OnClick(entry_index)
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            AuxBuyEntry_OnClick(sheet.data[data_index])
         end,
 
         on_cell_enter = function (sheet, row_index, column_index)
@@ -157,18 +141,18 @@ Aux.buy.modes = {
         end,
         columns = {
             {
-                title = '#',
-                width = 23,
-                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                title = 'Page',
+                width = 40,
+                comparator = function(row1, row2) return Aux.util.compare(row1.page, row2.page, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.stack_size)
+                    cell.text:SetText(datum.page)
                     auction_alpha_setter(cell, datum)
                 end,
             },
             {
                 title = 'Auction Item',
-                width = 157,
+                width = 181,
                 comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
@@ -215,33 +199,6 @@ Aux.buy.modes = {
                 end,
             },
             {
-                title = 'Lvl',
-                width = 23,
-                comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    local level = max(1, datum.level)
-                    local text
-                    if level > UnitLevel('player') then
-                        text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
-                    else
-                        text = level
-                    end
-                    cell.text:SetText(text)
-                    auction_alpha_setter(cell, datum)
-                end,
-            },
-            {
-                title = '#',
-                width = 23,
-                comparator = function(row1, row2) return Aux.util.compare(row1.page, row2.page, Aux.util.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.page)
-                    auction_alpha_setter(cell, datum)
-                end,
-            },
-            {
                 title = 'Left',
                 width = 30,
                 comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
@@ -262,18 +219,28 @@ Aux.buy.modes = {
                 end,
             },
             {
-                title = 'Owner',
-                width = 70,
-                comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
+                title = 'High Bidder',
+                width = 95,
+                comparator = function(auction1, auction2) return Aux.util.compare(auction1.high_bidder, auction2.high_bidder, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
+                cell_setter = function(cell, auction)
+                    cell.text:SetText(auction.high_bidder)
+                    auction_alpha_setter(cell, auction)
+                end,
+            },
+            {
+                title = '#',
+                width = 23,
+                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.owner)
+                    cell.text:SetText(datum.stack_size)
                     auction_alpha_setter(cell, datum)
                 end,
             },
             {
                 title = 'Bid/ea',
-                width = 140,
+                width = 110,
                 comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
@@ -283,7 +250,7 @@ Aux.buy.modes = {
             },
             {
                 title = 'Bid',
-                width = 140,
+                width = 110,
                 comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
@@ -292,12 +259,13 @@ Aux.buy.modes = {
                 end,
             },
         },
+        sort_order = {{column = 2, order = 'ascending' }, {column = 6, order = 'ascending' }, {column = 3, order = 'ascending'}},
 	},
 	[FULL] = {
 		name = 'Full',
         on_cell_click = function (sheet, row_index, column_index)
-            local entry_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            AuxBuyEntry_OnClick(entry_index)
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            AuxBuyEntry_OnClick(sheet.data[data_index])
         end,
 
         on_cell_enter = function (sheet, row_index, column_index)
@@ -454,6 +422,7 @@ Aux.buy.modes = {
                 end,
             },
         },
+        sort_order = {},
 	},
 }
 
@@ -544,10 +513,10 @@ function Aux.buy.SearchButton_onclick()
 		usable = AuxBuyUsableCheckButton:GetChecked()
 	}
 	
-	set_message('Starting scan')
+	Aux.log('Starting scan')
 	Aux.scan.start{
 		query = search_query,
-		page = 0,
+		page = AuxBuyAllPagesCheckButton:GetChecked() and 0 or AuxBuyPageEditBox:GetNumber(),
 		on_submit_query = function()
 			current_page = nil
 		end,
@@ -555,49 +524,40 @@ function Aux.buy.SearchButton_onclick()
 			current_page = page
 		end,
 		on_start_page = function(page, total_pages)
-			set_message('Scanning page ' .. page + 1 .. (total_pages > 0 and ' out of ' .. total_pages or ''))
+			Aux.log('Scanning page ' .. page + 1 .. (total_pages > 0 and ' out of ' .. total_pages or ''))
 		end,
 		on_read_auction = function(i)
 			local auction_item = Aux.info.auction_item(i)
 			if auction_item then
 				if (auction_item.name == search_query.name or search_query.name == '' or not AuxBuyExactCheckButton:GetChecked()) and Aux.info.tooltip_match(tooltip_patterns, auction_item.tooltip) then
-					process_auction(auction_item, current_page)
+                    auctions = auctions or {}
+                    tinsert(auctions, create_auction_record(auction_item, current_page))
 				end
 			end
 		end,
 		on_complete = function()
 			auctions = auctions or {}
-			if getn(auctions) == 0 then
-				set_message("No auctions were found")
-			else
-				AuxBuyMessage:Hide()
-			end
+            Aux.log('Scan completed: '..getn(auctions)..' auctions found')
 			AuxBuyStopButton:Hide()
 			AuxBuySearchButton:Show()
 			refresh = true
 		end,
 		on_abort = function()
 			auctions = auctions or {}
-			if getn(auctions) == 0 then
-				set_message("No auctions were found")
-			else
-				AuxBuyMessage:Hide()
-			end
+            Aux.log('Scan aborted: '..getn(auctions)..' auctions found')
 			AuxBuyStopButton:Hide()
 			AuxBuySearchButton:Show()
 			refresh = true
 		end,
 		next_page = function(page, total_pages)
-			local last_page = max(total_pages - 1, 0)
-			if page < last_page then
-				return page + 1
-			end
+            if AuxBuyAllPagesCheckButton:GetChecked() then
+                local last_page = max(total_pages - 1, 0)
+                if page < last_page then
+                    return page + 1
+                end
+            end
 		end,
 	}
-end
-
-function set_message(msg)
-    Aux.log(msg)
 end
 
 function show_dialog(buyout_mode, entry, amount)
@@ -634,17 +594,16 @@ end
 function find_auction(entry, buyout_mode, express_mode)
 
 	if entry.gone then
+        Aux.log('Auction not available')
 		return
 	end
 	
 	if buyout_mode and not entry.buyout_price then
+        Aux.log('Auction has no buyout price')
 		return
 	end
-	
-	-- if not buyout_mode and entry.high_bidder == UnitName('player') then
-		-- return
-	-- end
-	
+
+    Aux.log('Processing '..(buyout_mode and 'buyout' or 'bid')..' request')
 	AuxBuySearchButton:Disable()
 	
 	local amount
@@ -661,7 +620,6 @@ function find_auction(entry, buyout_mode, express_mode)
 	PlaySound('igMainMenuOptionCheckBoxOn')
 	
 	local found
-	local order_key = Aux.auction_key(entry.tooltip, entry.stack_size, amount) 
 	
 	Aux.scan.start{
 		query = search_query,
@@ -681,23 +639,18 @@ function find_auction(entry, buyout_mode, express_mode)
 			
 			local stack_size = auction_item.charges or auction_item.count
 			local bid = (auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid) + auction_item.min_increment
-
-			local auction_amount
-			if buyout_mode then
-				auction_amount = auction_item.buyout_price
-			else
-				auction_amount = bid
-			end
 			
-			local key = Aux.auction_key(auction_item.tooltip, stack_size, auction_amount)
+			local signature = Aux.auction_signature(auction_item.hyperlink, stack_size, bid, auction_item.buyout_price)
 			
-			if key == order_key then
+			if entry.signature == signature then
 				ctrl.suspend()
 				found = true
+                Aux.log('Matching auction found')
 				
 				if express_mode then
 					if GetMoney() >= amount then
 						PlaceAuctionBid("list", i, amount)
+                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..entry.hyperlink..' x '..entry.stack_size)
 						entry.gone = true
 						refresh = true
 					else
@@ -708,7 +661,8 @@ function find_auction(entry, buyout_mode, express_mode)
 					Aux.buy.dialog_action = function()						
 						if GetMoney() >= amount then
 							PlaceAuctionBid("list", i, amount)
-							entry.gone = true
+                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..entry.hyperlink..' x '..entry.stack_size)
+                            entry.gone = true
 							refresh = true
 						else
 							Aux.log('Not enough money.')
@@ -745,12 +699,10 @@ function find_auction(entry, buyout_mode, express_mode)
 	}
 end
 
-function AuxBuyEntry_OnClick(entry_index)
+function AuxBuyEntry_OnClick(entry)
 
 	local express_mode = IsAltKeyDown()
 	local buyout_mode = arg1 == 'LeftButton'
-	
-	local entry = auctions[entry_index]
 	
 	if IsControlKeyDown() then 
 		DressUpItemLink(entry.hyperlink)
@@ -759,37 +711,36 @@ function AuxBuyEntry_OnClick(entry_index)
 	end	
 end
 
-function process_auction(auction_item, current_page)
-	auctions = auctions or {}
+function create_auction_record(auction_item, current_page)
 	
 	local stack_size = auction_item.charges or auction_item.count
 	local bid = (auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid) + auction_item.min_increment
 	local buyout_price = auction_item.buyout_price > 0 and auction_item.buyout_price or nil
 	local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price/stack_size)
-	
-	if auction_item.owner ~= UnitName('player') then
-		tinsert(auctions, {
-				name = auction_item.name,
-				level = auction_item.level,
-				texture = auction_item.texture,
-				tooltip = auction_item.tooltip,
-				stack_size = stack_size,
-				buyout_price = buyout_price,
-				buyout_price_per_unit = buyout_price_per_unit,
-				quality = auction_item.quality,
-				hyperlink = auction_item.hyperlink,
-				itemstring = auction_item.itemstring,
-				page = current_page,
-				bid = bid,
-				bid_per_unit = Aux_Round(bid/stack_size),
-				owner = auction_item.owner,
-				duration = auction_item.duration,
-				usable = auction_item.usable,
-				high_bidder = auction_item.high_bidder,
-				
-				EnhTooltip_info = auction_item.EnhTooltip_info,
-		})
-	end
+
+    return {
+            signature = Aux.auction_signature(auction_item.hyperlink, stack_size, bid, auction_item.buyout_price),
+
+            name = auction_item.name,
+            level = auction_item.level,
+            texture = auction_item.texture,
+            tooltip = auction_item.tooltip,
+            stack_size = stack_size,
+            buyout_price = buyout_price,
+            buyout_price_per_unit = buyout_price_per_unit,
+            quality = auction_item.quality,
+            hyperlink = auction_item.hyperlink,
+            itemstring = auction_item.itemstring,
+            page = current_page,
+            bid = bid,
+            bid_per_unit = Aux_Round(bid/stack_size),
+            owner = auction_item.owner,
+            duration = auction_item.duration,
+            usable = auction_item.usable,
+            high_bidder = auction_item.high_bidder,
+
+            EnhTooltip_info = auction_item.EnhTooltip_info,
+    }
 end
 
 function Aux.buy.onupdate()

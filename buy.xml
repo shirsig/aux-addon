@@ -48,10 +48,6 @@
 				<FontString inherits="GameFontNormal" text="Aux Buy">
 					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="20" y="-18"/></Offset></Anchor></Anchors>
 				</FontString>
-
-				<FontString name="AuxBuyMessage" inherits="GameFontWhite">
-					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="145" y="-150"/></Offset></Anchor></Anchors>
-				</FontString>
 			</Layer>
 			<Layer level="ARTWORK">
 				<FontString inherits="GameFontHighlightSmall" text="Filters">
@@ -71,7 +67,8 @@
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="179" y="-94"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
-                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, Aux.util.map(Aux.buy.modes[1].columns, function(column) return { column = column, sort_ascending = true } end), Aux.buy.modes[1].on_cell_click, Aux.buy.modes[1].on_cell_enter, Aux.buy.modes[1].on_cell_leave)
+                        local sort_order = Aux.util.map(Aux.buy.modes[1].sort_order, function(column_order) return { column = Aux.buy.modes[1].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, sort_order, Aux.buy.modes[1].on_cell_click, Aux.buy.modes[1].on_cell_enter, Aux.buy.modes[1].on_cell_leave)
                     </OnLoad>
                 </Scripts>
             </Frame>
@@ -80,7 +77,8 @@
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="179" y="-94"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
-                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[2].columns, Aux.util.map(Aux.buy.modes[2].columns, function(column) return { column = column, sort_ascending = true } end), Aux.buy.modes[2].on_cell_click, Aux.buy.modes[2].on_cell_enter, Aux.buy.modes[2].on_cell_leave)
+                        local sort_order = Aux.util.map(Aux.buy.modes[2].sort_order, function(column_order) return { column = Aux.buy.modes[2].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[2].columns, sort_order, Aux.buy.modes[2].on_cell_click, Aux.buy.modes[2].on_cell_enter, Aux.buy.modes[2].on_cell_leave)
                     </OnLoad>
                 </Scripts>
             </Frame>
@@ -89,19 +87,21 @@
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="179" y="-94"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnLoad>
-                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[3].columns, Aux.util.map(Aux.buy.modes[3].columns, function(column) return { column = column, sort_ascending = true } end), Aux.buy.modes[3].on_cell_click, Aux.buy.modes[3].on_cell_enter, Aux.buy.modes[3].on_cell_leave)
+                        local sort_order = Aux.util.map(Aux.buy.modes[3].sort_order, function(column_order) return { column = Aux.buy.modes[3].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[3].columns, sort_order, Aux.buy.modes[3].on_cell_click, Aux.buy.modes[3].on_cell_enter, Aux.buy.modes[3].on_cell_leave)
 					</OnLoad>
 				</Scripts>
 			</Frame>
 			
 			<Frame name="AuxBuyFilters">
 				<Size><AbsDimension x="1" y="1"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="28" y="-112"/></Offset></Anchor></Anchors>
+				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="28" y="-117"/></Offset></Anchor></Anchors>
 				<Frames>
                     <Frame name="AuxBuyModeDropDown" inherits="UIDropDownMenuTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0" /></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-23" y="0" /></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
+                                UIDropDownMenu_SetWidth(140)
                                 UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)
                                 UIDropDownMenu_SetSelectedValue(this, 1)
                             </OnLoad>
@@ -119,8 +119,8 @@
                     </Frame>
 
 					<EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="InputBoxTemplate">
-						<Size><AbsDimension x="120" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-65"/></Offset></Anchor></Anchors>
+						<Size><AbsDimension x="119" y="22"/></Size>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="1" y="-56"/></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Name" justifyH="LEFT">
@@ -159,7 +159,7 @@
 					
 					<CheckButton name="AuxBuyExactCheckButton" inherits="UICheckButtonTemplate" checked="true">
 						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="123" y="-65" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="123" y="-56" /></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Exact" justifyH="LEFT">
@@ -170,7 +170,7 @@
 					</CheckButton>
 												
 					<Frame name="AuxBuyCategoryDropDown" inherits="UIDropDownMenuTemplate">
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-23" y="-30" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-23" y="-89" /></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Category" justifyH="LEFT">
@@ -180,8 +180,8 @@
 						</Layers>						
 						<Scripts>
 							<OnLoad>
+                                UIDropDownMenu_SetWidth(140)
 								UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
-								UIDropDownMenu_SetWidth(140)
 							</OnLoad>
 							<OnShow>
 								UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
@@ -190,9 +190,10 @@
 					</Frame>
 
 					<Frame name="AuxBuyQualityDropDown" inherits="UIDropDownMenuTemplate">
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-23" y="-101" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-23" y="-128" /></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnLoad>
+                                UIDropDownMenu_SetWidth(140)
 								UIDropDownMenu_Initialize(this, AuxBuyQualityDropDown_Initialize)
 							</OnLoad>
 							<OnShow>
@@ -211,7 +212,7 @@
 					<EditBox name="AuxBuyMinLevel" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
 						<Size><AbsDimension x="30" y="22"/></Size>
 						<Anchors>
-							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-130"/></Offset></Anchor>
+							<Anchor point="TOPLEFT"><Offset><AbsDimension x="1" y="-167"/></Offset></Anchor>
 						</Anchors>
 						<Layers>
 							<Layer level="ARTWORK">
@@ -244,7 +245,7 @@
 					</EditBox>
 					<CheckButton name="AuxBuyUsableCheckButton" inherits="UICheckButtonTemplate">
 						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="100" y="-130" /></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="72" y="-167" /></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Usable" justifyH="LEFT">
@@ -256,7 +257,7 @@
 					
 					<EditBox name="AuxBuyTooltipInputBox" autoFocus="false" inherits="InputBoxTemplate">
 						<Size><AbsDimension x="110" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-131"/></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-201"/></Offset></Anchor></Anchors>
 						<Layers>
 							<Layer level="OVERLAY">
 								<FontString inherits="GameFontHighlightSmall" text="Tooltip" justifyH="LEFT">
@@ -306,14 +307,55 @@
 					</Button>					
 					<Button name="AuxBuyTooltipButton" inherits="UIPanelButtonTemplate" text="+">
 						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="127" y="-131"/></Offset></Anchor></Anchors>
+						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="127" y="-201"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnClick>
 								AuxBuyTooltipButton_OnClick(this)
 							</OnClick>
 						</Scripts>
 					</Button>
-				</Frames>
+
+                    <EditBox name="AuxBuyPageEditBox" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
+                        <Size><AbsDimension x="30" y="22"/></Size>
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="1" y="-235"/></Offset></Anchor>
+                        </Anchors>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                                <FontString inherits="GameFontHighlightSmall" text="Page" justifyH="LEFT">
+                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnLoad>
+                                this:EnableMouse(false)
+                                this:SetAlpha(0.5)
+                            </OnLoad>
+                            <OnEnterPressed>
+                                this:ClearFocus()
+                            </OnEnterPressed>
+                        </Scripts>
+                    </EditBox>
+                    <CheckButton name="AuxBuyAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
+                        <Size><AbsDimension x="22" y="22"/></Size>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="34" y="-235" /></Offset></Anchor></Anchors>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                                <FontString inherits="GameFontHighlightSmall" text="All" justifyH="LEFT">
+                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnClick>
+                                AuxBuyPageEditBox:EnableMouse(not this:GetChecked())
+                                AuxBuyPageEditBox:SetAlpha(this:GetChecked() and 0.5 or 1)
+                                AuxBuyPageEditBox:ClearFocus()
+                            </OnClick>
+                        </Scripts>
+                    </CheckButton>
+                </Frames>
 			</Frame>		
             
 			<Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">

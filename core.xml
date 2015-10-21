@@ -16,7 +16,7 @@
 		</Scripts>
 	</Frame>
 
-    <ScrollingMessageFrame name="AuxLogFrame" hidden="false">
+    <ScrollingMessageFrame name="AuxLogFrame" hidden="false" maxLines="500">
         <Size><AbsDimension x="400" y="45"/></Size>
         <Layers>
             <Layer level="BACKGROUND">
@@ -59,11 +59,8 @@
                 getglobal(this:GetName()..'Middle'):Hide()
             </OnLeave>
             <OnHyperlinkClick>
-                ChatFrame_OnHyperlinkShow(arg1)
+                <!--ChatFrame_OnHyperlinkShow(arg1) TODO not working because of center -->
             </OnHyperlinkClick>
-            <OnHyperlinkLeave>
-                ChatFrame_OnHyperlinkHide()
-            </OnHyperlinkLeave>
             <OnMouseWheel>
                 if arg1 == 1 then
                     this:ScrollUp()
@@ -71,9 +68,6 @@
                     this:ScrollDown()
                 end
             </OnMouseWheel>
-            <OnMouseUp>
-                this:ScrollToBottom()
-            </OnMouseUp>
         </Scripts>
         <FontString inherits="ChatFontNormal" justifyH="CENTER"/>
     </ScrollingMessageFrame>
@@ -104,21 +98,6 @@
                 </FontString>
             </Layer>
         </Layers>
-        <Scripts>
-            <OnEnter>
-                if ( this.tooltipText ) then
-                GameTooltip:SetOwner(this, "ANCHOR_RIGHT");
-                GameTooltip:SetText(this.tooltipText, nil, nil, nil, nil, 1);
-                end
-                if ( this.tooltipRequirement ) then
-                GameTooltip:AddLine(this.tooltipRequirement, "", 1.0, 1.0, 1.0);
-                GameTooltip:Show();
-                end
-            </OnEnter>
-            <OnLeave>
-                GameTooltip:Hide();
-            </OnLeave>
-        </Scripts>
         <ThumbTexture name="$parentThumb" file="Interface\Buttons\UI-SliderBar-Button-Horizontal">
             <Size>
                 <AbsDimension x="32" y="32"/>

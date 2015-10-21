@@ -1,4 +1,4 @@
-AuxVersion = "1.5.0"
+AuxVersion = "1.6.0"
 AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)"
 
 local lastRightClickAction = GetTime()
@@ -306,7 +306,6 @@ function Aux_AddPanels()
     AuxLogFrame:SetPoint('TOP', buyFrame, 100, -43)
 	relevel(buyFrame)
 	buyFrame:Hide()
-    -- AuxLogFrame:SetFrameLevel(buyFrame:GetFrameLevel() + 1)
 	
 	local optionsFrame = CreateFrame("Frame", "AuxOptionsButtonPanel", AuctionFrame, "AuxOptionsButtonTemplate")
 	optionsFrame:SetParent("AuctionFrame")
@@ -497,17 +496,6 @@ end
 
 -----------------------------------------
 
-function Aux.auction_key(tooltip, stack_size, amount)
-	local key = ''
-	for i, line in ipairs(tooltip) do
-		local left_text = line[1].text
-		local right_text = line[2].text
-		if left_text then
-			key = key .. left_text .. (i == 1 and '' or '_')
-		end
-		if right_text then
-			key = key .. right_text .. '_'
-		end
-	end
-	return key .. (stack_size or '0') .. '_' .. (amount or '0')
+function Aux.auction_signature(hyperlink, stack_size, amount)
+	return hyperlink .. (stack_size or '0') .. '_' .. (amount or '0')
 end

@@ -64,7 +64,7 @@ function Aux.info.auction_item(index)
 	
 	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status, id = GetAuctionItemInfo("list", index)
 	local duration = GetAuctionItemTimeLeft("list", index)
-	
+
 	auction_item.texture = texture
 	auction_item.count = count
 	auction_item.min_bid = min_bid

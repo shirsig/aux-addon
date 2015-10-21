@@ -16,7 +16,7 @@ function Aux.sheet.render(sheet)
 	for i, column in ipairs(sheet.columns) do
 		local sort_info = sheet.sort_order[1]
 
-		if sort_info.column == column then
+		if sort_info and sort_info.column == column then
 			if sort_info.sort_ascending then
 				sheet.labels[i].sort_texture:SetTexCoord(0,0.55,0.2,0.9)
 				sheet.labels[i].sort_texture:SetVertexColor(0.2,1,0)
@@ -257,15 +257,8 @@ function Aux.list.sort(sheet, column_index)
 	if sheet.sort_order[1].column == column then
 		sheet.sort_order[1].sort_ascending = not sheet.sort_order[1].sort_ascending
 	else
-		for index, sort_info in ipairs(sheet.sort_order) do
-			if sort_info.column == column then
-				local temp = sort_info
-				table.remove(sheet.sort_order, index)
-				table.insert(sheet.sort_order, 1, temp)
-				break
-			end
-		end
-		sheet.sort_order[1].sort_ascending = true
+        sort_order = Aux.util.filter(sort_order, function(sort_info) return not sort_info.column == column end)
+        tinsert(sort_order, 1, {column=column, sort_ascending=true})
 	end
 	
 	Aux.util.merge_sort(sheet.data, Aux.list.row_comparator(sheet))
