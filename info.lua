@@ -132,7 +132,7 @@ function Aux.info.tooltip(setter)
 		right.text = getglobal('AuxInfoTooltipTextRight'..i):GetText()
 		right.r, right.b, right.g = getglobal('AuxInfoTooltipTextRight'..i):GetTextColor()
 		
-		tinsert(tooltip, {left, right})
+		tinsert(tooltip, {left or '', right or ''})
 	end
 	
 	for i = 1, TOOLTIP_LENGTH do

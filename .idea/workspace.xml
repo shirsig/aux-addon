@@ -3,12 +3,11 @@
   <component name="ChangeListManager">
     <list default="true" id="3c1af1d3-ae57-470d-8daa-a9295703c6fc" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/buy.lua" afterPath="$PROJECT_DIR$/buy.lua" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/buy.xml" afterPath="$PROJECT_DIR$/buy.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core.lua" afterPath="$PROJECT_DIR$/core.lua" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/core.xml" afterPath="$PROJECT_DIR$/core.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/info.lua" afterPath="$PROJECT_DIR$/info.lua" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/list.lua" afterPath="$PROJECT_DIR$/list.lua" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scan.lua" afterPath="$PROJECT_DIR$/scan.lua" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="Aux-Addon.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -74,8 +73,8 @@
       <file leaf-file-name="core.lua" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="8602">
-              <caret line="0" column="17" selection-start-line="0" selection-start-column="17" selection-end-line="0" selection-end-column="17" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="2295" max-vertical-offset="8602">
+              <caret line="150" column="0" selection-start-line="150" selection-start-column="0" selection-end-line="150" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -84,8 +83,8 @@
       <file leaf-file-name="info.lua" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/info.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="921" max-vertical-offset="3060">
-              <caret line="67" column="26" selection-start-line="67" selection-start-column="26" selection-end-line="67" selection-end-column="26" />
+            <state vertical-scroll-proportion="-15.892858" vertical-offset="1833" max-vertical-offset="3060">
+              <caret line="134" column="49" selection-start-line="134" selection-start-column="49" selection-end-line="134" selection-end-column="49" />
               <folding />
             </state>
           </provider>
@@ -94,8 +93,8 @@
       <file leaf-file-name="scan.lua" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/scan.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="700" max-vertical-offset="2737">
-              <caret line="54" column="9" selection-start-line="54" selection-start-column="9" selection-end-line="54" selection-end-column="9" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="2043" max-vertical-offset="2737">
+              <caret line="138" column="14" selection-start-line="138" selection-start-column="14" selection-end-line="138" selection-end-column="14" />
               <folding />
             </state>
           </provider>
@@ -104,8 +103,18 @@
       <file leaf-file-name="buy.lua" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/buy.lua">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.36456558" vertical-offset="3645" max-vertical-offset="15045">
-              <caret line="227" column="34" selection-start-line="227" selection-start-column="34" selection-end-line="227" selection-end-column="34" />
+            <state vertical-scroll-proportion="0.36456558" vertical-offset="12111" max-vertical-offset="15198">
+              <caret line="725" column="77" selection-start-line="725" selection-start-column="77" selection-end-line="725" selection-end-column="77" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="util.lua" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/util.lua">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="1224" max-vertical-offset="4420">
+              <caret line="92" column="24" selection-start-line="92" selection-start-column="18" selection-end-line="92" selection-end-column="24" />
               <folding />
             </state>
           </provider>
@@ -151,16 +160,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="options.xml" pinned="false" current="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/options.xml">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="3672" max-vertical-offset="6579">
-              <caret line="237" column="0" selection-start-line="237" selection-start-column="0" selection-end-line="249" selection-end-column="34" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="core.xml" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/core.xml">
           <provider selected="true" editor-type-id="text-editor">
@@ -190,11 +189,11 @@
         <option value="$PROJECT_DIR$/sell.lua" />
         <option value="$PROJECT_DIR$/core.xml" />
         <option value="$PROJECT_DIR$/buy.xml" />
-        <option value="$PROJECT_DIR$/buy.lua" />
-        <option value="$PROJECT_DIR$/list.lua" />
         <option value="$PROJECT_DIR$/core.lua" />
         <option value="$PROJECT_DIR$/scan.lua" />
         <option value="$PROJECT_DIR$/info.lua" />
+        <option value="$PROJECT_DIR$/list.lua" />
+        <option value="$PROJECT_DIR$/buy.lua" />
       </list>
     </option>
   </component>
@@ -440,26 +439,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/util.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-137.21428" vertical-offset="408" max-vertical-offset="4420">
-          <caret line="250" column="11" selection-start-line="250" selection-start-column="11" selection-end-line="250" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/sell.lua">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-3.0" vertical-offset="3520" max-vertical-offset="10353">
           <caret line="212" column="12" selection-start-line="212" selection-start-column="12" selection-end-line="212" selection-end-column="12" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/options.lua">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2040">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -488,26 +471,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/list.lua">
+    <entry file="file://$PROJECT_DIR$/core.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-11.928572" vertical-offset="4052" max-vertical-offset="4624">
-          <caret line="258" column="8" selection-start-line="258" selection-start-column="8" selection-end-line="258" selection-end-column="8" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="2295" max-vertical-offset="8602">
+          <caret line="150" column="0" selection-start-line="150" selection-start-column="0" selection-end-line="150" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/core.lua">
+    <entry file="file://$PROJECT_DIR$/options.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="8602">
-          <caret line="0" column="17" selection-start-line="0" selection-start-column="17" selection-end-line="0" selection-end-column="17" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="2040">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/scan.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="700" max-vertical-offset="2737">
-          <caret line="54" column="9" selection-start-line="54" selection-start-column="9" selection-end-line="54" selection-end-column="9" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="2043" max-vertical-offset="2737">
+          <caret line="138" column="14" selection-start-line="138" selection-start-column="14" selection-end-line="138" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/info.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-15.892858" vertical-offset="1833" max-vertical-offset="3060">
+          <caret line="134" column="49" selection-start-line="134" selection-start-column="49" selection-end-line="134" selection-end-column="49" />
           <folding />
         </state>
       </provider>
@@ -520,18 +511,26 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/info.lua">
+    <entry file="file://$PROJECT_DIR$/util.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="921" max-vertical-offset="3060">
-          <caret line="67" column="26" selection-start-line="67" selection-start-column="26" selection-end-line="67" selection-end-column="26" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="1224" max-vertical-offset="4420">
+          <caret line="92" column="24" selection-start-line="92" selection-start-column="18" selection-end-line="92" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/list.lua">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-11.928572" vertical-offset="4052" max-vertical-offset="4624">
+          <caret line="258" column="8" selection-start-line="258" selection-start-column="8" selection-end-line="258" selection-end-column="8" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/buy.lua">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.36456558" vertical-offset="3645" max-vertical-offset="15045">
-          <caret line="227" column="34" selection-start-line="227" selection-start-column="34" selection-end-line="227" selection-end-column="34" />
+        <state vertical-scroll-proportion="0.36456558" vertical-offset="12111" max-vertical-offset="15198">
+          <caret line="725" column="77" selection-start-line="725" selection-start-column="77" selection-end-line="725" selection-end-column="77" />
           <folding />
         </state>
       </provider>

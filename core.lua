@@ -148,7 +148,7 @@ function Aux.log(msg)
 end
 
 function Aux_SetupHookFunctions()
-	
+
 	Aux.orig.AuctionFrameAuctions_OnShow = AuctionFrameAuctions_OnShow
 	AuctionFrameAuctions_OnShow = Aux_Sell_AuctionFrameAuctions_OnShow
 	

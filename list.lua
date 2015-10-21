@@ -257,8 +257,8 @@ function Aux.list.sort(sheet, column_index)
 	if sheet.sort_order[1].column == column then
 		sheet.sort_order[1].sort_ascending = not sheet.sort_order[1].sort_ascending
 	else
-        sort_order = Aux.util.filter(sort_order, function(sort_info) return not sort_info.column == column end)
-        tinsert(sort_order, 1, {column=column, sort_ascending=true})
+        sheet.sort_order = Aux.util.filter(sheet.sort_order, function(sort_info) return not sort_info.column == column end)
+        tinsert(sheet.sort_order, 1, {column=column, sort_ascending=true})
 	end
 	
 	Aux.util.merge_sort(sheet.data, Aux.list.row_comparator(sheet))
