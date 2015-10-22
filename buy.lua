@@ -565,8 +565,8 @@ function show_dialog(buyout_mode, entry, amount)
 	AuxBuyConfirmation.EnhTooltip_info = entry.EnhTooltip_info
 	
 	AuxBuyConfirmationActionButton:Disable()
-	AuxBuyConfirmationItem:SetNormalTexture(entry.texture)
-	AuxBuyConfirmationItemName:SetText(entry.name)
+	AuxBuyConfirmationItemIconTexture:SetTexture(entry.texture)
+	AuxBuyConfirmationItemName:SetText(entry.tooltip[1][1].text)
 	local color = ITEM_QUALITY_COLORS[entry.quality]
 	AuxBuyConfirmationItemName:SetTextColor(color.r, color.g, color.b)
 
@@ -587,7 +587,6 @@ function show_dialog(buyout_mode, entry, amount)
 		AuxBuyConfirmationBuyoutPrice:Hide()
 		AuxBuyConfirmationBid:Show()
 	end
-	hide_sheet()
 	AuxBuyConfirmation:Show()
 end
 
