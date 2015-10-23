@@ -30,26 +30,38 @@
                 </FontString>
             </Layer>
         </Layers>
-        <Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+        <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
             <EdgeSize>
                 <AbsValue val="16"/>
             </EdgeSize>
-            <!--<TileSize>-->
-                <!--<AbsValue val="16"/>-->
-            <!--</TileSize>-->
-            <!--<BackgroundInsets>-->
-                <!--<AbsInset left="5" right="5" top="5" bottom="5"/>-->
-            <!--</BackgroundInsets>-->
+            <TileSize>
+                <AbsValue val="16"/>
+            </TileSize>
+            <BackgroundInsets>
+                <AbsInset left="5" right="5" top="5" bottom="5"/>
+            </BackgroundInsets>
         </Backdrop>
         <Scripts>
             <OnLoad>
                 this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                <!--this:SetBackdropColor(0.5, 0.5, 0.5);-->
+                this:SetBackdropColor(0.15, 0.15, 0.15)
             </OnLoad>
         </Scripts>
     </Frame>
 
-    <Slider name="AuxSliderTemplate" orientation="HORIZONTAL" virtual="true" enableMouse="true">
+    <EditBox name="AuxInputBoxTemplate" autoFocus="false" inherits="InputBoxTemplate" virtual="true">
+        <Size><AbsDimension x="119" y="22"/></Size>
+        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-71"/></Offset></Anchor></Anchors>
+        <Layers>
+            <Layer level="OVERLAY">
+                <FontString name="$parentLabel" inherits="GameFontNormalSmall" justifyH="LEFT">
+                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+    </EditBox>
+
+    <Slider name="AuxSliderTemplate" orientation="HORIZONTAL" enableMouse="true" virtual="true">
         <Size>
             <AbsDimension x="128" y="17"/>
         </Size>

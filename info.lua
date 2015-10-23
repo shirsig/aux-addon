@@ -159,6 +159,11 @@ function item_id(hyperlink)
 	return tonumber(id_string)	
 end
 
+function parse_hyperlink(hyperlink)
+    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(hyperlink, '|Hitem:(%d+):(%d+):(%d+):(%d+)|h[[]([^]]+)[]]|h')
+    return tonumber(item_id) or 0, tonumber(suffix_id) or 0, tonumber(enchant_id) or 0, tonumber(unique_id) or 0, name
+end
+
 function hyperlink_item(hyperlink)
 	local name, itemstring, quality, level, type, subtype, max_stack = GetItemInfo(item_id(hyperlink))
 	return {
