@@ -84,7 +84,12 @@ function Aux_OnAddonLoaded()
 		
 		Aux.tabs.buy.hiddenElements = {
 --				AuctionFrameBrowse,
-		}
+        }
+
+        Aux.buy.elements = {
+            AuxBuyFilters,
+            AuxBuySheetFrame,
+        }
 
 		Aux.tabs.sell.recommendationElements = {
 				AuxRecommendText,
@@ -99,6 +104,7 @@ function Aux_OnAddonLoaded()
 end
 
 function Aux.log_frame_load()
+    this:SetFading(false)
     this:EnableMouseWheel()
     -- this.flashTimer = 0 TODO remove
 end
@@ -141,8 +147,8 @@ end
 
 function Aux.log(msg)
     local info = ChatTypeInfo["SYSTEM"]
-    AuxLogFrame:AddMessage(msg, 1, 1, 0)
-    if not AuxLogFrame:IsVisible() and DEFAULT_CHAT_FRAME then
+    AuxLogFrameMessageFrame:AddMessage(msg, 1, 1, 0)
+    if not AuxLogFrameMessageFrame:IsVisible() and DEFAULT_CHAT_FRAME then
         DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
     end
 end
@@ -239,6 +245,20 @@ function Aux_OnAuctionHouseClosed()
 	AuxSellPanel:Hide()
 	AuxBuyPanel:Hide()
 	
+end
+
+function Aux.on_tab_click(button)
+
+    for i=1,4 do
+        getglobal('AuxTab'..i):SetAlpha(i == this:GetID() and 1 or 0.5)
+    end
+
+    Aux_HideElems(Aux.buy.elements)
+    AuxSellPanel:Hide()
+    if this:GetID() == 1 then
+        Aux_ShowElems(Aux.buy.elements)
+    end
+
 end
 
 function Aux_AuctionFrameTab_OnClick(index)

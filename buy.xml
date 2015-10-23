@@ -39,38 +39,133 @@
 			<TexCoords left="0" right="1.0" top="0" bottom="0.578125"/>
 		</HighlightTexture>
 	</Button>
-	
-	<!--<Frame name="AuxBuyTemplate" virtual="true" hidden="true" inherits="OptionFrameBoxTemplate">-->
-		<!--<Size><AbsDimension x="694" y="447"/></Size>-->
-		<!--<Anchors><Anchor point="TOPLEFT"/></Anchors>	-->
-    <Frame name="AuxBuyPanel" toplevel="true" frameStrata="DIALOG" movable="true" enableMouse="true" hidden="true" parent="UIParent">
+
+    <Button name="AuxTabTemplate" hidden="false" virtual="true">
         <Size>
-            <AbsDimension x="895" y="425"/>
+            <AbsDimension x="64" y="32"/>
+        </Size>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentLeft" file="Interface\ChatFrame\ChatFrameTab">
+                    <Size>
+                        <AbsDimension x="16" y="32"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="LEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.0" right="0.25" top="0.0" bottom="1.0"/>
+                </Texture>
+                <Texture name="$parentRight" file="Interface\ChatFrame\ChatFrameTab">
+                    <Size>
+                        <AbsDimension x="16" y="32"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="RIGHT"/>
+                    </Anchors>
+                    <TexCoords left="0.75" right="1.0" top="0.0" bottom="1.0"/>
+                </Texture>
+                <Texture name="$parentMiddle" file="Interface\ChatFrame\ChatFrameTab">
+                    <Size>
+                        <AbsDimension x="44" y="32"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        <Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                    </Anchors>
+                    <TexCoords left="0.25" right="0.75" top="0.0" bottom="1.0"/>
+                </Texture>
+            </Layer>
+        </Layers>
+        <Scripts>
+            <OnShow>
+                this:SetWidth(getglobal(this:GetName()..'Text'):GetStringWidth()+40)
+            </OnShow>
+            <OnClick>
+                Aux.on_tab_click(arg1)
+            </OnClick>
+        </Scripts>
+        <NormalText name="$parentText" inherits="GameFontNormalSmall">
+            <Size>
+                <AbsDimension x="50" y="8"/>
+            </Size>
+            <Anchors>
+                <Anchor point="CENTER">
+                    <Offset>
+                        <AbsDimension x="0" y="-5"/>
+                    </Offset>
+                </Anchor>
+            </Anchors>
+        </NormalText>
+        <HighlightTexture name="$parentHighlight" file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD" setAllPoints="true">
+            <Size>
+                <AbsDimension x="5" y="32"/>
+            </Size>
+            <Anchors>
+                <Anchor point="LEFT" relativeTo="$parentLeft">
+                    <Offset>
+                        <AbsDimension x="0" y="-7"/>
+                    </Offset>
+                </Anchor>
+                <Anchor point="RIGHT" relativeTo="$parentRight">
+                    <Offset>
+                        <AbsDimension x="0" y="-7"/>
+                    </Offset>
+                </Anchor>
+            </Anchors>
+        </HighlightTexture>
+    </Button>
+
+    <Frame name="AuxBuyPanel" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent">
+        <Size>
+            <AbsDimension x="890" y="560"/>
         </Size>
         <Anchors>
             <Anchor point="CENTER"/>
         </Anchors>
         <Scripts>
-            <OnLoad>this:RegisterForDrag('LeftButton')</OnLoad>
-            <OnDragStart>this:StartMoving()</OnDragStart>
-            <OnDragStop>this:StopMovingOrSizing()</OnDragStop>
+            <OnLoad>
+                this:RegisterForDrag('LeftButton')
+            </OnLoad>
+            <OnDragStart>
+                this:StartMoving()
+            </OnDragStart>
+            <OnDragStop>
+                this:StopMovingOrSizing()
+            </OnDragStop>
         </Scripts>
-        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-            <BackgroundInsets>
-                <AbsInset left="11" right="12" top="12" bottom="11"/>
-            </BackgroundInsets>
-            <TileSize>
-                <AbsValue val="32"/>
-            </TileSize>
+        <Backdrop edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
+            <!--<BackgroundInsets>-->
+                <!--<AbsInset left="11" right="12" top="12" bottom="11"/>-->
+            <!--</BackgroundInsets>-->
+            <!--<TileSize>-->
+                <!--<AbsValue val="32"/>-->
+            <!--</TileSize>-->
             <EdgeSize>
                 <AbsValue val="32"/>
             </EdgeSize>
         </Backdrop>
         <Layers>
+            <Layer level="BACKGROUND">
+                <Texture>
+                    <Anchors>
+                        <Anchor point="TOPLEFT">
+                            <Offset>
+                                <AbsDimension x="12" y="-11"/>
+                            </Offset>
+                        </Anchor>
+                        <Anchor point="BOTTOMRIGHT">
+                            <Offset>
+                                <AbsDimension x="-12" y="11"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                    <Color r="0" g="0" b="0" a="1.0"/>
+                </Texture>
+            </Layer>
             <Layer level="ARTWORK">
                 <Texture name="$parentHeader" file="Interface\DialogFrame\UI-DialogBox-Header">
                     <Size>
-                        <AbsDimension x="256" y="64"/>
+                        <AbsDimension x="150" y="64"/>
                     </Size>
                     <Anchors>
                         <Anchor point="TOP">
@@ -80,7 +175,7 @@
                         </Anchor>
                     </Anchors>
                 </Texture>
-                <FontString inherits="GameFontNormal" text="Aux Buy">
+                <FontString inherits="GameFontNormal" text="Aux">
                     <Anchors>
                         <Anchor point="TOP" relativeTo="$parentHeader">
                             <Offset>
@@ -92,481 +187,603 @@
             </Layer>
 		</Layers>
 		<Frames>
-            <Frame name="AuxBuySheetFrame" inherits="OptionFrameBoxTemplate">
-                <Size>
-                    <AbsDimension x="655" y="326"/>
-                </Size>
-                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="220" y="-50"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnLoad>
-                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                        this:SetBackdropColor(0.15, 0.15, 0.15)
-                        getglobal(this:GetName().."Title"):SetText('Search Results')
-                    </OnLoad>
-                </Scripts>
+            <Button name="AuctionFrameCloseButton" inherits="UIPanelCloseButton">
+                <Anchors>
+                    <Anchor point="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="-6" y="-6"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Frame name="AuxLogFrame" inherits="OptionFrameBoxTemplate">
+                <Size><AbsDimension x="600" y="71"/></Size>
+                <Anchors>
+                    <Anchor point="LEFT">
+                        <Offset>
+                            <AbsDimension x="20" y="0"/>
+                        </Offset>
+                    </Anchor>
+                    <Anchor point="RIGHT">
+                        <Offset>
+                            <AbsDimension x="-20" y="0"/>
+                        </Offset>
+                    </Anchor>
+                    <Anchor point="BOTTOM">
+                        <Offset>
+                            <AbsDimension x="0" y="20"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
                 <Frames>
-                    <Frame name="AuxBuyBuyList" hidden="true">
+                    <ScrollingMessageFrame name="$parentMessageFrame" maxLines="500">
                         <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                            <Anchor point="TOPLEFT">
+                                <Offset>
+                                    <AbsDimension x="7" y="-5"/>
+                                </Offset>
+                            </Anchor>
+                            <Anchor point="BOTTOMRIGHT">
+                                <Offset>
+                                    <AbsDimension x="-7" y="9"/>
+                                </Offset>
+                            </Anchor>
                         </Anchors>
                         <Scripts>
                             <OnLoad>
-                                local sort_order = Aux.util.map(Aux.buy.modes[1].sort_order, function(column_order) return { column = Aux.buy.modes[1].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, sort_order, Aux.buy.modes[1].on_cell_click, Aux.buy.modes[1].on_cell_enter, Aux.buy.modes[1].on_cell_leave)
+                                Aux.log_frame_load()
                             </OnLoad>
+                            <OnUpdate>
+                                Aux.log_frame_update(arg1)
+                            </OnUpdate>
+                            <OnHyperlinkClick>
+                                ChatFrame_OnHyperlinkShow(arg1)
+                            </OnHyperlinkClick>
+                            <OnMouseWheel>
+                                if arg1 == 1 then
+                                this:ScrollUp()
+                                elseif arg1 == -1 then
+                                this:ScrollDown()
+                                end
+                            </OnMouseWheel>
                         </Scripts>
-                    </Frame>
-                    <Frame name="AuxBuyBidList" hidden="true">
-                        <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                local sort_order = Aux.util.map(Aux.buy.modes[2].sort_order, function(column_order) return { column = Aux.buy.modes[2].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[2].columns, sort_order, Aux.buy.modes[2].on_cell_click, Aux.buy.modes[2].on_cell_enter, Aux.buy.modes[2].on_cell_leave)
-                            </OnLoad>
-                        </Scripts>
-                    </Frame>
-                    <Frame name="AuxBuyFullList" hidden="true">
-                        <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                local sort_order = Aux.util.map(Aux.buy.modes[3].sort_order, function(column_order) return { column = Aux.buy.modes[3].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[3].columns, sort_order, Aux.buy.modes[3].on_cell_click, Aux.buy.modes[3].on_cell_enter, Aux.buy.modes[3].on_cell_leave)
-                            </OnLoad>
-                        </Scripts>
-                    </Frame>
-                    <Frame name="AuxBuyConfirmation" enableMouse="true" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" hidden="true">
-                        <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                        </Anchors>
-                        <Scripts>
-                        </Scripts>
-                        <Frames>
-                            <Frame name="$parentItem">
-                                <Size><AbsDimension x="193" y="37"/></Size>
-                                <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-100"/></Offset></Anchor></Anchors>
-                                <Layers>
-                                    <Layer level="BORDER">
-                                        <Texture name="$parentIconTexture">
-                                            <Size><AbsDimension x="32" y="32"/></Size>
-                                            <Anchors><Anchor point="LEFT"><Offset><AbsDimension x="2" y="0"/></Offset></Anchor></Anchors>
-                                        </Texture>
-                                        <Texture file="Interface\Buttons\UI-Quickslot2">
-                                            <Size><AbsDimension x="60" y="60"/></Size>
-                                            <Anchors><Anchor point="CENTER" relativeTo="$parentIconTexture"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                        </Texture>
-                                        <FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT">
-                                            <Anchors><Anchor point="BOTTOMRIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="-5" y="2"/></Offset></Anchor></Anchors>
-                                        </FontString>
-                                        <FontString name="$parentName" inherits="GameFontNormal" justifyH="LEFT">
-                                            <Anchors>
-                                                <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
-                                                <Anchor point="RIGHT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor>
-                                                <Anchor point="TOP"><Offset><AbsDimension x="0" y="-5"/></Offset></Anchor>
-                                                <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor>
-                                            </Anchors>
-                                        </FontString>
-                                    </Layer>
-                                    <Layer level="BACKGROUND">
-                                        <Texture name="$parentLeft" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
-                                            <Size><AbsDimension x="10" y="37"/></Size>
-                                            <Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="2" y="0"/></Offset></Anchor></Anchors>
-                                            <TexCoords left="0" right="0.078125" top="0" bottom="1.0"/>
-                                        </Texture>
-                                        <Texture name="$parentRight" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
-                                            <Size><AbsDimension x="10" y="37"/></Size>
-                                            <Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                            </Anchors>
-                                            <TexCoords left="0.75" right="0.828125" top="0" bottom="1.0"/>
-                                        </Texture>
-                                        <Texture file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
-                                            <Size><AbsDimension x="10" y="37"/></Size>
-                                            <Anchors>
-                                                <Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                                <Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                            </Anchors>
-                                            <TexCoords left="0.078125" right="0.75" top="0" bottom="1.0"/>
-                                        </Texture>
-                                    </Layer>
-                                </Layers>
-                                <Scripts>
-                                    <OnEnter>
-                                        Aux.info.set_game_tooltip(this, this:GetParent().tooltip, 'ANCHOR_LEFT', this:GetParent().EnhTooltip_info)
-                                    </OnEnter>
-                                    <OnLeave>
-                                        GameTooltip:Hide()
-                                    </OnLeave>
-                                </Scripts>
-                                <HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
-                            </Frame>
-                            <Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
-                                <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="115"/></Offset></Anchor></Anchors>
-                                <Layers>
-                                    <Layer level="OVERLAY">
-                                        <FontString inherits="GameFontNormalLarge" text="Price:" justifyH="RIGHT">
-                                            <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor></Anchors>
-                                        </FontString>
-                                    </Layer>
-                                </Layers>
-                            </Frame>
-                            <Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
-                                <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="130"/></Offset></Anchor></Anchors>
-                                <Scripts>
-                                    <OnLoad>
-                                        SmallMoneyFrame_OnLoad()
-                                        MoneyFrame_SetType("STATIC")
-                                    </OnLoad>
-                                </Scripts>
-                                <Layers>
-                                    <Layer level="OVERLAY">
-                                        <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
-                                            <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
-                                        </FontString>
-                                    </Layer>
-                                </Layers>
-                            </Frame>
-                            <Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
-                                <Size><AbsDimension x="80" y="21"/>	</Size>
-                                <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="240" y="90"/></Offset></Anchor></Anchors>
-                                <Scripts>
-                                    <OnClick>
-                                        Aux.buy.dialog_action()
-                                    </OnClick>
-                                </Scripts>
-                            </Button>
-                            <Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
-                                <Size><AbsDimension x="80" y="21"/></Size>
-                                <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-240" y="90"/></Offset></Anchor></Anchors>
-                                <Scripts>
-                                    <OnClick>
-                                        Aux.buy.dialog_cancel()
-                                    </OnClick>
-                                </Scripts>
-                            </Button>
-                        </Frames>
-                    </Frame>
+                        <FontString inherits="ChatFontNormal" justifyH="LEFT"/>
+                    </ScrollingMessageFrame>
                 </Frames>
             </Frame>
-			
-			<Frame name="AuxBuyFilters" inherits="OptionFrameBoxTemplate">
-				<Size><AbsDimension x="180" y="290"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="28" y="-50"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnLoad>
-                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                        this:SetBackdropColor(0.15, 0.15, 0.15)
-                        getglobal(this:GetName().."Title"):SetText('Filters')
-                    </OnLoad>
-                </Scripts>
-				<Frames>
-                    <Frame name="AuxBuyModeDropDown" inherits="UIDropDownMenuTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-15" /></Offset></Anchor></Anchors>
+            <Frame name="AuxBuySubPanel" inherits="AuxFrameBoxTemplate">
+                <Anchors>
+                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="20" y="-50"/></Offset></Anchor>
+                    <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="100"/></Offset></Anchor>
+                </Anchors>
+                <Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+                    <EdgeSize>
+                        <AbsValue val="16"/>
+                    </EdgeSize>
+                </Backdrop>
+                <Frames>
+                    <Button name="AuxTab1" inherits="AuxTabTemplate" id="1">
+                        <Anchors>
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
+                                <Offset>
+                                    <AbsDimension x="7" y="-2"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
                         <Scripts>
                             <OnLoad>
-                                UIDropDownMenu_SetWidth(140)
-                                UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)
-                                UIDropDownMenu_SetSelectedValue(this, 1)
+                                getglobal(this:GetName().."Text"):SetText('Search')
                             </OnLoad>
-                            <OnShow>
-                                UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)
-                            </OnShow>
                         </Scripts>
-                        <Layers>
-                            <Layer level="OVERLAY">
-                                <FontString inherits="GameFontHighlightSmall" text="Mode" justifyH="LEFT">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="20" y="8"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
+                    </Button>
+                    <Button name="AuxTab2" inherits="AuxTabTemplate" id="2">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="AuxTab1" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="0" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText('Post')
+                            </OnLoad>
+                        </Scripts>
+                    </Button>
+                    <Button name="AuxTab3" inherits="AuxTabTemplate" id="3">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="AuxTab2" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="0" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText('Auctions')
+                            </OnLoad>
+                        </Scripts>
+                    </Button>
+                    <Button name="AuxTab4" inherits="AuxTabTemplate" id="4">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="AuxTab3" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="0" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText('Bids')
+                            </OnLoad>
+                        </Scripts>
+                    </Button>
+                    <Frame name="AuxBuyFilters" inherits="AuxFrameBoxTemplate">
+                        <Size><AbsDimension x="180" y="326"/></Size>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                                getglobal(this:GetName().."Title"):SetText('Filters')
+                            </OnLoad>
+                        </Scripts>
+                        <Frames>
+                            <Frame name="AuxBuyModeDropDown" inherits="UIDropDownMenuTemplate">
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-15" /></Offset></Anchor></Anchors>
+                                <Scripts>
+                                    <OnLoad>
+                                        UIDropDownMenu_SetWidth(140)
+                                        UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)
+                                        UIDropDownMenu_SetSelectedValue(this, 1)
+                                    </OnLoad>
+                                    <OnShow>
+                                        UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)
+                                    </OnShow>
+                                </Scripts>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString inherits="GameFontHighlightSmall" text="Mode" justifyH="LEFT">
+                                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="20" y="8"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                            </Frame>
+
+                            <EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="InputBoxTemplate">
+                                <Size><AbsDimension x="119" y="22"/></Size>
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-71"/></Offset></Anchor></Anchors>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString inherits="GameFontHighlightSmall" text="Name" justifyH="LEFT">
+                                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnLoad>
+                                        this.completor = Aux.completion.completor(this)
+                                    </OnLoad>
+                                    <OnTextChanged>
+                                        this.completor.suggest()
+                                    </OnTextChanged>
+                                    <OnTabPressed>
+                                        if IsShiftKeyDown() then
+                                            this.completor.previous()
+                                        else
+                                            this.completor.next()
+                                        end
+                                    </OnTabPressed>
+                                    <OnEnterPressed>
+                                        this.completor.close()
+                                        this:ClearFocus()
+                                        Aux.buy.SearchButton_onclick()
+                                    </OnEnterPressed>
+                                    <OnEscapePressed>
+                                        if this.completor.open() then
+                                            this.completor.close()
+                                        else
+                                            this:ClearFocus()
+                                        end
+                                    </OnEscapePressed>
+                                </Scripts>
+                            </EditBox>
+
+                            <CheckButton name="AuxBuyExactCheckButton" inherits="UICheckButtonTemplate" checked="true">
+                                <Size><AbsDimension x="22" y="22"/></Size>
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="138" y="-71" /></Offset></Anchor></Anchors>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString inherits="GameFontHighlightSmall" text="Exact" justifyH="LEFT">
+                                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                            </CheckButton>
+
+                            <Frame name="AuxBuyCategoryDropDown" inherits="UIDropDownMenuTemplate">
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-104" /></Offset></Anchor></Anchors>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString inherits="GameFontHighlightSmall" text="Category" justifyH="LEFT">
+                                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="20" y="8"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnLoad>
+                                        UIDropDownMenu_SetWidth(140)
+                                        UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
+                                    </OnLoad>
+                                    <OnShow>
+                                        UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
+                                    </OnShow>
+                                </Scripts>
+                            </Frame>
+
+                            <Frame name="AuxBuyQualityDropDown" inherits="UIDropDownMenuTemplate">
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-143" /></Offset></Anchor></Anchors>
+                                <Scripts>
+                                    <OnLoad>
+                                        UIDropDownMenu_SetWidth(140)
+                                        UIDropDownMenu_Initialize(this, AuxBuyQualityDropDown_Initialize)
+                                    </OnLoad>
+                                    <OnShow>
+                                        UIDropDownMenu_Initialize(this, AuxBuyQualityDropDown_Initialize)
+                                    </OnShow>
+                                </Scripts>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString inherits="GameFontHighlightSmall" text="Rarity" justifyH="LEFT">
+                                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="20" y="8"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                            </Frame>
+
+                            <EditBox name="AuxBuyMinLevel" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
+                                <Size><AbsDimension x="30" y="22"/></Size>
+                                <Anchors>
+                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="18" y="-182"/></Offset></Anchor>
+                                </Anchors>
+                                <Layers>
+                                    <Layer level="ARTWORK">
+                                        <FontString inherits="GameFontHighlightSmall" text="-">
+                                            <Anchors><Anchor point="LEFT" relativePoint="RIGHT"><Offset><AbsDimension x="-1" y="0"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                    <Layer level="OVERLAY">
+                                        <FontString inherits="GameFontHighlightSmall" text="Level Range" justifyH="LEFT">
+                                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnEnterPressed>
+                                        this:ClearFocus()
+                                    </OnEnterPressed>
+                                </Scripts>
+                            </EditBox>
+                            <EditBox name="AuxBuyMaxLevel" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
+                                <Size><AbsDimension x="30" y="22"/></Size>
+                                <Anchors>
+                                    <Anchor point="LEFT" relativeTo="AuxBuyMinLevel" relativePoint="RIGHT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor>
+                                </Anchors>
+                                <Scripts>
+                                    <OnEnterPressed>
+                                        this:ClearFocus()
+                                    </OnEnterPressed>
+                                </Scripts>
+                            </EditBox>
+                            <CheckButton name="AuxBuyUsableCheckButton" inherits="UICheckButtonTemplate">
+                                <Size><AbsDimension x="22" y="22"/></Size>
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-182" /></Offset></Anchor></Anchors>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString inherits="GameFontHighlightSmall" text="Usable" justifyH="LEFT">
+                                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                            </CheckButton>
+
+                            <EditBox name="AuxBuyTooltipInputBox" autoFocus="false" inherits="InputBoxTemplate">
+                                <Size><AbsDimension x="110" y="22"/></Size>
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-216"/></Offset></Anchor></Anchors>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString inherits="GameFontHighlightSmall" text="Tooltip" justifyH="LEFT">
+                                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnEnterPressed>
+                                        AuxBuyTooltipButton_OnClick(this)
+                                    </OnEnterPressed>
+                                </Scripts>
+                            </EditBox>
+
+                            <Frame name="AuxBuyTooltipDropDown" inherits="UIDropDownMenuTemplate" hidden="true">
+                                <Scripts>
+                                    <OnLoad>
+                                        UIDropDownMenu_Initialize(this, AuxBuyTooltipDropDown_Initialize)
+                                    </OnLoad>
+                                </Scripts>
+                            </Frame>
+                            <Button name="AuxBuyTooltipArrow">
+                                <Size><AbsDimension x="24" y="24"/></Size>
+                                <Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxBuyTooltipInputBox"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor></Anchors>
+                                <Scripts>
+                                    <OnClick>
+                                        Aux.buy.toggle_tooltip_dropdown()
+                                        PlaySound("igMainMenuOptionCheckBoxOn")
+                                    </OnClick>
+                                </Scripts>
+                                <NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
+                                    <Size><AbsDimension x="24" y="24"/></Size>
+                                    <Anchors><Anchor point="RIGHT"/></Anchors>
+                                </NormalTexture>
+                                <PushedTexture name="$parentPushedTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down">
+                                    <Size><AbsDimension x="24" y="24"/></Size>
+                                    <Anchors><Anchor point="RIGHT"/></Anchors>
+                                </PushedTexture>
+                                <DisabledTexture name="$parentDisabledTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled">
+                                    <Size><AbsDimension x="24" y="24"/></Size>
+                                    <Anchors><Anchor point="RIGHT"/></Anchors>
+                                </DisabledTexture>
+                                <HighlightTexture name="$parentHighlightTexture" file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
+                                    <Size><AbsDimension x="24" y="24"/></Size>
+                                    <Anchors><Anchor point="RIGHT"/></Anchors>
+                                </HighlightTexture>
+                            </Button>
+                            <Button name="AuxBuyTooltipButton" inherits="UIPanelButtonTemplate" text="+">
+                                <Size><AbsDimension x="22" y="22"/></Size>
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="143" y="-216"/></Offset></Anchor></Anchors>
+                                <Scripts>
+                                    <OnClick>
+                                        AuxBuyTooltipButton_OnClick(this)
+                                    </OnClick>
+                                </Scripts>
+                            </Button>
+
+                            <EditBox name="AuxBuyPageEditBox" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
+                                <Size><AbsDimension x="30" y="22"/></Size>
+                                <Anchors>
+                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-250"/></Offset></Anchor>
+                                </Anchors>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString inherits="GameFontHighlightSmall" text="Page" justifyH="LEFT">
+                                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnLoad>
+                                        this:EnableMouse(false)
+                                        this:SetAlpha(0.5)
+                                    </OnLoad>
+                                    <OnEnterPressed>
+                                        this:ClearFocus()
+                                    </OnEnterPressed>
+                                </Scripts>
+                            </EditBox>
+                            <CheckButton name="AuxBuyAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
+                                <Size><AbsDimension x="22" y="22"/></Size>
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="49" y="-250" /></Offset></Anchor></Anchors>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString inherits="GameFontHighlightSmall" text="All" justifyH="LEFT">
+                                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                                <Scripts>
+                                    <OnClick>
+                                        AuxBuyPageEditBox:EnableMouse(not this:GetChecked())
+                                        AuxBuyPageEditBox:SetAlpha(this:GetChecked() and 0.5 or 1)
+                                        AuxBuyPageEditBox:ClearFocus()
+                                    </OnClick>
+                                </Scripts>
+                            </CheckButton>
+                        </Frames>
                     </Frame>
 
-					<EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="InputBoxTemplate">
-						<Size><AbsDimension x="119" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-71"/></Offset></Anchor></Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString inherits="GameFontHighlightSmall" text="Name" justifyH="LEFT">
-									<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnLoad>
-								this.completor = Aux.completion.completor(this)
-							</OnLoad>
-							<OnTextChanged>
-								this.completor.suggest()
-							</OnTextChanged>
-							<OnTabPressed>
-								if IsShiftKeyDown() then
-									this.completor.previous()
-								else
-									this.completor.next()
-								end
-							</OnTabPressed>
-							<OnEnterPressed>
-								this.completor.close()
-								this:ClearFocus()
-								Aux.buy.SearchButton_onclick()
-							</OnEnterPressed>
-							<OnEscapePressed>
-								if this.completor.open() then
-									this.completor.close()
-								else
-									this:ClearFocus()
-								end
-							</OnEscapePressed>
-						</Scripts>
-					</EditBox>
-					
-					<CheckButton name="AuxBuyExactCheckButton" inherits="UICheckButtonTemplate" checked="true">
-						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="138" y="-71" /></Offset></Anchor></Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString inherits="GameFontHighlightSmall" text="Exact" justifyH="LEFT">
-									<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-					</CheckButton>
-												
-					<Frame name="AuxBuyCategoryDropDown" inherits="UIDropDownMenuTemplate">
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-104" /></Offset></Anchor></Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString inherits="GameFontHighlightSmall" text="Category" justifyH="LEFT">
-									<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="20" y="8"/></Offset></Anchor></Anchors>
-								</FontString>
-							</Layer>
-						</Layers>						
-						<Scripts>
-							<OnLoad>
-                                UIDropDownMenu_SetWidth(140)
-								UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
-							</OnLoad>
-							<OnShow>
-								UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
-							</OnShow>
-						</Scripts>
-					</Frame>
-
-					<Frame name="AuxBuyQualityDropDown" inherits="UIDropDownMenuTemplate">
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-143" /></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnLoad>
-                                UIDropDownMenu_SetWidth(140)
-								UIDropDownMenu_Initialize(this, AuxBuyQualityDropDown_Initialize)
-							</OnLoad>
-							<OnShow>
-								UIDropDownMenu_Initialize(this, AuxBuyQualityDropDown_Initialize)
-							</OnShow>
-						</Scripts>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString inherits="GameFontHighlightSmall" text="Rarity" justifyH="LEFT">
-									<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="20" y="8"/></Offset></Anchor></Anchors>
-								</FontString>
-							</Layer>
-						</Layers>	
-					</Frame>
-					
-					<EditBox name="AuxBuyMinLevel" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
-						<Size><AbsDimension x="30" y="22"/></Size>
-						<Anchors>
-							<Anchor point="TOPLEFT"><Offset><AbsDimension x="18" y="-182"/></Offset></Anchor>
-						</Anchors>
-						<Layers>
-							<Layer level="ARTWORK">
-								<FontString inherits="GameFontHighlightSmall" text="-">
-									<Anchors><Anchor point="LEFT" relativePoint="RIGHT"><Offset><AbsDimension x="-1" y="0"/></Offset></Anchor></Anchors>
-								</FontString>
-							</Layer>
-							<Layer level="OVERLAY">
-								<FontString inherits="GameFontHighlightSmall" text="Level Range" justifyH="LEFT">
-									<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-						<Scripts>
-							<OnEnterPressed>
-								this:ClearFocus()
-							</OnEnterPressed>
-						</Scripts>
-					</EditBox>
-					<EditBox name="AuxBuyMaxLevel" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
-						<Size><AbsDimension x="30" y="22"/></Size>
-						<Anchors>
-							<Anchor point="LEFT" relativeTo="AuxBuyMinLevel" relativePoint="RIGHT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor>
-						</Anchors>
-						<Scripts>
-							<OnEnterPressed>
-								this:ClearFocus()
-							</OnEnterPressed>
-						</Scripts>
-					</EditBox>
-					<CheckButton name="AuxBuyUsableCheckButton" inherits="UICheckButtonTemplate">
-						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-182" /></Offset></Anchor></Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString inherits="GameFontHighlightSmall" text="Usable" justifyH="LEFT">
-									<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
-								</FontString>
-							</Layer>
-						</Layers>
-					</CheckButton>					
-					
-					<EditBox name="AuxBuyTooltipInputBox" autoFocus="false" inherits="InputBoxTemplate">
-						<Size><AbsDimension x="110" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-216"/></Offset></Anchor></Anchors>
-						<Layers>
-							<Layer level="OVERLAY">
-								<FontString inherits="GameFontHighlightSmall" text="Tooltip" justifyH="LEFT">
-									<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
-								</FontString>
-							</Layer>
-						</Layers>						
-						<Scripts>
-							<OnEnterPressed>
-								AuxBuyTooltipButton_OnClick(this)
-							</OnEnterPressed>
-						</Scripts>
-					</EditBox>
-					
-					<Frame name="AuxBuyTooltipDropDown" inherits="UIDropDownMenuTemplate" hidden="true">
-						<Scripts>
-							<OnLoad>
-								UIDropDownMenu_Initialize(this, AuxBuyTooltipDropDown_Initialize)
-							</OnLoad>
-						</Scripts>
-					</Frame>
-					<Button name="AuxBuyTooltipArrow">
-						<Size><AbsDimension x="24" y="24"/></Size>
-						<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxBuyTooltipInputBox"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnClick>
-								Aux.buy.toggle_tooltip_dropdown()
-								PlaySound("igMainMenuOptionCheckBoxOn")
-							</OnClick>
-						</Scripts>
-						<NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
-							<Size><AbsDimension x="24" y="24"/></Size>
-							<Anchors><Anchor point="RIGHT"/></Anchors>
-						</NormalTexture>
-						<PushedTexture name="$parentPushedTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down">
-							<Size><AbsDimension x="24" y="24"/></Size>
-							<Anchors><Anchor point="RIGHT"/></Anchors>
-						</PushedTexture>
-						<DisabledTexture name="$parentDisabledTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled">
-							<Size><AbsDimension x="24" y="24"/></Size>
-							<Anchors><Anchor point="RIGHT"/></Anchors>
-						</DisabledTexture>
-						<HighlightTexture name="$parentHighlightTexture" file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
-							<Size><AbsDimension x="24" y="24"/></Size>
-							<Anchors><Anchor point="RIGHT"/></Anchors>
-						</HighlightTexture>
-					</Button>					
-					<Button name="AuxBuyTooltipButton" inherits="UIPanelButtonTemplate" text="+">
-						<Size><AbsDimension x="22" y="22"/></Size>
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="143" y="-216"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnClick>
-								AuxBuyTooltipButton_OnClick(this)
-							</OnClick>
-						</Scripts>
-					</Button>
-
-                    <EditBox name="AuxBuyPageEditBox" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
-                        <Size><AbsDimension x="30" y="22"/></Size>
-                        <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-250"/></Offset></Anchor>
-                        </Anchors>
-                        <Layers>
-                            <Layer level="OVERLAY">
-                                <FontString inherits="GameFontHighlightSmall" text="Page" justifyH="LEFT">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
+                    <Frame name="AuxBuySheetFrame" inherits="AuxFrameBoxTemplate">
+                        <Size>
+                            <AbsDimension x="655" y="326"/>
+                        </Size>
+                        <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxBuyFilters"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                this:EnableMouse(false)
-                                this:SetAlpha(0.5)
+                                this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                                getglobal(this:GetName().."Title"):SetText('Search Results')
                             </OnLoad>
-                            <OnEnterPressed>
-                                this:ClearFocus()
-                            </OnEnterPressed>
                         </Scripts>
-                    </EditBox>
-                    <CheckButton name="AuxBuyAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
-                        <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="49" y="-250" /></Offset></Anchor></Anchors>
-                        <Layers>
-                            <Layer level="OVERLAY">
-                                <FontString inherits="GameFontHighlightSmall" text="All" justifyH="LEFT">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
+                        <Frames>
+                            <Frame name="AuxBuyBuyList" hidden="true">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                    <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                                </Anchors>
+                                <Scripts>
+                                    <OnLoad>
+                                        local sort_order = Aux.util.map(Aux.buy.modes[1].sort_order, function(column_order) return { column = Aux.buy.modes[1].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, sort_order, Aux.buy.modes[1].on_cell_click, Aux.buy.modes[1].on_cell_enter, Aux.buy.modes[1].on_cell_leave)
+                                    </OnLoad>
+                                </Scripts>
+                            </Frame>
+                            <Frame name="AuxBuyBidList" hidden="true">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                    <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                                </Anchors>
+                                <Scripts>
+                                    <OnLoad>
+                                        local sort_order = Aux.util.map(Aux.buy.modes[2].sort_order, function(column_order) return { column = Aux.buy.modes[2].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[2].columns, sort_order, Aux.buy.modes[2].on_cell_click, Aux.buy.modes[2].on_cell_enter, Aux.buy.modes[2].on_cell_leave)
+                                    </OnLoad>
+                                </Scripts>
+                            </Frame>
+                            <Frame name="AuxBuyFullList" hidden="true">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                    <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                                </Anchors>
+                                <Scripts>
+                                    <OnLoad>
+                                        local sort_order = Aux.util.map(Aux.buy.modes[3].sort_order, function(column_order) return { column = Aux.buy.modes[3].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[3].columns, sort_order, Aux.buy.modes[3].on_cell_click, Aux.buy.modes[3].on_cell_enter, Aux.buy.modes[3].on_cell_leave)
+                                    </OnLoad>
+                                </Scripts>
+                            </Frame>
+                            <Frame name="AuxBuyConfirmation" enableMouse="true" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" hidden="true">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                    <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                </Anchors>
+                                <Scripts>
+                                </Scripts>
+                                <Frames>
+                                    <Frame name="$parentItem">
+                                        <Size><AbsDimension x="193" y="37"/></Size>
+                                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-100"/></Offset></Anchor></Anchors>
+                                        <Layers>
+                                            <Layer level="BORDER">
+                                                <Texture name="$parentIconTexture">
+                                                    <Size><AbsDimension x="32" y="32"/></Size>
+                                                    <Anchors><Anchor point="LEFT"><Offset><AbsDimension x="2" y="0"/></Offset></Anchor></Anchors>
+                                                </Texture>
+                                                <Texture file="Interface\Buttons\UI-Quickslot2">
+                                                    <Size><AbsDimension x="60" y="60"/></Size>
+                                                    <Anchors><Anchor point="CENTER" relativeTo="$parentIconTexture"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                                </Texture>
+                                                <FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT">
+                                                    <Anchors><Anchor point="BOTTOMRIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="-5" y="2"/></Offset></Anchor></Anchors>
+                                                </FontString>
+                                                <FontString name="$parentName" inherits="GameFontNormal" justifyH="LEFT">
+                                                    <Anchors>
+                                                        <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
+                                                        <Anchor point="RIGHT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor>
+                                                        <Anchor point="TOP"><Offset><AbsDimension x="0" y="-5"/></Offset></Anchor>
+                                                        <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor>
+                                                    </Anchors>
+                                                </FontString>
+                                            </Layer>
+                                            <Layer level="BACKGROUND">
+                                                <Texture name="$parentLeft" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
+                                                    <Size><AbsDimension x="10" y="37"/></Size>
+                                                    <Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="2" y="0"/></Offset></Anchor></Anchors>
+                                                    <TexCoords left="0" right="0.078125" top="0" bottom="1.0"/>
+                                                </Texture>
+                                                <Texture name="$parentRight" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
+                                                    <Size><AbsDimension x="10" y="37"/></Size>
+                                                    <Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                                    </Anchors>
+                                                    <TexCoords left="0.75" right="0.828125" top="0" bottom="1.0"/>
+                                                </Texture>
+                                                <Texture file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
+                                                    <Size><AbsDimension x="10" y="37"/></Size>
+                                                    <Anchors>
+                                                        <Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                                        <Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                                    </Anchors>
+                                                    <TexCoords left="0.078125" right="0.75" top="0" bottom="1.0"/>
+                                                </Texture>
+                                            </Layer>
+                                        </Layers>
+                                        <Scripts>
+                                            <OnEnter>
+                                                Aux.info.set_game_tooltip(this, this:GetParent().tooltip, 'ANCHOR_LEFT', this:GetParent().EnhTooltip_info)
+                                            </OnEnter>
+                                            <OnLeave>
+                                                GameTooltip:Hide()
+                                            </OnLeave>
+                                        </Scripts>
+                                        <HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+                                    </Frame>
+                                    <Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
+                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="115"/></Offset></Anchor></Anchors>
+                                        <Layers>
+                                            <Layer level="OVERLAY">
+                                                <FontString inherits="GameFontNormalLarge" text="Price:" justifyH="RIGHT">
+                                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor></Anchors>
+                                                </FontString>
+                                            </Layer>
+                                        </Layers>
+                                    </Frame>
+                                    <Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
+                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="130"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnLoad>
+                                                SmallMoneyFrame_OnLoad()
+                                                MoneyFrame_SetType("STATIC")
+                                            </OnLoad>
+                                        </Scripts>
+                                        <Layers>
+                                            <Layer level="OVERLAY">
+                                                <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
+                                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
+                                                </FontString>
+                                            </Layer>
+                                        </Layers>
+                                    </Frame>
+                                    <Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
+                                        <Size><AbsDimension x="90" y="26"/>	</Size>
+                                        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="230" y="90"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnClick>
+                                                Aux.buy.dialog_action()
+                                            </OnClick>
+                                        </Scripts>
+                                    </Button>
+                                    <Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
+                                        <Size><AbsDimension x="90" y="26"/></Size>
+                                        <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-230" y="90"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnClick>
+                                                Aux.buy.dialog_cancel()
+                                            </OnClick>
+                                        </Scripts>
+                                    </Button>
+                                </Frames>
+                            </Frame>
+                        </Frames>
+                    </Frame>
+
+                    <Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
+                        <Size><AbsDimension x="90" y="26"/></Size>
+                        <Anchors>
+                            <Anchor point="BOTTOMRIGHT">
+                                <Offset>
+                                    <AbsDimension x="-10" y="10"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
                         <Scripts>
                             <OnClick>
-                                AuxBuyPageEditBox:EnableMouse(not this:GetChecked())
-                                AuxBuyPageEditBox:SetAlpha(this:GetChecked() and 0.5 or 1)
-                                AuxBuyPageEditBox:ClearFocus()
+                                Aux.buy.SearchButton_onclick()
                             </OnClick>
                         </Scripts>
-                    </CheckButton>
+                    </Button>
+
+                    <Button name="AuxBuyStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
+                        <Size><AbsDimension x="90" y="26"/></Size>
+                        <Anchors>
+                            <Anchor point="BOTTOMRIGHT">
+                                <Offset>
+                                    <AbsDimension x="-10" y="10"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnClick>
+                                Aux.buy.StopButton_onclick()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
                 </Frames>
-			</Frame>		
-            
-			<Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
-				<Size><AbsDimension x="80" y="22"/></Size>
-				<Anchors>
-					<Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-99" y="20"/></Offset></Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						Aux.buy.SearchButton_onclick()
-					</OnClick>
-				</Scripts>
-			</Button>
-			
-			<Button name="AuxBuyStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
-				<Size><AbsDimension x="80" y="22"/></Size>
-				<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-99" y="20"/></Offset></Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						Aux.buy.StopButton_onclick()
-					</OnClick>
-				</Scripts>
-			</Button>
-			
-			<Button name="AuxBuyCloseButton" inherits="UIPanelButtonTemplate" text="CLOSE">
-				<Size>
-					<AbsDimension x="80" y="22"/>
-				</Size>
-				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
-						<Offset>
-							<AbsDimension x="-20" y="20"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						HideUIPanel(this:GetParent())
-					</OnClick>
-				</Scripts>
-			</Button>
+            </Frame>
 		</Frames>
 	</Frame>
 </Ui>
