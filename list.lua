@@ -254,7 +254,7 @@ function Aux.list.sort(sheet, column_index)
 
 	local column = sheet.columns[column_index]
 			
-	if sheet.sort_order[1].column == column then
+	if sheet.sort_order[1] and sheet.sort_order[1].column == column then
 		sheet.sort_order[1].sort_ascending = not sheet.sort_order[1].sort_ascending
 	else
         sheet.sort_order = Aux.util.filter(sheet.sort_order, function(sort_info) return not sort_info.column == column end)

@@ -826,18 +826,20 @@ end
 
 function AuxBuyQualityDropDown_Initialize()
 
+    local function on_click()
+        UIDropDownMenu_SetSelectedValue(AuxBuyQualityDropDown, this.value)
+    end
+
 	UIDropDownMenu_AddButton{
 		text = ALL,
 		value = -1,
-		func = AuxBuyQualityDropDown_OnClick,
+		func = on_click,
 	}
 	for i=0,getn(ITEM_QUALITY_COLORS)-2 do
 		UIDropDownMenu_AddButton{
 			text = getglobal("ITEM_QUALITY"..i.."_DESC"),
 			value = i,
-			func = function()
-				UIDropDownMenu_SetSelectedValue(AuxBuyQualityDropDown, this.value)
-			end,
+			func = on_click,
 		}
 	end
 end
