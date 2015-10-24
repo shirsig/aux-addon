@@ -16,6 +16,81 @@
 		</Scripts>
 	</Frame>
 
+    <Button name="AuxTabTemplate" virtual="true">
+        <Size>
+            <AbsDimension x="64" y="32"/>
+        </Size>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <Texture name="$parentLeft" file="Interface\ChatFrame\ChatFrameTab">
+                    <Size>
+                        <AbsDimension x="16" y="32"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="LEFT"/>
+                    </Anchors>
+                    <TexCoords left="0.0" right="0.25" top="0.0" bottom="1.0"/>
+                </Texture>
+                <Texture name="$parentRight" file="Interface\ChatFrame\ChatFrameTab">
+                    <Size>
+                        <AbsDimension x="16" y="32"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="RIGHT"/>
+                    </Anchors>
+                    <TexCoords left="0.75" right="1.0" top="0.0" bottom="1.0"/>
+                </Texture>
+                <Texture name="$parentMiddle" file="Interface\ChatFrame\ChatFrameTab">
+                    <Size>
+                        <AbsDimension x="44" y="32"/>
+                    </Size>
+                    <Anchors>
+                        <Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        <Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                    </Anchors>
+                    <TexCoords left="0.25" right="0.75" top="0.0" bottom="1.0"/>
+                </Texture>
+            </Layer>
+        </Layers>
+        <Scripts>
+            <OnShow>
+                this:SetWidth(getglobal(this:GetName()..'Text'):GetStringWidth()+40)
+            </OnShow>
+            <OnClick>
+                Aux.on_tab_click(this:GetID())
+            </OnClick>
+        </Scripts>
+        <NormalText name="$parentText" inherits="GameFontNormalSmall">
+            <Size>
+                <AbsDimension x="50" y="8"/>
+            </Size>
+            <Anchors>
+                <Anchor point="CENTER">
+                    <Offset>
+                        <AbsDimension x="0" y="-5"/>
+                    </Offset>
+                </Anchor>
+            </Anchors>
+        </NormalText>
+        <HighlightTexture name="$parentHighlight" file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD" setAllPoints="true">
+            <Size>
+                <AbsDimension x="5" y="32"/>
+            </Size>
+            <Anchors>
+                <Anchor point="LEFT" relativeTo="$parentLeft">
+                    <Offset>
+                        <AbsDimension x="0" y="-7"/>
+                    </Offset>
+                </Anchor>
+                <Anchor point="RIGHT" relativeTo="$parentRight">
+                    <Offset>
+                        <AbsDimension x="0" y="-7"/>
+                    </Offset>
+                </Anchor>
+            </Anchors>
+        </HighlightTexture>
+    </Button>
+
     <Frame name="AuxFrameBoxTemplate" virtual="true">
         <Layers>
             <Layer level="BACKGROUND">
@@ -94,4 +169,173 @@
             </Size>
         </ThumbTexture>
     </Slider>
+
+    <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent">
+        <Size>
+            <AbsDimension x="850" y="450"/>
+        </Size>
+        <Anchors>
+            <Anchor point="CENTER"/>
+        </Anchors>
+        <Scripts>
+            <OnLoad>
+                this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                this:RegisterForDrag('LeftButton')
+            </OnLoad>
+            <OnDragStart>
+                this:StartMoving()
+            </OnDragStart>
+            <OnDragStop>
+                this:StopMovingOrSizing()
+            </OnDragStop>
+        </Scripts>
+        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+            <BackgroundInsets>
+                <AbsInset left="4" right="4" top="4" bottom="4"/>
+            </BackgroundInsets>
+            <TileSize>
+                <AbsValue val="32"/>
+            </TileSize>
+            <EdgeSize>
+                <AbsValue val="16"/>
+            </EdgeSize>
+        </Backdrop>
+        <Frames>
+            <Button name="AuctionFrameCloseButton" inherits="UIPanelCloseButton">
+                <Anchors>
+                    <Anchor point="TOPRIGHT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+            </Button>
+            <Button name="AuxTab1" inherits="AuxTabTemplate" id="1">
+                <Anchors>
+                    <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
+                        <Offset>
+                            <AbsDimension x="7" y="-2"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        getglobal(this:GetName().."Text"):SetText('Search')
+                    </OnLoad>
+                </Scripts>
+            </Button>
+            <Button name="AuxTab2" inherits="AuxTabTemplate" id="2">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="AuxTab1" relativePoint="RIGHT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        getglobal(this:GetName().."Text"):SetText('Post')
+                    </OnLoad>
+                </Scripts>
+            </Button>
+            <Button name="AuxTab3" inherits="AuxTabTemplate" id="3">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="AuxTab2" relativePoint="RIGHT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        getglobal(this:GetName().."Text"):SetText('Auctions')
+                    </OnLoad>
+                </Scripts>
+            </Button>
+            <Button name="AuxTab4" inherits="AuxTabTemplate" id="4">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="AuxTab3" relativePoint="RIGHT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        getglobal(this:GetName().."Text"):SetText('Bids')
+                    </OnLoad>
+                </Scripts>
+            </Button>
+            <Button name="AuxTab5" inherits="AuxTabTemplate" id="5">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="AuxTab4" relativePoint="RIGHT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        getglobal(this:GetName().."Text"):SetText('Scan')
+                    </OnLoad>
+                </Scripts>
+            </Button>
+            <Frame name="AuxLogFrame" inherits="OptionFrameBoxTemplate">
+                <Size><AbsDimension x="400" y="71"/></Size>
+                <Anchors>
+                    <Anchor point="LEFT">
+                        <Offset>
+                            <AbsDimension x="5" y="0"/>
+                        </Offset>
+                    </Anchor>
+                    <Anchor point="BOTTOM">
+                        <Offset>
+                            <AbsDimension x="0" y="10"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                        this:SetBackdropColor(0.15, 0.15, 0.15)
+                    </OnLoad>
+                </Scripts>
+                <Frames>
+                    <ScrollingMessageFrame name="$parentMessageFrame" maxLines="500">
+                        <Anchors>
+                            <Anchor point="TOPLEFT">
+                                <Offset>
+                                    <AbsDimension x="8" y="-5"/>
+                                </Offset>
+                            </Anchor>
+                            <Anchor point="BOTTOMRIGHT">
+                                <Offset>
+                                    <AbsDimension x="-8" y="9"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                Aux.log_frame_load()
+                            </OnLoad>
+                            <OnUpdate>
+                                Aux.log_frame_update(arg1)
+                            </OnUpdate>
+                            <OnHyperlinkClick>
+                                ChatFrame_OnHyperlinkShow(arg1)
+                            </OnHyperlinkClick>
+                            <OnMouseWheel>
+                                if arg1 == 1 then
+                                this:ScrollUp()
+                                elseif arg1 == -1 then
+                                this:ScrollDown()
+                                end
+                            </OnMouseWheel>
+                        </Scripts>
+                        <FontString inherits="ChatFontNormal" justifyH="LEFT"/>
+                    </ScrollingMessageFrame>
+                </Frames>
+            </Frame>
+        </Frames>
+    </Frame>
 </Ui>

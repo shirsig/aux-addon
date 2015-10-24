@@ -2,7 +2,7 @@ local TOOLTIP_LENGTH = 30
 
 Aux.info = {}
 
-local hyperlink_item, item_id, item_charges
+local hyperlink_item, item_id, item_charges, item_signature, parse_item_signature, parse_hyperlink
 
 function Aux.info.container_item(bag, slot)
 	local hyperlink = GetContainerItemLink(bag, slot)
@@ -12,15 +12,16 @@ function Aux.info.container_item(bag, slot)
 	end
 	
 	local container_item = hyperlink_item(hyperlink)
-	
-	local texture, count, locked, quality, readable, lootable, hyperlink = GetContainerItemInfo(bag, slot)
+    container_item.item_signature = item_signature(hyperlink)
+
+    local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot)
 	container_item.texture = texture
 	container_item.count = count
 	container_item.locked = locked
 	container_item.readable = readable
 	container_item.lootable = lootable
 	container_item.hyperlink = hyperlink
-	
+
 	container_item.tooltip = Aux.info.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
 	container_item.charges = item_charges(container_item.tooltip)
 	
@@ -153,6 +154,16 @@ function item_charges(tooltip)
 		end
 	end
 end	
+
+function item_signature(hyperlink)
+    local item_id, suffix_id = parse_hyperlink(hyperlink)
+    return item_id..':'..suffix_id
+end
+
+function parse_item_signature(item_signature)
+    local _, _, item_id, suffix_id = strfind(item_signature, '^(%d+):(%d+)$')
+    return item_id, suffix_id
+end
 
 function item_id(hyperlink)
 	local _, _, id_string = strfind(hyperlink, "^.-:(%d*).*")

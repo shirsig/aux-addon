@@ -9,6 +9,20 @@ local merge, copy_array
 function Aux.util.pass()
 end
 
+function Aux.util.without_sound(f)
+    local orig = UIErrorsFrame.AddMessage
+    UIErrorsFrame.AddMessage = Aux.util.pass
+    f()
+    UIErrorsFrame.AddMessage = orig
+end
+
+function Aux.util.without_errors(f)
+    local orig = GetCVar('MasterSoundEffects')
+    SetCVar('MasterSoundEffects', false)
+    f()
+    SetCVar('MasterSoundEffects', orig)
+end
+
 function Aux.util.iter(array)
 	local with_index = ipairs(array)
 	return function()

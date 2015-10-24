@@ -44,6 +44,9 @@ function Aux.sheet.render(sheet)
 	for i, row in ipairs(rows) do
 		local direction, rowR, rowG, rowB, rowA1, rowA2 = "Horizontal", 1, 1, 1, 0, 0 --row level coloring used for gradients
 		local datum = data[i + offset]
+        if sheet.row_setter then
+            sheet.row_setter(row, datum)
+        end
 		for j, column in sheet.columns do
 			local cell = row[j]
 			if datum then
@@ -57,7 +60,7 @@ function Aux.sheet.render(sheet)
 	end
 end
 
-function Aux.sheet.create(frame, columns, sort_order, on_cell_click, on_cell_enter, on_cell_leave)
+function Aux.sheet.create(frame, columns, sort_order, row_setter, on_cell_click, on_cell_enter, on_cell_leave)
 	local sheet
 	local name = (frame:GetName() or '')..'ScrollSheet'
 	
@@ -192,6 +195,7 @@ function Aux.sheet.create(frame, columns, sort_order, on_cell_click, on_cell_ent
         columns = columns,
 		data = {},
 		sort_order = sort_order,
+        row_setter = row_setter,
 		on_cell_click = on_cell_click,
 		on_cell_enter = on_cell_enter,
 		on_cell_leave = on_cell_leave,
@@ -254,7 +258,7 @@ function Aux.list.sort(sheet, column_index)
 
 	local column = sheet.columns[column_index]
 			
-	if sheet.sort_order[1].column == column then
+	if sheet.sort_order[1] and sheet.sort_order[1].column == column then
 		sheet.sort_order[1].sort_ascending = not sheet.sort_order[1].sort_ascending
 	else
         sheet.sort_order = Aux.util.filter(sheet.sort_order, function(sort_info) return not sort_info.column == column end)

@@ -89,6 +89,16 @@ function Aux_OnAddonLoaded()
         Aux.buy.elements = {
             AuxBuyFilters,
             AuxBuySheetFrame,
+            AuxBuySearchButton,
+            AuxBuyStopButton,
+        }
+
+        Aux.sell.elements = {
+            AuxSellInventory,
+            AuxSellParameters,
+            AuxSellAuctions,
+            AuxSellPostButton,
+            AuxSellRefreshButton,
         }
 
 		Aux.tabs.sell.recommendationElements = {
@@ -222,6 +232,7 @@ function Aux_OnAuctionHouseShow()
 
 	AuxOptionsButtonPanel:Show()
 
+    Aux.on_tab_click(1)
 	if AUX_OPEN_SELL then
 		AuctionFrameTab_OnClick(Aux.tabs.sell.index)
 	elseif AUX_OPEN_BUY then
@@ -242,21 +253,26 @@ function Aux_OnAuctionHouseClosed()
 	AuxOptionsButtonPanel:Hide()
 	AuxOptionsFrame:Hide()
 	AuxAboutFrame:Hide()
-	AuxSellPanel:Hide()
-	AuxBuyPanel:Hide()
+--	AuxSellPanel:Hide()
+	AuxFrame:Hide()
 	
 end
 
-function Aux.on_tab_click(button)
+function Aux.on_tab_click(index)
 
-    for i=1,4 do
-        getglobal('AuxTab'..i):SetAlpha(i == this:GetID() and 1 or 0.5)
+    for i=1,5 do
+        getglobal('AuxTab'..i):SetAlpha(i == index and 1 or 0.5)
     end
 
-    Aux_HideElems(Aux.buy.elements)
-    AuxSellPanel:Hide()
-    if this:GetID() == 1 then
-        Aux_ShowElems(Aux.buy.elements)
+    AuxSellFrame:Hide()
+    AuxBuyFrame:Hide()
+
+    if index == 1 then
+        AuxBuyFrame:Show()
+        Aux.buy.on_open()
+    elseif index == 2 then
+        AuxSellFrame:Show()
+        Aux.sell.on_open()
     end
 
 end
@@ -272,8 +288,8 @@ function Aux_AuctionFrameTab_OnClick(index)
 	Aux.buy.exit()
 	Aux.scan.abort()
 
-	AuxSellPanel:Hide()
-	AuxBuyPanel:Hide()
+--	AuxSellPanel:Hide()
+	AuxFrame:Hide()
 
 	if index == 2 then		
 		Aux_ShowElems(Aux.tabs.buy.hiddenElements)
@@ -285,13 +301,12 @@ function Aux_AuctionFrameTab_OnClick(index)
 	
 	if index == Aux.tabs.sell.index then
 		AuctionFrameTab_OnClick(3)
-		Aux.sell.on_open()
-		
+
 		PanelTemplates_SetTab(AuctionFrame, Aux.tabs.sell.index)
 		
 		Aux_HideElems(Aux.tabs.sell.hiddenElements)
 		
-		AuxSellPanel:Show()
+--		AuxSellPanel:Show()
 		AuctionFrame:EnableMouse(false)
 		
 	elseif index == Aux.tabs.buy.index then
@@ -301,10 +316,8 @@ function Aux_AuctionFrameTab_OnClick(index)
 		
 		Aux_HideElems(Aux.tabs.buy.hiddenElements)
 		
-		AuxBuyPanel:Show()
+		AuxFrame:Show()
 		AuctionFrame:EnableMouse(false)
-		
-		Aux.buy.on_open()
 	else
 		Aux.orig.AuctionFrameTab_OnClick(index)
 		lastItemPosted = nil
@@ -313,11 +326,11 @@ end
 
 function Aux_AddPanels()
 	
-	local sellFrame = CreateFrame("Frame", "AuxSellPanel", AuctionFrame, "AuxSellTemplate")
-	sellFrame:SetParent("AuctionFrame")
-	sellFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
-	relevel(sellFrame)
-	sellFrame:Hide()
+--	local sellFrame = CreateFrame("Frame", "AuxSellPanel", AuctionFrame, "AuxSellTemplate")
+--	sellFrame:SetParent("AuctionFrame")
+--	sellFrame:SetPoint("TOPLEFT", "AuctionFrame", "TOPLEFT")
+--	relevel(sellFrame)
+--	sellFrame:Hide()
     
     --local buyFrame = CreateFrame("Frame", "AuxBuyPanel", AuctionFrame, "AuxBuyTemplate")
 	--buyFrame:SetParent("AuctionFrame")
@@ -481,12 +494,12 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 		elseif AUX_SELL_SHORTCUT and IsAltKeyDown()then
 			Aux.sell.set_auction(bag, slot)	
 			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Aux.tabs.sell.index then
-				AuctionFrameTab_OnClick(Aux.tabs.sell.index)
+				Aux.on_tab_click(2)
 			end			
 			return
 		elseif AUX_BUY_SHORTCUT and IsControlKeyDown() then
 			if PanelTemplates_GetSelectedTab(AuctionFrame) ~= Aux.tabs.buy.index then
-				AuctionFrameTab_OnClick(Aux.tabs.buy.index)
+                Aux.on_tab_click(1)
 			end
 			AuxBuyNameInputBox.completor.set_quietly(container_item.name)
 			Aux.buy.SearchButton_onclick()
