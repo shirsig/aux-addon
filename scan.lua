@@ -65,8 +65,11 @@ function wait_for_complete_results(k)
 	end, k)
 end
 
-function wait_for_callback(f, args, k)
+function wait_for_callback(args)
 	local ok = true
+
+    local f = tremove(args, 1)
+    local k = tremove(args)
 
 	if f then
 		tinsert(args, {
@@ -87,11 +90,9 @@ function scan()
 	
 	submit_query(function()
 		
-	local count, total_count = GetNumAuctionItems("list")
+	local count, _ = GetNumAuctionItems('list')
 	
 	scan_auctions(count, function()
-	
-	state.total_pages = math.ceil(total_count / AUCTIONS_PER_PAGE)
 	
 	state.page = state.job.next_page and state.job.next_page(state.page, state.total_pages)
 	
@@ -112,7 +113,7 @@ function scan_auctions(count, k)
 end
 
 function scan_auctions_helper(i, n, k)
-	wait_for_callback(state.job.on_read_auction, {i}, function()
+	wait_for_callback{state.job.on_read_auction, i, function()
 	
 	if i >= n then
 		return k()
@@ -120,23 +121,22 @@ function scan_auctions_helper(i, n, k)
 		return scan_auctions_helper(i + 1, n, k)
 	end
 	
-	end)
+	end}
 end
 
 function submit_query(k)
 	if state.page then
-		wait_for_callback(state.job.on_start_page, {state.page, state.total_pages or 0}, function()
 		controller().wait(CanSendAuctionQuery, function()
 		if state.job.on_submit_query then
 			state.job.on_submit_query()
 		end
 		wait_for_results(function()
 		--wait_for_complete_results(function()
-		if state.job.on_page_loaded then
-			state.job.on_page_loaded(state.page)
-		end
+        local _, total_count = GetNumAuctionItems('list')
+        state.total_pages = math.ceil(total_count / AUCTIONS_PER_PAGE)
+        wait_for_callback{state.job.on_page_loaded, state.page, state.total_pages, function()
 		k()
-		end)--end)
+		end}end)-- end)
 		QueryAuctionItems(
 			state.job.query.name,
 			state.job.query.min_level,
@@ -148,7 +148,7 @@ function submit_query(k)
 			state.job.query.usable,
 			state.job.query.quality
 		)
-		end)end)
+		end)
 	else
 		return k()
 	end

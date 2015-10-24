@@ -91,6 +91,39 @@
         </HighlightTexture>
     </Button>
 
+    <CheckButton name="AuxRadioButtonTemplate" virtual="true">
+        <Size>
+            <AbsDimension x="16" y="16"/>
+        </Size>
+        <Layers>
+            <Layer level="BACKGROUND">
+                <FontString name="$parentText" inherits="GameFontHighlightSmall">
+                    <Anchors>
+                        <Anchor point="LEFT" relativePoint="RIGHT">
+                            <Offset>
+                                <AbsDimension x="5" y="0"/>
+                            </Offset>
+                        </Anchor>
+                    </Anchors>
+                </FontString>
+            </Layer>
+        </Layers>
+        <Scripts>
+            <OnClick>
+                SendMailRadioButton_OnClick(this:GetID());
+            </OnClick>
+        </Scripts>
+        <NormalTexture file="Interface\Buttons\UI-RadioButton">
+            <TexCoords left="0" right="0.25" top="0" bottom="1"/>
+        </NormalTexture>
+        <HighlightTexture file="Interface\Buttons\UI-RadioButton" alphaMode="ADD">
+            <TexCoords left="0.5" right="0.75" top="0" bottom="1"/>
+        </HighlightTexture>
+        <CheckedTexture file="Interface\Buttons\UI-RadioButton">
+            <TexCoords left="0.25" right="0.5" top="0" bottom="1"/>
+        </CheckedTexture>
+    </CheckButton>
+
     <Frame name="AuxFrameBoxTemplate" virtual="true">
         <Layers>
             <Layer level="BACKGROUND">
@@ -126,7 +159,6 @@
 
     <EditBox name="AuxInputBoxTemplate" autoFocus="false" inherits="InputBoxTemplate" virtual="true">
         <Size><AbsDimension x="119" y="22"/></Size>
-        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-71"/></Offset></Anchor></Anchors>
         <Layers>
             <Layer level="OVERLAY">
                 <FontString name="$parentLabel" inherits="GameFontNormalSmall" justifyH="LEFT">
@@ -138,7 +170,7 @@
 
     <Slider name="AuxSliderTemplate" orientation="HORIZONTAL" enableMouse="true" virtual="true">
         <Size>
-            <AbsDimension x="128" y="17"/>
+            <AbsDimension x="150" y="17"/>
         </Size>
         <HitRectInsets>
             <AbsInset left="0" right="0" top="-10" bottom="-10"/>
@@ -156,7 +188,7 @@
         </Backdrop>
         <Layers>
             <Layer level="ARTWORK">
-                <FontString name="$parentText" inherits="GameFontHighlightSmall">
+                <FontString name="$parentText" inherits="GameFontNormalSmall">
                     <Anchors>
                         <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
                     </Anchors>
@@ -170,9 +202,22 @@
         </ThumbTexture>
     </Slider>
 
+    <Button name="AuxButton" inherits="UIPanelButtonTemplate" text="Aux" hidden="true">
+        <Size><AbsDimension x="50" y="22"/></Size>
+        <Scripts>
+            <OnClick>
+                if AuxFrame:IsVisible() then
+                    AuxFrame:Hide()
+                else
+                    AuxFrame:Show()
+                end
+            </OnClick>
+        </Scripts>
+    </Button>
+
     <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent">
         <Size>
-            <AbsDimension x="850" y="450"/>
+            <AbsDimension x="850" y="445"/>
         </Size>
         <Anchors>
             <Anchor point="CENTER"/>
@@ -201,7 +246,7 @@
             </EdgeSize>
         </Backdrop>
         <Frames>
-            <Button name="AuctionFrameCloseButton" inherits="UIPanelCloseButton">
+            <Button name="AuxCloseButtonTop" inherits="UIPanelCloseButton">
                 <Anchors>
                     <Anchor point="TOPRIGHT">
                         <Offset>
@@ -209,6 +254,15 @@
                         </Offset>
                     </Anchor>
                 </Anchors>
+            </Button>
+            <Button name="AuxCloseButtonBottom" inherits="UIPanelButtonTemplate" text="Close">
+                <Size><AbsDimension x="90" y="26"/></Size>
+                <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-10" y="10"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnClick>
+                        HideUIPanel(this:GetParent())
+                    </OnClick>
+                </Scripts>
             </Button>
             <Button name="AuxTab1" inherits="AuxTabTemplate" id="1">
                 <Anchors>
@@ -296,6 +350,7 @@
                 </Anchors>
                 <Scripts>
                     <OnLoad>
+                        this:SetWidth(floor(this:GetParent():GetWidth()/2))
                         this:SetBackdropBorderColor(0.4, 0.4, 0.4)
                         this:SetBackdropColor(0.15, 0.15, 0.15)
                     </OnLoad>

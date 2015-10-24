@@ -9,6 +9,28 @@ local merge, copy_array
 function Aux.util.pass()
 end
 
+function Aux.util.safe_index(chain)
+    local target = chain[1]
+
+    for i=2,getn(chain) do
+        if not target then
+            return
+        end
+        target = target[chain[i]]
+    end
+
+    return target
+end
+
+function Aux_PluralizeIf(word, count)
+
+    if count and count == 1 then
+        return word
+    else
+        return word.."s"
+    end
+end
+
 function Aux.util.without_sound(f)
     local orig = UIErrorsFrame.AddMessage
     UIErrorsFrame.AddMessage = Aux.util.pass

@@ -10,6 +10,8 @@ local current_auction
 
 local set_auction, update_auction_listing, update_inventory_listing, record_auction, undercut, item_class_index, item_subclass_index, report, select_entry, update_recommendation, refresh_entries, auction_candidates, charge_classes, get_stack_size_slider_value
 
+local LIVE, HISTORICAL = 1, 2
+
 Aux.sell.inventory_listing_config = {
     on_cell_click = function (sheet, row_index, column_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -37,8 +39,17 @@ Aux.sell.inventory_listing_config = {
 
     columns = {
         {
+            title = 'Qty',
+            width = 23,
+            comparator = function(datum1, datum2) return Aux.util.compare(datum1.aux_quantity, datum2.aux_quantity, Aux.util.LT) end,
+            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+            cell_setter = function(cell, datum)
+                cell.text:SetText(datum.aux_quantity)
+            end,
+        },
+        {
             title = 'Item',
-            width = 175,
+            width = 186,
             comparator = function(row1, row2) return Aux.util.compare(row1.name, row2.name, Aux.util.GT) end,
             cell_initializer = function(cell)
                 local icon = CreateFrame('Button', nil, cell)
@@ -74,17 +85,8 @@ Aux.sell.inventory_listing_config = {
                 cell.text:SetTextColor(color.r, color.g, color.b)
             end,
         },
-        {
-            title = 'Qty',
-            width = 23,
-            comparator = function(datum1, datum2) return Aux.util.compare(datum1.aux_quantity, datum2.aux_quantity, Aux.util.LT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-            cell_setter = function(cell, datum)
-                cell.text:SetText(datum.aux_quantity)
-            end,
-        },
     },
-    sort_order = {{column = 1, order = 'ascending' }},
+    sort_order = {{column = 2, order = 'ascending' }},
 }
 
 Aux.sell.auction_listing_config = {
@@ -99,13 +101,14 @@ Aux.sell.auction_listing_config = {
 
     on_cell_leave = function (sheet, row_index, column_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-        if not (current_auction and auxSellEntries[current_auction.name] and sheet.data[data_index] == auxSellEntries[current_auction.name].selected) then
+        local datum = sheet.data[data_index]
+        if not (datum and current_auction and Aux.util.safe_index{auxSellEntries, current_auction.name, 'selected', 'key'} == datum.key) then
             sheet.rows[row_index].highlight:SetAlpha(0)
         end
     end,
 
     row_setter = function(row, datum)
-        if datum and current_auction and auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected == datum then
+        if datum and current_auction and Aux.util.safe_index{auxSellEntries, current_auction.name, 'selected', 'key'} == datum.key then
             row.highlight:SetAlpha(.5)
         else
             row.highlight:SetAlpha(0)
@@ -178,7 +181,7 @@ Aux.sell.auction_listing_config = {
             end,
         },
     },
-    sort_order = {{column = 2, order = 'ascending' }, {column = 4, order = 'ascending'}},
+    sort_order = {{column = 4, order = 'ascending' }, {column = 4, order = 'ascending'}},
 }
 
 function update_inventory_listing()
@@ -190,11 +193,22 @@ function update_auction_listing()
 end
 
 function Aux.sell.on_open()
+    UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, LIVE)
+    Aux_Sell_SetAuctionDuration(AUX_AUCTION_DURATION)
+
     AuxSellStackSizeSlider:SetValueStep(1)
     AuxSellStackSizeSliderText:SetText('Stack Size')
 
     AuxSellStackCountSlider:SetValueStep(1)
     AuxSellStackCountSliderText:SetText('Stack Count')
+
+    -- so that it's initialized with zeroes, not sometimes zero, sometimes empty
+    MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 100000)
+    MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 100000)
+    MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 1000)
+    MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 1000)
+    MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 1)
+    MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 1)
 
     Aux.sell.validate_parameters()
 
@@ -202,6 +216,10 @@ function Aux.sell.on_open()
 
     update_inventory_listing()
     update_auction_listing()
+end
+
+function Aux.sell.on_close()
+
 end
 
 function Aux.sell.duration_radio_button_on_click(index)
@@ -224,13 +242,6 @@ function Aux.sell.duration_radio_button_on_click(index)
     update_recommendation()
 end
 
-function Aux_Sell_AuctionFrameAuctions_OnShow()
-	Aux.orig.AuctionFrameAuctions_OnShow()
-	Aux_Sell_SetAuctionDuration(AUX_AUCTION_DURATION)
-end
-
------------------------------------------
-
 function Aux_Sell_SetAuctionDuration(duration)
 	if duration == 'short' then
         Aux.sell.duration_radio_button_on_click(1)
@@ -240,17 +251,6 @@ function Aux_Sell_SetAuctionDuration(duration)
         Aux.sell.duration_radio_button_on_click(3)
 	end
 end
-
------------------------------------------
-
-function Aux_AuctionFrameAuctions_Update()
-	Aux.orig.AuctionFrameAuctions_Update()
-	if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.sell.index and AuctionFrame:IsShown() then
-		Aux_HideElems(Aux.tabs.sell.hiddenElements)
-	end
-end
-
------------------------------------------
 
 function Aux.sell.post_auctions()
 	if current_auction then
@@ -283,33 +283,28 @@ function Aux.sell.post_auctions()
 					end
 				end
 				Aux.sell.clear_auction()
+                inventory_data = auction_candidates()
+                update_inventory_listing()
 				report(hyperlink, stack_size, buyout_price, posted)
 			end
 		)
 	end
 end
 
------------------------------------------
-
-function Aux.sell.AuctionSellItemButton_OnEvent()
-	Aux.orig.AuctionSellItemButton_OnEvent()
-end
-
 function select_entry()
-	
 	if current_auction and auxSellEntries[current_auction.name] and not auxSellEntries[current_auction.name].selected then
-		local bestPrice	= {} -- a table with one entry per stacksize that is the cheapest auction for that particular stacksize
+		local bestPrice	= {} -- a table with one entry per stack_size that is the cheapest auction for that particular stack_size
 		local absoluteBest -- the overall cheapest auction
 
 		----- find the best price per stacksize and overall -----
 		
-		for _,auxEntry in ipairs(auxSellEntries[current_auction.name]) do
-			if not bestPrice[auxEntry.stack_size] or bestPrice[auxEntry.stack_size].unit_buyout_price >= auxEntry.unit_buyout_price then
-				bestPrice[auxEntry.stack_size] = auxEntry
+		for _, auction_datum in ipairs(auxSellEntries[current_auction.name]) do
+			if not bestPrice[auction_datum.stack_size] or bestPrice[auction_datum.stack_size].unit_buyout_price >= auction_datum.unit_buyout_price then
+				bestPrice[auction_datum.stack_size] = auction_datum
 			end
 		
-			if not absoluteBest or absoluteBest.unit_buyout_price > auxEntry.unit_buyout_price then
-				absoluteBest = auxEntry
+			if not absoluteBest or absoluteBest.unit_buyout_price > auction_datum.unit_buyout_price then
+				absoluteBest = auction_datum
 			end	
 		end
 		
@@ -321,8 +316,6 @@ function select_entry()
 		end
 	end
 end
-
------------------------------------------
 
 function get_stack_size_slider_value()
     if current_auction.charges then
@@ -353,7 +346,7 @@ function Aux.sell.validate_parameters()
 end
 
 function update_recommendation()
-	AuxRecommendStaleText:Hide()
+    AuxSellParametersStrategyDropDownStaleWarning:SetText()
 
 	if not current_auction then
 		AuxSellRefreshButton:Disable()
@@ -377,21 +370,19 @@ function update_recommendation()
         AuxSellParametersItemName:SetText(current_auction.name)
         local color = ITEM_QUALITY_COLORS[current_auction.quality]
         AuxSellParametersItemName:SetTextColor(color.r, color.g, color.b)
-		if get_stack_size_slider_value() > 1 then
-            AuxSellParametersItemCount:SetText(get_stack_size_slider_value())
-            AuxSellParametersItemCount:Show()
+		if current_auction.aux_quantity > 1 then
+            AuxSellParametersItemCount:SetText(current_auction.aux_quantity)
 		else
-            AuxSellParametersItemCount:Hide()
+            AuxSellParametersItemCount:SetText()
 		end
 		
 		AuxSellRefreshButton:Enable()
 		
-		MoneyFrame_Update("AuctionsDepositMoneyFrame", floor(current_auction.vendor_price_per_unit * current_auction.deposit_factor * (current_auction.charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
+		MoneyFrame_Update("AuxSellParametersDepositMoneyFrame", floor(current_auction.vendor_price_per_unit * current_auction.deposit_factor * (current_auction.charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
 		
 		if auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected then
 			if not auxSellEntries[current_auction.name].created or GetTime() - auxSellEntries[current_auction.name].created > 1800 then
-				AuxRecommendStaleText:SetText("STALE DATA") -- data older than half an hour marked as stale
-				AuxRecommendStaleText:Show()
+                AuxSellParametersStrategyDropDownStaleWarning:SetText("Stale data!") -- data older than half an hour marked as stale
 			end
 		
 			local newBuyoutPrice = auxSellEntries[current_auction.name].selected.unit_buyout_price * get_stack_size_slider_value()
@@ -402,7 +393,7 @@ function update_recommendation()
 			
 			local newStartPrice = newBuyoutPrice * 0.95
 			
-			Aux_ShowElems(Aux.tabs.sell.recommendationElements)
+--			Aux_ShowElems(Aux.tabs.sell.recommendationElements)
 			
 --			AuxRecommendText:SetText("Recommended Buyout Price")
 --			AuxRecommendPerStackText:SetText("for a stack of "..get_stack_size_slider_value())
@@ -429,15 +420,11 @@ function update_recommendation()
 --			else
 --				AuxRecommendBasisText:SetText("(based on auction selected below)")
 --			end
-		elseif auxSellEntries[current_auction.name] then
-			Aux.log("No auctions were found for "..current_auction.name)
-			auxSellEntries[current_auction.name] = nil
-		else 
-			-- Aux_HideElems(Aux.tabs.sell.shownElements)
-		end
+        else
+            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
+            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 0)
+        end
 	end
-	
-	Aux.sell.scrollbar_update()
 end
 
 function Aux.sell.quantity_update()
@@ -459,10 +446,13 @@ end
 -----------------------------------------
 
 function set_auction(auction_candidate)
-		
+
+    PlaySound("igMainMenuOptionCheckBoxOn")
+
     Aux.scan.abort(function()
 
         current_auction = auction_candidate
+        update_inventory_listing()
 
         local charge_classes = charge_classes(current_auction.availability)
         AuxSellStackSizeSlider.charge_classes = charge_classes
@@ -470,9 +460,8 @@ function set_auction(auction_candidate)
         AuxSellStackSizeSlider:SetMinMaxValues(1, stack_size_slider_max)
 
         AuxSellStackSizeSlider:SetValue(stack_size_slider_max)
-        AuxSellStackCountSlider:SetValue(1)
-
         Aux.sell.quantity_update()
+        AuxSellStackCountSlider:SetValue(current_auction.aux_quantity) -- reduced to max possible
 
         if not auxSellEntries[current_auction.name] then
             refresh_entries()
@@ -481,7 +470,6 @@ function set_auction(auction_candidate)
         select_entry()
         update_recommendation()
         update_auction_listing()
-        update_inventory_listing()
 
     end)
 
@@ -569,7 +557,7 @@ function refresh_entries()
 		-- local class_index = item_class_index(current_auction.class)
 		-- local subclass_index = item_subclass_index(class_index, current_auction.subclass)
 
-		Aux.log('Scanning auctions ...')
+		Aux.log('Starting scan.')
 		Aux.scan.start{
 			query = {
 				name = name,
@@ -577,24 +565,27 @@ function refresh_entries()
 				subclass = subclass_index,
 			},
 			page = 0,
-			on_start_page = function(page, total_pages)
-				Aux.log('Scanning page ' .. page + 1 .. (total_pages > 0 and ' out of ' .. total_pages or '') .. ' ...')
+			on_page_loaded = function(page, total_pages)
+				Aux.log('Scanning page '..(page + 1)..' out of '..total_pages..' ...')
 			end,
 			on_read_auction = function(i)
 				local auction_item = Aux.info.auction_item(i)
 				if auction_item and auction_item.name == name then
-					local stack_size = auction_item.charges or auction_item.count
-					record_auction(auction_item.name, stack_size, auction_item.buyout_price, auction_item.duration, auction_item.owner)
+					local aux_quantity = auction_item.charges or auction_item.count
+					record_auction(auction_item.name, aux_quantity, auction_item.buyout_price, auction_item.duration, auction_item.owner)
 				end
 			end,
 			on_abort = function()
 				auxSellEntries[name] = nil
+                Aux.log('Scan aborted.')
 			end,
 			on_complete = function()
 				auxSellEntries[name] = auxSellEntries[name] or { created = GetTime() }
 				select_entry()
 				update_recommendation()
-			end,
+                update_auction_listing()
+                Aux.log('Scan complete: '..getn(auxSellEntries[name])..' '..Aux_PluralizeIf('auction', getn(auxSellEntries[name]))..' of '..current_auction.hyperlink..' found.')
+            end,
 			next_page = function(page, total_pages)
 				local last_page = max(total_pages - 1, 0)
 				if page < last_page then
@@ -605,82 +596,6 @@ function refresh_entries()
 	end
 end
 	
-function Aux.sell.scrollbar_update()
-
---	local numrows
---	if not current_auction or not auxSellEntries[current_auction.name] then
---		numrows = 0
---	else
---		numrows = getn(auxSellEntries[current_auction.name])
---	end
-	
-	-- FauxScrollFrame_Update(AuxScrollFrame, numrows, 12, 16)
-
---	for line = 1, 12 do
-
---		local dataOffset = 1 -- line + FauxScrollFrame_GetOffset(AuxScrollFrame)
---		local lineEntry = getglobal("AuxSellEntry"..line)
---
---		if numrows <= 12 then
---			lineEntry:SetWidth(603)
---		else
---			lineEntry:SetWidth(585)
---		end
---
---		lineEntry:SetID(dataOffset)
-		
---		if current_auction and dataOffset <= numrows and auxSellEntries[current_auction.name] then
---
---			local entry = auxSellEntries[current_auction.name][dataOffset]
---
---			if auxSellEntries[current_auction.name].selected and entry.unit_buyout_price == auxSellEntries[current_auction.name].selected.unit_buyout_price and entry.stack_size == auxSellEntries[current_auction.name].selected.stack_size then
---				lineEntry:LockHighlight()
---			else
---				lineEntry:UnlockHighlight()
---			end
---
---			local lineEntry_stacks	= getglobal("AuxSellEntry"..line.."_Stacks")
---			local lineEntry_time	= getglobal("AuxSellEntry"..line.."_Time")
---
---			if entry.max_time_left == 1 then
---				lineEntry_time:SetText("Short")
---			elseif entry.max_time_left == 2 then
---				lineEntry_time:SetText("Medium")
---			elseif entry.max_time_left == 3 then
---				lineEntry_time:SetText("Long")
---			elseif entry.max_time_left == 4 then
---				lineEntry_time:SetText("Very Long")
---			end
---
---			if entry.stack_size == get_stack_size_slider_value() then
---				lineEntry_stacks:SetTextColor(0.2, 0.9, 0.2)
---			else
---				lineEntry_stacks:SetTextColor(1.0, 1.0, 1.0)
---			end
---
---			local own
---			if entry.yours == 0 then
---				own = ""
---			elseif
---				entry.yours == entry.count then
---				own = "(yours)"
---			else
---				own = "(yours: "..entry.yours..")"
---			end
---
---			local tx = string.format("%i %s of %i %s", entry.count, Aux_PluralizeIf("stack", entry.count), entry.stack_size, own)
---			lineEntry_stacks:SetText(tx)
---
---			MoneyFrame_Update("AuxSellEntry"..line.."_UnitPrice", Aux_Round(entry.buyout_price/entry.stack_size))
---			MoneyFrame_Update("AuxSellEntry"..line.."_TotalPrice", Aux_Round(entry.buyout_price))
---
---			lineEntry:Show()
---		else
---			lineEntry:Hide()
---		end
---	end
-end
-
 function AuxSellEntry_OnClick(entry)
 
 	auxSellEntries[current_auction.name].selected = entry
@@ -696,6 +611,7 @@ function AuxSellRefreshButton_OnClick()
 		refresh_entries()
 		select_entry()
 		update_recommendation()
+        update_auction_listing()
 	end)
 end
 
@@ -709,12 +625,12 @@ end
 
 -----------------------------------------
 
-function record_auction(name, stack_size, buyout_price, duration, owner)
+function record_auction(name, aux_quantity, buyout_price, duration, owner)
 	if buyout_price > 0 then
 		auxSellEntries[name] = auxSellEntries[name] or { created = GetTime() }
 		local entry
 		for _, existingEntry in ipairs(auxSellEntries[name]) do
-			if existingEntry.buyout_price == buyout_price and existingEntry.stack_size == stack_size then
+			if existingEntry.buyout_price == buyout_price and existingEntry.stack_size == aux_quantity then
 				entry = existingEntry
 			end
 		end
@@ -724,9 +640,11 @@ function record_auction(name, stack_size, buyout_price, duration, owner)
 			entry.max_time_left = max(entry.max_time_left, duration)
 		else
 			entry = {
-				stack_size = stack_size,
+                key = aux_quantity..':'..buyout_price,
+
+				stack_size = aux_quantity,
 				buyout_price = buyout_price,
-				unit_buyout_price = buyout_price / stack_size,
+				unit_buyout_price = buyout_price / aux_quantity,
 				max_time_left = duration,
 				count = 1,
 				yours = owner == UnitName("player") and 1 or 0,
@@ -763,14 +681,32 @@ end
 	-- end
 -- end
 
------------------------------------------
-
 function report(hyperlink, stack_size, buyout_price, posted)
 	Aux.log(string.format(
-        '%i auctions of %s x %i posted for %s each)',
+        '%i %s of %s x %i posted at %s.',
         posted,
+        Aux_PluralizeIf('auction', posted),
         hyperlink,
         stack_size,
         Aux.util.money_string(buyout_price)
 	))
+end
+
+function Aux.sell.initialize_strategy_dropdown()
+
+    local function on_click()
+        UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, this.value)
+    end
+
+    UIDropDownMenu_AddButton{
+        text = 'Live scan',
+        value = LIVE,
+        func = on_click,
+    }
+
+--    UIDropDownMenu_AddButton{
+--        text = 'Historical price',
+--        value = HISTORICAL,
+--        func = on_click,
+--    }
 end

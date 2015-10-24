@@ -117,7 +117,7 @@
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="138" y="-71" /></Offset></Anchor></Anchors>
                         <Layers>
                             <Layer level="OVERLAY">
-                                <FontString inherits="GameFontHighlightSmall" text="Exact" justifyH="LEFT">
+                                <FontString inherits="GameFontNormalSmall" text="Exact" justifyH="LEFT">
                                     <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
                                 </FontString>
                             </Layer>
@@ -176,10 +176,9 @@
                         </Layers>
                     </Frame>
 
-                    <EditBox name="AuxBuyMinLevel" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
-                        <Size><AbsDimension x="30" y="22"/></Size>
+                    <EditBox name="AuxBuyMinLevel" letters="2" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
                         <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="18" y="-182"/></Offset></Anchor>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-182"/></Offset></Anchor>
                         </Anchors>
                         <Layers>
                             <Layer level="ARTWORK">
@@ -187,24 +186,25 @@
                                     <Anchors><Anchor point="LEFT" relativePoint="RIGHT"><Offset><AbsDimension x="-1" y="0"/></Offset></Anchor></Anchors>
                                 </FontString>
                             </Layer>
-                            <Layer level="OVERLAY">
-                                <FontString inherits="GameFontHighlightSmall" text="Level Range" justifyH="LEFT">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
                         </Layers>
                         <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName()..'Label'):SetText('Level Range')
+                                this:SetWidth(30)
+                            </OnLoad>
                             <OnEnterPressed>
                                 this:ClearFocus()
                             </OnEnterPressed>
                         </Scripts>
                     </EditBox>
-                    <EditBox name="AuxBuyMaxLevel" letters="2" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
-                        <Size><AbsDimension x="30" y="22"/></Size>
+                    <EditBox name="AuxBuyMaxLevel" letters="2" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
                         <Anchors>
                             <Anchor point="LEFT" relativeTo="AuxBuyMinLevel" relativePoint="RIGHT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor>
                         </Anchors>
                         <Scripts>
+                            <OnLoad>
+                                this:SetWidth(30)
+                            </OnLoad>
                             <OnEnterPressed>
                                 this:ClearFocus()
                             </OnEnterPressed>
@@ -215,7 +215,7 @@
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-182" /></Offset></Anchor></Anchors>
                         <Layers>
                             <Layer level="OVERLAY">
-                                <FontString inherits="GameFontHighlightSmall" text="Usable" justifyH="LEFT">
+                                <FontString inherits="GameFontNormalSmall" text="Usable" justifyH="LEFT">
                                     <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
                                 </FontString>
                             </Layer>
@@ -278,20 +278,12 @@
                         </Scripts>
                     </Button>
 
-                    <EditBox name="AuxBuyPageEditBox" numeric="true" autoFocus="false" inherits="InputBoxTemplate">
-                        <Size><AbsDimension x="30" y="22"/></Size>
-                        <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-250"/></Offset></Anchor>
-                        </Anchors>
-                        <Layers>
-                            <Layer level="OVERLAY">
-                                <FontString inherits="GameFontHighlightSmall" text="Page" justifyH="LEFT">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
+                    <EditBox name="AuxBuyPageEditBox" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-250"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
+                                getglobal(this:GetName()..'Label'):SetText('Page')
+                                this:SetWidth(30)
                                 this:EnableMouse(false)
                                 this:SetAlpha(0.5)
                             </OnLoad>
@@ -305,7 +297,7 @@
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="49" y="-250" /></Offset></Anchor></Anchors>
                         <Layers>
                             <Layer level="OVERLAY">
-                                <FontString inherits="GameFontHighlightSmall" text="All" justifyH="LEFT">
+                                <FontString inherits="GameFontNormalSmall" text="All" justifyH="LEFT">
                                     <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
                                 </FontString>
                             </Layer>
@@ -368,12 +360,13 @@
                                     </OnLoad>
                                 </Scripts>
                             </Frame>
-                            <Frame name="AuxBuyConfirmation" enableMouse="true" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" hidden="true">
+                            <Frame name="AuxBuyConfirmation" enableMouse="true" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" hidden="true" enableMouseWheel="true">
                                 <Anchors>
                                     <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                                     <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                                 </Anchors>
                                 <Scripts>
+                                    <OnMouseWheel></OnMouseWheel>
                                 </Scripts>
                                 <Frames>
                                     <Frame name="$parentItem">
@@ -461,7 +454,7 @@
                                     </Frame>
                                     <Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
                                         <Size><AbsDimension x="90" y="26"/>	</Size>
-                                        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="230" y="110"/></Offset></Anchor></Anchors>
+                                        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="229" y="110"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnClick>
                                                 Aux.buy.dialog_action()
@@ -470,7 +463,7 @@
                                     </Button>
                                     <Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
                                         <Size><AbsDimension x="90" y="26"/></Size>
-                                        <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-230" y="110"/></Offset></Anchor></Anchors>
+                                        <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-229" y="110"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnClick>
                                                 Aux.buy.dialog_cancel()
@@ -485,13 +478,7 @@
             </Frame>
             <Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
                 <Size><AbsDimension x="90" y="26"/></Size>
-                <Anchors>
-                    <Anchor point="BOTTOMRIGHT">
-                        <Offset>
-                            <AbsDimension x="-10" y="10"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
+                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButtonBottom"><Offset><AbsDimension x="-25" y="0"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnClick>
                         Aux.buy.SearchButton_onclick()
@@ -501,13 +488,7 @@
 
             <Button name="AuxBuyStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
                 <Size><AbsDimension x="90" y="26"/></Size>
-                <Anchors>
-                    <Anchor point="BOTTOMRIGHT">
-                        <Offset>
-                            <AbsDimension x="-10" y="10"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
+                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButtonBottom"><Offset><AbsDimension x="-25" y="0"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnClick>
                         Aux.buy.StopButton_onclick()
