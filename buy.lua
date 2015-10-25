@@ -103,7 +103,7 @@ Aux.buy.modes = {
             },
             {
                 title = 'Buy/ea',
-                width = 110,
+                width = 93,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price_per_unit, group2[1].buyout_price_per_unit, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
@@ -113,11 +113,28 @@ Aux.buy.modes = {
             },
             {
                 title = 'Buy',
-                width = 110,
+                width = 93,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price, group2[1].buyout_price, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
                     cell.text:SetText(Aux.util.money_string(group[1].buyout_price))
+                    group_alpha_setter(cell, group)
+                end,
+            },
+            {
+                title = 'Pct',
+                width = 30,
+                comparator = function(group1, group2)
+                    local market_price1 = Aux.history.get_market_price(group1[1].key)
+                    local market_price2 = Aux.history.get_market_price(group2[1].key)
+                    local factor1 = market_price1 and group1[1].buyout_price_per_unit / market_price1
+                    local factor2 = market_price2 and group2[1].buyout_price_per_unit / market_price2
+                    return Aux.util.compare(factor1, factor2, Aux.util.GT)
+                end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, group)
+                    local market_price = Aux.history.get_market_price(group[1].key)
+                    cell.text:SetText(market_price and ceil(100 / group[1].buyout_price_per_unit * market_price)..'%' or 'N/A')
                     group_alpha_setter(cell, group)
                 end,
             },
@@ -433,8 +450,6 @@ function Aux.buy.on_close()
 end
 
 function Aux.buy.on_open()
-    AuxBuySearchButton:Show()
-    AuxBuyStopButton:Hide()
 	update_sheet()
 end
 
@@ -722,7 +737,8 @@ function create_auction_record(auction_item, current_page)
     end
 
     return {
-            signature = Aux.auction_signature(auction_item.hyperlink, stack_size, bid, auction_item.buyout_price),
+            key = Aux.auction_signature(auction_item.hyperlink, stack_size, bid, auction_item.buyout_price),
+            signature = Aux.auction_signature(auction_item.hyperlink, stack_size, bid, auction_item.buyout_price), -- TODO remove
 
             name = auction_item.name,
             level = auction_item.level,

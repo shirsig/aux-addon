@@ -171,6 +171,7 @@ function Aux.on_tab_click(index)
 
     AuxSellFrame:Hide()
     AuxBuyFrame:Hide()
+    AuxHistoryFrame:Hide()
 
     if index == 1 then
         AuxBuyFrame:Show()
@@ -178,6 +179,9 @@ function Aux.on_tab_click(index)
     elseif index == 2 then
         AuxSellFrame:Show()
         Aux.sell.on_open()
+    elseif index == 5 then
+        AuxHistoryFrame:Show()
+        Aux.history.on_open()
     end
 
 end

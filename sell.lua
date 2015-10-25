@@ -1,6 +1,6 @@
 Aux.sell = {}
 
-auxSellEntries = {} -- persisted
+local auxSellEntries = {}
 
 local inventory_data
 
@@ -10,7 +10,7 @@ local current_auction
 
 local set_auction, update_auction_listing, update_inventory_listing, record_auction, undercut, item_class_index, item_subclass_index, report, select_entry, update_recommendation, refresh_entries, auction_candidates, charge_classes, get_stack_size_slider_value
 
-local LIVE, HISTORICAL = 1, 2
+local LIVE, HISTORICAL, FIXED = 1, 2, 3
 
 Aux.sell.inventory_listing_config = {
     on_cell_click = function (sheet, row_index, column_index)
@@ -381,46 +381,25 @@ function update_recommendation()
         -- TODO neutral AH deposit formula
 		MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', floor(current_auction.unit_vendor_price * 0.05 * (current_auction.charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
 		
-		if auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected then
+		if UIDropDownMenu_GetSelectedValue(AuxSellParametersStrategyDropDown) == LIVE and auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected then
 			if not auxSellEntries[current_auction.name].created or GetTime() - auxSellEntries[current_auction.name].created > 1800 then
                 AuxSellParametersStrategyDropDownStaleWarning:SetText('Stale data!') -- data older than half an hour marked as stale
 			end
 		
-			local newBuyoutPrice = auxSellEntries[current_auction.name].selected.unit_buyout_price * get_stack_size_slider_value()
+			local new_buyout_price = auxSellEntries[current_auction.name].selected.unit_buyout_price * get_stack_size_slider_value()
 
 			if auxSellEntries[current_auction.name].selected.yours == 0 then
-				newBuyoutPrice = undercut(newBuyoutPrice)
+				new_buyout_price = undercut(new_buyout_price)
 			end
 			
-			local newStartPrice = newBuyoutPrice * 0.95
+			local new_start_price = new_buyout_price * 0.95
 			
---			Aux_ShowElems(Aux.tabs.sell.recommendationElements)
-			
---			AuxRecommendText:SetText("Recommended Buyout Price")
---			AuxRecommendPerStackText:SetText("for a stack of "..get_stack_size_slider_value())
-			
-
---			AuxRecommendItemTex:SetNormalTexture(current_auction.texture)
---			if AuxSellStackSize:GetNumber() > 1 then
---				AuxRecommendItemTexCount:SetText(get_stack_size_slider_value())
---				AuxRecommendItemTexCount:Show()
---			else
---				AuxRecommendItemTexCount:Hide()
---			end
-
---			MoneyFrame_Update("AuxRecommendPerItemPrice",  Aux_Round(get_stack_size_slider_value() > 0 and newBuyoutPrice / get_stack_size_slider_value() or 0))
---			MoneyFrame_Update("AuxRecommendPerStackPrice", Aux_Round(newBuyoutPrice))
-			
-			MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(newBuyoutPrice))
-			MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, Aux_Round(newStartPrice))
-			
---			if auxSellEntries[current_auction.name].selected.stack_size == auxSellEntries[current_auction.name][1].stack_size and auxSellEntries[current_auction.name].selected.buyout_price == auxSellEntries[current_auction.name][1].buyout_price then
---				AuxRecommendBasisText:SetText("(based on cheapest)")
---			elseif bestPriceOurStackSize and auxSellEntries[current_auction.name].selected.stack_size == bestPriceOurStackSize.stack_size and auxSellEntries[current_auction.name].selected.buyout_price == bestPriceOurStackSize.buyout_price then
---				AuxRecommendBasisText:SetText("(based on cheapest stack of the same size)")
---			else
---				AuxRecommendBasisText:SetText("(based on auction selected below)")
---			end
+			MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(new_buyout_price))
+			MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, Aux_Round(new_start_price))
+        elseif UIDropDownMenu_GetSelectedValue(AuxSellParametersStrategyDropDown) == HISTORICAL then
+            local market_price = Aux.history.get_price_suggestion(current_auction.key, current_auction.aux_quantity)
+            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(market_price * 0.95))
+            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, market_price)
         else
             MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
             MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 0)
@@ -526,6 +505,7 @@ function update_inventory_data()
                     if not auction_candidate_map[item_info.item_signature] then
 
                         auction_candidate_map[item_info.item_signature] = {
+                            key = item_info.item_signature,
                             hyperlink = item_info.hyperlink,
                             name = item_info.name,
                             texture = item_info.texture,
@@ -573,7 +553,7 @@ function refresh_entries()
 		-- local class_index = item_class_index(current_auction.class)
 		-- local subclass_index = item_subclass_index(class_index, current_auction.subclass)
 
-		Aux.log('Starting scan.')
+		Aux.log('Scanning auctions ...')
 		Aux.scan.start{
 			query = {
 				name = name,
@@ -720,9 +700,15 @@ function Aux.sell.initialize_strategy_dropdown()
         func = on_click,
     }
 
+    UIDropDownMenu_AddButton{
+        text = 'Historical price',
+        value = HISTORICAL,
+        func = on_click,
+    }
+
 --    UIDropDownMenu_AddButton{
---        text = 'Historical price',
---        value = HISTORICAL,
+--        text = 'Fixed',
+--        value = FIXED,
 --        func = on_click,
 --    }
 end

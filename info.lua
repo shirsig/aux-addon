@@ -53,13 +53,14 @@ function Aux.info.auction_sell_item()
 end
 
 function Aux.info.auction_item(index)
-	local hyperlink = GetAuctionItemLink("list", index)
+	local hyperlink = GetAuctionItemLink('list', index)
 	
 	if not hyperlink then
 		return
 	end
 	
 	local auction_item = hyperlink_item(hyperlink)
+    auction_item.item_signature = item_signature(hyperlink)
 	
 	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status, id = GetAuctionItemInfo("list", index)
 	local duration = GetAuctionItemTimeLeft("list", index)
@@ -152,6 +153,38 @@ function item_charges(tooltip)
 		end
 	end
 end	
+
+function Aux.info.auction(args)
+    local index = tremove(args, 1)
+
+    local key_set = Aux.util.array_to_set(args)
+end
+
+-- not unique!
+function Aux.info.auction_signature(index)
+    -- owner not used because waiting for it would slow down the scan too much
+    local _, _, count, _, _, _, min_bid, _, buyout_price, _, _, owner = GetAuctionItemInfo('list', index)
+    local hyperlink = GetAuctionItemLink('list', index)
+    local item_id, suffix_id, enchant_id, unique_id = parse_hyperlink(hyperlink)
+    return string.format(
+        '%s:%s:%s:%s:%s:%s:%s',
+        item_id or 0,
+        suffix_id or 0,
+        enchant_id or 0,
+        unique_id or 0,
+        count or 0,
+        min_bid or 0,
+        buyout_price or 0
+    )
+end
+
+function Aux.info.break_auction_signature(signature)
+    local parts = strfind(signature, '^(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)$')
+    for i=1,2 do
+        tremove(parts, 1)
+    end
+    return unpack(parts)
+end
 
 function item_signature(hyperlink)
     local item_id, suffix_id = parse_hyperlink(hyperlink)
