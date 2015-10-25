@@ -2,7 +2,6 @@ Aux.buy = {}
 
 local create_auction_record, show_dialog, find_auction, hide_sheet, update_sheet, auction_alpha_setter, group_alpha_setter
 local auctions
-local selectedAuctions = {}
 local search_query
 local tooltip_patterns = {}
 local current_page
@@ -426,23 +425,21 @@ Aux.buy.modes = {
 	},
 }
 
-function Aux.buy.exit()
-	Aux.buy.dialog_cancel()
+function Aux.buy.on_close()
+    if AuxBuyConfirmation:IsVisible() then
+	    Aux.buy.dialog_cancel()
+    end
 	current_page = nil
 end
 
 function Aux.buy.on_open()
+    AuxBuySearchButton:Show()
+    AuxBuyStopButton:Hide()
 	update_sheet()
 end
 
-function Aux_AuctionFrameBid_Update()
-	Aux.orig.AuctionFrameBid_Update()
-	if PanelTemplates_GetSelectedTab(AuctionFrame) == Aux.tabs.buy.index and AuctionFrame:IsShown() then
-		Aux_HideElems(Aux.tabs.buy.hiddenElements)
-	end
-end
-
 function Aux.buy.dialog_cancel()
+    Aux.log('Canceled.')
 	Aux.scan.abort()
 	AuxBuyConfirmation:Hide()
 	update_sheet()
@@ -495,7 +492,6 @@ function Aux.buy.SearchButton_onclick()
 	AuxBuyStopButton:Show()
 	
 	auctions = nil
-	selectedAuctions = {}
 	
 	refresh = true
 	
@@ -513,18 +509,16 @@ function Aux.buy.SearchButton_onclick()
 		usable = AuxBuyUsableCheckButton:GetChecked()
 	}
 	
-	Aux.log('Starting scan')
+	Aux.log('Scanning auctions ...')
 	Aux.scan.start{
 		query = search_query,
 		page = AuxBuyAllPagesCheckButton:GetChecked() and 0 or AuxBuyPageEditBox:GetNumber(),
 		on_submit_query = function()
 			current_page = nil
 		end,
-		on_page_loaded = function(page)
-			current_page = page
-		end,
-		on_start_page = function(page, total_pages)
-			Aux.log('Scanning page ' .. page + 1 .. (total_pages > 0 and ' out of ' .. total_pages or ''))
+		on_page_loaded = function(page, total_pages)
+            Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
+            current_page = page
 		end,
 		on_read_auction = function(i)
 			local auction_item = Aux.info.auction_item(i)
@@ -537,14 +531,15 @@ function Aux.buy.SearchButton_onclick()
 		end,
 		on_complete = function()
 			auctions = auctions or {}
-            Aux.log('Scan completed: '..getn(auctions)..' auctions found')
-			AuxBuyStopButton:Hide()
+            Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+
+            AuxBuyStopButton:Hide()
 			AuxBuySearchButton:Show()
 			refresh = true
 		end,
 		on_abort = function()
 			auctions = auctions or {}
-            Aux.log('Scan aborted: '..getn(auctions)..' auctions found')
+            Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
 			AuxBuyStopButton:Hide()
 			AuxBuySearchButton:Show()
 			refresh = true
@@ -565,8 +560,8 @@ function show_dialog(buyout_mode, entry, amount)
 	AuxBuyConfirmation.EnhTooltip_info = entry.EnhTooltip_info
 	
 	AuxBuyConfirmationActionButton:Disable()
-	AuxBuyConfirmationItem:SetNormalTexture(entry.texture)
-	AuxBuyConfirmationItemName:SetText(entry.name)
+	AuxBuyConfirmationItemIconTexture:SetTexture(entry.texture)
+	AuxBuyConfirmationItemName:SetText(entry.tooltip[1][1].text)
 	local color = ITEM_QUALITY_COLORS[entry.quality]
 	AuxBuyConfirmationItemName:SetTextColor(color.r, color.g, color.b)
 
@@ -587,7 +582,6 @@ function show_dialog(buyout_mode, entry, amount)
 		AuxBuyConfirmationBuyoutPrice:Hide()
 		AuxBuyConfirmationBid:Show()
 	end
-	hide_sheet()
 	AuxBuyConfirmation:Show()
 end
 
@@ -603,15 +597,15 @@ function find_auction(entry, buyout_mode, express_mode)
 		return
 	end
 
-    Aux.log('Processing '..(buyout_mode and 'buyout' or 'bid')..' request')
+    local amount
+    if buyout_mode then
+        amount = entry.buyout_price
+    else
+        amount = entry.bid
+    end
+
+    Aux.log('Processing '..(buyout_mode and 'buyout' or 'bid')..' request for '..entry.hyperlink..' x '..entry.stack_size..' at '..Aux.util.money_string(amount)..' ...')
 	AuxBuySearchButton:Disable()
-	
-	local amount
-	if buyout_mode then
-		amount = entry.buyout_price
-	else
-		amount = entry.bid
-	end
 	
 	if not express_mode then
 		show_dialog(buyout_mode, entry, amount)
@@ -645,23 +639,23 @@ function find_auction(entry, buyout_mode, express_mode)
 			if entry.signature == signature then
 				ctrl.suspend()
 				found = true
-                Aux.log('Matching auction found')
+                Aux.log('Matching auction found.'..(express_mode and '' or ' Awaiting confirmation ...'))
 				
 				if express_mode then
 					if GetMoney() >= amount then
 						PlaceAuctionBid("list", i, amount)
-                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..entry.hyperlink..' x '..entry.stack_size)
+                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..entry.hyperlink..' x '..entry.stack_size..' at '..Aux.util.money_string(amount)..'.')
 						entry.gone = true
 						refresh = true
 					else
-						Aux.log('Not enough money.')
+						Aux.log((buyout_mode and 'Purchase' or 'Bid')..' failed: Not enough money.')
 					end
 					Aux.scan.abort()
 				else
 					Aux.buy.dialog_action = function()						
 						if GetMoney() >= amount then
 							PlaceAuctionBid("list", i, amount)
-                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..entry.hyperlink..' x '..entry.stack_size)
+                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..entry.hyperlink..' x '..entry.stack_size..' at '..Aux.util.money_string(amount)..'.')
                             entry.gone = true
 							refresh = true
 						else
@@ -678,6 +672,7 @@ function find_auction(entry, buyout_mode, express_mode)
 		end,
 		on_complete = function()
 			if not found then
+                Aux.log('No matching auction found. Removing entry from the cache.')
 				entry.gone = true
 				refresh = true
 				Aux.buy.dialog_cancel()
@@ -723,7 +718,7 @@ function create_auction_record(auction_item, current_page)
     elseif auction_item.high_bidder then
         status = GREEN_FONT_COLOR_CODE..'Your Bid'..FONT_COLOR_CODE_CLOSE
     else
-        status = RED_FONT_COLOR_CODE .. 'Other Bidder'..FONT_COLOR_CODE_CLOSE
+        status = RED_FONT_COLOR_CODE..'Other Bidder'..FONT_COLOR_CODE_CLOSE
     end
 
     return {
@@ -831,7 +826,7 @@ function AuxBuyQualityDropDown_Initialize()
     end
 
 	UIDropDownMenu_AddButton{
-		text = ALL,
+		text = 'All',
 		value = -1,
 		func = on_click,
 	}

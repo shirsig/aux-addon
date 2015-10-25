@@ -1,388 +1,101 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="sell.lua"/> 
-  
-	<!-- Frame to handle all core events --> 
-	<Frame>
-		<Scripts> 
-		</Scripts> 
-	</Frame> 
+	<Script file="sell.lua"/>
 
-	<Button name="AuxSellEntryTemplate" virtual="true" hidden="true">
-		<Size><AbsDimension y="16" /></Size>		
+	<Frame name="AuxSellFrame" parent="AuxFrame" hidden="true">
+        <Anchors>
+            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+        </Anchors>
 		<Frames>
-			<Frame>
-				<Size><AbsDimension x="120" y="16" /></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="22" y="0"/></Offset></Anchor></Anchors>
-				<Frames>
-					<Frame name="$parent_UnitPrice" inherits="SmallMoneyFrameTemplate">
-						
-						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnLoad>
-								SmallMoneyFrame_OnLoad()
-								MoneyFrame_SetType("STATIC")
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames>
-			</Frame>
-			
-			<Frame>
-				<Size><AbsDimension x="100" y="16"/></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="185" y="-3"/></Offset></Anchor></Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_Stacks" inherits="GameFontHighlightSmall">
-							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Frame>
-			
-			<Frame>
-				<Size><AbsDimension x="100" y="16"/></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="340" y="-3"/></Offset></Anchor></Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parent_Time" inherits="GameFontHighlightSmall">
-							<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Frame>
-			
-			<Frame>
-				<Size><AbsDimension x="120" y="16"/></Size>
-				<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="440" y="0"/></Offset></Anchor></Anchors>
-				<Frames>
-					<Frame name="$parent_TotalPrice" inherits="SmallMoneyFrameTemplate">
-						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnLoad>
-								SmallMoneyFrame_OnLoad()
-								MoneyFrame_SetType("STATIC")
-							</OnLoad>
-						</Scripts>
-					</Frame>
-				</Frames>
-			</Frame>
-		</Frames>
-
-		<HighlightTexture file="Interface\HelpFrame\HelpFrameButton-Highlight" alphaMode="ADD">
-			<TexCoords left="0" right="1.0" top="0.0" bottom="0.6"/>
-		</HighlightTexture>
-		<Scripts>
-			<OnClick>
-				AuxSellEntry_OnClick()
-			</OnClick>
-		</Scripts>
-	</Button>
-
-	<Frame name="AuxSellTemplate" virtual="true" hidden="true">
-		<Size>
-			<AbsDimension x="694" y="447"/>
-		</Size>
-		<Anchors>
-			<Anchor point="TOPLEFT">
-				<Offset>
-					<AbsDimension x="210" y="0"/>
-				</Offset>
-			</Anchor>
-		</Anchors>	
-
-		<Layers>
-			<Layer level="BACKGROUND">
-				<FontString inherits="GameFontNormal" text="Aux Sell">
-					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="20" y="-18"/></Offset></Anchor></Anchors>
-				</FontString>
-
-				<FontString name="AuxMessage" inherits="GameFontNormal">
-					<Anchors><Anchor point="TOP"><Offset><AbsDimension x="170" y="-100"/></Offset></Anchor></Anchors>
-				</FontString>
-
-				<FontString name="AuxRecommendText" inherits="GameFontNormal" text="Recommended buyout price">
-					<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="287" y="-98"/></Offset></Anchor></Anchors>
-				</FontString>
-
-				<FontString name="AuxRecommendBasisText" inherits="GameFontHighlightSmall" text="based on">
-					<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="20" y="-2"/></Offset></Anchor></Anchors>
-				</FontString>
-
-				<FontString name="AuxRecommendPerStackText" inherits="GameFontHighlightSmall" text="per stack">
-					<Anchors><Anchor point="TOPLEFT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="152" y="-28"/></Offset></Anchor></Anchors>
-				</FontString>
-				
-				<FontString name="AuxRecommendPerItemText" inherits="GameFontHighlightSmall" text="per item">
-					<Anchors><Anchor point="TOPLEFT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="152" y="-51"/></Offset></Anchor></Anchors>
-				</FontString>
-				
-				<FontString name="AuxRecommendStaleText" inherits="GameFontRedLarge">
-					<Anchors><Anchor point="TOPLEFT" relativeTo="AuxRecommendText"><Offset><AbsDimension x="430" y="-65"/></Offset></Anchor></Anchors>
-				</FontString>
-			</Layer>
-			<Layer level="ARTWORK">
-				<Texture name="$parentMiddle" file="Interface\Glues\CharacterCreate\CharacterCreate-LabelFrame">
-					<Size><AbsDimension x="606" y="64"/></Size>
-					<Anchors>
-						<Anchor point="TOPLEFT">
-							<Offset>
-								<AbsDimension x="216" y="-167"/>
-							</Offset>
-						</Anchor>
-					</Anchors>
-					<TexCoords left="0.1953125" right="0.8046875" top="0" bottom="1"/>
-				</Texture>
-
-				<FontString inherits="GameFontHighlightSmall" text="Unit Price">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="80" y="1"/></Offset></Anchor></Anchors>
-				</FontString>
-
-				<FontString inherits="GameFontHighlightSmall" text="Stacks">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="189" y="1"/></Offset></Anchor></Anchors>
-				</FontString>
-
-				<FontString inherits="GameFontHighlightSmall" text="Max Time Left">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="341" y="1"/></Offset></Anchor></Anchors>
-				</FontString>
-
-				<FontString inherits="GameFontHighlightSmall" text="Total Price">
-					<Anchors><Anchor point="LEFT" relativePoint="LEFT" relativeTo="$parentMiddle"><Offset><AbsDimension x="496" y="1"/></Offset></Anchor></Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-		<Frames>
-			<Button name="AuxSellItem">
-				<Size>
-					<AbsDimension x="37" y="37"/>
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset>
-							<AbsDimension x="28" y="-98"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Layers>
-					<Layer level="BACKGROUND">
-						<FontString name="$parentName" inherits="GameFontNormal">
-							<Size>
-								<AbsDimension x="124" y="30"/>
-							</Size>
-							<Anchors>
-								<Anchor point="TOPLEFT" relativePoint="TOPRIGHT">
-									<Offset>
-										<AbsDimension x="5" y="0"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</FontString>
-					</Layer>
-					<Layer level="OVERLAY">
-						<FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT" hidden="true">
-							<Anchors>
-								<Anchor point="BOTTOMRIGHT">
-									<Offset>
-										<AbsDimension x="-5" y="2"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Button>
-			<Button name="AuxSellPostButton" inherits="UIPanelButtonTemplate" text="Post Auctions">
-				<Size>
-					<AbsDimension x="191" y="20"/>
-				</Size>
-				<Anchors>
-					<Anchor point="BOTTOMLEFT">
-						<Offset>
-							<AbsDimension x="18" y="39"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						Aux.sell.post_auctions()
-					</OnClick>
-				</Scripts>
-			</Button>		
-			<Button>
-				<Size><AbsDimension x="612" y="118"/></Size>
-				<Anchors>
-					<Anchor point="TOPLEFT"><Offset><AbsDimension x="213" y="-70"/></Offset></Anchor>
-				</Anchors>
-				<Layers>
-					<Layer level="BACKGROUND"></Layer>
-				</Layers>
-				<Scripts>
-					<OnLoad>
-						this:RegisterEvent("NEW_AUCTION_UPDATE")
-						this:RegisterForDrag("LeftButton")
-					</OnLoad>
-					<OnEvent>
-						if event == "NEW_AUCTION_UPDATE" then
-							Aux_Hilite1:Hide()
-						end
-					</OnEvent>
-					<OnClick>
-						if CursorHasItem() then
-							Aux.sell.set_auction(Aux.last_picked_up.bag, Aux.last_picked_up.slot)
-						else
-							Aux.sell.clear_auction()
-						end
-					</OnClick>
-					<OnReceiveDrag>
-						Aux.sell.set_auction(Aux.last_picked_up.bag, Aux.last_picked_up.slot)
-						ClearCursor()
-					</OnReceiveDrag>
-					<OnEnter>
-						Aux_Hilite1:Show()
-					</OnEnter>
-					<OnLeave>
-						Aux_Hilite1:Hide()
-					</OnLeave>
-				</Scripts>
-				
-				<Frames>
-					<Frame name="Aux_Hilite1" hidden="true">
-						<Anchors>
-							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-							<Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-						</Anchors>
-
-						<Backdrop edgeFile="Interface\Tooltips\UI-Tooltip-Border">
-							<EdgeSize>
-								<AbsValue val="16"/>
-							</EdgeSize>
-						</Backdrop>
-					</Frame>			
-				</Frames>		
-			</Button>
-
-			<Button name="AuxRecommendItemTex">
-				<Size><AbsDimension x="37" y="37"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="234" y="-87"/></Offset></Anchor></Anchors>
-				<Layers>
-					<Layer level="OVERLAY">
-						<FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT" hidden="true">
-							<Anchors>
-								<Anchor point="BOTTOMRIGHT">
-									<Offset>
-										<AbsDimension x="-5" y="2"/>
-									</Offset>
-								</Anchor>
-							</Anchors>
-						</FontString>
-					</Layer>
-				</Layers>
-			</Button>
-
-			<Frame>
-				<Size><AbsDimension x="120" y="20"/></Size>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="AuxRecommendText">
-						<Offset><AbsDimension x="32" y="-24"/></Offset>
-					</Anchor>
-				</Anchors>
-				<Frames>
-					<Frame name="AuxRecommendPerStackPrice" inherits="SmallMoneyFrameTemplate">
-						<Size><AbsDimension x="120" y="16" /></Size>
-						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts><OnLoad>AuxMoneyFrame_OnLoad()</OnLoad></Scripts>
-					</Frame>
-				</Frames>
-			</Frame>
-
-			<Frame>
-				<Size><AbsDimension x="120" y="20"/></Size>
-				<Anchors>
-					<Anchor point="TOPLEFT" relativeTo="AuxRecommendText">
-						<Offset><AbsDimension x="32" y="-46"/></Offset>
-					</Anchor>
-				</Anchors>
-				<Frames>
-					<Frame name="AuxRecommendPerItemPrice" inherits="SmallMoneyFrameTemplate">
-						<Size><AbsDimension x="120" y="16" /></Size>
-						<Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-						<Scripts><OnLoad>AuxMoneyFrame_OnLoad()</OnLoad></Scripts>
-					</Frame>
-				</Frames>
-			</Frame>
-
-			<Button name="AuxSellRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
-				<Size><AbsDimension x="126" y="22"/></Size>
-				<Anchors>
-					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT">
-						<Offset>
-							<AbsDimension x="51" y="14"/>
-						</Offset>
-					</Anchor>
-				</Anchors>
-				<Scripts>
-					<OnClick>
-						AuxSellRefreshButton_OnClick()
-					</OnClick>
-				</Scripts>
-			</Button>
-			
-			<ScrollFrame name="AuxScrollFrame" inherits="FauxScrollFrameTemplate">
-				<Size><AbsDimension x="588" y="194"/></Size>
-				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="210" y="-213"/></Offset></Anchor></Anchors>
-
-				<Scripts>
-					<OnVerticalScroll>
-						FauxScrollFrame_OnVerticalScroll(16, Aux.sell.scrollbar_update)
-					</OnVerticalScroll>
-					<OnShow>
-						<!--Aux.sell.scrollbar_update();-->
-					</OnShow>
-				</Scripts>
-			</ScrollFrame>
-
-			<Button name="AuxSellEntry1" inherits="AuxSellEntryTemplate">
-			<Anchors><Anchor point="TOPLEFT" relativeTo="AuxScrollFrame" relativePoint="TOPLEFT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor></Anchors>
-			</Button>
-			<Button name="AuxSellEntry2"  inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry1"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry3"  inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry2"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry4"  inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry3"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry5"  inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry4"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry6"  inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry5"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry7"  inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry6"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry8"  inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry7"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry9"  inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry8"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry10" inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry9"  relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry11" inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry10" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-			<Button name="AuxSellEntry12" inherits="AuxSellEntryTemplate"><Anchors><Anchor point="TOPLEFT" relativeTo="AuxSellEntry11" relativePoint="BOTTOMLEFT"/></Anchors></Button>
-
-			<frame name="AuxSellParameters">
-				<Size>
-					<AbsDimension x="200" y="600"/>
-				</Size>
-				<Anchors>
-					<Anchor point="TOPLEFT">
-						<Offset>
-							<AbsDimension x="28" y="-153"/>
-						</Offset>
-					</Anchor>
-				</Anchors>	
-				<layers>
-					<layer level="BACKGROUND">
-                        <FontString name="$parentDurationText" inherits="GameFontHighlightSmall" text="Duration">
-                            <Anchors>
-                                <Anchor point="TOPLEFT">
-                                    <Offset>
-                                        <AbsDimension x="0" y="-49"/>
-                                    </Offset>
-                                </Anchor>
-                            </Anchors>
-                        </FontString>
-					</layer>
-				</layers>
+            <Frame name="AuxSellInventory" inherits="AuxFrameBoxTemplate">
+                <Size><AbsDimension x="260" y="326"/></Size>
+                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnLoad>
+                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                        this:SetBackdropColor(0.15, 0.15, 0.15)
+                        getglobal(this:GetName().."Title"):SetText('Inventory')
+                    </OnLoad>
+                </Scripts>
+                <Frames>
+                    <Frame name="$parentListing">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                local config = Aux.sell.inventory_listing_config
+                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_cell_click, config.on_cell_enter, config.on_cell_leave)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                </Frames>
+            </Frame>
+			<frame name="AuxSellParameters" inherits="AuxFrameBoxTemplate">
+				<Size><AbsDimension x="213" y="326"/></Size>
+                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnLoad>
+                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                        this:SetBackdropColor(0.15, 0.15, 0.15)
+                        getglobal(this:GetName().."Title"):SetText('Parameters')
+                    </OnLoad>
+                </Scripts>
 				<frames>
+                    <Frame name="$parentItem">
+                        <Size><AbsDimension x="193" y="37"/></Size>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-10"/></Offset></Anchor></Anchors>
+                        <Layers>
+                            <Layer level="BORDER">
+                                <Texture name="$parentIconTexture">
+                                    <Size><AbsDimension x="32" y="32"/></Size>
+                                    <Anchors><Anchor point="LEFT"><Offset><AbsDimension x="2" y="0"/></Offset></Anchor></Anchors>
+                                </Texture>
+                                <Texture file="Interface\Buttons\UI-Quickslot2">
+                                    <Size><AbsDimension x="60" y="60"/></Size>
+                                    <Anchors><Anchor point="CENTER" relativeTo="$parentIconTexture"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                </Texture>
+                                <FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT">
+                                    <Anchors><Anchor point="BOTTOMRIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="-5" y="2"/></Offset></Anchor></Anchors>
+                                </FontString>
+                                <FontString name="$parentName" inherits="GameFontNormal" justifyH="LEFT">
+                                    <Anchors>
+                                        <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
+                                        <Anchor point="RIGHT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor>
+                                        <Anchor point="TOP"><Offset><AbsDimension x="0" y="-5"/></Offset></Anchor>
+                                        <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor>
+                                    </Anchors>
+                                </FontString>
+                            </Layer>
+                            <Layer level="BACKGROUND">
+                                <Texture name="$parentLeft" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
+                                    <Size><AbsDimension x="10" y="37"/></Size>
+                                    <Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="2" y="0"/></Offset></Anchor></Anchors>
+                                    <TexCoords left="0" right="0.078125" top="0" bottom="1.0"/>
+                                </Texture>
+                                <Texture name="$parentRight" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
+                                    <Size><AbsDimension x="10" y="37"/></Size>
+                                    <Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                    </Anchors>
+                                    <TexCoords left="0.75" right="0.828125" top="0" bottom="1.0"/>
+                                </Texture>
+                                <Texture file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
+                                    <Size><AbsDimension x="10" y="37"/></Size>
+                                    <Anchors>
+                                        <Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                        <Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                    </Anchors>
+                                    <TexCoords left="0.078125" right="0.75" top="0" bottom="1.0"/>
+                                </Texture>
+                            </Layer>
+                        </Layers>
+                        <HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
+                    </Frame>
                     <Slider name="AuxSellStackSizeSlider" inherits="AuxSliderTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-70"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnValueChanged>
                                 Aux.sell.quantity_update()
@@ -390,7 +103,7 @@
                         </Scripts>
                     </Slider>
                     <Slider name="AuxSellStackCountSlider" inherits="AuxSliderTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="-30"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-100"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnValueChanged>
                                 Aux.sell.quantity_update()
@@ -402,7 +115,14 @@
 						<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxSellStackSizeSlider"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>
 						<Scripts>
 							<OnTextChanged>
-                                AuxSellStackSizeSlider:SetValue(this.charge_classes and this.charge_classes[this:GetNumber()] or this:GetNumber())
+                                if AuxSellStackSizeSlider.charge_classes then
+                                    local charge_slider_value = Aux.util.index_of(this:GetNumber(), AuxSellStackSizeSlider.charge_classes)
+                                    if charge_slider_value then
+                                        AuxSellStackSizeSlider:SetValue(charge_slider_value)
+                                    end
+                                else
+                                    AuxSellStackSizeSlider:SetValue(this:GetNumber())
+                                end
 								Aux.sell.quantity_update()
 							</OnTextChanged>
 							<OnTabPressed>
@@ -450,50 +170,73 @@
 							</OnEditFocusGained>
 						</Scripts>
 					</EditBox>
-                    <CheckButton name="$parentShortDurationRadio" inherits="SendMailRadioButtonTemplate">
-                        <Anchors>
-                            <Anchor point="TOPLEFT" relativeTo="$parentDurationText" relativePoint="BOTTOMLEFT">
-                                <Offset>
-                                    <AbsDimension x="3" y="-4"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
+                    <CheckButton name="$parentShortDurationRadio" inherits="AuxRadioButtonTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="11" y="-143"/></Offset></Anchor></Anchors>
+                        <layers>
+                            <layer level="BACKGROUND">
+                                <FontString name="$parentDurationText" inherits="GameFontNormalSmall" text="Duration">
+                                    <Anchors><Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"><Offset><AbsDimension x="0" y="4"/></Offset></Anchor></Anchors>
+                                </FontString>
+                            </layer>
+                        </layers>
                         <Scripts>
-                            <OnLoad>getglobal(this:GetName().."Text"):SetText("2h");</OnLoad>
-                            <OnClick>Aux.sell.duration_radio_button_on_click(1)</OnClick>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText("2h")
+                            </OnLoad>
+                            <OnClick>
+                                Aux.sell.duration_radio_button_on_click(1)
+                            </OnClick>
                         </Scripts>
                     </CheckButton>
-                    <CheckButton name="$parentMediumDurationRadio" inherits="SendMailRadioButtonTemplate">
-                        <Anchors>
-                            <Anchor point="LEFT" relativeTo="$parentShortDurationRadio" relativePoint="RIGHT">
-                                <Offset>
-                                    <AbsDimension x="44" y="0"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
+                    <CheckButton name="$parentMediumDurationRadio" inherits="AuxRadioButtonTemplate">
+                        <Anchors><Anchor point="LEFT" relativeTo="$parentShortDurationRadio" relativePoint="RIGHT"><Offset><AbsDimension x="30" y="0"/></Offset></Anchor></Anchors>
                         <Scripts>
-                            <OnLoad>getglobal(this:GetName().."Text"):SetText("8h");</OnLoad>
-                            <OnClick>Aux.sell.duration_radio_button_on_click(2)</OnClick>
+                            <OnLoad>
+                                getglobal(this:GetName()..'Text'):SetText("8h")
+                            </OnLoad>
+                            <OnClick>
+                                Aux.sell.duration_radio_button_on_click(2)
+                            </OnClick>
                         </Scripts>
                     </CheckButton>
-                    <CheckButton name="$parentLongDurationRadio" inherits="SendMailRadioButtonTemplate">
-                        <Anchors>
-                            <Anchor point="LEFT" relativeTo="$parentMediumDurationRadio" relativePoint="RIGHT">
-                                <Offset>
-                                    <AbsDimension x="44" y="0"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
+                    <CheckButton name="$parentLongDurationRadio" inherits="AuxRadioButtonTemplate">
+                        <Anchors><Anchor point="LEFT" relativeTo="$parentMediumDurationRadio" relativePoint="RIGHT"><Offset><AbsDimension x="30" y="0"/></Offset></Anchor></Anchors>
                         <Scripts>
-                            <OnLoad>getglobal(this:GetName().."Text"):SetText("24h");</OnLoad>
-                            <OnClick>Aux.sell.duration_radio_button_on_click(3)</OnClick>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText("24h")
+                            </OnLoad>
+                            <OnClick>
+                                Aux.sell.duration_radio_button_on_click(3)
+                            </OnClick>
                         </Scripts>
                     </CheckButton>
+                    <Frame name="$parentStrategyDropDown" inherits="UIDropDownMenuTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-11" y="-180" /></Offset></Anchor></Anchors>
+                        <Layers>
+                            <Layer level="BACKGROUND">
+                                <FontString name="$parentLabel" inherits="GameFontNormalSmall" text="Suggestion Based On">
+                                    <Anchors><Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"><Offset><AbsDimension x="21" y="0"/></Offset></Anchor></Anchors>
+                                </FontString>
+                                <FontString name="$parentStaleWarning" inherits="GameFontRedSmall">
+                                    <Anchors><Anchor point="LEFT" relativePoint="RIGHT"><Offset><AbsDimension x="-6" y="3"/></Offset></Anchor></Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnLoad>
+                                UIDropDownMenu_SetWidth(100)
+                                UIDropDownMenu_Initialize(this, Aux.sell.initialize_strategy_dropdown)
+                            </OnLoad>
+                            <OnShow>
+                                UIDropDownMenu_Initialize(this, Aux.sell.initialize_strategy_dropdown)
+                            </OnShow>
+                        </Scripts>
+                    </Frame>
                     <Frame name="$parentStartPrice" inherits="MoneyInputFrameTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="2" y="-94"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="12" y="-221"/></Offset></Anchor></Anchors>
                         <layers>
                             <Layer level="ARTWORK">
-                                <FontString name="$parentText" inherits="GameFontHighlightSmall" text="STARTING_PRICE">
+                                <FontString name="$parentText" inherits="GameFontNormalSmall" text="STARTING_PRICE">
                                     <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="12"/></Offset></Anchor></Anchors>
                                 </FontString>
                             </Layer>
@@ -505,10 +248,10 @@
                         </Scripts>
                     </Frame>
                     <Frame name="$parentBuyoutPrice" inherits="MoneyInputFrameTemplate">
-                        <Anchors><Anchor point="TOPLEFT" relativeTo="AuctionsBuyoutText" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="2" y="-2"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="12" y="-256"/></Offset></Anchor></Anchors>
                         <layers>
                             <Layer level="OVERLAY">
-                                <FontString name="$parentText" inherits="GameFontHighlightSmall" text="Buyout Price |cff808080(optional)|r">
+                                <FontString name="$parentText" inherits="GameFontNormalSmall" text="Buyout Price |cff808080(optional)|r">
                                     <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="12"/></Offset></Anchor></Anchors>
                                 </FontString>
                                 <FontString name="$parentErrorText" inherits="GameFontRedSmall" text="AUCTION_BUYOUT_ERROR">
@@ -522,37 +265,68 @@
                             </OnLoad>
                         </Scripts>
                     </Frame>
+                    <Frame name="$parentDepositMoneyFrame" inherits="SmallMoneyFrameTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="62" y="-295"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                SmallMoneyFrame_OnLoad();
+                                MoneyFrame_SetType("AUCTION");
+                            </OnLoad>
+                        </Scripts>
+                        <Layers>
+                            <Layer level="BACKGROUND">
+                                <FontString inherits="GameFontNormal" text="Deposit:">
+                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                    </Frame>
 				</frames>
 			</frame>
-			<Frame name="AuxSellReport" frameStrata="FULLSCREEN_DIALOG" toplevel="true" parent="UIParent" enableMouse="true" hidden="true">
-				<Size><AbsDimension x="400" y="180" /></Size>		
-				<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-90"/></Offset></Anchor></Anchors>
-
-				<Backdrop bgFile="Interface\CharacterFrame\UI-Party-Background" edgeFile="Interface\DialogFrame\UI-DialogBox-Border" tile="true">
-					<BackgroundInsets><AbsInset left="11" right="12" top="12" bottom="11"/></BackgroundInsets>
-					<TileSize><AbsValue val="32"/></TileSize>
-					<EdgeSize><AbsValue val="32"/></EdgeSize>
-				</Backdrop>
-
-				<Frames>
-					<SimpleHTML name="AuxSellReportHTML">
-						<Size><AbsDimension x="420" y="1" /></Size>		
-						<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="30" y="-30"/></Offset></Anchor></Anchors>
-						<FontString inherits="GameFontHighlightSmall"/>
-						<FontStringHeader1 inherits="GameFontNormal"/>
-					</SimpleHTML>
-
-					<Button inherits="UIPanelButtonTemplate" text="Close">
-						<Size><AbsDimension x="100" y="22"/>	</Size>
-						<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-20" y="15"/></Offset></Anchor></Anchors>
-						<Scripts>
-							<OnClick>
-								AuxSellReport:Hide()
-							</OnClick>
-						</Scripts>
-					</Button>
-				</Frames>
-			</Frame>
+            <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">
+                <Size><AbsDimension x="361" y="326"/></Size>
+                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnLoad>
+                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                        this:SetBackdropColor(0.15, 0.15, 0.15)
+                        getglobal(this:GetName().."Title"):SetText('Existing Auctions')
+                    </OnLoad>
+                </Scripts>
+                <Frames>
+                <Frame name="$parentListing">
+                    <Anchors>
+                        <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                    </Anchors>
+                    <Scripts>
+                        <OnLoad>
+                            local config = Aux.sell.auction_listing_config
+                            local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                            this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_cell_click, config.on_cell_enter, config.on_cell_leave)
+                        </OnLoad>
+                    </Scripts>
+                </Frame>
+                </Frames>
+            </Frame>
+            <Button name="AuxSellRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
+                <Size><AbsDimension x="90" y="26"/></Size>
+                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButtonBottom"><Offset><AbsDimension x="-25" y="0"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnClick>
+                        AuxSellRefreshButton_OnClick()
+                    </OnClick>
+                </Scripts>
+            </Button>
+            <Button name="AuxSellPostButton" inherits="UIPanelButtonTemplate" text="Post Auctions">
+                <Size><AbsDimension x="120" y="26"/></Size>
+                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxSellRefreshButton"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnClick>
+                        Aux.sell.post_auctions()
+                    </OnClick>
+                </Scripts>
+            </Button>
 		</Frames>
 	</Frame>
 </Ui>

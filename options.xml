@@ -19,7 +19,11 @@
 				<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="758" y="-12"/></Offset></Anchor></Anchors>
 				<Scripts>
 					<OnClick>
-						Aux.options.show()
+                        if AuxFrame:IsVisible() then
+                            AuxFrame:Hide()
+                        else
+                            AuxFrame:Show()
+                        end
 					</OnClick>
 				</Scripts>
 			</Button>
