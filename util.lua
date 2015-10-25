@@ -9,6 +9,26 @@ local merge, copy_array
 function Aux.util.pass()
 end
 
+function Aux.util.inventory_iterator()
+    local inventory = {}
+    for bag = 0, 4 do
+        if GetBagName(bag) then
+            for bag_slot = 1, GetContainerNumSlots(bag) do
+                tinsert(inventory, { bag = bag, bag_slot = bag_slot })
+            end
+        end
+    end
+
+    local i = 0
+    local n = getn(inventory)
+    return function()
+        i = i + 1
+        if i <= n then
+            return inventory[i]
+        end
+    end
+end
+
 function Aux.util.safe_index(chain)
     local target = chain[1]
 

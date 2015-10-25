@@ -212,7 +212,7 @@ function Aux.sell.on_open()
 
     Aux.sell.validate_parameters()
 
-    inventory_data = auction_candidates()
+    update_inventory_data()
 
     update_inventory_listing()
     update_auction_listing()
@@ -283,7 +283,7 @@ function Aux.sell.post_auctions()
 					end
 				end
 				Aux.sell.clear_auction()
-                inventory_data = auction_candidates()
+                update_inventory_data()
                 update_inventory_listing()
 				report(hyperlink, stack_size, buyout_price, posted)
 			end
@@ -363,7 +363,7 @@ function update_recommendation()
         AuxSellStackCountSlider:SetMinMaxValues(0,0)
         AuxSellStackCount:SetNumber(0)
     else
-        AuxSellStackSize:SetNumber(AuxSellStackSizeSlider:GetValue())
+        AuxSellStackSize:SetNumber(current_auction.charges and AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider:GetValue()] or AuxSellStackSizeSlider:GetValue())
         AuxSellStackCount:SetNumber(AuxSellStackCountSlider:GetValue())
 
         AuxSellParametersItemIconTexture:SetTexture(current_auction.texture)
@@ -377,12 +377,13 @@ function update_recommendation()
 		end
 		
 		AuxSellRefreshButton:Enable()
-		
-		MoneyFrame_Update("AuxSellParametersDepositMoneyFrame", floor(current_auction.vendor_price_per_unit * current_auction.deposit_factor * (current_auction.charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
+
+        -- TODO neutral AH deposit formula
+		MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', floor(current_auction.unit_vendor_price * 0.05 * (current_auction.charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
 		
 		if auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected then
 			if not auxSellEntries[current_auction.name].created or GetTime() - auxSellEntries[current_auction.name].created > 1800 then
-                AuxSellParametersStrategyDropDownStaleWarning:SetText("Stale data!") -- data older than half an hour marked as stale
+                AuxSellParametersStrategyDropDownStaleWarning:SetText('Stale data!') -- data older than half an hour marked as stale
 			end
 		
 			local newBuyoutPrice = auxSellEntries[current_auction.name].selected.unit_buyout_price * get_stack_size_slider_value()
@@ -429,7 +430,7 @@ end
 
 function Aux.sell.quantity_update()
     if current_auction then
-        AuxSellStackCountSlider:SetMinMaxValues(1, current_auction.charges and current_auction.availability[AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider.GetValue()]] or floor(current_auction.availability[0] / get_stack_size_slider_value()))
+        AuxSellStackCountSlider:SetMinMaxValues(1, current_auction.charges and current_auction.availability[AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider:GetValue()]] or floor(current_auction.availability[0] / get_stack_size_slider_value()))
     end
     select_entry()
 	update_recommendation()
@@ -455,7 +456,7 @@ function set_auction(auction_candidate)
         update_inventory_listing()
 
         local charge_classes = charge_classes(current_auction.availability)
-        AuxSellStackSizeSlider.charge_classes = charge_classes
+        AuxSellStackSizeSlider.charge_classes = current_auction.charges and charge_classes
         local stack_size_slider_max = current_auction.charges and getn(charge_classes) or min(current_auction.max_stack, current_auction.availability[0])
         AuxSellStackSizeSlider:SetMinMaxValues(1, stack_size_slider_max)
 
@@ -484,66 +485,81 @@ function charge_classes(availability)
 	return charge_classes
 end
 
-function auction_candidates()
+function update_inventory_data()
+    inventory_data = {}
+    update_inventory_listing()
 
     local auction_candidate_map = {}
 
-    Aux.util.without_sound(function()
-        Aux.util.without_errors(function()
+    local function process_inventory(inventory_iterator, k)
+        local slot = inventory_iterator()
 
-            for bag = 0, 4 do
-                if GetBagName(bag) then
-                    for slot = 1, GetContainerNumSlots(bag) do
-                        local item_info = Aux.info.container_item(bag, slot)
+        if not slot then
+            return k()
+        end
 
-                        if item_info then
+        local item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
 
-                            local charge_class = item_info.charges or 0
+        if item_info then
 
-                            ClearCursor()
-                            PickupContainerItem(bag,slot)
-                            ClickAuctionSellItemButton()
-                            local auction_sell_item = Aux.info.auction_sell_item()
-                            ClearCursor()
-                            ClickAuctionSellItemButton()
-                            ClearCursor()
+            return Aux.control.on_next_update(function()
 
-                            if auction_sell_item then
-                                if not auction_candidate_map[item_info.item_signature] then
+                local charge_class = item_info.charges or 0
 
-                                    auction_candidate_map[item_info.item_signature] = {
-                                        hyperlink = item_info.hyperlink,
-                                        name = item_info.name,
-                                        texture = item_info.texture,
-                                        quality = item_info.quality,
-                                        class = item_info.type,
-                                        subclass = item_info.subtype,
-                                        deposit_factor = auction_sell_item.deposit_factor,
-                                        vendor_price_per_unit = auction_sell_item.vendor_price_per_unit,
-                                        charges = item_info.charges,
-                                        aux_quantity = item_info.charges or item_info.count,
-                                        max_stack = item_info.max_stack,
-                                        availability = { [charge_class]=item_info.count },
-                                    }
-                                else
-                                    local candidate = auction_candidate_map[item_info.item_signature]
-                                    candidate.availability[charge_class] = (candidate.availability[charge_class] or 0) + item_info.count
-                                    candidate.aux_quantity = candidate.aux_quantity + (item_info.charges or item_info.count)
-                                end
-                            end
-                        end
+                local auction_sell_item
+
+                Aux.util.without_sound(function()
+                    Aux.util.without_errors(function()
+
+                        ClearCursor()
+                        PickupContainerItem(slot.bag, slot.bag_slot)
+                        ClickAuctionSellItemButton()
+                        auction_sell_item = Aux.info.auction_sell_item()
+                        ClearCursor()
+                        ClickAuctionSellItemButton()
+                        ClearCursor()
+
+                    end)
+                end)
+
+                if auction_sell_item then
+                    if not auction_candidate_map[item_info.item_signature] then
+
+                        auction_candidate_map[item_info.item_signature] = {
+                            hyperlink = item_info.hyperlink,
+                            name = item_info.name,
+                            texture = item_info.texture,
+                            quality = item_info.quality,
+                            class = item_info.type,
+                            subclass = item_info.subtype,
+                            unit_vendor_price = auction_sell_item.unit_vendor_price,
+                            charges = item_info.charges,
+                            aux_quantity = item_info.charges or item_info.count,
+                            max_stack = item_info.max_stack,
+                            availability = { [charge_class]=item_info.count },
+                        }
+                    else
+                        local candidate = auction_candidate_map[item_info.item_signature]
+                        candidate.availability[charge_class] = (candidate.availability[charge_class] or 0) + item_info.count
+                        candidate.aux_quantity = candidate.aux_quantity + (item_info.charges or item_info.count)
                     end
                 end
-            end
 
-        end)
-    end)
+                return process_inventory(inventory_iterator, k)
+            end)
+        end
 
-    local auction_candidates = {}
-    for _, auction_candidate in pairs(auction_candidate_map) do
-        tinsert(auction_candidates, auction_candidate)
+        return process_inventory(inventory_iterator, k)
     end
-    return auction_candidates
+
+    process_inventory(Aux.util.inventory_iterator(), function()
+        local auction_candidates = {}
+        for _, auction_candidate in pairs(auction_candidate_map) do
+            tinsert(auction_candidates, auction_candidate)
+        end
+        inventory_data = auction_candidates
+        update_inventory_listing()
+    end)
 end
 
 function refresh_entries()

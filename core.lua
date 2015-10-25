@@ -121,6 +121,15 @@ function Aux_SetupHookFunctions()
 	Aux.orig.ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
 	ContainerFrameItemButton_OnClick = Aux_ContainerFrameItemButton_OnClick
 
+    Aux.orig.AuctionFrameAuctions_OnEvent = AuctionFrameAuctions_OnEvent
+    AuctionFrameAuctions_OnEvent = Aux.AuctionFrameAuctions_OnEvent
+
+end
+
+function Aux.AuctionFrameAuctions_OnEvent()
+    if AuctionFrameAuctions:IsVisible() then
+        Aux.orig.AuctionFrameAuctions_OnEvent()
+    end
 end
 
 function Aux_OnAuctionHouseShow()

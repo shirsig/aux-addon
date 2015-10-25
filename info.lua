@@ -33,8 +33,7 @@ function Aux.info.auction_sell_item()
 
 	if name then
 
-        local deposit_factor = CalculateAuctionDeposit(120) / vendor_price
-        local vendor_price_per_unit = vendor_price / stack_size
+        local unit_vendor_price = vendor_price / stack_size
 
 		auction_sell_item = {
 			name = name,
@@ -42,8 +41,7 @@ function Aux.info.auction_sell_item()
 			stack_size = stack_size,
 			quality = quality,
 			usable = usable,
-            vendor_price_per_unit = vendor_price_per_unit,
-			vendor_price = vendor_price,
+            unit_vendor_price = unit_vendor_price,
 			deposit_factor = deposit_factor,
 		}
 		

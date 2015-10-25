@@ -10,30 +10,10 @@ end)()
 
 local state
 
-local inventory, item_slots, find_empty_slot, locked, same_slot, move_item, item_name, stack_size, stop, process
-
-function inventory()
-	local inventory = {}
-	for bag = 0, 4 do
-		if GetBagName(bag) then
-			for bag_slot = 1, GetContainerNumSlots(bag) do
-				tinsert(inventory, { bag = bag, bag_slot = bag_slot })
-			end
-		end
-	end
-
-	local i = 0
-	local n = getn(inventory)
-	return function()
-		i = i + 1
-		if i <= n then
-			return inventory[i]
-		end
-	end
-end
+local item_slots, find_empty_slot, locked, same_slot, move_item, item_name, stack_size, stop, process
 
 function item_slots(name)
-	local slots = inventory()
+	local slots = Aux.util.inventory_iterator()
 	return function()
 		repeat
 			slot = slots()
@@ -43,7 +23,7 @@ function item_slots(name)
 end
 
 function find_empty_slot()
-	for slot in inventory() do
+	for slot in Aux.util.inventory_iterator() do
 		if not GetContainerItemInfo(slot.bag, slot.bag_slot) then
 			return slot
 		end
