@@ -9,36 +9,6 @@
 			</OnUpdate> 
 		</Scripts> 
 	</Frame>
-	
-	<Button name="SearchListItemTemplate" inherits="ListItemTemplate" virtual="true">
-		<Scripts>
-			<OnLoad>
-				this:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-			</OnLoad>
-			<OnLeave>
-				GameTooltip:Hide()
-				ResetCursor()
-			</OnLeave>
-			<OnClick>
-				AuxBuyEntry_OnClick(index)
-			</OnClick>
-			<OnUpdate>
-				if index then
-					if IsControlKeyDown() then
-						ShowInspectCursor()
-					elseif IsAltKeyDown() then
-						SetCursor("BUY_CURSOR")
-					else
-						ResetCursor()
-					end
-				end
-			</OnUpdate>
-		</Scripts>
-		<HighlightTexture name="$parentHighlight" file="Interface\HelpFrame\HelpFrameButton-Highlight" alphaMode="ADD">
-			<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor><Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-			<TexCoords left="0" right="1.0" top="0" bottom="0.578125"/>
-		</HighlightTexture>
-	</Button>
 
     <Frame name="AuxBuyFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>

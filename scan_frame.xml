@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-    <Script file="history.lua"/>
+    <Script file="scan_frame.lua"/>
 
     <Frame>
         <Scripts>
