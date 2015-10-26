@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="sell.lua"/>
+	<Script file="post_frame.lua"/>
 
 	<Frame name="AuxSellFrame" parent="AuxFrame" hidden="true">
         <Anchors>
@@ -45,54 +45,8 @@
                     </OnLoad>
                 </Scripts>
 				<frames>
-                    <Frame name="$parentItem">
-                        <Size><AbsDimension x="193" y="37"/></Size>
+                    <Frame name="$parentItem" inherits="AuxItemTemplate">
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-10"/></Offset></Anchor></Anchors>
-                        <Layers>
-                            <Layer level="BORDER">
-                                <Texture name="$parentIconTexture">
-                                    <Size><AbsDimension x="32" y="32"/></Size>
-                                    <Anchors><Anchor point="LEFT"><Offset><AbsDimension x="2" y="0"/></Offset></Anchor></Anchors>
-                                </Texture>
-                                <Texture file="Interface\Buttons\UI-Quickslot2">
-                                    <Size><AbsDimension x="60" y="60"/></Size>
-                                    <Anchors><Anchor point="CENTER" relativeTo="$parentIconTexture"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                </Texture>
-                                <FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT">
-                                    <Anchors><Anchor point="BOTTOMRIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="-5" y="2"/></Offset></Anchor></Anchors>
-                                </FontString>
-                                <FontString name="$parentName" inherits="GameFontNormal" justifyH="LEFT">
-                                    <Anchors>
-                                        <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
-                                        <Anchor point="RIGHT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor>
-                                        <Anchor point="TOP"><Offset><AbsDimension x="0" y="-5"/></Offset></Anchor>
-                                        <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor>
-                                    </Anchors>
-                                </FontString>
-                            </Layer>
-                            <Layer level="BACKGROUND">
-                                <Texture name="$parentLeft" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
-                                    <Size><AbsDimension x="10" y="37"/></Size>
-                                    <Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="2" y="0"/></Offset></Anchor></Anchors>
-                                    <TexCoords left="0" right="0.078125" top="0" bottom="1.0"/>
-                                </Texture>
-                                <Texture name="$parentRight" file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
-                                    <Size><AbsDimension x="10" y="37"/></Size>
-                                    <Anchors><Anchor point="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                    </Anchors>
-                                    <TexCoords left="0.75" right="0.828125" top="0" bottom="1.0"/>
-                                </Texture>
-                                <Texture file="Interface\AuctionFrame\UI-AuctionItemNameFrame">
-                                    <Size><AbsDimension x="10" y="37"/></Size>
-                                    <Anchors>
-                                        <Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                        <Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                    </Anchors>
-                                    <TexCoords left="0.078125" right="0.75" top="0" bottom="1.0"/>
-                                </Texture>
-                            </Layer>
-                        </Layers>
-                        <HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
                     </Frame>
                     <Slider name="AuxSellStackSizeSlider" inherits="AuxSliderTemplate">
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-70"/></Offset></Anchor></Anchors>

@@ -14,9 +14,10 @@ list.lua
 info.xml
 completion.xml
 
-sell.xml
-buy.xml
-history.xml
+search_frame.xml
+post_frame.xml
+manage_frame.xml
+scan_frame.xml
 
 options.xml
 about.xml
