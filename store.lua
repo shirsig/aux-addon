@@ -1,6 +1,11 @@
-local load_snapshot, update_snapshot, load_history, update_history
+local version_outdated, on_load, load_snapshot, save_snapshot, load_history, save_history
 
 aux_store = {}
+
+function on_load()
+	perform_migration(aux_store)
+	aux_store.version = Aux.core.version
+end
 
 function get_auction_house_id()
 	local realm = GetCVar('realmName')
@@ -15,28 +20,32 @@ function get_auction_house_id()
 end
 
 function load_history()
-    aux_store.history[history_key] = aux_history[history_key] or {}
-    return aux_store.history[history_key]
+	local auction_house_id = get_auction_house_id()
+    aux_store.datasets[auction_house_id] = aux_store.datasets[auction_house_id] or {}
+    return aux_store.datasets[auction_house_id]
 end
 
-function load_history()
-    aux_store.history[history_key] = aux_history[history_key] or {}
-    return aux_store.history[history_key]
+function save_history(history)
+	local auction_house_id = get_auction_house_id()
+    aux_store.datasets[auction_house_id] = aux_store.datasets[auction_house_id] or {}
+    return aux_store.datasets[auction_house_id]
 end
 
-function load_history()
-    aux_store.history[history_key] = aux_history[history_key] or {}
-    return aux_store.history[history_key]
+function load_shapshot()
+	local auction_house_id = get_auction_house_id()
+    aux_store.datasets[auction_house_id] = aux_store.datasets[auction_house_id] or {}
+    return aux_store.datasets[auction_house_id]
 end
 
-function load_history()
-    aux_store.history[history_key] = aux_history[history_key] or {}
-    return aux_store.history[history_key]
+function save_snapshot(snapshot)
+	local auction_house_id = get_auction_house_id()
+    aux_store.datasets[auction_house_id] = aux_store.datasets[auction_house_id] or {}
+    return aux_store.datasets[auction_house_id]
 end
 
 Aux.store = {
 	load_history = load_history,
-	update_history = update_history,
+	update_history = save_history,
 	load_snapshot = load_snapshot,
-	update_snapshot = update_snapshot,
+	update_snapshot = save_snapshot,
 }
