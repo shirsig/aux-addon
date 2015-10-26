@@ -5,6 +5,7 @@
 ## SavedVariables: aux_history, aux_snapshot, aux_post_parameters
 core.xml
 control.xml
+store.lua
 util.lua
 
 scan.lua
