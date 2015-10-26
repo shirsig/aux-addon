@@ -737,8 +737,8 @@ function create_auction_record(auction_item, current_page)
     end
 
     return {
-            key = Aux.auction_signature(auction_item.hyperlink, stack_size, bid, auction_item.buyout_price),
-            signature = Aux.auction_signature(auction_item.hyperlink, stack_size, bid, auction_item.buyout_price), -- TODO remove
+            key = auction_item.item_signature,
+            signature = Aux.auction_signature(auction_item.hyperlink, stack_size, bid, auction_item.buyout_price),
 
             name = auction_item.name,
             level = auction_item.level,

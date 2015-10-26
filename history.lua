@@ -1,20 +1,17 @@
-local MAX_HISTORY_SIZE = 500
-local MIN_SEEN = 2
+local MAX_HISTORY_SIZE = 100
+local MIN_SEEN = 1
 local UNDERCUT_FACTOR = 0.2
 
 Aux.history = {}
 
-aux_snapshot = {
-    signatures = {},
-    records = {},
-}
+aux_snapshot = {}
 
 aux_history = {}
 
 local cache
 
-local get_history, set_history, process_auction, flush_cache, create_balanced_list
-local get_market_price, get_usable_median, get_historical_median, get_snapshot_median, get_median, get_percentile
+local get_history, process_auction, create_balanced_list
+local get_market_price, get_usable_median, get_historical_median, get_median, get_percentile
 
 function Aux.history.on_close()
 
@@ -46,13 +43,13 @@ function Aux.history.start_scan()
             process_auction(i)
         end,
         on_complete = function()
-            flush_cache()
+            remove_old_signatures()
 
             AuxHistoryStopButton:Hide()
             AuxHistoryScanButton:Show()
         end,
         on_abort = function()
-            flush_cache()
+            remove_old_signatures()
 
             AuxHistoryStopButton:Hide()
             AuxHistoryScanButton:Show()
@@ -68,21 +65,22 @@ function Aux.history.start_scan()
     }
 end
 
+function remove_old_signatures()
+    for sig, _ in ipairs(aux_snapshot) do
+        if not cache[sig] then
+            Aux.util.set_remove(aux_snapshot, sig)
+        end
+    end
+end
+
 function Aux.history.stop_scan()
     Aux.scan.abort()
 end
 
-function get_history(key)
+function get_history()
     local history_key = GetCVar('realmName')
     aux_history[history_key] = aux_history[history_key] or {}
-    aux_history[history_key][key] = aux_history[history_key][key] or {}
-    return aux_history[history_key][key]
-end
-
-function set_history(key, history)
-    local history_key = GetCVar('realmName')
-    aux_history[history_key] = aux_history[history_key] or {}
-    aux_history[history_key][key] = history
+    return aux_history[history_key]
 end
 
 function process_auction(index)
@@ -92,43 +90,27 @@ function process_auction(index)
         local aux_quantity = auction_info.charges or auction_info.count
         local price = ceil(buyout_price / aux_quantity)
         local key = auction_info.item_signature
-        cache[Aux.info.auction_signature(index)] = {key=key, price=price}
-    end
-end
 
-function flush_cache()
+        local signature = Aux.info.auction_signature(index)
+        Aux.util.set_add(cache, signature)
 
-    -- local timestamp = time()
+        if not Aux.util.set_contains(aux_snapshot, signature) then
 
-    local new_history = {}
+            Aux.util.set_add(aux_snapshot, signature)
 
-    aux_snapshot.records = {}
+            local history = get_history()
+            history[key] = history[key] or {
+                name = auction_info.name,
+                count = 0,
+                records = {},
+            }
 
-    for sig, auction_data in pairs(cache) do
-        local key = auction_data.key
-        aux_snapshot.records[key] = aux_snapshot.records[key] or {}
-        tinsert(aux_snapshot.records[key], auction_data.price)
-        snipe.log(getn(aux_snapshot.records[key]))
+            local records = create_balanced_list(MAX_HISTORY_SIZE)
+            records.add_all(history[key].records)
+            records.add(price)
 
-        if not Aux.util.set_contains(aux_snapshot.signatures, sig) then
-
-            Aux.util.set_add(aux_snapshot.signatures, sig)
-
-            if not new_history[key] then
-                new_history[key] = create_balanced_list(MAX_HISTORY_SIZE)
-                new_history[key].add_all(get_history(key))
-            end
-            new_history[key].add(auction_data.price)
-        end
-    end
-
-    for key, history in new_history do
-        set_history(key, history.values())
-    end
-
-    for sig, _ in ipairs(aux_snapshot.signatures) do
-        if not cache[sig] then
-            Aux.util.set_remove(aux_snapshot.signatures, sig)
+            history[key].records = records.values()
+            history[key].count = history[key].count + 1
         end
     end
 end
@@ -188,63 +170,21 @@ function Aux.history.get_market_price(key)
 --        price = avgBuy;
     end
 
---    local playerMade, skill, level = Auctioneer.Core.IsPlayerMade(key);
---    if Auctioneer.Core.Constants.BidBasedCategories[Auctioneer.Core.GetItemCategory(key)] and not (playerMade and level < 250 and commonBuyout < 100000) then
---        -- returns bibasedSellablePrice for bidbaseditems, playermade items or if the buyoutprice is not present or less than 10g
---        return getBidBasedSellablePrice(key, realm, avgMin,avgBuy,avgBid,bidPct,buyPct,avgQty,seenCount)
---    end
-
     return price
 end
 
 function get_usable_median(key)
 
-    local snapshot_median, snapshot_count = get_snapshot_median(key)
     local historical_median, historical_count = get_historical_median(key)
 
-    if snapshot_count >= MIN_SEEN and (historical_count < snapshot_count or snapshot_median < 1.2 * historical_median) then
-        return snapshot_median, snapshot_count
-    elseif historical_count >= MIN_SEEN then
+    if historical_count >= MIN_SEEN then
         return historical_median, historical_count
     end
 end
 
-function get_snapshot_median(key)
-    local median, count
-
---    if AuctionConfig.stats and AuctionConfig.stats.snapmed and AuctionConfig.stats.snapmed[auctKey] then
---        median = AuctionConfig.stats.snapmed[auctKey][key]
---        count = AuctionConfig.stats.snapcount[auctKey][key]
---    end
-
-    if (not median) or (not count) then
-
-        local snapshot_prices = aux_snapshot.records[key]
-        median, count = get_median(snapshot_prices or {})
-
---        Auctioneer.Storage.SetSnapMed(auctKey, key, median, count)
-    end
-
-    return median, count
-end
-
 function get_historical_median(key)
-    local median, count
-
---    if AuctionConfig.stats and AuctionConfig.stats.histmed and AuctionConfig.stats.histmed[auctKey] then
---        median = AuctionConfig.stats.histmed[auctKey][key]
---        count = AuctionConfig.stats.histcount[auctKey][key]
---    end
-
-    if (not median) or (not count) then
-
-        local historical_prices = get_history(key)
-        median, count = get_median(historical_prices or {})
-
---        Auctioneer.Storage.SetHistMed(auctKey, key, median, count)
-    end
-
-    return median, count
+    local historical_prices = Aux.util.safe_index{get_history()[key], 'records'}
+    return get_median(historical_prices or {})
 end
 
 function get_median(values)
@@ -379,5 +319,6 @@ function create_balanced_list(max_size, cmp)
 end
 
 function Aux.history.get_price_suggestion(key, quantity)
-    return get_market_price(key) * quantity * UNDERCUT_FACTOR or 0
+    local market_price = Aux.history.get_market_price(key)
+    return market_price and market_price * quantity * UNDERCUT_FACTOR or 0
 end
