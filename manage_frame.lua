@@ -1,6 +1,6 @@
 local on_open, on_close
 
-local bid_records, auctions_records, create_bid_record, create_auction_record
+local bid_records, auctions_records, create_maybe_bid_record, create_maybe_auction_record
 
 local bid_listing_config = {
     on_cell_click = function (sheet, row_index, column_index)
@@ -179,30 +179,42 @@ function on_open()
     if not bid_records then
         GetBidderAuctionItems()
         bid_records = {}
+        local i = 0
+        while true do
+			local maybe_bid_record = create_maybe_bid_record(i)
+			
+			if maybe_bid_record.present() then
+				tinsert(auction_records, maybe_bid_record.get())
+			else
+				break
+			end
+			i = i + 1
+        end 
     end
-    AuctionFrameBid.page = 0;
-    AuctionFrameBid_Update();
+    AuctionFrameBid.page = 0
+    AuctionFrameBid_Update()
 
     if not auctions_records then
         GetOwnerAuctionItems()
         auction_records = {}
+        local i = 0
+        while true do
+			local maybe_auction_record = create_maybe_auction_record(i)
+			
+			if maybe_auction_record.present() then
+				tinsert(auction_records, maybe_auction_record.get())
+			else
+				break
+			end
+			i = i + 1
+        end 
     end
-    AuctionFrameAuctions.page = 0;
-    AuctionFrameAuctions_Update();
+    AuctionFrameAuctions.page = 0
+    AuctionFrameAuctions_Update()
 end
 
 function on_close()
 end
-
-
-
-
-
-
-
-
-
-
 
 Aux.manage_frame = {
     on_open = on_open,
@@ -210,4 +222,13 @@ Aux.manage_frame = {
     bid_listing_config = bid_listing_config,
     auction_listing_config = auction_listing_config,
 }
+
+function create_maybe_auction_record(index)
+	GetAuctionItemInfo('owner', index)
+end
+
+function create_maybe_bid_record(index)
+	GetAuctionItemInfo('bidder', index)
+end
+
 

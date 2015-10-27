@@ -356,3 +356,45 @@ function Aux.util.set()
 
     return self
 end
+
+function Aux.util.maybe(value)
+	local self = {}
+
+	function self.join()
+		if value == nil then
+			return Aux.util.maybe()
+		else
+			return value
+		end
+	end
+	
+	function self.map(f)
+		if value == nil then
+			return Aux.util.maybe()
+		else
+			return maybe(f(value))
+		end
+	end
+	
+	function self.bind(f)
+		return self.map(f).join()
+	end
+	
+	function self.get()
+		return value
+	end
+	
+	function self.or_else(default_value)
+		if value == nil then
+			return default_value
+		else
+			return value
+		end
+	end
+	
+	function self.present()
+		return value ~= nil
+	end
+	
+	return self
+end
