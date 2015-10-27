@@ -308,3 +308,51 @@ function Aux.util.group_by(tables, equal)
 	end
 	return groups
 end
+
+function Aux.util.set()
+    local self = {}
+
+    local data = {}
+
+    function self.set_data(new_data)
+        data = new_data
+    end
+
+    function self.get_data()
+        return data
+    end
+
+    function self.add(value)
+        data[value] = true
+    end
+
+    function self.add_all(values)
+        for _, value in ipairs(values) do
+            self.add(value)
+        end
+    end
+
+    function self.remove(value)
+        data[value] = nil
+    end
+
+    function self.remove_all(values)
+        for _, value in ipairs(values) do
+            self.remove(value)
+        end
+    end
+
+    function self.contains(value)
+        return data[value] ~= nil
+    end
+
+    function self.values()
+        local values = {}
+        for value, _ in pairs(data) do
+            tinsert(values, value)
+        end
+        return values
+    end
+
+    return self
+end

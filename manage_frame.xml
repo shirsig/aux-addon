@@ -32,8 +32,9 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								local sort_order = Aux.util.map(Aux.buy.modes[1].sort_order, function(column_order) return { column = Aux.buy.modes[1].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-								this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, sort_order, Aux.buy.modes[1].row_setter, Aux.buy.modes[1].on_cell_click, Aux.buy.modes[1].on_cell_enter, Aux.buy.modes[1].on_cell_leave)
+                                local config = Aux.manage_frame.bid_listing_config
+								local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+								this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_cell_click, config.on_cell_enter, config.on_cell_leave)
 							</OnLoad>
 						</Scripts>
 					</Frame>
@@ -123,8 +124,9 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-								local sort_order = Aux.util.map(Aux.buy.modes[1].sort_order, function(column_order) return { column = Aux.buy.modes[1].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-								this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, sort_order, Aux.buy.modes[1].row_setter, Aux.buy.modes[1].on_cell_click, Aux.buy.modes[1].on_cell_enter, Aux.buy.modes[1].on_cell_leave)
+                                local config = Aux.manage_frame.auction_listing_config
+                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_cell_click, config.on_cell_enter, config.on_cell_leave)
 							</OnLoad>
 						</Scripts>
 					</Frame>

@@ -280,121 +280,120 @@
                             </OnClick>
                         </Scripts>
                     </CheckButton>
-
-                    <Frame name="AuxBuySheetFrame" inherits="AuxFrameBoxTemplate">
-                        <Size>
-                            <AbsDimension x="655" y="326"/>
-                        </Size>
-                        <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxBuyFilters"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                </Frames>
+            </Frame>
+            <Frame name="AuxBuySheetFrame" inherits="AuxFrameBoxTemplate">
+                <Size>
+                    <AbsDimension x="655" y="326"/>
+                </Size>
+                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxBuyFilters"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnLoad>
+                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                        this:SetBackdropColor(0.15, 0.15, 0.15)
+                        getglobal(this:GetName().."Title"):SetText('Search Results')
+                    </OnLoad>
+                </Scripts>
+                <Frames>
+                    <Frame name="AuxBuyBuyList" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                        </Anchors>
                         <Scripts>
                             <OnLoad>
-                                this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                                this:SetBackdropColor(0.15, 0.15, 0.15)
-                                getglobal(this:GetName().."Title"):SetText('Search Results')
+                                local sort_order = Aux.util.map(Aux.buy.modes[1].sort_order, function(column_order) return { column = Aux.buy.modes[1].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, sort_order, Aux.buy.modes[1].row_setter, Aux.buy.modes[1].on_cell_click, Aux.buy.modes[1].on_cell_enter, Aux.buy.modes[1].on_cell_leave)
                             </OnLoad>
                         </Scripts>
+                    </Frame>
+                    <Frame name="AuxBuyBidList" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                local sort_order = Aux.util.map(Aux.buy.modes[2].sort_order, function(column_order) return { column = Aux.buy.modes[2].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[2].columns, sort_order, Aux.buy.modes[2].row_setter, Aux.buy.modes[2].on_cell_click, Aux.buy.modes[2].on_cell_enter, Aux.buy.modes[2].on_cell_leave)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                    <Frame name="AuxBuyFullList" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                local sort_order = Aux.util.map(Aux.buy.modes[3].sort_order, function(column_order) return { column = Aux.buy.modes[3].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[3].columns, sort_order, Aux.buy.modes[3].row_setter, Aux.buy.modes[3].on_cell_click, Aux.buy.modes[3].on_cell_enter, Aux.buy.modes[3].on_cell_leave)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                    <Frame name="AuxBuyConfirmation" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnMouseWheel></OnMouseWheel>
+                        </Scripts>
                         <Frames>
-                            <Frame name="AuxBuyBuyList" hidden="true">
-                                <Anchors>
-                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                    <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
-                                </Anchors>
-                                <Scripts>
-                                    <OnLoad>
-                                        local sort_order = Aux.util.map(Aux.buy.modes[1].sort_order, function(column_order) return { column = Aux.buy.modes[1].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, sort_order, Aux.buy.modes[1].row_setter, Aux.buy.modes[1].on_cell_click, Aux.buy.modes[1].on_cell_enter, Aux.buy.modes[1].on_cell_leave)
-                                    </OnLoad>
-                                </Scripts>
-                            </Frame>
-                            <Frame name="AuxBuyBidList" hidden="true">
-                                <Anchors>
-                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                    <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
-                                </Anchors>
-                                <Scripts>
-                                    <OnLoad>
-                                        local sort_order = Aux.util.map(Aux.buy.modes[2].sort_order, function(column_order) return { column = Aux.buy.modes[2].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[2].columns, sort_order, Aux.buy.modes[2].row_setter, Aux.buy.modes[2].on_cell_click, Aux.buy.modes[2].on_cell_enter, Aux.buy.modes[2].on_cell_leave)
-                                    </OnLoad>
-                                </Scripts>
-                            </Frame>
-                            <Frame name="AuxBuyFullList" hidden="true">
-                                <Anchors>
-                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                    <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
-                                </Anchors>
-                                <Scripts>
-                                    <OnLoad>
-                                        local sort_order = Aux.util.map(Aux.buy.modes[3].sort_order, function(column_order) return { column = Aux.buy.modes[3].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                        this.sheet = Aux.sheet.create(this, Aux.buy.modes[3].columns, sort_order, Aux.buy.modes[3].row_setter, Aux.buy.modes[3].on_cell_click, Aux.buy.modes[3].on_cell_enter, Aux.buy.modes[3].on_cell_leave)
-                                    </OnLoad>
-                                </Scripts>
-                            </Frame>
-                            <Frame name="AuxBuyConfirmation" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
-                                <Anchors>
-                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                    <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                </Anchors>
-                                <Scripts>
-                                    <OnMouseWheel></OnMouseWheel>
-                                </Scripts>
+                            <Frame name="$parentContent">
+                                <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                <Size><AbsDimension x="193" y="140"/></Size>
                                 <Frames>
-									<Frame name="$parentContent">
-										<Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-										<Size><AbsDimension x="193" y="300"/></Size>
-										<Frames>
-											<Frame name="$parentItem" inherits="AuxItemTemplate">
-												<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-											</Frame>
-											<Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
-												<Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="148"/></Offset></Anchor></Anchors>
-												<Layers>
-													<Layer level="OVERLAY">
-														<FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
-															<Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor></Anchors>
-														</FontString>
-													</Layer>
-												</Layers>
-											</Frame>
-											<Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
-												<Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="150"/></Offset></Anchor></Anchors>
-												<Scripts>
-													<OnLoad>
-														SmallMoneyFrame_OnLoad()
-														MoneyFrame_SetType("STATIC")
-													</OnLoad>
-												</Scripts>
-												<Layers>
-													<Layer level="OVERLAY">
-														<FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
-															<Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
-														</FontString>
-													</Layer>
-												</Layers>
-											</Frame>
-											<Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
-												<Size><AbsDimension x="90" y="26"/>	</Size>
-												<Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="229" y="110"/></Offset></Anchor></Anchors>
-												<Scripts>
-													<OnClick>
-														Aux.buy.dialog_action()
-													</OnClick>
-												</Scripts>
-											</Button>
-											<Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
-												<Size><AbsDimension x="90" y="26"/></Size>
-												<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-229" y="110"/></Offset></Anchor></Anchors>
-												<Scripts>
-													<OnClick>
-														Aux.buy.dialog_cancel()
-													</OnClick>
-												</Scripts>
-											</Button>
-										</Frames>
-									</Frame>
-								</Frames>
-							</Frame>
-						</Frames
+                                    <Frame name="$parentItem" inherits="AuxItemTemplate">
+                                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                    </Frame>
+                                    <Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
+                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="48"/></Offset></Anchor></Anchors>
+                                        <Layers>
+                                            <Layer level="OVERLAY">
+                                                <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
+                                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor></Anchors>
+                                                </FontString>
+                                            </Layer>
+                                        </Layers>
+                                    </Frame>
+                                    <Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
+                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="50"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnLoad>
+                                                SmallMoneyFrame_OnLoad()
+                                                MoneyFrame_SetType("STATIC")
+                                            </OnLoad>
+                                        </Scripts>
+                                        <Layers>
+                                            <Layer level="OVERLAY">
+                                                <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
+                                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
+                                                </FontString>
+                                            </Layer>
+                                        </Layers>
+                                    </Frame>
+                                    <Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
+                                        <Size><AbsDimension x="90" y="26"/>	</Size>
+                                        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnClick>
+                                                Aux.buy.dialog_action()
+                                            </OnClick>
+                                        </Scripts>
+                                    </Button>
+                                    <Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
+                                        <Size><AbsDimension x="90" y="26"/></Size>
+                                        <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnClick>
+                                                Aux.buy.dialog_cancel()
+                                            </OnClick>
+                                        </Scripts>
+                                    </Button>
+                                </Frames>
+                            </Frame>
+                        </Frames>
                     </Frame>
                 </Frames>
             </Frame>

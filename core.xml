@@ -250,12 +250,12 @@
 		</Layers>
 		<Scripts>
 			<OnEnter>
-				if this:GetParent().tooltip then
-					Aux.info.set_game_tooltip(this, this:GetParent().tooltip, 'ANCHOR_LEFT', this:GetParent().EnhTooltip_info)
+				if this.tooltip then
+					Aux.info.set_game_tooltip(this, this.tooltip, 'ANCHOR_LEFT', this.EnhTooltip_info)
 				end
 			</OnEnter>
 			<OnLeave>
-				if this:GetParent().tooltip then
+				if this.tooltip then
 					GameTooltip:Hide()
 				end
 			</OnLeave>

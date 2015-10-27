@@ -4,14 +4,10 @@ local UNDERCUT_FACTOR = 0.2
 
 Aux.history = {}
 
-aux_snapshot = {}
-
-aux_history = {}
-
-local cache
-
-local get_history, process_auction, create_balanced_list
+local process_auction, balanced_list, update_snapshot
 local get_market_price, get_usable_median, get_historical_median, get_median, get_percentile
+
+local signature_cache
 
 function Aux.history.on_close()
 
@@ -30,7 +26,7 @@ function Aux.history.start_scan()
     AuxHistoryScanButton:Hide()
     AuxHistoryStopButton:Show()
 
-    cache = {}
+    signature_cache = Aux.util.set()
 
     Aux.log('Scanning auctions ...')
     Aux.scan.start{
@@ -43,13 +39,13 @@ function Aux.history.start_scan()
             process_auction(i)
         end,
         on_complete = function()
-            remove_old_signatures()
+            update_snapshot()
 
             AuxHistoryStopButton:Hide()
             AuxHistoryScanButton:Show()
         end,
         on_abort = function()
-            remove_old_signatures()
+            update_snapshot()
 
             AuxHistoryStopButton:Hide()
             AuxHistoryScanButton:Show()
@@ -65,22 +61,14 @@ function Aux.history.start_scan()
     }
 end
 
-function remove_old_signatures()
-    for sig, _ in ipairs(aux_snapshot) do
-        if not cache[sig] then
-            Aux.util.set_remove(aux_snapshot, sig)
-        end
-    end
+function update_snapshot()
+    local snapshot = Aux.persistence.get_snapshot()
+    snapshot.remove_all(signature_cache.values())
+    Aux.persistence.save_snapshot(snapshot)
 end
 
 function Aux.history.stop_scan()
     Aux.scan.abort()
-end
-
-function get_history()
-    local history_key = GetCVar('realmName')
-    aux_history[history_key] = aux_history[history_key] or {}
-    return aux_history[history_key]
 end
 
 function process_auction(index)
@@ -89,72 +77,37 @@ function process_auction(index)
     if buyout_price and buyout_price > 0 then
         local aux_quantity = auction_info.charges or auction_info.count
         local price = ceil(buyout_price / aux_quantity)
-        local key = auction_info.item_signature
+        local item_key = auction_info.item_signature
 
         local signature = Aux.info.auction_signature(index)
-        Aux.util.set_add(cache, signature)
+        signature_cache.add(signature)
 
-        if not Aux.util.set_contains(aux_snapshot, signature) then
-
-            Aux.util.set_add(aux_snapshot, signature)
-
-            local history = get_history()
-            history[key] = history[key] or {
-                name = auction_info.name,
-                count = 0,
-                records = {},
-            }
-
-            local records = create_balanced_list(MAX_HISTORY_SIZE)
-            records.add_all(history[key].records)
-            records.add(price)
-
-            history[key].records = records.values()
-            history[key].count = history[key].count + 1
+        local snapshot = Aux.persistence.get_snapshot()
+        if not snapshot.contains(signature) then
+            snapshot.add(signature)
+            Aux.persistence.save_snapshot(snapshot)
+--
+--            local item_record = Aux.persistence.get_item_record(item_key)
+--
+--            item_record = item_record or {
+--                count = 0,
+--                accumulated_price = 0,
+--                price_list = {},
+--            }
+--
+--            local price_list = balanced_list(MAX_HISTORY_SIZE)
+--            price_list.add_all(item_record.price_list)
+--            price_list.add(price)
+--
+--            Aux.persistence.save_item_record(item_key, {
+--                count = item_record.count + 1,
+--                accumulated_price = item_record.accumulated_price + price,
+--                price_list = price_list.values(),
+--            })
+--
         end
     end
 end
-
---function store_median_list(list)
---    local hist = ''
---    local function grow_list(last, n)
---        if n == 1 then
---            hist = hist == '' and last or string.format('%s:%d', hist, last)
---        elseif n > 1 then
---            hist = hist == '' and string.format('%dx%d', last, n) or string.format('%s:%dx%d', hist, last, n)
---        end
---    end
---    local n = 0
---    local last = 0
---    for i, price in pairs(list) do
---        if i == 1 then
---            last = price
---        elseif price ~= last then
---            grow_list(last, n)
---            last = price
---            n = 0
---        end
---        n = n + 1
---    end
---    grow_list(last, n)
---    return hist
---end
---
---function load_median_list(str)
---    local splut = {}
---    for x, c in string.gfind(str, '([^%:]*)(%:?)') do
---        local _, _, y, n = string.find(x, '(%d*)x(%d*)')
---        if y == nil then
---            table.insert(splut, tonumber(x))
---        else
---            for i = 1,n do
---                table.insert(splut, tonumber(y))
---            end
---        end
---        if c == '' then break end
---    end
---    return splut
---end
 
 function Aux.history.get_market_price(key)
     local price
@@ -173,18 +126,19 @@ function Aux.history.get_market_price(key)
     return price
 end
 
-function get_usable_median(key)
+function get_usable_median(item_key)
 
-    local historical_median, historical_count = get_historical_median(key)
+    local historical_median, historical_count = get_historical_median(item_key)
 
     if historical_count >= MIN_SEEN then
         return historical_median, historical_count
     end
 end
 
-function get_historical_median(key)
-    local historical_prices = Aux.util.safe_index{get_history()[key], 'records'}
-    return get_median(historical_prices or {})
+function get_historical_median(item_key)
+    local price_list = Aux.util.safe_index{Aux.persistence.get_item_record(item_key), 'price_list'}
+
+    return get_median(price_list or {})
 end
 
 function get_median(values)
@@ -244,7 +198,7 @@ function get_percentile(values, pct)
     return _percentile(values, pct, first, last), last - first + 1
 end
 
-function create_balanced_list(max_size, cmp)
+function balanced_list(max_size, cmp)
     local self = {}
 
     local values = {}

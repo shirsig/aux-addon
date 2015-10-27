@@ -571,31 +571,31 @@ function Aux.buy.SearchButton_onclick()
 end
 
 function show_dialog(buyout_mode, entry, amount)
-	AuxBuyConfirmation.tooltip = entry.tooltip
-	AuxBuyConfirmation.EnhTooltip_info = entry.EnhTooltip_info
+	AuxBuyConfirmationContentItem.tooltip = entry.tooltip
+	AuxBuyConfirmationContentItem.EnhTooltip_info = entry.EnhTooltip_info
 	
-	AuxBuyConfirmationActionButton:Disable()
-	AuxBuyConfirmationItemIconTexture:SetTexture(entry.texture)
-	AuxBuyConfirmationItemName:SetText(entry.tooltip[1][1].text)
+	AuxBuyConfirmationContentActionButton:Disable()
+	AuxBuyConfirmationContentItemIconTexture:SetTexture(entry.texture)
+	AuxBuyConfirmationContentItemName:SetText(entry.tooltip[1][1].text)
 	local color = ITEM_QUALITY_COLORS[entry.quality]
-	AuxBuyConfirmationItemName:SetTextColor(color.r, color.g, color.b)
+	AuxBuyConfirmationContentItemName:SetTextColor(color.r, color.g, color.b)
 
 	if entry.stack_size > 1 then
-		AuxBuyConfirmationItemCount:SetText(entry.stack_size);
-		AuxBuyConfirmationItemCount:Show()
+		AuxBuyConfirmationContentItemCount:SetText(entry.stack_size);
+		AuxBuyConfirmationContentItemCount:Show()
 	else
-		AuxBuyConfirmationItemCount:Hide()
+		AuxBuyConfirmationContentItemCount:Hide()
 	end
 	if buyout_mode then
-		AuxBuyConfirmationActionButton:SetText('Buy')
-		MoneyFrame_Update('AuxBuyConfirmationBuyoutPrice', amount)
-		AuxBuyConfirmationBid:Hide()
-		AuxBuyConfirmationBuyoutPrice:Show()
+		AuxBuyConfirmationContentActionButton:SetText('Buy')
+		MoneyFrame_Update('AuxBuyConfirmationContentBuyoutPrice', amount)
+		AuxBuyConfirmationContentBid:Hide()
+		AuxBuyConfirmationContentBuyoutPrice:Show()
 	else
-		AuxBuyConfirmationActionButton:SetText('Bid')
-		MoneyInputFrame_SetCopper(AuxBuyConfirmationBid, amount)
-		AuxBuyConfirmationBuyoutPrice:Hide()
-		AuxBuyConfirmationBid:Show()
+		AuxBuyConfirmationContentActionButton:SetText('Bid')
+		MoneyInputFrame_SetCopper(AuxBuyConfirmationContentBid, amount)
+		AuxBuyConfirmationContentBuyoutPrice:Hide()
+		AuxBuyConfirmationContentBid:Show()
 	end
 	AuxBuyConfirmation:Show()
 end
@@ -681,7 +681,7 @@ function find_auction(entry, buyout_mode, express_mode)
 						AuxBuyConfirmation:Hide()
 						update_sheet()
 					end
-					AuxBuyConfirmationActionButton:Enable()
+					AuxBuyConfirmationContentActionButton:Enable()
 				end
 			end
 		end,
