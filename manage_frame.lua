@@ -5,16 +5,16 @@ local bid_records, auction_records, create_bid_record, create_auction_record, up
 local position
 
 local bid_listing_config = {
-    on_cell_click = function (sheet, row_index, column_index)
+    on_cell_click = function(sheet, row_index, column_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         AuxBuyEntry_OnClick(sheet.data[data_index])
     end,
 
-    on_cell_enter = function (sheet, row_index, column_index)
+    on_cell_enter = function(sheet, row_index, column_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
     end,
 
-    on_cell_leave = function (sheet, row_index, column_index)
+    on_cell_leave = function(sheet, row_index, column_index)
         sheet.rows[row_index].highlight:SetAlpha(0)
     end,
     columns = {
@@ -349,7 +349,7 @@ function update_bid_records(k)
             position = nil
         end,
         on_page_loaded = function(page, total_pages)
-            Aux.log('Scanning bid page '..(page+1)..' out of '..total_pages..' ...')
+			Aux.log('Scanning bid page '..(page+1)..' out of '..total_pages..' ...')
             position = 'bids#'..page
         end,
         on_read_auction = function(i)
@@ -379,7 +379,7 @@ function update_auction_records(k)
             position = nil
         end,
         on_page_loaded = function(page, total_pages)
-            Aux.log('Scanning auction page '..(page+1)..' out of '..total_pages..' ...')
+			Aux.log('Scanning auction page '..(page+1)..' out of '..total_pages..' ...')
             position = 'auctions#'..page
         end,
         on_read_auction = function(i)

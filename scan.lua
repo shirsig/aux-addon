@@ -47,9 +47,7 @@ end
 function wait_for_results(k)
 	local ok
     if state.job.type == 'bidder' then
-        Aux.control.on_next_event('AUCTION_BIDDER_LIST_UPDATE', function()
-            ok = true
-        end)
+		ok = true
     elseif state.job.type == 'owner' then
         Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', function()
             ok = true
@@ -146,9 +144,13 @@ function submit_query(k)
                 --wait_for_owner_data(function()
                 local _, total_count = GetNumAuctionItems(state.job.type)
                 state.total_pages = math.ceil(total_count / PAGE_SIZE)
-                wait_for_callback{state.job.on_page_loaded, state.page, state.total_pages, function()
-                    k()
-                end}
+                if total_pages >= state.page + 1 then
+					wait_for_callback{state.job.on_page_loaded, state.page, state.total_pages, function()
+						return k()
+					end}
+				else
+					return k()
+				end
                 -- end)
             end)
             if state.job.type == 'bidder' then
