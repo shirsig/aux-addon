@@ -7,7 +7,7 @@ Aux.history = {}
 local process_auction, balanced_list, update_snapshot
 local get_market_price, get_usable_median, get_historical_median, get_median, get_percentile
 
-local scanned_signatures
+local price_cache
 
 function Aux.history.on_close()
 
@@ -26,7 +26,7 @@ function Aux.history.start_scan()
     AuxHistoryScanButton:Hide()
     AuxHistoryStopButton:Show()
 
-    scanned_signatures = Aux.util.set()
+    price_cache = {}
 
     Aux.log('Scanning auctions ...')
     Aux.scan.start{
@@ -39,14 +39,12 @@ function Aux.history.start_scan()
             process_auction(i)
         end,
         on_complete = function()
-            update_snapshot()
+            process_scanned_prices()
 
             AuxHistoryStopButton:Hide()
             AuxHistoryScanButton:Show()
         end,
         on_abort = function()
-            update_snapshot()
-
             AuxHistoryStopButton:Hide()
             AuxHistoryScanButton:Show()
         end,
@@ -61,13 +59,9 @@ function Aux.history.start_scan()
     }
 end
 
-function update_snapshot()
-    local snapshot = Aux.persistence.get_snapshot()
-    for _, sig in ipairs(snapshot.values()) do
-        if not scanned_signatures.contains(sig) then
-            snapshot.remove(sig)
-        end
-    end
+function process_scanned_prices()
+	for item_key, item_data in price_cache do
+	end
 end
 
 function Aux.history.stop_scan()
