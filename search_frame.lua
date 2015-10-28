@@ -1,6 +1,6 @@
 Aux.buy = {}
 
-local create_auction_record, show_dialog, find_auction, hide_sheet, update_sheet, auction_alpha_setter, group_alpha_setter
+local create_auction_record, show_dialog, find_auction, hide_sheet, update_sheet, auction_alpha_setter, group_alpha_setter, create_auction_record
 local auctions
 local search_query
 local tooltip_patterns = {}
@@ -45,7 +45,7 @@ Aux.buy.modes = {
             },
             {
                 title = 'Auction Item',
-                width = 312,
+                width = 342,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].name, group2[1].name, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
@@ -118,23 +118,6 @@ Aux.buy.modes = {
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
                     cell.text:SetText(Aux.util.money_string(group[1].buyout_price))
-                    group_alpha_setter(cell, group)
-                end,
-            },
-            {
-                title = 'Pct',
-                width = 30,
-                comparator = function(group1, group2)
-                    local market_price1 = Aux.history.get_market_price(group1[1].key)
-                    local market_price2 = Aux.history.get_market_price(group2[1].key)
-                    local factor1 = market_price1 and group1[1].buyout_price_per_unit / market_price1
-                    local factor2 = market_price2 and group2[1].buyout_price_per_unit / market_price2
-                    return Aux.util.compare(factor1, factor2, Aux.util.GT)
-                end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, group)
-                    local market_price = Aux.history.get_market_price(group[1].key)
-                    cell.text:SetText(market_price and ceil(100 / group[1].buyout_price_per_unit * market_price)..'%' or 'N/A')
                     group_alpha_setter(cell, group)
                 end,
             },

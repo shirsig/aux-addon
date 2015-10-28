@@ -4,6 +4,7 @@ AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)
 local lastRightClickAction = GetTime()
 
 Aux = {
+    blizzard_ui_shown = false,
 	loaded = false,
 	orig = {},
 	elements = {},
@@ -37,9 +38,7 @@ end
 
 function Aux_OnAddonLoaded()
 	if string.lower(arg1) == "blizzard_auctionui" then
-        AuxButton:SetParent("AuctionFrame")
-        AuxButton:SetPoint("TOPRIGHT", "AuctionFrame", "TOPRIGHT", -26, -12)
-
+        AuctionFrame:SetScript('OnHide', nil)
 		Aux_SetupHookFunctions()
 	end
 end
@@ -96,26 +95,17 @@ end
 
 function Aux_SetupHookFunctions()
 
-	AuctionsButton1:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	AuctionsButton1:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
-	AuctionsButton2:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	AuctionsButton2:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
-	AuctionsButton3:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	AuctionsButton3:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
-	AuctionsButton4:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	AuctionsButton4:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
-	AuctionsButton5:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	AuctionsButton5:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
-	AuctionsButton6:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	AuctionsButton6:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
-	AuctionsButton7:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	AuctionsButton7:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
-	AuctionsButton8:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	AuctionsButton8:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
-	AuctionsButton9:RegisterForClicks("LeftButtonUp", "RightButtonDown")
-	AuctionsButton9:SetScript("OnMouseDown", Aux_AuctionsButton_OnMouseDown)
+    Aux.orig.AuctionFrame_OnShow = AuctionFrame_OnShow
+    -- TODO for some reason this breaks the auction house functionality
+    AuctionFrame_OnShow = function()
+        if not Aux.blizzard_ui_shown then
+            HideUIPanel(AuctionFrame)
+        else
+            return Aux.orig.AuctionFrame_OnShow()
+        end
+    end
 
-	Aux.orig.PickupContainerItem = PickupContainerItem
+    Aux.orig.PickupContainerItem = PickupContainerItem
 	PickupContainerItem = Aux.PickupContainerItem
 	
 	Aux.orig.ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
@@ -134,7 +124,6 @@ end
 
 function Aux_OnAuctionHouseShow()
 
-    AuxButton:Show()
     AuxFrame:Show()
 
     Aux.on_tab_click(1)
@@ -173,6 +162,7 @@ function Aux.on_tab_click(index)
         AuxSellFrame:Hide()
         AuxBuyFrame:Hide()
         AuxHistoryFrame:Hide()
+        AuxManageFrame:Hide()
 
         if index == 1 then
             AuxBuyFrame:Show()
@@ -181,6 +171,7 @@ function Aux.on_tab_click(index)
             AuxSellFrame:Show()
             Aux.sell.on_open()
         elseif index == 3 then
+            AuxManageFrame:Show()
             Aux.manage_frame.on_open()
         elseif index == 4 then
             AuxHistoryFrame:Show()

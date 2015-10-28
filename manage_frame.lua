@@ -1,3 +1,5 @@
+local private, public = {}, {}
+
 local on_open, on_close
 
 local bid_records, auction_records, create_bid_record, create_auction_record, update_bid_records, update_auction_records, wait_for_bids, wait_for_auctions, create_record
@@ -25,7 +27,7 @@ local bid_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(datum.stack_size)
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -73,7 +75,7 @@ local bid_listing_config = {
                 cell.text:SetText('['..datum.tooltip[1][1].text..']')
                 local color = ITEM_QUALITY_COLORS[datum.quality]
                 cell.text:SetTextColor(color.r, color.g, color.b)
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -90,7 +92,7 @@ local bid_listing_config = {
                     text = level
                 end
                 cell.text:SetText(text)
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -110,7 +112,7 @@ local bid_listing_config = {
                     text = '24h'
                 end
                 cell.text:SetText(text)
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -120,7 +122,7 @@ local bid_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(datum.owner)
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -130,7 +132,7 @@ local bid_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -140,7 +142,7 @@ local bid_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -150,7 +152,7 @@ local bid_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(Aux.util.money_string(datum.bid))
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -160,7 +162,7 @@ local bid_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(Aux.util.money_string(datum.buyout_price))
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
     },
@@ -188,7 +190,7 @@ local auction_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(datum.stack_size)
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -236,7 +238,7 @@ local auction_listing_config = {
                 cell.text:SetText('['..datum.tooltip[1][1].text..']')
                 local color = ITEM_QUALITY_COLORS[datum.quality]
                 cell.text:SetTextColor(color.r, color.g, color.b)
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -253,7 +255,7 @@ local auction_listing_config = {
                     text = level
                 end
                 cell.text:SetText(text)
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -273,7 +275,7 @@ local auction_listing_config = {
                     text = '24h'
                 end
                 cell.text:SetText(text)
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -283,7 +285,7 @@ local auction_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(datum.owner)
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -293,7 +295,7 @@ local auction_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -303,7 +305,7 @@ local auction_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -313,7 +315,7 @@ local auction_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(Aux.util.money_string(datum.bid))
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
         {
@@ -323,7 +325,7 @@ local auction_listing_config = {
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
                 cell.text:SetText(Aux.util.money_string(datum.buyout_price))
-                auction_alpha_setter(cell, datum)
+                private.auction_alpha_setter(cell, datum)
             end,
         },
     },
@@ -331,6 +333,9 @@ local auction_listing_config = {
 }
 
 function on_open()
+    Aux.list.populate(AuxManageBidsListing.sheet, {})
+    Aux.list.populate(AuxManageAuctionsListing.sheet, {})
+
     update_bid_records(function()
         update_auction_records(function()
         end)
@@ -338,6 +343,10 @@ function on_open()
 end
 
 function on_close()
+end
+
+function private.auction_alpha_setter(cell, auction)
+    cell:SetAlpha(auction.gone and 0.3 or 1)
 end
 
 function update_bid_records(k)
@@ -353,10 +362,10 @@ function update_bid_records(k)
             position = 'bids#'..page
         end,
         on_read_auction = function(i)
-            snipe.log('bids#'..i)
+            create_bid_record(i)
         end,
         on_complete = function()
---            Aux.list.populate(AuxManageBidsListing.sheet, bid_records)
+            Aux.list.populate(AuxManageBidsListing.sheet, bid_records)
             return k()
         end,
         on_abort = function()
@@ -383,10 +392,10 @@ function update_auction_records(k)
             position = 'auctions#'..page
         end,
         on_read_auction = function(i)
-            snipe.log('auctions#'..i)
+            create_auction_record(i)
         end,
         on_complete = function()
---            Aux.list.populate(AuxManageAuctionsListing.sheet, auction_records)
+            Aux.list.populate(AuxManageAuctionsListing.sheet, auction_records)
             return k()
         end,
         on_abort = function()
@@ -400,12 +409,12 @@ function update_auction_records(k)
     }
 end
 
-function create_record(auction_item, current_page)
+function create_record(auction_item)
 
     local stack_size = auction_item.charges or auction_item.count
     local bid = (auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid) + auction_item.min_increment
     local buyout_price = auction_item.buyout_price > 0 and auction_item.buyout_price or nil
-    local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price/stack_size)
+    local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price / stack_size)
     local status
     if auction_item.current_bid == 0 then
         status = 'No Bid'
@@ -429,7 +438,6 @@ function create_record(auction_item, current_page)
         quality = auction_item.quality,
         hyperlink = auction_item.hyperlink,
         itemstring = auction_item.itemstring,
-        page = current_page,
         bid = bid,
         bid_per_unit = Aux_Round(bid/stack_size),
         owner = auction_item.owner,
@@ -443,16 +451,16 @@ function create_record(auction_item, current_page)
 end
 
 function create_auction_record(index)
-    local auction_item = Aux.info.auction_item(i, 'owner')
+    local auction_item = Aux.info.auction_item(index, 'owner')
     if auction_item then
-        tinsert(auction_records, create_record(auction_item, i))
+        tinsert(auction_records, create_record(auction_item))
     end
 end
 
 function create_bid_record(index)
-    local auction_item = Aux.info.auction_item(i, 'bidder')
+    local auction_item = Aux.info.auction_item(index, 'bidder')
     if auction_item then
-        tinsert(auction_records, create_record(auction_item, i))
+        tinsert(auction_records, create_record(auction_item))
     end
 end
 

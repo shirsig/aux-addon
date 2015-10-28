@@ -262,19 +262,6 @@
 		</Scripts>
 		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 	</Frame>
-											
-    <Button name="AuxButton" inherits="UIPanelButtonTemplate" text="Aux" hidden="true">
-        <Size><AbsDimension x="50" y="22"/></Size>
-        <Scripts>
-            <OnClick>
-                if AuxFrame:IsVisible() then
-                    AuxFrame:Hide()
-                else
-                    AuxFrame:Show()
-                end
-            </OnClick>
-        </Scripts>
-    </Button>
 
     <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent">
         <Size>
@@ -288,6 +275,13 @@
                 this:SetBackdropBorderColor(0.4, 0.4, 0.4)
                 this:RegisterForDrag('LeftButton')
             </OnLoad>
+            <OnShow>
+                PlaySound('AuctionWindowOpen')
+            </OnShow>
+            <OnHide>
+                PlaySound('AuctionWindowClose')
+                CloseAuctionHouse()
+            </OnHide>
             <OnDragStart>
                 this:StartMoving()
             </OnDragStart>
@@ -322,6 +316,21 @@
                 <Scripts>
                     <OnClick>
                         HideUIPanel(this:GetParent())
+                    </OnClick>
+                </Scripts>
+            </Button>
+            <Button name="AuxAuctionFrameButton" inherits="UIPanelButtonTemplate" text="Default UI">
+                <Size><AbsDimension x="120" y="26"/></Size>
+                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButtonBottom"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnClick>
+                        if AuctionFrame:IsVisible() then
+                            Aux.blizzard_ui_shown = false
+                            HideUIPanel(AuctionFrame)
+                        else
+                            Aux.blizzard_ui_shown = true
+                            ShowUIPanel(AuctionFrame)
+                        end
                     </OnClick>
                 </Scripts>
             </Button>

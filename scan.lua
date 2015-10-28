@@ -137,6 +137,7 @@ end
 function submit_query(k)
 	if state.page then
 		controller().wait(function() return state.job.type ~= 'list' or CanSendAuctionQuery() end, function()
+            snipe.log('kek')
             if state.job.on_submit_query then
                 state.job.on_submit_query()
             end
@@ -144,7 +145,7 @@ function submit_query(k)
                 --wait_for_owner_data(function()
                 local _, total_count = GetNumAuctionItems(state.job.type)
                 state.total_pages = math.ceil(total_count / PAGE_SIZE)
-                if total_pages >= state.page + 1 then
+                if state.total_pages >= state.page + 1 then
 					wait_for_callback{state.job.on_page_loaded, state.page, state.total_pages, function()
 						return k()
 					end}
@@ -155,7 +156,6 @@ function submit_query(k)
             end)
             if state.job.type == 'bidder' then
                 GetBidderAuctionItems(state.page)
-                snipe.log('kek'..state.page)
             elseif state.job.type == 'owner' then
                 GetOwnerAuctionItems(state.page)
             else

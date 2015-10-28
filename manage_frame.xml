@@ -14,7 +14,7 @@
 		<Frames>
 			<Frame name="AuxManageBids" inherits="AuxFrameBoxTemplate">
 				<Size>
-					<AbsDimension x="655" y="326"/>
+					<AbsDimension x="400" y="326"/>
 				</Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
 				<Scripts>
@@ -25,7 +25,7 @@
 					</OnLoad>
 				</Scripts>
 				<Frames>
-					<Frame name="$parentListing" hidden="true">
+					<Frame name="$parentListing">
 						<Anchors>
 							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
 							<Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
@@ -117,7 +117,7 @@
 					</OnLoad>
 				</Scripts>
 				<Frames>
-					<Frame name="$parentListing" hidden="true">
+					<Frame name="$parentListing">
 						<Anchors>
 							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
 							<Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
