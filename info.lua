@@ -52,8 +52,10 @@ function Aux.info.auction_sell_item()
 	end
 end
 
-function Aux.info.auction_item(index)
-	local hyperlink = GetAuctionItemLink('list', index)
+function Aux.info.auction_item(index, type)
+    type = type or 'list'
+
+	local hyperlink = GetAuctionItemLink(type, index)
 	
 	if not hyperlink then
 		return
@@ -62,8 +64,8 @@ function Aux.info.auction_item(index)
 	local auction_item = hyperlink_item(hyperlink)
     auction_item.item_signature = item_signature(hyperlink)
 	
-	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status, id = GetAuctionItemInfo("list", index)
-	local duration = GetAuctionItemTimeLeft("list", index)
+	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status, id = GetAuctionItemInfo(type, index)
+	local duration = GetAuctionItemTimeLeft(type, index)
 
 	auction_item.texture = texture
 	auction_item.count = count
@@ -77,7 +79,7 @@ function Aux.info.auction_item(index)
 	auction_item.id = id
 	auction_item.duration = duration
 	auction_item.usable = usable
-	auction_item.tooltip = Aux.info.tooltip(function(tt) tt:SetAuctionItem("list", index) end)
+	auction_item.tooltip = Aux.info.tooltip(function(tt) tt:SetAuctionItem(type, index) end)
 	auction_item.charges = item_charges(auction_item.tooltip)
 	
 	auction_item.EnhTooltip_info = {

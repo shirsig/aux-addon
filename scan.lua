@@ -1,6 +1,6 @@
 Aux.scan = {}
 
-local AUCTIONS_PER_PAGE = 50
+local PAGE_SIZE = 50
 
 local controller = (function()
 	local controller
@@ -12,12 +12,13 @@ end)()
 
 local state, abort, new_job
 
-local scan, scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, wait_for_complete_results, abort
+local scan, scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, wait_for_owner_data, abort
 
 function Aux.scan.start(job)
 	Aux.control.on_next_update(function()
 		abort()
-		state = {
+        job.type = job.type or 'list'
+        state = {
 			job = job,
 			page = job.page
 		}
@@ -45,16 +46,27 @@ end
 
 function wait_for_results(k)
 	local ok
-	Aux.control.on_next_event('AUCTION_ITEM_LIST_UPDATE', function()
-		ok = true
-	end)
+    ok = true
+    if state.job.type == 'bidder' then
+        Aux.control.on_next_event('AUCTION_BIDDER_LIST_UPDATE', function()
+            ok = true
+        end)
+    elseif state.job.type == 'owner' then
+        Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', function()
+            ok = true
+        end)
+    else
+        Aux.control.on_next_event('AUCTION_ITEM_LIST_UPDATE', function()
+            ok = true
+        end)
+    end
 
 	return controller().wait(function() return ok end, k)
 end
 
-function wait_for_complete_results(k)
+function wait_for_owner_data(k)
 	return controller().wait(function()
-		local count, _ = GetNumAuctionItems("list")
+		local count, _ = GetNumAuctionItems(state.job.type)
 		for i=1,count do
 			local auction_item_info = Aux.info.auction_item(i)
 			if auction_item_info and not auction_item_info.owner then
@@ -90,22 +102,23 @@ function scan()
 	
 	submit_query(function()
 		
-	local count, _ = GetNumAuctionItems('list')
-	
-	scan_auctions(count, function()
-	
-	state.page = state.job.next_page and state.job.next_page(state.page, state.total_pages)
-	
-	if state.page then
-		return scan()
-	else
-		if state.job.on_complete then
-			state.job.on_complete()
-		end
-		state = nil
-	end
-	
-	end)end)
+        local count, _ = GetNumAuctionItems(state.job.type)
+
+        scan_auctions(count, function()
+
+            state.page = state.job.next_page and state.job.next_page(state.page, state.total_pages)
+
+            if state.page then
+                return scan()
+            else
+                if state.job.on_complete then
+                    state.job.on_complete()
+                end
+                state = nil
+            end
+
+        end)
+    end)
 end
 
 function scan_auctions(count, k)
@@ -115,39 +128,48 @@ end
 function scan_auctions_helper(i, n, k)
 	wait_for_callback{state.job.on_read_auction, i, function()
 	
-	if i >= n then
-		return k()
-	else
-		return scan_auctions_helper(i + 1, n, k)
-	end
+        if i >= n then
+            return k()
+        else
+            return scan_auctions_helper(i + 1, n, k)
+        end
 	
 	end}
 end
 
 function submit_query(k)
 	if state.page then
-		controller().wait(CanSendAuctionQuery, function()
-		if state.job.on_submit_query then
-			state.job.on_submit_query()
-		end
-		wait_for_results(function()
-		--wait_for_complete_results(function()
-        local _, total_count = GetNumAuctionItems('list')
-        state.total_pages = math.ceil(total_count / AUCTIONS_PER_PAGE)
-        wait_for_callback{state.job.on_page_loaded, state.page, state.total_pages, function()
-		k()
-		end}end)-- end)
-		QueryAuctionItems(
-			state.job.query.name,
-			state.job.query.min_level,
-			state.job.query.max_level,
-			state.job.query.slot,
-			state.job.query.class,
-			state.job.query.subclass,
-			state.page,
-			state.job.query.usable,
-			state.job.query.quality
-		)
+		controller().wait(function() return state.job.type ~= 'list' or CanSendAuctionQuery() end, function()
+            snipe.log('kek')
+            if state.job.on_submit_query then
+                state.job.on_submit_query()
+            end
+            wait_for_results(function()
+                --wait_for_owner_data(function()
+                local _, total_count = GetNumAuctionItems(state.job.type)
+                state.total_pages = math.ceil(total_count / PAGE_SIZE)
+                wait_for_callback{state.job.on_page_loaded, state.page, state.total_pages, function()
+                    k()
+                end}
+                -- end)
+            end)
+            if state.job.type == 'bidder' then
+                GetBidderAuctionItems(state.page)
+            elseif state.job.type == 'owner' then
+                GetOwnerAuctionItems(state.page)
+            else
+                QueryAuctionItems(
+                    state.job.query.name,
+                    state.job.query.min_level,
+                    state.job.query.max_level,
+                    state.job.query.slot,
+                    state.job.query.class,
+                    state.job.query.subclass,
+                    state.page,
+                    state.job.query.usable,
+                    state.job.query.quality
+                )
+            end
 		end)
 	else
 		return k()

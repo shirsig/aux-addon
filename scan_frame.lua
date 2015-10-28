@@ -7,7 +7,7 @@ Aux.history = {}
 local process_auction, balanced_list, update_snapshot
 local get_market_price, get_usable_median, get_historical_median, get_median, get_percentile
 
-local signature_cache
+local scanned_signatures
 
 function Aux.history.on_close()
 
@@ -26,7 +26,7 @@ function Aux.history.start_scan()
     AuxHistoryScanButton:Hide()
     AuxHistoryStopButton:Show()
 
-    signature_cache = Aux.util.set()
+    scanned_signatures = Aux.util.set()
 
     Aux.log('Scanning auctions ...')
     Aux.scan.start{
@@ -63,8 +63,11 @@ end
 
 function update_snapshot()
     local snapshot = Aux.persistence.get_snapshot()
-    snapshot.remove_all(signature_cache.values())
-    Aux.persistence.save_snapshot(snapshot)
+    for _, sig in ipairs(snapshot.values()) do
+        if not scanned_signatures.contains(sig) then
+            snapshot.remove(sig)
+        end
+    end
 end
 
 function Aux.history.stop_scan()
@@ -80,65 +83,57 @@ function process_auction(index)
         local item_key = auction_info.item_signature
 
         local signature = Aux.info.auction_signature(index)
-        signature_cache.add(signature)
+        scanned_signatures.add(signature)
 
         local snapshot = Aux.persistence.get_snapshot()
         if not snapshot.contains(signature) then
             snapshot.add(signature)
-            Aux.persistence.save_snapshot(snapshot)
---
---            local item_record = Aux.persistence.get_item_record(item_key)
---
---            item_record = item_record or {
---                count = 0,
---                accumulated_price = 0,
---                price_list = {},
---            }
---
---            local price_list = balanced_list(MAX_HISTORY_SIZE)
---            price_list.add_all(item_record.price_list)
---            price_list.add(price)
---
---            Aux.persistence.save_item_record(item_key, {
---                count = item_record.count + 1,
---                accumulated_price = item_record.accumulated_price + price,
---                price_list = price_list.values(),
---            })
---
+
+            local item_record = Aux.persistence.load_item_record(item_key)
+
+            item_record = item_record or {
+                count = 0,
+                accumulated_price = 0,
+                median_list = {},
+            }
+
+            local median_list = balanced_list(MAX_HISTORY_SIZE)
+            median_list.add_all(item_record.median_list)
+            median_list.add(price)
+
+            Aux.persistence.store_item_record(item_key, {
+                count = item_record.count + 1,
+                accumulated_price = item_record.accumulated_price + price,
+                median_list = median_list.values(),
+            })
         end
     end
 end
 
-function Aux.history.get_market_price(key)
-    local price
+function Aux.history.get_market_price(item_key)
+    local market_price
 
-    local median = get_usable_median(key)
---    local avgMin, avgBuy, avgBid, bidPct, buyPct, avgQty, meanCount = getMeans(key, realm)
+    local item_record = Aux.persistence.load_item_record(item_key)
 
-    -- assign the best common buyout
-    if median and median > 0 then
-        price = median
---    elseif meanCount and meanCount > 0 then
---        -- if a usable median does not exist, use the average buyout instead
---        price = avgBuy;
+    if item_record then
+        local median = get_usable_median(item_record.median_list)
+
+        if median then
+            market_price = median
+        elseif item_record.count > 0 then
+            market_price = item_record.accumulated_price / item_record.count
+        end
     end
 
-    return price
+    return market_price
 end
 
-function get_usable_median(item_key)
+function get_usable_median(values)
 
-    local historical_median, historical_count = get_historical_median(item_key)
-
-    if historical_count >= MIN_SEEN then
-        return historical_median, historical_count
+    local median, count = get_median(values)
+    if count >= MIN_SEEN then
+        return median, count
     end
-end
-
-function get_historical_median(item_key)
-    local price_list = Aux.util.safe_index{Aux.persistence.get_item_record(item_key), 'price_list'}
-
-    return get_median(price_list or {})
 end
 
 function get_median(values)

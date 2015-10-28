@@ -167,7 +167,7 @@ function Aux.on_tab_click(index)
     Aux.manage_frame.on_close()
     Aux.history.on_close()
 
-    for i=1,5 do
+    for i=1,4 do
         getglobal('AuxTab'..i):SetAlpha(i == index and 1 or 0.5)
     end
 
