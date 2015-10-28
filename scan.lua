@@ -46,7 +46,6 @@ end
 
 function wait_for_results(k)
 	local ok
-    ok = true
     if state.job.type == 'bidder' then
         Aux.control.on_next_event('AUCTION_BIDDER_LIST_UPDATE', function()
             ok = true
@@ -140,7 +139,6 @@ end
 function submit_query(k)
 	if state.page then
 		controller().wait(function() return state.job.type ~= 'list' or CanSendAuctionQuery() end, function()
-            snipe.log('kek')
             if state.job.on_submit_query then
                 state.job.on_submit_query()
             end
@@ -155,6 +153,7 @@ function submit_query(k)
             end)
             if state.job.type == 'bidder' then
                 GetBidderAuctionItems(state.page)
+                snipe.log('kek'..state.page)
             elseif state.job.type == 'owner' then
                 GetOwnerAuctionItems(state.page)
             else

@@ -160,33 +160,33 @@ end
 function Aux.on_tab_click(index)
     Aux.post.stop()
     Aux.stack.stop()
-    Aux.scan.abort()
+    Aux.scan.abort(function()
+        Aux.buy.on_close()
+        Aux.sell.on_close()
+        Aux.manage_frame.on_close()
+        Aux.history.on_close()
 
-    Aux.buy.on_close()
-    Aux.sell.on_close()
-    Aux.manage_frame.on_close()
-    Aux.history.on_close()
+        for i=1,4 do
+            getglobal('AuxTab'..i):SetAlpha(i == index and 1 or 0.5)
+        end
 
-    for i=1,4 do
-        getglobal('AuxTab'..i):SetAlpha(i == index and 1 or 0.5)
-    end
+        AuxSellFrame:Hide()
+        AuxBuyFrame:Hide()
+        AuxHistoryFrame:Hide()
 
-    AuxSellFrame:Hide()
-    AuxBuyFrame:Hide()
-    AuxHistoryFrame:Hide()
-
-    if index == 1 then
-        AuxBuyFrame:Show()
-        Aux.buy.on_open()
-    elseif index == 2 then
-        AuxSellFrame:Show()
-        Aux.sell.on_open()
-    elseif index == 3 then
-        Aux.manage_frame.on_open()
-    elseif index == 4 then
-        AuxHistoryFrame:Show()
-        Aux.history.on_open()
-    end
+        if index == 1 then
+            AuxBuyFrame:Show()
+            Aux.buy.on_open()
+        elseif index == 2 then
+            AuxSellFrame:Show()
+            Aux.sell.on_open()
+        elseif index == 3 then
+            Aux.manage_frame.on_open()
+        elseif index == 4 then
+            AuxHistoryFrame:Show()
+            Aux.history.on_open()
+        end
+    end)
 end
 
 function Aux_Round(v)

@@ -331,10 +331,10 @@ local auction_listing_config = {
 }
 
 function on_open()
---    update_bid_records(function()
+    update_bid_records(function()
         update_auction_records(function()
         end)
---    end)
+    end)
 end
 
 function on_close()
