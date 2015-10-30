@@ -4,12 +4,40 @@ local NUM_MATCHES = 5
 
 local fuzzy, generate_suggestions
 
-local item_names = {}
+local items = {}
+
+local potentially_auctionable_items = {}
+function _process_batch(i)
+    for j=i, i+1000 do
+        local name = GetItemInfo('item:'..j)
+        if name then
+            local tooltip = Aux.info.tooltip(function(tt) tt:SetHyperlink('item:'..j) end)
+            if not Aux.info.tooltip_match({'binds when picked up'}, tooltip) and not Aux.info.tooltip_match({'quest item'}, tooltip) then
+                Aux.log(name)
+                tinsert(potentially_auctionable_items, { id=j, s=0 })
+            end
+        end
+    end
+    if i+1000 > 30000 then
+        snipe.log(getn(potentially_auctionable_items))
+    else
+        local t0 = time()
+        Aux.control.as_soon_as(function() return time() - t0 > 1 end, function()
+            return _process_batch(i+1000)
+        end)
+    end
+end
+
+function find_auctionable_items()
+    _process_batch(1)
+end
+
+find_auctionable_items()
 
 for item_id=1,30000 do
 	local name = GetItemInfo(item_id)
 	if name then
-		tinsert(item_names, name)
+		tinsert(items, { name=name, id=item_id })
 	end
 end
 
@@ -42,10 +70,10 @@ function generate_suggestions(input)
 	end
 	
 	local best = {}
-	for _, name in ipairs(item_names) do
-		local rating = matcher(name)
+	for _, item in ipairs(items) do
+		local rating = matcher(item.name)
 		if rating then
-			local candidate = { name=name, rating=rating }
+			local candidate = { name=item.name, id=item.id, rating=rating }
 			if getn(best) < NUM_MATCHES then
 				tinsert(best, candidate)
 				fuzzy_sort(best)
@@ -56,7 +84,7 @@ function generate_suggestions(input)
 		end
 	end
 
-	return Aux.util.map(best, function(match) return match.name end)
+	return Aux.util.map(best, function(match) return { text=match.name, display_text='|c'..Aux_QualityColor(({GetItemInfo(match.id)})[3])..'['..match.name..']'..'|r', value=match.id } end)
 end
 
 function Aux.completion.completor(edit_box)
@@ -71,12 +99,21 @@ function Aux.completion.completor(edit_box)
 
 	function fill_dropdown()
 		for _, suggestion in ipairs(suggestions) do
+            local text = suggestion.text
 			UIDropDownMenu_AddButton{
-				text = suggestion,
-				value = suggestion,
+				text = suggestion.display_text,
+				value = suggestion.value,
 				notCheckable = true,
 				func = function()
-					self.set_quietly(this.value)
+--					self.set_quietly(text)
+                    local info = { GetItemInfo(this.value) }
+                    AuxBuyFiltersItemIconTexture:SetTexture(info[9])
+                    AuxBuyFiltersItemName:SetText(text)
+                    local color = ITEM_QUALITY_COLORS[info[3]]
+                    AuxBuyFiltersItemName:SetTextColor(color.r, color.g, color.b)
+
+                    Aux.browse_frame.set_item(this.value)
+                    Aux.browse_frame.update_item()
 				end,
 			}
 		end
@@ -148,7 +185,7 @@ function Aux.completion.completor(edit_box)
 			if index == 0 then
 				self.set_quietly(input)
 			else	
-				self.set_quietly(suggestions[index])
+				self.set_quietly(suggestions[index].text)
 			end
 		end
 	end
@@ -161,7 +198,7 @@ function Aux.completion.completor(edit_box)
 			if index == 0 then
 				self.set_quietly(input)
 			else	
-				self.set_quietly(suggestions[index])
+				self.set_quietly(suggestions[index].text)
 			end
 		end
 	end

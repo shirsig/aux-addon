@@ -13,58 +13,82 @@
     <Frame name="AuxBuyFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
             <Frame name="AuxBuyFilters" inherits="AuxFrameBoxTemplate">
-                <Size><AbsDimension x="180" y="326"/></Size>
+                <Size><AbsDimension x="213" y="326"/></Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
                         this:SetBackdropBorderColor(0.4, 0.4, 0.4)
                         this:SetBackdropColor(0.15, 0.15, 0.15)
-                        getglobal(this:GetName().."Title"):SetText('Filters')
+                        <!--getglobal(this:GetName().."Title"):SetText('Filters')-->
                     </OnLoad>
                 </Scripts>
                 <Frames>
-                    <Frame name="AuxBuyModeDropDown" inherits="UIDropDownMenuTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-15" /></Offset></Anchor></Anchors>
+                    <Button name="$parentTab1" inherits="AuxTopTabTemplate" id="1">
+                        <Anchors>
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
+                                <Offset>
+                                    <AbsDimension x="7" y="-2"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
                         <Scripts>
                             <OnLoad>
-                                UIDropDownMenu_SetWidth(140)
-                                UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)
-                                UIDropDownMenu_SetSelectedValue(this, 1)
+                                getglobal(this:GetName().."Text"):SetText('Item')
                             </OnLoad>
-                            <OnShow>
-                                UIDropDownMenu_Initialize(this, AuxBuyModeDropDown_Initialize)
-                            </OnShow>
+                            <OnClick>
+                                Aux.browse_frame.set_filter(this:GetID())
+                            </OnClick>
                         </Scripts>
-                        <Layers>
-                            <Layer level="BACKGROUND">
-                                <FontString name="$parentLabel" inherits="GameFontNormalSmall" text="Mode">
-                                    <Anchors>
-                                        <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
-                                            <Offset>
-                                                <AbsDimension x="21" y="0"/>
-                                            </Offset>
-                                        </Anchor>
-                                    </Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
-                    </Frame>
-
-                    <EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-71"/></Offset></Anchor></Anchors>
+                    </Button>
+                    <Button name="$parentTab2" inherits="AuxTopTabTemplate" id="2">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="0" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
                         <Scripts>
                             <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Name')
+                                getglobal(this:GetName().."Text"):SetText('Filters')
+                            </OnLoad>
+                            <OnClick>
+                                Aux.browse_frame.set_filter(this:GetID())
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+
+                    <Button name="$parentItem" inherits="AuxItemTemplate">
+                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
+                        <scripts>
+                            <OnLoad>
+                                this:SetHighlightTexture(nil)
+                            </OnLoad>
+                            <OnClick>
+                                Aux.browse_frame.set_item()
+                                Aux.browse_frame.update_item()
+                                AuxBuyFiltersItemInputBox:SetText('')
+                                AuxBuyFiltersItemInputBox:SetFocus()
+                            </OnClick>
+                        </scripts>
+                    </Button>
+
+                    <EditBox name="$parentItemInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
+                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-28"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName()..'Label'):SetText('Item')
                                 this.completor = Aux.completion.completor(this)
+                                this:SetWidth(193)
                             </OnLoad>
                             <OnTextChanged>
                                 this.completor.suggest()
                             </OnTextChanged>
                             <OnTabPressed>
                                 if IsShiftKeyDown() then
-                                    this.completor.previous()
+                                this.completor.previous()
                                 else
-                                    this.completor.next()
+                                this.completor.next()
                                 end
                             </OnTabPressed>
                             <OnEnterPressed>
@@ -74,25 +98,29 @@
                             </OnEnterPressed>
                             <OnEscapePressed>
                                 if this.completor.open() then
-                                    this.completor.close()
+                                this.completor.close()
                                 else
-                                    this:ClearFocus()
+                                this:ClearFocus()
                                 end
                             </OnEscapePressed>
                         </Scripts>
                     </EditBox>
 
-                    <CheckButton name="AuxBuyExactCheckButton" inherits="UICheckButtonTemplate" checked="true">
-                        <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="138" y="-71" /></Offset></Anchor></Anchors>
-                        <Layers>
-                            <Layer level="OVERLAY">
-                                <FontString inherits="GameFontNormalSmall" text="Exact" justifyH="LEFT">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
-                    </CheckButton>
+                    <EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-71"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName()..'Label'):SetText('Name')
+                            </OnLoad>
+                            <OnEnterPressed>
+                                this:ClearFocus()
+                                Aux.buy.SearchButton_onclick()
+                            </OnEnterPressed>
+                            <OnEscapePressed>
+                                this:ClearFocus()
+                            </OnEscapePressed>
+                        </Scripts>
+                    </EditBox>
 
                     <Frame name="AuxBuyCategoryDropDown" inherits="UIDropDownMenuTemplate">
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-104" /></Offset></Anchor></Anchors>
@@ -248,8 +276,17 @@
                         </Scripts>
                     </Button>
 
+                    <Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
+                        <Size><AbsDimension x="90" y="26"/></Size>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="5" y="5"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnClick>
+                                Aux.buy.SearchButton_onclick()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
                     <EditBox name="AuxBuyPageEditBox" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-250"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="110" y="5"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
                                 getglobal(this:GetName()..'Label'):SetText('Page')
@@ -264,7 +301,7 @@
                     </EditBox>
                     <CheckButton name="AuxBuyAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
                         <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="49" y="-250" /></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="143" y="5"/></Offset></Anchor></Anchors>
                         <Layers>
                             <Layer level="OVERLAY">
                                 <FontString inherits="GameFontNormalSmall" text="All" justifyH="LEFT">
@@ -291,10 +328,61 @@
                     <OnLoad>
                         this:SetBackdropBorderColor(0.4, 0.4, 0.4)
                         this:SetBackdropColor(0.15, 0.15, 0.15)
-                        getglobal(this:GetName().."Title"):SetText('Search Results')
+                        <!--getglobal(this:GetName().."Title"):SetText('Search Results')-->
                     </OnLoad>
                 </Scripts>
                 <Frames>
+                    <Button name="$parentTab1" inherits="AuxTopTabTemplate" id="1">
+                        <Anchors>
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
+                                <Offset>
+                                    <AbsDimension x="7" y="-2"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText('Buy')
+                            </OnLoad>
+                            <OnClick>
+                                Aux.browse_frame.set_view(this:GetID())
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <Button name="$parentTab2" inherits="AuxTopTabTemplate" id="2">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="0" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText('Bid')
+                            </OnLoad>
+                            <OnClick>
+                                Aux.browse_frame.set_view(this:GetID())
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <Button name="$parentTab3" inherits="AuxTopTabTemplate" id="3">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="0" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText('Full')
+                            </OnLoad>
+                            <OnClick>
+                                Aux.browse_frame.set_view(this:GetID())
+                            </OnClick>
+                        </Scripts>
+                    </Button>
                     <Frame name="AuxBuyBuyList" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
@@ -397,16 +485,6 @@
                     </Frame>
                 </Frames>
             </Frame>
-            <Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
-                <Size><AbsDimension x="90" y="26"/></Size>
-                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxAuctionFrameButton"><Offset><AbsDimension x="-25" y="0"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnClick>
-                        Aux.buy.SearchButton_onclick()
-                    </OnClick>
-                </Scripts>
-            </Button>
-
             <Button name="AuxBuyStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
                 <Size><AbsDimension x="90" y="26"/></Size>
                 <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxAuctionFrameButton"><Offset><AbsDimension x="-25" y="0"/></Offset></Anchor></Anchors>

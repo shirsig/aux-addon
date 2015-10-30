@@ -1,5 +1,8 @@
 Aux.buy = {}
 
+local private, public = {}, {}
+Aux.browse_frame = public
+
 local create_auction_record, show_dialog, find_auction, hide_sheet, update_sheet, auction_alpha_setter, group_alpha_setter, create_auction_record
 local auctions
 local search_query
@@ -16,6 +19,7 @@ function group_alpha_setter(cell, group)
 end
 
 local BUYOUT, BID, FULL = 1, 2, 3
+local ITEM, ADVANCED = 1, 2
 
 Aux.buy.modes = {
 	[BUYOUT] = {
@@ -64,7 +68,7 @@ Aux.buy.modes = {
                     icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
                     icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
                     icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
-                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT', cell.EnhTooltip_info) end)
+                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
                     icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
                     local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                     text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
@@ -170,7 +174,7 @@ Aux.buy.modes = {
                     icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
                     icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
                     icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
-                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT', cell.EnhTooltip_info) end)
+                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
                     icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
                     local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                     text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
@@ -306,7 +310,7 @@ Aux.buy.modes = {
                     icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
                     icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
                     icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
-                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT', cell.EnhTooltip_info) end)
+                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
                     icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
                     local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                     text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
@@ -433,6 +437,8 @@ function Aux.buy.on_close()
 end
 
 function Aux.buy.on_open()
+    public.set_filter(1)
+    public.set_view(1)
 	update_sheet()
 end
 
@@ -452,25 +458,18 @@ function update_sheet()
 	AuxBuyBuyList:Hide()
 	AuxBuyBidList:Hide()
 	AuxBuyFullList:Hide()
-	
-    local mode = UIDropDownMenu_GetSelectedValue(AuxBuyModeDropDown)
-    if mode == BUYOUT then
+
+    if private.view == BUYOUT then
 		AuxBuyBuyList:Show()
-	elseif mode == BID then
+        local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
+        Aux.list.populate(AuxBuyBuyList.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price == a2.buyout_price end) or {})
+	elseif private.view == BID then
 		AuxBuyBidList:Show()
-	elseif mode == FULL then
+        local bid_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
+        Aux.list.populate(AuxBuyBidList.sheet, bid_auctions)
+	elseif private.view == FULL then
 		AuxBuyFullList:Show()
-	end
-	
-    local mode = UIDropDownMenu_GetSelectedValue(AuxBuyModeDropDown)
-    if mode == BUYOUT then
-		local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-		Aux.list.populate(AuxBuyBuyList.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price == a2.buyout_price end) or {})
-	elseif mode == BID then
-		local bid_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
-		Aux.list.populate(AuxBuyBidList.sheet, bid_auctions)
-	elseif mode == FULL then
-		Aux.list.populate(AuxBuyFullList.sheet, auctions or {})
+        Aux.list.populate(AuxBuyFullList.sheet, auctions or {})
 	end
 end
 
@@ -478,6 +477,55 @@ function hide_sheet()
 	AuxBuyBuyList:Hide()
 	AuxBuyBidList:Hide()
 	AuxBuyFullList:Hide()
+end
+
+function public.set_view(view)
+    private.view = view
+    update_sheet()
+end
+
+function public.set_item(item_id)
+    private.item_id = item_id
+end
+
+function public.update_item()
+    if private.item_id then
+        AuxBuyFiltersItem:Show()
+        AuxBuyFiltersItemInputBox:Hide()
+    else
+        AuxBuyFiltersItem:Hide()
+        AuxBuyFiltersItemInputBox:Show()
+    end
+end
+
+function public.set_filter(filter)
+    local filter_elements = {
+        AuxBuyNameInputBox,
+        AuxBuyCategoryDropDown,
+        AuxBuyQualityDropDown,
+        AuxBuyMinLevel,
+        AuxBuyMaxLevel,
+        AuxBuyUsableCheckButton,
+        AuxBuyTooltipInputBox,
+        AuxBuyTooltipArrow,
+        AuxBuyTooltipButton,
+    }
+    private.filter = filter
+    if filter == ITEM then
+        public.update_item()
+        for _, element in filter_elements do
+            element:Hide()
+        end
+    elseif filter == ADVANCED then
+        AuxBuyFiltersItem:Hide()
+        AuxBuyFiltersItemInputBox:Hide()
+        for _, element in filter_elements do
+            element:Hide()
+        end
+        for _, element in filter_elements do
+            element:Show()
+        end
+    end
 end
 
 function Aux.buy.SearchButton_onclick()
@@ -521,7 +569,7 @@ function Aux.buy.SearchButton_onclick()
 		on_read_auction = function(i)
 			local auction_item = Aux.info.auction_item(i)
 			if auction_item then
-				if (auction_item.name == search_query.name or search_query.name == '' or not AuxBuyExactCheckButton:GetChecked()) and Aux.info.tooltip_match(tooltip_patterns, auction_item.tooltip) then
+				if (auction_item.name == search_query.name or search_query.name == '' or not (private.filter == ITEM)) and Aux.info.tooltip_match(tooltip_patterns, auction_item.tooltip) then
                     auctions = auctions or {}
                     tinsert(auctions, create_auction_record(auction_item, current_page))
 				end
@@ -867,18 +915,4 @@ end
 
 function Aux.buy.toggle_tooltip_dropdown()
 	ToggleDropDownMenu(1, nil, AuxBuyTooltipDropDown, AuxBuyTooltipInputBox, -12, 4)
-end
-
-function AuxBuyModeDropDown_Initialize()
-
-	for i, mode in ipairs(Aux.buy.modes) do
-		UIDropDownMenu_AddButton{
-			text = mode.name,
-			value = i,
-			func = function()
-				UIDropDownMenu_SetSelectedValue(AuxBuyModeDropDown, this.value)
-				update_sheet()
-			end,
-		}
-	end
 end

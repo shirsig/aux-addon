@@ -97,13 +97,13 @@ function Aux_SetupHookFunctions()
 
     Aux.orig.AuctionFrame_OnShow = AuctionFrame_OnShow
     -- TODO for some reason this breaks the auction house functionality
-    AuctionFrame_OnShow = function()
-        if not Aux.blizzard_ui_shown then
-            HideUIPanel(AuctionFrame)
-        else
-            return Aux.orig.AuctionFrame_OnShow()
-        end
-    end
+--    AuctionFrame_OnShow = function()
+--        if not Aux.blizzard_ui_shown then
+--            HideUIPanel(AuctionFrame)
+--        else
+--            return Aux.orig.AuctionFrame_OnShow()
+--        end
+--    end
 
     Aux.orig.PickupContainerItem = PickupContainerItem
 	PickupContainerItem = Aux.PickupContainerItem
