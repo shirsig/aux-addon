@@ -278,6 +278,15 @@ Aux.buy.modes = {
         on_cell_leave = function (sheet, row_index, column_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
         end,
+        
+		row_setter = function(row, datum)
+			if current_auction and datum == current_auction then
+				row.highlight:SetAlpha(.5)
+			else
+				row.highlight:SetAlpha(0)
+			end
+		end,
+    
 		columns = {
             {
                 title = 'Qty',

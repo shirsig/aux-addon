@@ -153,8 +153,13 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_cell_click,
 			row:SetPoint('TOPRIGHT', labels[getn(columns)], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
 			row:RegisterForClicks("LeftButtonDown", "RightButtonDown")
 			row:SetHeight(14)
-			row.cells = {}
 			
+			local row_index = row_index
+			row:SetScript("OnClick", function() if sheet.on_row_click then sheet.on_row_click(sheet, row_index) end end)
+			row:SetScript("OnEnter", function() if sheet.on_row_enter then sheet.on_row_enter(sheet, row_index) end end)
+			row:SetScript("OnLeave", function() if sheet.on_row_leave then sheet.on_row_leave(sheet, row_index) end end)
+			
+			row.cells = {}			
 			for i = 1,getn(columns) do
 				local cell = CreateFrame('Button', nil, content)
 				cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
@@ -163,7 +168,7 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_cell_click,
 				
 				cell:SetHeight(14)
 				
-				local row_index, column_index = row_index, i
+				local column_index = i
 				cell:SetScript("OnClick", function() if sheet.on_cell_click then sheet.on_cell_click(sheet, row_index, column_index) end end)
 				cell:SetScript("OnEnter", function() if sheet.on_cell_enter then sheet.on_cell_enter(sheet, row_index, column_index) end end)
 				cell:SetScript("OnLeave", function() if sheet.on_cell_leave then sheet.on_cell_leave(sheet, row_index, column_index) end end)

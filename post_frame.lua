@@ -13,16 +13,16 @@ local set_auction, update_auction_listing, update_inventory_listing, record_auct
 local LIVE, HISTORICAL, FIXED = 1, 2, 3
 
 Aux.sell.inventory_listing_config = {
-    on_cell_click = function (sheet, row_index, column_index)
+    on_row_click = function (sheet, row_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         set_auction(sheet.data[data_index])
     end,
 
-    on_cell_enter = function (sheet, row_index, column_index)
+    on_row_enter = function (sheet, row_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
     end,
 
-    on_cell_leave = function (sheet, row_index, column_index)
+    on_row_leave = function (sheet, row_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         if not (current_auction and sheet.data[data_index] == current_auction) then
             sheet.rows[row_index].highlight:SetAlpha(0)
