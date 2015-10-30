@@ -48,7 +48,7 @@ function Aux.sheet.render(sheet)
             sheet.row_setter(row, datum)
         end
 		for j, column in sheet.columns do
-			local cell = row[j]
+			local cell = row.cells[j]
 			if datum then
                 column.cell_setter(cell, datum)
 				cell:Show()
@@ -147,41 +147,49 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_cell_click,
 	local max_height = content:GetHeight()
 	local total_height = 16
 	while total_height + 14 < max_height do
-		local row = {}
-		for i = 1,getn(columns) do
-			local cell = CreateFrame('Button', nil, content)
-			cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
-			cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
-			cell:RegisterForClicks("LeftButtonDown", "RightButtonDown")			
+		if getn(columns) > 0 then
+			local row = CreateFrame('Button', nil, content)
+			row:SetPoint('TOPLEFT', labels[1], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
+			row:SetPoint('TOPRIGHT', labels[getn(columns)], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
+			row:RegisterForClicks("LeftButtonDown", "RightButtonDown")
+			row:SetHeight(14)
+			row.cells = {}
 			
-			cell:SetHeight(14)
-			
-			local row_index, column_index = row_index, i
-			cell:SetScript("OnClick", function() if sheet.on_cell_click then sheet.on_cell_click(sheet, row_index, column_index) end end)
-			cell:SetScript("OnEnter", function() if sheet.on_cell_enter then sheet.on_cell_enter(sheet, row_index, column_index) end end)
-			cell:SetScript("OnLeave", function() if sheet.on_cell_leave then sheet.on_cell_leave(sheet, row_index, column_index) end end)
+			for i = 1,getn(columns) do
+				local cell = CreateFrame('Button', nil, content)
+				cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
+				cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
+				cell:RegisterForClicks("LeftButtonDown", "RightButtonDown")			
+				
+				cell:SetHeight(14)
+				
+				local row_index, column_index = row_index, i
+				cell:SetScript("OnClick", function() if sheet.on_cell_click then sheet.on_cell_click(sheet, row_index, column_index) end end)
+				cell:SetScript("OnEnter", function() if sheet.on_cell_enter then sheet.on_cell_enter(sheet, row_index, column_index) end end)
+				cell:SetScript("OnLeave", function() if sheet.on_cell_leave then sheet.on_cell_leave(sheet, row_index, column_index) end end)
 
-            columns[i].cell_initializer(cell)
+				columns[i].cell_initializer(cell)
+				
+				row.cells[i] = cell
+			end
 			
-			row[i] = cell
+			local color_texture = row:CreateTexture()
+			color_texture:SetPoint('TOPLEFT', row, 'TOPLEFT', 0, 0)
+			color_texture:SetPoint('BOTTOMRIGHT', row, 'BOTTOMRIGHT', 0, 1)
+			color_texture:SetTexture(1, 1, 1)
+			row.color_texture = color_texture
+			
+			local highlight = row:CreateTexture()
+			highlight:SetPoint('TOPLEFT', row 'TOPLEFT', 0, 0)
+			highlight:SetPoint('BOTTOMRIGHT', row, 'BOTTOMRIGHT', 0, 1)
+			highlight:SetAlpha(0)
+			highlight:SetTexture(0.8, 0.6, 0)
+			row.highlight = highlight
+			
+			rows[row_index] = row
+			row_index = row_index + 1
+			total_height = total_height + 14
 		end
-		
-		local color_texture = content:CreateTexture()
-		color_texture:SetPoint('TOPLEFT', row[1], 'TOPLEFT', 0, 0)
-		color_texture:SetPoint('BOTTOMRIGHT', row[getn(columns)], 'BOTTOMRIGHT', 0, 1)
-		color_texture:SetTexture(1, 1, 1)
-		row.color_texture = color_texture
-		
-		local highlight = content:CreateTexture()
-		highlight:SetPoint('TOPLEFT', row[1], 'TOPLEFT', 0, 0)
-		highlight:SetPoint('BOTTOMRIGHT', row[getn(columns)], 'BOTTOMRIGHT', 0, 1)
-		highlight:SetAlpha(0)
-		highlight:SetTexture(0.8, 0.6, 0)
-		row.highlight = highlight
-		
-		rows[row_index] = row
-		row_index = row_index + 1
-		total_height = total_height + 14		
 	end
 	
 	content:SetWidth(total_width)
@@ -210,7 +218,7 @@ function Aux.list.row_comparator(sheet)
 		for _, sort_info in ipairs(sheet.sort_order) do
 			local column = sort_info.column
 			if column.comparator then
-				local ordering = column.comparator(row1, row2)
+				local ordering = column.comparator(row1.cells, row2.cells)
 				if ordering ~= Aux.util.EQ then
 					return sort_info.sort_ascending and ordering or Aux.util.invert_order(ordering)
 				end

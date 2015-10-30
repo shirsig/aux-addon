@@ -506,9 +506,10 @@ function public.set_filter(filter)
         AuxBuyMinLevel,
         AuxBuyMaxLevel,
         AuxBuyUsableCheckButton,
-        AuxBuyTooltipInputBox,
-        AuxBuyTooltipArrow,
-        AuxBuyTooltipButton,
+        AuxBuyFiltersTooltipInputBox1,
+        AuxBuyFiltersTooltipInputBox2,
+        AuxBuyFiltersTooltipInputBox3,
+        AuxBuyFiltersTooltipInputBox4,
     }
     private.filter = filter
     if filter == ITEM then
@@ -542,7 +543,13 @@ function Aux.buy.SearchButton_onclick()
 	refresh = true
 	
 	local category = UIDropDownMenu_GetSelectedValue(AuxBuyCategoryDropDown)
-	local tooltip_patterns = Aux.util.set_to_array(tooltip_patterns)
+	local tooltip_patterns = {}
+	for i=1,4 do
+		local tooltip_pattern = getglobal('AuxBuyFiltersTooltipInputBox'..i):GetText()
+		if tooltip_pattern ~= '' then
+			tinsert(tooltip_patterns, tooltip_pattern)
+		end
+	end
 	
 	search_query = {
 		name = AuxBuyNameInputBox:GetText(),
@@ -886,33 +893,3 @@ function AuxBuyQualityDropDown_Initialize()
 	end
 end
 
-function AuxBuyTooltipButton_OnClick()
-	local pattern = AuxBuyTooltipInputBox:GetText()
-	if pattern ~= '' then
-		Aux.util.set_add(tooltip_patterns, pattern)
-		if DropDownList1:IsVisible() then
-			Aux.buy.toggle_tooltip_dropdown()
-		end
-		Aux.buy.toggle_tooltip_dropdown()
-	end
-	AuxBuyTooltipInputBox:SetText('')
-end
-
-function AuxBuyTooltipDropDown_Initialize()
-	for pattern, _ in tooltip_patterns do
-		UIDropDownMenu_AddButton{
-			text = pattern,
-			value = pattern,
-			func = AuxBuyTooltipDropDown_OnClick,
-			notCheckable = true,
-		}
-	end
-end
-
-function AuxBuyTooltipDropDown_OnClick()
-	Aux.util.set_remove(tooltip_patterns, this.value)
-end
-
-function Aux.buy.toggle_tooltip_dropdown()
-	ToggleDropDownMenu(1, nil, AuxBuyTooltipDropDown, AuxBuyTooltipInputBox, -12, 4)
-end

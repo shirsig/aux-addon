@@ -220,7 +220,7 @@
                         </Layers>
                     </CheckButton>
 
-                    <EditBox name="AuxBuyTooltipInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
+                    <EditBox name="$parentTooltipInputBox1" autoFocus="false" inherits="AuxInputBoxTemplate">
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-216"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
@@ -232,49 +232,45 @@
                             </OnEnterPressed>
                         </Scripts>
                     </EditBox>
-
-                    <Frame name="AuxBuyTooltipDropDown" inherits="UIDropDownMenuTemplate" hidden="true">
+                    
+                    <EditBox name="$parentTooltipInputBox2" autoFocus="false" inherits="AuxInputBoxTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-246"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                UIDropDownMenu_Initialize(this, AuxBuyTooltipDropDown_Initialize)
+                                getglobal(this:GetName()..'Label'):SetText('Tooltip')
+                                this:SetWidth(110)
                             </OnLoad>
-                        </Scripts>
-                    </Frame>
-                    <Button name="AuxBuyTooltipArrow">
-                        <Size><AbsDimension x="24" y="24"/></Size>
-                        <Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxBuyTooltipInputBox"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnClick>
-                                Aux.buy.toggle_tooltip_dropdown()
-                                PlaySound("igMainMenuOptionCheckBoxOn")
-                            </OnClick>
-                        </Scripts>
-                        <NormalTexture name="$parentNormalTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up">
-                            <Size><AbsDimension x="24" y="24"/></Size>
-                            <Anchors><Anchor point="RIGHT"/></Anchors>
-                        </NormalTexture>
-                        <PushedTexture name="$parentPushedTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down">
-                            <Size><AbsDimension x="24" y="24"/></Size>
-                            <Anchors><Anchor point="RIGHT"/></Anchors>
-                        </PushedTexture>
-                        <DisabledTexture name="$parentDisabledTexture" file="Interface\ChatFrame\UI-ChatIcon-ScrollDown-Disabled">
-                            <Size><AbsDimension x="24" y="24"/></Size>
-                            <Anchors><Anchor point="RIGHT"/></Anchors>
-                        </DisabledTexture>
-                        <HighlightTexture name="$parentHighlightTexture" file="Interface\Buttons\UI-Common-MouseHilight" alphaMode="ADD">
-                            <Size><AbsDimension x="24" y="24"/></Size>
-                            <Anchors><Anchor point="RIGHT"/></Anchors>
-                        </HighlightTexture>
-                    </Button>
-                    <Button name="AuxBuyTooltipButton" inherits="UIPanelButtonTemplate" text="+">
-                        <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="143" y="-216"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnClick>
+                            <OnEnterPressed>
                                 AuxBuyTooltipButton_OnClick(this)
-                            </OnClick>
+                            </OnEnterPressed>
                         </Scripts>
-                    </Button>
+                    </EditBox>
+                    
+                    <EditBox name="$parentTooltipInputBox3" autoFocus="false" inherits="AuxInputBoxTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-276"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName()..'Label'):SetText('Tooltip')
+                                this:SetWidth(110)
+                            </OnLoad>
+                            <OnEnterPressed>
+                                AuxBuyTooltipButton_OnClick(this)
+                            </OnEnterPressed>
+                        </Scripts>
+                    </EditBox>
+                    
+                    <EditBox name="$parentTooltipInputBox4" autoFocus="false" inherits="AuxInputBoxTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-306"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName()..'Label'):SetText('Tooltip')
+                                this:SetWidth(110)
+                            </OnLoad>
+                            <OnEnterPressed>
+                                AuxBuyTooltipButton_OnClick(this)
+                            </OnEnterPressed>
+                        </Scripts>
+                    </EditBox>
 
                     <Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
                         <Size><AbsDimension x="90" y="26"/></Size>
