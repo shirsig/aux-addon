@@ -21,7 +21,8 @@ function Aux.scan.start(job)
         state = {
 			job = job,
 			page = job.page
-		}
+        }
+
 		return scan()
 	end)
 end
@@ -49,9 +50,13 @@ function wait_for_results(k)
     if state.job.type == 'bidder' then
 		ok = true
     elseif state.job.type == 'owner' then
-        Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', function()
+        if state.page == Aux.current_owner_page then
             ok = true
-        end)
+        else
+            Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', function()
+                ok = true
+            end)
+        end
     else
         Aux.control.on_next_event('AUCTION_ITEM_LIST_UPDATE', function()
             ok = true
@@ -137,7 +142,7 @@ end
 function submit_query(k)
 	if state.page then
 		controller().wait(function() return state.job.type ~= 'list' or CanSendAuctionQuery() end, function()
-            snipe.log('kek')
+
             if state.job.on_submit_query then
                 state.job.on_submit_query()
             end

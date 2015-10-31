@@ -5,10 +5,11 @@
 	<Frame>
       <Scripts>
 			<OnLoad>
-				this:RegisterEvent("VARIABLES_LOADED")
-				this:RegisterEvent("ADDON_LOADED")
-				this:RegisterEvent("AUCTION_HOUSE_SHOW")
-				this:RegisterEvent("AUCTION_HOUSE_CLOSED")
+				this:RegisterEvent('VARIABLES_LOADED')
+				this:RegisterEvent('ADDON_LOADED')
+				this:RegisterEvent('AUCTION_HOUSE_SHOW')
+				this:RegisterEvent('AUCTION_HOUSE_CLOSED')
+                this:RegisterEvent('AUCTION_OWNED_LIST_UPDATE')
 			</OnLoad>
 			<OnEvent> 
 				Aux_OnEvent()
@@ -18,7 +19,7 @@
 
     <Button name="AuxTopTabTemplate" virtual="true">
         <Size>
-            <AbsDimension x="64" y="32"/>
+            <AbsDimension x="100" y="32"/>
         </Size>
         <Layers>
             <Layer level="BACKGROUND">
@@ -59,7 +60,7 @@
         </Scripts>
         <NormalText name="$parentText" inherits="GameFontHighlight">
             <Size>
-                <AbsDimension x="50" y="8"/>
+                <AbsDimension x="100" y="8"/>
             </Size>
             <Anchors>
                 <Anchor point="CENTER">
@@ -89,7 +90,7 @@
     </Button>
     <Button name="AuxBottomTabTemplate" virtual="true">
         <Size>
-            <AbsDimension x="64" y="32"/>
+            <AbsDimension x="100" y="32"/>
         </Size>
         <Layers>
             <Layer level="BACKGROUND">
@@ -131,9 +132,9 @@
                 Aux.on_tab_click(this:GetID())
             </OnClick>
         </Scripts>
-        <NormalText name="$parentText" inherits="GameFontNormalSmall">
+        <NormalText name="$parentText" inherits="GameFontNormal">
             <Size>
-                <AbsDimension x="50" y="8"/>
+                <AbsDimension x="100" y="8"/>
             </Size>
             <Anchors>
                 <Anchor point="CENTER">
@@ -372,7 +373,7 @@
             </EdgeSize>
         </Backdrop>
         <Frames>
-            <Button name="AuxCloseButtonTop" inherits="UIPanelCloseButton">
+            <Button name="AuxCloseButton" inherits="UIPanelCloseButton">
                 <Anchors>
                     <Anchor point="TOPRIGHT">
                         <Offset>
@@ -381,25 +382,16 @@
                     </Anchor>
                 </Anchors>
             </Button>
-            <Button name="AuxCloseButtonBottom" inherits="UIPanelButtonTemplate" text="Close">
-                <Size><AbsDimension x="90" y="26"/></Size>
-                <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-10" y="10"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnClick>
-                        HideUIPanel(this:GetParent())
-                    </OnClick>
-                </Scripts>
-            </Button>
             <Button name="AuxAuctionFrameButton" inherits="UIPanelButtonTemplate" text="Default UI">
-                <Size><AbsDimension x="120" y="26"/></Size>
-                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButtonBottom"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
+                <Size><AbsDimension x="60" y="15"/></Size>
+                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButton"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnClick>
                         if AuctionFrame:IsVisible() then
                             Aux.blizzard_ui_shown = false
                             HideUIPanel(AuctionFrame)
                         else
-                            Aux.blizzard_ui_shown = true
+                        Aux.blizzard_ui_shown = true
                             ShowUIPanel(AuctionFrame)
                         end
                     </OnClick>
@@ -415,7 +407,7 @@
                 </Anchors>
                 <Scripts>
                     <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Browse')
+                        getglobal(this:GetName().."Text"):SetText('Item Search')
                     </OnLoad>
                     <OnClick>
                         Aux.on_tab_click(this:GetID())
@@ -432,7 +424,7 @@
                 </Anchors>
                 <Scripts>
                     <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Post')
+                        getglobal(this:GetName().."Text"):SetText('Filter Search')
                     </OnLoad>
                     <OnClick>
                         Aux.on_tab_click(this:GetID())
@@ -449,7 +441,7 @@
                 </Anchors>
                 <Scripts>
                     <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Manage')
+                        getglobal(this:GetName().."Text"):SetText('Post')
                     </OnLoad>
                     <OnClick>
                         Aux.on_tab_click(this:GetID())
@@ -466,7 +458,7 @@
                 </Anchors>
                 <Scripts>
                     <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Scan')
+                        getglobal(this:GetName().."Text"):SetText('Manage')
                     </OnLoad>
                     <OnClick>
                         Aux.on_tab_click(this:GetID())
@@ -479,6 +471,11 @@
                     <Anchor point="LEFT">
                         <Offset>
                             <AbsDimension x="5" y="0"/>
+                        </Offset>
+                    </Anchor>
+                    <Anchor point="RIGHT">
+                        <Offset>
+                            <AbsDimension x="-5" y="0"/>
                         </Offset>
                     </Anchor>
                     <Anchor point="BOTTOM">

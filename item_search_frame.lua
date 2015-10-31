@@ -7,6 +7,7 @@ local search_query
 local tooltip_patterns = {}
 local current_page
 local refresh
+local recently_searched = {}
 
 function auction_alpha_setter(cell, auction)
     cell:SetAlpha(auction.gone and 0.3 or 1)
@@ -18,6 +19,60 @@ end
 
 local BUYOUT, BID, FULL = 1, 2, 3
 
+public.recently_searched_config = {
+    on_row_click = function (sheet, row_index)
+        local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+        public.set_item(sheet.data[data_index].item_id)
+    end,
+    on_row_enter = function (sheet, row_index)
+        sheet.rows[row_index].highlight:SetAlpha(.5)
+    end,
+    on_row_leave = function (sheet, row_index)
+        sheet.rows[row_index].highlight:SetAlpha(0)
+    end,
+    columns = {
+        {
+            title = 'Item',
+            width = 163,
+            comparator = function(datum1, datum2)
+                return Aux.util.compare(datum1.time, datum2.time, Aux.util.GT)
+            end,
+            cell_initializer = function(cell)
+                local icon = CreateFrame('Button', nil, cell)
+                icon:EnableMouse(false)
+                local icon_texture = icon:CreateTexture(nil, 'BORDER')
+                icon_texture:SetAllPoints(icon)
+                icon.icon_texture = icon_texture
+                local normal_texture = icon:CreateTexture(nil)
+                normal_texture:SetPoint('CENTER', 0, 0)
+                normal_texture:SetWidth(22)
+                normal_texture:SetHeight(22)
+                normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
+                icon:SetNormalTexture(normal_texture)
+                icon:SetPoint('LEFT', cell)
+                icon:SetWidth(12)
+                icon:SetHeight(12)
+                local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
+                text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
+                text:SetPoint('TOPRIGHT', cell)
+                text:SetPoint('BOTTOMRIGHT', cell)
+                text:SetJustifyV('TOP')
+                text:SetJustifyH('LEFT')
+                text:SetTextColor(0.8, 0.8, 0.8)
+                cell.text = text
+                cell.icon = icon
+            end,
+            cell_setter = function(cell, datum)
+                local info = { GetItemInfo(datum.item_id) }
+                cell.icon.icon_texture:SetTexture(info[9])
+                cell.text:SetText('['..info[1]..']')
+                local color = ITEM_QUALITY_COLORS[info[3]]
+                cell.text:SetTextColor(color.r, color.g, color.b)
+            end,
+        },
+    },
+    sort_order = {},
+}
 public.views = {
 	[BUYOUT] = {
 		name = 'Buyout',
@@ -39,22 +94,22 @@ public.views = {
         end,
         columns = {
             {
-                title = 'Avail',
-                width = 40,
-                comparator = function(group1, group2) return Aux.util.compare(getn(Aux.util.filter(group1, function(auction) return not auction.gone end)), getn(Aux.util.filter(group2, function(auction) return not auction.gone end)), Aux.util.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, group)
-                    cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
-                    group_alpha_setter(cell, group)
-                end,
-            },
-            {
                 title = 'Qty',
                 width = 23,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].stack_size, group2[1].stack_size, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
                     cell.text:SetText(group[1].stack_size)
+                    group_alpha_setter(cell, group)
+                end,
+            },
+            {
+                title = 'Buy',
+                width = 93,
+                comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price, group2[1].buyout_price, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, group)
+                    cell.text:SetText(Aux.util.money_string(group[1].buyout_price))
                     group_alpha_setter(cell, group)
                 end,
             },
@@ -69,17 +124,17 @@ public.views = {
                 end,
             },
             {
-                title = 'Buy',
-                width = 93,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price, group2[1].buyout_price, Aux.util.GT) end,
+                title = 'Avail',
+                width = 40,
+                comparator = function(group1, group2) return Aux.util.compare(getn(Aux.util.filter(group1, function(auction) return not auction.gone end)), getn(Aux.util.filter(group2, function(auction) return not auction.gone end)), Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
-                    cell.text:SetText(Aux.util.money_string(group[1].buyout_price))
+                    cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
                     group_alpha_setter(cell, group)
                 end,
             },
         },
-        sort_order = {{column = 2, order = 'ascending' }, {column = 4, order = 'ascending'}},
+        sort_order = {{column = 3, order = 'ascending' }},
 	},
 	[BID] = {
 		name = 'Bid',
@@ -295,7 +350,7 @@ public.views = {
 }
 
 function public.on_close()
-    if AuxBuyConfirmation:IsVisible() then
+    if AuxItemSearchFrameAuctionsConfirmation:IsVisible() then
 	    public.dialog_cancel()
     end
 	current_page = nil
@@ -304,15 +359,16 @@ end
 function public.on_open()
     public.set_view(1)
     public.update_item()
+    private.update_recently_searched()
 	update_listing()
 end
 
 function public.dialog_cancel()
     Aux.log('Canceled.')
 	Aux.scan.abort()
-	AuxBuyConfirmation:Hide()
+    AuxItemSearchFrameAuctionsConfirmation:Hide()
 	update_listing()
-	AuxBuySearchButton:Enable()
+    AuxItemSearchFrameItemSearchButton:Enable()
 end
 
 function public.stop_search()
@@ -328,13 +384,19 @@ function update_listing()
 		AuxItemSearchFrameAuctionsBuyListing:Show()
         local buy_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
         Aux.list.populate(AuxItemSearchFrameAuctionsBuyListing.sheet, auctions and Aux.util.group_by(buy_records, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price == a2.buyout_price end) or {})
+        AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBuyListing:GetWidth() + 40)
+        AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 20)
 	elseif private.view == BID then
 		AuxItemSearchFrameAuctionsBidListing:Show()
         local bid_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
         Aux.list.populate(AuxItemSearchFrameAuctionsBidListing.sheet, bid_records)
+        AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBidListing:GetWidth() + 40)
+        AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 20)
 	elseif private.view == FULL then
 		AuxItemSearchFrameAuctionsFullListing:Show()
         Aux.list.populate(AuxItemSearchFrameAuctionsFullListing.sheet, auctions or {})
+        AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsFullListing:GetWidth() + 40)
+        AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 20)
 	end
 end
 
@@ -352,8 +414,18 @@ function public.set_view(view)
     update_listing()
 end
 
+function private.update_recently_searched()
+    Aux.list.populate(AuxItemSearchFrameRecentlySearchedListing.sheet, recently_searched)
+end
+
 function public.set_item(item_id)
-    private.item_id = item_id
+    if item_id ~= private.item_id then
+        private.item_id = item_id
+        public.update_item()
+        tinsert(recently_searched, 1, { item_id=item_id, time=time() })
+        private.update_recently_searched()
+        public.start_search()
+    end
 end
 
 function public.update_item()
@@ -365,7 +437,6 @@ function public.update_item()
         AuxItemSearchFrameItemItemName:SetTextColor(color.r, color.g, color.b)
         AuxItemSearchFrameItemItem:Show()
         AuxItemSearchFrameItemItemInputBox:Hide()
-        public.start_search()
     else
         AuxItemSearchFrameItemItem:Hide()
     end
@@ -444,33 +515,33 @@ function public.start_search()
 end
 
 function show_dialog(buyout_mode, entry, amount)
-	AuxBuyConfirmationContentItem.tooltip = entry.tooltip
-	AuxBuyConfirmationContentItem.EnhTooltip_info = entry.EnhTooltip_info
-	
-	AuxBuyConfirmationContentActionButton:Disable()
-	AuxBuyConfirmationContentItemIconTexture:SetTexture(entry.texture)
-	AuxBuyConfirmationContentItemName:SetText(entry.tooltip[1][1].text)
+	AuxItemSearchFrameAuctionsConfirmationContentItem.tooltip = entry.tooltip
+    AuxItemSearchFrameAuctionsConfirmationContentItem.EnhTooltip_info = entry.EnhTooltip_info
+
+    AuxItemSearchFrameAuctionsConfirmationContentActionButton:Disable()
+    AuxItemSearchFrameAuctionsConfirmationContentItemIconTexture:SetTexture(entry.texture)
+    AuxItemSearchFrameAuctionsConfirmationContentItemName:SetText(entry.tooltip[1][1].text)
 	local color = ITEM_QUALITY_COLORS[entry.quality]
-	AuxBuyConfirmationContentItemName:SetTextColor(color.r, color.g, color.b)
+    AuxItemSearchFrameAuctionsConfirmationContentItemName:SetTextColor(color.r, color.g, color.b)
 
 	if entry.stack_size > 1 then
-		AuxBuyConfirmationContentItemCount:SetText(entry.stack_size);
-		AuxBuyConfirmationContentItemCount:Show()
+        AuxItemSearchFrameAuctionsConfirmationContentItemCount:SetText(entry.stack_size);
+        AuxItemSearchFrameAuctionsConfirmationContentItemCount:Show()
 	else
-		AuxBuyConfirmationContentItemCount:Hide()
+        AuxItemSearchFrameAuctionsConfirmationContentItemCount:Hide()
 	end
 	if buyout_mode then
-		AuxBuyConfirmationContentActionButton:SetText('Buy')
-		MoneyFrame_Update('AuxBuyConfirmationContentBuyoutPrice', amount)
-		AuxBuyConfirmationContentBid:Hide()
-		AuxBuyConfirmationContentBuyoutPrice:Show()
+        AuxItemSearchFrameAuctionsConfirmationContentActionButton:SetText('Buy')
+		MoneyFrame_Update('AuxItemSearchFrameAuctionsConfirmationContentBuyoutPrice', amount)
+        AuxItemSearchFrameAuctionsConfirmationContentBid:Hide()
+        AuxItemSearchFrameAuctionsConfirmationContentBuyoutPrice:Show()
 	else
-		AuxBuyConfirmationContentActionButton:SetText('Bid')
-		MoneyInputFrame_SetCopper(AuxBuyConfirmationContentBid, amount)
-		AuxBuyConfirmationContentBuyoutPrice:Hide()
-		AuxBuyConfirmationContentBid:Show()
+        AuxItemSearchFrameAuctionsConfirmationContentActionButton:SetText('Bid')
+		MoneyInputFrame_SetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid, amount)
+        AuxItemSearchFrameAuctionsConfirmationContentBuyoutPrice:Hide()
+        AuxItemSearchFrameAuctionsConfirmationContentBid:Show()
 	end
-	AuxBuyConfirmation:Show()
+    AuxItemSearchFrameAuctionsConfirmation:Show()
 end
 
 function find_auction(entry, buyout_mode, express_mode)
@@ -551,10 +622,10 @@ function find_auction(entry, buyout_mode, express_mode)
 						end				
 						Aux.scan.abort()
 						AuxItemSearchFrameItemSearchButton:Enable()
-						AuxItemSearchFrameConfirmation:Hide()
+						AuxItemSearchFrameAuctionsConfirmation:Hide()
 						update_listing()
 					end
-					AuxItemSearchFrameConfirmationContentActionButton:Enable()
+					AuxItemSearchFrameAuctionsConfirmationContentActionButton:Enable()
 				end
 			end
 		end,
@@ -606,7 +677,7 @@ function create_auction_record(auction_item, current_page)
     elseif auction_item.high_bidder then
         status = GREEN_FONT_COLOR_CODE..'Your Bid'..FONT_COLOR_CODE_CLOSE
     else
-        status = RED_FONT_COLOR_CODE..'Other Bidder'..FONT_COLOR_CODE_CLOSE
+        status = 'Other Bidder'
     end
 
     return {

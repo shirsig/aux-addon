@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="search_frame.lua"/> 
+	<Script file="filter_search_frame.lua"/>
 
 	<Frame>
       <Scripts> 
@@ -10,10 +10,10 @@
 		</Scripts> 
 	</Frame>
 
-    <Frame name="AuxBuyFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
+    <Frame name="AuxFilterSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
-            <Frame name="AuxBuyFilters" inherits="AuxFrameBoxTemplate">
-                <Size><AbsDimension x="213" y="326"/></Size>
+            <Frame name="$parentFilters" inherits="AuxFrameBoxTemplate">
+                <Size><AbsDimension x="180" y="326"/></Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
@@ -23,50 +23,16 @@
                     </OnLoad>
                 </Scripts>
                 <Frames>
-                    <Button name="$parentTab1" inherits="AuxTopTabTemplate" id="1">
-                        <Anchors>
-                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
-                                <Offset>
-                                    <AbsDimension x="7" y="-2"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText('Item')
-                            </OnLoad>
-                            <OnClick>
-                                Aux.browse_frame.set_filter(this:GetID())
-                            </OnClick>
-                        </Scripts>
-                    </Button>
-                    <Button name="$parentTab2" inherits="AuxTopTabTemplate" id="2">
-                        <Anchors>
-                            <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT">
-                                <Offset>
-                                    <AbsDimension x="0" y="0"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText('Filters')
-                            </OnLoad>
-                            <OnClick>
-                                Aux.browse_frame.set_filter(this:GetID())
-                            </OnClick>
-                        </Scripts>
-                    </Button>
-
-                    <EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-71"/></Offset></Anchor></Anchors>
+                    <EditBox name="$parentNameInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-20"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
                                 getglobal(this:GetName()..'Label'):SetText('Name')
+                                this:SetWidth(150)
                             </OnLoad>
                             <OnEnterPressed>
                                 this:ClearFocus()
-                                Aux.buy.SearchButton_onclick()
+                                Aux.filter_search_frame.start_search()
                             </OnEnterPressed>
                             <OnEscapePressed>
                                 this:ClearFocus()
@@ -74,8 +40,8 @@
                         </Scripts>
                     </EditBox>
 
-                    <Frame name="AuxBuyCategoryDropDown" inherits="UIDropDownMenuTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-104" /></Offset></Anchor></Anchors>
+                    <Frame name="$parentCategoryDropDown" inherits="UIDropDownMenuTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-55" /></Offset></Anchor></Anchors>
                         <Layers>
                             <Layer level="BACKGROUND">
                                 <FontString name="$parentLabel" inherits="GameFontNormalSmall" text="Category">
@@ -92,23 +58,23 @@
                         <Scripts>
                             <OnLoad>
                                 UIDropDownMenu_SetWidth(140)
-                                UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
+                                UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersCategoryDropDown_Initialize)
                             </OnLoad>
                             <OnShow>
-                                UIDropDownMenu_Initialize(this, AuxBuyCategoryDropDown_Initialize)
+                                UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersCategoryDropDown_Initialize)
                             </OnShow>
                         </Scripts>
                     </Frame>
 
-                    <Frame name="AuxBuyQualityDropDown" inherits="UIDropDownMenuTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-143" /></Offset></Anchor></Anchors>
+                    <Frame name="$parentQualityDropDown" inherits="UIDropDownMenuTemplate">
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-95" /></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
                                 UIDropDownMenu_SetWidth(140)
-                                UIDropDownMenu_Initialize(this, AuxBuyQualityDropDown_Initialize)
+                                UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersQualityDropDown_Initialize)
                             </OnLoad>
                             <OnShow>
-                                UIDropDownMenu_Initialize(this, AuxBuyQualityDropDown_Initialize)
+                                UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersQualityDropDown_Initialize)
                             </OnShow>
                         </Scripts>
                         <Layers>
@@ -126,9 +92,9 @@
                         </Layers>
                     </Frame>
 
-                    <EditBox name="AuxBuyMinLevel" letters="2" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
+                    <EditBox name="$parentMinLevel" letters="2" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
                         <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-182"/></Offset></Anchor>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-135"/></Offset></Anchor>
                         </Anchors>
                         <Layers>
                             <Layer level="ARTWORK">
@@ -147,9 +113,9 @@
                             </OnEnterPressed>
                         </Scripts>
                     </EditBox>
-                    <EditBox name="AuxBuyMaxLevel" letters="2" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
+                    <EditBox name="$parentMaxLevel" letters="2" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
                         <Anchors>
-                            <Anchor point="LEFT" relativeTo="AuxBuyMinLevel" relativePoint="RIGHT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor>
+                            <Anchor point="LEFT" relativeTo="$parentMinLevel" relativePoint="RIGHT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor>
                         </Anchors>
                         <Scripts>
                             <OnLoad>
@@ -160,9 +126,9 @@
                             </OnEnterPressed>
                         </Scripts>
                     </EditBox>
-                    <CheckButton name="AuxBuyUsableCheckButton" inherits="UICheckButtonTemplate">
+                    <CheckButton name="$parentUsableCheckButton" inherits="UICheckButtonTemplate">
                         <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-182" /></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-135" /></Offset></Anchor></Anchors>
                         <Layers>
                             <Layer level="OVERLAY">
                                 <FontString inherits="GameFontNormalSmall" text="Usable" justifyH="LEFT">
@@ -173,64 +139,61 @@
                     </CheckButton>
 
                     <EditBox name="$parentTooltipInputBox1" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-216"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-170"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
                                 getglobal(this:GetName()..'Label'):SetText('Tooltip')
-                                this:SetWidth(110)
+                                this:SetWidth(150)
                             </OnLoad>
-                            <OnEnterPressed>
-                                AuxBuyTooltipButton_OnClick(this)
-                            </OnEnterPressed>
                         </Scripts>
                     </EditBox>
                     
                     <EditBox name="$parentTooltipInputBox2" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-246"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-190"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                this:SetWidth(110)
+                                this:SetWidth(150)
                             </OnLoad>
-                            <OnEnterPressed>
-                                AuxBuyTooltipButton_OnClick(this)
-                            </OnEnterPressed>
                         </Scripts>
                     </EditBox>
                     
                     <EditBox name="$parentTooltipInputBox3" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-276"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-210"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                this:SetWidth(110)
+                                this:SetWidth(150)
                             </OnLoad>
-                            <OnEnterPressed>
-                                AuxBuyTooltipButton_OnClick(this)
-                            </OnEnterPressed>
                         </Scripts>
                     </EditBox>
                     
                     <EditBox name="$parentTooltipInputBox4" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-306"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-230"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                this:SetWidth(110)
+                                this:SetWidth(150)
                             </OnLoad>
-                            <OnEnterPressed>
-                                AuxBuyTooltipButton_OnClick(this)
-                            </OnEnterPressed>
                         </Scripts>
                     </EditBox>
 
-                    <Button name="AuxBuySearchButton" inherits="UIPanelButtonTemplate" text="Search">
+                    <Button name="$parentSearchButton" inherits="UIPanelButtonTemplate" text="Search">
                         <Size><AbsDimension x="90" y="26"/></Size>
                         <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="5" y="5"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnClick>
-                                Aux.buy.SearchButton_onclick()
+                                Aux.filter_search_frame.start_search()
                             </OnClick>
                         </Scripts>
                     </Button>
-                    <EditBox name="AuxBuyPageEditBox" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
+                    <Button name="$parentStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
+                        <Size><AbsDimension x="90" y="26"/></Size>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="5" y="5"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnClick>
+                                Aux.filter_search_frame.stop_search()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <EditBox name="$parentPageEditBox" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
                         <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="110" y="5"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
@@ -244,7 +207,7 @@
                             </OnEnterPressed>
                         </Scripts>
                     </EditBox>
-                    <CheckButton name="AuxBuyAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
+                    <CheckButton name="$parentAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
                         <Size><AbsDimension x="22" y="22"/></Size>
                         <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="143" y="5"/></Offset></Anchor></Anchors>
                         <Layers>
@@ -256,19 +219,19 @@
                         </Layers>
                         <Scripts>
                             <OnClick>
-                                AuxBuyPageEditBox:EnableMouse(not this:GetChecked())
-                                AuxBuyPageEditBox:SetAlpha(this:GetChecked() and 0.5 or 1)
-                                AuxBuyPageEditBox:ClearFocus()
+                                AuxFilterSearchFrameFiltersPageEditBox:EnableMouse(not this:GetChecked())
+                                AuxFilterSearchFrameFiltersPageEditBox:SetAlpha(this:GetChecked() and 0.5 or 1)
+                                AuxFilterSearchFrameFiltersPageEditBox:ClearFocus()
                             </OnClick>
                         </Scripts>
                     </CheckButton>
                 </Frames>
             </Frame>
-            <Frame name="AuxBuySheetFrame" inherits="AuxFrameBoxTemplate">
+            <Frame name="$parentResults" inherits="AuxFrameBoxTemplate">
                 <Size>
                     <AbsDimension x="655" y="326"/>
                 </Size>
-                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxBuyFilters"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$parentFilters"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
                         this:SetBackdropBorderColor(0.4, 0.4, 0.4)
@@ -290,7 +253,7 @@
                                 getglobal(this:GetName().."Text"):SetText('Buy')
                             </OnLoad>
                             <OnClick>
-                                Aux.browse_frame.set_view(this:GetID())
+                                Aux.filter_search_frame.set_view(this:GetID())
                             </OnClick>
                         </Scripts>
                     </Button>
@@ -307,7 +270,7 @@
                                 getglobal(this:GetName().."Text"):SetText('Bid')
                             </OnLoad>
                             <OnClick>
-                                Aux.browse_frame.set_view(this:GetID())
+                                Aux.filter_search_frame.set_view(this:GetID())
                             </OnClick>
                         </Scripts>
                     </Button>
@@ -324,47 +287,50 @@
                                 getglobal(this:GetName().."Text"):SetText('Full')
                             </OnLoad>
                             <OnClick>
-                                Aux.browse_frame.set_view(this:GetID())
+                                Aux.filter_search_frame.set_view(this:GetID())
                             </OnClick>
                         </Scripts>
                     </Button>
-                    <Frame name="AuxBuyBuyList" hidden="true">
+                    <Frame name="$parentBuyListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
                         <Scripts>
                             <OnLoad>
-                                local sort_order = Aux.util.map(Aux.buy.modes[1].sort_order, function(column_order) return { column = Aux.buy.modes[1].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, sort_order, Aux.buy.modes[1].row_setter, Aux.buy.modes[1].on_row_click, Aux.buy.modes[1].on_row_enter, Aux.buy.modes[1].on_row_leave)
+                                local config = Aux.filter_search_frame.views[1]
+                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
                             </OnLoad>
                         </Scripts>
                     </Frame>
-                    <Frame name="AuxBuyBidList" hidden="true">
+                    <Frame name="$parentBidListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
                         <Scripts>
                             <OnLoad>
-                                local sort_order = Aux.util.map(Aux.buy.modes[2].sort_order, function(column_order) return { column = Aux.buy.modes[2].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[2].columns, sort_order, Aux.buy.modes[2].row_setter, Aux.buy.modes[2].on_row_click, Aux.buy.modes[2].on_row_enter, Aux.buy.modes[2].on_row_leave)
+                                local config = Aux.filter_search_frame.views[2]
+                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
                             </OnLoad>
                         </Scripts>
                     </Frame>
-                    <Frame name="AuxBuyFullList" hidden="true">
+                    <Frame name="$parentFullListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-40" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
                         <Scripts>
                             <OnLoad>
-                                local sort_order = Aux.util.map(Aux.buy.modes[3].sort_order, function(column_order) return { column = Aux.buy.modes[3].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[3].columns, sort_order, Aux.buy.modes[3].row_setter, Aux.buy.modes[3].on_row_click, Aux.buy.modes[3].on_row_enter, Aux.buy.modes[3].on_row_leave)
+                                local config = Aux.filter_search_frame.views[3]
+                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
                             </OnLoad>
                         </Scripts>
                     </Frame>
-                    <Frame name="AuxBuyConfirmation" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
+                    <Frame name="$parentConfirmation" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
@@ -411,7 +377,7 @@
                                         <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnClick>
-                                                Aux.buy.dialog_action()
+                                                Aux.filter_search_frame.dialog_action()
                                             </OnClick>
                                         </Scripts>
                                     </Button>
@@ -420,7 +386,7 @@
                                         <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnClick>
-                                                Aux.buy.dialog_cancel()
+                                                Aux.filter_search_frame.dialog_cancel()
                                             </OnClick>
                                         </Scripts>
                                     </Button>
@@ -430,15 +396,6 @@
                     </Frame>
                 </Frames>
             </Frame>
-            <Button name="AuxBuyStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
-                <Size><AbsDimension x="90" y="26"/></Size>
-                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxAuctionFrameButton"><Offset><AbsDimension x="-25" y="0"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnClick>
-                        Aux.buy.StopButton_onclick()
-                    </OnClick>
-                </Scripts>
-            </Button>
 		</Frames>
 	</Frame>
 </Ui>

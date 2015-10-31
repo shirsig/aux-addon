@@ -1,7 +1,7 @@
 Aux.buy = {}
 
 local private, public = {}, {}
-Aux.browse_frame = public
+Aux.filter_search_frame = public
 
 local create_auction_record, show_dialog, find_auction, hide_sheet, update_sheet, auction_alpha_setter, group_alpha_setter, create_auction_record
 local auctions
@@ -20,12 +20,12 @@ end
 
 local BUYOUT, BID, FULL = 1, 2, 3
 
-Aux.buy.modes = {
+public.views = {
 	[BUYOUT] = {
 		name = 'Buyout',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            AuxBuyEntry_OnClick(Aux.util.filter(sheet.data[data_index], function(auction) return not auction.gone end)[1] or sheet.data[data_index][1])
+            private.on_row_click(Aux.util.filter(sheet.data[data_index], function(auction) return not auction.gone end)[1] or sheet.data[data_index][1])
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
@@ -80,8 +80,6 @@ Aux.buy.modes = {
                     cell.icon = icon
                 end,
                 cell_setter = function(cell, group)
-                    cell.tooltip = group[1].tooltip
-                    cell.EnhTooltip_info = group[1].EnhTooltip_info
                     cell.icon.icon_texture:SetTexture(group[1].texture)
                     if not group[1].usable then
                         cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
@@ -131,7 +129,7 @@ Aux.buy.modes = {
 		name = 'Bid',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            AuxBuyEntry_OnClick(sheet.data[data_index])
+            private.on_row_click(sheet.data[data_index])
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
@@ -186,8 +184,6 @@ Aux.buy.modes = {
                     cell.icon = icon
                 end,
                 cell_setter = function(cell, datum)
-                    cell.tooltip = datum.tooltip
-                    cell.EnhTooltip_info = datum.EnhTooltip_info
                     cell.icon.icon_texture:SetTexture(datum.texture)
                     if not datum.usable then
                         cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
@@ -267,7 +263,7 @@ Aux.buy.modes = {
 		name = 'Full',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            AuxBuyEntry_OnClick(sheet.data[data_index])
+            private.on_row_click(sheet.data[data_index])
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
@@ -324,8 +320,6 @@ Aux.buy.modes = {
                     cell.icon = icon
                 end,
                 cell_setter = function(cell, datum)
-                    cell.tooltip = datum.tooltip
-                    cell.EnhTooltip_info = datum.EnhTooltip_info
                     cell.icon.icon_texture:SetTexture(datum.texture)
                     if not datum.usable then
                         cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
@@ -430,56 +424,65 @@ Aux.buy.modes = {
 	},
 }
 
-function Aux.buy.on_close()
-    if AuxBuyConfirmation:IsVisible() then
+function public.on_close()
+    if AuxFilterSearchFrameResultsConfirmation:IsVisible() then
 	    Aux.buy.dialog_cancel()
     end
 	current_page = nil
 end
 
-function Aux.buy.on_open()
+function public.on_open()
     public.set_view(1)
 	update_sheet()
 end
 
-function Aux.buy.dialog_cancel()
+function public.dialog_cancel()
     Aux.log('Canceled.')
 	Aux.scan.abort()
-	AuxBuyConfirmation:Hide()
+    AuxFilterSearchFrameResultsConfirmation:Hide()
 	update_sheet()
-	AuxBuySearchButton:Enable()
+    AuxFilterSearchFrameFiltersSearchButton:Enable()
 end
 
-function Aux.buy.StopButton_onclick()
+function public.stop_search()
 	Aux.scan.abort()
 end
 
 function update_sheet()
-	AuxBuyBuyList:Hide()
-	AuxBuyBidList:Hide()
-	AuxBuyFullList:Hide()
+	AuxFilterSearchFrameResultsBuyListing:Hide()
+    AuxFilterSearchFrameResultsBidListing:Hide()
+    AuxFilterSearchFrameResultsFullListing:Hide()
 
     if private.view == BUYOUT then
-		AuxBuyBuyList:Show()
+        AuxFilterSearchFrameResultsBuyListing:Show()
         local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-        Aux.list.populate(AuxBuyBuyList.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price == a2.buyout_price end) or {})
+        Aux.list.populate(AuxFilterSearchFrameResultsBuyListing.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price == a2.buyout_price end) or {})
+        AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBuyListing:GetWidth() + 40)
+        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 20)
 	elseif private.view == BID then
-		AuxBuyBidList:Show()
+        AuxFilterSearchFrameResultsBidListing:Show()
         local bid_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
-        Aux.list.populate(AuxBuyBidList.sheet, bid_auctions)
+        Aux.list.populate(AuxFilterSearchFrameResultsBidListing.sheet, bid_auctions)
+        AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBidListing:GetWidth() + 40)
+        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 20)
 	elseif private.view == FULL then
-		AuxBuyFullList:Show()
-        Aux.list.populate(AuxBuyFullList.sheet, auctions or {})
+        AuxFilterSearchFrameResultsFullListing:Show()
+        Aux.list.populate(AuxFilterSearchFrameResultsFullListing.sheet, auctions or {})
+        AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsFullListing:GetWidth() + 40)
+        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 20)
 	end
 end
 
 function hide_sheet()
-	AuxBuyBuyList:Hide()
-	AuxBuyBidList:Hide()
-	AuxBuyFullList:Hide()
+    AuxFilterSearchFrameResultsBuyListing:Hide()
+    AuxFilterSearchFrameResultsBidListing:Hide()
+    AuxFilterSearchFrameResultsFullListing:Hide()
 end
 
 function public.set_view(view)
+    for i=1,3 do
+        getglobal('AuxFilterSearchFrameResultsTab'..i):SetAlpha(i == view and 1 or 0.5)
+    end
     private.view = view
     update_sheet()
 end
@@ -488,43 +491,43 @@ function public.set_item(item_id)
     private.item_id = item_id
 end
 
-function Aux.buy.SearchButton_onclick()
+function public.start_search()
 
-	if not AuxBuySearchButton:IsVisible() then
+	if not AuxFilterSearchFrameFiltersSearchButton:IsVisible() then
 		return
 	end
-	
-	AuxBuySearchButton:Hide()
-	AuxBuyStopButton:Show()
+
+    AuxFilterSearchFrameFiltersSearchButton:Hide()
+    AuxFilterSearchFrameFiltersStopButton:Show()
 	
 	auctions = nil
 	
 	refresh = true
 	
-	local category = UIDropDownMenu_GetSelectedValue(AuxBuyCategoryDropDown)
+	local category = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown)
 	local tooltip_patterns = {}
 	for i=1,4 do
-		local tooltip_pattern = getglobal('AuxBuyFiltersTooltipInputBox'..i):GetText()
+		local tooltip_pattern = getglobal('AuxFilterSearchFrameFiltersTooltipInputBox'..i):GetText()
 		if tooltip_pattern ~= '' then
 			tinsert(tooltip_patterns, tooltip_pattern)
 		end
 	end
 	
 	search_query = {
-		name = AuxBuyNameInputBox:GetText(),
-		min_level = AuxBuyMinLevel:GetText(),
-		max_level = AuxBuyMaxLevel:GetText(),
+		name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
+		min_level = AuxFilterSearchFrameFiltersMinLevel:GetText(),
+		max_level = AuxFilterSearchFrameFiltersMaxLevel:GetText(),
 		slot = category and category.slot,
 		class = category and category.class,	
 		subclass = category and category.subclass,
-		quality = UIDropDownMenu_GetSelectedValue(AuxBuyQualityDropDown),
-		usable = AuxBuyUsableCheckButton:GetChecked()
+		quality = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown),
+		usable = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked()
 	}
 	
 	Aux.log('Scanning auctions ...')
 	Aux.scan.start{
 		query = search_query,
-		page = AuxBuyAllPagesCheckButton:GetChecked() and 0 or AuxBuyPageEditBox:GetNumber(),
+		page = AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() and 0 or AuxFilterSearchFrameFiltersPageEditBox:GetNumber(),
 		on_submit_query = function()
 			current_page = nil
 		end,
@@ -535,7 +538,7 @@ function Aux.buy.SearchButton_onclick()
 		on_read_auction = function(i)
 			local auction_item = Aux.info.auction_item(i)
 			if auction_item then
-				if (auction_item.name == search_query.name or search_query.name == '' or not (private.filter == ITEM)) and Aux.info.tooltip_match(tooltip_patterns, auction_item.tooltip) then
+				if Aux.info.tooltip_match(tooltip_patterns, auction_item.tooltip) then
                     auctions = auctions or {}
                     tinsert(auctions, create_auction_record(auction_item, current_page))
 				end
@@ -545,19 +548,19 @@ function Aux.buy.SearchButton_onclick()
 			auctions = auctions or {}
             Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
 
-            AuxBuyStopButton:Hide()
-			AuxBuySearchButton:Show()
+            AuxFilterSearchFrameFiltersStopButton:Hide()
+            AuxFilterSearchFrameFiltersSearchButton:Show()
 			refresh = true
 		end,
 		on_abort = function()
 			auctions = auctions or {}
             Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
-			AuxBuyStopButton:Hide()
-			AuxBuySearchButton:Show()
+            AuxFilterSearchFrameFiltersStopButton:Hide()
+            AuxFilterSearchFrameFiltersSearchButton:Show()
 			refresh = true
 		end,
 		next_page = function(page, total_pages)
-            if AuxBuyAllPagesCheckButton:GetChecked() then
+            if AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() then
                 local last_page = max(total_pages - 1, 0)
                 if page < last_page then
                     return page + 1
@@ -568,33 +571,33 @@ function Aux.buy.SearchButton_onclick()
 end
 
 function show_dialog(buyout_mode, entry, amount)
-	AuxBuyConfirmationContentItem.tooltip = entry.tooltip
-	AuxBuyConfirmationContentItem.EnhTooltip_info = entry.EnhTooltip_info
-	
-	AuxBuyConfirmationContentActionButton:Disable()
-	AuxBuyConfirmationContentItemIconTexture:SetTexture(entry.texture)
-	AuxBuyConfirmationContentItemName:SetText(entry.tooltip[1][1].text)
+    AuxFilterSearchFrameResultsConfirmationContentItem.tooltip = entry.tooltip
+    AuxFilterSearchFrameResultsConfirmationContentItem.EnhTooltip_info = entry.EnhTooltip_info
+
+    AuxFilterSearchFrameResultsConfirmationContentActionButton:Disable()
+    AuxFilterSearchFrameResultsConfirmationContentItemIconTexture:SetTexture(entry.texture)
+    AuxFilterSearchFrameResultsConfirmationContentItemName:SetText(entry.tooltip[1][1].text)
 	local color = ITEM_QUALITY_COLORS[entry.quality]
-	AuxBuyConfirmationContentItemName:SetTextColor(color.r, color.g, color.b)
+    AuxFilterSearchFrameResultsConfirmationContentItemName:SetTextColor(color.r, color.g, color.b)
 
 	if entry.stack_size > 1 then
-		AuxBuyConfirmationContentItemCount:SetText(entry.stack_size);
-		AuxBuyConfirmationContentItemCount:Show()
+        AuxFilterSearchFrameResultsConfirmationContentItemCount:SetText(entry.stack_size);
+        AuxFilterSearchFrameResultsConfirmationContentItemCount:Show()
 	else
-		AuxBuyConfirmationContentItemCount:Hide()
+        AuxFilterSearchFrameResultsConfirmationContentItemCount:Hide()
 	end
 	if buyout_mode then
-		AuxBuyConfirmationContentActionButton:SetText('Buy')
-		MoneyFrame_Update('AuxBuyConfirmationContentBuyoutPrice', amount)
-		AuxBuyConfirmationContentBid:Hide()
-		AuxBuyConfirmationContentBuyoutPrice:Show()
+        AuxFilterSearchFrameResultsConfirmationContentActionButton:SetText('Buy')
+		MoneyFrame_Update('AuxFilterSearchFrameResultsConfirmationContentBuyoutPrice', amount)
+        AuxFilterSearchFrameResultsConfirmationContentBid:Hide()
+        AuxFilterSearchFrameResultsConfirmationContentBuyoutPrice:Show()
 	else
-		AuxBuyConfirmationContentActionButton:SetText('Bid')
-		MoneyInputFrame_SetCopper(AuxBuyConfirmationContentBid, amount)
-		AuxBuyConfirmationContentBuyoutPrice:Hide()
-		AuxBuyConfirmationContentBid:Show()
+        AuxFilterSearchFrameResultsConfirmationContentActionButton:SetText('Bid')
+		MoneyInputFrame_SetCopper(AuxFilterSearchFrameResultsConfirmationContentBid, amount)
+        AuxFilterSearchFrameResultsConfirmationContentBuyoutPrice:Hide()
+        AuxFilterSearchFrameResultsConfirmationContentBid:Show()
 	end
-	AuxBuyConfirmation:Show()
+    AuxFilterSearchFrameResultsConfirmation:Show()
 end
 
 function find_auction(entry, buyout_mode, express_mode)
@@ -617,7 +620,7 @@ function find_auction(entry, buyout_mode, express_mode)
     end
 
     Aux.log('Processing '..(buyout_mode and 'buyout' or 'bid')..' request for '..entry.hyperlink..' x '..entry.stack_size..' at '..Aux.util.money_string(amount)..' ...')
-	AuxBuySearchButton:Disable()
+    AuxFilterSearchFrameFiltersSearchButton:Disable()
 	
 	if not express_mode then
 		show_dialog(buyout_mode, entry, amount)
@@ -674,11 +677,11 @@ function find_auction(entry, buyout_mode, express_mode)
 							Aux.log('Not enough money.')
 						end				
 						Aux.scan.abort()
-						AuxBuySearchButton:Enable()
-						AuxBuyConfirmation:Hide()
+                        AuxFilterSearchFrameFiltersSearchButton:Enable()
+                        AuxFilterSearchFrameResultsConfirmation:Hide()
 						update_sheet()
 					end
-					AuxBuyConfirmationContentActionButton:Enable()
+                    AuxFilterSearchFrameResultsConfirmationContentActionButton:Enable()
 				end
 			end
 		end,
@@ -690,12 +693,12 @@ function find_auction(entry, buyout_mode, express_mode)
 				Aux.buy.dialog_cancel()
 			end
 			if express_mode then
-				AuxBuySearchButton:Enable()
+                AuxFilterSearchFrameFiltersSearchButton:Enable()
 			end
 		end,
 		on_abort = function()
 			if express_mode then
-				AuxBuySearchButton:Enable()
+                AuxFilterSearchFrameFiltersSearchButton:Enable()
 			end
 		end,
 		next_page = function(page, total_pages)
@@ -706,7 +709,7 @@ function find_auction(entry, buyout_mode, express_mode)
 	}
 end
 
-function AuxBuyEntry_OnClick(entry)
+function private.on_row_click(entry)
 
 	local express_mode = IsAltKeyDown()
 	local buyout_mode = arg1 == 'LeftButton'
@@ -730,7 +733,7 @@ function create_auction_record(auction_item, current_page)
     elseif auction_item.high_bidder then
         status = GREEN_FONT_COLOR_CODE..'Your Bid'..FONT_COLOR_CODE_CLOSE
     else
-        status = RED_FONT_COLOR_CODE..'Other Bidder'..FONT_COLOR_CODE_CLOSE
+        status = 'Other Bidder'
     end
 
     return {
@@ -767,7 +770,7 @@ function Aux.buy.onupdate()
 	end
 end
 
-function AuxBuyCategoryDropDown_Initialize(arg1)
+function AuxFilterSearchFrameFiltersCategoryDropDown_Initialize(arg1)
 	local level = arg1 or 1
 	
 	if level == 1 then
@@ -775,7 +778,7 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 		UIDropDownMenu_AddButton({
 			text = ALL,
 			value = value,
-			func = AuxBuyCategoryDropDown_OnClick,
+			func = AuxFilterSearchFrameFiltersCategoryDropDown_OnClick,
 		}, 1)
 		
 		for i, class in pairs({ GetAuctionItemClasses() }) do
@@ -784,7 +787,7 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 				hasArrow = GetAuctionItemSubClasses(value.class),
 				text = class,
 				value = value,
-				func = AuxBuyCategoryDropDown_OnClick,
+				func = AuxFilterSearchFrameFiltersCategoryDropDown_OnClick,
 			}, 1)
 		end
 	end
@@ -797,7 +800,7 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 				hasArrow = GetAuctionInvTypes(value.class, value.subclass),
 				text = subclass,
 				value = value,
-				func = AuxBuyCategoryDropDown_OnClick,
+				func = AuxFilterSearchFrameFiltersCategoryDropDown_OnClick,
 			}, 2)
 		end
 	end
@@ -810,13 +813,13 @@ function AuxBuyCategoryDropDown_Initialize(arg1)
 			UIDropDownMenu_AddButton({
 				text = slot_name,
 				value = value,
-				func = AuxBuyCategoryDropDown_OnClick,
+				func = AuxFilterSearchFrameFiltersCategoryDropDown_OnClick,
 			}, 3)
 		end
 	end
 end
 
-function AuxBuyCategoryDropDown_OnClick()
+function AuxFilterSearchFrameFiltersCategoryDropDown_OnClick()
 	local qualified_name = ({ GetAuctionItemClasses() })[this.value.class] or 'All'
 	if this.value.subclass then
 		local subclass_name = ({ GetAuctionItemSubClasses(this.value.class) })[this.value.subclass]
@@ -827,15 +830,15 @@ function AuxBuyCategoryDropDown_OnClick()
 		end
 	end
 
-	UIDropDownMenu_SetSelectedValue(AuxBuyCategoryDropDown, this.value)
-	UIDropDownMenu_SetText(qualified_name, AuxBuyCategoryDropDown)
+	UIDropDownMenu_SetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown, this.value)
+	UIDropDownMenu_SetText(qualified_name, AuxFilterSearchFrameFiltersCategoryDropDown)
 	CloseDropDownMenus(1)
 end
 
-function AuxBuyQualityDropDown_Initialize()
+function AuxFilterSearchFrameFiltersQualityDropDown_Initialize()
 
     local function on_click()
-        UIDropDownMenu_SetSelectedValue(AuxBuyQualityDropDown, this.value)
+        UIDropDownMenu_SetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown, this.value)
     end
 
 	UIDropDownMenu_AddButton{

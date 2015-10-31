@@ -32,20 +32,21 @@ function Aux_OnLoad()
 end
 
 function Aux_OnEvent()
-	if event == "VARIABLES_LOADED" then
+	if event == 'VARIABLES_LOADED' then
 		Aux_OnLoad()
-	elseif event == "ADDON_LOADED" then
+	elseif event == 'ADDON_LOADED' then
 		Aux_OnAddonLoaded()
-	elseif event == "AUCTION_HOUSE_SHOW" then
+	elseif event == 'AUCTION_HOUSE_SHOW' then
 		Aux_OnAuctionHouseShow()
-	elseif event == "AUCTION_HOUSE_CLOSED" then
+	elseif event == 'AUCTION_HOUSE_CLOSED' then
 		Aux_OnAuctionHouseClosed()
-	end
+	elseif event == 'AUCTION_OWNED_LIST_UPDATE' then
+        Aux.current_owner_page = Aux.last_owner_page_requested
+    end
 end
 
 function Aux_OnAddonLoaded()
 	if string.lower(arg1) == "blizzard_auctionui" then
-        AuctionFrame:SetScript('OnHide', nil)
 		Aux_SetupHookFunctions()
 	end
 end
@@ -102,15 +103,23 @@ end
 
 function Aux_SetupHookFunctions()
 
+    local blizzard_ui_on_hide = function()
+        Aux.blizzard_ui_shown = false
+    end
+    AuctionFrame:SetScript('OnHide', blizzard_ui_on_hide)
+
     Aux.orig.AuctionFrame_OnShow = AuctionFrame_OnShow
-    -- TODO for some reason this breaks the auction house functionality
---    AuctionFrame_OnShow = function()
---        if not Aux.blizzard_ui_shown then
---            HideUIPanel(AuctionFrame)
---        else
---            return Aux.orig.AuctionFrame_OnShow()
---        end
---    end
+    AuctionFrame_OnShow = function()
+        if not Aux.blizzard_ui_shown then
+            Aux.control.as_soon_as(function() return AuctionFrame:GetScript('OnHide') == blizzard_ui_on_hide end, function()
+                HideUIPanel(AuctionFrame)
+            end)
+        end
+        return Aux.orig.AuctionFrame_OnShow()
+    end
+
+    Aux.orig.GetOwnerAuctionItems = GetOwnerAuctionItems
+    GetOwnerAuctionItems = Aux.GetOwnerAuctionItems
 
     Aux.orig.PickupContainerItem = PickupContainerItem
 	PickupContainerItem = Aux.PickupContainerItem
@@ -121,6 +130,11 @@ function Aux_SetupHookFunctions()
     Aux.orig.AuctionFrameAuctions_OnEvent = AuctionFrameAuctions_OnEvent
     AuctionFrameAuctions_OnEvent = Aux.AuctionFrameAuctions_OnEvent
 
+end
+
+function Aux.GetOwnerAuctionItems(page)
+    Aux.last_owner_page_requested = page
+    return Aux.orig.GetOwnerAuctionItems(page)
 end
 
 function Aux.AuctionFrameAuctions_OnEvent()
@@ -147,7 +161,7 @@ function Aux_OnAuctionHouseClosed()
 	Aux.stack.stop()
 	Aux.scan.abort()
 
-    Aux.buy.on_close()
+    Aux.filter_search_frame.on_close()
     Aux.sell.on_close()
 	
 	AuxFrame:Hide()
@@ -158,7 +172,7 @@ function Aux.on_tab_click(index)
     Aux.stack.stop()
     Aux.scan.abort(function()
         Aux.item_search_frame.on_close()
-        Aux.buy.on_close()
+        Aux.filter_search_frame.on_close()
         Aux.sell.on_close()
         Aux.manage_frame.on_close()
         Aux.history.on_close()
@@ -168,7 +182,7 @@ function Aux.on_tab_click(index)
         end
 
         AuxItemSearchFrame:Hide()
-        AuxBuyFrame:Hide()
+        AuxFilterSearchFrame:Hide()
         AuxSellFrame:Hide()
         AuxManageFrame:Hide()
         AuxHistoryFrame:Hide()
@@ -177,7 +191,7 @@ function Aux.on_tab_click(index)
             AuxItemSearchFrame:Show()
             Aux.item_search_frame.on_open()
         elseif index == 2 then
-            AuxBuyFrame:Show()
+            AuxFilterSearchFrame:Show()
             Aux.filter_search_frame.on_open()
         elseif index == 3 then
             AuxSellFrame:Show()
@@ -221,23 +235,23 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 	local bag, slot = this:GetParent():GetID(), this:GetID()
 	local container_item = Aux.info.container_item(bag, slot)
 	
-	if AuctionFrame:IsVisible() and button == "LeftButton" and container_item then
-	
-		if IsShiftKeyDown()
-				and not ChatFrameEditBox:IsVisible()
-				and AuxBuyFrame:IsVisible()
-		then
-            AuxBuyNameInputBox.completor.set_quietly(container_item.name)
-			return
-		elseif AUX_BUY_SHORTCUT and IsAltKeyDown() then
-			if not AuxBuyFrame:IsVisible() then
-                Aux.on_tab_click(1)
-			end
-			AuxBuyNameInputBox.completor.set_quietly(container_item.name)
-			Aux.buy.SearchButton_onclick()
-			return
-		end
-	end
+--	if AuctionFrame:IsVisible() and button == "LeftButton" and container_item then
+--
+--		if IsShiftKeyDown()
+--				and not ChatFrameEditBox:IsVisible()
+--				and AuxBuyFrame:IsVisible()
+--		then
+--            AuxBuyNameInputBox.completor.set_quietly(container_item.name)
+--			return
+--		elseif AUX_BUY_SHORTCUT and IsAltKeyDown() then
+--			if not AuxBuyFrame:IsVisible() then
+--                Aux.on_tab_click(1)
+--			end
+--			AuxBuyNameInputBox.completor.set_quietly(container_item.name)
+--			Aux.filter_search_frame.start_search()
+--			return
+--		end
+--	end
 	return Aux.orig.ContainerFrameItemButton_OnClick(button)
 end
 

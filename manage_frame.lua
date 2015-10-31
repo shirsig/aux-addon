@@ -1,22 +1,23 @@
 local private, public = {}, {}
+Aux.manage_frame = public
 
-local on_open, on_close
+local update_bid_records, update_auction_records, wait_for_bids, wait_for_auctions
 
-local bid_records, auction_records, create_bid_record, create_auction_record, update_bid_records, update_auction_records, wait_for_bids, wait_for_auctions, create_record
+local bid_records, auction_records
 
-local position
+local BIDS, AUCTIONS = 1, 2
 
-local bid_listing_config = {
-    on_cell_click = function(sheet, row_index, column_index)
+public.bid_listing_config = {
+    on_row_click = function(sheet, row_index, column_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         AuxBuyEntry_OnClick(sheet.data[data_index])
     end,
 
-    on_cell_enter = function(sheet, row_index, column_index)
+    on_row_enter = function(sheet, row_index, column_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
     end,
 
-    on_cell_leave = function(sheet, row_index, column_index)
+    on_row_leave = function(sheet, row_index, column_index)
         sheet.rows[row_index].highlight:SetAlpha(0)
     end,
     columns = {
@@ -36,6 +37,7 @@ local bid_listing_config = {
             comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
             cell_initializer = function(cell)
                 local icon = CreateFrame('Button', nil, cell)
+                icon:EnableMouse(false)
                 local icon_texture = icon:CreateTexture(nil, 'BORDER')
                 icon_texture:SetAllPoints(icon)
                 icon.icon_texture = icon_texture
@@ -48,10 +50,7 @@ local bid_listing_config = {
                 icon:SetPoint('LEFT', cell)
                 icon:SetWidth(12)
                 icon:SetHeight(12)
-                icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
-                icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
-                icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
-                icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT', cell.EnhTooltip_info) end)
+                icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
                 icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
                 local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                 text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
@@ -75,23 +74,6 @@ local bid_listing_config = {
                 cell.text:SetText('['..datum.tooltip[1][1].text..']')
                 local color = ITEM_QUALITY_COLORS[datum.quality]
                 cell.text:SetTextColor(color.r, color.g, color.b)
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
-            title = 'Lvl',
-            width = 23,
-            comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-            cell_setter = function(cell, datum)
-                local level = max(1, datum.level)
-                local text
-                if level > UnitLevel('player') then
-                    text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
-                else
-                    text = level
-                end
-                cell.text:SetText(text)
                 private.auction_alpha_setter(cell, datum)
             end,
         },
@@ -126,26 +108,6 @@ local bid_listing_config = {
             end,
         },
         {
-            title = 'Bid/ea',
-            width = 70,
-            comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-            cell_setter = function(cell, datum)
-                cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
-            title = 'Buy/ea',
-            width = 70,
-            comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-            cell_setter = function(cell, datum)
-                cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
             title = 'Bid',
             width = 70,
             comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
@@ -169,17 +131,17 @@ local bid_listing_config = {
     sort_order = {},
 }
 
-local auction_listing_config = {
-    on_cell_click = function (sheet, row_index, column_index)
+public.auction_listing_config = {
+    on_row_click = function (sheet, row_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         AuxBuyEntry_OnClick(sheet.data[data_index])
     end,
 
-    on_cell_enter = function (sheet, row_index, column_index)
+    on_row_enter = function (sheet, row_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
     end,
 
-    on_cell_leave = function (sheet, row_index, column_index)
+    on_row_leave = function (sheet, row_index)
         sheet.rows[row_index].highlight:SetAlpha(0)
     end,
     columns = {
@@ -199,6 +161,7 @@ local auction_listing_config = {
             comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
             cell_initializer = function(cell)
                 local icon = CreateFrame('Button', nil, cell)
+                icon:EnableMouse(false)
                 local icon_texture = icon:CreateTexture(nil, 'BORDER')
                 icon_texture:SetAllPoints(icon)
                 icon.icon_texture = icon_texture
@@ -211,10 +174,7 @@ local auction_listing_config = {
                 icon:SetPoint('LEFT', cell)
                 icon:SetWidth(12)
                 icon:SetHeight(12)
-                icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
-                icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
-                icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
-                icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_RIGHT', cell.EnhTooltip_info) end)
+                icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
                 icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
                 local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                 text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
@@ -242,23 +202,6 @@ local auction_listing_config = {
             end,
         },
         {
-            title = 'Lvl',
-            width = 23,
-            comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-            cell_setter = function(cell, datum)
-                local level = max(1, datum.level)
-                local text
-                if level > UnitLevel('player') then
-                    text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
-                else
-                    text = level
-                end
-                cell.text:SetText(text)
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
             title = 'Left',
             width = 30,
             comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
@@ -275,36 +218,6 @@ local auction_listing_config = {
                     text = '24h'
                 end
                 cell.text:SetText(text)
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
-            title = 'Owner',
-            width = 70,
-            comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
-            cell_setter = function(cell, datum)
-                cell.text:SetText(datum.owner)
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
-            title = 'Bid/ea',
-            width = 70,
-            comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-            cell_setter = function(cell, datum)
-                cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
-            title = 'Buy/ea',
-            width = 70,
-            comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-            cell_setter = function(cell, datum)
-                cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
                 private.auction_alpha_setter(cell, datum)
             end,
         },
@@ -332,41 +245,39 @@ local auction_listing_config = {
     sort_order = {},
 }
 
-function on_open()
-    Aux.list.populate(AuxManageBidsListing.sheet, {})
-    Aux.list.populate(AuxManageAuctionsListing.sheet, {})
+function public.on_open()
+    public.listing = public.listing or BIDS
 
-    update_bid_records(function()
-        update_auction_records(function()
-        end)
-    end)
+    if public.listing == BIDS then
+        public.update_bid_records()
+    elseif public.listing == AUCTIONS then
+        public.update_auction_records()
+    end
+
+    public.update_listing()
 end
 
-function on_close()
+function public.on_close()
 end
 
 function private.auction_alpha_setter(cell, auction)
     cell:SetAlpha(auction.gone and 0.3 or 1)
 end
 
-function update_bid_records(k)
+function public.update_bid_records()
     bid_records = {}
     Aux.scan.start{
         type = 'bidder',
         page = 0,
-        on_submit_query = function()
-            position = nil
-        end,
         on_page_loaded = function(page, total_pages)
 			Aux.log('Scanning bid page '..(page+1)..' out of '..total_pages..' ...')
-            position = 'bids#'..page
         end,
         on_read_auction = function(i)
-            create_bid_record(i)
+            private.create_bid_record(i)
         end,
         on_complete = function()
-            Aux.list.populate(AuxManageBidsListing.sheet, bid_records)
-            return k()
+            Aux.log('Scan complete: '..getn(bid_records)..' bids found')
+            public.update_listing()
         end,
         on_abort = function()
         end,
@@ -379,24 +290,20 @@ function update_bid_records(k)
     }
 end
 
-function update_auction_records(k)
+function public.update_auction_records()
     auction_records = {}
     Aux.scan.start{
         type = 'owner',
         page = 0,
-        on_submit_query = function()
-            position = nil
-        end,
         on_page_loaded = function(page, total_pages)
 			Aux.log('Scanning auction page '..(page+1)..' out of '..total_pages..' ...')
-            position = 'auctions#'..page
         end,
         on_read_auction = function(i)
-            create_auction_record(i)
+            private.create_auction_record(i)
         end,
         on_complete = function()
-            Aux.list.populate(AuxManageAuctionsListing.sheet, auction_records)
-            return k()
+            Aux.log('Scan complete: '..getn(auction_records)..' auctions found')
+            public.update_listing()
         end,
         on_abort = function()
         end,
@@ -409,7 +316,26 @@ function update_auction_records(k)
     }
 end
 
-function create_record(auction_item)
+function public.update_listing()
+    AuxManageFrameListingBidListing:Hide()
+    AuxManageFrameListingAuctionListing:Hide()
+
+    for i=1,2 do
+        getglobal('AuxManageFrameListingTab'..i):SetAlpha(i == public.listing and 1 or 0.5)
+    end
+
+    if public.listing == BIDS then
+        AuxManageFrameListingBidListing:Show()
+        Aux.list.populate(AuxManageFrameListingBidListing.sheet, bid_records)
+        AuxManageFrameListing:SetWidth(AuxManageFrameListingBidListing:GetWidth() + 40)
+    elseif public.listing == AUCTIONS then
+        AuxManageFrameListingAuctionListing:Show()
+        Aux.list.populate(AuxManageFrameListingAuctionListing.sheet, auction_records)
+        AuxManageFrameListing:SetWidth(AuxManageFrameListingAuctionListing:GetWidth() + 40)
+    end
+end
+
+function private.create_record(auction_item)
 
     local stack_size = auction_item.charges or auction_item.count
     local bid = (auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid) + auction_item.min_increment
@@ -450,25 +376,18 @@ function create_record(auction_item)
     }
 end
 
-function create_auction_record(index)
+function private.create_auction_record(index)
     local auction_item = Aux.info.auction_item(index, 'owner')
     if auction_item then
-        tinsert(auction_records, create_record(auction_item))
+        tinsert(auction_records, private.create_record(auction_item))
     end
 end
 
-function create_bid_record(index)
+function private.create_bid_record(index)
     local auction_item = Aux.info.auction_item(index, 'bidder')
     if auction_item then
-        tinsert(auction_records, create_record(auction_item))
+        tinsert(bid_records, private.create_record(auction_item))
     end
 end
-
-Aux.manage_frame = {
-    on_open = on_open,
-    on_close = on_close,
-    bid_listing_config = bid_listing_config,
-    auction_listing_config = auction_listing_config,
-}
 
 

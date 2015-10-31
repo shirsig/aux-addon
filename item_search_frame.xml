@@ -13,7 +13,7 @@
     <Frame name="AuxItemSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
             <Frame name="$parentItem" inherits="AuxFrameBoxTemplate">
-                <Size><AbsDimension x="213" y="326"/></Size>
+                <Size><AbsDimension x="213" y="120"/></Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
@@ -39,45 +39,46 @@
                     </Button>
 
                     <EditBox name="$parentItemInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-28"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="2" y="-28"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Item')
-                                this.completor = Aux.completion.completor(this)
-                                this:SetWidth(165)
+                                this.selector = Aux.completion.selector(this)
+                                this:SetWidth(185)
                             </OnLoad>
                             <OnTextChanged>
-                                this.completor.suggest()
+                                this.selector.suggest()
                             </OnTextChanged>
                             <OnTabPressed>
                                 if IsShiftKeyDown() then
-                                    this.completor.previous()
+                                    this.selector.previous()
                                 else
-                                    this.completor.next()
+                                    this.selector.next()
                                 end
                             </OnTabPressed>
                             <OnEnterPressed>
-                                this.completor.close()
-                                this:ClearFocus()
-                            </OnEnterPressed>
-                            <OnEditFocusLost>
-                                this:Hide()
-                                Aux.item_search_frame.update_item()
-                                Aux.item_search_frame.start_search()
-                            </OnEditFocusLost>
-                            <OnEscapePressed>
-                                if this.completor.open() then
-                                    this.completor.close()
-                                else
+                                if this.selector.selected_value() then
                                     this:ClearFocus()
                                 end
+                            </OnEnterPressed>
+                            <OnEditFocusLost>
+                                this.selector.close()
+                                if this.selector.selected_value() then
+                                    Aux.item_search_frame.set_item(this.selector.selected_value())
+                                end
+                                this:Hide()
+                                this.selector.clear()
+                                Aux.item_search_frame.update_item()
+                            </OnEditFocusLost>
+                            <OnEscapePressed>
+                                this.selector.clear()
+                                this:ClearFocus()
                             </OnEscapePressed>
                         </Scripts>
                     </EditBox>
 
                     <Button name="$parentSearchButton" inherits="UIPanelButtonTemplate" text="Refresh">
                         <Size><AbsDimension x="90" y="26"/></Size>
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="5" y="5"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="8" y="15"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnClick>
                                 Aux.item_search_frame.start_search()
@@ -86,7 +87,7 @@
                     </Button>
                     <Button name="$parentStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
                         <Size><AbsDimension x="90" y="26"/></Size>
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="5" y="5"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="8" y="15"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnClick>
                                 Aux.item_search_frame.stop_search()
@@ -94,7 +95,7 @@
                         </Scripts>
                     </Button>
                     <EditBox name="$parentPageEditBox" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="110" y="5"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="111" y="15"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
                                 getglobal(this:GetName()..'Label'):SetText('Page')
@@ -109,7 +110,7 @@
                     </EditBox>
                     <CheckButton name="$parentAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
                         <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="143" y="5"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="144" y="15"/></Offset></Anchor></Anchors>
                         <Layers>
                             <Layer level="OVERLAY">
                                 <FontString inherits="GameFontNormalSmall" text="All" justifyH="LEFT">
@@ -125,6 +126,35 @@
                             </OnClick>
                         </Scripts>
                     </CheckButton>
+                </Frames>
+            </Frame>
+            <Frame name="$parentRecentlySearched" inherits="AuxFrameBoxTemplate">
+                <Size>
+                    <AbsDimension x="213" y="186"/>
+                </Size>
+                <Anchors><Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$parentItem"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
+                <Anchors><Anchor point="BOTTOM" relativePoint="BOTTOM" relativeTo="$parentAuctions"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnLoad>
+                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                        this:SetBackdropColor(0.15, 0.15, 0.15)
+                        getglobal(this:GetName().."Title"):SetText('Recently Searched')
+                    </OnLoad>
+                </Scripts>
+                <Frames>
+                    <Frame name="$parentListing">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                local config = Aux.item_search_frame.recently_searched_config
+                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
                 </Frames>
             </Frame>
             <Frame name="$parentAuctions" inherits="AuxFrameBoxTemplate">
