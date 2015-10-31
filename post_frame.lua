@@ -53,6 +53,7 @@ Aux.sell.inventory_listing_config = {
             comparator = function(row1, row2) return Aux.util.compare(row1.name, row2.name, Aux.util.GT) end,
             cell_initializer = function(cell)
                 local icon = CreateFrame('Button', nil, cell)
+                icon:EnableMouse(false)
                 local icon_texture = icon:CreateTexture(nil, 'BORDER')
                 icon_texture:SetAllPoints(icon)
                 icon.icon_texture = icon_texture
@@ -65,9 +66,6 @@ Aux.sell.inventory_listing_config = {
                 icon:SetPoint('LEFT', cell)
                 icon:SetWidth(12)
                 icon:SetHeight(12)
-                icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
-                icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
-                icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
                 local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                 text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
                 text:SetPoint('TOPRIGHT', cell)

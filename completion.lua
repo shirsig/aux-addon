@@ -4,43 +4,6 @@ local NUM_MATCHES = 5
 
 local fuzzy, generate_suggestions
 
-local items = {}
-
-local potentially_auctionable_items = {}
-function _process_batch(i)
-    for j=i, i+1000 do
-        local name = GetItemInfo('item:'..j)
-        if name then
-            local tooltip = Aux.info.tooltip(function(tt) tt:SetHyperlink('item:'..j) end)
-            if not Aux.info.tooltip_match({'binds when picked up'}, tooltip) and not Aux.info.tooltip_match({'quest item'}, tooltip) then
-                Aux.log(name)
-                tinsert(potentially_auctionable_items, { id=j, s=0 })
-            end
-        end
-    end
-    if i+1000 > 30000 then
-        snipe.log(getn(potentially_auctionable_items))
-    else
-        local t0 = time()
-        Aux.control.as_soon_as(function() return time() - t0 > 1 end, function()
-            return _process_batch(i+1000)
-        end)
-    end
-end
-
-function find_auctionable_items()
-    _process_batch(1)
-end
-
-find_auctionable_items()
-
-for item_id=1,30000 do
-	local name = GetItemInfo(item_id)
-	if name then
-		tinsert(items, { name=name, id=item_id })
-	end
-end
-
 function fuzzy(input)
 	local uppercase_input = strupper(input)
 	local pattern = '(.*)'
@@ -70,7 +33,7 @@ function generate_suggestions(input)
 	end
 	
 	local best = {}
-	for _, item in ipairs(items) do
+	for _, item in ipairs(Aux.localized_auctionable_items) do
 		local rating = matcher(item.name)
 		if rating then
 			local candidate = { name=item.name, id=item.id, rating=rating }
@@ -106,14 +69,8 @@ function Aux.completion.completor(edit_box)
 				notCheckable = true,
 				func = function()
 --					self.set_quietly(text)
-                    local info = { GetItemInfo(this.value) }
-                    AuxBuyFiltersItemIconTexture:SetTexture(info[9])
-                    AuxBuyFiltersItemName:SetText(text)
-                    local color = ITEM_QUALITY_COLORS[info[3]]
-                    AuxBuyFiltersItemName:SetTextColor(color.r, color.g, color.b)
-
-                    Aux.browse_frame.set_item(this.value)
-                    Aux.browse_frame.update_item()
+                    Aux.item_search_frame.set_item(this.value)
+                    AuxItemSearchFrameItemItemInputBox:ClearFocus()
 				end,
 			}
 		end
@@ -183,10 +140,11 @@ function Aux.completion.completor(edit_box)
 			index = index > 0 and math.mod(index + 1, getn(suggestions) + 1) or 1
 			update_highlighting()
 			if index == 0 then
-				self.set_quietly(input)
+--				self.set_quietly(input)
 			else	
-				self.set_quietly(suggestions[index].text)
-			end
+--				self.set_quietly(suggestions[index].text)
+                Aux.item_search_frame.set_item(suggestions[index].value)
+            end
 		end
 	end
 	
@@ -196,9 +154,10 @@ function Aux.completion.completor(edit_box)
 			index = index > 0 and index - 1 or getn(suggestions)
 			update_highlighting()
 			if index == 0 then
-				self.set_quietly(input)
+--				self.set_quietly(input)
 			else	
-				self.set_quietly(suggestions[index].text)
+--				self.set_quietly(suggestions[index].text)
+                Aux.item_search_frame.set_item(suggestions[index].value)
 			end
 		end
 	end

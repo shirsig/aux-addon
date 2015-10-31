@@ -19,7 +19,7 @@
                     <OnLoad>
                         this:SetBackdropBorderColor(0.4, 0.4, 0.4)
                         this:SetBackdropColor(0.15, 0.15, 0.15)
-                        <!--getglobal(this:GetName().."Title"):SetText('Filters')-->
+                        getglobal(this:GetName().."Title"):SetText('Filters')
                     </OnLoad>
                 </Scripts>
                 <Frames>
@@ -57,54 +57,6 @@
                             </OnClick>
                         </Scripts>
                     </Button>
-
-                    <Button name="$parentItem" inherits="AuxItemTemplate">
-                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
-                        <scripts>
-                            <OnLoad>
-                                this:SetHighlightTexture(nil)
-                            </OnLoad>
-                            <OnClick>
-                                Aux.browse_frame.set_item()
-                                Aux.browse_frame.update_item()
-                                AuxBuyFiltersItemInputBox:SetText('')
-                                AuxBuyFiltersItemInputBox:SetFocus()
-                            </OnClick>
-                        </scripts>
-                    </Button>
-
-                    <EditBox name="$parentItemInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-28"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Item')
-                                this.completor = Aux.completion.completor(this)
-                                this:SetWidth(193)
-                            </OnLoad>
-                            <OnTextChanged>
-                                this.completor.suggest()
-                            </OnTextChanged>
-                            <OnTabPressed>
-                                if IsShiftKeyDown() then
-                                this.completor.previous()
-                                else
-                                this.completor.next()
-                                end
-                            </OnTabPressed>
-                            <OnEnterPressed>
-                                this.completor.close()
-                                this:ClearFocus()
-                                Aux.buy.SearchButton_onclick()
-                            </OnEnterPressed>
-                            <OnEscapePressed>
-                                if this.completor.open() then
-                                this.completor.close()
-                                else
-                                this:ClearFocus()
-                                end
-                            </OnEscapePressed>
-                        </Scripts>
-                    </EditBox>
 
                     <EditBox name="AuxBuyNameInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-71"/></Offset></Anchor></Anchors>
@@ -237,7 +189,6 @@
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-246"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Tooltip')
                                 this:SetWidth(110)
                             </OnLoad>
                             <OnEnterPressed>
@@ -250,7 +201,6 @@
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-276"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Tooltip')
                                 this:SetWidth(110)
                             </OnLoad>
                             <OnEnterPressed>
@@ -263,7 +213,6 @@
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-306"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Tooltip')
                                 this:SetWidth(110)
                             </OnLoad>
                             <OnEnterPressed>
@@ -387,7 +336,7 @@
                         <Scripts>
                             <OnLoad>
                                 local sort_order = Aux.util.map(Aux.buy.modes[1].sort_order, function(column_order) return { column = Aux.buy.modes[1].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, sort_order, Aux.buy.modes[1].row_setter, Aux.buy.modes[1].on_cell_click, Aux.buy.modes[1].on_cell_enter, Aux.buy.modes[1].on_cell_leave)
+                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[1].columns, sort_order, Aux.buy.modes[1].row_setter, Aux.buy.modes[1].on_row_click, Aux.buy.modes[1].on_row_enter, Aux.buy.modes[1].on_row_leave)
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -399,7 +348,7 @@
                         <Scripts>
                             <OnLoad>
                                 local sort_order = Aux.util.map(Aux.buy.modes[2].sort_order, function(column_order) return { column = Aux.buy.modes[2].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[2].columns, sort_order, Aux.buy.modes[2].row_setter, Aux.buy.modes[2].on_cell_click, Aux.buy.modes[2].on_cell_enter, Aux.buy.modes[2].on_cell_leave)
+                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[2].columns, sort_order, Aux.buy.modes[2].row_setter, Aux.buy.modes[2].on_row_click, Aux.buy.modes[2].on_row_enter, Aux.buy.modes[2].on_row_leave)
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -411,7 +360,7 @@
                         <Scripts>
                             <OnLoad>
                                 local sort_order = Aux.util.map(Aux.buy.modes[3].sort_order, function(column_order) return { column = Aux.buy.modes[3].columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[3].columns, sort_order, Aux.buy.modes[3].row_setter, Aux.buy.modes[3].on_cell_click, Aux.buy.modes[3].on_cell_enter, Aux.buy.modes[3].on_cell_leave)
+                                this.sheet = Aux.sheet.create(this, Aux.buy.modes[3].columns, sort_order, Aux.buy.modes[3].row_setter, Aux.buy.modes[3].on_row_click, Aux.buy.modes[3].on_row_enter, Aux.buy.modes[3].on_row_leave)
                             </OnLoad>
                         </Scripts>
                     </Frame>

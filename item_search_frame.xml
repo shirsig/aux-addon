@@ -1,0 +1,301 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+	<Script file="item_search_frame.lua"/>
+
+	<Frame>
+      <Scripts> 
+			<OnUpdate> 
+				Aux.item_search_frame.on_update()
+			</OnUpdate> 
+		</Scripts> 
+	</Frame>
+
+    <Frame name="AuxItemSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
+		<Frames>
+            <Frame name="$parentItem" inherits="AuxFrameBoxTemplate">
+                <Size><AbsDimension x="213" y="326"/></Size>
+                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnLoad>
+                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                        this:SetBackdropColor(0.15, 0.15, 0.15)
+                        getglobal(this:GetName().."Title"):SetText('Item')
+                    </OnLoad>
+                </Scripts>
+                <Frames>
+                    <Button name="$parentItem" inherits="AuxItemTemplate">
+                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
+                        <scripts>
+                            <OnLoad>
+                                this:SetHighlightTexture(nil)
+                            </OnLoad>
+                            <OnClick>
+                                AuxItemSearchFrameItemItemInputBox:Show()
+                                Aux.item_search_frame.update_item()
+                                AuxItemSearchFrameItemItemInputBox:SetText('')
+                                AuxItemSearchFrameItemItemInputBox:SetFocus()
+                            </OnClick>
+                        </scripts>
+                    </Button>
+
+                    <EditBox name="$parentItemInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
+                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-28"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName()..'Label'):SetText('Item')
+                                this.completor = Aux.completion.completor(this)
+                                this:SetWidth(165)
+                            </OnLoad>
+                            <OnTextChanged>
+                                this.completor.suggest()
+                            </OnTextChanged>
+                            <OnTabPressed>
+                                if IsShiftKeyDown() then
+                                    this.completor.previous()
+                                else
+                                    this.completor.next()
+                                end
+                            </OnTabPressed>
+                            <OnEnterPressed>
+                                this.completor.close()
+                                this:ClearFocus()
+                            </OnEnterPressed>
+                            <OnEditFocusLost>
+                                this:Hide()
+                                Aux.item_search_frame.update_item()
+                                Aux.item_search_frame.start_search()
+                            </OnEditFocusLost>
+                            <OnEscapePressed>
+                                if this.completor.open() then
+                                    this.completor.close()
+                                else
+                                    this:ClearFocus()
+                                end
+                            </OnEscapePressed>
+                        </Scripts>
+                    </EditBox>
+
+                    <Button name="$parentSearchButton" inherits="UIPanelButtonTemplate" text="Refresh">
+                        <Size><AbsDimension x="90" y="26"/></Size>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="5" y="5"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnClick>
+                                Aux.item_search_frame.start_search()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <Button name="$parentStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
+                        <Size><AbsDimension x="90" y="26"/></Size>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="5" y="5"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnClick>
+                                Aux.item_search_frame.stop_search()
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <EditBox name="$parentPageEditBox" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="110" y="5"/></Offset></Anchor></Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName()..'Label'):SetText('Page')
+                                this:SetWidth(30)
+                                this:EnableMouse(false)
+                                this:SetAlpha(0.5)
+                            </OnLoad>
+                            <OnEnterPressed>
+                                this:ClearFocus()
+                            </OnEnterPressed>
+                        </Scripts>
+                    </EditBox>
+                    <CheckButton name="$parentAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
+                        <Size><AbsDimension x="22" y="22"/></Size>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="143" y="5"/></Offset></Anchor></Anchors>
+                        <Layers>
+                            <Layer level="OVERLAY">
+                                <FontString inherits="GameFontNormalSmall" text="All" justifyH="LEFT">
+                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
+                                </FontString>
+                            </Layer>
+                        </Layers>
+                        <Scripts>
+                            <OnClick>
+                                AuxItemSearchFrameItemPageEditBox:EnableMouse(not this:GetChecked())
+                                AuxItemSearchFrameItemPageEditBox:SetAlpha(this:GetChecked() and 0.5 or 1)
+                                AuxItemSearchFrameItemPageEditBox:ClearFocus()
+                            </OnClick>
+                        </Scripts>
+                    </CheckButton>
+                </Frames>
+            </Frame>
+            <Frame name="$parentAuctions" inherits="AuxFrameBoxTemplate">
+                <Size>
+                    <AbsDimension x="620" y="326"/>
+                </Size>
+                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$parentItem"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                <Scripts>
+                    <OnLoad>
+                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+                        this:SetBackdropColor(0.15, 0.15, 0.15)
+                        <!--getglobal(this:GetName().."Title"):SetText('Search Results')-->
+                    </OnLoad>
+                </Scripts>
+                <Frames>
+                    <Button name="$parentTab1" inherits="AuxTopTabTemplate" id="1">
+                        <Anchors>
+                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
+                                <Offset>
+                                    <AbsDimension x="7" y="-2"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText('Buy')
+                            </OnLoad>
+                            <OnClick>
+                                Aux.item_search_frame.set_view(this:GetID())
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <Button name="$parentTab2" inherits="AuxTopTabTemplate" id="2">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="0" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText('Bid')
+                            </OnLoad>
+                            <OnClick>
+                                Aux.item_search_frame.set_view(this:GetID())
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <Button name="$parentTab3" inherits="AuxTopTabTemplate" id="3">
+                        <Anchors>
+                            <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT">
+                                <Offset>
+                                    <AbsDimension x="0" y="0"/>
+                                </Offset>
+                            </Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                getglobal(this:GetName().."Text"):SetText('Full')
+                            </OnLoad>
+                            <OnClick>
+                                Aux.item_search_frame.set_view(this:GetID())
+                            </OnClick>
+                        </Scripts>
+                    </Button>
+                    <Frame name="$parentBuyListing" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                local config = Aux.item_search_frame.views[1]
+                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                    <Frame name="$parentBidListing" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                local config = Aux.item_search_frame.views[2]
+                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                    <Frame name="$parentFullListing" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                local config = Aux.item_search_frame.views[3]
+                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                    <Frame name="$parentConfirmation" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnMouseWheel></OnMouseWheel>
+                        </Scripts>
+                        <Frames>
+                            <Frame name="$parentContent">
+                                <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                <Size><AbsDimension x="193" y="140"/></Size>
+                                <Frames>
+                                    <Frame name="$parentItem" inherits="AuxItemTemplate">
+                                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                    </Frame>
+                                    <Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
+                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="48"/></Offset></Anchor></Anchors>
+                                        <Layers>
+                                            <Layer level="OVERLAY">
+                                                <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
+                                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor></Anchors>
+                                                </FontString>
+                                            </Layer>
+                                        </Layers>
+                                    </Frame>
+                                    <Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
+                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="50"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnLoad>
+                                                SmallMoneyFrame_OnLoad()
+                                                MoneyFrame_SetType("STATIC")
+                                            </OnLoad>
+                                        </Scripts>
+                                        <Layers>
+                                            <Layer level="OVERLAY">
+                                                <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
+                                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
+                                                </FontString>
+                                            </Layer>
+                                        </Layers>
+                                    </Frame>
+                                    <Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
+                                        <Size><AbsDimension x="90" y="26"/>	</Size>
+                                        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnClick>
+                                                Aux.item_search_frame.dialog_action()
+                                            </OnClick>
+                                        </Scripts>
+                                    </Button>
+                                    <Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
+                                        <Size><AbsDimension x="90" y="26"/></Size>
+                                        <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnClick>
+                                                Aux.item_search_frame.dialog_cancel()
+                                            </OnClick>
+                                        </Scripts>
+                                    </Button>
+                                </Frames>
+                            </Frame>
+                        </Frames>
+                    </Frame>
+                </Frames>
+            </Frame>
+		</Frames>
+	</Frame>
+</Ui>

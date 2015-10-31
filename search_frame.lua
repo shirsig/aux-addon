@@ -19,22 +19,25 @@ function group_alpha_setter(cell, group)
 end
 
 local BUYOUT, BID, FULL = 1, 2, 3
-local ITEM, ADVANCED = 1, 2
 
 Aux.buy.modes = {
 	[BUYOUT] = {
 		name = 'Buyout',
-        on_cell_click = function (sheet, row_index, column_index)
+        on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
             AuxBuyEntry_OnClick(Aux.util.filter(sheet.data[data_index], function(auction) return not auction.gone end)[1] or sheet.data[data_index][1])
         end,
-
-        on_cell_enter = function (sheet, row_index, column_index)
+        on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
+            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info)
         end,
-
-        on_cell_leave = function (sheet, row_index, column_index)
+        on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
+            GameTooltip:Hide()
+        end,
+        row_setter = function(row, group)
+            row.tooltip = group[1].tooltip
+            row.EnhTooltip_info = group[1].EnhTooltip_info
         end,
         columns = {
             {
@@ -53,6 +56,7 @@ Aux.buy.modes = {
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].name, group2[1].name, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
+                    icon:EnableMouse(false)
                     local icon_texture = icon:CreateTexture(nil, 'BORDER')
                     icon_texture:SetAllPoints(icon)
                     icon.icon_texture = icon_texture
@@ -65,11 +69,6 @@ Aux.buy.modes = {
                     icon:SetPoint('LEFT', cell)
                     icon:SetWidth(12)
                     icon:SetHeight(12)
-                    icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
-                    icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
-                    icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
-                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
-                    icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
                     local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                     text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
                     text:SetPoint('TOPRIGHT', cell)
@@ -130,17 +129,21 @@ Aux.buy.modes = {
 	},
 	[BID] = {
 		name = 'Bid',
-        on_cell_click = function (sheet, row_index, column_index)
+        on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
             AuxBuyEntry_OnClick(sheet.data[data_index])
         end,
-
-        on_cell_enter = function (sheet, row_index, column_index)
+        on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
+            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info)
         end,
-
-        on_cell_leave = function (sheet, row_index, column_index)
+        on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
+            GameTooltip:Hide()
+        end,
+        row_setter = function(row, datum)
+            row.tooltip = datum.tooltip
+            row.EnhTooltip_info = datum.EnhTooltip_info
         end,
         columns = {
             {
@@ -159,6 +162,7 @@ Aux.buy.modes = {
                 comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
+                    icon:EnableMouse(false)
                     local icon_texture = icon:CreateTexture(nil, 'BORDER')
                     icon_texture:SetAllPoints(icon)
                     icon.icon_texture = icon_texture
@@ -171,11 +175,6 @@ Aux.buy.modes = {
                     icon:SetPoint('LEFT', cell)
                     icon:SetWidth(12)
                     icon:SetHeight(12)
-                    icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
-                    icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
-                    icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
-                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
-                    icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
                     local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                     text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
                     text:SetPoint('TOPRIGHT', cell)
@@ -266,27 +265,22 @@ Aux.buy.modes = {
 	},
 	[FULL] = {
 		name = 'Full',
-        on_cell_click = function (sheet, row_index, column_index)
+        on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
             AuxBuyEntry_OnClick(sheet.data[data_index])
         end,
-
-        on_cell_enter = function (sheet, row_index, column_index)
+        on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
+            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info)
         end,
-
-        on_cell_leave = function (sheet, row_index, column_index)
+        on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
+            GameTooltip:Hide()
         end,
-        
-		row_setter = function(row, datum)
-			if current_auction and datum == current_auction then
-				row.highlight:SetAlpha(.5)
-			else
-				row.highlight:SetAlpha(0)
-			end
-		end,
-    
+        row_setter = function(row, datum)
+            row.tooltip = datum.tooltip
+            row.EnhTooltip_info = datum.EnhTooltip_info
+        end,
 		columns = {
             {
                 title = 'Qty',
@@ -304,6 +298,7 @@ Aux.buy.modes = {
                 comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
+                    icon:EnableMouse(false)
                     local icon_texture = icon:CreateTexture(nil, 'BORDER')
                     icon_texture:SetAllPoints(icon)
                     icon.icon_texture = icon_texture
@@ -316,9 +311,6 @@ Aux.buy.modes = {
                     icon:SetPoint('LEFT', cell)
                     icon:SetWidth(12)
                     icon:SetHeight(12)
-                    icon:SetNormalTexture('Interface\\Buttons\\UI-Quickslot2')
-                    icon:SetPushedTexture('Interface\\Buttons\\UI-Quickslot-Depress')
-                    icon:SetHighlightTexture('Interface\\Buttons\\ButtonHilight-Square')
                     icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
                     icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
                     local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
@@ -446,7 +438,6 @@ function Aux.buy.on_close()
 end
 
 function Aux.buy.on_open()
-    public.set_filter(1)
     public.set_view(1)
 	update_sheet()
 end
@@ -495,47 +486,6 @@ end
 
 function public.set_item(item_id)
     private.item_id = item_id
-end
-
-function public.update_item()
-    if private.item_id then
-        AuxBuyFiltersItem:Show()
-        AuxBuyFiltersItemInputBox:Hide()
-    else
-        AuxBuyFiltersItem:Hide()
-        AuxBuyFiltersItemInputBox:Show()
-    end
-end
-
-function public.set_filter(filter)
-    local filter_elements = {
-        AuxBuyNameInputBox,
-        AuxBuyCategoryDropDown,
-        AuxBuyQualityDropDown,
-        AuxBuyMinLevel,
-        AuxBuyMaxLevel,
-        AuxBuyUsableCheckButton,
-        AuxBuyFiltersTooltipInputBox1,
-        AuxBuyFiltersTooltipInputBox2,
-        AuxBuyFiltersTooltipInputBox3,
-        AuxBuyFiltersTooltipInputBox4,
-    }
-    private.filter = filter
-    if filter == ITEM then
-        public.update_item()
-        for _, element in filter_elements do
-            element:Hide()
-        end
-    elseif filter == ADVANCED then
-        AuxBuyFiltersItem:Hide()
-        AuxBuyFiltersItemInputBox:Hide()
-        for _, element in filter_elements do
-            element:Hide()
-        end
-        for _, element in filter_elements do
-            element:Show()
-        end
-    end
 end
 
 function Aux.buy.SearchButton_onclick()

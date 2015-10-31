@@ -28,7 +28,7 @@
                             <OnLoad>
                                 local config = Aux.sell.inventory_listing_config
                                 local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_cell_click, config.on_cell_enter, config.on_cell_leave)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
                             </OnLoad>
                         </Scripts>
                     </Frame>

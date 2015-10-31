@@ -44,8 +44,14 @@ function Aux.sheet.render(sheet)
 	for i, row in ipairs(rows) do
 		local direction, rowR, rowG, rowB, rowA1, rowA2 = "Horizontal", 1, 1, 1, 0, 0 --row level coloring used for gradients
 		local datum = data[i + offset]
-        if sheet.row_setter then
-            sheet.row_setter(row, datum)
+
+        if datum then
+            if sheet.row_setter then
+                sheet.row_setter(row, datum)
+            end
+            row:Show()
+        else
+            row:Hide()
         end
 		for j, column in sheet.columns do
 			local cell = row.cells[j]
@@ -60,7 +66,7 @@ function Aux.sheet.render(sheet)
 	end
 end
 
-function Aux.sheet.create(frame, columns, sort_order, row_setter, on_cell_click, on_cell_enter, on_cell_leave)
+function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, on_row_enter, on_row_leave)
 	local sheet
 	local name = (frame:GetName() or '')..'ScrollSheet'
 	
@@ -141,6 +147,7 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_cell_click,
 		labels[i] = label
 	end
 	total_width = total_width + 5
+    frame:SetWidth(total_width)
 	
 	local rows = {}
 	local row_index = 1
@@ -154,24 +161,18 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_cell_click,
 			row:RegisterForClicks("LeftButtonDown", "RightButtonDown")
 			row:SetHeight(14)
 			
-			local row_index = row_index
-			row:SetScript("OnClick", function() if sheet.on_row_click then sheet.on_row_click(sheet, row_index) end end)
-			row:SetScript("OnEnter", function() if sheet.on_row_enter then sheet.on_row_enter(sheet, row_index) end end)
-			row:SetScript("OnLeave", function() if sheet.on_row_leave then sheet.on_row_leave(sheet, row_index) end end)
+			local row_idx = row_index
+			row:SetScript("OnClick", function() if sheet.on_row_click then sheet.on_row_click(sheet, row_idx) end end)
+			row:SetScript("OnEnter", function() if sheet.on_row_enter then sheet.on_row_enter(sheet, row_idx) end end)
+			row:SetScript("OnLeave", function() if sheet.on_row_leave then sheet.on_row_leave(sheet, row_idx) end end)
 			
 			row.cells = {}			
 			for i = 1,getn(columns) do
 				local cell = CreateFrame('Button', nil, content)
 				cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
 				cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
-				cell:RegisterForClicks("LeftButtonDown", "RightButtonDown")			
 				
 				cell:SetHeight(14)
-				
-				local column_index = i
-				cell:SetScript("OnClick", function() if sheet.on_cell_click then sheet.on_cell_click(sheet, row_index, column_index) end end)
-				cell:SetScript("OnEnter", function() if sheet.on_cell_enter then sheet.on_cell_enter(sheet, row_index, column_index) end end)
-				cell:SetScript("OnLeave", function() if sheet.on_cell_leave then sheet.on_cell_leave(sheet, row_index, column_index) end end)
 
 				columns[i].cell_initializer(cell)
 				
@@ -185,7 +186,7 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_cell_click,
 			row.color_texture = color_texture
 			
 			local highlight = row:CreateTexture()
-			highlight:SetPoint('TOPLEFT', row 'TOPLEFT', 0, 0)
+			highlight:SetPoint('TOPLEFT', row, 'TOPLEFT', 0, 0)
 			highlight:SetPoint('BOTTOMRIGHT', row, 'BOTTOMRIGHT', 0, 1)
 			highlight:SetAlpha(0)
 			highlight:SetTexture(0.8, 0.6, 0)
@@ -209,9 +210,9 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_cell_click,
 		data = {},
 		sort_order = sort_order,
         row_setter = row_setter,
-		on_cell_click = on_cell_click,
-		on_cell_enter = on_cell_enter,
-		on_cell_leave = on_cell_leave,
+		on_row_click = on_row_click,
+		on_row_enter = on_row_enter,
+		on_row_leave = on_row_leave,
 	}
 	scroll_frame.sheet = sheet
 	
@@ -223,7 +224,7 @@ function Aux.list.row_comparator(sheet)
 		for _, sort_info in ipairs(sheet.sort_order) do
 			local column = sort_info.column
 			if column.comparator then
-				local ordering = column.comparator(row1.cells, row2.cells)
+				local ordering = column.comparator(row1, row2)
 				if ordering ~= Aux.util.EQ then
 					return sort_info.sort_ascending and ordering or Aux.util.invert_order(ordering)
 				end

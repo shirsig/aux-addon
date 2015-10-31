@@ -22,6 +22,13 @@ Aux = {
 function Aux_OnLoad()
 	Aux.log('Aux v'..AuxVersion..' loaded.')
 	Aux.loaded = true
+
+    Aux.localized_auctionable_items = {}
+
+    for _, item_id in Aux.auctionable_items do
+        local name = GetItemInfo(item_id)
+        tinsert(Aux.localized_auctionable_items, { name=name, id=item_id })
+    end
 end
 
 function Aux_OnEvent()
@@ -150,6 +157,7 @@ function Aux.on_tab_click(index)
     Aux.post.stop()
     Aux.stack.stop()
     Aux.scan.abort(function()
+        Aux.item_search_frame.on_close()
         Aux.buy.on_close()
         Aux.sell.on_close()
         Aux.manage_frame.on_close()
@@ -159,23 +167,24 @@ function Aux.on_tab_click(index)
             getglobal('AuxTab'..i):SetAlpha(i == index and 1 or 0.5)
         end
 
-        AuxSellFrame:Hide()
+        AuxItemSearchFrame:Hide()
         AuxBuyFrame:Hide()
-        AuxHistoryFrame:Hide()
+        AuxSellFrame:Hide()
         AuxManageFrame:Hide()
+        AuxHistoryFrame:Hide()
 
         if index == 1 then
-            AuxBuyFrame:Show()
-            Aux.buy.on_open()
+            AuxItemSearchFrame:Show()
+            Aux.item_search_frame.on_open()
         elseif index == 2 then
+            AuxBuyFrame:Show()
+            Aux.filter_search_frame.on_open()
+        elseif index == 3 then
             AuxSellFrame:Show()
             Aux.sell.on_open()
-        elseif index == 3 then
+        elseif index == 4 then
             AuxManageFrame:Show()
             Aux.manage_frame.on_open()
-        elseif index == 4 then
-            AuxHistoryFrame:Show()
-            Aux.history.on_open()
         end
     end)
 end
