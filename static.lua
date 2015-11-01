@@ -12,7 +12,9 @@ function public.on_event()
         Aux.localized_auctionable_items = {}
         for _, item_id in private.auctionable_items do
             local name = GetItemInfo(item_id)
-            tinsert(Aux.localized_auctionable_items, { name=name, id=item_id })
+            if name then
+                tinsert(Aux.localized_auctionable_items, { name=name, id=item_id })
+            end
         end
     end
 end
