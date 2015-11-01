@@ -1,4 +1,5 @@
-Aux.scan = {}
+local private , public = {}, {}
+Aux.scan = public
 
 local PAGE_SIZE = 50
 
@@ -70,8 +71,8 @@ function wait_for_owner_data(k)
 	return controller().wait(function()
 		local count, _ = GetNumAuctionItems(state.job.type)
 		for i=1,count do
-			local auction_item_info = Aux.info.auction_item(i)
-			if auction_item_info and not auction_item_info.owner then
+			local auction_info = Aux.info.auction(i, state.job.type)
+			if auction_info and not auction_info.owner then
 				return false
 			end
 		end
@@ -128,15 +129,20 @@ function scan_auctions(count, k)
 end
 
 function scan_auctions_helper(i, n, k)
-	wait_for_callback{state.job.on_read_auction, i, function()
-	
+    local recurse = function()
         if i >= n then
             return k()
         else
             return scan_auctions_helper(i + 1, n, k)
         end
-	
-	end}
+    end
+
+    local auction_info = Aux.info.auction(i, state.job.type)
+    if auction_info then
+        wait_for_callback{state.job.on_read_auction, auction_info, recurse}
+    else
+        recurse()
+    end
 end
 
 function submit_query(k)

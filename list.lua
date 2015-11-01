@@ -66,7 +66,7 @@ function Aux.sheet.render(sheet)
 	end
 end
 
-function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, on_row_enter, on_row_leave)
+function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, on_row_enter, on_row_leave, on_row_update)
 	local sheet
 	local name = (frame:GetName() or '')..'ScrollSheet'
 	
@@ -162,9 +162,10 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, 
 			row:SetHeight(14)
 			
 			local row_idx = row_index
-			row:SetScript("OnClick", function() if sheet.on_row_click then sheet.on_row_click(sheet, row_idx) end end)
-			row:SetScript("OnEnter", function() if sheet.on_row_enter then sheet.on_row_enter(sheet, row_idx) end end)
-			row:SetScript("OnLeave", function() if sheet.on_row_leave then sheet.on_row_leave(sheet, row_idx) end end)
+			row:SetScript('OnClick', function() if sheet.on_row_click then sheet.on_row_click(sheet, row_idx) end end)
+			row:SetScript('OnEnter', function() if sheet.on_row_enter then sheet.on_row_enter(sheet, row_idx) end end)
+			row:SetScript('OnLeave', function() if sheet.on_row_leave then sheet.on_row_leave(sheet, row_idx) end end)
+            row:SetScript('OnUpdate', function() if sheet.on_row_update then sheet.on_row_update(sheet, row_idx) end end)
 			
 			row.cells = {}			
 			for i = 1,getn(columns) do
@@ -213,6 +214,7 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, 
 		on_row_click = on_row_click,
 		on_row_enter = on_row_enter,
 		on_row_leave = on_row_leave,
+        on_row_update = on_row_update,
 	}
 	scroll_frame.sheet = sheet
 	

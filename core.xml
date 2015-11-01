@@ -322,12 +322,12 @@
 		</Layers>
 		<Scripts>
 			<OnEnter>
-				if this.tooltip then
-					Aux.info.set_game_tooltip(this, this.tooltip, 'ANCHOR_LEFT', this.EnhTooltip_info)
+				if this.itemstring then
+					Aux.info.set_tooltip(this.itemstring, this.EnhTooltip_info, this, 'ANCHOR_LEFT')
 				end
 			</OnEnter>
 			<OnLeave>
-				if this.tooltip then
+				if this.itemstring then
                     AuxTooltip:Hide()
 				end
 			</OnLeave>
@@ -384,7 +384,7 @@
             </Button>
             <Button name="AuxAuctionFrameButton" inherits="UIPanelButtonTemplate" text="Default UI">
                 <Size><AbsDimension x="65" y="17"/></Size>
-                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButton"><Offset><AbsDimension x="-3" y="0"/></Offset></Anchor></Anchors>
+                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButton"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
                         this:SetTextFontObject('GameFontNormalSmall')

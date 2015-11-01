@@ -300,7 +300,7 @@
                             <OnLoad>
                                 local config = Aux.filter_search_frame.views[1]
                                 local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -313,7 +313,7 @@
                             <OnLoad>
                                 local config = Aux.filter_search_frame.views[2]
                                 local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -326,7 +326,7 @@
                             <OnLoad>
                                 local config = Aux.filter_search_frame.views[3]
                                 local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -340,14 +340,14 @@
                         </Scripts>
                         <Frames>
                             <Frame name="$parentContent">
-                                <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                <Size><AbsDimension x="193" y="140"/></Size>
+                                <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor></Anchors>
+                                <Size><AbsDimension x="193" y="120"/></Size>
                                 <Frames>
                                     <Frame name="$parentItem" inherits="AuxItemTemplate">
                                         <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                                     </Frame>
                                     <Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
-                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="48"/></Offset></Anchor></Anchors>
+                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="43"/></Offset></Anchor></Anchors>
                                         <Layers>
                                             <Layer level="OVERLAY">
                                                 <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
@@ -357,7 +357,7 @@
                                         </Layers>
                                     </Frame>
                                     <Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
-                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="50"/></Offset></Anchor></Anchors>
+                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="45"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnLoad>
                                                 SmallMoneyFrame_OnLoad()

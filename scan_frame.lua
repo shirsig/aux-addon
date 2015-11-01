@@ -35,8 +35,8 @@ function Aux.history.start_scan()
         on_page_loaded = function(page, total_pages)
             Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
         end,
-        on_read_auction = function(i)
-            process_auction(i)
+        on_read_auction = function(auction_info)
+            process_auction(auction_info)
         end,
         on_complete = function()
             process_scanned_auctions()
@@ -82,8 +82,7 @@ function Aux.history.stop_scan()
     Aux.scan.abort()
 end
 
-function process_auction(index)
-    local auction_info = Aux.info.auction_item(index)
+function process_auction(auction_info)
     local buyout_price = Aux.util.safe_index{auction_info, 'buyout_price'}
     if buyout_price and buyout_price > 0 then
         local aux_quantity = auction_info.charges or auction_info.count

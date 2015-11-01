@@ -63,73 +63,9 @@
 							<OnLoad>
                                 local config = Aux.manage_frame.bid_listing_config
 								local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-								this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+								this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
 							</OnLoad>
 						</Scripts>
-					</Frame>
-					<Frame name="$parentBidConfirmation" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
-						<Anchors>
-							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-							<Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-						</Anchors>
-						<Scripts>
-							<OnMouseWheel></OnMouseWheel>
-						</Scripts>
-						<Frames>
-							<Frame name="$parentContent">
-								<Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-								<Size><AbsDimension x="193" y="300"/></Size>
-								<Frames>
-									<Frame name="$parentItem" inherits="AuxItemTemplate">
-										<Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-									</Frame>
-									<Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
-										<Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="148"/></Offset></Anchor></Anchors>
-										<Layers>
-											<Layer level="OVERLAY">
-												<FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
-													<Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor></Anchors>
-												</FontString>
-											</Layer>
-										</Layers>
-									</Frame>
-									<Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
-										<Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="150"/></Offset></Anchor></Anchors>
-										<Scripts>
-											<OnLoad>
-												SmallMoneyFrame_OnLoad()
-												MoneyFrame_SetType("STATIC")
-											</OnLoad>
-										</Scripts>
-										<Layers>
-											<Layer level="OVERLAY">
-												<FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
-													<Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
-												</FontString>
-											</Layer>
-										</Layers>
-									</Frame>
-									<Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
-										<Size><AbsDimension x="90" y="26"/>	</Size>
-										<Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="229" y="110"/></Offset></Anchor></Anchors>
-										<Scripts>
-											<OnClick>
-												Aux.buy.dialog_action()
-											</OnClick>
-										</Scripts>
-									</Button>
-									<Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
-										<Size><AbsDimension x="90" y="26"/></Size>
-										<Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-229" y="110"/></Offset></Anchor></Anchors>
-										<Scripts>
-											<OnClick>
-												Aux.buy.dialog_cancel()
-											</OnClick>
-										</Scripts>
-									</Button>
-								</Frames>
-							</Frame>
-						</Frames>
 					</Frame>
                     <Frame name="$parentAuctionListing">
                         <Anchors>
@@ -140,11 +76,11 @@
                             <OnLoad>
                                 local config = Aux.manage_frame.auction_listing_config
                                 local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
                             </OnLoad>
                         </Scripts>
                     </Frame>
-                    <Frame name="$parentAuctionConfirmation" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
+                    <Frame name="$parentDialog" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
@@ -154,14 +90,21 @@
                         </Scripts>
                         <Frames>
                             <Frame name="$parentContent">
-                                <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                <Size><AbsDimension x="193" y="300"/></Size>
+                                <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor></Anchors>
+                                <Size><AbsDimension x="193" y="120"/></Size>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString name="$parentCancelLabel" inherits="GameFontNormal" text="Cancel this auction?" justifyH="RIGHT">
+                                            <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="45"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
                                 <Frames>
                                     <Frame name="$parentItem" inherits="AuxItemTemplate">
                                         <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                                     </Frame>
                                     <Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
-                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="148"/></Offset></Anchor></Anchors>
+                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="43"/></Offset></Anchor></Anchors>
                                         <Layers>
                                             <Layer level="OVERLAY">
                                                 <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
@@ -171,7 +114,7 @@
                                         </Layers>
                                     </Frame>
                                     <Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
-                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="150"/></Offset></Anchor></Anchors>
+                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="45"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnLoad>
                                                 SmallMoneyFrame_OnLoad()
@@ -188,19 +131,19 @@
                                     </Frame>
                                     <Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
                                         <Size><AbsDimension x="90" y="26"/>	</Size>
-                                        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="229" y="110"/></Offset></Anchor></Anchors>
+                                        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnClick>
-                                                Aux.buy.dialog_action()
+                                                Aux.manage_frame.dialog_action()
                                             </OnClick>
                                         </Scripts>
                                     </Button>
                                     <Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
                                         <Size><AbsDimension x="90" y="26"/></Size>
-                                        <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-229" y="110"/></Offset></Anchor></Anchors>
+                                        <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnClick>
-                                                Aux.buy.dialog_cancel()
+                                                Aux.manage_frame.dialog_cancel()
                                             </OnClick>
                                         </Scripts>
                                     </Button>

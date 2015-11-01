@@ -239,7 +239,6 @@ function Aux.completion.selector(edit_box)
         if getn(suggestions) > 0 then
             index = math.mod(index, getn(suggestions)) + 1
             update_highlighting()
-            Aux.item_search_frame.set_item(suggestions[index].value)
         end
     end
 
@@ -248,7 +247,6 @@ function Aux.completion.selector(edit_box)
         if getn(suggestions) > 0 then
             index = index > 1 and index - 1 or getn(suggestions)
             update_highlighting()
-            Aux.item_search_frame.set_item(suggestions[index].value)
         end
     end
 

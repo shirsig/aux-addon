@@ -1,4 +1,4 @@
-AuxVersion = "2.0.0"
+AuxVersion = "2.1.0"
 AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)"
 
 local lastRightClickAction = GetTime()
@@ -226,25 +226,19 @@ end
 
 function Aux_ContainerFrameItemButton_OnClick(button)
 	local bag, slot = this:GetParent():GetID(), this:GetID()
-	local container_item = Aux.info.container_item(bag, slot)
+	local container_item_info = Aux.info.container_item(bag, slot)
 	
---	if AuctionFrame:IsVisible() and button == "LeftButton" and container_item then
---
---		if IsShiftKeyDown()
---				and not ChatFrameEditBox:IsVisible()
---				and AuxBuyFrame:IsVisible()
---		then
---            AuxBuyNameInputBox.completor.set_quietly(container_item.name)
---			return
---		elseif AUX_BUY_SHORTCUT and IsAltKeyDown() then
---			if not AuxBuyFrame:IsVisible() then
---                Aux.on_tab_click(1)
---			end
---			AuxBuyNameInputBox.completor.set_quietly(container_item.name)
---			Aux.filter_search_frame.start_search()
---			return
---		end
---	end
+	if AuxFrame:IsVisible() and button == "LeftButton" and container_item_info then
+		if IsAltKeyDown() then
+			if not AuxItemSearchFrame:IsVisible() then
+                Aux.on_tab_click(1)
+            end
+            AuxItemSearchFrameItemItemInputBox:Hide()
+            Aux.item_search_frame.set_item(container_item_info.item_id)
+			return
+		end
+    end
+
 	return Aux.orig.ContainerFrameItemButton_OnClick(button)
 end
 
@@ -266,4 +260,20 @@ end
 
 function Aux.auction_signature(hyperlink, stack_size, amount)
 	return hyperlink .. (stack_size or '0') .. '_' .. (amount or '0')
+end
+
+function Aux.item_class_index(item_class)
+    for i, class in ipairs({ GetAuctionItemClasses() }) do
+        if class == item_class then
+            return i
+        end
+    end
+end
+
+function Aux.item_subclass_index(class_index, item_subclass)
+    for i, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
+        if subclass == item_subclass then
+            return i
+        end
+    end
 end

@@ -3,57 +3,70 @@ local TOOLTIP_LENGTH = 30
 local private, public = {}, {}
 Aux.info = public
 
-local hyperlink_item, item_id, item_charges, item_signature, parse_item_signature, parse_hyperlink
-
-function Aux.info.container_item(bag, slot)
+function public.container_item(bag, slot)
 	local hyperlink = GetContainerItemLink(bag, slot)
 	
 	if not hyperlink then
 		return
-	end
-	
-	local container_item = hyperlink_item(hyperlink)
-    container_item.item_signature = item_signature(hyperlink)
+    end
+
+    local item_id, suffix_id, unique_id, enchant_id = private.parse_hyperlink(hyperlink)
+    local item_info = public.item(item_id, suffix_id, unique_id, enchant_id)
 
     local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot)
-	container_item.texture = texture
-	container_item.count = count
-	container_item.locked = locked
-	container_item.readable = readable
-	container_item.lootable = lootable
-	container_item.hyperlink = hyperlink
+    local tooltip = public.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
 
-	container_item.tooltip = Aux.info.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
-	container_item.charges = item_charges(container_item.tooltip)
-	
-	return container_item
+    return {
+        item_id = item_id,
+        suffix_id = suffix_id,
+        unique_id = unique_id,
+        enchant_id = enchant_id,
+
+        hyperlink = hyperlink,
+        itemstring = item_info.itemstring,
+        item_key = item_id..':'..suffix_id,
+
+        name = item_info.name,
+        texture = texture,
+        level = item_info.level,
+        type = item_info.type,
+        subtype = item_info.subtype,
+        quality = quality,
+        max_stack = item_info.max_stack,
+
+        count = count,
+        locked = locked,
+        readable = readable,
+        lootable = lootable,
+
+        tooltip = tooltip,
+        charges = private.item_charges(tooltip),
+    }
 end
 
-function Aux.info.auction_sell_item()
+function public.auction_sell_item()
 	local name, texture, stack_size, quality, usable, vendor_price = GetAuctionSellItemInfo()
 
 	if name then
 
         local unit_vendor_price = vendor_price / stack_size
+        local tooltip = public.tooltip(function(tt) tt:SetAuctionSellItem() end)
 
-		auction_sell_item = {
+		return {
 			name = name,
 			texture = texture,
+            quality = quality,
+
 			stack_size = stack_size,
-			quality = quality,
 			usable = usable,
             unit_vendor_price = unit_vendor_price,
-			deposit_factor = deposit_factor,
+            tooltip = tooltip,
+            charges = private.item_charges(tooltip),
 		}
-		
-		auction_sell_item.tooltip = Aux.info.tooltip(function(tt) tt:SetAuctionSellItem() end)
-		auction_sell_item.charges = item_charges(auction_sell_item.tooltip)
-		
-		return auction_sell_item
 	end
 end
 
-function Aux.info.auction_item(index, type)
+function public.auction(index, type)
     type = type or 'list'
 
 	local hyperlink = GetAuctionItemLink(type, index)
@@ -61,36 +74,54 @@ function Aux.info.auction_item(index, type)
 	if not hyperlink then
 		return
 	end
-	
-	local auction_item = hyperlink_item(hyperlink)
-    auction_item.item_signature = item_signature(hyperlink)
-	
-	local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status, id = GetAuctionItemInfo(type, index)
-	local duration = GetAuctionItemTimeLeft(type, index)
 
-	auction_item.texture = texture
-	auction_item.count = count
-	auction_item.min_bid = min_bid
-	auction_item.min_increment = min_increment
-	auction_item.buyout_price = buyout_price
-	auction_item.current_bid = current_bid
-	auction_item.high_bidder = high_bidder
-	auction_item.owner = owner
-	auction_item.sale_status = sale_status
-	auction_item.id = id
-	auction_item.duration = duration
-	auction_item.usable = usable
-	auction_item.tooltip = Aux.info.tooltip(function(tt) tt:SetAuctionItem(type, index) end)
-	auction_item.charges = item_charges(auction_item.tooltip)
-	
-	auction_item.EnhTooltip_info = {
-		name = auction_item.name,
-		hyperlink = auction_item.hyperlink,
-		quality = auction_item.quality,
-		count = auction_item.count,
-	}
-	
-	return auction_item
+    local item_id, suffix_id, unique_id, enchant_id = private.parse_hyperlink(hyperlink)
+    local item_info = public.item(item_id, suffix_id, unique_id, enchant_id)
+
+    local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(type, index)
+	local duration = GetAuctionItemTimeLeft(type, index)
+    local tooltip = public.tooltip(function(tt) tt:SetAuctionItem(type, index) end)
+
+    return {
+        index = index,
+
+        item_id = item_id,
+        suffix_id = suffix_id,
+        unique_id = unique_id,
+        enchant_id = enchant_id,
+
+        hyperlink = hyperlink,
+        itemstring = item_info.itemstring,
+        item_key = item_id..':'..suffix_id,
+
+        name = name,
+        texture = texture,
+        level = item_info.level,
+        type = item_info.type,
+        subtype = item_info.subtype,
+        quality = quality,
+        max_stack = item_info.max_stack,
+
+        count = count,
+        min_bid = min_bid,
+        min_increment = min_increment,
+        buyout_price = buyout_price,
+        current_bid = current_bid,
+        high_bidder = high_bidder,
+        owner = owner,
+        sale_status = sale_status,
+        duration = duration,
+        usable = usable,
+        tooltip = tooltip,
+        charges = private.item_charges(tooltip),
+
+        EnhTooltip_info = {
+            name = name,
+            hyperlink = hyperlink,
+            quality = quality,
+            count = count,
+        },
+    }
 end
 
 function public.reanchor_tooltip()
@@ -102,7 +133,7 @@ function public.reanchor_tooltip()
     end
 end
 
-function Aux.info.set_game_tooltip(owner, tooltip, anchor, EnhTooltip_info, x_offset, y_offset)
+function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor, x_offset, y_offset)
     if anchor == 'ANCHOR_CURSOR' and (x_offset or y_offset) then
         private.anchor_cursor = true
         private.x_offset = x_offset
@@ -112,16 +143,16 @@ function Aux.info.set_game_tooltip(owner, tooltip, anchor, EnhTooltip_info, x_of
         private.anchor_cursor = false
     end
     AuxTooltip:SetOwner(owner, anchor)
-	for _, line in ipairs(tooltip) do
-        AuxTooltip:AddDoubleLine(line[1].text, line[2].text, line[1].r, line[1].b, line[1].g, line[2].r, line[2].b, line[2].g, true)
-	end
+
+    AuxTooltip:SetHyperlink(itemstring)
+
     AuxTooltip:Show()
 	if EnhTooltip and EnhTooltip_info then
-		EnhTooltip.TooltipCAux(AuxTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
+		EnhTooltip.TooltipCall(AuxTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
 	end
 end
 
-function Aux.info.tooltip_match(patterns, tooltip)
+function public.tooltip_match(patterns, tooltip)
     return Aux.util.all(patterns, function(pattern)
         return Aux.util.any(tooltip, function(line)
             local left_match = line[1].text and strfind(strupper(line[1].text), strupper(pattern), 1, true)
@@ -131,7 +162,7 @@ function Aux.info.tooltip_match(patterns, tooltip)
     end)
 end
 
-function Aux.info.tooltip(setter)
+function public.tooltip(setter)
 	for i = 1, TOOLTIP_LENGTH do
 		getglobal('AuxInfoTooltipTextLeft'..i):SetText()
 		getglobal('AuxInfoTooltipTextRight'..i):SetText()
@@ -162,7 +193,7 @@ function Aux.info.tooltip(setter)
 	return tooltip
 end
 
-function item_charges(tooltip)
+function private.item_charges(tooltip)
 	for _, line in ipairs(tooltip) do
 		local _, _, left_charges_string = strfind(line[1].text or '', "^(%d+) Charges")
 		local _, _, right_charges_string = strfind(line[2].text or '', "^(%d+) Charges$")
@@ -171,33 +202,27 @@ function item_charges(tooltip)
 			return charges
 		end
 	end
-end	
-
-function Aux.info.auction(args)
-    local index = tremove(args, 1)
-
-    local key_set = Aux.util.array_to_set(args)
 end
 
 -- not unique!
-function Aux.info.auction_signature(index)
+function public.auction_signature(index)
     -- owner not used because waiting for it would slow down the scan too much
     local _, _, count, _, _, _, min_bid, _, buyout_price, _, _, owner = GetAuctionItemInfo('list', index)
     local hyperlink = GetAuctionItemLink('list', index)
-    local item_id, suffix_id, enchant_id, unique_id = parse_hyperlink(hyperlink)
+    local item_id, suffix_id, unique_id, enchant_id = private.parse_hyperlink(hyperlink)
     return string.format(
         '%s:%s:%s:%s:%s:%s:%s',
         item_id or 0,
         suffix_id or 0,
-        enchant_id or 0,
         unique_id or 0,
+        enchant_id or 0,
         count or 0,
         min_bid or 0,
         buyout_price or 0
     )
 end
 
-function Aux.info.break_auction_signature(signature)
+function public.break_auction_signature(signature)
     local parts = strfind(signature, '^(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)$')
     for i=1,2 do
         tremove(parts, 1)
@@ -205,36 +230,32 @@ function Aux.info.break_auction_signature(signature)
     return unpack(parts)
 end
 
-function item_signature(hyperlink)
-    local item_id, suffix_id = parse_hyperlink(hyperlink)
+function public.item_key(hyperlink)
+    local item_id, suffix_id = private.parse_hyperlink(hyperlink)
     return item_id..':'..suffix_id
 end
 
-function parse_item_signature(item_signature)
-    local _, _, item_id, suffix_id = strfind(item_signature, '^(%d+):(%d+)$')
-    return item_id, suffix_id
-end
-
-function item_id(hyperlink)
-	local _, _, id_string = strfind(hyperlink, "^.-:(%d*).*")
-	return tonumber(id_string)	
-end
-
-function parse_hyperlink(hyperlink)
+function private.parse_hyperlink(hyperlink)
     local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(hyperlink, '|Hitem:(%d+):(%d+):(%d+):(%d+)|h[[]([^]]+)[]]|h')
-    return tonumber(item_id) or 0, tonumber(suffix_id) or 0, tonumber(enchant_id) or 0, tonumber(unique_id) or 0, name
+    return tonumber(item_id) or 0, tonumber(suffix_id) or 0, tonumber(unique_id) or 0, tonumber(enchant_id) or 0, name
 end
 
-function hyperlink_item(hyperlink)
-	local name, itemstring, quality, level, type, subtype, max_stack = GetItemInfo(item_id(hyperlink))
-	return {
-		name = name,
-		hyperlink = hyperlink,
-		itemstring = itemstring,
-		quality = quality,
-		level = level,
-		type = type,
-		subtype = subtype,
-		max_stack = max_stack,
-	}
+function public.itemstring(item_id, suffix_id, unique_id, enchant_id)
+    return 'item:'..(item_id or 0)..':'..(enchant_id or 0)..':'..(suffix_id or 0)..':'..(unique_id or 0)
+end
+
+function public.item(item_id, suffix_id, unique_id, enchant_id)
+    local itemstring = 'item:'..(item_id or 0)..':'..(enchant_id or 0)..':'..(suffix_id or 0)..':'..(unique_id or 0)
+    local name, itemstring, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
+    return {
+        itemstring = itemstring,
+        name = name,
+        texture = texture,
+        quality = quality,
+        level = level,
+        slot = slot,
+        class = class,
+        subclass = subclass,
+        max_stack = max_stack,
+    }
 end

@@ -1,6 +1,5 @@
-Aux.post = {
-	orig = {}
-}
+local private, public = {}, {}
+Aux.post = public
 
 local controller = (function()
 	local controller
@@ -20,7 +19,7 @@ function process()
 		local stack_slot
 		
 		Aux.stack.start(
-			state.name,
+			state.item_key,
 			state.stack_size,
 			function(slot)
 				stacking_complete = true
@@ -43,7 +42,7 @@ function process()
 	end
 end
 
-function Aux.post.stop(k)
+function public.stop(k)
 	Aux.control.on_next_update(function()
 		stop()
 		
@@ -78,7 +77,7 @@ function post_auction(slot, k)
 	controller().wait(function() return not GetContainerItemInfo(slot.bag, slot.bag_slot) end, k)
 end
 
-function Aux.post.start(name, stack_size, duration, bid, buyout, count, callback)
+function public.start(item_key, stack_size, duration, bid, buyout, count, callback)
 	Aux.control.on_next_update(function()
 		stop()
 		
@@ -87,7 +86,7 @@ function Aux.post.start(name, stack_size, duration, bid, buyout, count, callback
 		ClearCursor()
 		
 		state = {
-			name = name,
+            item_key = item_key,
 			stack_size = stack_size,
 			duration = duration,
 			bid = bid,

@@ -1,13 +1,13 @@
 local private, public = {}, {}
 Aux.item_search_frame = public
 
+aux_recently_searched = {}
+
 local create_auction_record, show_dialog, find_auction, hide_sheet, update_listing, auction_alpha_setter, group_alpha_setter, create_auction_record
 local auctions
 local search_query
-local tooltip_patterns = {}
 local current_page
 local refresh
-local recently_searched = {}
 
 function auction_alpha_setter(cell, auction)
     cell:SetAlpha(auction.gone and 0.3 or 1)
@@ -22,12 +22,13 @@ local BUYOUT, BID, FULL = 1, 2, 3
 public.recently_searched_config = {
     on_row_click = function (sheet, row_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+        AuxItemSearchFrameItemItemInputBox:Hide()
         public.set_item(sheet.data[data_index].item_id)
     end,
-    on_row_enter = function (sheet, row_index)
+    on_row_enter = function(sheet, row_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
     end,
-    on_row_leave = function (sheet, row_index)
+    on_row_leave = function(sheet, row_index)
         sheet.rows[row_index].highlight:SetAlpha(0)
     end,
     columns = {
@@ -63,10 +64,10 @@ public.recently_searched_config = {
                 cell.icon = icon
             end,
             cell_setter = function(cell, datum)
-                local info = { GetItemInfo(datum.item_id) }
-                cell.icon.icon_texture:SetTexture(info[9])
-                cell.text:SetText('['..info[1]..']')
-                local color = ITEM_QUALITY_COLORS[info[3]]
+                local item_info = Aux.info.item(datum.item_id)
+                cell.icon.icon_texture:SetTexture(item_info.texture)
+                cell.text:SetText('['..item_info.name..']')
+                local color = ITEM_QUALITY_COLORS[item_info.quality]
                 cell.text:SetTextColor(color.r, color.g, color.b)
             end,
         },
@@ -82,24 +83,34 @@ public.views = {
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
-            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info, 0, 30)
+            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_CURSOR', 0, 30)
         end,
         on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
             AuxTooltip:Hide()
+            ResetCursor()
+        end,
+        on_row_update = function(sheet, row_index)
+            if IsControlKeyDown() then
+                ShowInspectCursor()
+            elseif IsAltKeyDown() then
+                SetCursor('BUY_CURSOR')
+            else
+                ResetCursor()
+            end
         end,
         row_setter = function(row, group)
-            row.tooltip = group[1].tooltip
+            row.itemstring = Aux.info.itemstring(group[1].item_id, group[1].suffix_id, nil, group[1].enchant_id)
             row.EnhTooltip_info = group[1].EnhTooltip_info
         end,
         columns = {
             {
                 title = 'Qty',
-                width = 23,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].stack_size, group2[1].stack_size, Aux.util.LT) end,
+                width = 25,
+                comparator = function(group1, group2) return Aux.util.compare(group1[1].aux_quantity, group2[1].aux_quantity, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
-                    cell.text:SetText(group[1].stack_size)
+                    cell.text:SetText(group[1].aux_quantity)
                     group_alpha_setter(cell, group)
                 end,
             },
@@ -144,24 +155,34 @@ public.views = {
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
-            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info, 0, 30)
+            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_CURSOR', 0, 30)
         end,
         on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
             AuxTooltip:Hide()
+            ResetCursor()
+        end,
+        on_row_update = function(sheet, row_index)
+            if IsControlKeyDown() then
+                ShowInspectCursor()
+            elseif IsAltKeyDown() then
+                SetCursor('BUY_CURSOR')
+            else
+                ResetCursor()
+            end
         end,
         row_setter = function(row, datum)
-            row.tooltip = datum.tooltip
+            row.itemstring = Aux.info.itemstring(datum.item_id, datum.suffix_id, datum.unique_id, datum.enchant_id)
             row.EnhTooltip_info = datum.EnhTooltip_info
         end,
         columns = {
             {
                 title = 'Qty',
-                width = 23,
-                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                width = 25,
+                comparator = function(row1, row2) return Aux.util.compare(row1.aux_quantity, row2.aux_quantity, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.stack_size)
+                    cell.text:SetText(datum.aux_quantity)
                     auction_alpha_setter(cell, datum)
                 end,
             },
@@ -226,7 +247,7 @@ public.views = {
                 end,
             },
         },
-        sort_order = {{column = 2, order = 'ascending' }, {column = 6, order = 'ascending' }, {column = 3, order = 'ascending'}},
+        sort_order = {{column = 3, order = 'ascending'}, {column = 5, order = 'ascending'}},
 	},
 	[FULL] = {
 		name = 'Full',
@@ -236,24 +257,34 @@ public.views = {
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
-            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info, 0, 30)
+            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_CURSOR', 0, 30)
         end,
         on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
             AuxTooltip:Hide()
+            ResetCursor()
+        end,
+        on_row_update = function(sheet, row_index)
+            if IsControlKeyDown() then
+                ShowInspectCursor()
+            elseif IsAltKeyDown() then
+                SetCursor('BUY_CURSOR')
+            else
+                ResetCursor()
+            end
         end,
         row_setter = function(row, datum)
-            row.tooltip = datum.tooltip
+            row.itemstring = Aux.info.itemstring(datum.item_id, datum.suffix_id, datum.unique_id, datum.enchant_id)
             row.EnhTooltip_info = datum.EnhTooltip_info
         end,
 		columns = {
             {
                 title = 'Qty',
-                width = 23,
-                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                width = 25,
+                comparator = function(row1, row2) return Aux.util.compare(row1.aux_quantity, row2.aux_quantity, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.stack_size)
+                    cell.text:SetText(datum.aux_quantity)
                     auction_alpha_setter(cell, datum)
                 end,
             },
@@ -299,7 +330,7 @@ public.views = {
             },
             {
                 title = 'Lvl',
-                width = 23,
+                width = 25,
                 comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
@@ -346,7 +377,7 @@ public.views = {
             },
             {
                 title = 'Owner',
-                width = 70,
+                width = 90,
                 comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
                 cell_setter = function(cell, datum)
@@ -381,14 +412,17 @@ function public.on_open()
     public.update_item()
     private.update_recently_searched()
 	update_listing()
+    if not private.item_id then
+        AuxItemSearchFrameItemRefreshButton:Disable()
+    end
 end
 
 function public.dialog_cancel()
-    Aux.log('Canceled.')
+    Aux.log('Aborted.')
 	Aux.scan.abort()
     AuxItemSearchFrameAuctionsConfirmation:Hide()
 	update_listing()
-    AuxItemSearchFrameItemSearchButton:Enable()
+    AuxItemSearchFrameItemRefreshButton:Enable()
 end
 
 function public.stop_search()
@@ -403,7 +437,7 @@ function update_listing()
     if private.view == BUYOUT then
 		AuxItemSearchFrameAuctionsBuyListing:Show()
         local buy_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-        Aux.list.populate(AuxItemSearchFrameAuctionsBuyListing.sheet, auctions and Aux.util.group_by(buy_records, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price == a2.buyout_price end) or {})
+        Aux.list.populate(AuxItemSearchFrameAuctionsBuyListing.sheet, auctions and Aux.util.group_by(buy_records, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
         AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBuyListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
 	elseif private.view == BID then
@@ -435,14 +469,18 @@ function public.set_view(view)
 end
 
 function private.update_recently_searched()
-    Aux.list.populate(AuxItemSearchFrameRecentlySearchedListing.sheet, recently_searched)
+    Aux.list.populate(AuxItemSearchFrameRecentlySearchedListing.sheet, aux_recently_searched)
 end
 
 function public.set_item(item_id)
     if item_id ~= private.item_id then
+        AuxItemSearchFrameItemRefreshButton:Enable()
         private.item_id = item_id
         public.update_item()
-        tinsert(recently_searched, 1, { item_id=item_id, time=time() })
+        tinsert(aux_recently_searched, 1, { item_id=item_id, time=time() })
+        while getn(aux_recently_searched) > 50 do
+            tremove(aux_recently_searched, getn(aux_recently_searched))
+        end
         private.update_recently_searched()
         public.start_search()
     end
@@ -464,28 +502,32 @@ end
 
 function public.start_search()
 
-	if not AuxItemSearchFrameItemSearchButton:IsVisible() then
+	if not AuxItemSearchFrameItemRefreshButton:IsVisible() then
 		return
 	end
 	
-	AuxItemSearchFrameItemSearchButton:Hide()
+	AuxItemSearchFrameItemRefreshButton:Hide()
 	AuxItemSearchFrameItemStopButton:Show()
 	
 	auctions = nil
 	
 	refresh = true
 
-    local name = GetItemInfo(private.item_id)
-	
+    local item_id = private.item_id
+    local item_info = Aux.info.item(item_id)
+
+    local class_index = Aux.item_class_index(item_info.class)
+    local subclass_index = Aux.item_subclass_index(class_index, item_info.subclass)
+
 	search_query = {
-		name = name,
---		min_level = AuxBuyMinLevel:GetText(),
---		max_level = AuxBuyMaxLevel:GetText(),
---		slot = category and category.slot,
---		class = category and category.class,
---		subclass = category and category.subclass,
---		quality = UIDropDownMenu_GetSelectedValue(AuxBuyQualityDropDown),
---		usable = AuxBuyUsableCheckButton:GetChecked()
+		name = item_info.name,
+		min_level = item_info.level,
+        min_level = item_info.level,
+		slot = item_info.slot,
+		class = Aux.item_class_index(item_info.class),
+		subclass = item_info.subclass,
+		quality = item_info.quality,
+		usable = item_info.usable,
 	}
 	
 	Aux.log('Scanning auctions ...')
@@ -499,28 +541,25 @@ function public.start_search()
             Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
             current_page = page
 		end,
-		on_read_auction = function(i)
-			local auction_item = Aux.info.auction_item(i)
-			if auction_item then
-				if auction_item.name == search_query.name then
-                    auctions = auctions or {}
-                    tinsert(auctions, create_auction_record(auction_item, current_page))
-				end
-			end
+		on_read_auction = function(auction_info)
+            if auction_info.item_id == item_id then
+                auctions = auctions or {}
+                tinsert(auctions, create_auction_record(auction_info, current_page))
+            end
 		end,
 		on_complete = function()
 			auctions = auctions or {}
             Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
 
             AuxItemSearchFrameItemStopButton:Hide()
-			AuxItemSearchFrameItemSearchButton:Show()
+			AuxItemSearchFrameItemRefreshButton:Show()
 			refresh = true
 		end,
 		on_abort = function()
 			auctions = auctions or {}
             Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
 			AuxItemSearchFrameItemStopButton:Hide()
-			AuxItemSearchFrameItemSearchButton:Show()
+			AuxItemSearchFrameItemRefreshButton:Show()
 			refresh = true
 		end,
 		next_page = function(page, total_pages)
@@ -535,17 +574,17 @@ function public.start_search()
 end
 
 function show_dialog(buyout_mode, entry, amount)
-	AuxItemSearchFrameAuctionsConfirmationContentItem.tooltip = entry.tooltip
+	AuxItemSearchFrameAuctionsConfirmationContentItem.itemstring = Aux.info.itemstring(entry.item_id, entry.suffix_id, entry.unique_id, entry.enchant_id)
     AuxItemSearchFrameAuctionsConfirmationContentItem.EnhTooltip_info = entry.EnhTooltip_info
 
     AuxItemSearchFrameAuctionsConfirmationContentActionButton:Disable()
-    AuxItemSearchFrameAuctionsConfirmationContentItemIconTexture:SetTexture(entry.texture)
-    AuxItemSearchFrameAuctionsConfirmationContentItemName:SetText(entry.tooltip[1][1].text)
+    AuxItemSearchFrameAuctionsConfirmationContentItemIconTexture:SetTexture(Aux.info.item(entry.item_id).texture)
+    AuxItemSearchFrameAuctionsConfirmationContentItemName:SetText(entry.name)
 	local color = ITEM_QUALITY_COLORS[entry.quality]
     AuxItemSearchFrameAuctionsConfirmationContentItemName:SetTextColor(color.r, color.g, color.b)
 
-	if entry.stack_size > 1 then
-        AuxItemSearchFrameAuctionsConfirmationContentItemCount:SetText(entry.stack_size);
+	if entry.aux_quantity > 1 then
+        AuxItemSearchFrameAuctionsConfirmationContentItemCount:SetText(entry.aux_quantity);
         AuxItemSearchFrameAuctionsConfirmationContentItemCount:Show()
 	else
         AuxItemSearchFrameAuctionsConfirmationContentItemCount:Hide()
@@ -583,8 +622,8 @@ function find_auction(entry, buyout_mode, express_mode)
         amount = entry.bid
     end
 
-    Aux.log('Processing '..(buyout_mode and 'buyout' or 'bid')..' request for '..entry.hyperlink..' x '..entry.stack_size..' at '..Aux.util.money_string(amount)..' ...')
-	AuxItemSearchFrameItemSearchButton:Disable()
+    Aux.log('Processing '..(buyout_mode and 'buyout' or 'bid')..' request for '..entry.hyperlink..' x '..entry.aux_quantity..' at '..Aux.util.money_string(amount)..' ...')
+	AuxItemSearchFrameItemRefreshButton:Disable()
 	
 	if not express_mode then
 		show_dialog(buyout_mode, entry, amount)
@@ -603,27 +642,17 @@ function find_auction(entry, buyout_mode, express_mode)
 		on_page_loaded = function(page)
 			current_page = page
 		end,
-		on_read_auction = function(i, ctrl)
-			local auction_item = Aux.info.auction_item(i)
-			
-			if not auction_item then
-				return
-			end
-			
-			local stack_size = auction_item.charges or auction_item.count
-			local bid = (auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid) + auction_item.min_increment
-			
-			local signature = Aux.auction_signature(auction_item.hyperlink, stack_size, bid, auction_item.buyout_price)
-			
-			if entry.signature == signature then
+		on_read_auction = function(auction_info, ctrl)
+			local auction_record = create_auction_record(auction_info)
+			if entry.signature == auction_record.signature then
 				ctrl.suspend()
 				found = true
                 Aux.log('Matching auction found.'..(express_mode and '' or ' Awaiting confirmation ...'))
 				
 				if express_mode then
 					if GetMoney() >= amount then
-						PlaceAuctionBid("list", i, amount)
-                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..entry.hyperlink..' x '..entry.stack_size..' at '..Aux.util.money_string(amount)..'.')
+						PlaceAuctionBid('list', auction_info.index, amount)
+                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(amount)..'.')
 						entry.gone = true
 						refresh = true
 					else
@@ -631,17 +660,17 @@ function find_auction(entry, buyout_mode, express_mode)
 					end
 					Aux.scan.abort()
 				else
-					Aux.buy.dialog_action = function()						
+					public.dialog_action = function()
 						if GetMoney() >= amount then
-							PlaceAuctionBid("list", i, amount)
-                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..entry.hyperlink..' x '..entry.stack_size..' at '..Aux.util.money_string(amount)..'.')
+							PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))
+                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(amount)..'.')
                             entry.gone = true
 							refresh = true
 						else
 							Aux.log('Not enough money.')
 						end				
 						Aux.scan.abort()
-						AuxItemSearchFrameItemSearchButton:Enable()
+						AuxItemSearchFrameItemRefreshButton:Enable()
 						AuxItemSearchFrameAuctionsConfirmation:Hide()
 						update_listing()
 					end
@@ -657,12 +686,12 @@ function find_auction(entry, buyout_mode, express_mode)
 				public.dialog_cancel()
 			end
 			if express_mode then
-				AuxItemSearchFrameItemSearchButton:Enable()
+				AuxItemSearchFrameItemRefreshButton:Enable()
 			end
 		end,
 		on_abort = function()
 			if express_mode then
-				AuxItemSearchFrameItemSearchButton:Enable()
+				AuxItemSearchFrameItemRefreshButton:Enable()
 			end
 		end,
 		next_page = function(page, total_pages)
@@ -685,45 +714,46 @@ function public.on_row_click(entry)
 	end	
 end
 
-function create_auction_record(auction_item, current_page)
+function create_auction_record(auction_info, current_page)
 	
-	local stack_size = auction_item.charges or auction_item.count
-	local bid = (auction_item.current_bid > 0 and auction_item.current_bid or auction_item.min_bid) + auction_item.min_increment
-	local buyout_price = auction_item.buyout_price > 0 and auction_item.buyout_price or nil
-	local buyout_price_per_unit = buyout_price and Aux_Round(auction_item.buyout_price/stack_size)
+	local aux_quantity = auction_info.charges or auction_info.count
+	local bid = (auction_info.current_bid > 0 and auction_info.current_bid or auction_info.min_bid) + auction_info.min_increment
+	local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
+	local buyout_price_per_unit = buyout_price and Aux_Round(auction_info.buyout_price / aux_quantity)
     local status
-    if auction_item.current_bid == 0 then
+    if auction_info.current_bid == 0 then
         status = 'No Bid'
-    elseif auction_item.high_bidder then
+    elseif auction_info.high_bidder then
         status = GREEN_FONT_COLOR_CODE..'Your Bid'..FONT_COLOR_CODE_CLOSE
     else
         status = 'Other Bidder'
     end
 
     return {
-            key = auction_item.item_signature,
-            signature = Aux.auction_signature(auction_item.hyperlink, stack_size, bid, auction_item.buyout_price),
+            item_id = auction_info.item_id,
+            suffix_id = auction_info.suffix_id,
+            unique_id = auction_info.unique_id,
+            enchant_id = auction_info.enchant_id,
 
-            name = auction_item.name,
-            level = auction_item.level,
-            texture = auction_item.texture,
-            tooltip = auction_item.tooltip,
-            stack_size = stack_size,
+            signature = Aux.auction_signature(auction_info.hyperlink, aux_quantity, bid, auction_info.buyout_price),
+
+            name = auction_info.name,
+            level = auction_info.level,
+            aux_quantity = aux_quantity,
             buyout_price = buyout_price,
             buyout_price_per_unit = buyout_price_per_unit,
-            quality = auction_item.quality,
-            hyperlink = auction_item.hyperlink,
-            itemstring = auction_item.itemstring,
+            quality = auction_info.quality,
+            hyperlink = auction_info.hyperlink,
             page = current_page,
             bid = bid,
-            bid_per_unit = Aux_Round(bid/stack_size),
-            owner = auction_item.owner,
-            duration = auction_item.duration,
-            usable = auction_item.usable,
-            high_bidder = auction_item.high_bidder,
+            bid_per_unit = Aux_Round(bid/aux_quantity),
+            owner = auction_info.owner,
+            duration = auction_info.duration,
+            usable = auction_info.usable,
+            high_bidder = auction_info.high_bidder,
             status = status,
 
-            EnhTooltip_info = auction_item.EnhTooltip_info,
+            EnhTooltip_info = auction_info.EnhTooltip_info,
     }
 end
 

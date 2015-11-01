@@ -1,6 +1,7 @@
-Aux.sell = {}
+local private, public = {}, {}
+Aux.sell = public
 
-local auxSellEntries = {}
+local existing_auctions = {}
 
 local inventory_data
 
@@ -40,7 +41,7 @@ Aux.sell.inventory_listing_config = {
     columns = {
         {
             title = 'Qty',
-            width = 23,
+            width = 25,
             comparator = function(datum1, datum2) return Aux.util.compare(datum1.aux_quantity, datum2.aux_quantity, Aux.util.LT) end,
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, datum)
@@ -100,13 +101,13 @@ Aux.sell.auction_listing_config = {
     on_cell_leave = function (sheet, row_index, column_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         local datum = sheet.data[data_index]
-        if not (datum and current_auction and Aux.util.safe_index{auxSellEntries, current_auction.name, 'selected', 'key'} == datum.key) then
+        if not (datum and current_auction and Aux.util.safe_index{existing_auctions, current_auction.key, 'selected', 'key'} == datum.key) then
             sheet.rows[row_index].highlight:SetAlpha(0)
         end
     end,
 
     row_setter = function(row, datum)
-        if datum and current_auction and Aux.util.safe_index{auxSellEntries, current_auction.name, 'selected', 'key'} == datum.key then
+        if datum and current_auction and Aux.util.safe_index{existing_auctions, current_auction.key, 'selected', 'key'} == datum.key then
             row.highlight:SetAlpha(.5)
         else
             row.highlight:SetAlpha(0)
@@ -153,11 +154,11 @@ Aux.sell.auction_listing_config = {
         },
         {
             title = 'Qty',
-            width = 23,
+            width = 25,
             comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, row)
-                cell.text:SetText(row.stack_size)
+                cell.text:SetText(row.stack_size == get_stack_size_slider_value() and GREEN_FONT_COLOR_CODE..row.stack_size..FONT_COLOR_CODE_CLOSE or row.stack_size)
             end,
         },
         {
@@ -178,11 +179,12 @@ function update_inventory_listing()
 end
 
 function update_auction_listing()
-    Aux.list.populate(AuxSellAuctionsListing.sheet, current_auction and auxSellEntries[current_auction.name] or {})
+    Aux.list.populate(AuxSellAuctionsListing.sheet, current_auction and existing_auctions[current_auction.key] or {})
 end
 
 function Aux.sell.on_open()
     MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', 0)
+    AuxSellInventory:SetWidth(AuxSellInventoryListing:GetWidth() + 40)
     AuxSellAuctions:SetWidth(AuxSellAuctionsListing:GetWidth() + 40)
     AuxFrame:SetWidth(AuxSellInventory:GetWidth() + AuxSellParameters:GetWidth() + AuxSellAuctions:GetWidth() + 15)
 
@@ -247,7 +249,7 @@ end
 
 function Aux.sell.post_auctions()
 	if current_auction then
-		local name, hyperlink, stack_size, buyout_price, stack_count = current_auction.name, current_auction.hyperlink, get_stack_size_slider_value(), MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice), AuxSellStackCountSlider:GetValue()
+		local key, hyperlink, stack_size, buyout_price, stack_count = current_auction.key, current_auction.hyperlink, get_stack_size_slider_value(), MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice), AuxSellStackCountSlider:GetValue()
 		local duration
 		if AuctionFrameAuctions.duration == 120 then
 			duration = 2
@@ -258,7 +260,7 @@ function Aux.sell.post_auctions()
 		end
 		
 		Aux.post.start(
-			name,
+			key,
 			stack_size,
 			AuctionFrameAuctions.duration,
 			MoneyInputFrame_GetCopper(AuxSellParametersStartPrice),
@@ -266,12 +268,12 @@ function Aux.sell.post_auctions()
 			stack_count,
 			function(posted)
 				for i = 1, posted do
-					record_auction(name, stack_size, buyout_price, duration, UnitName("player"))
+					record_auction(key, stack_size, buyout_price, duration, UnitName("player"))
 				end
-				if auxSellEntries[name] then
-					for _, entry in ipairs(auxSellEntries[name]) do
+				if existing_auctions[key] then
+					for _, entry in ipairs(existing_auctions[key]) do
 						if entry.buyout_price == buyout_price and entry.stack_size == stack_size then
-							auxSellEntries[name].selected = entry
+							existing_auctions[key].selected = entry
 						end
 					end
 				end
@@ -285,13 +287,13 @@ function Aux.sell.post_auctions()
 end
 
 function select_entry()
-	if current_auction and auxSellEntries[current_auction.name] and not auxSellEntries[current_auction.name].selected then
+	if current_auction and existing_auctions[current_auction.key] and not existing_auctions[current_auction.key].selected then
 		local bestPrice	= {} -- a table with one entry per stack_size that is the cheapest auction for that particular stack_size
 		local absoluteBest -- the overall cheapest auction
 
 		----- find the best price per stacksize and overall -----
 		
-		for _, auction_datum in ipairs(auxSellEntries[current_auction.name]) do
+		for _, auction_datum in ipairs(existing_auctions[current_auction.key]) do
 			if not bestPrice[auction_datum.stack_size] or bestPrice[auction_datum.stack_size].unit_buyout_price >= auction_datum.unit_buyout_price then
 				bestPrice[auction_datum.stack_size] = auction_datum
 			end
@@ -301,10 +303,10 @@ function select_entry()
 			end	
 		end
 		
-		auxSellEntries[current_auction.name].selected = absoluteBest
+		existing_auctions[current_auction.key].selected = absoluteBest
 
 		if bestPrice[get_stack_size_slider_value()] then
-			auxSellEntries[current_auction.name].selected = bestPrice[get_stack_size_slider_value()]
+			existing_auctions[current_auction.key].selected = bestPrice[get_stack_size_slider_value()]
 			bestPriceOurStackSize = bestPrice[get_stack_size_slider_value()]
 		end
 	end
@@ -374,21 +376,21 @@ function update_recommendation()
         -- TODO neutral AH deposit formula
 		MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', floor(current_auction.unit_vendor_price * 0.05 * (current_auction.charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
 		
-		if auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected then
-			if not auxSellEntries[current_auction.name].created or GetTime() - auxSellEntries[current_auction.name].created > 1800 then
+		if existing_auctions[current_auction.key] and existing_auctions[current_auction.key].selected then
+			if not existing_auctions[current_auction.key].created or GetTime() - existing_auctions[current_auction.key].created > 1800 then
                 AuxSellParametersStrategyDropDownStaleWarning:SetText('Stale data!') -- data older than half an hour marked as stale
 			end
 		
-			local new_buyout_price = auxSellEntries[current_auction.name].selected.unit_buyout_price * get_stack_size_slider_value()
+			local new_buyout_price = existing_auctions[current_auction.key].selected.unit_buyout_price * get_stack_size_slider_value()
 
-			if auxSellEntries[current_auction.name].selected.yours == 0 then
+			if existing_auctions[current_auction.key].selected.yours == 0 then
 				new_buyout_price = undercut(new_buyout_price)
 			end
 			
 			local new_start_price = new_buyout_price * 0.95
-			
-			MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(new_buyout_price))
-			MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, Aux_Round(new_start_price))
+
+            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux_Round(new_start_price)))
+            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux_Round(new_buyout_price)))
 --        elseif UIDropDownMenu_GetSelectedValue(AuxSellParametersStrategyDropDown) == HISTORICAL then
 --            local market_price = Aux.history.get_price_suggestion(current_auction.key, current_auction.aux_quantity)
 --            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(market_price * 0.95))
@@ -406,17 +408,14 @@ function Aux.sell.quantity_update()
     end
     select_entry()
 	update_recommendation()
+    update_auction_listing()
 end
-
------------------------------------------
 
 function Aux.sell.clear_auction()
 	current_auction = nil
 	select_entry()
 	update_recommendation()
 end
-
------------------------------------------
 
 function set_auction(auction_candidate)
 
@@ -436,7 +435,7 @@ function set_auction(auction_candidate)
         Aux.sell.quantity_update()
         AuxSellStackCountSlider:SetValue(current_auction.aux_quantity) -- reduced to max possible
 
-        if not auxSellEntries[current_auction.name] then
+        if not existing_auctions[current_auction.key] then
             refresh_entries()
         end
 
@@ -495,11 +494,15 @@ function update_inventory_data()
                 end)
 
                 if auction_sell_item then
-                    if not auction_candidate_map[item_info.item_signature] then
+                    if not auction_candidate_map[item_info.item_key] then
 
-                        auction_candidate_map[item_info.item_signature] = {
-                            key = item_info.item_signature,
+                        auction_candidate_map[item_info.item_key] = {
+                            item_id = item_info.item_id,
+                            suffix_id = item_info.suffix_id,
+
+                            key = item_info.item_key,
                             hyperlink = item_info.hyperlink,
+                            
                             name = item_info.name,
                             texture = item_info.texture,
                             quality = item_info.quality,
@@ -512,7 +515,7 @@ function update_inventory_data()
                             availability = { [charge_class]=item_info.count },
                         }
                     else
-                        local candidate = auction_candidate_map[item_info.item_signature]
+                        local candidate = auction_candidate_map[item_info.item_key]
                         candidate.availability[charge_class] = (candidate.availability[charge_class] or 0) + item_info.count
                         candidate.aux_quantity = candidate.aux_quantity + (item_info.charges or item_info.count)
                     end
@@ -537,43 +540,50 @@ end
 
 function refresh_entries()
 	if current_auction then
-		local name, class, subclass = current_auction.name, current_auction.class, current_auction.subclass
-		
-		auxSellEntries[name] = nil
-		
-		class, subclass = GetItemInfo(name)
+		local item_id, suffix_id = current_auction.item_id, current_auction.suffix_id
+        local item_key = item_id..':'..suffix_id
+        local item_info = Aux.info.item(item_id, suffix_id)
 
-		-- local class_index = item_class_index(current_auction.class)
-		-- local subclass_index = item_subclass_index(class_index, current_auction.subclass)
+        existing_auctions[item_key] = nil
+
+
+        local class_index = Aux.item_class_index(item_info.class)
+        local subclass_index = Aux.item_subclass_index(class_index, item_info.subclass)
+
+        local search_query = {
+            name = Aux.info.item(item_id).name, -- blizzard doesn't support queries with name suffixes
+            min_level = item_info.level,
+            min_level = item_info.level,
+            slot = item_info.slot,
+            class = class_index,
+            subclass = subclass_index,
+            quality = item_info.quality,
+            usable = item_info.usable,
+        }
 
 		Aux.log('Scanning auctions ...')
 		Aux.scan.start{
-			query = {
-				name = name,
-				class = class_index,
-				subclass = subclass_index,
-			},
+			query = search_query,
 			page = 0,
 			on_page_loaded = function(page, total_pages)
 				Aux.log('Scanning page '..(page + 1)..' out of '..total_pages..' ...')
 			end,
-			on_read_auction = function(i)
-				local auction_item = Aux.info.auction_item(i)
-				if auction_item and auction_item.name == name then
-					local aux_quantity = auction_item.charges or auction_item.count
-					record_auction(auction_item.name, aux_quantity, auction_item.buyout_price, auction_item.duration, auction_item.owner)
+			on_read_auction = function(auction_info)
+				if auction_info.name == item_info.name then
+					local aux_quantity = auction_info.charges or auction_info.count
+					record_auction(auction_info.item_key, aux_quantity, auction_info.buyout_price, auction_info.duration, auction_info.owner)
 				end
 			end,
 			on_abort = function()
-				auxSellEntries[name] = nil
+				existing_auctions[item_key] = nil
                 Aux.log('Scan aborted.')
 			end,
 			on_complete = function()
-				auxSellEntries[name] = auxSellEntries[name] or { created = GetTime() }
+				existing_auctions[item_key] = existing_auctions[item_key] or { created = GetTime() }
 				select_entry()
 				update_recommendation()
                 update_auction_listing()
-                Aux.log('Scan complete: '..getn(auxSellEntries[name])..' '..Aux_PluralizeIf('auction', getn(auxSellEntries[name]))..' of '..current_auction.hyperlink..' found.')
+                Aux.log('Scan complete: '..getn(existing_auctions[item_key])..' '..Aux_PluralizeIf('auction', getn(existing_auctions[item_key]))..' of '..current_auction.hyperlink..' found.')
             end,
 			next_page = function(page, total_pages)
 				local last_page = max(total_pages - 1, 0)
@@ -587,7 +597,7 @@ end
 	
 function AuxSellEntry_OnClick(entry)
 
-	auxSellEntries[current_auction.name].selected = entry
+	existing_auctions[current_auction.key].selected = entry
 
     update_auction_listing()
 	update_recommendation()
@@ -604,21 +614,11 @@ function AuxSellParametersRefreshButton_OnClick()
 	end)
 end
 
------------------------------------------
-
-function AuxMoneyFrame_OnLoad()
-	this.small = 1
-	SmallMoneyFrame_OnLoad()
-	MoneyFrame_SetType("AUCTION")
-end
-
------------------------------------------
-
-function record_auction(name, aux_quantity, buyout_price, duration, owner)
+function record_auction(key, aux_quantity, buyout_price, duration, owner)
 	if buyout_price > 0 then
-		auxSellEntries[name] = auxSellEntries[name] or { created = GetTime() }
+		existing_auctions[key] = existing_auctions[key] or { created = GetTime() }
 		local entry
-		for _, existingEntry in ipairs(auxSellEntries[name]) do
+		for _, existingEntry in ipairs(existing_auctions[key]) do
 			if existingEntry.buyout_price == buyout_price and existingEntry.stack_size == aux_quantity then
 				entry = existingEntry
 			end
@@ -638,45 +638,23 @@ function record_auction(name, aux_quantity, buyout_price, duration, owner)
 				count = 1,
 				yours = owner == UnitName("player") and 1 or 0,
 			}
-			tinsert(auxSellEntries[name], entry)
-			table.sort(auxSellEntries[name], function(a,b) return a.unit_buyout_price < b.unit_buyout_price end)
+			tinsert(existing_auctions[key], entry)
+			table.sort(existing_auctions[key], function(a,b) return a.unit_buyout_price < b.unit_buyout_price end)
 		end
 	end
 end
-
------------------------------------------
 
 function undercut(price)
 	return math.max(0, price - 1)
 end
 
------------------------------------------
-
--- function item_class_index(item_class)
-	-- for i, class in ipairs({ GetAuctionItemClasses() }) do
-		-- if class == item_class then
-			-- return i
-		-- end
-	-- end
--- end
-
--- -----------------------------------------
-
--- function item_subclass_index(class_index, item_subclass)
-	-- for i, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
-		-- if subclass == item_subclass then
-			-- return i
-		-- end
-	-- end
--- end
-
-function report(hyperlink, stack_size, buyout_price, posted)
+function report(hyperlink, aux_quantity, buyout_price, posted)
 	Aux.log(string.format(
         '%i %s of %s x %i posted at %s.',
         posted,
         Aux_PluralizeIf('auction', posted),
         hyperlink,
-        stack_size,
+        aux_quantity,
         Aux.util.money_string(buyout_price)
 	))
 end
