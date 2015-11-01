@@ -29,11 +29,11 @@ public.views = {
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
-            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info)
+            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info, 0, 30)
         end,
         on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
-            GameTooltip:Hide()
+            AuxTooltip:Hide()
         end,
         row_setter = function(row, group)
             row.tooltip = group[1].tooltip
@@ -41,18 +41,8 @@ public.views = {
         end,
         columns = {
             {
-                title = 'Avail',
-                width = 40,
-                comparator = function(group1, group2) return Aux.util.compare(getn(Aux.util.filter(group1, function(auction) return not auction.gone end)), getn(Aux.util.filter(group2, function(auction) return not auction.gone end)), Aux.util.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, group)
-                    cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
-                    group_alpha_setter(cell, group)
-                end,
-            },
-            {
                 title = 'Auction Item',
-                width = 342,
+                width = 280,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].name, group2[1].name, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
@@ -103,8 +93,18 @@ public.views = {
                 end,
             },
             {
+                title = 'Buy',
+                width = 80,
+                comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price, group2[1].buyout_price, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, group)
+                    cell.text:SetText(Aux.util.money_string(group[1].buyout_price))
+                    group_alpha_setter(cell, group)
+                end,
+            },
+            {
                 title = 'Buy/ea',
-                width = 93,
+                width = 80,
                 comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price_per_unit, group2[1].buyout_price_per_unit, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
@@ -113,12 +113,12 @@ public.views = {
                 end,
             },
             {
-                title = 'Buy',
-                width = 93,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].buyout_price, group2[1].buyout_price, Aux.util.GT) end,
+                title = 'Avail',
+                width = 40,
+                comparator = function(group1, group2) return Aux.util.compare(getn(Aux.util.filter(group1, function(auction) return not auction.gone end)), getn(Aux.util.filter(group2, function(auction) return not auction.gone end)), Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
-                    cell.text:SetText(Aux.util.money_string(group[1].buyout_price))
+                    cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
                     group_alpha_setter(cell, group)
                 end,
             },
@@ -133,11 +133,11 @@ public.views = {
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
-            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info)
+            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info, 0, 30)
         end,
         on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
-            GameTooltip:Hide()
+            AuxTooltip:Hide()
         end,
         row_setter = function(row, datum)
             row.tooltip = datum.tooltip
@@ -145,18 +145,8 @@ public.views = {
         end,
         columns = {
             {
-                title = 'Page',
-                width = 40,
-                comparator = function(row1, row2) return Aux.util.compare(row1.page, row2.page, Aux.util.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.page)
-                    auction_alpha_setter(cell, datum)
-                end,
-            },
-            {
                 title = 'Auction Item',
-                width = 206,
+                width = 280,
                 comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
@@ -197,6 +187,46 @@ public.views = {
                 end,
             },
             {
+                title = 'Qty',
+                width = 23,
+                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(datum.stack_size)
+                    auction_alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Bid',
+                width = 80,
+                comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.bid))
+                    auction_alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Bid/ea',
+                width = 80,
+                comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
+                    auction_alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Status',
+                width = 70,
+                comparator = function(auction1, auction2) return Aux.util.compare(auction1.status, auction2.status, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
+                cell_setter = function(cell, auction)
+                    cell.text:SetText(auction.status)
+                    auction_alpha_setter(cell, auction)
+                end,
+            },
+            {
                 title = 'Left',
                 width = 30,
                 comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
@@ -217,42 +247,12 @@ public.views = {
                 end,
             },
             {
-                title = 'Status',
-                width = 70,
-                comparator = function(auction1, auction2) return Aux.util.compare(auction1.status, auction2.status, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                cell_setter = function(cell, auction)
-                    cell.text:SetText(auction.status)
-                    auction_alpha_setter(cell, auction)
-                end,
-            },
-            {
-                title = 'Qty',
-                width = 23,
-                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                title = 'Page',
+                width = 40,
+                comparator = function(row1, row2) return Aux.util.compare(row1.page, row2.page, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.stack_size)
-                    auction_alpha_setter(cell, datum)
-                end,
-            },
-            {
-                title = 'Bid/ea',
-                width = 110,
-                comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
-                    auction_alpha_setter(cell, datum)
-                end,
-            },
-            {
-                title = 'Bid',
-                width = 110,
-                comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.bid))
+                    cell.text:SetText(datum.page)
                     auction_alpha_setter(cell, datum)
                 end,
             },
@@ -267,11 +267,11 @@ public.views = {
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
-            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info)
+            Aux.info.set_game_tooltip(this, sheet.rows[row_index].tooltip, 'ANCHOR_CURSOR', sheet.rows[row_index].EnhTooltip_info, 0, 20)
         end,
         on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
-            GameTooltip:Hide()
+            AuxTooltip:Hide()
         end,
         row_setter = function(row, datum)
             row.tooltip = datum.tooltip
@@ -279,18 +279,8 @@ public.views = {
         end,
 		columns = {
             {
-                title = 'Qty',
-                width = 23,
-                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.stack_size)
-                    auction_alpha_setter(cell, datum)
-                end,
-            },
-            {
                 title = 'Auction Item',
-                width = 157,
+                width = 280,
                 comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
@@ -307,8 +297,8 @@ public.views = {
                     icon:SetPoint('LEFT', cell)
                     icon:SetWidth(12)
                     icon:SetHeight(12)
-                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
-                    icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
+                    icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info, 0, 30) end)
+                    icon:SetScript('OnLeave', function() AuxTooltip:Hide() end)
                     local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                     text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
                     text:SetPoint('TOPRIGHT', cell)
@@ -350,6 +340,66 @@ public.views = {
                 end,
             },
             {
+                title = 'Qty',
+                width = 23,
+                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(datum.stack_size)
+                    auction_alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Bid',
+                width = 80,
+                comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.bid))
+                    auction_alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Buy',
+                width = 80,
+                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.buyout_price))
+                    auction_alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Bid/ea',
+                width = 80,
+                comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
+                    auction_alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Buy/ea',
+                width = 80,
+                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
+                    auction_alpha_setter(cell, datum)
+                end,
+            },
+            {
+                title = 'Status',
+                width = 70,
+                comparator = function(auction1, auction2) return Aux.util.compare(auction1.status, auction2.status, Aux.util.GT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
+                cell_setter = function(cell, auction)
+                    cell.text:SetText(auction.status)
+                    auction_alpha_setter(cell, auction)
+                end,
+            },
+            {
                 title = 'Left',
                 width = 30,
                 comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
@@ -376,46 +426,6 @@ public.views = {
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(datum.owner)
-                    auction_alpha_setter(cell, datum)
-                end,
-            },
-            {
-                title = 'Bid/ea',
-                width = 70,
-                comparator = function(row1, row2) return Aux.util.compare(row1.bid_per_unit, row2.bid_per_unit, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.bid_per_unit))
-                    auction_alpha_setter(cell, datum)
-                end,
-            },
-            {
-                title = 'Buy/ea',
-                width = 70,
-                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price_per_unit, row2.buyout_price_per_unit, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.buyout_price_per_unit))
-                    auction_alpha_setter(cell, datum)
-                end,
-            },
-            {
-                title = 'Bid',
-                width = 70,
-                comparator = function(row1, row2) return Aux.util.compare(row1.bid, row2.bid, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.bid))
-                    auction_alpha_setter(cell, datum)
-                end,
-            },
-            {
-                title = 'Buy',
-                width = 70,
-                comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(Aux.util.money_string(datum.buyout_price))
                     auction_alpha_setter(cell, datum)
                 end,
             },
@@ -458,18 +468,18 @@ function update_sheet()
         local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
         Aux.list.populate(AuxFilterSearchFrameResultsBuyListing.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.hyperlink == a2.hyperlink and a1.stack_size == a2.stack_size and a1.buyout_price == a2.buyout_price end) or {})
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBuyListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 20)
+        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
 	elseif private.view == BID then
         AuxFilterSearchFrameResultsBidListing:Show()
         local bid_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
         Aux.list.populate(AuxFilterSearchFrameResultsBidListing.sheet, bid_auctions)
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBidListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 20)
+        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
 	elseif private.view == FULL then
         AuxFilterSearchFrameResultsFullListing:Show()
         Aux.list.populate(AuxFilterSearchFrameResultsFullListing.sheet, auctions or {})
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsFullListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 20)
+        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
 	end
 end
 

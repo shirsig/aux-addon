@@ -152,15 +152,6 @@ Aux.sell.auction_listing_config = {
             end,
         },
         {
-            title = 'Buy/ea',
-            width = 70,
-            comparator = function(row1, row2) return Aux.util.compare(row1.unit_buyout_price, row2.unit_buyout_price, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-            cell_setter = function(cell, row)
-                cell.text:SetText(Aux.util.money_string(row.unit_buyout_price))
-            end,
-        },
-        {
             title = 'Qty',
             width = 23,
             comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
@@ -170,12 +161,12 @@ Aux.sell.auction_listing_config = {
             end,
         },
         {
-            title = 'Buy',
-            width = 70,
-            comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
+            title = 'Buy/ea',
+            width = 80,
+            comparator = function(row1, row2) return Aux.util.compare(row1.unit_buyout_price, row2.unit_buyout_price, Aux.util.GT) end,
             cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
             cell_setter = function(cell, row)
-                cell.text:SetText(Aux.util.money_string(row.buyout_price))
+                cell.text:SetText(Aux.util.money_string(row.unit_buyout_price))
             end,
         },
     },
@@ -191,7 +182,10 @@ function update_auction_listing()
 end
 
 function Aux.sell.on_open()
-    UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, LIVE)
+    MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', 0)
+    AuxFrame:SetWidth(AuxSellInventory:GetWidth() + AuxSellParameters:GetWidth() + AuxSellAuctions:GetWidth() + 15)
+
+    --    UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, LIVE)
     Aux_Sell_SetAuctionDuration(AUX_AUCTION_DURATION)
 
     AuxSellStackSizeSlider:SetValueStep(1)
@@ -324,7 +318,7 @@ function get_stack_size_slider_value()
 end
 
 function Aux.sell.validate_parameters()
-    AuxSellPostButton:Disable()
+    AuxSellParametersPostButton:Disable()
     AuxSellParametersBuyoutPriceErrorText:Hide()
 
     if not current_auction then
@@ -340,14 +334,14 @@ function Aux.sell.validate_parameters()
         return
     end
 
-    AuxSellPostButton:Enable()
+    AuxSellParametersPostButton:Enable()
 end
 
 function update_recommendation()
-    AuxSellParametersStrategyDropDownStaleWarning:SetText()
+--    AuxSellParametersStrategyDropDownStaleWarning:SetText()
 
 	if not current_auction then
-		AuxSellRefreshButton:Disable()
+		AuxSellParametersRefreshButton:Disable()
 		
 		AuxSellParametersItemIconTexture:SetTexture(nil)
         AuxSellParametersItemCount:SetText()
@@ -373,13 +367,13 @@ function update_recommendation()
 		else
             AuxSellParametersItemCount:SetText()
 		end
-		
-		AuxSellRefreshButton:Enable()
+
+        AuxSellParametersRefreshButton:Enable()
 
         -- TODO neutral AH deposit formula
 		MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', floor(current_auction.unit_vendor_price * 0.05 * (current_auction.charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
 		
-		if UIDropDownMenu_GetSelectedValue(AuxSellParametersStrategyDropDown) == LIVE and auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected then
+		if auxSellEntries[current_auction.name] and auxSellEntries[current_auction.name].selected then
 			if not auxSellEntries[current_auction.name].created or GetTime() - auxSellEntries[current_auction.name].created > 1800 then
                 AuxSellParametersStrategyDropDownStaleWarning:SetText('Stale data!') -- data older than half an hour marked as stale
 			end
@@ -394,10 +388,10 @@ function update_recommendation()
 			
 			MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(new_buyout_price))
 			MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, Aux_Round(new_start_price))
-        elseif UIDropDownMenu_GetSelectedValue(AuxSellParametersStrategyDropDown) == HISTORICAL then
-            local market_price = Aux.history.get_price_suggestion(current_auction.key, current_auction.aux_quantity)
-            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(market_price * 0.95))
-            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, market_price)
+--        elseif UIDropDownMenu_GetSelectedValue(AuxSellParametersStrategyDropDown) == HISTORICAL then
+--            local market_price = Aux.history.get_price_suggestion(current_auction.key, current_auction.aux_quantity)
+--            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(market_price * 0.95))
+--            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, market_price)
         else
             MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
             MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 0)
@@ -600,7 +594,7 @@ function AuxSellEntry_OnClick(entry)
 	PlaySound("igMainMenuOptionCheckBoxOn")
 end
 
-function AuxSellRefreshButton_OnClick()
+function AuxSellParametersRefreshButton_OnClick()
 	Aux.scan.abort(function()
 		refresh_entries()
 		select_entry()
@@ -686,27 +680,27 @@ function report(hyperlink, stack_size, buyout_price, posted)
 	))
 end
 
-function Aux.sell.initialize_strategy_dropdown()
-
-    local function on_click()
-        UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, this.value)
-    end
-
-    UIDropDownMenu_AddButton{
-        text = 'Live scan',
-        value = LIVE,
-        func = on_click,
-    }
-
-    UIDropDownMenu_AddButton{
-        text = 'Historical price',
-        value = HISTORICAL,
-        func = on_click,
-    }
-
+--function Aux.sell.initialize_strategy_dropdown()
+--
+--    local function on_click()
+--        UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, this.value)
+--    end
+--
 --    UIDropDownMenu_AddButton{
---        text = 'Fixed',
---        value = FIXED,
+--        text = 'Live scan',
+--        value = LIVE,
 --        func = on_click,
 --    }
-end
+--
+--    UIDropDownMenu_AddButton{
+--        text = 'Historical price',
+--        value = HISTORICAL,
+--        func = on_click,
+--    }
+--
+----    UIDropDownMenu_AddButton{
+----        text = 'Fixed',
+----        value = FIXED,
+----        func = on_click,
+----    }
+--end

@@ -262,7 +262,7 @@
             <Layer level="ARTWORK">
                 <FontString name="$parentText" inherits="GameFontNormalSmall">
                     <Anchors>
-                        <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"/>
+                        <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor>
                     </Anchors>
                 </FontString>
             </Layer>
@@ -328,7 +328,7 @@
 			</OnEnter>
 			<OnLeave>
 				if this.tooltip then
-					GameTooltip:Hide()
+                    AuxTooltip:Hide()
 				end
 			</OnLeave>
 		</Scripts>
@@ -383,9 +383,13 @@
                 </Anchors>
             </Button>
             <Button name="AuxAuctionFrameButton" inherits="UIPanelButtonTemplate" text="Default UI">
-                <Size><AbsDimension x="60" y="15"/></Size>
-                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButton"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
+                <Size><AbsDimension x="65" y="17"/></Size>
+                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButton"><Offset><AbsDimension x="-3" y="0"/></Offset></Anchor></Anchors>
                 <Scripts>
+                    <OnLoad>
+                        this:SetTextFontObject('GameFontNormalSmall')
+                        this:SetHighlightFontObject('GameFontHighlightSmall')
+                    </OnLoad>
                     <OnClick>
                         if AuctionFrame:IsVisible() then
                             Aux.blizzard_ui_shown = false
@@ -475,7 +479,7 @@
                     </Anchor>
                     <Anchor point="RIGHT">
                         <Offset>
-                            <AbsDimension x="-5" y="0"/>
+                            <AbsDimension x="-10" y="0"/>
                         </Offset>
                     </Anchor>
                     <Anchor point="BOTTOM">

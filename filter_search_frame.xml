@@ -13,7 +13,7 @@
     <Frame name="AuxFilterSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
             <Frame name="$parentFilters" inherits="AuxFrameBoxTemplate">
-                <Size><AbsDimension x="180" y="326"/></Size>
+                <Size><AbsDimension x="178" y="326"/></Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
@@ -177,7 +177,7 @@
 
                     <Button name="$parentSearchButton" inherits="UIPanelButtonTemplate" text="Search">
                         <Size><AbsDimension x="90" y="26"/></Size>
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="5" y="5"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="8" y="15"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnClick>
                                 Aux.filter_search_frame.start_search()
@@ -186,7 +186,7 @@
                     </Button>
                     <Button name="$parentStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
                         <Size><AbsDimension x="90" y="26"/></Size>
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="5" y="5"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="8" y="15"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnClick>
                                 Aux.filter_search_frame.stop_search()
@@ -194,7 +194,7 @@
                         </Scripts>
                     </Button>
                     <EditBox name="$parentPageEditBox" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="110" y="5"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="111" y="15"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
                                 getglobal(this:GetName()..'Label'):SetText('Page')
@@ -209,7 +209,7 @@
                     </EditBox>
                     <CheckButton name="$parentAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
                         <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="143" y="5"/></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="144" y="15"/></Offset></Anchor></Anchors>
                         <Layers>
                             <Layer level="OVERLAY">
                                 <FontString inherits="GameFontNormalSmall" text="All" justifyH="LEFT">

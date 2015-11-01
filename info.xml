@@ -3,4 +3,11 @@
 	<Script file="info.lua"/>
   
 	<GameTooltip name="AuxInfoTooltip" inherits="GameTooltipTemplate"/>
+    <GameTooltip name="AuxTooltip" parent="UIParent" inherits="GameTooltipTemplate">
+        <Scripts>
+            <OnUpdate>
+                Aux.info.reanchor_tooltip()
+            </OnUpdate>
+        </Scripts>
+    </GameTooltip>
 </Ui>

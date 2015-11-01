@@ -1,6 +1,7 @@
 local TOOLTIP_LENGTH = 30
 
-Aux.info = {}
+local private, public = {}, {}
+Aux.info = public
 
 local hyperlink_item, item_id, item_charges, item_signature, parse_item_signature, parse_hyperlink
 
@@ -92,15 +93,31 @@ function Aux.info.auction_item(index, type)
 	return auction_item
 end
 
-function Aux.info.set_game_tooltip(owner, tooltip, anchor, EnhTooltip_info)
-	GameTooltip:SetOwner(owner, anchor)
+function public.reanchor_tooltip()
+    if private.anchor_cursor then
+        this:ClearAllPoints()
+        local x, y = GetCursorPosition()
+        x, y = x / UIParent:GetEffectiveScale() + private.x_offset, y / UIParent:GetEffectiveScale() + private.y_offset
+        this:SetPoint('BOTTOM', UIParent, 'BOTTOMLEFT', x, y)
+    end
+end
+
+function Aux.info.set_game_tooltip(owner, tooltip, anchor, EnhTooltip_info, x_offset, y_offset)
+    if anchor == 'ANCHOR_CURSOR' and (x_offset or y_offset) then
+        private.anchor_cursor = true
+        private.x_offset = x_offset
+        private.y_offset = y_offset
+        anchor = 'BOTTOM'
+    else
+        private.anchor_cursor = false
+    end
+    AuxTooltip:SetOwner(owner, anchor)
 	for _, line in ipairs(tooltip) do
-		GameTooltip:AddDoubleLine(line[1].text, line[2].text, line[1].r, line[1].b, line[1].g, line[2].r, line[2].b, line[2].g, true)
+        AuxTooltip:AddDoubleLine(line[1].text, line[2].text, line[1].r, line[1].b, line[1].g, line[2].r, line[2].b, line[2].g, true)
 	end
-	GameTooltip:Show()
-	
+    AuxTooltip:Show()
 	if EnhTooltip and EnhTooltip_info then
-		EnhTooltip.TooltipCall(GameTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
+		EnhTooltip.TooltipCAux(AuxTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
 	end
 end
 
@@ -120,7 +137,7 @@ function Aux.info.tooltip(setter)
 		getglobal('AuxInfoTooltipTextRight'..i):SetText()
 	end
 	
-	AuxInfoTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+	AuxInfoTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
 	setter(AuxInfoTooltip)
 	AuxInfoTooltip:Show()
 	

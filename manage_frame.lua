@@ -51,7 +51,7 @@ public.bid_listing_config = {
                 icon:SetWidth(12)
                 icon:SetHeight(12)
                 icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
-                icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
+                icon:SetScript('OnLeave', function() AuxTooltip:Hide() end)
                 local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                 text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
                 text:SetPoint('TOPRIGHT', cell)
@@ -175,7 +175,7 @@ public.auction_listing_config = {
                 icon:SetWidth(12)
                 icon:SetHeight(12)
                 icon:SetScript('OnEnter', function() Aux.info.set_game_tooltip(this, cell.tooltip, 'ANCHOR_CURSOR', cell.EnhTooltip_info) end)
-                icon:SetScript('OnLeave', function() GameTooltip:Hide() end)
+                icon:SetScript('OnLeave', function() AuxTooltip:Hide() end)
                 local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
                 text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
                 text:SetPoint('TOPRIGHT', cell)
@@ -328,10 +328,12 @@ function public.update_listing()
         AuxManageFrameListingBidListing:Show()
         Aux.list.populate(AuxManageFrameListingBidListing.sheet, bid_records)
         AuxManageFrameListing:SetWidth(AuxManageFrameListingBidListing:GetWidth() + 40)
+        AuxFrame:SetWidth(AuxManageFrameListing:GetWidth() + 15)
     elseif public.listing == AUCTIONS then
         AuxManageFrameListingAuctionListing:Show()
         Aux.list.populate(AuxManageFrameListingAuctionListing.sheet, auction_records)
         AuxManageFrameListing:SetWidth(AuxManageFrameListingAuctionListing:GetWidth() + 40)
+        AuxFrame:SetWidth(AuxManageFrameListing:GetWidth() + 15)
     end
 end
 
