@@ -23,9 +23,12 @@ function Aux_OnLoad()
 	Aux.log('Aux v'..AuxVersion..' loaded.')
 	Aux.loaded = true
 
+    aux_auctionable_items = {}
+    Aux.auctionable_items.find_auctionable_items(1)
+
     Aux.localized_auctionable_items = {}
 
-    for _, item_id in Aux.auctionable_items do
+    for _, item_id in Aux.auctionable_items.items do
         local name = GetItemInfo(item_id)
         tinsert(Aux.localized_auctionable_items, { name=name, id=item_id })
     end

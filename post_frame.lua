@@ -183,6 +183,7 @@ end
 
 function Aux.sell.on_open()
     MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', 0)
+    AuxSellAuctions:SetWidth(AuxSellAuctionsListing:GetWidth() + 40)
     AuxFrame:SetWidth(AuxSellInventory:GetWidth() + AuxSellParameters:GetWidth() + AuxSellAuctions:GetWidth() + 15)
 
     --    UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, LIVE)
