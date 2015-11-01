@@ -26,5 +26,4 @@ options.xml
 about.xml
 
 static.xml
-static.lua
 
