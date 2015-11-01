@@ -34,7 +34,7 @@ public.bid_listing_config = {
     columns = {
         {
             title = 'Auction Item',
-            width = 157,
+            width = 280,
             comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
             cell_initializer = function(cell)
                 local icon = CreateFrame('Button', nil, cell)
@@ -164,7 +164,7 @@ public.auction_listing_config = {
     columns = {
         {
             title = 'Auction Item',
-            width = 157,
+            width = 280,
             comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
             cell_initializer = function(cell)
                 local icon = CreateFrame('Button', nil, cell)
@@ -288,6 +288,7 @@ function private.auction_alpha_setter(cell, auction)
 end
 
 function public.update_bid_records()
+    Aux.log('Scanning bids ...')
     bid_records = {}
     Aux.scan.start{
         type = 'bidder',
@@ -314,6 +315,7 @@ function public.update_bid_records()
 end
 
 function public.update_auction_records()
+    Aux.log('Scanning auctions ...')
     auction_records = {}
     Aux.scan.start{
         type = 'owner',
@@ -479,7 +481,7 @@ function private.find_auction(entry, action, express_mode)
                             Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity)
                         elseif GetMoney() >= amount then
                             PlaceAuctionBid('bidder', auction_info.index, action == 'bid' and MoneyInputFrame_GetCopper(AuxManageFrameListingDialogContentBid) or amount)
-                            Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(amount)..'.')
+                            Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(action == 'bid' and MoneyInputFrame_GetCopper(AuxManageFrameListingDialogContentBid) or amount)..'.')
                             entry.gone = true
                         else
                             Aux.log('Not enough money.')

@@ -663,7 +663,7 @@ function find_auction(entry, buyout_mode, express_mode)
 					public.dialog_action = function()
 						if GetMoney() >= amount then
 							PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))
-                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(amount)..'.')
+                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))..'.')
                             entry.gone = true
 							refresh = true
 						else
