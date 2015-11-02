@@ -746,7 +746,7 @@ function create_auction_record(auction_info, current_page)
         hyperlink = auction_info.hyperlink,
         page = current_page,
         bid = bid,
-        bid_per_unit = Aux_Round(bid/aux_quantity),
+        bid_per_unit = Aux_Round(bid / aux_quantity),
         owner = auction_info.owner,
         duration = auction_info.duration,
         usable = auction_info.usable,

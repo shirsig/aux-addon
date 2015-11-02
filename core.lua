@@ -258,8 +258,8 @@ function Aux_QualityColor(code)
 	end
 end
 
-function Aux.auction_signature(hyperlink, stack_size, amount)
-	return hyperlink .. (stack_size or '0') .. '_' .. (amount or '0')
+function Aux.auction_signature(hyperlink, stack_size, bid, amount)
+	return hyperlink .. (stack_size or '0') .. '_' .. (bid or '0') .. '_' .. (amount or '0')
 end
 
 function Aux.item_class_index(item_class)
