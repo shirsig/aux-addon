@@ -548,7 +548,7 @@ function refresh_entries()
 
 
         local class_index = Aux.item_class_index(item_info.class)
-        local subclass_index = Aux.item_subclass_index(class_index, item_info.subclass)
+        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
 
         local search_query = {
             name = Aux.info.item(item_id).name, -- blizzard doesn't support queries with name suffixes
