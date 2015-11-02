@@ -517,7 +517,7 @@ function public.start_search()
     local item_info = Aux.info.item(item_id)
 
     local class_index = Aux.item_class_index(item_info.class)
-    local subclass_index = Aux.item_subclass_index(class_index, item_info.subclass)
+    local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
 
 	search_query = {
 		name = item_info.name,

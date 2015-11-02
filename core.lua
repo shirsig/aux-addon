@@ -22,6 +22,7 @@ Aux = {
 function Aux_OnLoad()
 	Aux.log('Aux v'..AuxVersion..' loaded.')
 	Aux.loaded = true
+    tinsert(UISpecialFrames, 'AuxFrame')
 end
 
 function Aux_OnEvent()
