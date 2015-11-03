@@ -29,6 +29,13 @@ function private.load_dataset()
     return aux_database[dataset_key]
 end
 
+function load_snapshot()
+    local dataset = load_dataset()
+    local snapshot = Aux.util.set()
+    snapshot.set_data(dataset.snapshot)
+    return snapshot
+end
+
 function public.load_scan_records(item_key)
     local dataset = private.load_dataset()
 
