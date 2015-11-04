@@ -3,6 +3,9 @@ Aux.static = public
 
 aux_auctionable_items = {}
 
+private.last_query_time = 0
+private.uncached_item_ids = {}
+
 function public.on_event()
     if event == 'VARIABLES_LOADED' then
 
@@ -14,9 +17,32 @@ function public.on_event()
             local name = GetItemInfo(item_id)
             if name then
                 tinsert(Aux.localized_auctionable_items, { name=name, id=item_id })
-            end
+            else
+				tinsert(private.uncached_item_ids, item_id)
+			end
         end
     end
+end
+
+function public.on_update()	
+	while private.uncached_item_ids[1] do
+		local name = GetItemInfo(private.uncached_item_ids[1])
+		if name then
+			local item_id = tremove(private.uncached_item_ids, 1)
+			tinsert(Aux.localized_auctionable_items, { name=name, id=item_id })
+		else
+			break
+		end
+	end
+
+	if private.uncached_item_ids[1] then
+		local now = time()
+		if now - private.last_query_time > 1 then
+			private.last_query_time = now
+			Aux.log('querying data for item id '..private.uncached_item_ids[1])
+			AuxStaticTooltip:SetHyperlink('item:'..private.uncached_item_ids[1])
+		end
+	end
 end
 
 function private.find_auctionable_items(i)

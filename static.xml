@@ -9,7 +9,11 @@
 			</OnLoad>
 			<OnEvent> 
 				Aux.static.on_event()
-			</OnEvent> 
+			</OnEvent>
+			<OnUpdate>
+				Aux.static.on_update()
+			</OnUpdate>
 		</Scripts>
 	</Frame>
+	<GameTooltip name="AuxStaticTooltip" inherits="GameTooltipTemplate"/>
 </Ui>

@@ -68,7 +68,11 @@ function wait_for_results(k)
 end
 
 function wait_for_owner_data(k)
+	local t0 = time()
 	return controller().wait(function()
+		if time() - t0 > 5 then -- we won't wait longer than 5 seconds
+			return true
+		end
 		local count, _ = GetNumAuctionItems(state.job.type)
 		for i=1,count do
 			local auction_info = Aux.info.auction(i, state.job.type)
