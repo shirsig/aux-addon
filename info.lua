@@ -247,7 +247,7 @@ end
 function public.item(item_id, suffix_id, unique_id, enchant_id)
     local itemstring = 'item:'..(item_id or 0)..':'..(enchant_id or 0)..':'..(suffix_id or 0)..':'..(unique_id or 0)
     local name, itemstring, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
-    return {
+    return name and {
         itemstring = itemstring,
         name = name,
         texture = texture,

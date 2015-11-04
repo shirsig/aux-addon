@@ -39,7 +39,7 @@ function public.on_update()
 		local now = time()
 		if now - private.last_query_time > 1 then
 			private.last_query_time = now
-			Aux.log('querying data for item id '..private.uncached_item_ids[1])
+--			Aux.log('querying data for item id '..private.uncached_item_ids[1])
 			AuxStaticTooltip:SetHyperlink('item:'..private.uncached_item_ids[1])
 		end
 	end

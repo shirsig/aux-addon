@@ -65,10 +65,16 @@ public.recently_searched_config = {
             end,
             cell_setter = function(cell, datum)
                 local item_info = Aux.info.item(datum.item_id)
-                cell.icon.icon_texture:SetTexture(item_info.texture)
-                cell.text:SetText('['..item_info.name..']')
-                local color = ITEM_QUALITY_COLORS[item_info.quality]
-                cell.text:SetTextColor(color.r, color.g, color.b)
+                if item_info then
+                    cell.icon.icon_texture:SetTexture(item_info.texture)
+                    cell.text:SetText('['..item_info.name..']')
+                    local color = ITEM_QUALITY_COLORS[item_info.quality]
+                    cell.text:SetTextColor(color.r, color.g, color.b)
+                else
+                    cell.icon.icon_texture:SetTexture()
+                    cell.text:SetText('N/A')
+                    cell.text:SetTextColor(1,1,1)
+                end
             end,
         },
     },
@@ -473,7 +479,7 @@ function private.update_recently_searched()
 end
 
 function public.set_item(item_id)
-    if item_id ~= private.item_id then
+    if item_id ~= private.item_id and GetItemInfo(item_id) then
         AuxItemSearchFrameItemRefreshButton:Enable()
         private.item_id = item_id
         public.update_item()
@@ -483,6 +489,8 @@ function public.set_item(item_id)
         end
         private.update_recently_searched()
         public.start_search()
+    elseif not private.item_id then
+        AuxItemSearchFrameItemItemInputBox:Show()
     end
 end
 
@@ -494,7 +502,6 @@ function public.update_item()
         local color = ITEM_QUALITY_COLORS[info[3]]
         AuxItemSearchFrameItemItemName:SetTextColor(color.r, color.g, color.b)
         AuxItemSearchFrameItemItem:Show()
-        AuxItemSearchFrameItemItemInputBox:Hide()
     else
         AuxItemSearchFrameItemItem:Hide()
     end
