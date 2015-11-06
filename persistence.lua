@@ -23,7 +23,7 @@ function private.get_dataset_key()
 	return realm..'|'..faction
 end
 
-function private.load_dataset()
+function public.load_dataset()
     local dataset_key = private.get_dataset_key()
     aux_database[dataset_key] = aux_database[dataset_key] or {}
     return aux_database[dataset_key]
