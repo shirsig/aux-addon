@@ -65,9 +65,11 @@
                                 if this.selector.selected_value() then
                                     Aux.item_search_frame.set_item(this.selector.selected_value())
                                 end
-                                this:Hide()
-                                this.selector.clear()
-                                Aux.item_search_frame.update_item()
+                                if Aux.item_search_frame.item_set() then
+                                    this:Hide()
+                                    this.selector.clear()
+                                    Aux.item_search_frame.update_item()
+                                end
                             </OnEditFocusLost>
                             <OnEscapePressed>
                                 this.selector.clear()
