@@ -494,6 +494,10 @@ function public.set_item(item_id)
     end
 end
 
+function public.item_set()
+    return private.item_id ~= nil
+end
+
 function public.update_item()
     if private.item_id and not AuxItemSearchFrameItemItemInputBox:IsVisible() then
         local info = { GetItemInfo(private.item_id) }

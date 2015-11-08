@@ -329,7 +329,7 @@ function Aux.sell.validate_parameters()
     end
 
     if MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice) > 0 and MoneyInputFrame_GetCopper(AuxSellParametersStartPrice) > MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice) then
-        AuxSellParametersBuyoutPriceErrorText:Show()
+--        AuxSellParametersBuyoutPriceErrorText:Show()
         return
     end
 
@@ -357,6 +357,8 @@ function update_recommendation()
         AuxSellStackSize:SetNumber(0)
         AuxSellStackCountSlider:SetMinMaxValues(0,0)
         AuxSellStackCount:SetNumber(0)
+
+        MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', 0)
     else
         AuxSellStackSize:SetNumber(current_auction.charges and AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider:GetValue()] or AuxSellStackSizeSlider:GetValue())
         AuxSellStackCount:SetNumber(AuxSellStackCountSlider:GetValue())
