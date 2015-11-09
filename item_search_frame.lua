@@ -720,6 +720,10 @@ function public.on_row_click(entry)
 	
 	if IsControlKeyDown() then 
 		DressUpItemLink(entry.hyperlink)
+    elseif IsShiftKeyDown() then
+        if ChatFrameEditBox:IsVisible() then
+            ChatFrameEditBox:Insert(entry.hyperlink)
+        end
 	else
 		find_auction(entry, buyout_mode, express_mode)
 	end	
