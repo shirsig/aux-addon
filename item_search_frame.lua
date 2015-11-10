@@ -672,18 +672,20 @@ function find_auction(entry, buyout_mode, express_mode)
 					Aux.scan.abort()
 				else
 					public.dialog_action = function()
-						if GetMoney() >= amount then
-							PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))
-                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))..'.')
-                            entry.gone = true
-							refresh = true
-						else
-							Aux.log('Not enough money.')
-						end				
-						Aux.scan.abort()
-						AuxItemSearchFrameItemRefreshButton:Enable()
-						AuxItemSearchFrameAuctionsConfirmation:Hide()
-						update_listing()
+                        if create_auction_record(Aux.info.auction(auction_info.index)).signature == entry.signature then
+                            if GetMoney() >= amount then
+                                PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))
+                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))..'.')
+                                entry.gone = true
+                                refresh = true
+                            else
+                                Aux.log('Not enough money.')
+                            end
+                            Aux.scan.abort()
+                            AuxItemSearchFrameItemRefreshButton:Enable()
+                            AuxItemSearchFrameAuctionsConfirmation:Hide()
+                            update_listing()
+                        end
 					end
 					AuxItemSearchFrameAuctionsConfirmationContentActionButton:Enable()
 				end

@@ -475,20 +475,22 @@ function private.find_auction(entry, action, express_mode)
                     Aux.scan.abort()
                 else
                     public.dialog_action = function()
-                        if action == 'cancel' then
-                            CancelAuction(auction_info.index)
-                            entry.gone = true
-                            Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity)
-                        elseif GetMoney() >= amount then
-                            PlaceAuctionBid('bidder', auction_info.index, action == 'bid' and MoneyInputFrame_GetCopper(AuxManageFrameListingDialogContentBid) or amount)
-                            Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(action == 'bid' and MoneyInputFrame_GetCopper(AuxManageFrameListingDialogContentBid) or amount)..'.')
-                            entry.gone = true
-                        else
-                            Aux.log('Not enough money.')
+                        if create_auction_record(Aux.info.auction(auction_info.index)).signature == entry.signature then
+                            if action == 'cancel' then
+                                CancelAuction(auction_info.index)
+                                entry.gone = true
+                                Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity)
+                            elseif GetMoney() >= amount then
+                                PlaceAuctionBid('bidder', auction_info.index, action == 'bid' and MoneyInputFrame_GetCopper(AuxManageFrameListingDialogContentBid) or amount)
+                                Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(action == 'bid' and MoneyInputFrame_GetCopper(AuxManageFrameListingDialogContentBid) or amount)..'.')
+                                entry.gone = true
+                            else
+                                Aux.log('Not enough money.')
+                            end
+                            Aux.scan.abort()
+                            AuxManageFrameListingDialog:Hide()
+                            public.update_listing()
                         end
-                        Aux.scan.abort()
-                        AuxManageFrameListingDialog:Hide()
-                        public.update_listing()
                     end
                     AuxManageFrameListingDialogContentActionButton:Enable()
                 end

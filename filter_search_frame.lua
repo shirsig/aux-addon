@@ -696,18 +696,20 @@ function find_auction(entry, buyout_mode, express_mode)
 					Aux.scan.abort()
 				else
 					public.dialog_action = function()
-						if GetMoney() >= amount then
-							PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))
-                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))..'.')
-                            entry.gone = true
-							refresh = true
-						else
-							Aux.log('Not enough money.')
-						end				
-						Aux.scan.abort()
-                        AuxFilterSearchFrameFiltersSearchButton:Enable()
-                        AuxFilterSearchFrameResultsConfirmation:Hide()
-						update_sheet()
+                        if create_auction_record(Aux.info.auction(auction_info.index)).signature == entry.signature then
+                            if GetMoney() >= amount then
+                                PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))
+                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))..'.')
+                                entry.gone = true
+                                refresh = true
+                            else
+                                Aux.log('Not enough money.')
+                            end
+                            Aux.scan.abort()
+                            AuxFilterSearchFrameFiltersSearchButton:Enable()
+                            AuxFilterSearchFrameResultsConfirmation:Hide()
+                            update_sheet()
+                        end
 					end
                     AuxFilterSearchFrameResultsConfirmationContentActionButton:Enable()
 				end
