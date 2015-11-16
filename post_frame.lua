@@ -89,16 +89,16 @@ Aux.sell.inventory_listing_config = {
 }
 
 Aux.sell.auction_listing_config = {
-    on_cell_click = function (sheet, row_index, column_index)
+    on_row_click = function (sheet, row_index, column_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         AuxSellEntry_OnClick(sheet.data[data_index])
     end,
 
-    on_cell_enter = function (sheet, row_index, column_index)
+    on_row_enter = function (sheet, row_index, column_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
     end,
 
-    on_cell_leave = function (sheet, row_index, column_index)
+    on_row_leave = function (sheet, row_index, column_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         local datum = sheet.data[data_index]
         if not (datum and current_auction and Aux.util.safe_index{existing_auctions, current_auction.key, 'selected', 'key'} == datum.key) then
@@ -175,11 +175,11 @@ Aux.sell.auction_listing_config = {
 }
 
 function update_inventory_listing()
-    Aux.list.populate(AuxSellInventoryListing.sheet, inventory_data)
+    Aux.sheet.populate(AuxSellInventoryListing.sheet, inventory_data)
 end
 
 function update_auction_listing()
-    Aux.list.populate(AuxSellAuctionsListing.sheet, current_auction and existing_auctions[current_auction.key] or {})
+    Aux.sheet.populate(AuxSellAuctionsListing.sheet, current_auction and existing_auctions[current_auction.key] or {})
 end
 
 function Aux.sell.on_open()
@@ -604,7 +604,7 @@ function AuxSellEntry_OnClick(entry)
     update_auction_listing()
 	update_recommendation()
 
-	PlaySound("igMainMenuOptionCheckBoxOn")
+	PlaySound('igMainMenuOptionCheckBoxOn')
 end
 
 function AuxSellParametersRefreshButton_OnClick()

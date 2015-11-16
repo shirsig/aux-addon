@@ -37,6 +37,13 @@
                             <OnEscapePressed>
                                 this:ClearFocus()
                             </OnEscapePressed>
+                            <OnTabPressed>
+                                if IsShiftKeyDown() then
+                                    getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+                                else
+                                    getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
+                                end
+                            </OnTabPressed>
                         </Scripts>
                     </EditBox>
 
@@ -110,7 +117,15 @@
                             </OnLoad>
                             <OnEnterPressed>
                                 this:ClearFocus()
+                                Aux.filter_search_frame.start_search()
                             </OnEnterPressed>
+                            <OnTabPressed>
+                                if IsShiftKeyDown() then
+                                    getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+                                else
+                                    getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+                                end
+                            </OnTabPressed>
                         </Scripts>
                     </EditBox>
                     <EditBox name="$parentMaxLevel" letters="2" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
@@ -123,7 +138,15 @@
                             </OnLoad>
                             <OnEnterPressed>
                                 this:ClearFocus()
+                                Aux.filter_search_frame.start_search()
                             </OnEnterPressed>
+                            <OnTabPressed>
+                                if IsShiftKeyDown() then
+                                    getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
+                                else
+                                    getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
+                                end
+                            </OnTabPressed>
                         </Scripts>
                     </EditBox>
                     <CheckButton name="$parentUsableCheckButton" inherits="UICheckButtonTemplate">
@@ -145,6 +168,17 @@
                                 getglobal(this:GetName()..'Label'):SetText('Tooltip')
                                 this:SetWidth(150)
                             </OnLoad>
+                            <OnEnterPressed>
+                                this:ClearFocus()
+                                Aux.filter_search_frame.start_search()
+                            </OnEnterPressed>
+                            <OnTabPressed>
+                                if IsShiftKeyDown() then
+                                    getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+                                else
+                                    getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+                                end
+                            </OnTabPressed>
                         </Scripts>
                     </EditBox>
                     
@@ -154,6 +188,17 @@
                             <OnLoad>
                                 this:SetWidth(150)
                             </OnLoad>
+                            <OnEnterPressed>
+                                this:ClearFocus()
+                                Aux.filter_search_frame.start_search()
+                            </OnEnterPressed>
+                            <OnTabPressed>
+                                if IsShiftKeyDown() then
+                                    getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
+                                else
+                                    getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+                                end
+                            </OnTabPressed>
                         </Scripts>
                     </EditBox>
                     
@@ -163,6 +208,17 @@
                             <OnLoad>
                                 this:SetWidth(150)
                             </OnLoad>
+                            <OnEnterPressed>
+                                this:ClearFocus()
+                                Aux.filter_search_frame.start_search()
+                            </OnEnterPressed>
+                            <OnTabPressed>
+                                if IsShiftKeyDown() then
+                                    getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+                                else
+                                    getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+                                end
+                            </OnTabPressed>
                         </Scripts>
                     </EditBox>
                     
@@ -172,6 +228,17 @@
                             <OnLoad>
                                 this:SetWidth(150)
                             </OnLoad>
+                            <OnEnterPressed>
+                                this:ClearFocus()
+                                Aux.filter_search_frame.start_search()
+                            </OnEnterPressed>
+                            <OnTabPressed>
+                                if IsShiftKeyDown() then
+                                    getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+                                else
+                                    getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+                                end
+                            </OnTabPressed>
                         </Scripts>
                     </EditBox>
 
@@ -250,7 +317,7 @@
                         </Anchors>
                         <Scripts>
                             <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText('Buy')
+                                getglobal(this:GetName()..'Text'):SetText('Buy')
                             </OnLoad>
                             <OnClick>
                                 Aux.filter_search_frame.set_view(this:GetID())
@@ -267,7 +334,7 @@
                         </Anchors>
                         <Scripts>
                             <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText('Bid')
+                                getglobal(this:GetName()..'Text'):SetText('Bid')
                             </OnLoad>
                             <OnClick>
                                 Aux.filter_search_frame.set_view(this:GetID())
@@ -284,7 +351,7 @@
                         </Anchors>
                         <Scripts>
                             <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText('Full')
+                                getglobal(this:GetName()..'Text'):SetText('Full')
                             </OnLoad>
                             <OnClick>
                                 Aux.filter_search_frame.set_view(this:GetID())
@@ -299,8 +366,16 @@
                         <Scripts>
                             <OnLoad>
                                 local config = Aux.filter_search_frame.views[1]
-                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
+                                this.sheet = Aux.sheet.create{
+                                    frame = this,
+                                    columns = config.columns,
+                                    sort_order = config.sort_order,
+                                    row_setter = config.row_setter,
+                                    on_row_click = config.on_row_click,
+                                    on_row_enter = config.on_row_enter,
+                                    on_row_leave = config.on_row_leave,
+                                    on_row_update = config.on_row_update,
+                                }
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -312,8 +387,16 @@
                         <Scripts>
                             <OnLoad>
                                 local config = Aux.filter_search_frame.views[2]
-                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
+                                this.sheet = Aux.sheet.create{
+                                    frame = this,
+                                    columns = config.columns,
+                                    sort_order = config.sort_order,
+                                    row_setter = config.row_setter,
+                                    on_row_click = config.on_row_click,
+                                    on_row_enter = config.on_row_enter,
+                                    on_row_leave = config.on_row_leave,
+                                    on_row_update = config.on_row_update,
+                                }
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -325,8 +408,16 @@
                         <Scripts>
                             <OnLoad>
                                 local config = Aux.filter_search_frame.views[3]
-                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
+                                this.sheet = Aux.sheet.create{
+                                    frame = this,
+                                    columns = config.columns,
+                                    sort_order = config.sort_order,
+                                    row_setter = config.row_setter,
+                                    on_row_click = config.on_row_click,
+                                    on_row_enter = config.on_row_enter,
+                                    on_row_leave = config.on_row_leave,
+                                    on_row_update = config.on_row_update,
+                                }
                             </OnLoad>
                         </Scripts>
                     </Frame>

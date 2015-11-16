@@ -18,10 +18,8 @@ function group_alpha_setter(cell, group)
     cell:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.3 or 1)
 end
 
-local BUYOUT, BID, FULL = 1, 2, 3
-
 public.views = {
-	[BUYOUT] = {
+	[Aux.view.BUYOUT] = {
 		name = 'Buyout',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -135,7 +133,7 @@ public.views = {
         },
         sort_order = {{column = 1, order = 'ascending' }, {column = 4, order = 'ascending'}},
 	},
-	[BID] = {
+	[Aux.view.BID] = {
 		name = 'Bid',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -279,7 +277,7 @@ public.views = {
         },
         sort_order = {{column = 1, order = 'ascending' }, {column = 4, order = 'ascending' }, {column = 6, order = 'ascending'}},
 	},
-	[FULL] = {
+	[Aux.view.FULL] = {
 		name = 'Full',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -470,7 +468,7 @@ function public.on_close()
 end
 
 function public.on_open()
-    public.set_view(1)
+    public.set_view(aux_view)
 	update_sheet()
 end
 
@@ -491,21 +489,21 @@ function update_sheet()
     AuxFilterSearchFrameResultsBidListing:Hide()
     AuxFilterSearchFrameResultsFullListing:Hide()
 
-    if private.view == BUYOUT then
+    if aux_view == Aux.view.BUYOUT then
         AuxFilterSearchFrameResultsBuyListing:Show()
         local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-        Aux.list.populate(AuxFilterSearchFrameResultsBuyListing.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
+        Aux.sheet.populate(AuxFilterSearchFrameResultsBuyListing.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBuyListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
-	elseif private.view == BID then
+	elseif aux_view == Aux.view.BID then
         AuxFilterSearchFrameResultsBidListing:Show()
         local bid_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
-        Aux.list.populate(AuxFilterSearchFrameResultsBidListing.sheet, bid_auctions)
+        Aux.sheet.populate(AuxFilterSearchFrameResultsBidListing.sheet, bid_auctions)
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBidListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
-	elseif private.view == FULL then
+	elseif aux_view == Aux.view.FULL then
         AuxFilterSearchFrameResultsFullListing:Show()
-        Aux.list.populate(AuxFilterSearchFrameResultsFullListing.sheet, auctions or {})
+        Aux.sheet.populate(AuxFilterSearchFrameResultsFullListing.sheet, auctions or {})
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsFullListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
 	end
@@ -521,7 +519,7 @@ function public.set_view(view)
     for i=1,3 do
         getglobal('AuxFilterSearchFrameResultsTab'..i):SetAlpha(i == view and 1 or 0.5)
     end
-    private.view = view
+    aux_view = view
     update_sheet()
 end
 

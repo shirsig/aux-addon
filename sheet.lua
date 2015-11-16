@@ -1,8 +1,9 @@
-Aux.sheet = {}
+local private, public = {}, {}
+Aux.sheet = public
 
 Aux.list = {}
 
-MoneyTypeInfo["AUX_LIST"] = {
+MoneyTypeInfo['AUX_LIST'] = {
 	UpdateFunc = function()
 		return this.staticMoney
 	end,
@@ -11,13 +12,13 @@ MoneyTypeInfo["AUX_LIST"] = {
 	showSmallerCoins = 1,
 }
 
-function Aux.sheet.render(sheet)
+function public.render(sheet)
 	
 	for i, column in ipairs(sheet.columns) do
 		local sort_info = sheet.sort_order[1]
 
-		if sort_info and sort_info.column == column then
-			if sort_info.sort_ascending then
+		if sort_info and sort_info.column == i then
+			if sort_info.order == 'ascending' then
 				sheet.labels[i].sort_texture:SetTexCoord(0,0.55,0.2,0.9)
 				sheet.labels[i].sort_texture:SetVertexColor(0.2,1,0)
 				sheet.labels[i].sort_texture:Show()
@@ -42,7 +43,7 @@ function Aux.sheet.render(sheet)
 	local data = sheet.data
 
 	for i, row in ipairs(rows) do
-		local direction, rowR, rowG, rowB, rowA1, rowA2 = "Horizontal", 1, 1, 1, 0, 0 --row level coloring used for gradients
+		local direction, rowR, rowG, rowB, rowA1, rowA2 = 'Horizontal', 1, 1, 1, 0, 0 --row level coloring used for gradients
 		local datum = data[i + offset]
 
         if datum then
@@ -66,9 +67,9 @@ function Aux.sheet.render(sheet)
 	end
 end
 
-function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, on_row_enter, on_row_leave, on_row_update)
+function public.create(params)
 	local sheet
-	local name = (frame:GetName() or '')..'ScrollSheet'
+	local name = (params.frame:GetName() or '')..'ScrollSheet'
 	
 	local id = 1
 	while getglobal(name..id) do
@@ -76,22 +77,22 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, 
 	end
 	name = name..id
 
-	local scroll_frame = CreateFrame("ScrollFrame", name..'ScrollFrame', frame, "FauxScrollFrameTemplate")
-	scroll_frame:SetScript("OnVerticalScroll", function()
-		FauxScrollFrame_OnVerticalScroll(16, function() Aux.sheet.render(this.sheet) end)
+	local scroll_frame = CreateFrame('ScrollFrame', name..'ScrollFrame', params.frame, 'FauxScrollFrameTemplate')
+	scroll_frame:SetScript('OnVerticalScroll', function()
+		FauxScrollFrame_OnVerticalScroll(16, function() public.render(this.sheet) end)
 	end)
-	scroll_frame:SetPoint("TOPLEFT", frame, "TOPLEFT", 5, -10)
-	scroll_frame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 5, 19)
+	scroll_frame:SetPoint('TOPLEFT', params.frame, 'TOPLEFT', 5, -10)
+	scroll_frame:SetPoint('BOTTOMRIGHT', params.frame, 'BOTTOMRIGHT', 5, 19)
 	
-	local parent_height = frame:GetHeight()
-	local content = CreateFrame('Frame', name..'Content', frame)
+	local parent_height = params.frame:GetHeight()
+	local content = CreateFrame('Frame', name..'Content', params.frame)
 	content:SetHeight(parent_height - 30)
-	content:SetPoint("TOPLEFT", scroll_frame, "TOPLEFT", 5, 0)
+	content:SetPoint('TOPLEFT', scroll_frame, 'TOPLEFT', 5, 0)
 
 	local total_width = 0
 	
 	local labels = {}
-	for i = 1,getn(columns) do
+	for i = 1,getn(params.columns) do
 		local button = CreateFrame('Button', nil, content)
 		if i == 1 then
 			button:SetPoint('TOPLEFT', content, 'TOPLEFT', 5, 0)
@@ -101,15 +102,15 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, 
 			total_width = total_width + 3
 		end
 		local label = content:CreateFontString(nil, 'OVERLAY', 'GameFontHighlight')
-		label:SetText(columns[i].title)
-		local column_width = columns[i].width or 30
+		label:SetText(params.columns[i].title)
+		local column_width = params.columns[i].width or 30
 		
 		total_width = total_width + column_width
 		button:SetWidth(column_width)
 		button:SetHeight(16)
 		button:SetID(i)
 		button:SetHighlightTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
-		button:SetScript("OnMouseDown", function() Aux.list.sort(sheet, this:GetID()) end)
+		button:SetScript("OnMouseDown", function() Aux.sheet.sort(sheet, this:GetID()) end)
 		button:RegisterForClicks("LeftButtonDown", "RightButtonDown")
 		
 		local texture = content:CreateTexture(nil, 'ARTWORK')
@@ -147,17 +148,17 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, 
 		labels[i] = label
 	end
 	total_width = total_width + 5
-    frame:SetWidth(total_width)
+    params.frame:SetWidth(total_width)
 	
 	local rows = {}
 	local row_index = 1
 	local max_height = content:GetHeight()
 	local total_height = 16
 	while total_height + 14 < max_height do
-		if getn(columns) > 0 then
+		if getn(params.columns) > 0 then
 			local row = CreateFrame('Button', nil, content)
 			row:SetPoint('TOPLEFT', labels[1], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
-			row:SetPoint('TOPRIGHT', labels[getn(columns)], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
+			row:SetPoint('TOPRIGHT', labels[getn(params.columns)], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
 			row:RegisterForClicks("LeftButtonDown", "RightButtonDown")
 			row:SetHeight(14)
 			
@@ -168,14 +169,14 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, 
             row:SetScript('OnUpdate', function() if sheet.on_row_update then sheet.on_row_update(sheet, row_idx) end end)
 			
 			row.cells = {}			
-			for i = 1,getn(columns) do
+			for i = 1,getn(params.columns) do
 				local cell = CreateFrame('Button', nil, content)
 				cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
 				cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
 				
 				cell:SetHeight(14)
 
-				columns[i].cell_initializer(cell)
+                params.columns[i].cell_initializer(cell)
 				
 				row.cells[i] = cell
 			end
@@ -207,28 +208,28 @@ function Aux.sheet.create(frame, columns, sort_order, row_setter, on_row_click, 
 		scroll_frame = scroll_frame,
 		labels = labels,
 		rows = rows,
-        columns = columns,
+        columns = params.columns,
 		data = {},
-		sort_order = sort_order,
-        row_setter = row_setter,
-		on_row_click = on_row_click,
-		on_row_enter = on_row_enter,
-		on_row_leave = on_row_leave,
-        on_row_update = on_row_update,
+		sort_order = params.sort_order,
+        row_setter = params.row_setter,
+		on_row_click = params.on_row_click,
+		on_row_enter = params.on_row_enter,
+		on_row_leave = params.on_row_leave,
+        on_row_update = params.on_row_update,
 	}
 	scroll_frame.sheet = sheet
 	
 	return sheet
 end
 
-function Aux.list.row_comparator(sheet)
+function private.row_comparator(sheet)
 	return function(row1, row2)
 		for _, sort_info in ipairs(sheet.sort_order) do
-			local column = sort_info.column
+			local column = sheet.columns[sort_info.column]
 			if column.comparator then
 				local ordering = column.comparator(row1, row2)
 				if ordering ~= Aux.util.EQ then
-					return sort_info.sort_ascending and ordering or Aux.util.invert_order(ordering)
+					return sort_info.order == 'ascending' and ordering or Aux.util.invert_order(ordering)
 				end
 			end
 		end
@@ -236,7 +237,7 @@ function Aux.list.row_comparator(sheet)
 	end
 end
 
-function Aux.sheet.default_cell_initializer(alignment)
+function public.default_cell_initializer(alignment)
 	return function(cell)
 		local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
 		text:SetAllPoints(cell)
@@ -247,41 +248,24 @@ function Aux.sheet.default_cell_initializer(alignment)
 	end
 end
 
-function Aux.sheet.initialize(frame)
-
-	local sort_order = {}
-	for i, column in columns do
-		if i ~= BUYOUT_UNIT and i ~= NAME then 
-			tinsert(sort_order, { column = column, sort_ascending = true })
-		end
-	end
-	tinsert(sort_order, 1, { column = columns[BUYOUT_UNIT], sort_ascending = true })
-	tinsert(sort_order, 1, { column = columns[NAME], sort_ascending = true })
-
-end
-
-function Aux.list.populate(sheet, data)
+function public.populate(sheet, data)
 	sheet.data = data
 
-	-- Perform the sort.
-	Aux.util.merge_sort(sheet.data, Aux.list.row_comparator(sheet))
+	Aux.util.merge_sort(sheet.data, private.row_comparator(sheet))
 
-	-- Update the scroll pane.
-	Aux.sheet.render(sheet)
+	public.render(sheet)
 end
 
-function Aux.list.sort(sheet, column_index)
-
-	local column = sheet.columns[column_index]
+function Aux.sheet.sort(sheet, column_index)
 			
-	if sheet.sort_order[1] and sheet.sort_order[1].column == column then
-		sheet.sort_order[1].sort_ascending = not sheet.sort_order[1].sort_ascending
+	if sheet.sort_order[1] and sheet.sort_order[1].column == column_index then
+		sheet.sort_order[1].order = sheet.sort_order[1].order == 'ascending' and 'descending' or 'ascending'
 	else
-        sheet.sort_order = Aux.util.filter(sheet.sort_order, function(sort_info) return not sort_info.column == column end)
-        tinsert(sheet.sort_order, 1, {column=column, sort_ascending=true})
+        sheet.sort_order = Aux.util.filter(sheet.sort_order, function(sort_info) return not sort_info.column == column_index end)
+        tinsert(sheet.sort_order, 1, {column=column_index, order = 'ascending'})
 	end
 	
-	Aux.util.merge_sort(sheet.data, Aux.list.row_comparator(sheet))
+	Aux.util.merge_sort(sheet.data, private.row_comparator(sheet))
 
-	Aux.sheet.render(sheet)
+	public.render(sheet)
 end

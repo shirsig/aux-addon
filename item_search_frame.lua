@@ -17,8 +17,6 @@ function group_alpha_setter(cell, group)
     cell:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.3 or 1)
 end
 
-local BUYOUT, BID, FULL = 1, 2, 3
-
 public.recently_searched_config = {
     on_row_click = function (sheet, row_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -81,7 +79,7 @@ public.recently_searched_config = {
     sort_order = {},
 }
 public.views = {
-	[BUYOUT] = {
+	[Aux.view.BUYOUT] = {
 		name = 'Buyout',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -153,7 +151,7 @@ public.views = {
         },
         sort_order = {{column = 3, order = 'ascending' }},
 	},
-	[BID] = {
+	[Aux.view.BID] = {
 		name = 'Bid',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -255,7 +253,7 @@ public.views = {
         },
         sort_order = {{column = 3, order = 'ascending'}, {column = 5, order = 'ascending'}},
 	},
-	[FULL] = {
+	[Aux.view.FULL] = {
 		name = 'Full',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -414,7 +412,7 @@ function public.on_close()
 end
 
 function public.on_open()
-    public.set_view(1)
+    public.set_view(aux_view)
     public.update_item()
     private.update_recently_searched()
 	update_listing()
@@ -440,21 +438,21 @@ function update_listing()
     AuxItemSearchFrameAuctionsBidListing:Hide()
     AuxItemSearchFrameAuctionsFullListing:Hide()
 
-    if private.view == BUYOUT then
+    if aux_view == Aux.view.BUYOUT then
 		AuxItemSearchFrameAuctionsBuyListing:Show()
         local buy_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-        Aux.list.populate(AuxItemSearchFrameAuctionsBuyListing.sheet, auctions and Aux.util.group_by(buy_records, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
+        Aux.sheet.populate(AuxItemSearchFrameAuctionsBuyListing.sheet, auctions and Aux.util.group_by(buy_records, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
         AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBuyListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
-	elseif private.view == BID then
+	elseif aux_view == Aux.view.BID then
 		AuxItemSearchFrameAuctionsBidListing:Show()
         local bid_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
-        Aux.list.populate(AuxItemSearchFrameAuctionsBidListing.sheet, bid_records)
+        Aux.sheet.populate(AuxItemSearchFrameAuctionsBidListing.sheet, bid_records)
         AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBidListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
-	elseif private.view == FULL then
+	elseif aux_view == Aux.view.FULL then
 		AuxItemSearchFrameAuctionsFullListing:Show()
-        Aux.list.populate(AuxItemSearchFrameAuctionsFullListing.sheet, auctions or {})
+        Aux.sheet.populate(AuxItemSearchFrameAuctionsFullListing.sheet, auctions or {})
         AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsFullListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
 	end
@@ -470,12 +468,12 @@ function public.set_view(view)
     for i=1,3 do
         getglobal('AuxItemSearchFrameAuctionsTab'..i):SetAlpha(i == view and 1 or 0.5)
     end
-    private.view = view
+    aux_view = view
     update_listing()
 end
 
 function private.update_recently_searched()
-    Aux.list.populate(AuxItemSearchFrameRecentlySearchedListing.sheet, aux_recently_searched)
+    Aux.sheet.populate(AuxItemSearchFrameRecentlySearchedListing.sheet, aux_recently_searched)
 end
 
 function public.set_item(item_id)

@@ -1,5 +1,5 @@
-AuxVersion = "2.1.0"
-AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)"
+AuxVersion = '2.1.1'
+AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
 
@@ -17,7 +17,15 @@ Aux = {
         },
     },
 	last_picked_up = {},
+    view = {
+        BUYOUT = 1,
+        BID = 2,
+        FULL = 3,
+    },
+    last_owner_page_requested = 0,
 }
+
+aux_view = Aux.view.BUYOUT
 
 function Aux_OnLoad()
 	Aux.log('Aux v'..AuxVersion..' loaded.')

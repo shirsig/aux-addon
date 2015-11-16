@@ -27,8 +27,15 @@
                         <Scripts>
                             <OnLoad>
                                 local config = Aux.sell.inventory_listing_config
-                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+                                this.sheet = Aux.sheet.create{
+                                    frame = this,
+                                    columns = config.columns,
+                                    sort_order = config.sort_order,
+                                    row_setter = config.row_setter,
+                                    on_row_click = config.on_row_click,
+                                    on_row_enter = config.on_row_enter,
+                                    on_row_leave = config.on_row_leave,
+                                }
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -222,6 +229,10 @@
                         </layers>
                         <Scripts>
                             <OnLoad>
+                                MoneyInputFrame_SetPreviousFocus(getglobal(this:GetParent():GetName()..'StartPrice'), getglobal(this:GetName()..'Copper'))
+                                MoneyInputFrame_SetNextFocus(getglobal(this:GetParent():GetName()..'StartPrice'), getglobal(this:GetName()..'Gold'))
+                                MoneyInputFrame_SetPreviousFocus(this, getglobal(this:GetParent():GetName()..'StartPriceCopper'))
+                                MoneyInputFrame_SetNextFocus(this, getglobal(this:GetParent():GetName()..'StartPriceGold'))
                                 MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.sell.validate_parameters)
                             </OnLoad>
                         </Scripts>
@@ -274,8 +285,15 @@
                     <Scripts>
                         <OnLoad>
                             local config = Aux.sell.auction_listing_config
-                            local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                            this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_cell_click, config.on_cell_enter, config.on_cell_leave)
+                            this.sheet = Aux.sheet.create{
+                                frame = this,
+                                columns = config.columns,
+                                sort_order = config.sort_order,
+                                row_setter = config.row_setter,
+                                on_row_click = config.on_row_click,
+                                on_row_enter = config.on_row_enter,
+                                on_row_leave = config.on_row_leave,
+                            }
                         </OnLoad>
                     </Scripts>
                 </Frame>

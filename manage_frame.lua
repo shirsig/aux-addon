@@ -351,12 +351,12 @@ function public.update_listing()
 
     if public.listing == BIDS then
         AuxManageFrameListingBidListing:Show()
-        Aux.list.populate(AuxManageFrameListingBidListing.sheet, bid_records)
+        Aux.sheet.populate(AuxManageFrameListingBidListing.sheet, bid_records)
         AuxManageFrameListing:SetWidth(AuxManageFrameListingBidListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxManageFrameListing:GetWidth() + 15)
     elseif public.listing == AUCTIONS then
         AuxManageFrameListingAuctionListing:Show()
-        Aux.list.populate(AuxManageFrameListingAuctionListing.sheet, auction_records)
+        Aux.sheet.populate(AuxManageFrameListingAuctionListing.sheet, auction_records)
         AuxManageFrameListing:SetWidth(AuxManageFrameListingAuctionListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxManageFrameListing:GetWidth() + 15)
     end
