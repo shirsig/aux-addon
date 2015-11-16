@@ -22,7 +22,6 @@ Aux = {
         BID = 2,
         FULL = 3,
     },
-    last_owner_page_requested = 0,
 }
 
 aux_view = Aux.view.BUYOUT
@@ -43,7 +42,7 @@ function Aux_OnEvent()
 	elseif event == 'AUCTION_HOUSE_CLOSED' then
 		Aux_OnAuctionHouseClosed()
 	elseif event == 'AUCTION_OWNED_LIST_UPDATE' then
-        Aux.current_owner_page = Aux.last_owner_page_requested
+        Aux.current_owner_page = Aux.last_owner_page_requested or 0
     end
 end
 
