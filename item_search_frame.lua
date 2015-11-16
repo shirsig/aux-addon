@@ -19,6 +19,7 @@ end
 
 public.recently_searched_config = {
     on_row_click = function (sheet, row_index)
+        PlaySound('igMainMenuOptionCheckBoxOn')
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         AuxItemSearchFrameItemItemInputBox:Hide()
         public.set_item(sheet.data[data_index].item_id)
