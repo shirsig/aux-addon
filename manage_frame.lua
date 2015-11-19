@@ -475,7 +475,7 @@ function private.find_auction(entry, action, express_mode)
                     Aux.scan.abort()
                 else
                     public.dialog_action = function()
-                        if private.create_record(Aux.info.auction(auction_info.index, 'bidder')).signature == entry.signature then
+                        if private.create_record(Aux.info.auction(auction_info.index, action == 'cancel' and 'owner' or 'bidder')).signature == entry.signature then
                             if action == 'cancel' then
                                 CancelAuction(auction_info.index)
                                 entry.gone = true
