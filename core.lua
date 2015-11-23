@@ -175,10 +175,11 @@ function Aux.on_tab_click(index)
         Aux.item_search_frame.on_close()
         Aux.filter_search_frame.on_close()
         Aux.sell.on_close()
-        Aux.manage_frame.on_close()
+        Aux.auctions_frame.on_close()
+        Aux.bids_frame.on_close()
         Aux.history.on_close()
 
-        for i=1,4 do
+        for i=1,5 do
             getglobal('AuxTab'..i):SetAlpha(i == index and 1 or 0.5)
         end
 
@@ -199,7 +200,10 @@ function Aux.on_tab_click(index)
             Aux.sell.on_open()
         elseif index == 4 then
             AuxManageFrame:Show()
-            Aux.manage_frame.on_open()
+            Aux.auctions_frame.on_open()
+        elseif index == 5 then
+            AuxManageFrame:Show()
+            Aux.bids_frame.on_open()
         end
     end)
 end

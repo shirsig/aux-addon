@@ -462,7 +462,24 @@
                 </Anchors>
                 <Scripts>
                     <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Manage')
+                        getglobal(this:GetName().."Text"):SetText('Auctions')
+                    </OnLoad>
+                    <OnClick>
+                        Aux.on_tab_click(this:GetID())
+                    </OnClick>
+                </Scripts>
+            </Button>
+            <Button name="AuxTab5" inherits="AuxBottomTabTemplate" id="5">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="AuxTab4" relativePoint="RIGHT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        getglobal(this:GetName().."Text"):SetText('Bids')
                     </OnLoad>
                     <OnClick>
                         Aux.on_tab_click(this:GetID())

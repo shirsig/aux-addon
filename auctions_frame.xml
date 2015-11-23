@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="bids_frame.lua"/>
+	<Script file="auctions_frame.lua"/>
 
     <Frame name="AuxManageFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
@@ -16,15 +16,15 @@
 					</OnLoad>
 				</Scripts>
 				<Frames>
-					<Frame name="$parentBidListing">
-						<Anchors>
-							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                    <Frame name="$parentAuctionListing">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-						</Anchors>
-						<Scripts>
-							<OnLoad>
-                                local config = Aux.bids_frame.bid_listing_config
-								this.sheet = Aux.sheet.create{
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                local config = Aux.auctions_frame.auction_listing_config
+                                this.sheet = Aux.sheet.create{
                                     frame = this,
                                     columns = config.columns,
                                     sort_order = config.sort_order,
@@ -34,9 +34,9 @@
                                     on_row_leave = config.on_row_leave,
                                     on_row_update = config.on_row_update,
                                 }
-							</OnLoad>
-						</Scripts>
-					</Frame>
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
                     <Frame name="$parentDialog" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
@@ -91,7 +91,7 @@
                                         <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnClick>
-                                                Aux.bids_frame.dialog_action()
+                                                Aux.auctions_frame.dialog_action()
                                             </OnClick>
                                         </Scripts>
                                     </Button>
@@ -100,7 +100,7 @@
                                         <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnClick>
-                                                Aux.bids_frame.dialog_cancel()
+                                                Aux.auctions_frame.dialog_cancel()
                                             </OnClick>
                                         </Scripts>
                                     </Button>

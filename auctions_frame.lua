@@ -1,32 +1,21 @@
 local private, public = {}, {}
-Aux.bids_frame = public
+Aux.auctions_frame = public
 
-local bid_records
+local auction_records
 
-public.bid_listing_config = {
-    on_row_click = function(sheet, row_index, column_index)
+public.auction_listing_config = {
+    on_row_click = function (sheet, row_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-        public.on_bid_click(sheet.data[data_index])
+        public.on_auction_click(sheet.data[data_index])
     end,
 
-    on_row_enter = function(sheet, row_index, column_index)
+    on_row_enter = function (sheet, row_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
     end,
 
-    on_row_leave = function(sheet, row_index, column_index)
+    on_row_leave = function (sheet, row_index)
         sheet.rows[row_index].highlight:SetAlpha(0)
-        ResetCursor()
     end,
-    on_row_update = function(sheet, row_index)
-        if IsControlKeyDown() then
-            ShowInspectCursor()
-        elseif IsAltKeyDown() then
-            SetCursor('BUY_CURSOR')
-        else
-            ResetCursor()
-        end
-    end,
-
     columns = {
         {
             title = 'Auction Item',
@@ -81,16 +70,6 @@ public.bid_listing_config = {
             end,
         },
         {
-            title = 'Status',
-            width = 70,
-            comparator = function(auction1, auction2) return Aux.util.compare(auction1.status, auction2.status, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-            cell_setter = function(cell, auction)
-                cell.text:SetText(auction.status)
-                private.auction_alpha_setter(cell, auction)
-            end,
-        },
-        {
             title = 'Left',
             width = 30,
             comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
@@ -111,22 +90,22 @@ public.bid_listing_config = {
             end,
         },
         {
-            title = 'Owner',
-            width = 90,
-            comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
-            cell_setter = function(cell, datum)
-                cell.text:SetText(datum.owner)
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
-            title = 'Your Bid',
+            title = 'Current Bid',
             width = 90,
             comparator = function(auction1, auction2) return Aux.util.compare(auction1.current_bid, auction2.current_bid, Aux.util.GT) end,
             cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
             cell_setter = function(cell, auction)
-                cell.text:SetText(Aux.util.money_string(auction.current_bid))
+                cell.text:SetText(auction.current_bid and Aux.util.money_string(auction.current_bid) or RED_FONT_COLOR_CODE..'No Bids'..FONT_COLOR_CODE_CLOSE)
+                private.auction_alpha_setter(cell, auction)
+            end,
+        },
+        {
+            title = 'Min Bid',
+            width = 90,
+            comparator = function(auction1, auction2) return Aux.util.compare(auction1.min_bid, auction2.min_bid, Aux.util.GT) end,
+            cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
+            cell_setter = function(cell, auction)
+                cell.text:SetText(Aux.util.money_string(auction.min_bid))
                 private.auction_alpha_setter(cell, auction)
             end,
         },
@@ -145,7 +124,7 @@ public.bid_listing_config = {
 }
 
 function public.on_open()
-    public.update_bid_records()
+    public.update_auction_records()
     public.update_listing()
 end
 
@@ -156,20 +135,20 @@ function private.auction_alpha_setter(cell, auction)
     cell:SetAlpha(auction.gone and 0.3 or 1)
 end
 
-function public.update_bid_records()
-    Aux.log('Scanning bids ...')
-    bid_records = {}
+function public.update_auction_records()
+    Aux.log('Scanning auctions ...')
+    auction_records = {}
     Aux.scan.start{
-        type = 'bidder',
+        type = 'owner',
         page = 0,
         on_page_loaded = function(page, total_pages)
-			Aux.log('Scanning bid page '..(page+1)..' out of '..total_pages..' ...')
+			Aux.log('Scanning auction page '..(page+1)..' out of '..total_pages..' ...')
         end,
         on_read_auction = function(auction_info)
-            private.create_bid_record(auction_info)
+            private.create_auction_record(auction_info)
         end,
         on_complete = function()
-            Aux.log('Scan complete: '..getn(bid_records)..' bids found')
+            Aux.log('Scan complete: '..getn(auction_records)..' auctions found')
             public.update_listing()
         end,
         on_abort = function()
@@ -184,9 +163,9 @@ function public.update_bid_records()
 end
 
 function public.update_listing()
-    AuxManageFrameListingBidListing:Show()
-    Aux.sheet.populate(AuxManageFrameListingBidListing.sheet, bid_records)
-    AuxManageFrameListing:SetWidth(AuxManageFrameListingBidListing:GetWidth() + 40)
+    AuxManageFrameListingAuctionListing:Show()
+    Aux.sheet.populate(AuxManageFrameListingAuctionListing.sheet, auction_records)
+    AuxManageFrameListing:SetWidth(AuxManageFrameListingAuctionListing:GetWidth() + 40)
     AuxFrame:SetWidth(AuxManageFrameListing:GetWidth() + 15)
 end
 
@@ -232,8 +211,8 @@ function private.create_record(auction_info)
     }
 end
 
-function private.create_bid_record(auction_info)
-    tinsert(bid_records, private.create_record(auction_info))
+function private.create_auction_record(auction_info)
+    tinsert(auction_records, private.create_record(auction_info))
 end
 
 function public.dialog_cancel()
@@ -338,15 +317,14 @@ function private.find_auction(entry, action, express_mode)
     }
 end
 
-function public.on_bid_click(bid_record)
+function public.on_auction_click(auction_record)
 
     local express_mode = IsAltKeyDown()
-    local action = arg1 == 'LeftButton' and 'buyout' or 'bid'
 
     if IsControlKeyDown() then
-        DressUpItemLink(bid_record.hyperlink)
+        DressUpItemLink(auction_record.hyperlink)
     else
-        private.find_auction(bid_record, action, express_mode)
+        private.find_auction(auction_record, 'cancel', express_mode)
     end
 end
 
