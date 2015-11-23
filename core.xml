@@ -340,7 +340,11 @@
             <AbsDimension x="850" y="445"/>
         </Size>
         <Anchors>
-            <Anchor point="CENTER"/>
+            <Anchor point="LEFT">
+                <Offset>
+                    <AbsDimension x="100" y="0"/>
+                </Offset>
+            </Anchor>
         </Anchors>
         <Scripts>
             <OnLoad>

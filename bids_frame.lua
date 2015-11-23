@@ -169,7 +169,7 @@ function public.update_bid_records()
             private.create_bid_record(auction_info)
         end,
         on_complete = function()
-            Aux.log('Scan complete: '..getn(bid_records)..' bids found')
+            Aux.log('Scan complete: '..getn(bid_records)..' '..Aux_PluralizeIf('bid', getn(bid_records))..' found')
             public.update_listing()
         end,
         on_abort = function()

@@ -204,7 +204,7 @@
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-181"/></Offset></Anchor></Anchors>
                         <layers>
                             <Layer level="ARTWORK">
-                                <FontString name="$parentText" inherits="GameFontNormalSmall" text="STARTING_PRICE">
+                                <FontString name="$parentText" inherits="GameFontNormalSmall" text="Starting Stack Price">
                                     <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="12"/></Offset></Anchor></Anchors>
                                 </FontString>
                             </Layer>
@@ -219,7 +219,7 @@
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-216"/></Offset></Anchor></Anchors>
                         <layers>
                             <Layer level="OVERLAY">
-                                <FontString name="$parentText" inherits="GameFontNormalSmall" text="Buyout Price |cff808080(optional)|r">
+                                <FontString name="$parentText" inherits="GameFontNormalSmall" text="Buyout Stack Price |cff808080(optional)|r">
                                     <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="12"/></Offset></Anchor></Anchors>
                                 </FontString>
                                 <FontString name="$parentErrorText" inherits="GameFontRedSmall" text="AUCTION_BUYOUT_ERROR">

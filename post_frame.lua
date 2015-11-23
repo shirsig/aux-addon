@@ -397,9 +397,12 @@ function update_recommendation()
 --            local market_price = Aux.history.get_price_suggestion(current_auction.key, current_auction.aux_quantity)
 --            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(market_price * 0.95))
 --            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, market_price)
+        elseif existing_auctions[current_auction.key] then
+            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux_Round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 1.5)))
+            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux_Round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 2)))
         else
-            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
             MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 0)
+            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
         end
 	end
 end
