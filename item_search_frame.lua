@@ -435,6 +435,11 @@ function public.stop_search()
 end
 
 function update_listing()
+
+    if not AuxItemSearchFrame:IsVisible() then
+        return
+    end
+
 	AuxItemSearchFrameAuctionsBuyListing:Hide()
     AuxItemSearchFrameAuctionsBidListing:Hide()
     AuxItemSearchFrameAuctionsFullListing:Hide()

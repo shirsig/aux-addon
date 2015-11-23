@@ -2,7 +2,7 @@
 
 	<Script file="auctions_frame.lua"/>
 
-    <Frame name="AuxManageFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
+    <Frame name="AuxAuctionsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
 			<Frame name="$parentListing" inherits="AuxFrameBoxTemplate">
 				<Size>
@@ -59,32 +59,6 @@
                                 <Frames>
                                     <Frame name="$parentItem" inherits="AuxItemTemplate">
                                         <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                    </Frame>
-                                    <Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
-                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="43"/></Offset></Anchor></Anchors>
-                                        <Layers>
-                                            <Layer level="OVERLAY">
-                                                <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
-                                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor></Anchors>
-                                                </FontString>
-                                            </Layer>
-                                        </Layers>
-                                    </Frame>
-                                    <Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
-                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="45"/></Offset></Anchor></Anchors>
-                                        <Scripts>
-                                            <OnLoad>
-                                                SmallMoneyFrame_OnLoad()
-                                                MoneyFrame_SetType("STATIC")
-                                            </OnLoad>
-                                        </Scripts>
-                                        <Layers>
-                                            <Layer level="OVERLAY">
-                                                <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
-                                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
-                                                </FontString>
-                                            </Layer>
-                                        </Layers>
                                     </Frame>
                                     <Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
                                         <Size><AbsDimension x="90" y="26"/>	</Size>

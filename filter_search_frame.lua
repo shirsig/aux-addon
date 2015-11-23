@@ -485,6 +485,11 @@ function public.stop_search()
 end
 
 function update_sheet()
+
+    if not AuxFilterSearchFrame:IsVisible() then
+        return
+    end
+
 	AuxFilterSearchFrameResultsBuyListing:Hide()
     AuxFilterSearchFrameResultsBidListing:Hide()
     AuxFilterSearchFrameResultsFullListing:Hide()

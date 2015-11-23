@@ -186,7 +186,8 @@ function Aux.on_tab_click(index)
         AuxItemSearchFrame:Hide()
         AuxFilterSearchFrame:Hide()
         AuxSellFrame:Hide()
-        AuxManageFrame:Hide()
+        AuxAuctionsFrame:Hide()
+        AuxBidsFrame:Hide()
         AuxHistoryFrame:Hide()
 
         if index == 1 then
@@ -199,10 +200,10 @@ function Aux.on_tab_click(index)
             AuxSellFrame:Show()
             Aux.sell.on_open()
         elseif index == 4 then
-            AuxManageFrame:Show()
+            AuxAuctionsFrame:Show()
             Aux.auctions_frame.on_open()
         elseif index == 5 then
-            AuxManageFrame:Show()
+            AuxBidsFrame:Show()
             Aux.bids_frame.on_open()
         end
     end)

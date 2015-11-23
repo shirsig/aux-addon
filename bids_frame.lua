@@ -184,10 +184,10 @@ function public.update_bid_records()
 end
 
 function public.update_listing()
-    AuxManageFrameListingBidListing:Show()
-    Aux.sheet.populate(AuxManageFrameListingBidListing.sheet, bid_records)
-    AuxManageFrameListing:SetWidth(AuxManageFrameListingBidListing:GetWidth() + 40)
-    AuxFrame:SetWidth(AuxManageFrameListing:GetWidth() + 15)
+    AuxBidsFrameListingBidListing:Show()
+    Aux.sheet.populate(AuxBidsFrameListingBidListing.sheet, bid_records)
+    AuxBidsFrameListing:SetWidth(AuxBidsFrameListingBidListing:GetWidth() + 40)
+    AuxFrame:SetWidth(AuxBidsFrameListing:GetWidth() + 15)
 end
 
 function private.create_record(auction_info)
@@ -210,7 +210,6 @@ function private.create_record(auction_info)
         signature = Aux.auction_signature(auction_info.hyperlink, aux_quantity, bid, auction_info.buyout_price),
 
         name = auction_info.name,
-        level = auction_info.level,
         tooltip = auction_info.tooltip,
         aux_quantity = aux_quantity,
         buyout_price = buyout_price,
@@ -219,13 +218,11 @@ function private.create_record(auction_info)
         hyperlink = auction_info.hyperlink,
         itemstring = auction_info.itemstring,
         bid = bid,
-        bid_per_unit = Aux_Round(bid / aux_quantity),
         owner = auction_info.owner,
         duration = auction_info.duration,
         usable = auction_info.usable,
         high_bidder = auction_info.high_bidder,
         current_bid = auction_info.current_bid > 0 and auction_info.current_bid or nil,
-        min_bid = auction_info.min_bid,
         status = status,
 
         EnhTooltip_info = auction_info.EnhTooltip_info,
@@ -239,7 +236,7 @@ end
 function public.dialog_cancel()
     Aux.log('Aborted.')
     Aux.scan.abort()
-    AuxManageFrameListingDialog:Hide()
+    AuxBidsFrameListingDialog:Hide()
     public.update_listing()
 end
 
@@ -273,7 +270,7 @@ function private.find_auction(entry, action, express_mode)
     local found
 
     Aux.scan.start{
-        type = action == 'cancel' and 'owner' or 'bidder',
+        type = 'bidder',
         page = entry.page,
         on_read_auction = function(auction_info, ctrl)
 
@@ -285,11 +282,7 @@ function private.find_auction(entry, action, express_mode)
                 Aux.log('Matching auction found.'..(express_mode and '' or ' Awaiting confirmation ...'))
 
                 if express_mode then
-                    if action == 'cancel' then
-                        CancelAuction(auction_info.index)
-                        entry.gone = true
-                        Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity)
-                    elseif GetMoney() >= amount then
+                    if GetMoney() >= amount then
                         PlaceAuctionBid('bidder', auction_info.index, amount)
                         Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(amount)..'.')
                         entry.gone = true
@@ -299,24 +292,20 @@ function private.find_auction(entry, action, express_mode)
                     Aux.scan.abort()
                 else
                     public.dialog_action = function()
-                        if private.create_record(Aux.info.auction(auction_info.index, action == 'cancel' and 'owner' or 'bidder')).signature == entry.signature then
-                            if action == 'cancel' then
-                                CancelAuction(auction_info.index)
-                                entry.gone = true
-                                Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity)
-                            elseif GetMoney() >= amount then
-                                PlaceAuctionBid('bidder', auction_info.index, action == 'bid' and MoneyInputFrame_GetCopper(AuxManageFrameListingDialogContentBid) or amount)
-                                Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(action == 'bid' and MoneyInputFrame_GetCopper(AuxManageFrameListingDialogContentBid) or amount)..'.')
+                        if private.create_record(Aux.info.auction(auction_info.index, 'bidder')).signature == entry.signature then
+                            if GetMoney() >= amount then
+                                PlaceAuctionBid('bidder', auction_info.index, action == 'bid' and MoneyInputFrame_GetCopper(AuxBidsFrameListingDialogContentBid) or amount)
+                                Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(action == 'bid' and MoneyInputFrame_GetCopper(AuxBidsFrameListingDialogContentBid) or amount)..'.')
                                 entry.gone = true
                             else
                                 Aux.log('Not enough money.')
                             end
                             Aux.scan.abort()
-                            AuxManageFrameListingDialog:Hide()
+                            AuxBidsFrameListingDialog:Hide()
                             public.update_listing()
                         end
                     end
-                    AuxManageFrameListingDialogContentActionButton:Enable()
+                    AuxBidsFrameListingDialogContentActionButton:Enable()
                 end
             end
         end,
@@ -351,44 +340,36 @@ function public.on_bid_click(bid_record)
 end
 
 function private.show_dialog(action, entry, amount)
-    AuxManageFrameListingDialogContentItem.itemstring = Aux.info.itemstring(entry.item_id, entry.suffix_id, entry.unique_id, entry.enchant_id)
-    AuxManageFrameListingDialogContentItem.EnhTooltip_info = entry.EnhTooltip_info
+    AuxBidsFrameListingDialogContentItem.itemstring = Aux.info.itemstring(entry.item_id, entry.suffix_id, entry.unique_id, entry.enchant_id)
+    AuxBidsFrameListingDialogContentItem.EnhTooltip_info = entry.EnhTooltip_info
 
-    AuxManageFrameListingDialogContentActionButton:Disable()
-    AuxManageFrameListingDialogContentItemIconTexture:SetTexture(Aux.info.item(entry.item_id).texture)
-    AuxManageFrameListingDialogContentItemName:SetText(entry.name)
+    AuxBidsFrameListingDialogContentActionButton:Disable()
+    AuxBidsFrameListingDialogContentItemIconTexture:SetTexture(Aux.info.item(entry.item_id).texture)
+    AuxBidsFrameListingDialogContentItemName:SetText(entry.name)
     local color = ITEM_QUALITY_COLORS[entry.quality]
-    AuxManageFrameListingDialogContentItemName:SetTextColor(color.r, color.g, color.b)
+    AuxBidsFrameListingDialogContentItemName:SetTextColor(color.r, color.g, color.b)
 
     if entry.aux_quantity > 1 then
-        AuxManageFrameListingDialogContentItemCount:SetText(entry.aux_quantity);
-        AuxManageFrameListingDialogContentItemCount:Show()
+        AuxBidsFrameListingDialogContentItemCount:SetText(entry.aux_quantity);
+        AuxBidsFrameListingDialogContentItemCount:Show()
     else
-        AuxManageFrameListingDialogContentItemCount:Hide()
+        AuxBidsFrameListingDialogContentItemCount:Hide()
     end
 
     if action == 'buyout' then
-        AuxManageFrameListingDialogContentActionButton:SetText('Buy')
-        AuxManageFrameListingDialogContentCancelButton:SetText('Cancel')
-        MoneyFrame_Update('AuxManageFrameListingDialogContentBuyoutPrice', amount)
-        AuxManageFrameListingDialogContentBid:Hide()
-        AuxManageFrameListingDialogContentCancelLabel:Hide()
-        AuxManageFrameListingDialogContentBuyoutPrice:Show()
+        AuxBidsFrameListingDialogContentActionButton:SetText('Buy')
+        AuxBidsFrameListingDialogContentCancelButton:SetText('Cancel')
+        MoneyFrame_Update('AuxBidsFrameListingDialogContentBuyoutPrice', amount)
+        AuxBidsFrameListingDialogContentBid:Hide()
+        AuxBidsFrameListingDialogContentBuyoutPrice:Show()
     elseif action == 'bid' then
-        AuxManageFrameListingDialogContentActionButton:SetText('Bid')
-        AuxManageFrameListingDialogContentCancelButton:SetText('Cancel')
-        MoneyInputFrame_SetCopper(AuxManageFrameListingDialogContentBid, amount)
-        AuxManageFrameListingDialogContentBuyoutPrice:Hide()
-        AuxManageFrameListingDialogContentCancelLabel:Hide()
-        AuxManageFrameListingDialogContentBid:Show()
-    elseif action == 'cancel' then
-        AuxManageFrameListingDialogContentBid:Hide()
-        AuxManageFrameListingDialogContentBuyoutPrice:Hide()
-        AuxManageFrameListingDialogContentCancelLabel:Show()
-        AuxManageFrameListingDialogContentActionButton:SetText('Yes')
-        AuxManageFrameListingDialogContentCancelButton:SetText('No')
+        AuxBidsFrameListingDialogContentActionButton:SetText('Bid')
+        AuxBidsFrameListingDialogContentCancelButton:SetText('Cancel')
+        MoneyInputFrame_SetCopper(AuxBidsFrameListingDialogContentBid, amount)
+        AuxBidsFrameListingDialogContentBuyoutPrice:Hide()
+        AuxBidsFrameListingDialogContentBid:Show()
     end
-    AuxManageFrameListingDialog:Show()
+    AuxBidsFrameListingDialog:Show()
 end
 
 
