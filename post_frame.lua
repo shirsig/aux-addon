@@ -398,8 +398,8 @@ function update_recommendation()
 --            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(market_price * 0.95))
 --            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, market_price)
         elseif existing_auctions[current_auction.key] then
-            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux_Round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 1.5)))
-            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux_Round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 2)))
+            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux_Round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 1.053)))
+            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux_Round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 4)))
         else
             MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 0)
             MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
