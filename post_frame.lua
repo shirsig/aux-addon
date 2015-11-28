@@ -21,6 +21,7 @@ Aux.sell.inventory_listing_config = {
 
     on_row_enter = function (sheet, row_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
+        Aux.info.set_tooltip(sheet.rows[row_index].itemstring, nil, this, 'ANCHOR_CURSOR', 0, 30)
     end,
 
     on_row_leave = function (sheet, row_index)
@@ -28,6 +29,7 @@ Aux.sell.inventory_listing_config = {
         if not (current_auction and sheet.data[data_index] == current_auction) then
             sheet.rows[row_index].highlight:SetAlpha(0)
         end
+        AuxTooltip:Hide()
     end,
 
     row_setter = function(row, datum)
@@ -36,6 +38,7 @@ Aux.sell.inventory_listing_config = {
         else
             row.highlight:SetAlpha(0)
         end
+        row.itemstring = Aux.info.itemstring(datum.item_id, datum.suffix_id)
     end,
 
     columns = {
@@ -68,7 +71,7 @@ Aux.sell.inventory_listing_config = {
                 icon:SetWidth(12)
                 icon:SetHeight(12)
                 local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
-                text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
+                text:SetPoint('LEFT', icon, 'RIGHT', 1, 0)
                 text:SetPoint('TOPRIGHT', cell)
                 text:SetPoint('BOTTOMRIGHT', cell)
                 text:SetJustifyV('TOP')
@@ -424,7 +427,7 @@ end
 
 function set_auction(auction_candidate)
 
-    PlaySound("igMainMenuOptionCheckBoxOn")
+    PlaySound('igMainMenuOptionCheckBoxOn')
 
     Aux.scan.abort(function()
 
