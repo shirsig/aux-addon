@@ -3,7 +3,7 @@ Aux.sell = public
 
 local existing_auctions = {}
 
-local inventory_data
+local inventory_data = {}
 
 local bestPriceOurStackSize
 
@@ -465,9 +465,14 @@ function charge_classes(availability)
 end
 
 function update_inventory_data()
-    inventory_data = {}
+
     update_inventory_listing()
 
+    local old_auction_candidate_map = {}
+    for _, old_auction_candidate in inventory_data do
+        old_auction_candidate_map[old_auction_candidate.key] = old_auction_candidate
+    end
+    inventory_data = {}
     local auction_candidate_map = {}
 
     local function process_inventory(inventory_iterator, k)
@@ -481,36 +486,52 @@ function update_inventory_data()
 
         if item_info then
 
-            return Aux.control.on_next_update(function()
+            local charge_class = item_info.charges or 0
 
-                local charge_class = item_info.charges or 0
+            if auction_candidate_map[item_info.item_key] then
 
-                local auction_sell_item
+                local candidate = auction_candidate_map[item_info.item_key]
+                candidate.availability[charge_class] = (candidate.availability[charge_class] or 0) + item_info.count
+                candidate.aux_quantity = candidate.aux_quantity + (item_info.charges or item_info.count)
 
-                Aux.util.without_sound(function()
-                    Aux.util.without_errors(function()
+                return process_inventory(inventory_iterator, k)
 
-                        ClearCursor()
-                        PickupContainerItem(slot.bag, slot.bag_slot)
-                        ClickAuctionSellItemButton()
-                        auction_sell_item = Aux.info.auction_sell_item()
-                        ClearCursor()
-                        ClickAuctionSellItemButton()
-                        ClearCursor()
+            elseif old_auction_candidate_map[item_info.item_key] then
 
+                local candidate = old_auction_candidate_map[item_info.item_key]
+                candidate.aux_quantity = item_info.charges or item_info.count
+                candidate.availability = { [charge_class]=item_info.count }
+                auction_candidate_map[item_info.item_key] = candidate
+
+                return process_inventory(inventory_iterator, k)
+
+            else
+                return Aux.control.on_next_update(function()
+
+                    local auction_sell_item
+
+                    Aux.util.without_sound(function()
+                        Aux.util.without_errors(function()
+
+                            ClearCursor()
+                            PickupContainerItem(slot.bag, slot.bag_slot)
+                            ClickAuctionSellItemButton()
+                            auction_sell_item = Aux.info.auction_sell_item()
+                            ClearCursor()
+                            ClickAuctionSellItemButton()
+                            ClearCursor()
+
+                        end)
                     end)
-                end)
 
-                if auction_sell_item then
-                    if not auction_candidate_map[item_info.item_key] then
-
+                    if auction_sell_item then
                         auction_candidate_map[item_info.item_key] = {
                             item_id = item_info.item_id,
                             suffix_id = item_info.suffix_id,
 
                             key = item_info.item_key,
                             hyperlink = item_info.hyperlink,
-                            
+
                             name = item_info.name,
                             texture = item_info.texture,
                             quality = item_info.quality,
@@ -522,17 +543,12 @@ function update_inventory_data()
                             max_stack = item_info.max_stack,
                             availability = { [charge_class]=item_info.count },
                         }
-                    else
-                        local candidate = auction_candidate_map[item_info.item_key]
-                        candidate.availability[charge_class] = (candidate.availability[charge_class] or 0) + item_info.count
-                        candidate.aux_quantity = candidate.aux_quantity + (item_info.charges or item_info.count)
                     end
-                end
 
-                return process_inventory(inventory_iterator, k)
-            end)
+                    return process_inventory(inventory_iterator, k)
+                end)
+            end
         end
-
         return process_inventory(inventory_iterator, k)
     end
 
