@@ -472,7 +472,7 @@ function update_inventory_data()
     for _, old_auction_candidate in inventory_data do
         old_auction_candidate_map[old_auction_candidate.key] = old_auction_candidate
     end
-    inventory_data = {}
+
     local auction_candidate_map = {}
 
     local function process_inventory(inventory_iterator, k)
