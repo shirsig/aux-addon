@@ -282,7 +282,7 @@ function Aux.sell.post_auctions()
 					end
 				end
 				Aux.sell.clear_auction()
-                auction.aux_quantity = auction.aux_quantity - posted
+                auction.aux_quantity = auction.aux_quantity - (posted * stack_count)
                 private.parse_inventory()
 				report(hyperlink, stack_size, buyout_price, posted)
 			end
