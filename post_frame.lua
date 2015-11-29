@@ -178,7 +178,7 @@ Aux.sell.auction_listing_config = {
 }
 
 function private.parse_inventory()
-    Aux.sheet.populate(AuxSellInventoryListing.sheet, inventory_data)
+    Aux.sheet.populate(AuxSellInventoryListing.sheet, Aux.util.filter(inventory_data, function(item) return item.aux_quantity > 0 end))
 end
 
 function update_auction_listing()
@@ -283,6 +283,9 @@ function Aux.sell.post_auctions()
 				end
 				Aux.sell.clear_auction()
                 auction.aux_quantity = auction.aux_quantity - (posted * stack_size)
+                local charge_class = auction.charges or 0
+                auction.availability[charge_class] = auction.availability[charge_class] - (posted * (auction.charges and 1 or stack_size))
+
                 private.parse_inventory()
 				report(hyperlink, stack_size, buyout_price, posted)
 			end
