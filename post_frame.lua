@@ -174,7 +174,7 @@ Aux.sell.auction_listing_config = {
             end,
         },
     },
-    sort_order = {{column = 4, order = 'ascending' }, {column = 4, order = 'ascending'}},
+    sort_order = {{column = 5, order = 'ascending' }},
 }
 
 function private.parse_inventory()
