@@ -386,9 +386,9 @@ function update_recommendation()
 		MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', floor(current_auction.unit_vendor_price * 0.05 * (current_auction.charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
 		
 		if existing_auctions[current_auction.key] and existing_auctions[current_auction.key].selected then
-			if not existing_auctions[current_auction.key].created or GetTime() - existing_auctions[current_auction.key].created > 1800 then
-                AuxSellParametersStrategyDropDownStaleWarning:SetText('Stale data!') -- data older than half an hour marked as stale
-			end
+--			if not existing_auctions[current_auction.key].created or GetTime() - existing_auctions[current_auction.key].created > 1800 then
+--                AuxSellParametersStrategyDropDownStaleWarning:SetText('Stale data!') -- data older than half an hour marked as stale
+--			end
 		
 			local new_buyout_price = existing_auctions[current_auction.key].selected.unit_buyout_price * get_stack_size_slider_value()
 
