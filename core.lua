@@ -1,4 +1,4 @@
-AuxVersion = '2.1.3'
+AuxVersion = '2.1.4'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -274,7 +274,9 @@ function Aux_QualityColor(code)
 		return "ffa335ee" -- epic, purple
 	elseif code == 5 then
 		return "ffff8000" -- legendary, orange
-	end
+    elseif code == 6 then
+        return "ffe6cc80" -- artifact, pale gold
+    end
 end
 
 function Aux.auction_signature(hyperlink, stack_size, bid, amount)
