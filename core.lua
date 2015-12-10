@@ -1,4 +1,4 @@
-AuxVersion = '2.1.2'
+AuxVersion = '2.1.3'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -206,6 +206,8 @@ function Aux.on_tab_click(index)
             AuxBidsFrame:Show()
             Aux.bids_frame.on_open()
         end
+
+        Aux.active_panel = index
     end)
 end
 
@@ -243,12 +245,16 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 	
 	if AuxFrame:IsVisible() and button == "LeftButton" and container_item_info then
 		if IsAltKeyDown() then
-			if not AuxItemSearchFrame:IsVisible() then
+			if Aux.active_panel ~= 1 then
                 Aux.on_tab_click(1)
             end
-            AuxItemSearchFrameItemItemInputBox:Hide()
-            Aux.item_search_frame.set_item(container_item_info.item_id)
-			return
+
+            Aux.control.as_soon_as(function() return Aux.active_panel == 1 end, function()
+                AuxItemSearchFrameItemItemInputBox:Hide()
+                Aux.item_search_frame.set_item(container_item_info.item_id)
+            end)
+
+            return
 		end
     end
 

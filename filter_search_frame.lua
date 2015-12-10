@@ -536,76 +536,79 @@ function public.start_search()
 
 	if not AuxFilterSearchFrameFiltersSearchButton:IsVisible() then
 		return
-	end
+    end
 
-    AuxFilterSearchFrameFiltersSearchButton:Hide()
-    AuxFilterSearchFrameFiltersStopButton:Show()
-	
-	auctions = nil
-	
-	refresh = true
-	
-	local category = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown)
-	local tooltip_patterns = {}
-	for i=1,4 do
-		local tooltip_pattern = getglobal('AuxFilterSearchFrameFiltersTooltipInputBox'..i):GetText()
-		if tooltip_pattern ~= '' then
-			tinsert(tooltip_patterns, tooltip_pattern)
-		end
-	end
-	
-	search_query = {
-		name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
-		min_level = AuxFilterSearchFrameFiltersMinLevel:GetText(),
-		max_level = AuxFilterSearchFrameFiltersMaxLevel:GetText(),
-		slot = category and category.slot,
-		class = category and category.class,	
-		subclass = category and category.subclass,
-		quality = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown),
-		usable = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked()
-	}
-	
-	Aux.log('Scanning auctions ...')
-	Aux.scan.start{
-		query = search_query,
-		page = AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() and 0 or AuxFilterSearchFrameFiltersPageEditBox:GetNumber(),
-		on_submit_query = function()
-			current_page = nil
-		end,
-		on_page_loaded = function(page, total_pages)
-            Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
-            current_page = page
-		end,
-		on_read_auction = function(auction_info)
-            if Aux.info.tooltip_match(tooltip_patterns, auction_info.tooltip) then
-                auctions = auctions or {}
-                tinsert(auctions, create_auction_record(auction_info, current_page))
+    Aux.scan.abort(function()
+
+        AuxFilterSearchFrameFiltersSearchButton:Hide()
+        AuxFilterSearchFrameFiltersStopButton:Show()
+
+        auctions = nil
+
+        refresh = true
+
+        local category = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown)
+        local tooltip_patterns = {}
+        for i=1,4 do
+            local tooltip_pattern = getglobal('AuxFilterSearchFrameFiltersTooltipInputBox'..i):GetText()
+            if tooltip_pattern ~= '' then
+                tinsert(tooltip_patterns, tooltip_pattern)
             end
-		end,
-		on_complete = function()
-			auctions = auctions or {}
-            Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+        end
 
-            AuxFilterSearchFrameFiltersStopButton:Hide()
-            AuxFilterSearchFrameFiltersSearchButton:Show()
-			refresh = true
-		end,
-		on_abort = function()
-			auctions = auctions or {}
-            Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
-            AuxFilterSearchFrameFiltersStopButton:Hide()
-            AuxFilterSearchFrameFiltersSearchButton:Show()
-			refresh = true
-		end,
-		next_page = function(page, total_pages)
-            if AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() then
-                local last_page = max(total_pages - 1, 0)
-                if page < last_page then
-                    return page + 1
+        search_query = {
+            name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
+            min_level = AuxFilterSearchFrameFiltersMinLevel:GetText(),
+            max_level = AuxFilterSearchFrameFiltersMaxLevel:GetText(),
+            slot = category and category.slot,
+            class = category and category.class,
+            subclass = category and category.subclass,
+            quality = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown),
+            usable = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked()
+        }
+
+        Aux.log('Scanning auctions ...')
+        Aux.scan.start{
+            query = search_query,
+            page = AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() and 0 or AuxFilterSearchFrameFiltersPageEditBox:GetNumber(),
+            on_submit_query = function()
+                current_page = nil
+            end,
+            on_page_loaded = function(page, total_pages)
+                Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
+                current_page = page
+            end,
+            on_read_auction = function(auction_info)
+                if Aux.info.tooltip_match(tooltip_patterns, auction_info.tooltip) then
+                    auctions = auctions or {}
+                    tinsert(auctions, create_auction_record(auction_info, current_page))
                 end
-            end
-		end,
-	}
+            end,
+            on_complete = function()
+                auctions = auctions or {}
+                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+
+                AuxFilterSearchFrameFiltersStopButton:Hide()
+                AuxFilterSearchFrameFiltersSearchButton:Show()
+                refresh = true
+            end,
+            on_abort = function()
+                auctions = auctions or {}
+                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+                AuxFilterSearchFrameFiltersStopButton:Hide()
+                AuxFilterSearchFrameFiltersSearchButton:Show()
+                refresh = true
+            end,
+            next_page = function(page, total_pages)
+                if AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() then
+                    local last_page = max(total_pages - 1, 0)
+                    if page < last_page then
+                        return page + 1
+                    end
+                end
+            end,
+        }
+    end)
 end
 
 function show_dialog(buyout_mode, entry, amount)
