@@ -523,10 +523,6 @@ end
 
 function public.start_search()
 
-    if not AuxItemSearchFrameItemRefreshButton:IsVisible() then
-        return
-    end
-
     Aux.scan.abort(function()
 
         AuxItemSearchFrameItemRefreshButton:Hide()
@@ -572,7 +568,7 @@ function public.start_search()
             end,
             on_complete = function()
                 auctions = auctions or {}
-                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' of '..item_info.name..' found.')
 
                 AuxItemSearchFrameItemStopButton:Hide()
                 AuxItemSearchFrameItemRefreshButton:Show()
@@ -580,7 +576,7 @@ function public.start_search()
             end,
             on_abort = function()
                 auctions = auctions or {}
-                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' of '..item_info.name..' found.')
                 AuxItemSearchFrameItemStopButton:Hide()
                 AuxItemSearchFrameItemRefreshButton:Show()
                 refresh = true

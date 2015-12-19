@@ -534,10 +534,6 @@ end
 
 function public.start_search()
 
-	if not AuxFilterSearchFrameFiltersSearchButton:IsVisible() then
-		return
-    end
-
     Aux.scan.abort(function()
 
         AuxFilterSearchFrameFiltersSearchButton:Hide()
