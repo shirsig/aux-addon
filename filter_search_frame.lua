@@ -462,7 +462,7 @@ public.views = {
 
 function public.on_close()
     if AuxFilterSearchFrameResultsConfirmation:IsVisible() then
-	    Aux.buy.dialog_cancel()
+	    public.dialog_cancel()
     end
 	current_page = nil
 end
@@ -726,7 +726,7 @@ function find_auction(entry, buyout_mode, express_mode)
                 Aux.log('No matching auction found. Removing entry from the cache.')
 				entry.gone = true
 				refresh = true
-				Aux.buy.dialog_cancel()
+				public.dialog_cancel()
 			end
 			if express_mode then
                 AuxFilterSearchFrameFiltersSearchButton:Enable()
