@@ -1,4 +1,4 @@
-AuxVersion = '2.1.5'
+AuxVersion = '2.1.6'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -130,6 +130,9 @@ function Aux_SetupHookFunctions()
 
     Aux.orig.AuctionFrameAuctions_OnEvent = AuctionFrameAuctions_OnEvent
     AuctionFrameAuctions_OnEvent = Aux.AuctionFrameAuctions_OnEvent
+
+    Aux.orig.UIDropDownMenu_StartCounting = UIDropDownMenu_StartCounting
+    UIDropDownMenu_StartCounting = Aux.completion.UIDropDownMenu_StartCounting
 
 end
 
