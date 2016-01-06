@@ -214,6 +214,8 @@ function Aux.sell.on_open()
 
     private.parse_inventory()
     update_auction_listing()
+
+    update_recommendation()
 end
 
 function Aux.sell.on_close()
