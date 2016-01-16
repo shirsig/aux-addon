@@ -15,8 +15,8 @@ function public.start_scan()
 --        return
 --    end
 
-    AuxHistoryScanButton:Hide()
-    AuxHistoryStopButton:Show()
+--    AuxHistoryScanButton:Hide()
+--    AuxHistoryStopButton:Show()
 
     private.scanned_signatures = Aux.util.set()
 
@@ -32,15 +32,15 @@ function public.start_scan()
         end,
         on_complete = function()
             private.update_snapshot()
-
-            AuxHistoryStopButton:Hide()
-            AuxHistoryScanButton:Show()
+            Aux.log('Scan complete: Old auctions were removed from the snapshot.')
+--            AuxHistoryStopButton:Hide()
+--            AuxHistoryScanButton:Show()
         end,
         on_abort = function()
-            private.update_snapshot()
 
-            AuxHistoryStopButton:Hide()
-            AuxHistoryScanButton:Show()
+            Aux.log('Scanning aborted.')
+--            AuxHistoryStopButton:Hide()
+--            AuxHistoryScanButton:Show()
         end,
         next_page = function(page, total_pages)
             local last_page = max(total_pages - 1, 0)
@@ -66,11 +66,4 @@ end
 
 function private.process_auction(auction_info)
     private.scanned_signatures.add(auction_info.signature)
-
-    local snapshot = Aux.persistence.load_snapshot()
-
-    if not snapshot.contains(auction_info.signature) then
-        snapshot.add(auction_info.signature)
-        Aux.stat_average.process_auction(auction_info)
-    end
 end

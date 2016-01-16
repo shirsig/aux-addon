@@ -2,7 +2,7 @@ local private, public = {}, {}
 Aux.stat_average = public
 
 private.PUSH_INTERVAL = 57600
-private.NEW_RECORD = '0:0:0:0:0:0:0:0:0:0:0'
+private.NEW_RECORD = '0:0:0:0:0:0:0:0:0:0'
 
 function private.load_data()
 	local dataset = Aux.persistence.load_dataset()
@@ -125,8 +125,9 @@ end
 
 function private.push_data()
 	local data = private.load_data()
+	local item_data = data.item_data
 
-	for item_key, _ in pairs(data) do
+	for item_key, _ in pairs(item_data) do
 
 		local item_record = public.read_record(item_key)
 		local _, daily_auction_count, daily_unit_count, daily_accumulated_buyout, daily_min_buyout, seen_days, EMA3, EMA7, EMA14, average_min_buyout = unpack(item_record)

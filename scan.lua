@@ -145,7 +145,13 @@ function scan_auctions_helper(i, n, k)
 
     local auction_info = Aux.info.auction(i, state.job.type)
     if auction_info then
-        wait_for_callback{state.job.on_read_auction, auction_info, recurse}
+        wait_for_callback{state.job.on_read_auction, auction_info, recurse }
+
+        local snapshot = Aux.persistence.load_snapshot()
+        if not snapshot.contains(auction_info.signature) then
+            snapshot.add(auction_info.signature)
+            Aux.stat_average.process_auction(auction_info)
+        end
     else
         recurse()
     end

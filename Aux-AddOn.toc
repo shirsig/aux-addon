@@ -5,6 +5,7 @@
 ## SavedVariablesPerCharacter: aux_recently_searched, aux_view, AUX_SELL_SHORTCUT, AUX_BUY_SHORTCUT, AUX_OPEN_SELL, AUX_OPEN_BUY, AUX_INSTANT_BUYOUT, AUX_AUCTION_DURATION
 ## SavedVariables: aux_database
 
+slash.lua
 core.xml
 control.xml
 persistence.lua

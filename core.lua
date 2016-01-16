@@ -1,4 +1,4 @@
-AuxVersion = '2.1.8'
+AuxVersion = '2.2.0'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -40,7 +40,7 @@ function Aux_OnLoad()
             EnhTooltip.AddLine('Never seen at auction', nil, true)
             EnhTooltip.LineColor(0.5, 0.8, 0.5)
         else
-            EnhTooltip.AddLine('Seen '..auction_count..' '..Aux_PluralizeIf('time', auction_count)..' at auction total', nil, true)
+            EnhTooltip.AddLine('Seen '..auction_count..' '..Aux_PluralizeIf('time', auction_count)..' at auction', nil, true)
             EnhTooltip.LineColor(0.5, 0.8, 0.1)
 
             local unit_value = Aux.stat_average.get_mean(item_key)
