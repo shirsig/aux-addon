@@ -93,6 +93,7 @@ function public.auction(index, type)
         hyperlink = hyperlink,
         itemstring = item_info.itemstring,
         item_key = item_id..':'..suffix_id,
+        signature = public.auction_signature(index, type),
 
         name = name,
         texture = texture,
@@ -205,10 +206,11 @@ function private.item_charges(tooltip)
 end
 
 -- not unique!
-function public.auction_signature(index)
+function public.auction_signature(index, type)
+    type = type or 'list'
     -- owner not used because waiting for it would slow down the scan too much
     local _, _, count, _, _, _, min_bid, _, buyout_price, _, _, owner = GetAuctionItemInfo('list', index)
-    local hyperlink = GetAuctionItemLink('list', index)
+    local hyperlink = GetAuctionItemLink(type, index)
     local item_id, suffix_id, unique_id, enchant_id = private.parse_hyperlink(hyperlink)
     return string.format(
         '%s:%s:%s:%s:%s:%s:%s',

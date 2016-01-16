@@ -1,32 +1,24 @@
-local MAX_HISTORY_SIZE = 100
-local MIN_SEEN = 1
-local UNDERCUT_FACTOR = 0.2
+local private, public = {}, {}
+Aux.history_frame = public
 
-Aux.history = {}
-
-local process_auction, balanced_list, update_snapshot
-local get_market_price, get_usable_median, get_historical_median, get_median, get_percentile
-
-local auction_cache
-
-function Aux.history.on_close()
+function public.on_close()
 
 end
 
-function Aux.history.on_open()
+function public.on_open()
 
 end
 
-function Aux.history.start_scan()
+function public.start_scan()
 
-    if not AuxHistoryScanButton:IsVisible() then
-        return
-    end
+--    if not AuxHistoryScanButton:IsVisible() then
+--        return
+--    end
 
     AuxHistoryScanButton:Hide()
     AuxHistoryStopButton:Show()
 
-    auction_cache = {}
+    private.scanned_signatures = Aux.util.set()
 
     Aux.log('Scanning auctions ...')
     Aux.scan.start{
@@ -36,60 +28,49 @@ function Aux.history.start_scan()
             Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
         end,
         on_read_auction = function(auction_info)
-            process_auction(auction_info)
+            private.process_auction(auction_info)
         end,
         on_complete = function()
-            process_scanned_auctions()
+            private.update_snapshot()
 
             AuxHistoryStopButton:Hide()
             AuxHistoryScanButton:Show()
         end,
         on_abort = function()
-            process_scanned_auctions()
+            private.update_snapshot()
 
             AuxHistoryStopButton:Hide()
             AuxHistoryScanButton:Show()
         end,
         next_page = function(page, total_pages)
-            if AuxBuyAllPagesCheckButton:GetChecked() then
-                local last_page = max(total_pages - 1, 0)
-                if page < last_page then
-                    return page + 1
-                end
+            local last_page = max(total_pages - 1, 0)
+            if page < last_page then
+                return page + 1
             end
         end,
     }
 end
 
-function process_scanned_auctions()
-    local time = time()
-	for item_key, auctions in pairs(auction_cache) do
-        local min_price, accumulated_price
-        for _, auction in ipairs(auctions) do
-            min_price = min_price and min(min_price, auction.price) or auction.price
-            accumulated_price = (accumulated_price or 0) + auction.price
-        end
-        Aux.persistence.store_scan_record(item_key, {
-            time = time,
-            count = getn(auctions),
-            min_price = min_price,
-            accumulated_price = accumulated_price,
-        })
-	end
-end
-
-function Aux.history.stop_scan()
+function public.stop_scan()
     Aux.scan.abort()
 end
 
-function process_auction(auction_info)
-    local buyout_price = Aux.util.safe_index{auction_info, 'buyout_price'}
-    if buyout_price and buyout_price > 0 then
-        local aux_quantity = auction_info.charges or auction_info.count
-        local price = ceil(buyout_price / aux_quantity)
-        local item_key = auction_info.item_signature
+function private.update_snapshot()
+    local snapshot = Aux.persistence.load_snapshot()
+    for _, sig in ipairs(snapshot.values()) do
+        if not private.scanned_signatures.contains(sig) then
+            snapshot.remove(sig)
+        end
+    end
+end
 
-        auction_cache[item_key] = auction_cache[item_key] or {}
-        tinsert(auction_cache[item_key], { price=price })
+function private.process_auction(auction_info)
+    private.scanned_signatures.add(auction_info.signature)
+
+    local snapshot = Aux.persistence.load_snapshot()
+
+    if not snapshot.contains(auction_info.signature) then
+        snapshot.add(auction_info.signature)
+        Aux.stat_average.process_auction(auction_info)
     end
 end

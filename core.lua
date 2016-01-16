@@ -30,6 +30,28 @@ function Aux_OnLoad()
 	Aux.log('Aux v'..AuxVersion..' loaded.')
 	Aux.loaded = true
     tinsert(UISpecialFrames, 'AuxFrame')
+    Stubby.RegisterFunctionHook('EnhTooltip.AddTooltip', 100, function(_ ,_ ,_ ,_ , link, _, count)
+        local item_id, suffix_id = EnhTooltip.BreakLink(link)
+        local item_key = item_id..':'..suffix_id
+
+        local auction_count = unpack(Aux.stat_average.read_record(item_key))
+
+        if auction_count == 0 then
+            EnhTooltip.AddLine('Never seen at auction', nil, true)
+            EnhTooltip.LineColor(0.5, 0.8, 0.5)
+        else
+            EnhTooltip.AddLine('Seen '..auction_count..' '..Aux_PluralizeIf('time', auction_count)..' at auction total', nil, true)
+            EnhTooltip.LineColor(0.5, 0.8, 0.1)
+
+            local unit_value = Aux.stat_average.get_mean(item_key)
+            if count == 1 then
+                EnhTooltip.AddLine(Aux.util.money_string(unit_value), nil, true)
+            else
+                EnhTooltip.AddLine(Aux.util.money_string(unit_value * count)..' ('..Aux.util.money_string(unit_value)..' ea.)', nil, true)
+            end
+            EnhTooltip.LineColor(0.1,0.8,0.5)
+        end
+    end)
 end
 
 function Aux_OnEvent()
@@ -53,7 +75,10 @@ end
 function Aux_OnAddonLoaded()
 	if string.lower(arg1) == "blizzard_auctionui" then
 		Aux_SetupHookFunctions()
-	end
+    end
+    if string.lower(arg1) == "EnhTooltip" then
+
+    end
 end
 
 function Aux.log_frame_load()
@@ -184,7 +209,7 @@ function Aux.on_tab_click(index)
         Aux.sell.on_close()
         Aux.auctions_frame.on_close()
         Aux.bids_frame.on_close()
-        Aux.history.on_close()
+        Aux.history_frame.on_close()
 
         for i=1,5 do
             getglobal('AuxTab'..i):SetAlpha(i == index and 1 or 0.5)

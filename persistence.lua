@@ -6,8 +6,12 @@ Aux.persistence = public
 aux_database = {}
 
 function public.on_load()
-	perform_migration(aux_database)
+    private.perform_migration(aux_database)
     aux_database.version = DATABASE_VERSION
+end
+
+function private.perform_migration()
+
 end
 
 function private.get_dataset_key()
@@ -29,37 +33,38 @@ function public.load_dataset()
     return aux_database[dataset_key]
 end
 
-function load_snapshot()
-    local dataset = load_dataset()
+function public.load_snapshot()
+    local dataset = public.load_dataset()
+    dataset.snapshot = dataset.snapshot or {}
     local snapshot = Aux.util.set()
     snapshot.set_data(dataset.snapshot)
     return snapshot
 end
 
-function public.load_scan_records(item_key)
-    local dataset = private.load_dataset()
+--function public.load_scan_records(item_key)
+--    local dataset = private.load_dataset()
+--
+--    local serialized_records = private.deserialize(dataset[item_key] or '', ';')
+--    return Aux.util.map(serialized_records, function(serialized_record)
+--        local time, count, min_price, accumulated_price = private.deserialize(serialized_record, '#')
+--        return {
+--            time = time,
+--            count = count,
+--            min_price = min_price,
+--            accumulated_price = accumulated_price,
+--        }
+--    end)
+--end
+--
+--function public.store_scan_record(item_key, record)
+--    local dataset = private.load_dataset()
+--    local serialized_record = private.serialize({ record.time, record.count, record.min_price, record.accumulated_price }, '#')
+--    local serialized_records = dataset[item_key] or ''
+--    serialized_records = serialized_records..(serialized_records == '' and '' or ';')..serialized_record
+--    dataset[item_key] = serialized_records
+--end
 
-    local serialized_records = private.deserialize(dataset[item_key] or '', ';')
-    return Aux.util.map(serialized_records, function(serialized_record)
-        local time, count, min_price, accumulated_price = private.deserialize(serialized_record, '#')
-        return {
-            time = time,
-            count = count,
-            min_price = min_price,
-            accumulated_price = accumulated_price,
-        }
-    end)
-end
-
-function public.store_scan_record(item_key, record)
-    local dataset = private.load_dataset()
-    local serialized_record = private.serialize({ record.time, record.count, record.min_price, record.accumulated_price }, '#')
-    local serialized_records = dataset[item_key] or ''
-    serialized_records = serialized_records..(serialized_records == '' and '' or ';')..serialized_record
-    dataset[item_key] = serialized_records
-end
-
-function private.serialize(data, separator)
+function public.serialize(data, separator)
     local data_string = ''
     for i, datum in ipairs(data) do
         data_string = data_string..(i == 1 and '' or separator)..datum
@@ -67,7 +72,7 @@ function private.serialize(data, separator)
     return data_string
 end
 
-function private.deserialize(data_string, separator)
+function public.deserialize(data_string, separator)
     if data_string == '' then
         return {}
     end
