@@ -1,4 +1,4 @@
-AuxVersion = '2.1.7'
+AuxVersion = '2.1.8'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -41,6 +41,10 @@ function Aux_OnEvent()
 		Aux_OnAuctionHouseShow()
 	elseif event == 'AUCTION_HOUSE_CLOSED' then
 		Aux_OnAuctionHouseClosed()
+        Aux.bids_loaded = false
+        Aux.current_owner_page = nil
+    elseif event == 'AUCTION_BIDDER_LIST_UPDATE' then
+        Aux.bids_loaded = true
 	elseif event == 'AUCTION_OWNED_LIST_UPDATE' then
         Aux.current_owner_page = Aux.last_owner_page_requested or 0
     end

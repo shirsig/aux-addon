@@ -9,6 +9,7 @@
 				this:RegisterEvent('ADDON_LOADED')
 				this:RegisterEvent('AUCTION_HOUSE_SHOW')
 				this:RegisterEvent('AUCTION_HOUSE_CLOSED')
+                this:RegisterEvent('AUCTION_BIDDER_LIST_UPDATE')
                 this:RegisterEvent('AUCTION_OWNED_LIST_UPDATE')
 			</OnLoad>
 			<OnEvent> 
