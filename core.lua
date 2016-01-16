@@ -1,5 +1,5 @@
-AuxVersion = "2.1.0"
-AuxAuthors = "shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)"
+AuxVersion = '2.1.8'
+AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
 
@@ -17,7 +17,14 @@ Aux = {
         },
     },
 	last_picked_up = {},
+    view = {
+        BUYOUT = 1,
+        BID = 2,
+        FULL = 3,
+    },
 }
+
+aux_view = Aux.view.BUYOUT
 
 function Aux_OnLoad()
 	Aux.log('Aux v'..AuxVersion..' loaded.')
@@ -34,8 +41,12 @@ function Aux_OnEvent()
 		Aux_OnAuctionHouseShow()
 	elseif event == 'AUCTION_HOUSE_CLOSED' then
 		Aux_OnAuctionHouseClosed()
+        Aux.bids_loaded = false
+        Aux.current_owner_page = nil
+    elseif event == 'AUCTION_BIDDER_LIST_UPDATE' then
+        Aux.bids_loaded = true
 	elseif event == 'AUCTION_OWNED_LIST_UPDATE' then
-        Aux.current_owner_page = Aux.last_owner_page_requested
+        Aux.current_owner_page = Aux.last_owner_page_requested or 0
     end
 end
 
@@ -124,6 +135,9 @@ function Aux_SetupHookFunctions()
     Aux.orig.AuctionFrameAuctions_OnEvent = AuctionFrameAuctions_OnEvent
     AuctionFrameAuctions_OnEvent = Aux.AuctionFrameAuctions_OnEvent
 
+    Aux.orig.UIDropDownMenu_StartCounting = UIDropDownMenu_StartCounting
+    UIDropDownMenu_StartCounting = Aux.completion.UIDropDownMenu_StartCounting
+
 end
 
 function Aux.GetOwnerAuctionItems(page)
@@ -168,17 +182,19 @@ function Aux.on_tab_click(index)
         Aux.item_search_frame.on_close()
         Aux.filter_search_frame.on_close()
         Aux.sell.on_close()
-        Aux.manage_frame.on_close()
+        Aux.auctions_frame.on_close()
+        Aux.bids_frame.on_close()
         Aux.history.on_close()
 
-        for i=1,4 do
+        for i=1,5 do
             getglobal('AuxTab'..i):SetAlpha(i == index and 1 or 0.5)
         end
 
         AuxItemSearchFrame:Hide()
         AuxFilterSearchFrame:Hide()
         AuxSellFrame:Hide()
-        AuxManageFrame:Hide()
+        AuxAuctionsFrame:Hide()
+        AuxBidsFrame:Hide()
         AuxHistoryFrame:Hide()
 
         if index == 1 then
@@ -191,9 +207,14 @@ function Aux.on_tab_click(index)
             AuxSellFrame:Show()
             Aux.sell.on_open()
         elseif index == 4 then
-            AuxManageFrame:Show()
-            Aux.manage_frame.on_open()
+            AuxAuctionsFrame:Show()
+            Aux.auctions_frame.on_open()
+        elseif index == 5 then
+            AuxBidsFrame:Show()
+            Aux.bids_frame.on_open()
         end
+
+        Aux.active_panel = index
     end)
 end
 
@@ -231,12 +252,16 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 	
 	if AuxFrame:IsVisible() and button == "LeftButton" and container_item_info then
 		if IsAltKeyDown() then
-			if not AuxItemSearchFrame:IsVisible() then
+			if Aux.active_panel ~= 1 then
                 Aux.on_tab_click(1)
             end
-            AuxItemSearchFrameItemItemInputBox:Hide()
-            Aux.item_search_frame.set_item(container_item_info.item_id)
-			return
+
+            Aux.control.as_soon_as(function() return Aux.active_panel == 1 end, function()
+                AuxItemSearchFrameItemItemInputBox:Hide()
+                Aux.item_search_frame.set_item(container_item_info.item_id)
+            end)
+
+            return
 		end
     end
 
@@ -256,7 +281,9 @@ function Aux_QualityColor(code)
 		return "ffa335ee" -- epic, purple
 	elseif code == 5 then
 		return "ffff8000" -- legendary, orange
-	end
+    elseif code == 6 then
+        return "ffe6cc80" -- artifact, pale gold
+    end
 end
 
 function Aux.auction_signature(hyperlink, stack_size, bid, amount)

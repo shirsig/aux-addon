@@ -9,6 +9,7 @@
 				this:RegisterEvent('ADDON_LOADED')
 				this:RegisterEvent('AUCTION_HOUSE_SHOW')
 				this:RegisterEvent('AUCTION_HOUSE_CLOSED')
+                this:RegisterEvent('AUCTION_BIDDER_LIST_UPDATE')
                 this:RegisterEvent('AUCTION_OWNED_LIST_UPDATE')
 			</OnLoad>
 			<OnEvent> 
@@ -340,7 +341,11 @@
             <AbsDimension x="850" y="445"/>
         </Size>
         <Anchors>
-            <Anchor point="CENTER"/>
+            <Anchor point="LEFT">
+                <Offset>
+                    <AbsDimension x="100" y="0"/>
+                </Offset>
+            </Anchor>
         </Anchors>
         <Scripts>
             <OnLoad>
@@ -462,7 +467,24 @@
                 </Anchors>
                 <Scripts>
                     <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Manage')
+                        getglobal(this:GetName().."Text"):SetText('Auctions')
+                    </OnLoad>
+                    <OnClick>
+                        Aux.on_tab_click(this:GetID())
+                    </OnClick>
+                </Scripts>
+            </Button>
+            <Button name="AuxTab5" inherits="AuxBottomTabTemplate" id="5">
+                <Anchors>
+                    <Anchor point="LEFT" relativeTo="AuxTab4" relativePoint="RIGHT">
+                        <Offset>
+                            <AbsDimension x="0" y="0"/>
+                        </Offset>
+                    </Anchor>
+                </Anchors>
+                <Scripts>
+                    <OnLoad>
+                        getglobal(this:GetName().."Text"):SetText('Bids')
                     </OnLoad>
                     <OnClick>
                         Aux.on_tab_click(this:GetID())

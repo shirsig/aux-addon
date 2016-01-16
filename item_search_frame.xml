@@ -152,8 +152,15 @@
                         <Scripts>
                             <OnLoad>
                                 local config = Aux.item_search_frame.recently_searched_config
-                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave)
+                                this.sheet = Aux.sheet.create{
+                                    frame = this,
+                                    columns = config.columns,
+                                    sort_order = config.sort_order,
+                                    row_setter = config.row_setter,
+                                    on_row_click = config.on_row_click,
+                                    on_row_enter = config.on_row_enter,
+                                    on_row_leave = config.on_row_leave,
+                                }
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -231,8 +238,16 @@
                         <Scripts>
                             <OnLoad>
                                 local config = Aux.item_search_frame.views[1]
-                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
+                                this.sheet = Aux.sheet.create{
+                                    frame = this,
+                                    columns = config.columns,
+                                    sort_order =  config.sort_order,
+                                    row_setter = config.row_setter,
+                                    on_row_click = config.on_row_click,
+                                    on_row_enter = config.on_row_enter,
+                                    on_row_leave = config.on_row_leave,
+                                    on_row_update = config.on_row_update,
+                                }
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -244,8 +259,16 @@
                         <Scripts>
                             <OnLoad>
                                 local config = Aux.item_search_frame.views[2]
-                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
+                                this.sheet = Aux.sheet.create{
+                                    frame = this,
+                                    columns = config.columns,
+                                    sort_order = config.sort_order,
+                                    row_setter = config.row_setter,
+                                    on_row_click = config.on_row_click,
+                                    on_row_enter = config.on_row_enter,
+                                    on_row_leave = config.on_row_leave,
+                                    on_row_update = config.on_row_update,
+                                }
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -257,8 +280,16 @@
                         <Scripts>
                             <OnLoad>
                                 local config = Aux.item_search_frame.views[3]
-                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
+                                this.sheet = Aux.sheet.create{
+                                    frame = this,
+                                    columns = config.columns,
+                                    sort_order = config.sort_order,
+                                    row_setter = config.row_setter,
+                                    on_row_click = config.on_row_click,
+                                    on_row_enter = config.on_row_enter,
+                                    on_row_leave = config.on_row_leave,
+                                    on_row_update = config.on_row_update,
+                                }
                             </OnLoad>
                         </Scripts>
                     </Frame>

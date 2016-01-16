@@ -1,8 +1,8 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="manage_frame.lua"/>
+	<Script file="bids_frame.lua"/>
 
-    <Frame name="AuxManageFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
+    <Frame name="AuxBidsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
 			<Frame name="$parentListing" inherits="AuxFrameBoxTemplate">
 				<Size>
@@ -16,44 +16,6 @@
 					</OnLoad>
 				</Scripts>
 				<Frames>
-                    <Button name="$parentTab1" inherits="AuxTopTabTemplate" id="1">
-                        <Anchors>
-                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
-                                <Offset>
-                                    <AbsDimension x="7" y="-2"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText('Bids')
-                            </OnLoad>
-                            <OnClick>
-                                Aux.manage_frame.listing = this:GetID()
-                                Aux.manage_frame.update_bid_records()
-                                Aux.manage_frame.update_listing()
-                            </OnClick>
-                        </Scripts>
-                    </Button>
-                    <Button name="$parentTab2" inherits="AuxTopTabTemplate" id="2">
-                        <Anchors>
-                            <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT">
-                                <Offset>
-                                    <AbsDimension x="0" y="0"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText('Auctions')
-                            </OnLoad>
-                            <OnClick>
-                                Aux.manage_frame.listing = this:GetID()
-                                Aux.manage_frame.update_auction_records()
-                                Aux.manage_frame.update_listing()
-                            </OnClick>
-                        </Scripts>
-                    </Button>
 					<Frame name="$parentBidListing">
 						<Anchors>
 							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
@@ -61,25 +23,20 @@
 						</Anchors>
 						<Scripts>
 							<OnLoad>
-                                local config = Aux.manage_frame.bid_listing_config
-								local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-								this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
+                                local config = Aux.bids_frame.bid_listing_config
+								this.sheet = Aux.sheet.create{
+                                    frame = this,
+                                    columns = config.columns,
+                                    sort_order = config.sort_order,
+                                    row_setter = config.row_setter,
+                                    on_row_click = config.on_row_click,
+                                    on_row_enter = config.on_row_enter,
+                                    on_row_leave = config.on_row_leave,
+                                    on_row_update = config.on_row_update,
+                                }
 							</OnLoad>
 						</Scripts>
 					</Frame>
-                    <Frame name="$parentAuctionListing">
-                        <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                local config = Aux.manage_frame.auction_listing_config
-                                local sort_order = Aux.util.map(config.sort_order, function(column_order) return { column = config.columns[column_order.column], sort_ascending = column_order.order == 'ascending' } end)
-                                this.sheet = Aux.sheet.create(this, config.columns, sort_order, config.row_setter, config.on_row_click, config.on_row_enter, config.on_row_leave, config.on_row_update)
-                            </OnLoad>
-                        </Scripts>
-                    </Frame>
                     <Frame name="$parentDialog" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
@@ -92,13 +49,6 @@
                             <Frame name="$parentContent">
                                 <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor></Anchors>
                                 <Size><AbsDimension x="193" y="120"/></Size>
-                                <Layers>
-                                    <Layer level="OVERLAY">
-                                        <FontString name="$parentCancelLabel" inherits="GameFontNormal" text="Cancel this auction?" justifyH="RIGHT">
-                                            <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="45"/></Offset></Anchor></Anchors>
-                                        </FontString>
-                                    </Layer>
-                                </Layers>
                                 <Frames>
                                     <Frame name="$parentItem" inherits="AuxItemTemplate">
                                         <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
@@ -134,7 +84,7 @@
                                         <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnClick>
-                                                Aux.manage_frame.dialog_action()
+                                                Aux.bids_frame.dialog_action()
                                             </OnClick>
                                         </Scripts>
                                     </Button>
@@ -143,7 +93,7 @@
                                         <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
                                         <Scripts>
                                             <OnClick>
-                                                Aux.manage_frame.dialog_cancel()
+                                                Aux.bids_frame.dialog_cancel()
                                             </OnClick>
                                         </Scripts>
                                     </Button>
@@ -151,22 +101,6 @@
                             </Frame>
                         </Frames>
                     </Frame>
-				</Frames>
-            </Frame>
-            <Frame name="AuxManageAuctions" inherits="AuxFrameBoxTemplate">
-				<Size>
-					<AbsDimension x="400" y="326"/>
-				</Size>
-				<Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxManageBids"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnLoad>
-						this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-						this:SetBackdropColor(0.15, 0.15, 0.15)
-						getglobal(this:GetName().."Title"):SetText('Auctions')
-					</OnLoad>
-				</Scripts>
-				<Frames>
-
 				</Frames>
             </Frame>
 		</Frames>

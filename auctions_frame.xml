@@ -1,0 +1,89 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+
+	<Script file="auctions_frame.lua"/>
+
+    <Frame name="AuxAuctionsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
+		<Frames>
+			<Frame name="$parentListing" inherits="AuxFrameBoxTemplate">
+				<Size>
+					<AbsDimension x="400" y="326"/>
+				</Size>
+                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
+				<Scripts>
+					<OnLoad>
+						this:SetBackdropBorderColor(0.4, 0.4, 0.4)
+						this:SetBackdropColor(0.15, 0.15, 0.15)
+					</OnLoad>
+				</Scripts>
+				<Frames>
+                    <Frame name="$parentAuctionListing">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>
+                                local config = Aux.auctions_frame.auction_listing_config
+                                this.sheet = Aux.sheet.create{
+                                    frame = this,
+                                    columns = config.columns,
+                                    sort_order = config.sort_order,
+                                    row_setter = config.row_setter,
+                                    on_row_click = config.on_row_click,
+                                    on_row_enter = config.on_row_enter,
+                                    on_row_leave = config.on_row_leave,
+                                    on_row_update = config.on_row_update,
+                                }
+                            </OnLoad>
+                        </Scripts>
+                    </Frame>
+                    <Frame name="$parentDialog" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Scripts>
+                            <OnMouseWheel></OnMouseWheel>
+                        </Scripts>
+                        <Frames>
+                            <Frame name="$parentContent">
+                                <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor></Anchors>
+                                <Size><AbsDimension x="193" y="120"/></Size>
+                                <Layers>
+                                    <Layer level="OVERLAY">
+                                        <FontString name="$parentCancelLabel" inherits="GameFontNormal" text="Cancel this auction?" justifyH="RIGHT">
+                                            <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="45"/></Offset></Anchor></Anchors>
+                                        </FontString>
+                                    </Layer>
+                                </Layers>
+                                <Frames>
+                                    <Frame name="$parentItem" inherits="AuxItemTemplate">
+                                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                    </Frame>
+                                    <Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
+                                        <Size><AbsDimension x="90" y="26"/>	</Size>
+                                        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnClick>
+                                                Aux.auctions_frame.dialog_action()
+                                            </OnClick>
+                                        </Scripts>
+                                    </Button>
+                                    <Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
+                                        <Size><AbsDimension x="90" y="26"/></Size>
+                                        <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                                        <Scripts>
+                                            <OnClick>
+                                                Aux.auctions_frame.dialog_cancel()
+                                            </OnClick>
+                                        </Scripts>
+                                    </Button>
+                                </Frames>
+                            </Frame>
+                        </Frames>
+                    </Frame>
+				</Frames>
+            </Frame>
+		</Frames>
+	</Frame>
+</Ui>

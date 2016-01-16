@@ -1,4 +1,5 @@
-Aux.completion = {}
+local private, public = {}, {}
+Aux.completion = public
 
 local NUM_MATCHES = 5
 
@@ -50,7 +51,7 @@ function generate_suggestions(input)
 	return Aux.util.map(best, function(match) return { text=match.name, display_text='|c'..Aux_QualityColor(({GetItemInfo(match.id)})[3])..'['..match.name..']'..'|r', value=match.id } end)
 end
 
-function Aux.completion.completor(edit_box)
+function public.completor(edit_box)
 	local self = {}
 	
 	local suggestions = {}
@@ -161,7 +162,7 @@ function Aux.completion.completor(edit_box)
 	return self
 end
 
-function Aux.completion.selector(edit_box)
+function public.selector(edit_box)
     local self = {}
 
     local suggestions = {}
@@ -194,6 +195,10 @@ function Aux.completion.selector(edit_box)
             toggle()
         end
         toggle()
+		DropDownList1.aux = true
+		DropDownList1:SetScript('OnHide', function()
+			DropDownList1.aux = false
+		end)
     end
 
     function update_highlighting()
@@ -260,4 +265,10 @@ function Aux.completion.selector(edit_box)
     end
 
     return self
+end
+
+function public.UIDropDownMenu_StartCounting(frame)
+	if not frame.aux then
+		return Aux.orig.UIDropDownMenu_StartCounting(frame)
+	end
 end

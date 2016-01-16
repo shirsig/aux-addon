@@ -13,7 +13,7 @@ function public.container_item(bag, slot)
     local item_id, suffix_id, unique_id, enchant_id = private.parse_hyperlink(hyperlink)
     local item_info = public.item(item_id, suffix_id, unique_id, enchant_id)
 
-    local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot)
+    local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
     local tooltip = public.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
 
     return {
@@ -31,7 +31,7 @@ function public.container_item(bag, slot)
         level = item_info.level,
         type = item_info.type,
         subtype = item_info.subtype,
-        quality = quality,
+        quality = item_info.quality,
         max_stack = item_info.max_stack,
 
         count = count,

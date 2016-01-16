@@ -9,7 +9,7 @@ local bestPriceOurStackSize
 
 local current_auction
 
-local set_auction, update_auction_listing, update_inventory_listing, record_auction, undercut, item_class_index, item_subclass_index, report, select_entry, update_recommendation, refresh_entries, auction_candidates, charge_classes, get_stack_size_slider_value
+local set_auction, update_auction_listing, record_auction, undercut, item_class_index, item_subclass_index, report, select_entry, update_recommendation, refresh_entries, auction_candidates, charge_classes, get_stack_size_slider_value
 
 local LIVE, HISTORICAL, FIXED = 1, 2, 3
 
@@ -21,6 +21,7 @@ Aux.sell.inventory_listing_config = {
 
     on_row_enter = function (sheet, row_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
+        Aux.info.set_tooltip(sheet.rows[row_index].itemstring, nil, this, 'ANCHOR_CURSOR', 0, 30)
     end,
 
     on_row_leave = function (sheet, row_index)
@@ -28,6 +29,7 @@ Aux.sell.inventory_listing_config = {
         if not (current_auction and sheet.data[data_index] == current_auction) then
             sheet.rows[row_index].highlight:SetAlpha(0)
         end
+        AuxTooltip:Hide()
     end,
 
     row_setter = function(row, datum)
@@ -36,6 +38,7 @@ Aux.sell.inventory_listing_config = {
         else
             row.highlight:SetAlpha(0)
         end
+        row.itemstring = Aux.info.itemstring(datum.item_id, datum.suffix_id)
     end,
 
     columns = {
@@ -68,7 +71,7 @@ Aux.sell.inventory_listing_config = {
                 icon:SetWidth(12)
                 icon:SetHeight(12)
                 local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
-                text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
+                text:SetPoint('LEFT', icon, 'RIGHT', 1, 0)
                 text:SetPoint('TOPRIGHT', cell)
                 text:SetPoint('BOTTOMRIGHT', cell)
                 text:SetJustifyV('TOP')
@@ -89,16 +92,16 @@ Aux.sell.inventory_listing_config = {
 }
 
 Aux.sell.auction_listing_config = {
-    on_cell_click = function (sheet, row_index, column_index)
+    on_row_click = function (sheet, row_index, column_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         AuxSellEntry_OnClick(sheet.data[data_index])
     end,
 
-    on_cell_enter = function (sheet, row_index, column_index)
+    on_row_enter = function (sheet, row_index, column_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
     end,
 
-    on_cell_leave = function (sheet, row_index, column_index)
+    on_row_leave = function (sheet, row_index, column_index)
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         local datum = sheet.data[data_index]
         if not (datum and current_auction and Aux.util.safe_index{existing_auctions, current_auction.key, 'selected', 'key'} == datum.key) then
@@ -171,15 +174,15 @@ Aux.sell.auction_listing_config = {
             end,
         },
     },
-    sort_order = {{column = 4, order = 'ascending' }, {column = 4, order = 'ascending'}},
+    sort_order = {{column = 5, order = 'ascending' }},
 }
 
-function update_inventory_listing()
-    Aux.list.populate(AuxSellInventoryListing.sheet, inventory_data)
+function private.parse_inventory()
+    Aux.sheet.populate(AuxSellInventoryListing.sheet, Aux.util.filter(inventory_data, function(item) return item.aux_quantity > 0 end))
 end
 
 function update_auction_listing()
-    Aux.list.populate(AuxSellAuctionsListing.sheet, current_auction and existing_auctions[current_auction.key] or {})
+    Aux.sheet.populate(AuxSellAuctionsListing.sheet, current_auction and existing_auctions[current_auction.key] or {})
 end
 
 function Aux.sell.on_open()
@@ -209,8 +212,10 @@ function Aux.sell.on_open()
 
     update_inventory_data()
 
-    update_inventory_listing()
+    private.parse_inventory()
     update_auction_listing()
+
+    update_recommendation()
 end
 
 function Aux.sell.on_close()
@@ -248,8 +253,9 @@ function Aux_Sell_SetAuctionDuration(duration)
 end
 
 function Aux.sell.post_auctions()
-	if current_auction then
-		local key, hyperlink, stack_size, buyout_price, stack_count = current_auction.key, current_auction.hyperlink, get_stack_size_slider_value(), MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice), AuxSellStackCountSlider:GetValue()
+    local auction = current_auction
+	if auction then
+		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, get_stack_size_slider_value(), MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice), AuxSellStackCountSlider:GetValue()
 		local duration
 		if AuctionFrameAuctions.duration == 120 then
 			duration = 2
@@ -268,7 +274,7 @@ function Aux.sell.post_auctions()
 			stack_count,
 			function(posted)
 				for i = 1, posted do
-					record_auction(key, stack_size, buyout_price, duration, UnitName("player"))
+					record_auction(key, stack_size, buyout_price, duration, UnitName('player'))
 				end
 				if existing_auctions[key] then
 					for _, entry in ipairs(existing_auctions[key]) do
@@ -278,8 +284,11 @@ function Aux.sell.post_auctions()
 					end
 				end
 				Aux.sell.clear_auction()
-                update_inventory_data()
-                update_inventory_listing()
+                auction.aux_quantity = auction.aux_quantity - (posted * stack_size)
+                local charge_class = auction.charges or 0
+                auction.availability[charge_class] = auction.availability[charge_class] - (posted * (auction.charges and 1 or stack_size))
+
+                private.parse_inventory()
 				report(hyperlink, stack_size, buyout_price, posted)
 			end
 		)
@@ -379,9 +388,9 @@ function update_recommendation()
 		MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', floor(current_auction.unit_vendor_price * 0.05 * (current_auction.charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
 		
 		if existing_auctions[current_auction.key] and existing_auctions[current_auction.key].selected then
-			if not existing_auctions[current_auction.key].created or GetTime() - existing_auctions[current_auction.key].created > 1800 then
-                AuxSellParametersStrategyDropDownStaleWarning:SetText('Stale data!') -- data older than half an hour marked as stale
-			end
+--			if not existing_auctions[current_auction.key].created or GetTime() - existing_auctions[current_auction.key].created > 1800 then
+--                AuxSellParametersStrategyDropDownStaleWarning:SetText('Stale data!') -- data older than half an hour marked as stale
+--			end
 		
 			local new_buyout_price = existing_auctions[current_auction.key].selected.unit_buyout_price * get_stack_size_slider_value()
 
@@ -397,9 +406,12 @@ function update_recommendation()
 --            local market_price = Aux.history.get_price_suggestion(current_auction.key, current_auction.aux_quantity)
 --            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(market_price * 0.95))
 --            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, market_price)
+        elseif existing_auctions[current_auction.key] then
+            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux_Round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 1.053)))
+            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux_Round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 4)))
         else
-            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
             MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 0)
+            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
         end
 	end
 end
@@ -421,12 +433,12 @@ end
 
 function set_auction(auction_candidate)
 
-    PlaySound("igMainMenuOptionCheckBoxOn")
+    PlaySound('igMainMenuOptionCheckBoxOn')
 
     Aux.scan.abort(function()
 
         current_auction = auction_candidate
-        update_inventory_listing()
+        private.parse_inventory()
 
         local charge_classes = charge_classes(current_auction.availability)
         AuxSellStackSizeSlider.charge_classes = current_auction.charges and charge_classes
@@ -460,7 +472,7 @@ end
 
 function update_inventory_data()
     inventory_data = {}
-    update_inventory_listing()
+    private.parse_inventory()
 
     local auction_candidate_map = {}
 
@@ -536,7 +548,7 @@ function update_inventory_data()
             tinsert(auction_candidates, auction_candidate)
         end
         inventory_data = auction_candidates
-        update_inventory_listing()
+        private.parse_inventory()
     end)
 end
 
@@ -604,7 +616,7 @@ function AuxSellEntry_OnClick(entry)
     update_auction_listing()
 	update_recommendation()
 
-	PlaySound("igMainMenuOptionCheckBoxOn")
+	PlaySound('igMainMenuOptionCheckBoxOn')
 end
 
 function AuxSellParametersRefreshButton_OnClick()

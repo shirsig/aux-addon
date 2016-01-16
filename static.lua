@@ -1,4 +1,4 @@
-private, public = {}, {}
+local private, public = {}, {}
 Aux.static = public
 
 aux_auctionable_items = {}

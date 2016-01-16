@@ -1,11 +1,7 @@
 local private, public = {}, {}
-Aux.manage_frame = public
+Aux.bids_frame = public
 
-local update_bid_records, update_auction_records, wait_for_bids, wait_for_auctions
-
-local bid_records, auction_records
-
-local BIDS, AUCTIONS = 1, 2
+local bid_records
 
 public.bid_listing_config = {
     on_row_click = function(sheet, row_index, column_index)
@@ -148,135 +144,8 @@ public.bid_listing_config = {
     sort_order = {{ column = 1, order = 'ascending' }},
 }
 
-public.auction_listing_config = {
-    on_row_click = function (sheet, row_index)
-        local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-        public.on_auction_click(sheet.data[data_index])
-    end,
-
-    on_row_enter = function (sheet, row_index)
-        sheet.rows[row_index].highlight:SetAlpha(.5)
-    end,
-
-    on_row_leave = function (sheet, row_index)
-        sheet.rows[row_index].highlight:SetAlpha(0)
-    end,
-    columns = {
-        {
-            title = 'Auction Item',
-            width = 280,
-            comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
-            cell_initializer = function(cell)
-                local icon = CreateFrame('Button', nil, cell)
-                icon:EnableMouse(false)
-                local icon_texture = icon:CreateTexture(nil, 'BORDER')
-                icon_texture:SetAllPoints(icon)
-                icon.icon_texture = icon_texture
-                local normal_texture = icon:CreateTexture(nil)
-                normal_texture:SetPoint('CENTER', 0, 0)
-                normal_texture:SetWidth(22)
-                normal_texture:SetHeight(22)
-                normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
-                icon:SetNormalTexture(normal_texture)
-                icon:SetPoint('LEFT', cell)
-                icon:SetWidth(12)
-                icon:SetHeight(12)
-                local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
-                text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
-                text:SetPoint('TOPRIGHT', cell)
-                text:SetPoint('BOTTOMRIGHT', cell)
-                text:SetJustifyV('TOP')
-                text:SetJustifyH('LEFT')
-                text:SetTextColor(0.8, 0.8, 0.8)
-                cell.text = text
-                cell.icon = icon
-            end,
-            cell_setter = function(cell, datum)
-                cell.icon.icon_texture:SetTexture(Aux.info.item(datum.item_id).texture)
-                if not datum.usable then
-                    cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
-                else
-                    cell.icon.icon_texture:SetVertexColor(1.0, 1.0, 1.0)
-                end
-                cell.text:SetText('['..datum.tooltip[1][1].text..']')
-                local color = ITEM_QUALITY_COLORS[datum.quality]
-                cell.text:SetTextColor(color.r, color.g, color.b)
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
-            title = 'Qty',
-            width = 25,
-            comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-            cell_setter = function(cell, datum)
-                cell.text:SetText(datum.aux_quantity)
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
-            title = 'Left',
-            width = 30,
-            comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-            cell_setter = function(cell, datum)
-                local text
-                if datum.duration == 1 then
-                    text = '30m'
-                elseif datum.duration == 2 then
-                    text = '2h'
-                elseif datum.duration == 3 then
-                    text = '8h'
-                elseif datum.duration == 4 then
-                    text = '24h'
-                end
-                cell.text:SetText(text)
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-        {
-            title = 'Current Bid',
-            width = 90,
-            comparator = function(auction1, auction2) return Aux.util.compare(auction1.current_bid, auction2.current_bid, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-            cell_setter = function(cell, auction)
-                cell.text:SetText(auction.current_bid and Aux.util.money_string(auction.current_bid) or RED_FONT_COLOR_CODE..'No Bids'..FONT_COLOR_CODE_CLOSE)
-                private.auction_alpha_setter(cell, auction)
-            end,
-        },
-        {
-            title = 'Min Bid',
-            width = 90,
-            comparator = function(auction1, auction2) return Aux.util.compare(auction1.min_bid, auction2.min_bid, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-            cell_setter = function(cell, auction)
-                cell.text:SetText(Aux.util.money_string(auction.min_bid))
-                private.auction_alpha_setter(cell, auction)
-            end,
-        },
-        {
-            title = 'Buy',
-            width = 90,
-            comparator = function(row1, row2) return Aux.util.compare(row1.buyout_price, row2.buyout_price, Aux.util.GT) end,
-            cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-            cell_setter = function(cell, datum)
-                cell.text:SetText(Aux.util.money_string(datum.buyout_price))
-                private.auction_alpha_setter(cell, datum)
-            end,
-        },
-    },
-    sort_order = {{ column = 1, order = 'ascending' }},
-}
-
 function public.on_open()
-    public.listing = public.listing or BIDS
-
-    if public.listing == BIDS then
-        public.update_bid_records()
-    elseif public.listing == AUCTIONS then
-        public.update_auction_records()
-    end
-
+    public.update_bid_records()
     public.update_listing()
 end
 
@@ -300,34 +169,7 @@ function public.update_bid_records()
             private.create_bid_record(auction_info)
         end,
         on_complete = function()
-            Aux.log('Scan complete: '..getn(bid_records)..' bids found')
-            public.update_listing()
-        end,
-        on_abort = function()
-        end,
-        next_page = function(page, total_pages)
-            local last_page = max(total_pages - 1, 0)
-            if page < last_page then
-                return page + 1
-            end
-        end,
-    }
-end
-
-function public.update_auction_records()
-    Aux.log('Scanning auctions ...')
-    auction_records = {}
-    Aux.scan.start{
-        type = 'owner',
-        page = 0,
-        on_page_loaded = function(page, total_pages)
-			Aux.log('Scanning auction page '..(page+1)..' out of '..total_pages..' ...')
-        end,
-        on_read_auction = function(auction_info)
-            private.create_auction_record(auction_info)
-        end,
-        on_complete = function()
-            Aux.log('Scan complete: '..getn(auction_records)..' auctions found')
+            Aux.log('Scan complete: '..getn(bid_records)..' '..Aux_PluralizeIf('bid', getn(bid_records))..' found')
             public.update_listing()
         end,
         on_abort = function()
@@ -342,24 +184,10 @@ function public.update_auction_records()
 end
 
 function public.update_listing()
-    AuxManageFrameListingBidListing:Hide()
-    AuxManageFrameListingAuctionListing:Hide()
-
-    for i=1,2 do
-        getglobal('AuxManageFrameListingTab'..i):SetAlpha(i == public.listing and 1 or 0.5)
-    end
-
-    if public.listing == BIDS then
-        AuxManageFrameListingBidListing:Show()
-        Aux.list.populate(AuxManageFrameListingBidListing.sheet, bid_records)
-        AuxManageFrameListing:SetWidth(AuxManageFrameListingBidListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxManageFrameListing:GetWidth() + 15)
-    elseif public.listing == AUCTIONS then
-        AuxManageFrameListingAuctionListing:Show()
-        Aux.list.populate(AuxManageFrameListingAuctionListing.sheet, auction_records)
-        AuxManageFrameListing:SetWidth(AuxManageFrameListingAuctionListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxManageFrameListing:GetWidth() + 15)
-    end
+    AuxBidsFrameListingBidListing:Show()
+    Aux.sheet.populate(AuxBidsFrameListingBidListing.sheet, bid_records)
+    AuxBidsFrameListing:SetWidth(AuxBidsFrameListingBidListing:GetWidth() + 40)
+    AuxFrame:SetWidth(AuxBidsFrameListing:GetWidth() + 15)
 end
 
 function private.create_record(auction_info)
@@ -382,7 +210,6 @@ function private.create_record(auction_info)
         signature = Aux.auction_signature(auction_info.hyperlink, aux_quantity, bid, auction_info.buyout_price),
 
         name = auction_info.name,
-        level = auction_info.level,
         tooltip = auction_info.tooltip,
         aux_quantity = aux_quantity,
         buyout_price = buyout_price,
@@ -391,21 +218,15 @@ function private.create_record(auction_info)
         hyperlink = auction_info.hyperlink,
         itemstring = auction_info.itemstring,
         bid = bid,
-        bid_per_unit = Aux_Round(bid / aux_quantity),
         owner = auction_info.owner,
         duration = auction_info.duration,
         usable = auction_info.usable,
         high_bidder = auction_info.high_bidder,
         current_bid = auction_info.current_bid > 0 and auction_info.current_bid or nil,
-        min_bid = auction_info.min_bid,
         status = status,
 
         EnhTooltip_info = auction_info.EnhTooltip_info,
     }
-end
-
-function private.create_auction_record(auction_info)
-    tinsert(auction_records, private.create_record(auction_info))
 end
 
 function private.create_bid_record(auction_info)
@@ -415,7 +236,7 @@ end
 function public.dialog_cancel()
     Aux.log('Aborted.')
     Aux.scan.abort()
-    AuxManageFrameListingDialog:Hide()
+    AuxBidsFrameListingDialog:Hide()
     public.update_listing()
 end
 
@@ -449,7 +270,7 @@ function private.find_auction(entry, action, express_mode)
     local found
 
     Aux.scan.start{
-        type = action == 'cancel' and 'owner' or 'bidder',
+        type = 'bidder',
         page = entry.page,
         on_read_auction = function(auction_info, ctrl)
 
@@ -461,11 +282,7 @@ function private.find_auction(entry, action, express_mode)
                 Aux.log('Matching auction found.'..(express_mode and '' or ' Awaiting confirmation ...'))
 
                 if express_mode then
-                    if action == 'cancel' then
-                        CancelAuction(auction_info.index)
-                        entry.gone = true
-                        Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity)
-                    elseif GetMoney() >= amount then
+                    if GetMoney() >= amount then
                         PlaceAuctionBid('bidder', auction_info.index, amount)
                         Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(amount)..'.')
                         entry.gone = true
@@ -475,22 +292,20 @@ function private.find_auction(entry, action, express_mode)
                     Aux.scan.abort()
                 else
                     public.dialog_action = function()
-                        if action == 'cancel' then
-                            CancelAuction(auction_info.index)
-                            entry.gone = true
-                            Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity)
-                        elseif GetMoney() >= amount then
-                            PlaceAuctionBid('bidder', auction_info.index, action == 'bid' and MoneyInputFrame_GetCopper(AuxManageFrameListingDialogContentBid) or amount)
-                            Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(action == 'bid' and MoneyInputFrame_GetCopper(AuxManageFrameListingDialogContentBid) or amount)..'.')
-                            entry.gone = true
-                        else
-                            Aux.log('Not enough money.')
+                        if private.create_record(Aux.info.auction(auction_info.index, 'bidder')).signature == entry.signature then
+                            if GetMoney() >= amount then
+                                PlaceAuctionBid('bidder', auction_info.index, action == 'bid' and MoneyInputFrame_GetCopper(AuxBidsFrameListingDialogContentBid) or amount)
+                                Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(action == 'bid' and MoneyInputFrame_GetCopper(AuxBidsFrameListingDialogContentBid) or amount)..'.')
+                                entry.gone = true
+                            else
+                                Aux.log('Not enough money.')
+                            end
+                            Aux.scan.abort()
+                            AuxBidsFrameListingDialog:Hide()
+                            public.update_listing()
                         end
-                        Aux.scan.abort()
-                        AuxManageFrameListingDialog:Hide()
-                        public.update_listing()
                     end
-                    AuxManageFrameListingDialogContentActionButton:Enable()
+                    AuxBidsFrameListingDialogContentActionButton:Enable()
                 end
             end
         end,
@@ -512,17 +327,6 @@ function private.find_auction(entry, action, express_mode)
     }
 end
 
-function public.on_auction_click(auction_record)
-
-    local express_mode = IsAltKeyDown()
-
-    if IsControlKeyDown() then
-        DressUpItemLink(auction_record.hyperlink)
-    else
-        private.find_auction(auction_record, 'cancel', express_mode)
-    end
-end
-
 function public.on_bid_click(bid_record)
 
     local express_mode = IsAltKeyDown()
@@ -536,44 +340,36 @@ function public.on_bid_click(bid_record)
 end
 
 function private.show_dialog(action, entry, amount)
-    AuxManageFrameListingDialogContentItem.itemstring = Aux.info.itemstring(entry.item_id, entry.suffix_id, entry.unique_id, entry.enchant_id)
-    AuxManageFrameListingDialogContentItem.EnhTooltip_info = entry.EnhTooltip_info
+    AuxBidsFrameListingDialogContentItem.itemstring = Aux.info.itemstring(entry.item_id, entry.suffix_id, entry.unique_id, entry.enchant_id)
+    AuxBidsFrameListingDialogContentItem.EnhTooltip_info = entry.EnhTooltip_info
 
-    AuxManageFrameListingDialogContentActionButton:Disable()
-    AuxManageFrameListingDialogContentItemIconTexture:SetTexture(Aux.info.item(entry.item_id).texture)
-    AuxManageFrameListingDialogContentItemName:SetText(entry.name)
+    AuxBidsFrameListingDialogContentActionButton:Disable()
+    AuxBidsFrameListingDialogContentItemIconTexture:SetTexture(Aux.info.item(entry.item_id).texture)
+    AuxBidsFrameListingDialogContentItemName:SetText(entry.name)
     local color = ITEM_QUALITY_COLORS[entry.quality]
-    AuxManageFrameListingDialogContentItemName:SetTextColor(color.r, color.g, color.b)
+    AuxBidsFrameListingDialogContentItemName:SetTextColor(color.r, color.g, color.b)
 
     if entry.aux_quantity > 1 then
-        AuxManageFrameListingDialogContentItemCount:SetText(entry.aux_quantity);
-        AuxManageFrameListingDialogContentItemCount:Show()
+        AuxBidsFrameListingDialogContentItemCount:SetText(entry.aux_quantity);
+        AuxBidsFrameListingDialogContentItemCount:Show()
     else
-        AuxManageFrameListingDialogContentItemCount:Hide()
+        AuxBidsFrameListingDialogContentItemCount:Hide()
     end
 
     if action == 'buyout' then
-        AuxManageFrameListingDialogContentActionButton:SetText('Buy')
-        AuxManageFrameListingDialogContentCancelButton:SetText('Cancel')
-        MoneyFrame_Update('AuxManageFrameListingDialogContentBuyoutPrice', amount)
-        AuxManageFrameListingDialogContentBid:Hide()
-        AuxManageFrameListingDialogContentCancelLabel:Hide()
-        AuxManageFrameListingDialogContentBuyoutPrice:Show()
+        AuxBidsFrameListingDialogContentActionButton:SetText('Buy')
+        AuxBidsFrameListingDialogContentCancelButton:SetText('Cancel')
+        MoneyFrame_Update('AuxBidsFrameListingDialogContentBuyoutPrice', amount)
+        AuxBidsFrameListingDialogContentBid:Hide()
+        AuxBidsFrameListingDialogContentBuyoutPrice:Show()
     elseif action == 'bid' then
-        AuxManageFrameListingDialogContentActionButton:SetText('Bid')
-        AuxManageFrameListingDialogContentCancelButton:SetText('Cancel')
-        MoneyInputFrame_SetCopper(AuxManageFrameListingDialogContentBid, amount)
-        AuxManageFrameListingDialogContentBuyoutPrice:Hide()
-        AuxManageFrameListingDialogContentCancelLabel:Hide()
-        AuxManageFrameListingDialogContentBid:Show()
-    elseif action == 'cancel' then
-        AuxManageFrameListingDialogContentBid:Hide()
-        AuxManageFrameListingDialogContentBuyoutPrice:Hide()
-        AuxManageFrameListingDialogContentCancelLabel:Show()
-        AuxManageFrameListingDialogContentActionButton:SetText('Yes')
-        AuxManageFrameListingDialogContentCancelButton:SetText('No')
+        AuxBidsFrameListingDialogContentActionButton:SetText('Bid')
+        AuxBidsFrameListingDialogContentCancelButton:SetText('Cancel')
+        MoneyInputFrame_SetCopper(AuxBidsFrameListingDialogContentBid, amount)
+        AuxBidsFrameListingDialogContentBuyoutPrice:Hide()
+        AuxBidsFrameListingDialogContentBid:Show()
     end
-    AuxManageFrameListingDialog:Show()
+    AuxBidsFrameListingDialog:Show()
 end
 
 

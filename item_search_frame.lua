@@ -17,10 +17,9 @@ function group_alpha_setter(cell, group)
     cell:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.3 or 1)
 end
 
-local BUYOUT, BID, FULL = 1, 2, 3
-
 public.recently_searched_config = {
     on_row_click = function (sheet, row_index)
+        PlaySound('igMainMenuOptionCheckBoxOn')
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         AuxItemSearchFrameItemItemInputBox:Hide()
         public.set_item(sheet.data[data_index].item_id)
@@ -81,7 +80,7 @@ public.recently_searched_config = {
     sort_order = {},
 }
 public.views = {
-	[BUYOUT] = {
+	[Aux.view.BUYOUT] = {
 		name = 'Buyout',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -153,7 +152,7 @@ public.views = {
         },
         sort_order = {{column = 3, order = 'ascending' }},
 	},
-	[BID] = {
+	[Aux.view.BID] = {
 		name = 'Bid',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -255,7 +254,7 @@ public.views = {
         },
         sort_order = {{column = 3, order = 'ascending'}, {column = 5, order = 'ascending'}},
 	},
-	[FULL] = {
+	[Aux.view.FULL] = {
 		name = 'Full',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -414,7 +413,7 @@ function public.on_close()
 end
 
 function public.on_open()
-    public.set_view(1)
+    public.set_view(aux_view)
     public.update_item()
     private.update_recently_searched()
 	update_listing()
@@ -436,25 +435,30 @@ function public.stop_search()
 end
 
 function update_listing()
+
+    if not AuxItemSearchFrame:IsVisible() then
+        return
+    end
+
 	AuxItemSearchFrameAuctionsBuyListing:Hide()
     AuxItemSearchFrameAuctionsBidListing:Hide()
     AuxItemSearchFrameAuctionsFullListing:Hide()
 
-    if private.view == BUYOUT then
+    if aux_view == Aux.view.BUYOUT then
 		AuxItemSearchFrameAuctionsBuyListing:Show()
         local buy_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-        Aux.list.populate(AuxItemSearchFrameAuctionsBuyListing.sheet, auctions and Aux.util.group_by(buy_records, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
+        Aux.sheet.populate(AuxItemSearchFrameAuctionsBuyListing.sheet, auctions and Aux.util.group_by(buy_records, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
         AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBuyListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
-	elseif private.view == BID then
+	elseif aux_view == Aux.view.BID then
 		AuxItemSearchFrameAuctionsBidListing:Show()
         local bid_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
-        Aux.list.populate(AuxItemSearchFrameAuctionsBidListing.sheet, bid_records)
+        Aux.sheet.populate(AuxItemSearchFrameAuctionsBidListing.sheet, bid_records)
         AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBidListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
-	elseif private.view == FULL then
+	elseif aux_view == Aux.view.FULL then
 		AuxItemSearchFrameAuctionsFullListing:Show()
-        Aux.list.populate(AuxItemSearchFrameAuctionsFullListing.sheet, auctions or {})
+        Aux.sheet.populate(AuxItemSearchFrameAuctionsFullListing.sheet, auctions or {})
         AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsFullListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
 	end
@@ -470,12 +474,12 @@ function public.set_view(view)
     for i=1,3 do
         getglobal('AuxItemSearchFrameAuctionsTab'..i):SetAlpha(i == view and 1 or 0.5)
     end
-    private.view = view
+    aux_view = view
     update_listing()
 end
 
 function private.update_recently_searched()
-    Aux.list.populate(AuxItemSearchFrameRecentlySearchedListing.sheet, aux_recently_searched)
+    Aux.sheet.populate(AuxItemSearchFrameRecentlySearchedListing.sheet, aux_recently_searched)
 end
 
 function public.set_item(item_id)
@@ -483,10 +487,16 @@ function public.set_item(item_id)
         AuxItemSearchFrameItemRefreshButton:Enable()
         private.item_id = item_id
         public.update_item()
-        tinsert(aux_recently_searched, 1, { item_id=item_id, time=time() })
-        while getn(aux_recently_searched) > 50 do
-            tremove(aux_recently_searched, getn(aux_recently_searched))
+
+        local updated_recently_searched = Aux.util.filter(aux_recently_searched, function(item_entry)
+            return item_entry.item_id ~= item_id
+        end)
+        tinsert(updated_recently_searched, 1, { item_id=item_id, time=time() })
+        while getn(updated_recently_searched) > 50 do
+            tremove(updated_recently_searched, getn(updated_recently_searched))
         end
+        aux_recently_searched = updated_recently_searched
+
         private.update_recently_searched()
         public.start_search()
     elseif not private.item_id then
@@ -513,75 +523,74 @@ end
 
 function public.start_search()
 
-	if not AuxItemSearchFrameItemRefreshButton:IsVisible() then
-		return
-	end
-	
-	AuxItemSearchFrameItemRefreshButton:Hide()
-	AuxItemSearchFrameItemStopButton:Show()
-	
-	auctions = nil
-	
-	refresh = true
+    Aux.scan.abort(function()
 
-    local item_id = private.item_id
-    local item_info = Aux.info.item(item_id)
+        AuxItemSearchFrameItemRefreshButton:Hide()
+        AuxItemSearchFrameItemStopButton:Show()
 
-    local class_index = Aux.item_class_index(item_info.class)
-    local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
+        auctions = nil
 
-	search_query = {
-		name = item_info.name,
-		min_level = item_info.level,
-        min_level = item_info.level,
-		slot = item_info.slot,
-		class = Aux.item_class_index(item_info.class),
-		subclass = item_info.subclass,
-		quality = item_info.quality,
-		usable = item_info.usable,
-	}
-	
-	Aux.log('Scanning auctions ...')
-	Aux.scan.start{
-		query = search_query,
-		page = AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber(),
-		on_submit_query = function()
-			current_page = nil
-		end,
-		on_page_loaded = function(page, total_pages)
-            Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
-            current_page = page
-		end,
-		on_read_auction = function(auction_info)
-            if auction_info.item_id == item_id then
-                auctions = auctions or {}
-                tinsert(auctions, create_auction_record(auction_info, current_page))
-            end
-		end,
-		on_complete = function()
-			auctions = auctions or {}
-            Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+        refresh = true
 
-            AuxItemSearchFrameItemStopButton:Hide()
-			AuxItemSearchFrameItemRefreshButton:Show()
-			refresh = true
-		end,
-		on_abort = function()
-			auctions = auctions or {}
-            Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
-			AuxItemSearchFrameItemStopButton:Hide()
-			AuxItemSearchFrameItemRefreshButton:Show()
-			refresh = true
-		end,
-		next_page = function(page, total_pages)
-            if AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() then
-                local last_page = max(total_pages - 1, 0)
-                if page < last_page then
-                    return page + 1
+        local item_id = private.item_id
+        local item_info = Aux.info.item(item_id)
+
+        local class_index = Aux.item_class_index(item_info.class)
+        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
+
+        search_query = {
+            name = item_info.name,
+            min_level = item_info.level,
+            min_level = item_info.level,
+            slot = item_info.slot,
+            class = Aux.item_class_index(item_info.class),
+            subclass = item_info.subclass,
+            quality = item_info.quality,
+            usable = item_info.usable,
+        }
+
+        Aux.log('Scanning auctions ...')
+        Aux.scan.start{
+            query = search_query,
+            page = AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber(),
+            on_submit_query = function()
+                current_page = nil
+            end,
+            on_page_loaded = function(page, total_pages)
+                Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
+                current_page = page
+            end,
+            on_read_auction = function(auction_info)
+                if auction_info.item_id == item_id then
+                    auctions = auctions or {}
+                    tinsert(auctions, create_auction_record(auction_info, current_page))
                 end
-            end
-		end,
-	}
+            end,
+            on_complete = function()
+                auctions = auctions or {}
+                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' of '..item_info.name..' found.')
+
+                AuxItemSearchFrameItemStopButton:Hide()
+                AuxItemSearchFrameItemRefreshButton:Show()
+                refresh = true
+            end,
+            on_abort = function()
+                auctions = auctions or {}
+                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' of '..item_info.name..' found.')
+                AuxItemSearchFrameItemStopButton:Hide()
+                AuxItemSearchFrameItemRefreshButton:Show()
+                refresh = true
+            end,
+            next_page = function(page, total_pages)
+                if AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() then
+                    local last_page = max(total_pages - 1, 0)
+                    if page < last_page then
+                        return page + 1
+                    end
+                end
+            end,
+        }
+    end)
 end
 
 function show_dialog(buyout_mode, entry, amount)
@@ -672,18 +681,20 @@ function find_auction(entry, buyout_mode, express_mode)
 					Aux.scan.abort()
 				else
 					public.dialog_action = function()
-						if GetMoney() >= amount then
-							PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))
-                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))..'.')
-                            entry.gone = true
-							refresh = true
-						else
-							Aux.log('Not enough money.')
-						end				
-						Aux.scan.abort()
-						AuxItemSearchFrameItemRefreshButton:Enable()
-						AuxItemSearchFrameAuctionsConfirmation:Hide()
-						update_listing()
+                        if create_auction_record(Aux.info.auction(auction_info.index)).signature == entry.signature then
+                            if GetMoney() >= amount then
+                                PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))
+                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))..'.')
+                                entry.gone = true
+                                refresh = true
+                            else
+                                Aux.log('Not enough money.')
+                            end
+                            Aux.scan.abort()
+                            AuxItemSearchFrameItemRefreshButton:Enable()
+                            AuxItemSearchFrameAuctionsConfirmation:Hide()
+                            update_listing()
+                        end
 					end
 					AuxItemSearchFrameAuctionsConfirmationContentActionButton:Enable()
 				end
@@ -720,6 +731,10 @@ function public.on_row_click(entry)
 	
 	if IsControlKeyDown() then 
 		DressUpItemLink(entry.hyperlink)
+    elseif IsShiftKeyDown() then
+        if ChatFrameEditBox:IsVisible() then
+            ChatFrameEditBox:Insert(entry.hyperlink)
+        end
 	else
 		find_auction(entry, buyout_mode, express_mode)
 	end	

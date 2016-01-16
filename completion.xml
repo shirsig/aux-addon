@@ -4,9 +4,5 @@
 	
 	<Frame name="AuxCompletionDropDown" inherits="UIDropDownMenuTemplate" hidden="true">
 		<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="555" y="0"/></Offset></Anchor></Anchors>
-        <OnUpdate>
-            this.isCounting = false
-            UIDropDownMenu_OnUpdate(arg1)
-        </OnUpdate>
 	</Frame>
 </Ui>

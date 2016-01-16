@@ -18,10 +18,8 @@ function group_alpha_setter(cell, group)
     cell:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.3 or 1)
 end
 
-local BUYOUT, BID, FULL = 1, 2, 3
-
 public.views = {
-	[BUYOUT] = {
+	[Aux.view.BUYOUT] = {
 		name = 'Buyout',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -135,7 +133,7 @@ public.views = {
         },
         sort_order = {{column = 1, order = 'ascending' }, {column = 4, order = 'ascending'}},
 	},
-	[BID] = {
+	[Aux.view.BID] = {
 		name = 'Bid',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -279,7 +277,7 @@ public.views = {
         },
         sort_order = {{column = 1, order = 'ascending' }, {column = 4, order = 'ascending' }, {column = 6, order = 'ascending'}},
 	},
-	[FULL] = {
+	[Aux.view.FULL] = {
 		name = 'Full',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
@@ -464,13 +462,13 @@ public.views = {
 
 function public.on_close()
     if AuxFilterSearchFrameResultsConfirmation:IsVisible() then
-	    Aux.buy.dialog_cancel()
+	    public.dialog_cancel()
     end
 	current_page = nil
 end
 
 function public.on_open()
-    public.set_view(1)
+    public.set_view(aux_view)
 	update_sheet()
 end
 
@@ -487,25 +485,30 @@ function public.stop_search()
 end
 
 function update_sheet()
+
+    if not AuxFilterSearchFrame:IsVisible() then
+        return
+    end
+
 	AuxFilterSearchFrameResultsBuyListing:Hide()
     AuxFilterSearchFrameResultsBidListing:Hide()
     AuxFilterSearchFrameResultsFullListing:Hide()
 
-    if private.view == BUYOUT then
+    if aux_view == Aux.view.BUYOUT then
         AuxFilterSearchFrameResultsBuyListing:Show()
         local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-        Aux.list.populate(AuxFilterSearchFrameResultsBuyListing.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
+        Aux.sheet.populate(AuxFilterSearchFrameResultsBuyListing.sheet, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBuyListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
-	elseif private.view == BID then
+	elseif aux_view == Aux.view.BID then
         AuxFilterSearchFrameResultsBidListing:Show()
         local bid_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
-        Aux.list.populate(AuxFilterSearchFrameResultsBidListing.sheet, bid_auctions)
+        Aux.sheet.populate(AuxFilterSearchFrameResultsBidListing.sheet, bid_auctions)
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBidListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
-	elseif private.view == FULL then
+	elseif aux_view == Aux.view.FULL then
         AuxFilterSearchFrameResultsFullListing:Show()
-        Aux.list.populate(AuxFilterSearchFrameResultsFullListing.sheet, auctions or {})
+        Aux.sheet.populate(AuxFilterSearchFrameResultsFullListing.sheet, auctions or {})
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsFullListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
 	end
@@ -521,7 +524,7 @@ function public.set_view(view)
     for i=1,3 do
         getglobal('AuxFilterSearchFrameResultsTab'..i):SetAlpha(i == view and 1 or 0.5)
     end
-    private.view = view
+    aux_view = view
     update_sheet()
 end
 
@@ -531,78 +534,77 @@ end
 
 function public.start_search()
 
-	if not AuxFilterSearchFrameFiltersSearchButton:IsVisible() then
-		return
-	end
+    Aux.scan.abort(function()
 
-    AuxFilterSearchFrameFiltersSearchButton:Hide()
-    AuxFilterSearchFrameFiltersStopButton:Show()
-	
-	auctions = nil
-	
-	refresh = true
-	
-	local category = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown)
-	local tooltip_patterns = {}
-	for i=1,4 do
-		local tooltip_pattern = getglobal('AuxFilterSearchFrameFiltersTooltipInputBox'..i):GetText()
-		if tooltip_pattern ~= '' then
-			tinsert(tooltip_patterns, tooltip_pattern)
-		end
-	end
-	
-	search_query = {
-		name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
-		min_level = AuxFilterSearchFrameFiltersMinLevel:GetText(),
-		max_level = AuxFilterSearchFrameFiltersMaxLevel:GetText(),
-		slot = category and category.slot,
-		class = category and category.class,	
-		subclass = category and category.subclass,
-		quality = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown),
-		usable = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked()
-	}
-	
-	Aux.log('Scanning auctions ...')
-	Aux.scan.start{
-		query = search_query,
-		page = AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() and 0 or AuxFilterSearchFrameFiltersPageEditBox:GetNumber(),
-		on_submit_query = function()
-			current_page = nil
-		end,
-		on_page_loaded = function(page, total_pages)
-            Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
-            current_page = page
-		end,
-		on_read_auction = function(auction_info)
-            if Aux.info.tooltip_match(tooltip_patterns, auction_info.tooltip) then
-                auctions = auctions or {}
-                tinsert(auctions, create_auction_record(auction_info, current_page))
+        AuxFilterSearchFrameFiltersSearchButton:Hide()
+        AuxFilterSearchFrameFiltersStopButton:Show()
+
+        auctions = nil
+
+        refresh = true
+
+        local category = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown)
+        local tooltip_patterns = {}
+        for i=1,4 do
+            local tooltip_pattern = getglobal('AuxFilterSearchFrameFiltersTooltipInputBox'..i):GetText()
+            if tooltip_pattern ~= '' then
+                tinsert(tooltip_patterns, tooltip_pattern)
             end
-		end,
-		on_complete = function()
-			auctions = auctions or {}
-            Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+        end
 
-            AuxFilterSearchFrameFiltersStopButton:Hide()
-            AuxFilterSearchFrameFiltersSearchButton:Show()
-			refresh = true
-		end,
-		on_abort = function()
-			auctions = auctions or {}
-            Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
-            AuxFilterSearchFrameFiltersStopButton:Hide()
-            AuxFilterSearchFrameFiltersSearchButton:Show()
-			refresh = true
-		end,
-		next_page = function(page, total_pages)
-            if AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() then
-                local last_page = max(total_pages - 1, 0)
-                if page < last_page then
-                    return page + 1
+        search_query = {
+            name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
+            min_level = AuxFilterSearchFrameFiltersMinLevel:GetText(),
+            max_level = AuxFilterSearchFrameFiltersMaxLevel:GetText(),
+            slot = category and category.slot,
+            class = category and category.class,
+            subclass = category and category.subclass,
+            quality = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown),
+            usable = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked()
+        }
+
+        Aux.log('Scanning auctions ...')
+        Aux.scan.start{
+            query = search_query,
+            page = AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() and 0 or AuxFilterSearchFrameFiltersPageEditBox:GetNumber(),
+            on_submit_query = function()
+                current_page = nil
+            end,
+            on_page_loaded = function(page, total_pages)
+                Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
+                current_page = page
+            end,
+            on_read_auction = function(auction_info)
+                if Aux.info.tooltip_match(tooltip_patterns, auction_info.tooltip) then
+                    auctions = auctions or {}
+                    tinsert(auctions, create_auction_record(auction_info, current_page))
                 end
-            end
-		end,
-	}
+            end,
+            on_complete = function()
+                auctions = auctions or {}
+                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+
+                AuxFilterSearchFrameFiltersStopButton:Hide()
+                AuxFilterSearchFrameFiltersSearchButton:Show()
+                refresh = true
+            end,
+            on_abort = function()
+                auctions = auctions or {}
+                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+                AuxFilterSearchFrameFiltersStopButton:Hide()
+                AuxFilterSearchFrameFiltersSearchButton:Show()
+                refresh = true
+            end,
+            next_page = function(page, total_pages)
+                if AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() then
+                    local last_page = max(total_pages - 1, 0)
+                    if page < last_page then
+                        return page + 1
+                    end
+                end
+            end,
+        }
+    end)
 end
 
 function show_dialog(buyout_mode, entry, amount)
@@ -696,18 +698,20 @@ function find_auction(entry, buyout_mode, express_mode)
 					Aux.scan.abort()
 				else
 					public.dialog_action = function()
-						if GetMoney() >= amount then
-							PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))
-                            Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))..'.')
-                            entry.gone = true
-							refresh = true
-						else
-							Aux.log('Not enough money.')
-						end				
-						Aux.scan.abort()
-                        AuxFilterSearchFrameFiltersSearchButton:Enable()
-                        AuxFilterSearchFrameResultsConfirmation:Hide()
-						update_sheet()
+                        if create_auction_record(Aux.info.auction(auction_info.index)).signature == entry.signature then
+                            if GetMoney() >= amount then
+                                PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))
+                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))..'.')
+                                entry.gone = true
+                                refresh = true
+                            else
+                                Aux.log('Not enough money.')
+                            end
+                            Aux.scan.abort()
+                            AuxFilterSearchFrameFiltersSearchButton:Enable()
+                            AuxFilterSearchFrameResultsConfirmation:Hide()
+                            update_sheet()
+                        end
 					end
                     AuxFilterSearchFrameResultsConfirmationContentActionButton:Enable()
 				end
@@ -718,7 +722,7 @@ function find_auction(entry, buyout_mode, express_mode)
                 Aux.log('No matching auction found. Removing entry from the cache.')
 				entry.gone = true
 				refresh = true
-				Aux.buy.dialog_cancel()
+				public.dialog_cancel()
 			end
 			if express_mode then
                 AuxFilterSearchFrameFiltersSearchButton:Enable()
@@ -744,6 +748,10 @@ function private.on_row_click(entry)
 	
 	if IsControlKeyDown() then 
 		DressUpItemLink(entry.hyperlink)
+    elseif IsShiftKeyDown() then
+        if ChatFrameEditBox:IsVisible() then
+            ChatFrameEditBox:Insert(entry.hyperlink)
+        end
 	else
 		find_auction(entry, buyout_mode, express_mode)
 	end	

@@ -49,7 +49,9 @@ end
 function wait_for_results(k)
 	local ok
     if state.job.type == 'bidder' then
-		ok = true
+        Aux.control.as_soon_as(function() return Aux.bids_loaded end, function()
+            ok = true
+        end)
     elseif state.job.type == 'owner' then
         if state.page == Aux.current_owner_page then
             ok = true
