@@ -8,5 +8,9 @@ function SlashCmdList.AUX(parameter)
     elseif parameter == 'clear database' then
         aux_database = {}
         Aux.log('Database cleared.')
+    elseif parameter == 'clear' then
+        aux_database = {}
+        Aux.persistence.load_dataset().snapshot = {}
+        Aux.log('Snapshot and database cleared.')
     end
 end

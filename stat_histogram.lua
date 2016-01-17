@@ -117,6 +117,7 @@ function public.process_auction(auction_info)
 	end
 
 	local index = ceil(buyout / private.current_record.step)
+	snipe.log(private.current_record.step..'X'..auction_info.item_id)
 
 	if private.current_record.count <= 20 then
 
@@ -203,7 +204,7 @@ function private.refactor(pmax, precision)
 
 	private.current_record.min = new_min
 	private.current_record.max = new_max
-	private.current_record.max = new_step
+	private.current_record.step = new_step
 	private.current_record.count = new_count
 	private.current_record.values = new_values
 end
