@@ -314,14 +314,6 @@ function Aux.util.set()
 
     local data = {}
 
-    function self.set_data(new_data)
-        data = new_data
-    end
-
-    function self.get_data()
-        return data
-    end
-
     function self.add(value)
         data[value] = true
     end

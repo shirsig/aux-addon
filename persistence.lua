@@ -36,8 +36,7 @@ end
 function public.load_snapshot()
     local dataset = public.load_dataset()
     dataset.snapshot = dataset.snapshot or {}
-    local snapshot = Aux.util.set()
-    snapshot.set_data(dataset.snapshot)
+    local snapshot = private.snapshot(dataset.snapshot)
     return snapshot
 end
 
@@ -88,4 +87,39 @@ function public.deserialize(data_string, separator)
             return data
         end
     end
+end
+
+function private.snapshot(data)
+    local self = {}
+
+    function self.add(signature, duration)
+        local HOUR = 60 * 60 * 60
+        local seconds
+        if duration == 1 then
+            seconds = HOUR / 2
+        elseif duration == 2 then
+            seconds = HOUR * 2
+        elseif duration == 3 then
+            seconds = HOUR * 8
+        elseif duration == 4 then
+            seconds = HOUR * 24
+        end
+        data[signature] = time() + seconds
+    end
+
+    function self.contains(signature)
+        return data[signature] ~= nil and data[signature] >= time()
+    end
+
+    function self.signatures()
+        local signatures = {}
+        for signature, _ in pairs(data) do
+            if data[signature] >= time() then
+                tinsert(signatures, signature)
+            end
+        end
+        return signatures
+    end
+
+    return self
 end

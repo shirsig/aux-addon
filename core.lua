@@ -45,9 +45,16 @@ function Aux_OnLoad()
 
             local unit_value = Aux.stat_average.get_mean(item_key)
             if count == 1 then
-                EnhTooltip.AddLine(Aux.util.money_string(unit_value), nil, true)
+                EnhTooltip.AddLine('AVG: '..Aux.util.money_string(unit_value), nil, true)
             else
-                EnhTooltip.AddLine(Aux.util.money_string(unit_value * count)..' ('..Aux.util.money_string(unit_value)..' ea.)', nil, true)
+                EnhTooltip.AddLine('AVG: '..Aux.util.money_string(unit_value * count)..' ('..Aux.util.money_string(unit_value)..' ea.)', nil, true)
+            end
+            EnhTooltip.LineColor(0.1,0.8,0.5)
+            local unit_value = Aux.stat_histogram.get_price_data(item_key)
+            if count == 1 then
+                EnhTooltip.AddLine('Median: '..Aux.util.money_string(unit_value), nil, true)
+            else
+                EnhTooltip.AddLine('Median: '..Aux.util.money_string(unit_value * count)..' ('..Aux.util.money_string(unit_value)..' ea.)', nil, true)
             end
             EnhTooltip.LineColor(0.1,0.8,0.5)
         end

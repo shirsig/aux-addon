@@ -31,13 +31,11 @@ function public.start_scan()
             private.process_auction(auction_info)
         end,
         on_complete = function()
-            private.update_snapshot()
             Aux.log('Scan complete: Old auctions were removed from the snapshot.')
 --            AuxHistoryStopButton:Hide()
 --            AuxHistoryScanButton:Show()
         end,
         on_abort = function()
-
             Aux.log('Scanning aborted.')
 --            AuxHistoryStopButton:Hide()
 --            AuxHistoryScanButton:Show()
@@ -53,15 +51,6 @@ end
 
 function public.stop_scan()
     Aux.scan.abort()
-end
-
-function private.update_snapshot()
-    local snapshot = Aux.persistence.load_snapshot()
-    for _, sig in ipairs(snapshot.values()) do
-        if not private.scanned_signatures.contains(sig) then
-            snapshot.remove(sig)
-        end
-    end
 end
 
 function private.process_auction(auction_info)
