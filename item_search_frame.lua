@@ -88,7 +88,7 @@ public.views = {
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
-            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_CURSOR', 0, 30)
+            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
@@ -160,7 +160,7 @@ public.views = {
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
-            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_CURSOR', 0, 30)
+            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)
@@ -262,7 +262,7 @@ public.views = {
         end,
         on_row_enter = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(.5)
-            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_CURSOR', 0, 30)
+            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function (sheet, row_index)
             sheet.rows[row_index].highlight:SetAlpha(0)

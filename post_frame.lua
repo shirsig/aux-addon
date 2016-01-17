@@ -21,7 +21,7 @@ Aux.sell.inventory_listing_config = {
 
     on_row_enter = function (sheet, row_index)
         sheet.rows[row_index].highlight:SetAlpha(.5)
-        Aux.info.set_tooltip(sheet.rows[row_index].itemstring, nil, this, 'ANCHOR_CURSOR', 0, 30)
+        Aux.info.set_tooltip(sheet.rows[row_index].itemstring, nil, this, 'ANCHOR_LEFT', 0, 0)
     end,
 
     on_row_leave = function (sheet, row_index)

@@ -130,7 +130,7 @@ function public.reanchor_tooltip()
         this:ClearAllPoints()
         local x, y = GetCursorPosition()
         x, y = x / UIParent:GetEffectiveScale() + private.x_offset, y / UIParent:GetEffectiveScale() + private.y_offset
-        this:SetPoint('BOTTOM', UIParent, 'BOTTOMLEFT', x, y)
+        this:SetPoint('TOP', UIParent, 'BOTTOMLEFT', x, y)
     end
 end
 
@@ -139,7 +139,7 @@ function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor, x_offset
         private.anchor_cursor = true
         private.x_offset = x_offset
         private.y_offset = y_offset
-        anchor = 'BOTTOM'
+        anchor = 'TOP'
     else
         private.anchor_cursor = false
     end
