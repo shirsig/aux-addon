@@ -1,4 +1,4 @@
-AuxVersion = '2.2.0'
+AuxVersion = '2.2.1'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -34,7 +34,7 @@ function Aux_OnLoad()
     if IsAddOnLoaded('EnhTooltip') then
         Stubby.RegisterFunctionHook('EnhTooltip.AddTooltip', 100, function(_ ,_ ,_ ,_ , link, _, count)
             local item_id, suffix_id = EnhTooltip.BreakLink(link)
-            local item_key = item_id..':'..suffix_id
+            local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
             local auction_count, seen_days, daily_average, EMA3, EMA7, EMA14 = Aux.stat_average.get_price_data(item_key)
 

@@ -34,7 +34,7 @@ function generate_suggestions(input)
 	end
 	
 	local best = {}
-	for _, item in ipairs(Aux.localized_auctionable_items) do
+	for _, item in pairs(Aux.static.auctionable_items) do
 		local rating = matcher(item.name)
 		if rating then
 			local candidate = { name=item.name, id=item.id, rating=rating }
@@ -48,7 +48,7 @@ function generate_suggestions(input)
 		end
 	end
 
-	return Aux.util.map(best, function(match) return { text=match.name, display_text='|c'..Aux_QualityColor(({GetItemInfo(match.id)})[3])..'['..match.name..']'..'|r', value=match.id } end)
+	return Aux.util.map(best, function(match) return { text=match.name, display_text='|c'..Aux_QualityColor(Aux.static.auctionable_items[match.id].quality)..'['..match.name..']'..'|r', value=match.id } end)
 end
 
 function public.completor(edit_box)

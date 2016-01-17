@@ -63,17 +63,11 @@ public.recently_searched_config = {
                 cell.icon = icon
             end,
             cell_setter = function(cell, datum)
-                local item_info = Aux.info.item(datum.item_id)
-                if item_info then
-                    cell.icon.icon_texture:SetTexture(item_info.texture)
-                    cell.text:SetText('['..item_info.name..']')
-                    local color = ITEM_QUALITY_COLORS[item_info.quality]
-                    cell.text:SetTextColor(color.r, color.g, color.b)
-                else
-                    cell.icon.icon_texture:SetTexture()
-                    cell.text:SetText('N/A')
-                    cell.text:SetTextColor(1,1,1)
-                end
+                local item_info = Aux.static.auctionable_items[datum.item_id]
+                cell.icon.icon_texture:SetTexture(item_info.texture)
+                cell.text:SetText('['..item_info.name..']')
+                local color = ITEM_QUALITY_COLORS[item_info.quality]
+                cell.text:SetTextColor(color.r, color.g, color.b)
             end,
         },
     },
@@ -483,7 +477,7 @@ function private.update_recently_searched()
 end
 
 function public.set_item(item_id)
-    if item_id ~= private.item_id and GetItemInfo(item_id) then
+    if item_id ~= private.item_id and Aux.static.auctionable_items[item_id] then
         AuxItemSearchFrameItemRefreshButton:Enable()
         private.item_id = item_id
         public.update_item()
@@ -510,10 +504,10 @@ end
 
 function public.update_item()
     if private.item_id and not AuxItemSearchFrameItemItemInputBox:IsVisible() then
-        local info = { GetItemInfo(private.item_id) }
-        AuxItemSearchFrameItemItemIconTexture:SetTexture(info[9])
-        AuxItemSearchFrameItemItemName:SetText(info[1])
-        local color = ITEM_QUALITY_COLORS[info[3]]
+        local info = Aux.static.auctionable_items[private.item_id]
+        AuxItemSearchFrameItemItemIconTexture:SetTexture(info.texture)
+        AuxItemSearchFrameItemItemName:SetText(info.name)
+        local color = ITEM_QUALITY_COLORS[info.quality]
         AuxItemSearchFrameItemItemName:SetTextColor(color.r, color.g, color.b)
         AuxItemSearchFrameItemItem:Show()
     else
@@ -533,10 +527,10 @@ function public.start_search()
         refresh = true
 
         local item_id = private.item_id
-        local item_info = Aux.info.item(item_id)
+        local item_info = Aux.static.auctionable_items[item_id]
 
-        local class_index = Aux.item_class_index(item_info.class)
-        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
+--        local class_index = Aux.item_class_index(item_info.class)
+--        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
 
         search_query = {
             name = item_info.name,
@@ -568,7 +562,7 @@ function public.start_search()
             end,
             on_complete = function()
                 auctions = auctions or {}
-                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' of '..item_info.name..' found.')
+                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' of '..'|c'..Aux_QualityColor(Aux.static.auctionable_items[item_info.id].quality)..'['..item_info.name..']'..'|r'..' found.')
 
                 AuxItemSearchFrameItemStopButton:Hide()
                 AuxItemSearchFrameItemRefreshButton:Show()
@@ -576,7 +570,7 @@ function public.start_search()
             end,
             on_abort = function()
                 auctions = auctions or {}
-                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' of '..item_info.name..' found.')
+                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' of '..'|c'..Aux_QualityColor(Aux.static.auctionable_items[item_info.id].quality)..'['..item_info.name..']'..'|r'..' found.')
                 AuxItemSearchFrameItemStopButton:Hide()
                 AuxItemSearchFrameItemRefreshButton:Show()
                 refresh = true

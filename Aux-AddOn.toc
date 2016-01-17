@@ -2,7 +2,7 @@
 ## Title: Aux
 ## Notes: A lightweight addon designed to help manage auctions
 ## SavedVariablesPerCharacter: aux_recently_searched, aux_view, AUX_SELL_SHORTCUT, AUX_BUY_SHORTCUT, AUX_OPEN_SELL, AUX_OPEN_BUY, AUX_INSTANT_BUYOUT, AUX_AUCTION_DURATION
-## SavedVariables: aux_database
+## SavedVariables: aux_database, aux_auctionable_items
 
 slash.lua
 core.xml

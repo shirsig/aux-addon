@@ -2,18 +2,18 @@
 
 	<Script file="static.lua"/>
   
-	<Frame>
-      <Scripts>
-			<OnLoad>
-				this:RegisterEvent('VARIABLES_LOADED')
-			</OnLoad>
-			<OnEvent> 
-				Aux.static.on_event()
-			</OnEvent>
-			<OnUpdate>
-				Aux.static.on_update()
-			</OnUpdate>
-		</Scripts>
-	</Frame>
+	<!--<Frame>-->
+      <!--<Scripts>-->
+			<!--<OnLoad>-->
+				<!--this:RegisterEvent('VARIABLES_LOADED')-->
+			<!--</OnLoad>-->
+			<!--<OnEvent> -->
+				<!--Aux.static.on_event()-->
+			<!--</OnEvent>-->
+			<!--<OnUpdate>-->
+				<!--Aux.static.on_update()-->
+			<!--</OnUpdate>-->
+		<!--</Scripts>-->
+	<!--</Frame>-->
 	<GameTooltip name="AuxStaticTooltip" inherits="GameTooltipTemplate"/>
 </Ui>
