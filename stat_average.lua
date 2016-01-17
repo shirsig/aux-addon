@@ -1,7 +1,7 @@
 local private, public = {}, {}
 Aux.stat_average = public
 
-private.PUSH_INTERVAL = 57600
+private.PUSH_INTERVAL = 3
 private.NEW_RECORD = '0:0:0:0:0:0:0:0'
 
 function private.load_data()
@@ -49,6 +49,85 @@ function public.get_price_data(item_key)
 	local auction_count, daily_auction_count, daily_accumulated_buyout, seen_days, EMA3, EMA7, EMA14 = unpack(public.read_record(item_key))
 	local daily_average = daily_accumulated_buyout / daily_auction_count
 	return auction_count, seen_days, daily_average, EMA3, EMA7, EMA14
+end
+
+function public.get_mean(item_key)
+	local _, daily_auction_count, daily_accumulated_buyout, seen_days, EMA3, EMA7, EMA14 = unpack(public.read_record(item_key))
+
+	local mean = 0
+	local daily_average = daily_accumulated_buyout / daily_auction_count
+
+	if seen_days == 0 then
+		if daily_auction_count > 0 then
+			mean = daily_average
+		end
+	elseif seen_days <= 3 then -- No EMAs before day 4
+		mean = EMA3
+		if daily_auction_count > 0 then
+			mean = (mean * seen_days + daily_average) / (seen_days + 1)
+		end
+	else
+		-- we have 4 or more days of data, potentially enough to perform mean and stddev calculations
+		local count = 0
+		local valueset, weightset = {}, {}
+
+		-- include daily data if available
+		if daily_auction_count > 0 then
+			count = 1
+			valueset[count] = daily_average
+			weightset[count] = 1
+		end
+
+		-- EMA3: standard weight 3, reduced if seenDays < 6, reduced if there was daily data, but never less than 1
+		local weight = 3 - count
+		if seen_days < 6 then
+			weight = seen_days - 3
+			if weight > 1 then
+				weight = weight - count
+			end
+		end
+		count = count + 1
+		valueset[count] = EMA3
+		weightset[count] = weight
+
+		-- EMA7: standard weight 4, reduced if seenDays < 10
+		if seen_days > 6 then
+			count = count + 1
+			valueset[count] = EMA7
+			if seen_days < 10 then
+				weightset[count] = seen_days - 6
+			else
+				weightset[count] = 4
+			end
+		end
+
+		-- EMA14: standard weight 7, reduced if seenDays < 17
+		if seen_days > 10 then
+			count = count + 1
+			valueset[count] = EMA14
+			if seen_days < 17 then
+				weightset[count] = seen_days - 10
+			else
+				weightset[count] = 7
+			end
+		end
+
+		-- we will use a weighted incremental algorithm, based on sample code by West and Knuth http://en.wikipedia.org/wiki/Algorithms_for_calculating_variance
+		local sumWeight, sumSquares = 0, 0 -- actually "sum of squares of differences from the (current) mean", but that's rather long for a variable name.
+		for i=1,count do
+			local value, weight = valueset[i], weightset[i]
+			local nextweight = weight + sumWeight
+			local valuediff = value - mean
+			local meanadjust = valuediff * weight / nextweight
+			mean = mean + meanadjust
+			sumSquares = sumSquares + sumWeight * valuediff * meanadjust
+			sumWeight = nextweight
+		end
+
+		--		stddev = sqrt(sumSquares / sumWeight * count / (count - 1))
+	end
+
+	return mean
 end
 
 function private.push_data()

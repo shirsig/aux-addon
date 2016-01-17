@@ -117,14 +117,13 @@ function public.process_auction(auction_info)
 	end
 
 	local index = ceil(buyout / private.current_record.step)
-	snipe.log(private.current_record.step..'X'..auction_info.item_id)
 
-	if private.current_record.count <= 20 then
+	if private.current_record.count <= 20 and index > 100 then
+		private.refactor(buyout, 100)
+		index = 100
+	end
 
-		if index > 100 then
-			private.refactor(buyout, 100)
-			index = 100
-		end
+	if private.current_record.count <= 20 or index <= 300 then
 
 		if private.current_record.min == 0 then
 			private.current_record.min = index
@@ -146,30 +145,6 @@ function public.process_auction(auction_info)
 		private.current_record.count = private.current_record.count + 1
 
 		private.write_current_record()
-
-	elseif index <= 300 then
-
-		if not private.current_record.min then
-			private.current_record.min = index
-			private.current_record.max = index
-			private.current_record.values[index] = 0
-		elseif private.current_record.min > index then
-			for i = index, private.current_record.min - 1 do
-				private.current_record.values[i] = 0
-			end
-			private.current_record.min = index
-		elseif private.current_record.max < index then
-			for i = private.current_record.max + 1, index do
-				private.current_record.values[i] = 0
-			end
-			private.current_record.max = index
-		end
-
-		private.current_record.values[index] = private.current_record.values[index] + 1
-		private.current_record.count = private.current_record.count + 1
-
-		private.write_current_record()
-
 	end
 end
 
