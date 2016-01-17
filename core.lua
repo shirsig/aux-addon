@@ -34,7 +34,7 @@ function Aux_OnLoad()
         local item_id, suffix_id = EnhTooltip.BreakLink(link)
         local item_key = item_id..':'..suffix_id
 
-        local auction_count = unpack(Aux.stat_average.read_record(item_key))
+        local auction_count, seen_days, daily_average, EMA3, EMA7, EMA14 = Aux.stat_average.get_price_data(item_key)
 
         if auction_count == 0 then
             EnhTooltip.AddLine('Never seen at auction', nil, true)
@@ -43,20 +43,23 @@ function Aux_OnLoad()
             EnhTooltip.AddLine('Seen '..auction_count..' '..Aux_PluralizeIf('time', auction_count)..' at auction', nil, true)
             EnhTooltip.LineColor(0.5, 0.8, 0.1)
 
-            local unit_value = Aux.stat_average.get_mean(item_key)
+
+            local median = Aux.stat_histogram.get_price_data(item_key)
             if count == 1 then
-                EnhTooltip.AddLine('AVG: '..Aux.util.money_string(unit_value), nil, true)
+                EnhTooltip.AddLine('Median: '..Aux.util.money_string(median), nil, true)
             else
-                EnhTooltip.AddLine('AVG: '..Aux.util.money_string(unit_value * count)..' ('..Aux.util.money_string(unit_value)..' ea.)', nil, true)
+                EnhTooltip.AddLine('Median: '..Aux.util.money_string(median * count)..' ('..Aux.util.money_string(median)..' ea.)', nil, true)
             end
             EnhTooltip.LineColor(0.1,0.8,0.5)
-            local unit_value = Aux.stat_histogram.get_price_data(item_key)
-            if count == 1 then
-                EnhTooltip.AddLine('Median: '..Aux.util.money_string(unit_value), nil, true)
-            else
-                EnhTooltip.AddLine('Median: '..Aux.util.money_string(unit_value * count)..' ('..Aux.util.money_string(unit_value)..' ea.)', nil, true)
-            end
-            EnhTooltip.LineColor(0.1,0.8,0.5)
+
+--            EnhTooltip.AddLine('AVG TDA: '..(daily_average > 0 and Aux.util.money_string(daily_average) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
+--            EnhTooltip.LineColor(0.1,0.8,0.5)
+--            EnhTooltip.AddLine('EMA3: '..(EMA3 > 0 and Aux.util.money_string(EMA3) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
+--            EnhTooltip.LineColor(0.1,0.8,0.5)
+--            EnhTooltip.AddLine('EMA7: '..(EMA7 > 0 and Aux.util.money_string(EMA7) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
+--            EnhTooltip.LineColor(0.1,0.8,0.5)
+--            EnhTooltip.AddLine('EMA14: '..(EMA14 > 0 and Aux.util.money_string(EMA14) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
+--            EnhTooltip.LineColor(0.1,0.8,0.5)
         end
     end)
 end

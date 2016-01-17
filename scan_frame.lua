@@ -31,12 +31,12 @@ function public.start_scan()
             private.process_auction(auction_info)
         end,
         on_complete = function()
-            Aux.log('Scan complete: Old auctions were removed from the snapshot.')
+            Aux.log('Scan complete.')
 --            AuxHistoryStopButton:Hide()
 --            AuxHistoryScanButton:Show()
         end,
         on_abort = function()
-            Aux.log('Scanning aborted.')
+            Aux.log('Scan aborted.')
 --            AuxHistoryStopButton:Hide()
 --            AuxHistoryScanButton:Show()
         end,

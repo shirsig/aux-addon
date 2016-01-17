@@ -91,15 +91,15 @@ function public.get_price_data(item_key)
 		if private.current_record.step > median / 85 and private.current_record.step > 1 then
 			private.refactor(median * 3, 300)
 			private.write_current_record()
-			return private.GetPriceData()
+			return public.get_price_data(item_key)
 		elseif private.current_record.step < median / 115 then
 			private.refactor(median * 3, 300)
 			private.write_current_record()
-			return private.GetPriceData()
+			return public.get_price_data(item_key)
 		end
 	end
 
-	return median, Q1, Q3, private.current_record.step, percent40, percent30, private.current_record.count
+	return median, Q1, Q3, percent30, percent40, private.current_record.count, private.current_record.step
 end
 
 function public.process_auction(auction_info)
