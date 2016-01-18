@@ -40,38 +40,23 @@ function public.load_snapshot()
     return snapshot
 end
 
---function public.load_scan_records(item_key)
---    local dataset = private.load_dataset()
---
---    local serialized_records = private.deserialize(dataset[item_key] or '', ';')
---    return Aux.util.map(serialized_records, function(serialized_record)
---        local time, count, min_price, accumulated_price = private.deserialize(serialized_record, '#')
---        return {
---            time = time,
---            count = count,
---            min_price = min_price,
---            accumulated_price = accumulated_price,
---        }
---    end)
---end
---
---function public.store_scan_record(item_key, record)
---    local dataset = private.load_dataset()
---    local serialized_record = private.serialize({ record.time, record.count, record.min_price, record.accumulated_price }, '#')
---    local serialized_records = dataset[item_key] or ''
---    serialized_records = serialized_records..(serialized_records == '' and '' or ';')..serialized_record
---    dataset[item_key] = serialized_records
---end
-
-function public.serialize(data, separator)
+function public.serialize(data, separator, compactor)
     local data_string = ''
-    for i, datum in ipairs(data) do
-        data_string = data_string..(i == 1 and '' or separator)..datum
+    local i = 1
+    while i <= getn(data) do
+        local element, count = data[i], 0
+        repeat
+            count = count + 1
+            i = i + 1
+        until (not compactor) or data[i] ~= element
+        local part = (count > 1 and compactor) and element..compactor..count or element
+        data_string = data_string..(data_string == '' and '' or separator)..part
     end
+
     return data_string
 end
 
-function public.deserialize(data_string, separator)
+function public.deserialize(data_string, separator, compactor)
     if data_string == '' then
         return {}
     end
@@ -79,11 +64,25 @@ function public.deserialize(data_string, separator)
     local data = {}
     while true do
         local start_index, _ = strfind(data_string, separator, 1, true)
+
+        local part
         if start_index then
-            tinsert(data, string.sub(data_string, 1, start_index - 1))
+            part = string.sub(data_string, 1, start_index - 1)
             data_string = string.sub(data_string, start_index + 1, strlen(data_string))
         else
-            tinsert(data, string.sub(data_string, 1, strlen(data_string)))
+            part = string.sub(data_string, 1, strlen(data_string))
+        end
+
+        if compactor and strfind(part, compactor, 1, true) then
+            local compactor_index, _ = strfind(part, compactor, 1, true)
+            for i=1, tonumber(string.sub(part, compactor_index + 1, strlen(part))) do
+               tinsert(data, string.sub(part, 1, compactor_index - 1))
+            end
+        else
+            tinsert(data, part)
+        end
+
+        if not start_index then
             return data
         end
     end

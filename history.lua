@@ -18,7 +18,7 @@ function public.read_record(item_key)
 		day_count = tonumber(record[2]),
 		EMA5 = tonumber(record[3]),
 		EMA30 = tonumber(record[4]),
-		histogram = Aux.util.map(Aux.persistence.deserialize(record[5], ';'), function(value)
+		histogram = Aux.util.map(Aux.persistence.deserialize(record[5], ';', 'x'), function(value)
 			return tonumber(value)
 		end),
 	}
@@ -31,7 +31,7 @@ function private.write_record(item_key, record)
 		record.day_count,
 		record.EMA5,
 		record.EMA30,
-		Aux.persistence.serialize(record.histogram, ';'),
+		Aux.persistence.serialize(record.histogram, ';', 'x'),
 	},'#')
 end
 

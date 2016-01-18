@@ -1,4 +1,4 @@
-AuxVersion = '2.2.11'
+AuxVersion = '2.2.12'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -256,6 +256,20 @@ end
 
 function Aux_Round(v)
 	return math.floor(v + 0.5)
+end
+
+function Aux.price_level_color(pct)
+    if pct > 135 then
+        return 1.0,0.0,0.0 -- red
+    elseif pct > 110 then
+        return 1.0,0.6,0.1 -- orange
+    elseif pct > 80 then
+        return 1.0,1.0,0.0 -- yellow
+    elseif pct > 50 then
+        return 0.1,1.0,0.1 -- green
+    else
+        return 0.2,0.6,1.0 -- blue
+    end
 end
 
 function Aux_AuctionsButton_OnClick(button)

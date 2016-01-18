@@ -130,6 +130,34 @@ public.views = {
                     group_alpha_setter(cell, group)
                 end,
             },
+            {
+                title = 'Pct',
+                width = 40,
+                comparator = function(group1, group2)
+                    local market_price1 = Aux.history.get_market_value(group1[1].item_key)
+                    local market_price2 = Aux.history.get_market_value(group2[1].item_key)
+                    local factor1 = market_price1 and group1[1].buyout_price_per_unit / market_price1
+                    local factor2 = market_price2 and group2[1].buyout_price_per_unit / market_price2
+                    return Aux.util.compare(factor1, factor2, Aux.util.GT)
+                end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, group)
+                    local market_price = Aux.history.get_market_value(group[1].item_key)
+
+                    local pct = market_price > 0 and ceil(100 / market_price * group[1].buyout_price_per_unit)
+                    if not pct then
+                        cell.text:SetText('N/A')
+                    elseif pct > 999 then
+                        cell.text:SetText('>999%')
+                    else
+                        cell.text:SetText(pct..'%')
+                    end
+                    if pct then
+                        cell.text:SetTextColor(Aux.price_level_color(pct))
+                    end
+                    group_alpha_setter(cell, group)
+                end,
+            },
         },
         sort_order = {{column = 1, order = 'ascending' }, {column = 4, order = 'ascending'}},
 	},
@@ -455,6 +483,34 @@ public.views = {
                     auction_alpha_setter(cell, datum)
                 end,
             },
+            {
+                title = 'Pct',
+                width = 40,
+                comparator = function(row1, row2)
+                    local market_price1 = Aux.history.get_market_value(row1.item_key)
+                    local market_price2 = Aux.history.get_market_value(row2.item_key)
+                    local factor1 = market_price1 and row1.buyout_price_per_unit / market_price1
+                    local factor2 = market_price2 and row2.buyout_price_per_unit / market_price2
+                    return Aux.util.compare(factor1, factor2, Aux.util.GT)
+                end,
+                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                cell_setter = function(cell, datum)
+                    local market_price = Aux.history.get_market_value(datum.item_key)
+
+                    local pct = market_price > 0 and datum.buyout_price_per_unit and ceil(100 / market_price * datum.buyout_price_per_unit)
+                    if not pct then
+                        cell.text:SetText('N/A')
+                    elseif pct > 999 then
+                        cell.text:SetText('>999%')
+                    else
+                        cell.text:SetText(pct..'%')
+                    end
+                    if pct then
+                        cell.text:SetTextColor(Aux.price_level_color(pct))
+                    end
+                    auction_alpha_setter(cell, datum)
+                end,
+            },
         },
         sort_order = {{column = 1, order = 'ascending' }},
 	},
@@ -777,6 +833,8 @@ function create_auction_record(auction_info, current_page)
         suffix_id = auction_info.suffix_id,
         unique_id = auction_info.unique_id,
         enchant_id = auction_info.enchant_id,
+
+        item_key = auction_info.item_key,
         key = auction_info.item_signature,
         signature = Aux.auction_signature(auction_info.hyperlink, aux_quantity, bid, auction_info.buyout_price),
 
