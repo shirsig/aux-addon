@@ -42,7 +42,7 @@ function public.generate_cache()
 			AuxStaticTooltip:SetHyperlink('item:'..id)
 		end
 		local t0 = time()
-		Aux.control.as_soon_as(function() return GetItemInfo(id) or time() > t0 + 5 end, function()
+		Aux.control.as_soon_as(function() return GetItemInfo(id) or time() > t0 + 3 end, function()
 			local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(id)
 			if name then
 				Aux.log('Adding item '..id..' ...')

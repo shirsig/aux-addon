@@ -5,6 +5,12 @@ function SlashCmdList.AUX(parameter)
     elseif parameter == 'clear snapshot' then
         Aux.persistence.load_dataset().snapshot = {}
         Aux.log('Snapshot cleared.')
+    elseif parameter == 'clear average' then
+        Aux.persistence.load_dataset().stat_average_data = {}
+        Aux.log('Average data cleared.')
+    elseif parameter == 'clear histogram' then
+        Aux.persistence.load_dataset().stat_histogram_data = {}
+        Aux.log('Histogram data cleared.')
     elseif parameter == 'clear' then
         aux_database = {}
         Aux.log('Database cleared.')
