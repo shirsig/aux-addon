@@ -148,8 +148,7 @@ function private.refactor(pmax, precision)
 
 	local new_step = ceil(pmax / precision)
 
-	if getn(private.current_record.values) == 0 then
-		private.current_record.step = new_step
+	if private.current_record.min == 0 then
 		return
 	end
 
