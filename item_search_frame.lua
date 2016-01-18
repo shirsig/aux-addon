@@ -149,8 +149,8 @@ public.views = {
                 comparator = function(group1, group2)
                     local market_price1 = Aux.history.get_market_value(group1[1].item_key)
                     local market_price2 = Aux.history.get_market_value(group2[1].item_key)
-                    local factor1 = market_price1 and group1[1].buyout_price_per_unit / market_price1
-                    local factor2 = market_price2 and group2[1].buyout_price_per_unit / market_price2
+                    local factor1 = market_price1 > 0 and group1[1].buyout_price_per_unit / market_price1
+                    local factor2 = market_price2 > 0 and group2[1].buyout_price_per_unit / market_price2
                     return Aux.util.compare(factor1, factor2, Aux.util.GT)
                 end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
@@ -428,8 +428,8 @@ public.views = {
                 comparator = function(row1, row2)
                     local market_price1 = Aux.history.get_market_value(row1.item_key)
                     local market_price2 = Aux.history.get_market_value(row2.item_key)
-                    local factor1 = market_price1 and row1.buyout_price_per_unit / market_price1
-                    local factor2 = market_price2 and row2.buyout_price_per_unit / market_price2
+                    local factor1 = market_price1 > 0 and row1.buyout_price_per_unit and row1.buyout_price_per_unit / market_price1
+                    local factor2 = market_price2 > 0 and row2.buyout_price_per_unit and row2.buyout_price_per_unit / market_price2
                     return Aux.util.compare(factor1, factor2, Aux.util.GT)
                 end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
