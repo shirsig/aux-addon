@@ -1,7 +1,7 @@
 local private, public = {}, {}
 Aux.stat_average = public
 
-private.PUSH_INTERVAL = 20
+private.PUSH_INTERVAL = 57600
 private.NEW_RECORD = '0:0:0:0:0:0:0:0:0'
 
 function private.load_data()
