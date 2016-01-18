@@ -87,18 +87,6 @@ function public.get_price_data(item_key)
 		end
 	end
 
-	if private.current_record.count > 20 then
-		if private.current_record.step > median / 85 and private.current_record.step > 1 then
-			private.refactor(median * 3, 300)
-			private.write_current_record()
-			return public.get_price_data(item_key)
-		elseif private.current_record.step < median / 115 then
-			private.refactor(median * 3, 300)
-			private.write_current_record()
-			return public.get_price_data(item_key)
-		end
-	end
-
 	return median, Q1, Q3, percent30, percent40, private.current_record.count, private.current_record.step
 end
 
@@ -143,6 +131,14 @@ function public.process_auction(auction_info)
 
 		private.current_record.values[index] = private.current_record.values[index] + 1
 		private.current_record.count = private.current_record.count + 1
+
+		local median = public.get_price_data(auction_info.item_key)
+
+		local step_too_small = private.current_record.step < median / 115
+		local step_too_large = private.current_record.step > median / 85 and private.current_record.step > 1
+		if private.current_record.count > 20 and (step_too_small or step_too_large) then
+			private.refactor(median, 100)
+		end
 
 		private.write_current_record()
 	end
