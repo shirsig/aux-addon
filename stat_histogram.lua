@@ -110,7 +110,7 @@ function public.process_auction(auction_info)
 
 	private.read_current_record(auction_info.item_key)
 
-	local buyout = auction_info.buyout_price / auction_info.count
+	local buyout = auction_info.buyout_price / auction_info.aux_quantity
 
 	if private.current_record.count == 0 then
 		private.current_record.step = ceil(buyout / 100)

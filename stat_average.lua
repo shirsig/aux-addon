@@ -34,7 +34,7 @@ function public.process_auction(auction_info)
 		private.push_data()
 	end
 
-	local buyout = auction_info.buyout_price / auction_info.count
+	local buyout = auction_info.buyout_price / auction_info.aux_quantity
 
 	local item_record = public.read_record(auction_info.item_key)
 

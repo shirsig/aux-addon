@@ -81,6 +81,7 @@ function public.auction(index, type)
     local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(type, index)
 	local duration = GetAuctionItemTimeLeft(type, index)
     local tooltip = public.tooltip(function(tt) tt:SetAuctionItem(type, index) end)
+    local charges = private.item_charges(tooltip)
 
     return {
         index = index,
@@ -114,7 +115,8 @@ function public.auction(index, type)
         duration = duration,
         usable = usable,
         tooltip = tooltip,
-        charges = private.item_charges(tooltip),
+        charges = charges,
+        aux_quantity = charges or count,
 
         EnhTooltip_info = {
             name = name,
