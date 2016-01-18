@@ -1,4 +1,4 @@
-AuxVersion = '2.2.10'
+AuxVersion = '2.2.11'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -49,7 +49,7 @@ function Aux_OnLoad()
                 if count == 1 then
                     EnhTooltip.AddLine('Market Value: '..Aux.util.money_string(market_value), nil, true)
                 else
-                    EnhTooltip.AddLine('Market Value: '..Aux.util.money_string(market_value * count)..' ('..Aux.util.money_string(market_value)..' ea.)', nil, true)
+                    EnhTooltip.AddLine('Market Value: '..Aux.util.money_string(market_value * count)..' / '..Aux.util.money_string(market_value), nil, true)
                 end
                 EnhTooltip.LineColor(0.1,0.8,0.5)
 
