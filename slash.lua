@@ -12,5 +12,10 @@ function SlashCmdList.AUX(parameter)
         aux_database = {}
         Aux.persistence.load_dataset().snapshot = {}
         Aux.log('Snapshot and database cleared.')
+    elseif parameter == 'generate item cache' then
+        Aux.static.generate_cache()
+    elseif parameter == 'delete item cache' then
+        aux_auctionable_items = nil
+        Aux.log('Item cache deleted; falling back to the default.')
     end
 end

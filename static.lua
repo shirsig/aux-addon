@@ -1,12 +1,26 @@
 local private, public = {}, {}
 Aux.static = public
 
-aux_auctionable_items = {}
+aux_auctionable_items = nil
 
-function public.on_event()
---    if event == 'VARIABLES_LOADED' then
---        public.generate_cache()
---    end
+function public.item_ids()
+	local ids = {}
+	
+	local cache = aux_auctionable_items or public.auctionable_items
+	
+	for id, _ in pairs(cache) do
+		tinsert(ids, id)
+	end
+	
+	return ids
+end
+
+function public.item_info(item_id)
+	if aux_auctionable_items and aux_auctionable_items[item_id] then
+		return aux_auctionable_items[item_id]
+	else
+		return public.auctionable_items[item_id]
+	end
 end
 
 function public.generate_cache()

@@ -34,10 +34,11 @@ function generate_suggestions(input)
 	end
 	
 	local best = {}
-	for _, item in pairs(Aux.static.auctionable_items) do
-		local rating = matcher(item.name)
+	for _, id in ipairs(Aux.static.item_ids()) do
+		local item_info = Aux.static.item_info(id)
+		local rating = matcher(item_info.name)
 		if rating then
-			local candidate = { name=item.name, id=item.id, rating=rating }
+			local candidate = { name=item_info.name, id=item_info.id, rating=rating }
 			if getn(best) < NUM_MATCHES then
 				tinsert(best, candidate)
 				fuzzy_sort(best)
@@ -48,7 +49,7 @@ function generate_suggestions(input)
 		end
 	end
 
-	return Aux.util.map(best, function(match) return { text=match.name, display_text='|c'..Aux_QualityColor(Aux.static.auctionable_items[match.id].quality)..'['..match.name..']'..'|r', value=match.id } end)
+	return Aux.util.map(best, function(match) return { text=match.name, display_text='|c'..Aux_QualityColor(Aux.static.item_info(match.id).quality)..'['..match.name..']'..'|r', value=match.id } end)
 end
 
 function public.completor(edit_box)
