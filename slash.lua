@@ -5,13 +5,9 @@ function SlashCmdList.AUX(parameter)
     elseif parameter == 'clear snapshot' then
         Aux.persistence.load_dataset().snapshot = {}
         Aux.log('Snapshot cleared.')
-    elseif parameter == 'clear database' then
-        aux_database = {}
-        Aux.log('Database cleared.')
     elseif parameter == 'clear' then
         aux_database = {}
-        Aux.persistence.load_dataset().snapshot = {}
-        Aux.log('Snapshot and database cleared.')
+        Aux.log('Database cleared.')
     elseif parameter == 'generate item cache' then
         Aux.static.generate_cache()
     elseif parameter == 'delete item cache' then
