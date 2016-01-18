@@ -14,7 +14,7 @@ scan.lua
 stack.lua
 post.lua
 sheet.lua
-stat_average.lua
+history.lua
 stat_histogram.lua
 info.xml
 completion.xml
