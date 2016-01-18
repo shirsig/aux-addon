@@ -1,4 +1,4 @@
-AuxVersion = '2.2.9'
+AuxVersion = '2.2.10'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -36,7 +36,7 @@ function Aux_OnLoad()
             local item_id, suffix_id = EnhTooltip.BreakLink(link)
             local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
-            local auction_count, seen_days, AVG_TDA, MIN_TDA, AVG_EMA5, AVG_EMA30, MIN_EMA5, MIN_EMA30 = Aux.stat_average.get_price_data(item_key)
+            local auction_count, day_count, TDA, EMA5, EMA30 = Aux.history.get_price_data(item_key)
 
             if auction_count == 0 then
                 EnhTooltip.AddLine('Never seen at auction', nil, true)
@@ -45,26 +45,21 @@ function Aux_OnLoad()
                 EnhTooltip.AddLine('Seen '..auction_count..' '..Aux_PluralizeIf('time', auction_count)..' at auction', nil, true)
                 EnhTooltip.LineColor(0.5, 0.8, 0.1)
 
-                local median = Aux.stat_histogram.get_price_data(item_key)
+                local market_value = Aux.history.get_market_value(item_key)
                 if count == 1 then
-                    EnhTooltip.AddLine('Median: '..Aux.util.money_string(median), nil, true)
+                    EnhTooltip.AddLine('Market Value: '..Aux.util.money_string(market_value), nil, true)
                 else
-                    EnhTooltip.AddLine('Median: '..Aux.util.money_string(median * count)..' ('..Aux.util.money_string(median)..' ea.)', nil, true)
+                    EnhTooltip.AddLine('Market Value: '..Aux.util.money_string(market_value * count)..' ('..Aux.util.money_string(market_value)..' ea.)', nil, true)
                 end
                 EnhTooltip.LineColor(0.1,0.8,0.5)
 
---                EnhTooltip.AddLine('AVG TDA: '..(AVG_TDA > 0 and Aux.util.money_string(AVG_TDA) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
+--                EnhTooltip.AddLine('TDA: '..(TDA > 0 and Aux.util.money_string(TDA) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
 --                EnhTooltip.LineColor(0.1,0.8,0.5)
---                EnhTooltip.AddLine('AVG EMA5: '..(AVG_EMA5 > 0 and Aux.util.money_string(AVG_EMA5) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
+--                EnhTooltip.AddLine('EMA5: '..(EMA5 > 0 and Aux.util.money_string(EMA5) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
 --                EnhTooltip.LineColor(0.1,0.8,0.5)
---                EnhTooltip.AddLine('AVG EMA30: '..(AVG_EMA30 > 0 and Aux.util.money_string(AVG_EMA30) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
+--                EnhTooltip.AddLine('EMA30: '..(EMA30 > 0 and Aux.util.money_string(EMA30) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
 --                EnhTooltip.LineColor(0.1,0.8,0.5)
---                EnhTooltip.AddLine('MIN TDA: '..(MIN_TDA > 0 and Aux.util.money_string(MIN_TDA) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
---                EnhTooltip.LineColor(0.1,0.8,0.5)
---                EnhTooltip.AddLine('MIN EMA5: '..(MIN_EMA5 > 0 and Aux.util.money_string(MIN_EMA5) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
---                EnhTooltip.LineColor(0.1,0.8,0.5)
---                EnhTooltip.AddLine('MIN EMA30: '..(MIN_EMA30 > 0 and Aux.util.money_string(MIN_EMA30) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
---                EnhTooltip.LineColor(0.1,0.8,0.5)
+
             end
         end)
     end

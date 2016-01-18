@@ -150,8 +150,8 @@ function scan_auctions_helper(i, n, k)
         local snapshot = Aux.persistence.load_snapshot()
         if not snapshot.contains(auction_info.signature) then
             snapshot.add(auction_info.signature, auction_info.duration)
-            Aux.stat_average.process_auction(auction_info)
-            Aux.stat_histogram.process_auction(auction_info)
+            Aux.history.process_auction(auction_info)
+--            Aux.stat_histogram.process_auction(auction_info)
         end
     else
         recurse()
