@@ -148,7 +148,7 @@ function public.update_auction_records()
             private.create_auction_record(auction_info)
         end,
         on_complete = function()
-            Aux.log('Scan complete: '..getn(auction_records)..' '..Aux_PluralizeIf('auction', getn(auction_records))..' found')
+            Aux.log('Scan complete: '..getn(auction_records)..' '..Aux_PluralizeIf('auction', getn(auction_records))..' found.')
             public.update_listing()
         end,
         on_abort = function()
@@ -221,7 +221,7 @@ end
 function private.find_auction(entry, express_mode)
 
     if entry.gone then
-        Aux.log('Auction not available')
+        Aux.log('Auction not available.')
         return
     end
 

@@ -597,7 +597,7 @@ function refresh_entries()
 				select_entry()
 				update_recommendation()
                 update_auction_listing()
-                Aux.log('Scan complete: '..getn(existing_auctions[item_key])..' '..Aux_PluralizeIf('auction', getn(existing_auctions[item_key]))..' of '..current_auction.hyperlink..' found.')
+                Aux.log('Scan complete: '..getn(existing_auctions[item_key])..' '..Aux_PluralizeIf('auction', getn(existing_auctions[item_key]))..' found.')
             end,
 			next_page = function(page, total_pages)
 				local last_page = max(total_pages - 1, 0)

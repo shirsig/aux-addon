@@ -696,12 +696,12 @@ end
 function find_auction(entry, buyout_mode, express_mode)
 
 	if entry.gone then
-        Aux.log('Auction not available')
+        Aux.log('Auction not available.')
 		return
 	end
 	
 	if buyout_mode and not entry.buyout_price then
-        Aux.log('Auction has no buyout price')
+        Aux.log('Auction has no buyout price.')
 		return
 	end
 
@@ -744,7 +744,7 @@ function find_auction(entry, buyout_mode, express_mode)
 				if express_mode then
 					if GetMoney() >= amount then
 						PlaceAuctionBid('list', auction_info.index, amount)
-                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(amount)..'.')
+                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..'.')
 						entry.gone = true
 						refresh = true
 					else
@@ -756,7 +756,7 @@ function find_auction(entry, buyout_mode, express_mode)
                         if create_auction_record(Aux.info.auction(auction_info.index)).signature == entry.signature then
                             if GetMoney() >= amount then
                                 PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))
-                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))..'.')
+                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..'.')
                                 entry.gone = true
                                 refresh = true
                             else

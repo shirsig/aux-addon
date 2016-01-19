@@ -675,12 +675,12 @@ end
 function find_auction(entry, buyout_mode, express_mode)
 
 	if entry.gone then
-        Aux.log('Auction not available')
+        Aux.log('Auction not available.')
 		return
 	end
 	
 	if buyout_mode and not entry.buyout_price then
-        Aux.log('Auction has no buyout price')
+        Aux.log('Auction has no buyout price.')
 		return
 	end
 

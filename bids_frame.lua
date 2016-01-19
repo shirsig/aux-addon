@@ -169,7 +169,7 @@ function public.update_bid_records()
             private.create_bid_record(auction_info)
         end,
         on_complete = function()
-            Aux.log('Scan complete: '..getn(bid_records)..' '..Aux_PluralizeIf('bid', getn(bid_records))..' found')
+            Aux.log('Scan complete: '..getn(bid_records)..' '..Aux_PluralizeIf('bid', getn(bid_records))..' found.')
             public.update_listing()
         end,
         on_abort = function()
@@ -242,12 +242,12 @@ end
 function private.find_auction(entry, action, express_mode)
 
     if entry.gone then
-        Aux.log('Auction not available')
+        Aux.log('Auction not available.')
         return
     end
 
     if action == 'buyout' and not entry.buyout_price then
-        Aux.log('Auction has no buyout price')
+        Aux.log('Auction has no buyout price.')
         return
     end
 
