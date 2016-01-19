@@ -213,7 +213,6 @@ function private.create_auction_record(auction_info)
 end
 
 function public.dialog_cancel()
-    Aux.log('Aborted.')
     Aux.scan.abort()
     AuxAuctionsFrameListingDialog:Hide()
     public.update_listing()
@@ -228,7 +227,7 @@ function private.find_auction(entry, express_mode)
 
     local amount
 
-    Aux.log('Processing cancelation request for '..entry.hyperlink..' x '..entry.aux_quantity..' at '..Aux.util.money_string(amount)..' ...')
+    Aux.log('...')
 
     if not express_mode then
         private.show_dialog(entry)
@@ -248,7 +247,7 @@ function private.find_auction(entry, express_mode)
             if entry.signature == auction_record.signature then
                 ctrl.suspend()
                 found = true
-                Aux.log('Matching auction found.'..(express_mode and '' or ' Awaiting confirmation ...'))
+                Aux.log('')
 
                 if express_mode then
                     CancelAuction(auction_info.index)

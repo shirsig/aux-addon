@@ -529,7 +529,6 @@ function public.on_open()
 end
 
 function public.dialog_cancel()
-    Aux.log('Aborted.')
 	Aux.scan.abort()
     AuxFilterSearchFrameResultsConfirmation:Hide()
 	update_sheet()
@@ -713,7 +712,7 @@ function find_auction(entry, buyout_mode, express_mode)
         amount = entry.bid
     end
 
-    Aux.log('Processing '..(buyout_mode and 'buyout' or 'bid')..' request for '..entry.hyperlink..' x '..entry.aux_quantity..' at '..Aux.util.money_string(amount)..' ...')
+    Aux.log('Searching auction ...')
     AuxFilterSearchFrameFiltersSearchButton:Disable()
 	
 	if not express_mode then
@@ -740,8 +739,8 @@ function find_auction(entry, buyout_mode, express_mode)
 			if entry.signature == auction_record.signature then
 				ctrl.suspend()
 				found = true
-                Aux.log('Matching auction found.'..(express_mode and '' or ' Awaiting confirmation ...'))
-				
+                Aux.log('Matching auction found.')
+
 				if express_mode then
 					if GetMoney() >= amount then
 						PlaceAuctionBid('list', auction_info.index, amount)

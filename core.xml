@@ -522,12 +522,12 @@
                         <Anchors>
                             <Anchor point="TOPLEFT">
                                 <Offset>
-                                    <AbsDimension x="8" y="-5"/>
+                                    <AbsDimension x="8" y="-28"/>
                                 </Offset>
                             </Anchor>
                             <Anchor point="BOTTOMRIGHT">
                                 <Offset>
-                                    <AbsDimension x="-8" y="9"/>
+                                    <AbsDimension x="-8" y="28"/>
                                 </Offset>
                             </Anchor>
                         </Anchors>
@@ -538,9 +538,6 @@
                             <OnUpdate>
                                 Aux.log_frame_update(arg1)
                             </OnUpdate>
-                            <OnHyperlinkClick>
-                                ChatFrame_OnHyperlinkShow(arg1)
-                            </OnHyperlinkClick>
                             <OnMouseWheel>
                                 if arg1 == 1 then
                                 this:ScrollUp()
@@ -549,7 +546,7 @@
                                 end
                             </OnMouseWheel>
                         </Scripts>
-                        <FontString inherits="ChatFontNormal" justifyH="LEFT"/>
+                        <FontString inherits="GameFontNormalLarge" justifyH="CENTER"/>
                     </ScrollingMessageFrame>
                 </Frames>
             </Frame>

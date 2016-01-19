@@ -234,7 +234,6 @@ function private.create_bid_record(auction_info)
 end
 
 function public.dialog_cancel()
-    Aux.log('Aborted.')
     Aux.scan.abort()
     AuxBidsFrameListingDialog:Hide()
     public.update_listing()
@@ -259,7 +258,7 @@ function private.find_auction(entry, action, express_mode)
         amount = entry.bid
     end
 
-    Aux.log('Processing '..action..' request for '..entry.hyperlink..' x '..entry.aux_quantity..' at '..Aux.util.money_string(amount)..' ...')
+    Aux.log('Searching auction ...')
 
     if not express_mode then
         private.show_dialog(action, entry, amount)
@@ -279,7 +278,7 @@ function private.find_auction(entry, action, express_mode)
             if entry.signature == auction_record.signature then
                 ctrl.suspend()
                 found = true
-                Aux.log('Matching auction found.'..(express_mode and '' or ' Awaiting confirmation ...'))
+                Aux.log('Matching auction found.')
 
                 if express_mode then
                     if GetMoney() >= amount then
