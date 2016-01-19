@@ -96,7 +96,7 @@ function private.daily_market_value(histogram)
 	for i, frequency in ipairs(histogram) do
 		local limited_frequency = min(frequency, limit - count)
 		sum = sum + 1.1 ^ (i - 1) * 1.05 * limited_frequency
-		count = count + frequency
+		count = count + limited_frequency
 		if count >= limit then
 			break
 		end
