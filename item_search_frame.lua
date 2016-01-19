@@ -617,7 +617,7 @@ function public.start_search()
             end,
             on_complete = function()
                 auctions = auctions or {}
-                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' of '..'|c'..Aux_QualityColor(Aux.static.item_info(item_info.id).quality)..'['..item_info.name..']'..'|r'..' found.')
+                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
 
                 AuxItemSearchFrameItemStopButton:Hide()
                 AuxItemSearchFrameItemRefreshButton:Show()
@@ -625,7 +625,7 @@ function public.start_search()
             end,
             on_abort = function()
                 auctions = auctions or {}
-                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' of '..'|c'..Aux_QualityColor(Aux.static.item_info(item_info.id).quality)..'['..item_info.name..']'..'|r'..' found.')
+                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
                 AuxItemSearchFrameItemStopButton:Hide()
                 AuxItemSearchFrameItemRefreshButton:Show()
                 refresh = true
@@ -721,7 +721,7 @@ function find_auction(entry, buyout_mode, express_mode)
 				if express_mode then
 					if GetMoney() >= amount then
 						PlaceAuctionBid('list', auction_info.index, amount)
-                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(amount)..'.')
+                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..'.')
 						entry.gone = true
 						refresh = true
 					else
@@ -733,7 +733,7 @@ function find_auction(entry, buyout_mode, express_mode)
                         if create_auction_record(Aux.info.auction(auction_info.index)).signature == entry.signature then
                             if GetMoney() >= amount then
                                 PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))
-                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))..'.')
+                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..'.')
                                 entry.gone = true
                                 refresh = true
                             else

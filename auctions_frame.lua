@@ -252,14 +252,14 @@ function private.find_auction(entry, express_mode)
                 if express_mode then
                     CancelAuction(auction_info.index)
                     entry.gone = true
-                    Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity)
+                    Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity..'.')
                     Aux.scan.abort()
                 else
                     public.dialog_action = function()
                         if private.create_record(Aux.info.auction(auction_info.index, 'owner')).signature == entry.signature then
                             CancelAuction(auction_info.index)
                             entry.gone = true
-                            Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity)
+                            Aux.log('Canceled'..auction_record.hyperlink..' x '..auction_record.aux_quantity..'.')
                             Aux.scan.abort()
                             AuxAuctionsFrameListingDialog:Hide()
                             public.update_listing()

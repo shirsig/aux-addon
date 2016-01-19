@@ -283,7 +283,7 @@ function private.find_auction(entry, action, express_mode)
                 if express_mode then
                     if GetMoney() >= amount then
                         PlaceAuctionBid('bidder', auction_info.index, amount)
-                        Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(amount)..'.')
+                        Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..'.')
                         entry.gone = true
                     else
                         Aux.log((action == 'buyout' and 'Purchase' or 'Bid')..' failed: Not enough money.')
@@ -294,7 +294,7 @@ function private.find_auction(entry, action, express_mode)
                         if private.create_record(Aux.info.auction(auction_info.index, 'bidder')).signature == entry.signature then
                             if GetMoney() >= amount then
                                 PlaceAuctionBid('bidder', auction_info.index, action == 'bid' and MoneyInputFrame_GetCopper(AuxBidsFrameListingDialogContentBid) or amount)
-                                Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..' at '..Aux.util.money_string(action == 'bid' and MoneyInputFrame_GetCopper(AuxBidsFrameListingDialogContentBid) or amount)..'.')
+                                Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..'.')
                                 entry.gone = true
                             else
                                 Aux.log('Not enough money.')
