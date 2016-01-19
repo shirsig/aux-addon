@@ -76,7 +76,7 @@ function public.market_value(item_key)
 
 	if day_count == 0 then
 		return daily_market_value
-	elseif correlation < (trend < 1 and trend or 1 / trend) then -- history of bad predictions
+	elseif correlation < 0.8 then -- history of bad predictions
 		return EMA7
 	else
 		return EMA7 * trend

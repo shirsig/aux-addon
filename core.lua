@@ -1,4 +1,4 @@
-AuxVersion = '2.2.16'
+AuxVersion = '2.2.17'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -52,7 +52,7 @@ function Aux_OnLoad()
                     market_value_line = 'Market Value: '..Aux.util.money_string(market_value)
                 else
                     market_value_line = 'Market Value: '..Aux.util.money_string(market_value * count)..' / '..Aux.util.money_string(market_value)
-                    if correlation < (trend < 1 and trend or 1 / trend) then -- unreliable
+                    if correlation < 0.8 then -- unreliable
                         market_value_line = market_value_line..' (?)'
                     elseif trend_percentage > 0 then
                         market_value_line = market_value_line..' (+'..trend_percentage..'%)'
