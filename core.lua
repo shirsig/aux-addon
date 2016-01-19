@@ -1,4 +1,4 @@
-AuxVersion = '2.2.14'
+AuxVersion = '2.2.15'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -53,7 +53,7 @@ function Aux_OnLoad()
                 else
                     market_value_line = 'Market Value: '..Aux.util.money_string(market_value * count)..' / '..Aux.util.money_string(market_value)
                     if trend_percentage > 0 then
-                        market_value_line = market_value_line..' ('..GREEN_FONT_COLOR_CODE..'+'..trend_percentage..'%'..GREEN_COLOR_CODE_CLOSE..')'
+                        market_value_line = market_value_line..' ('..GREEN_FONT_COLOR_CODE..'+'..trend_percentage..'%'..FONT_COLOR_CODE_CLOSE..')'
                     elseif trend_percentage < 0 then
                         market_value_line = market_value_line..' ('..RED_FONT_COLOR_CODE..trend_percentage..'%'..FONT_COLOR_CODE_CLOSE..')'
                     end
