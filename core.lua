@@ -1,4 +1,4 @@
-AuxVersion = '2.2.13'
+AuxVersion = '2.2.14'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -36,7 +36,7 @@ function Aux_OnLoad()
             local item_id, suffix_id = EnhTooltip.BreakLink(link)
             local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
-            local auction_count, day_count, TDA, EMA5, EMA30 = Aux.history.get_price_data(item_key)
+            local auction_count, day_count, TDA, EMA7, trend, variance = Aux.history.price_data(item_key)
 
             if auction_count == 0 then
                 EnhTooltip.AddLine('Never seen at auction', nil, true)
@@ -45,21 +45,30 @@ function Aux_OnLoad()
                 EnhTooltip.AddLine('Seen '..auction_count..' '..Aux_PluralizeIf('time', auction_count)..' at auction', nil, true)
                 EnhTooltip.LineColor(0.5, 0.8, 0.1)
 
-                local market_value = Aux.history.get_market_value(item_key)
+                local market_value = Aux.history.market_value(item_key)
+                local trend_percentage = ceil((1 - trend) * 100)
+                local market_value_line
                 if count == 1 then
-                    EnhTooltip.AddLine('Market Value: '..Aux.util.money_string(market_value), nil, true)
+                    market_value_line = 'Market Value: '..Aux.util.money_string(market_value)
                 else
-                    EnhTooltip.AddLine('Market Value: '..Aux.util.money_string(market_value * count)..' / '..Aux.util.money_string(market_value), nil, true)
+                    market_value_line = 'Market Value: '..Aux.util.money_string(market_value * count)..' / '..Aux.util.money_string(market_value)
+                    if trend_percentage > 0 then
+                        market_value_line = market_value_line..' ('..GREEN_FONT_COLOR_CODE..'+'..trend_percentage..'%'..GREEN_COLOR_CODE_CLOSE..')'
+                    elseif trend_percentage < 0 then
+                        market_value_line = market_value_line..' ('..RED_FONT_COLOR_CODE..trend_percentage..'%'..FONT_COLOR_CODE_CLOSE..')'
+                    end
                 end
+                EnhTooltip.AddLine(market_value_line, nil, true)
                 EnhTooltip.LineColor(0.1,0.8,0.5)
 
 --                EnhTooltip.AddLine('TDA: '..(TDA > 0 and Aux.util.money_string(TDA) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
 --                EnhTooltip.LineColor(0.1,0.8,0.5)
---                EnhTooltip.AddLine('EMA5: '..(EMA5 > 0 and Aux.util.money_string(EMA5) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
+--                EnhTooltip.AddLine('EMA7: '..(EMA7 > 0 and Aux.util.money_string(EMA7) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
 --                EnhTooltip.LineColor(0.1,0.8,0.5)
---                EnhTooltip.AddLine('EMA30: '..(EMA30 > 0 and Aux.util.money_string(EMA30) or RED_FONT_COLOR_CODE..'n/a'..FONT_COLOR_CODE_CLOSE), nil, true)
+--                EnhTooltip.AddLine('Trend: '..trend_percentage..'%', nil, true)
 --                EnhTooltip.LineColor(0.1,0.8,0.5)
-
+--                EnhTooltip.AddLine('SD: '..sqrt(variance), nil, true)
+--                EnhTooltip.LineColor(0.1,0.8,0.5)
             end
         end)
     end

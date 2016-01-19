@@ -2,7 +2,7 @@ local private, public = {}, {}
 Aux.history = public
 
 private.PUSH_INTERVAL = 57600
-private.NEW_RECORD = '0#0#0#0#'
+private.NEW_RECORD = '0#0#0#1#0#'
 
 function private.load_data()
 	local dataset = Aux.persistence.load_dataset()
@@ -10,15 +10,16 @@ function private.load_data()
 	return dataset.history
 end
 
-function public.read_record(item_key)
+function private.read_record(item_key)
 	local data = private.load_data()
 	local record = Aux.persistence.deserialize(data.item_data[item_key] or private.NEW_RECORD, '#')
 	return {
 		auction_count = tonumber(record[1]),
 		day_count = tonumber(record[2]),
-		EMA5 = tonumber(record[3]),
-		EMA30 = tonumber(record[4]),
-		histogram = Aux.util.map(Aux.persistence.deserialize(record[5], ';', 'x'), function(value)
+		EMA7 = tonumber(record[3]),
+		trend = tonumber(record[4]),
+		variance = tonumber(record[5]),
+		histogram = Aux.util.map(Aux.persistence.deserialize(record[6], ';', 'x'), function(value)
 			return tonumber(value)
 		end),
 	}
@@ -29,8 +30,9 @@ function private.write_record(item_key, record)
 	data.item_data[item_key] = Aux.persistence.serialize({
 		record.auction_count,
 		record.day_count,
-		record.EMA5,
-		record.EMA30,
+		record.EMA7,
+		record.trend,
+		record.variance,
 		Aux.persistence.serialize(record.histogram, ';', 'x'),
 	},'#')
 end
@@ -49,7 +51,7 @@ function public.process_auction(auction_info)
 
 	local buyout = auction_info.buyout_price / auction_info.aux_quantity
 
-	local item_record = public.read_record(auction_info.item_key)
+	local item_record = private.read_record(auction_info.item_key)
 
 	item_record.auction_count = item_record.auction_count + 1
 
@@ -64,18 +66,18 @@ function public.process_auction(auction_info)
 	private.write_record(auction_info.item_key, item_record)
 end
 
-function public.get_price_data(item_key)
-	local item_record = public.read_record(item_key)
-	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), item_record.EMA5, item_record.EMA30
+function public.price_data(item_key)
+	local item_record = private.read_record(item_key)
+	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), item_record.EMA7, item_record.trend, item_record.variance
 end
 
-function public.get_market_value(item_key)
-	local auction_count, day_count, daily_market_value, EMA5, EMA30 = public.get_price_data(item_key)
+function public.market_value(item_key)
+	local auction_count, day_count, daily_market_value, EMA7, trend, variance = public.price_data(item_key)
 
 	if day_count == 0 then
 		return daily_market_value
 	else
-		return EMA5
+		return EMA7 * trend
 	end
 end
 
@@ -110,18 +112,23 @@ function private.push_data()
 
 	for item_key, _ in pairs(item_data) do
 
-		local item_record = public.read_record(item_key)
+		local item_record = private.read_record(item_key)
 
 		if getn(item_record.histogram) ~= 0 then
 
 			local daily_market_value = private.daily_market_value(item_record.histogram)
 
 			if item_record.day_count == 0 then
-				item_record.EMA5 = daily_market_value
-				item_record.EMA30 = daily_market_value
+				item_record.EMA7 = daily_market_value
+				item_record.trend = 1
+				item_record.variance = 0
 			else
-				item_record.EMA5 = 2/3 * item_record.EMA5 + 1/3 * daily_market_value
-				item_record.EMA30 = 13/14 * item_record.EMA30 + 1/14 * daily_market_value
+				local new_trend = daily_market_value / item_record.EMA7
+				local new_variance = (daily_market_value - item_record.EMA7) ^ 2
+
+				item_record.EMA7 = 3/4 * item_record.EMA7 + 1/4 * daily_market_value
+				item_record.trend = 3/4 * item_record.trend + 1/4 * new_trend
+				item_record.variance = 3/4 * item_record.variance + 1/4 * new_variance
 			end
 
 			item_record.day_count = item_record.day_count + 1
@@ -134,7 +141,7 @@ function private.push_data()
 	data.next_push = time() + private.PUSH_INTERVAL
 end
 
---function private.max_heap(array)
+--function private.max_heap(array) -- might use a max heap to keep track of the n smallest values of the day instead of the histogram calculation
 --	local self = {}
 --
 --	local ROOT = 1
@@ -160,7 +167,6 @@ end
 --	end
 --
 --	function self.extract(signature)
---		return data[signature] ~= nil and data[signature] >= time()
 --	end
 --
 --	return self

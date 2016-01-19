@@ -15,7 +15,6 @@ stack.lua
 post.lua
 sheet.lua
 history.lua
-stat_histogram.lua
 info.xml
 completion.xml
 
