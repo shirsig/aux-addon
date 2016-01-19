@@ -1,4 +1,4 @@
-AuxVersion = '2.2.15'
+AuxVersion = '2.2.16'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -36,7 +36,7 @@ function Aux_OnLoad()
             local item_id, suffix_id = EnhTooltip.BreakLink(link)
             local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
-            local auction_count, day_count, TDA, EMA7, trend, variance = Aux.history.price_data(item_key)
+            local auction_count, day_count, TDA, EMA7, trend, correlation = Aux.history.price_data(item_key)
 
             if auction_count == 0 then
                 EnhTooltip.AddLine('Never seen at auction', nil, true)
@@ -52,7 +52,9 @@ function Aux_OnLoad()
                     market_value_line = 'Market Value: '..Aux.util.money_string(market_value)
                 else
                     market_value_line = 'Market Value: '..Aux.util.money_string(market_value * count)..' / '..Aux.util.money_string(market_value)
-                    if trend_percentage > 0 then
+                    if correlation < (trend < 1 and trend or 1 / trend) then -- unreliable
+                        market_value_line = market_value_line..' (?)'
+                    elseif trend_percentage > 0 then
                         market_value_line = market_value_line..' (+'..trend_percentage..'%)'
                     elseif trend_percentage < 0 then
                         market_value_line = market_value_line..' ('..trend_percentage..'%)'

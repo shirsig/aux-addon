@@ -2,7 +2,7 @@ local private, public = {}, {}
 Aux.history = public
 
 private.PUSH_INTERVAL = 57600
-private.NEW_RECORD = '0#0#0#1#0#'
+private.NEW_RECORD = '0#0#0#1#1#'
 
 function private.load_data()
 	local dataset = Aux.persistence.load_dataset()
@@ -18,7 +18,7 @@ function private.read_record(item_key)
 		day_count = tonumber(record[2]),
 		EMA7 = tonumber(record[3]),
 		trend = tonumber(record[4]),
-		variance = tonumber(record[5]),
+		correlation = tonumber(record[5]),
 		histogram = Aux.util.map(Aux.persistence.deserialize(record[6], ';', 'x'), function(value)
 			return tonumber(value)
 		end),
@@ -32,7 +32,7 @@ function private.write_record(item_key, record)
 		record.day_count,
 		record.EMA7,
 		record.trend,
-		record.variance,
+		record.correlation,
 		Aux.persistence.serialize(record.histogram, ';', 'x'),
 	},'#')
 end
@@ -68,11 +68,11 @@ end
 
 function public.price_data(item_key)
 	local item_record = private.read_record(item_key)
-	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), item_record.EMA7, item_record.trend, item_record.variance
+	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), item_record.EMA7, item_record.trend, item_record.correlation
 end
 
 function public.market_value(item_key)
-	local auction_count, day_count, daily_market_value, EMA7, trend, variance = public.price_data(item_key)
+	local auction_count, day_count, daily_market_value, EMA7, trend, correlation = public.price_data(item_key)
 
 	if day_count == 0 then
 		return daily_market_value
@@ -120,15 +120,14 @@ function private.push_data()
 
 			if item_record.day_count == 0 then
 				item_record.EMA7 = daily_market_value
-				item_record.trend = 1
-				item_record.variance = 0
 			else
 				local new_trend = daily_market_value / item_record.EMA7
-				local new_variance = (daily_market_value - item_record.EMA7) ^ 2
+				local prediction = item_record.EMA7 * item_record.trend
+				local new_correlation =  min(prediction, daily_market_value) / max(prediction, daily_market_value)
 
 				item_record.EMA7 = 3/4 * item_record.EMA7 + 1/4 * daily_market_value
 				item_record.trend = 3/4 * item_record.trend + 1/4 * new_trend
-				item_record.variance = 3/4 * item_record.variance + 1/4 * new_variance
+				item_record.correlation = 3/4 * item_record.correlation + 1/4 * new_correlation
 			end
 
 			item_record.day_count = item_record.day_count + 1
