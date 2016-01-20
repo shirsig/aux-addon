@@ -338,7 +338,7 @@
 
     <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent">
         <Size>
-            <AbsDimension x="850" y="445"/>
+            <AbsDimension x="850" y="414"/>
         </Size>
         <Anchors>
             <Anchor point="LEFT">
@@ -492,7 +492,7 @@
                 </Scripts>
             </Button>
             <Frame name="AuxLogFrame" inherits="OptionFrameBoxTemplate">
-                <Size><AbsDimension x="400" y="71"/></Size>
+                <Size><AbsDimension x="400" y="40"/></Size>
                 <Anchors>
                     <Anchor point="LEFT">
                         <Offset>
@@ -522,12 +522,12 @@
                         <Anchors>
                             <Anchor point="TOPLEFT">
                                 <Offset>
-                                    <AbsDimension x="8" y="-28"/>
+                                    <AbsDimension x="8" y="-15"/>
                                 </Offset>
                             </Anchor>
                             <Anchor point="BOTTOMRIGHT">
                                 <Offset>
-                                    <AbsDimension x="-8" y="28"/>
+                                    <AbsDimension x="-8" y="15"/>
                                 </Offset>
                             </Anchor>
                         </Anchors>
@@ -546,7 +546,7 @@
                                 end
                             </OnMouseWheel>
                         </Scripts>
-                        <FontString inherits="GameFontNormalLarge" justifyH="CENTER"/>
+                        <FontString inherits="GameFontNormal" justifyH="CENTER"/>
                     </ScrollingMessageFrame>
                 </Frames>
             </Frame>
