@@ -451,7 +451,7 @@ public.views = {
                 end,
             },
         },
-        sort_order = {},
+        sort_order = {{column = 5, order = 'ascending'}},
 	},
 }
 

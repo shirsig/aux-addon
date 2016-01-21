@@ -512,7 +512,7 @@ public.views = {
                 end,
             },
         },
-        sort_order = {{column = 1, order = 'ascending' }},
+        sort_order = {{column = 1, order = 'ascending' }, {column = 7, order = 'ascending' }},
 	},
 }
 

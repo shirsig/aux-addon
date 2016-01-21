@@ -145,7 +145,8 @@ function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor, x_offset
     else
         private.anchor_cursor = false
     end
-    AuxTooltip:SetOwner(owner, anchor)
+    GameTooltip_SetDefaultAnchor(AuxTooltip, UIParent)
+--    AuxTooltip:SetOwner(owner, anchor)
 
     AuxTooltip:SetHyperlink(itemstring)
 

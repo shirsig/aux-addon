@@ -48,9 +48,9 @@ function Aux_OnLoad()
                 local market_value = Aux.history.market_value(item_key)
                 local market_value_line
                 if count == 1 then
-                    market_value_line = 'Market Value: '..Aux.util.money_string(market_value)
+                    market_value_line = 'Market Value: '..EnhTooltip.GetTextGSC(market_value)
                 else
-                    market_value_line = 'Market Value: '..Aux.util.money_string(market_value * count)..' / '..Aux.util.money_string(market_value)
+                    market_value_line = 'Market Value: '..EnhTooltip.GetTextGSC(market_value * count)..' / '..EnhTooltip.GetTextGSC(market_value)
                 end
 
                 EnhTooltip.AddLine(market_value_line, nil, true)
