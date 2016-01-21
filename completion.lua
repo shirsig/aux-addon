@@ -9,7 +9,9 @@ function fuzzy(input)
 	local uppercase_input = strupper(input)
 	local pattern = '(.*)'
 	for i=1,strlen(uppercase_input) do
-		pattern = pattern .. string.sub(uppercase_input, i, i) .. '(.*)'
+		if strfind(string.sub(uppercase_input, i, i), '%a') then
+			pattern = pattern .. string.sub(uppercase_input, i, i) .. '(.*)'
+		end
 	end
 	return function(item_name)
 		local match = { string.find(strupper(item_name), pattern) }
