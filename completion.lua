@@ -9,7 +9,7 @@ function fuzzy(input)
 	local uppercase_input = strupper(input)
 	local pattern = '(.*)'
 	for i=1,strlen(uppercase_input) do
-		if strfind(string.sub(uppercase_input, i, i), '%a') then
+		if strfind(string.sub(uppercase_input, i, i), '%a') or strfind(string.sub(uppercase_input, i, i), '%s') then
 			pattern = pattern .. string.sub(uppercase_input, i, i) .. '(.*)'
 		end
 	end
