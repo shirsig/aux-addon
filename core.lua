@@ -1,4 +1,4 @@
-AuxVersion = '2.2.20'
+AuxVersion = '2.2.21'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
