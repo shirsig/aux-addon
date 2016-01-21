@@ -2,7 +2,7 @@ local private, public = {}, {}
 Aux.history = public
 
 private.PUSH_INTERVAL = 57600
-private.NEW_RECORD = '0#0#0#1#1#'
+private.NEW_RECORD = '0#0#0#'
 
 function private.load_data()
 	local dataset = Aux.persistence.load_dataset()
@@ -17,9 +17,7 @@ function private.read_record(item_key)
 		auction_count = tonumber(record[1]),
 		day_count = tonumber(record[2]),
 		EMA7 = tonumber(record[3]),
-		trend = tonumber(record[4]),
-		correlation = tonumber(record[5]),
-		histogram = Aux.util.map(Aux.persistence.deserialize(record[6], ';', 'x'), function(value)
+		histogram = Aux.util.map(Aux.persistence.deserialize(record[4], ';', 'x'), function(value)
 			return tonumber(value)
 		end),
 	}
@@ -31,8 +29,6 @@ function private.write_record(item_key, record)
 		record.auction_count,
 		record.day_count,
 		record.EMA7,
-		record.trend,
-		record.correlation,
 		Aux.persistence.serialize(record.histogram, ';', 'x'),
 	},'#')
 end
@@ -68,18 +64,18 @@ end
 
 function public.price_data(item_key)
 	local item_record = private.read_record(item_key)
-	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), item_record.EMA7, item_record.trend, item_record.correlation
+	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), item_record.EMA7
 end
 
 function public.market_value(item_key)
-	local auction_count, day_count, daily_market_value, EMA7, trend, correlation = public.price_data(item_key)
+	local auction_count, day_count, daily_market_value, EMA7 = public.price_data(item_key)
 
-	if day_count == 0 then
+	if auction_count == 0 then
+		return nil
+	elseif day_count == 0 then
 		return daily_market_value
-	elseif correlation < 0.8 then -- history of bad predictions
-		return EMA7
 	else
-		return EMA7 * trend
+		return EMA7
 	end
 end
 
@@ -121,15 +117,9 @@ function private.push_data()
 			local daily_market_value = private.daily_market_value(item_record.histogram)
 
 			if item_record.day_count == 0 then
-				item_record.EMA7 = daily_market_value
+				item_record.EMA7 = Aux.round(daily_market_value)
 			else
-				local new_trend = daily_market_value / item_record.EMA7
-				local prediction = item_record.EMA7 * item_record.trend
-				local new_correlation =  min(prediction, daily_market_value) / max(prediction, daily_market_value)
-
-				item_record.EMA7 = 3/4 * item_record.EMA7 + 1/4 * daily_market_value
-				item_record.trend = 3/4 * item_record.trend + 1/4 * new_trend
-				item_record.correlation = 3/4 * item_record.correlation + 1/4 * new_correlation
+				item_record.EMA7 = Aux.round(3/4 * item_record.EMA7 + 1/4 * daily_market_value)
 			end
 
 			item_record.day_count = item_record.day_count + 1

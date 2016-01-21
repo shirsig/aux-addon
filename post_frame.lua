@@ -388,28 +388,27 @@ function update_recommendation()
 		MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', floor(current_auction.unit_vendor_price * 0.05 * (current_auction.charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
 		
 		if existing_auctions[current_auction.key] and existing_auctions[current_auction.key].selected then
---			if not existing_auctions[current_auction.key].created or GetTime() - existing_auctions[current_auction.key].created > 1800 then
---                AuxSellParametersStrategyDropDownStaleWarning:SetText('Stale data!') -- data older than half an hour marked as stale
---			end
-		
+
 			local new_buyout_price = existing_auctions[current_auction.key].selected.unit_buyout_price * get_stack_size_slider_value()
 
 			if existing_auctions[current_auction.key].selected.yours == 0 then
 				new_buyout_price = undercut(new_buyout_price)
 			end
-			
-			local new_start_price = new_buyout_price * 0.95
 
-            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux_Round(new_start_price)))
-            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux_Round(new_buyout_price)))
---        elseif UIDropDownMenu_GetSelectedValue(AuxSellParametersStrategyDropDown) == HISTORICAL then
---            local market_price = Aux.history.get_price_suggestion(current_auction.key, current_auction.aux_quantity)
---            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, Aux_Round(market_price * 0.95))
---            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, market_price)
-        elseif existing_auctions[current_auction.key] then
-            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux_Round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 1.053)))
-            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux_Round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 4)))
-        else
+            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux.round(new_buyout_price * 0.95)))
+            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux.round(new_buyout_price)))
+
+        elseif existing_auctions[current_auction.key] then -- unsuccessful search
+
+            local market_value = Aux.history.market_value(current_auction.key)
+            if market_value then
+                MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux.round(market_value * 0.95)))
+                MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux.round(market_value)))
+            else
+                MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux.round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 1.053)))
+                MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux.round(current_auction.unit_vendor_price * (current_auction.charges and 1 or get_stack_size_slider_value()) * 4)))
+            end
+        else -- no search yet
             MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 0)
             MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
         end
@@ -664,7 +663,7 @@ end
 
 function report(hyperlink, aux_quantity, buyout_price, posted)
 	Aux.log(string.format(
-        '%i %s of %s x %i posted at %s.',
+        '%i %s of %s (%i) posted at %s.',
         posted,
         Aux_PluralizeIf('auction', posted),
         hyperlink,

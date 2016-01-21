@@ -744,7 +744,7 @@ function find_auction(entry, buyout_mode, express_mode)
 				if express_mode then
 					if GetMoney() >= amount then
 						PlaceAuctionBid('list', auction_info.index, amount)
-                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..'.')
+                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' ('..auction_record.aux_quantity..').')
 						entry.gone = true
 						refresh = true
 					else
@@ -756,7 +756,7 @@ function find_auction(entry, buyout_mode, express_mode)
                         if create_auction_record(Aux.info.auction(auction_info.index)).signature == entry.signature then
                             if GetMoney() >= amount then
                                 PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxFilterSearchFrameResultsConfirmationContentBid))
-                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' x '..auction_record.aux_quantity..'.')
+                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' ('..auction_record.aux_quantity..').')
                                 entry.gone = true
                                 refresh = true
                             else
@@ -817,7 +817,7 @@ function create_auction_record(auction_info, current_page)
 	local aux_quantity = auction_info.charges or auction_info.count
 	local bid = (auction_info.current_bid > 0 and auction_info.current_bid or auction_info.min_bid) + auction_info.min_increment
 	local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
-	local buyout_price_per_unit = buyout_price and Aux_Round(auction_info.buyout_price / aux_quantity)
+	local buyout_price_per_unit = buyout_price and Aux.round(auction_info.buyout_price / aux_quantity)
     local status
     if auction_info.current_bid == 0 then
         status = 'No Bid'
@@ -848,7 +848,7 @@ function create_auction_record(auction_info, current_page)
         itemstring = auction_info.itemstring,
         page = current_page,
         bid = bid,
-        bid_per_unit = Aux_Round(bid / aux_quantity),
+        bid_per_unit = Aux.round(bid / aux_quantity),
         owner = auction_info.owner,
         duration = auction_info.duration,
         usable = auction_info.usable,
