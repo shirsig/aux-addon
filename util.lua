@@ -51,14 +51,14 @@ function Aux_PluralizeIf(word, count)
     end
 end
 
-function Aux.util.without_sound(f)
+function Aux.util.without_errors(f)
     local orig = UIErrorsFrame.AddMessage
     UIErrorsFrame.AddMessage = Aux.util.pass
     f()
     UIErrorsFrame.AddMessage = orig
 end
 
-function Aux.util.without_errors(f)
+function Aux.util.without_sound(f)
     local orig = GetCVar('MasterSoundEffects')
     SetCVar('MasterSoundEffects', false)
     f()

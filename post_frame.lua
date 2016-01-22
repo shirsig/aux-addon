@@ -492,8 +492,8 @@ function update_inventory_data()
 
                 local auction_sell_item
 
-                Aux.util.without_sound(function()
-                    Aux.util.without_errors(function()
+                Aux.util.without_errors(function()
+                    Aux.util.without_sound(function()
 
                         ClearCursor()
                         PickupContainerItem(slot.bag, slot.bag_slot)
