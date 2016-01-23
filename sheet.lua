@@ -111,10 +111,10 @@ function public.create(params)
 	for i = 1,getn(params.columns) do
 		local button = CreateFrame('Button', nil, content)
 		if i == 1 then
-			button:SetPoint('TOPLEFT', content, 'TOPLEFT', 5, 0)
+			button:SetPoint('TOPLEFT', content, 'TOPLEFT', 5, params.plain and 16 or 0)
 			total_width = total_width + 5
 		else
-			button:SetPoint('TOPLEFT', content, 'TOPLEFT', total_width + 3, 0)
+			button:SetPoint('TOPLEFT', content, 'TOPLEFT', total_width + 3, params.plain and 16 or 0)
 			total_width = total_width + 3
 		end
 		local label = content:CreateFontString(nil, 'OVERLAY', 'GameFontHighlight')
@@ -162,6 +162,12 @@ function public.create(params)
 		label.sort_texture = sort_texture
 		label.background = background
 		labels[i] = label
+
+		if params.plain then
+			for _, obj in ipairs({button, label, texture, sort_texture, background}) do
+				obj:Hide()
+			end
+		end
 	end
 	total_width = total_width + 5
     params.frame:SetWidth(total_width)

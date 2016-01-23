@@ -12,25 +12,25 @@
 
     <Frame name="AuxHistoryFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
         <Frames>
-            <Button name="AuxHistoryScanButton" inherits="UIPanelButtonTemplate" text="Scan">
-                <Size><AbsDimension x="90" y="26"/></Size>
-                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxAuctionFrameButton"><Offset><AbsDimension x="-25" y="0"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnClick>
-                        Aux.history.start_scan()
-                    </OnClick>
-                </Scripts>
-            </Button>
+            <!--<Button name="AuxHistoryScanButton" inherits="UIPanelButtonTemplate" text="Scan">-->
+                <!--<Size><AbsDimension x="90" y="26"/></Size>-->
+                <!--<Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxAuctionFrameButton"><Offset><AbsDimension x="-25" y="0"/></Offset></Anchor></Anchors>-->
+                <!--<Scripts>-->
+                    <!--<OnClick>-->
+                        <!--Aux.history.start_scan()-->
+                    <!--</OnClick>-->
+                <!--</Scripts>-->
+            <!--</Button>-->
 
-            <Button name="AuxHistoryStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
-                <Size><AbsDimension x="90" y="26"/></Size>
-                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxAuctionFrameButton"><Offset><AbsDimension x="-25" y="0"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnClick>
-                        Aux.history.stop_scan()
-                    </OnClick>
-                </Scripts>
-            </Button>
+            <!--<Button name="AuxHistoryStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">-->
+                <!--<Size><AbsDimension x="90" y="26"/></Size>-->
+                <!--<Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxAuctionFrameButton"><Offset><AbsDimension x="-25" y="0"/></Offset></Anchor></Anchors>-->
+                <!--<Scripts>-->
+                    <!--<OnClick>-->
+                        <!--Aux.history.stop_scan()-->
+                    <!--</OnClick>-->
+                <!--</Scripts>-->
+            <!--</Button>-->
         </Frames>
     </Frame>
 </Ui>

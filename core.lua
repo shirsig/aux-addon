@@ -1,4 +1,4 @@
-AuxVersion = '2.2.23'
+AuxVersion = '2.3.0'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 local lastRightClickAction = GetTime()
@@ -59,14 +59,32 @@ function Aux_OnLoad()
         end)
     end
 
-    local tab_group = Aux.gui.tab_group(AuxFrame, 'BOTTOM')
-    tab_group:create_tab('Item Search')
-    tab_group:create_tab('Filter Search')
-    tab_group:create_tab('Post')
-    tab_group:create_tab('Auctions')
-    tab_group:create_tab('Bids')
-    tab_group.on_select = Aux.on_tab_click
-    tab_group:set_tab(1)
+    do
+        local tab_group = Aux.gui.tab_group(AuxFrame, 'BOTTOM')
+        tab_group:create_tab('Item Search')
+        tab_group:create_tab('Filter Search')
+        tab_group:create_tab('Post')
+        tab_group:create_tab('Auctions')
+        tab_group:create_tab('Bids')
+        tab_group.on_select = Aux.on_tab_click
+        tab_group:set_tab(1)
+    end
+    do
+        local btn = Aux.gui.button(AuxFrame, 12)
+        btn:SetPoint('RIGHT', AuxCloseButton, 'LEFT')
+        btn:SetWidth(60)
+        btn:SetHeight(17)
+        btn:SetText('Default UI')
+        btn:SetScript('OnClick',function()
+            if AuctionFrame:IsVisible() then
+                Aux.blizzard_ui_shown = false
+                HideUIPanel(AuctionFrame)
+            else
+                Aux.blizzard_ui_shown = true
+                ShowUIPanel(AuctionFrame)
+            end
+        end)
+    end
 
     Aux.item_search_frame.on_load()
     Aux.filter_search_frame.on_load()

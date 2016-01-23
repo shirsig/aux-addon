@@ -380,25 +380,25 @@
                     </Anchor>
                 </Anchors>
             </Button>
-            <Button name="AuxAuctionFrameButton" inherits="UIPanelButtonTemplate" text="Default UI">
-                <Size><AbsDimension x="65" y="17"/></Size>
-                <Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButton"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnLoad>
-                        this:SetTextFontObject('GameFontNormalSmall')
-                        this:SetHighlightFontObject('GameFontHighlightSmall')
-                    </OnLoad>
-                    <OnClick>
-                        if AuctionFrame:IsVisible() then
-                            Aux.blizzard_ui_shown = false
-                            HideUIPanel(AuctionFrame)
-                        else
-                        Aux.blizzard_ui_shown = true
-                            ShowUIPanel(AuctionFrame)
-                        end
-                    </OnClick>
-                </Scripts>
-            </Button>
+            <!--<Button name="AuxAuctionFrameButton" inherits="UIPanelButtonTemplate" text="Default UI">-->
+                <!--<Size><AbsDimension x="65" y="17"/></Size>-->
+                <!--<Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButton"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>-->
+                <!--<Scripts>-->
+                    <!--<OnLoad>-->
+                        <!--this:SetTextFontObject('GameFontNormalSmall')-->
+                        <!--this:SetHighlightFontObject('GameFontHighlightSmall')-->
+                    <!--</OnLoad>-->
+                    <!--<OnClick>-->
+                        <!--if AuctionFrame:IsVisible() then-->
+                            <!--Aux.blizzard_ui_shown = false-->
+                            <!--HideUIPanel(AuctionFrame)-->
+                        <!--else-->
+                        <!--Aux.blizzard_ui_shown = true-->
+                            <!--ShowUIPanel(AuctionFrame)-->
+                        <!--end-->
+                    <!--</OnClick>-->
+                <!--</Scripts>-->
+            <!--</Button>-->
             <Frame name="AuxLogFrame" inherits="AuxFrameBoxTemplate">
                 <Size><AbsDimension x="400" y="40"/></Size>
                 <Anchors>
