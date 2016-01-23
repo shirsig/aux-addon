@@ -156,6 +156,7 @@
                                     on_row_click = config.on_row_click,
                                     on_row_enter = config.on_row_enter,
                                     on_row_leave = config.on_row_leave,
+                                    plain = true,
                                 }
                             </OnLoad>
                         </Scripts>

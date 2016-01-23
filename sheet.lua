@@ -78,6 +78,21 @@ function public.create(params)
 	name = name..id
 
 	local scroll_frame = CreateFrame('ScrollFrame', name..'ScrollFrame', params.frame, 'FauxScrollFrameTemplate')
+
+	local scrollbar = getglobal(scroll_frame:GetName()..'ScrollBar')
+	scrollbar:SetPoint('TOPLEFT', scroll_frame, 'TOPRIGHT', 6, -4)
+	scrollbar:SetPoint('BOTTOMLEFT', scroll_frame, 'BOTTOMRIGHT', 6, 4)
+	local thumbTex = scrollbar:GetThumbTexture()
+	thumbTex:SetPoint('CENTER', 0, 0)
+	thumbTex:SetTexture(42/255, 42/255, 42/255, 1)
+	thumbTex:SetHeight(params.frame:GetHeight() * .4)
+	thumbTex:SetWidth(scrollbar:GetWidth())
+	local scrollbg = scrollbar:CreateTexture(nil, 'BACKGROUND')
+	scrollbg:SetAllPoints(scrollbar)
+	scrollbg:SetTexture(24/255, 24/255, 24/255, 1)
+	local scrollbar = getglobal(scroll_frame:GetName()..'ScrollBarScrollUpButton'):Hide()
+	local scrollbar = getglobal(scroll_frame:GetName()..'ScrollBarScrollDownButton'):Hide()
+
 	scroll_frame:SetScript('OnVerticalScroll', function()
 		FauxScrollFrame_OnVerticalScroll(16, function() public.render(this.sheet) end)
 	end)
@@ -104,7 +119,7 @@ function public.create(params)
 		local label = content:CreateFontString(nil, 'OVERLAY', 'GameFontHighlight')
 		label:SetText(params.columns[i].title)
 		local column_width = params.columns[i].width or 30
-		
+
 		total_width = total_width + column_width
 		button:SetWidth(column_width)
 		button:SetHeight(16)
@@ -112,13 +127,13 @@ function public.create(params)
 		button:SetHighlightTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
 		button:SetScript("OnMouseDown", function() Aux.sheet.sort(sheet, this:GetID()) end)
 		button:RegisterForClicks("LeftButtonDown", "RightButtonDown")
-		
+
 		local texture = content:CreateTexture(nil, 'ARTWORK')
 		texture:SetTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
 		texture:SetTexCoord(0.1, 0.8, 0, 1)
 		texture:SetAllPoints(button)
-		button.texture = texture 
-		
+		button.texture = texture
+
 		local sort_texture = button:CreateTexture(nil, 'ARTWORK')
 		sort_texture:SetTexture('Interface\\Buttons\\UI-SortArrow')
 		sort_texture:SetPoint('TOPRIGHT', button, 'TOPRIGHT', 0, 0)
@@ -126,7 +141,7 @@ function public.create(params)
 		sort_texture:SetWidth(12)
 		sort_texture:Hide()
 		button.sort_texture = sort_texture
-		
+
 		local background = content:CreateTexture(nil, 'ARTWORK')
 		background:SetTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
 		-- background:SetTextCoord(0.2, 0.9, 0, 0.9)
@@ -134,13 +149,13 @@ function public.create(params)
 		background:SetPoint('TOPRIGHT', button, 'BOTTOMRIGHT', 0, 0)
 		background:SetPoint('BOTTOM', content, 'BOTTOM', 0, 0)
 		background:SetAlpha(0.2)
-		
+
 		label:SetPoint('TOPLEFT', button, 'TOPLEFT', 0, 0)
 		label:SetPoint('BOTTOMRIGHT', button, 'BOTTOMRIGHT', 0, 0)
 		label:SetJustifyH('CENTER')
 		label:SetJustifyV('CENTER')
 		label:SetTextColor(0.8, 0.8, 0.8)
-		
+
 		label.button = button
 		label.texture = texture
 		label.sort_texture = sort_texture
