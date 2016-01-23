@@ -497,6 +497,42 @@ function public.on_load()
         tab_group.on_select = Aux.item_search_frame.set_view
         tab_group:set_tab(aux_view)
     end
+    do
+        local editbox = Aux.gui.editbox(AuxItemSearchFrameItem, '$parentItemInputBox')
+        editbox.selector = Aux.completion.selector(editbox)
+        editbox:SetPoint('TOP', 0, -28)
+        editbox:SetWidth(185)
+        editbox:SetScript('OnTextChanged', function()
+            this.selector.suggest()
+        end)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                this.selector.previous()
+            else
+                this.selector.next()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            if this.selector.selected_value() then
+                this:ClearFocus()
+            end
+        end)
+        editbox:SetScript('OnEditFocusLost', function()
+            this.selector.close()
+            if this.selector.selected_value() then
+                Aux.item_search_frame.set_item(this.selector.selected_value())
+            end
+            if Aux.item_search_frame.item_set() then
+                this:Hide()
+                this.selector.clear()
+                Aux.item_search_frame.update_item()
+            end
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this.selector.clear()
+            this:ClearFocus()
+        end)
+    end
 end
 
 function public.dialog_cancel()

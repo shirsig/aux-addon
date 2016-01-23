@@ -36,45 +36,45 @@
                         </scripts>
                     </Button>
 
-                    <EditBox name="$parentItemInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="2" y="-28"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                this.selector = Aux.completion.selector(this)
-                                this:SetWidth(185)
-                            </OnLoad>
-                            <OnTextChanged>
-                                this.selector.suggest()
-                            </OnTextChanged>
-                            <OnTabPressed>
-                                if IsShiftKeyDown() then
-                                    this.selector.previous()
-                                else
-                                    this.selector.next()
-                                end
-                            </OnTabPressed>
-                            <OnEnterPressed>
-                                if this.selector.selected_value() then
-                                    this:ClearFocus()
-                                end
-                            </OnEnterPressed>
-                            <OnEditFocusLost>
-                                this.selector.close()
-                                if this.selector.selected_value() then
-                                    Aux.item_search_frame.set_item(this.selector.selected_value())
-                                end
-                                if Aux.item_search_frame.item_set() then
-                                    this:Hide()
-                                    this.selector.clear()
-                                    Aux.item_search_frame.update_item()
-                                end
-                            </OnEditFocusLost>
-                            <OnEscapePressed>
-                                this.selector.clear()
-                                this:ClearFocus()
-                            </OnEscapePressed>
-                        </Scripts>
-                    </EditBox>
+                    <!--<EditBox name="$parentItemInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">-->
+                        <!--<Anchors><Anchor point="TOP"><Offset><AbsDimension x="2" y="-28"/></Offset></Anchor></Anchors>-->
+                        <!--<Scripts>-->
+                            <!--<OnLoad>-->
+                                <!--this.selector = Aux.completion.selector(this)-->
+                                <!--this:SetWidth(185)-->
+                            <!--</OnLoad>-->
+                            <!--<OnTextChanged>-->
+                                <!--this.selector.suggest()-->
+                            <!--</OnTextChanged>-->
+                            <!--<OnTabPressed>-->
+                                <!--if IsShiftKeyDown() then-->
+                                    <!--this.selector.previous()-->
+                                <!--else-->
+                                    <!--this.selector.next()-->
+                                <!--end-->
+                            <!--</OnTabPressed>-->
+                            <!--<OnEnterPressed>-->
+                                <!--if this.selector.selected_value() then-->
+                                    <!--this:ClearFocus()-->
+                                <!--end-->
+                            <!--</OnEnterPressed>-->
+                            <!--<OnEditFocusLost>-->
+                                <!--this.selector.close()-->
+                                <!--if this.selector.selected_value() then-->
+                                    <!--Aux.item_search_frame.set_item(this.selector.selected_value())-->
+                                <!--end-->
+                                <!--if Aux.item_search_frame.item_set() then-->
+                                    <!--this:Hide()-->
+                                    <!--this.selector.clear()-->
+                                    <!--Aux.item_search_frame.update_item()-->
+                                <!--end-->
+                            <!--</OnEditFocusLost>-->
+                            <!--<OnEscapePressed>-->
+                                <!--this.selector.clear()-->
+                                <!--this:ClearFocus()-->
+                            <!--</OnEscapePressed>-->
+                        <!--</Scripts>-->
+                    <!--</EditBox>-->
 
                     <!--<Button name="$parentRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh" disabled="true">-->
                         <!--<Size><AbsDimension x="90" y="26"/></Size>-->

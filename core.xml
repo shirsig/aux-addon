@@ -366,10 +366,9 @@
             <EdgeSize>
                 <AbsValue val="1.5"/>
             </EdgeSize>
-            <Color r="0.09411764705882353" g="0.09411764705882353" b="0.09411764705882353" a="0.93"/>
+            <Color r="0.09411764705882353" g="0.09411764705882353" b="0.09411764705882353"/>
             <!--24/255-->
-            <BorderColor r="0.11764705882352941" g="0.11764705882352941" b="0.11764705882352941"/>
-            <!--30/255-->
+            <BorderColor r="1" g="1" b="1" a="0.03"/>
         </Backdrop>
         <Frames>
             <Button name="AuxCloseButton" inherits="UIPanelCloseButton">

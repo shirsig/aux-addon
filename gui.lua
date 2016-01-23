@@ -8,6 +8,7 @@ m.config = {
     content_color = {42/255, 42/255, 42/255, 1},
     content_border_color = {0, 0, 0, 0},
     content_font = [[Fonts\ARIALN.TTF]],
+    normal_font_size = 15,
 }
 
 function m.button(parent, text_height, name)
@@ -86,12 +87,17 @@ do
             image:SetAllPoints()
             image:SetTexture(unpack(m.config.content_color))
             tab.image = image
-            local bottom = tab:CreateTexture(nil, 'OVERLAY')
-            bottom:SetHeight(2)
-            bottom:SetPoint('BOTTOMLEFT', 1, -1)
-            bottom:SetPoint('BOTTOMRIGHT', -1, -1)
-            bottom:SetTexture(unpack(m.config.frame_color))
-            tab.bottom = bottom
+            local dock = tab:CreateTexture(nil, 'OVERLAY')
+            dock:SetHeight(2)
+            if position == 'TOP' then
+                dock:SetPoint('BOTTOMLEFT', 1, -1)
+                dock:SetPoint('BOTTOMRIGHT', -1, -1)
+            else
+                dock:SetPoint('TOPLEFT', 1, 1)
+                dock:SetPoint('TOPRIGHT', -1, 1)
+            end
+            dock:SetTexture(unpack(m.config.frame_color))
+            tab.dock = dock
             local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
             highlight:SetAllPoints()
             highlight:SetTexture(1, 1, 1, .2)
@@ -149,20 +155,20 @@ do
                 --        TSMAPI.Design:SetWidgetLabelColor(tab.text, true)
                 --        tab:Disable()
                 --        tab.text = tab:GetText()
-                --        tab.bottom:Hide()
+                --        tab.dock:Hide()
                 if tab.group.selected == tab.id then
 --                    TSMAPI.Design:SetWidgetLabelColor(tab.text)
                     tab.text:SetTextColor(255/255, 254/255, 250/255) -- TODO
                     tab:Disable()
                     tab.image:SetTexture(unpack(m.config.frame_color))
-                    tab.bottom:Show()
+                    tab.dock:Show()
                     tab:SetHeight(29)
                 else
 --                    TSMAPI.Design:SetWidgetTextColor(tab.text)
                     tab.text:SetTextColor(255/255, 254/255, 250/255) -- TODO
                     tab:Enable()
                     tab.image:SetTexture(unpack(m.config.content_color))
-                    tab.bottom:Hide()
+                    tab.dock:Hide()
                     tab:SetHeight(24)
                 end
             end
@@ -197,5 +203,47 @@ do
 --            end
 
         return self
+    end
+end
+
+do
+    local id = 0
+    function m.editbox(parent, name)
+        id = id + 1
+
+--        local frame = CreateFrame('Frame', name, parent)
+--        frame:Hide()
+
+        local editbox = CreateFrame('EditBox', name, parent)
+        editbox.selector = Aux.completion.selector(editbox)
+        editbox:SetAutoFocus(false)
+--        editbox:SetScript("OnEnter", Control_OnEnter)
+--        editbox:SetScript("OnLeave", Control_OnLeave)
+--        editbox:SetScript("OnEscapePressed", EditBox_OnEscapePressed)
+--        editbox:SetScript("OnEnterPressed", EditBox_OnEnterPressed)
+--        editbox:SetScript("OnTextChanged", EditBox_OnTextChanged)
+--        editbox:SetScript("OnReceiveDrag", EditBox_OnReceiveDrag)
+--        editbox:SetScript("OnMouseDown", EditBox_OnReceiveDrag)
+--        editbox:SetScript("OnEditFocusGained", EditBox_OnFocusGained)
+--        editbox:SetScript("OnEditFocusLost", EditBox_OnFocusLost)
+        editbox:SetTextInsets(0, 0, 3, 3)
+        editbox:SetMaxLetters(256)
+        editbox:SetHeight(19)
+        editbox:SetFont(m.config.content_font, m.config.normal_font_size)
+        editbox:SetShadowColor(0, 0, 0, 0)
+        editbox:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size})
+        editbox:SetBackdropColor(unpack(m.config.content_color))
+        editbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
+
+--        local label = frame:CreateFontString(nil, 'OVERLAY')
+--        label:SetPoint('TOPLEFT', 0, -2)
+--        label:SetPoint('TOPRIGHT', 0, -2)
+--        label:SetJustifyH('LEFT')
+--        label:SetJustifyV('CENTER')
+--        label:SetHeight(18)
+--        label:SetFont(m.config.content_font, m.config.normal_font_size)
+--        label:SetShadowColor(0, 0, 0, 0)
+
+        return editbox
     end
 end
