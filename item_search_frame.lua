@@ -85,7 +85,10 @@ public.views = {
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function (sheet, row_index)
-            sheet.rows[row_index].highlight:SetAlpha(0)
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            if sheet.data[data_index][1].signature ~= Aux.util.safe_index{private.selected, 'signature'} then
+                sheet.rows[row_index].highlight:SetAlpha(0)
+            end
             AuxTooltip:Hide()
             ResetCursor()
         end,
@@ -101,6 +104,11 @@ public.views = {
         row_setter = function(row, group)
             row.itemstring = Aux.info.itemstring(group[1].item_id, group[1].suffix_id, nil, group[1].enchant_id)
             row.EnhTooltip_info = group[1].EnhTooltip_info
+            if group[1].signature == Aux.util.safe_index{private.selected, 'signature'} then
+                row.highlight:SetAlpha(.5)
+            else
+                row.highlight:SetAlpha(0)
+            end
         end,
         columns = {
             {
@@ -456,26 +464,23 @@ public.views = {
 }
 
 function public.on_close()
-    if AuxItemSearchFrameAuctionsConfirmation:IsVisible() then
-	    public.dialog_cancel()
-    end
 	current_page = nil
 end
 
 function public.on_open()
     public.update_item()
     private.update_recently_searched()
-	update_listing()
     if not private.item_id then
         AuxItemSearchFrameItemRefreshButton:Disable()
     end
+    private.tab_group:set_tab(aux_view)
 end
 
 function public.on_load()
     do
         local btn = Aux.gui.button(AuxItemSearchFrameItem, 15, '$parentRefreshButton')
         btn:SetPoint('BOTTOMLEFT', 8, 15)
-        btn:SetWidth(75)
+        btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Refresh')
         btn:SetScript('OnClick', Aux.item_search_frame.start_search)
@@ -483,7 +488,7 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxItemSearchFrameItem, 15, '$parentStopButton')
         btn:SetPoint('BOTTOMLEFT', 8, 15)
-        btn:SetWidth(75)
+        btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Stop')
         btn:SetScript('OnClick', Aux.item_search_frame.stop_search)
@@ -495,7 +500,7 @@ function public.on_load()
         tab_group:create_tab('Bid')
         tab_group:create_tab('Full')
         tab_group.on_select = Aux.item_search_frame.set_view
-        tab_group:set_tab(aux_view)
+        private.tab_group = tab_group
     end
     do
         local editbox = Aux.gui.editbox(AuxItemSearchFrameItem, '$parentItemInputBox')
@@ -534,7 +539,7 @@ function public.on_load()
         end)
     end
     do
-        local status_bar = Aux.gui.status_bar(AuxItemSearchFrame, 15, 'kekbar')
+        local status_bar = Aux.gui.status_bar(AuxItemSearchFrame)
         status_bar:SetWidth(265)
         status_bar:SetHeight(30)
         status_bar:SetPoint('BOTTOMLEFT', AuxItemSearchFrame, 'BOTTOMLEFT', 6, 6)
@@ -542,13 +547,15 @@ function public.on_load()
         status_bar:set_text('')
         private.status_bar = status_bar
     end
-end
-
-function public.dialog_cancel()
-	Aux.scan.abort()
-    AuxItemSearchFrameAuctionsConfirmation:Hide()
-	update_listing()
-    AuxItemSearchFrameItemRefreshButton:Enable()
+    do
+        local btn = Aux.gui.button(AuxItemSearchFrameItem, 15)
+        btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('Buyout')
+        btn:Disable()
+        private.buyout_button = btn
+    end
 end
 
 function public.stop_search()
@@ -556,6 +563,8 @@ function public.stop_search()
 end
 
 function update_listing()
+
+    private.buyout_button:Disable()
 
     if not AuxItemSearchFrame:IsVisible() then
         return
@@ -678,7 +687,7 @@ function public.start_search()
                 current_page = nil
             end,
             on_page_loaded = function(page, total_pages)
-                private.status_bar:update_status(100 * (page + 1) / total_pages, 0)
+                private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages) -- TODO
                 private.status_bar:set_text(string.format('Scanning (Page %d / %d)', page + 1, total_pages))
 --                Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
                 current_page = page
@@ -720,36 +729,6 @@ function public.start_search()
     end)
 end
 
-function show_dialog(buyout_mode, entry, amount)
-	AuxItemSearchFrameAuctionsConfirmationContentItem.itemstring = Aux.info.itemstring(entry.item_id, entry.suffix_id, entry.unique_id, entry.enchant_id)
-    AuxItemSearchFrameAuctionsConfirmationContentItem.EnhTooltip_info = entry.EnhTooltip_info
-
-    AuxItemSearchFrameAuctionsConfirmationContentActionButton:Disable()
-    AuxItemSearchFrameAuctionsConfirmationContentItemIconTexture:SetTexture(Aux.info.item(entry.item_id).texture)
-    AuxItemSearchFrameAuctionsConfirmationContentItemName:SetText(entry.name)
-	local color = ITEM_QUALITY_COLORS[entry.quality]
-    AuxItemSearchFrameAuctionsConfirmationContentItemName:SetTextColor(color.r, color.g, color.b)
-
-	if entry.aux_quantity > 1 then
-        AuxItemSearchFrameAuctionsConfirmationContentItemCount:SetText(entry.aux_quantity);
-        AuxItemSearchFrameAuctionsConfirmationContentItemCount:Show()
-	else
-        AuxItemSearchFrameAuctionsConfirmationContentItemCount:Hide()
-	end
-	if buyout_mode then
-        AuxItemSearchFrameAuctionsConfirmationContentActionButton:SetText('Buy')
-		MoneyFrame_Update('AuxItemSearchFrameAuctionsConfirmationContentBuyoutPrice', amount)
-        AuxItemSearchFrameAuctionsConfirmationContentBid:Hide()
-        AuxItemSearchFrameAuctionsConfirmationContentBuyoutPrice:Show()
-	else
-        AuxItemSearchFrameAuctionsConfirmationContentActionButton:SetText('Bid')
-		MoneyInputFrame_SetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid, amount)
-        AuxItemSearchFrameAuctionsConfirmationContentBuyoutPrice:Hide()
-        AuxItemSearchFrameAuctionsConfirmationContentBid:Show()
-	end
-    AuxItemSearchFrameAuctionsConfirmation:Show()
-end
-
 function find_auction(entry, buyout_mode, express_mode)
 
 	if entry.gone then
@@ -769,12 +748,12 @@ function find_auction(entry, buyout_mode, express_mode)
         amount = entry.bid
     end
 
-    Aux.log('Searching auction ...')
-	AuxItemSearchFrameItemRefreshButton:Disable()
+    private.status_bar:update_status(0, 0)
+    private.status_bar:set_text('Searching auction...')
 	
-	if not express_mode then
-		show_dialog(buyout_mode, entry, amount)
-	end
+--	if not express_mode then
+--		show_dialog(buyout_mode, entry, amount)
+--	end
 
 	PlaySound('igMainMenuOptionCheckBoxOn')
 	
@@ -794,7 +773,8 @@ function find_auction(entry, buyout_mode, express_mode)
 			if entry.signature == auction_record.signature then
 				ctrl.suspend()
 				found = true
-                Aux.log('Matching auction found.')
+                private.status_bar:update_status(100, 100)
+                private.status_bar:set_text('Auction found')
 
 				if express_mode then
 					if GetMoney() >= amount then
@@ -807,10 +787,10 @@ function find_auction(entry, buyout_mode, express_mode)
 					end
 					Aux.scan.abort()
 				else
-					public.dialog_action = function()
+					private.buyout_button:SetScript('OnClick', function()
                         if create_auction_record(Aux.info.auction(auction_info.index)).signature == entry.signature then
                             if GetMoney() >= amount then
-                                PlaceAuctionBid('list', auction_info.index, buyout_mode and amount or MoneyInputFrame_GetCopper(AuxItemSearchFrameAuctionsConfirmationContentBid))
+                                PlaceAuctionBid('list', auction_info.index, amount)
                                 Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' ('..auction_record.aux_quantity..').')
                                 entry.gone = true
                                 refresh = true
@@ -818,12 +798,11 @@ function find_auction(entry, buyout_mode, express_mode)
                                 Aux.log('Not enough money.')
                             end
                             Aux.scan.abort()
-                            AuxItemSearchFrameItemRefreshButton:Enable()
-                            AuxItemSearchFrameAuctionsConfirmation:Hide()
                             update_listing()
                         end
-					end
-					AuxItemSearchFrameAuctionsConfirmationContentActionButton:Enable()
+                        private.buyout_button:Disable()
+					end)
+                    private.buyout_button:Enable()
 				end
 			end
 		end,
@@ -852,6 +831,9 @@ function find_auction(entry, buyout_mode, express_mode)
 end
 
 function public.on_row_click(entry)
+
+    private.selected = entry
+    update_listing()
 
 	local express_mode = IsAltKeyDown()
 	local buyout_mode = arg1 == 'LeftButton'

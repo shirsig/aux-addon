@@ -99,6 +99,7 @@ function Aux_OnLoad()
 
     Aux.item_search_frame.on_load()
     Aux.filter_search_frame.on_load()
+    Aux.post_frame.on_load()
 end
 
 function Aux_OnEvent()

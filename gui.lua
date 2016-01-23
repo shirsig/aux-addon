@@ -9,8 +9,8 @@ m.config = {
     content_border_color = {0, 0, 0, 0},
     content_font = [[Fonts\ARIALN.TTF]],
     normal_font_size = 15,
-    text_color = { enabled = { 255, 254, 250, 1 }, disabled = { 147, 151, 139, 1 } },
-    label_color = { enabled = { 216, 225, 211, 1 }, disabled = { 150, 148, 140, 1 } },
+    text_color = { enabled = { 255/255, 254/255, 250/255, 1 }, disabled = { 147/255, 151/255, 139/255, 1 } },
+    label_color = { enabled = { 216/255, 225/255, 211/255, 1 }, disabled = { 150/255, 148/255, 140/255, 1 } },
 
 }
 
@@ -24,17 +24,27 @@ function m.button(parent, text_height, name)
     highlight:SetTexture(1, 1, 1, .2)
     highlight:SetBlendMode('BLEND')
     button.highlight = highlight
-    button:Show()
-    local label = button:CreateFontString()
-    label:SetFont(m.config.content_font, text_height)
-    label:SetPoint('CENTER', 0, 0)
-    label:SetJustifyH('CENTER')
-    label:SetJustifyV('CENTER')
-    label:SetHeight(text_height)
-    label:SetTextColor(255/255, 254/255, 250/255)
---    TSM:Hook(button, "Enable", function() TSMAPI.Design:SetWidgetTextColor(label) end, true)
---    TSM:Hook(button, "Disable", function() TSMAPI.Design:SetWidgetTextColor(label, true) end, true)
-    button:SetFontString(label)
+    do
+        local label = button:CreateFontString()
+        label:SetFont(m.config.content_font, text_height)
+        label:SetPoint('CENTER', 0, 0)
+        label:SetJustifyH('CENTER')
+        label:SetJustifyV('CENTER')
+        label:SetHeight(text_height)
+        label:SetTextColor(unpack(m.config.text_color.enabled))
+        button:SetFontString(label)
+    end
+    button.default_Enable = button.Enable
+    function button:Enable()
+        self:GetFontString():SetTextColor(unpack(m.config.text_color.enabled))
+        return self:default_Enable()
+    end
+    button.default_Disable = button.Disable
+    function button:Disable()
+        self:GetFontString():SetTextColor(unpack(m.config.text_color.disabled))
+        return self:default_Disable()
+    end
+
     return button
 end
 
@@ -238,7 +248,7 @@ function m.editbox(parent, name)
     return editbox
 end
 
-function m.status_bar(parent, base_name)
+function m.status_bar(parent)
     local self = CreateFrame('Frame', nil, parent)
 
     local level = parent:GetFrameLevel()
@@ -247,11 +257,11 @@ function m.status_bar(parent, base_name)
 
     do
         -- minor status bar (gray one)
-        local status_bar = CreateFrame('STATUSBAR', base_name..'_minor', self, 'TextStatusBar')
+        local status_bar = CreateFrame('STATUSBAR', nil, self, 'TextStatusBar')
         status_bar:SetOrientation('HORIZONTAL')
         status_bar:SetMinMaxValues(0, 100)
         status_bar:SetAllPoints()
-        status_bar:SetStatusBarTexture('[[Interface\Buttons\WHITE8X8]]')
+        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
         status_bar:SetStatusBarColor(.42, .42, .42, .7)
         status_bar:SetFrameLevel(level + 2)
 --        local ag = status_bar:CreateAnimationGroup()
@@ -265,7 +275,7 @@ function m.status_bar(parent, base_name)
 
     do
         -- major status bar (main blue one)
-        local status_bar = CreateFrame('STATUSBAR', base_name..'_major', self, 'TextStatusBar')
+        local status_bar = CreateFrame('STATUSBAR', nil, self, 'TextStatusBar')
         status_bar:SetOrientation('HORIZONTAL')
         status_bar:SetMinMaxValues(0, 100)
         status_bar:SetAllPoints()

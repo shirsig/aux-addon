@@ -1,5 +1,6 @@
 local private, public = {}, {}
 Aux.sell = public
+Aux.post_frame = public
 
 local existing_auctions = {}
 
@@ -220,6 +221,25 @@ end
 
 function Aux.sell.on_close()
 
+end
+
+function public.on_load()
+    do
+        local btn = Aux.gui.button(AuxSellParameters, 15, '$parentPostButton')
+        btn:SetPoint('BOTTOMLEFT', 8, 15)
+        btn:SetWidth(75)
+        btn:SetHeight(24)
+        btn:SetText('Post')
+        btn:SetScript('OnClick', private.post_auctions)
+    end
+    do
+        local btn = Aux.gui.button(AuxSellParameters, 15, '$parentRefreshButton')
+        btn:SetPoint('LEFT', AuxSellParametersPostButton,'RIGHT', 5, 0)
+        btn:SetWidth(75)
+        btn:SetHeight(24)
+        btn:SetText('Refresh')
+        btn:SetScript('OnClick', private.refresh)
+    end
 end
 
 function Aux.sell.duration_radio_button_on_click(index)
@@ -618,7 +638,7 @@ function AuxSellEntry_OnClick(entry)
 	PlaySound('igMainMenuOptionCheckBoxOn')
 end
 
-function AuxSellParametersRefreshButton_OnClick()
+function private.refresh()
 	Aux.scan.abort(function()
 		refresh_entries()
 		select_entry()

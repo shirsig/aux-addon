@@ -242,24 +242,6 @@
                             </OnLoad>
                         </Scripts>
                     </Frame>
-                    <Button name="$parentPostButton" inherits="UIPanelButtonTemplate" text="Post">
-                        <Size><AbsDimension x="90" y="26"/></Size>
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="8" y="15"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnClick>
-                                Aux.sell.post_auctions()
-                            </OnClick>
-                        </Scripts>
-                    </Button>
-                    <Button name="$parentRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh">
-                        <Size><AbsDimension x="90" y="26"/></Size>
-                        <Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentPostButton"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnClick>
-                                AuxSellParametersRefreshButton_OnClick()
-                            </OnClick>
-                        </Scripts>
-                    </Button>
 				</frames>
 			</frame>
             <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">
