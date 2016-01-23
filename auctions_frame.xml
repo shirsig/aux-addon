@@ -9,12 +9,6 @@
 					<AbsDimension x="400" y="326"/>
 				</Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
-				<Scripts>
-					<OnLoad>
-						this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-						this:SetBackdropColor(0.15, 0.15, 0.15)
-					</OnLoad>
-				</Scripts>
 				<Frames>
                     <Frame name="$parentAuctionListing">
                         <Anchors>

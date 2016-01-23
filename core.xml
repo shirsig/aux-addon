@@ -204,30 +204,27 @@
                     <Anchors>
                         <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
                             <Offset>
-                                <AbsDimension x="9" y="0"/>
+                                <AbsDimension x="9" y="4"/>
                             </Offset>
                         </Anchor>
                     </Anchors>
                 </FontString>
             </Layer>
         </Layers>
-        <Backdrop bgFile="Interface\Tooltips\UI-Tooltip-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
+        <Backdrop bgFile="Interface\Buttons\WHITE8X8" edgeFile="Interface\Buttons\WHITE8X8" tile="true">
             <EdgeSize>
-                <AbsValue val="16"/>
+                <AbsValue val="1.5"/>
             </EdgeSize>
-            <TileSize>
-                <AbsValue val="16"/>
-            </TileSize>
-            <BackgroundInsets>
-                <AbsInset left="5" right="5" top="5" bottom="5"/>
-            </BackgroundInsets>
+            <Color r="0.09411764705882353" g="0.09411764705882353" b="0.09411764705882353"/>
+            <!--24/255-->
+            <BorderColor r="1" g="1" b="1" a="0.03"/>
         </Backdrop>
-        <Scripts>
-            <OnLoad>
-                this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                this:SetBackdropColor(0.15, 0.15, 0.15)
-            </OnLoad>
-        </Scripts>
+        <!--<Scripts>-->
+            <!--<OnLoad>-->
+                <!--this:SetBackdropBorderColor(0.4, 0.4, 0.4)-->
+                <!--this:SetBackdropColor(24/255, 24/255, 24/255)-->
+            <!--</OnLoad>-->
+        <!--</Scripts>-->
     </Frame>
 
     <EditBox name="AuxInputBoxTemplate" autoFocus="false" inherits="InputBoxTemplate" virtual="true">
@@ -349,7 +346,6 @@
         </Anchors>
         <Scripts>
             <OnLoad>
-                this:SetBackdropBorderColor(0.4, 0.4, 0.4)
                 this:RegisterForDrag('LeftButton')
             </OnLoad>
             <OnShow>
@@ -366,16 +362,14 @@
                 this:StopMovingOrSizing()
             </OnDragStop>
         </Scripts>
-        <Backdrop bgFile="Interface\DialogFrame\UI-DialogBox-Background" edgeFile="Interface\Tooltips\UI-Tooltip-Border" tile="true">
-            <BackgroundInsets>
-                <AbsInset left="4" right="4" top="4" bottom="4"/>
-            </BackgroundInsets>
-            <TileSize>
-                <AbsValue val="32"/>
-            </TileSize>
+        <Backdrop bgFile="Interface\Buttons\WHITE8X8" edgeFile="Interface\Buttons\WHITE8X8" tile="true">
             <EdgeSize>
-                <AbsValue val="16"/>
+                <AbsValue val="1.5"/>
             </EdgeSize>
+            <Color r="0.09411764705882353" g="0.09411764705882353" b="0.09411764705882353" a="0.93"/>
+            <!--24/255-->
+            <BorderColor r="0.11764705882352941" g="0.11764705882352941" b="0.11764705882352941"/>
+            <!--30/255-->
         </Backdrop>
         <Frames>
             <Button name="AuxCloseButton" inherits="UIPanelCloseButton">
@@ -406,92 +400,7 @@
                     </OnClick>
                 </Scripts>
             </Button>
-            <Button name="AuxTab1" inherits="AuxBottomTabTemplate" id="1">
-                <Anchors>
-                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT">
-                        <Offset>
-                            <AbsDimension x="7" y="2"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-                <Scripts>
-                    <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Item Search')
-                    </OnLoad>
-                    <OnClick>
-                        Aux.on_tab_click(this:GetID())
-                    </OnClick>
-                </Scripts>
-            </Button>
-            <Button name="AuxTab2" inherits="AuxBottomTabTemplate" id="2">
-                <Anchors>
-                    <Anchor point="LEFT" relativeTo="AuxTab1" relativePoint="RIGHT">
-                        <Offset>
-                            <AbsDimension x="0" y="0"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-                <Scripts>
-                    <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Filter Search')
-                    </OnLoad>
-                    <OnClick>
-                        Aux.on_tab_click(this:GetID())
-                    </OnClick>
-                </Scripts>
-            </Button>
-            <Button name="AuxTab3" inherits="AuxBottomTabTemplate" id="3">
-                <Anchors>
-                    <Anchor point="LEFT" relativeTo="AuxTab2" relativePoint="RIGHT">
-                        <Offset>
-                            <AbsDimension x="0" y="0"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-                <Scripts>
-                    <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Post')
-                    </OnLoad>
-                    <OnClick>
-                        Aux.on_tab_click(this:GetID())
-                    </OnClick>
-                </Scripts>
-            </Button>
-            <Button name="AuxTab4" inherits="AuxBottomTabTemplate" id="4">
-                <Anchors>
-                    <Anchor point="LEFT" relativeTo="AuxTab3" relativePoint="RIGHT">
-                        <Offset>
-                            <AbsDimension x="0" y="0"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-                <Scripts>
-                    <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Auctions')
-                    </OnLoad>
-                    <OnClick>
-                        Aux.on_tab_click(this:GetID())
-                    </OnClick>
-                </Scripts>
-            </Button>
-            <Button name="AuxTab5" inherits="AuxBottomTabTemplate" id="5">
-                <Anchors>
-                    <Anchor point="LEFT" relativeTo="AuxTab4" relativePoint="RIGHT">
-                        <Offset>
-                            <AbsDimension x="0" y="0"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-                <Scripts>
-                    <OnLoad>
-                        getglobal(this:GetName().."Text"):SetText('Bids')
-                    </OnLoad>
-                    <OnClick>
-                        Aux.on_tab_click(this:GetID())
-                    </OnClick>
-                </Scripts>
-            </Button>
-            <Frame name="AuxLogFrame" inherits="OptionFrameBoxTemplate">
+            <Frame name="AuxLogFrame" inherits="AuxFrameBoxTemplate">
                 <Size><AbsDimension x="400" y="40"/></Size>
                 <Anchors>
                     <Anchor point="LEFT">
@@ -513,8 +422,6 @@
                 <Scripts>
                     <OnLoad>
                         this:SetWidth(floor(this:GetParent():GetWidth()/2))
-                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                        this:SetBackdropColor(0.15, 0.15, 0.15)
                     </OnLoad>
                 </Scripts>
                 <Frames>

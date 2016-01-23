@@ -58,6 +58,18 @@ function Aux_OnLoad()
             end
         end)
     end
+
+    local tab_group = Aux.gui.tab_group(AuxFrame, 'BOTTOM')
+    tab_group:create_tab('Item Search')
+    tab_group:create_tab('Filter Search')
+    tab_group:create_tab('Post')
+    tab_group:create_tab('Auctions')
+    tab_group:create_tab('Bids')
+    tab_group.on_select = Aux.on_tab_click
+    tab_group:set_tab(1)
+
+    Aux.item_search_frame.on_load()
+    Aux.filter_search_frame.on_load()
 end
 
 function Aux_OnEvent()
@@ -216,10 +228,6 @@ function Aux.on_tab_click(index)
         Aux.auctions_frame.on_close()
         Aux.bids_frame.on_close()
         Aux.history_frame.on_close()
-
-        for i=1,5 do
-            getglobal('AuxTab'..i):SetAlpha(i == index and 1 or 0.5)
-        end
 
         AuxItemSearchFrame:Hide()
         AuxFilterSearchFrame:Hide()

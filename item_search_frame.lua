@@ -463,12 +463,39 @@ function public.on_close()
 end
 
 function public.on_open()
-    public.set_view(aux_view)
     public.update_item()
     private.update_recently_searched()
 	update_listing()
     if not private.item_id then
         AuxItemSearchFrameItemRefreshButton:Disable()
+    end
+end
+
+function public.on_load()
+    do
+        local btn = Aux.gui.button(AuxItemSearchFrameItem, 15, '$parentRefreshButton')
+        btn:SetPoint('BOTTOMLEFT', 8, 15)
+        btn:SetWidth(75)
+        btn:SetHeight(24)
+        btn:SetText('Refresh')
+        btn:SetScript('OnClick', Aux.item_search_frame.start_search)
+    end
+    do
+        local btn = Aux.gui.button(AuxItemSearchFrameItem, 15, '$parentStopButton')
+        btn:SetPoint('BOTTOMLEFT', 8, 15)
+        btn:SetWidth(75)
+        btn:SetHeight(24)
+        btn:SetText('Stop')
+        btn:SetScript('OnClick', Aux.item_search_frame.stop_search)
+        btn:Hide()
+    end
+    do
+        local tab_group = Aux.gui.tab_group(AuxItemSearchFrameAuctions, 'TOP')
+        tab_group:create_tab('Buy')
+        tab_group:create_tab('Bid')
+        tab_group:create_tab('Full')
+        tab_group.on_select = Aux.item_search_frame.set_view
+        tab_group:set_tab(aux_view)
     end
 end
 
@@ -520,9 +547,6 @@ function hide_sheet()
 end
 
 function public.set_view(view)
-    for i=1,3 do
-        getglobal('AuxItemSearchFrameAuctionsTab'..i):SetAlpha(i == view and 1 or 0.5)
-    end
     aux_view = view
     update_listing()
 end

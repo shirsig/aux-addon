@@ -17,8 +17,6 @@
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
-                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                        this:SetBackdropColor(0.15, 0.15, 0.15)
                         getglobal(this:GetName().."Title"):SetText('Item')
                     </OnLoad>
                 </Scripts>
@@ -78,24 +76,24 @@
                         </Scripts>
                     </EditBox>
 
-                    <Button name="$parentRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh" disabled="true">
-                        <Size><AbsDimension x="90" y="26"/></Size>
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="8" y="15"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnClick>
-                                Aux.item_search_frame.start_search()
-                            </OnClick>
-                        </Scripts>
-                    </Button>
-                    <Button name="$parentStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">
-                        <Size><AbsDimension x="90" y="26"/></Size>
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="8" y="15"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnClick>
-                                Aux.item_search_frame.stop_search()
-                            </OnClick>
-                        </Scripts>
-                    </Button>
+                    <!--<Button name="$parentRefreshButton" inherits="UIPanelButtonTemplate" text="Refresh" disabled="true">-->
+                        <!--<Size><AbsDimension x="90" y="26"/></Size>-->
+                        <!--<Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="8" y="15"/></Offset></Anchor></Anchors>-->
+                        <!--<Scripts>-->
+                            <!--<OnClick>-->
+                                <!--Aux.item_search_frame.start_search()-->
+                            <!--</OnClick>-->
+                        <!--</Scripts>-->
+                    <!--</Button>-->
+                    <!--<Button name="$parentStopButton" inherits="UIPanelButtonTemplate" text="Stop" hidden="true">-->
+                        <!--<Size><AbsDimension x="90" y="26"/></Size>-->
+                        <!--<Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="8" y="15"/></Offset></Anchor></Anchors>-->
+                        <!--<Scripts>-->
+                            <!--<OnClick>-->
+                                <!--Aux.item_search_frame.stop_search()-->
+                            <!--</OnClick>-->
+                        <!--</Scripts>-->
+                    <!--</Button>-->
                     <EditBox name="$parentPageEditBox" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
                         <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="111" y="15"/></Offset></Anchor></Anchors>
                         <Scripts>
@@ -138,8 +136,6 @@
                 <Anchors><Anchor point="BOTTOM" relativePoint="BOTTOM" relativeTo="$parentAuctions"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
-                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                        this:SetBackdropColor(0.15, 0.15, 0.15)
                         getglobal(this:GetName().."Title"):SetText('Recently Searched')
                     </OnLoad>
                 </Scripts>
@@ -170,66 +166,13 @@
                 <Size>
                     <AbsDimension x="620" y="326"/>
                 </Size>
-                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$parentItem"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$parentItem"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
-                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                        this:SetBackdropColor(0.15, 0.15, 0.15)
                         <!--getglobal(this:GetName().."Title"):SetText('Search Results')-->
                     </OnLoad>
                 </Scripts>
                 <Frames>
-                    <Button name="$parentTab1" inherits="AuxTopTabTemplate" id="1">
-                        <Anchors>
-                            <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
-                                <Offset>
-                                    <AbsDimension x="7" y="-2"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText('Buy')
-                            </OnLoad>
-                            <OnClick>
-                                Aux.item_search_frame.set_view(this:GetID())
-                            </OnClick>
-                        </Scripts>
-                    </Button>
-                    <Button name="$parentTab2" inherits="AuxTopTabTemplate" id="2">
-                        <Anchors>
-                            <Anchor point="LEFT" relativeTo="$parentTab1" relativePoint="RIGHT">
-                                <Offset>
-                                    <AbsDimension x="0" y="0"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText('Bid')
-                            </OnLoad>
-                            <OnClick>
-                                Aux.item_search_frame.set_view(this:GetID())
-                            </OnClick>
-                        </Scripts>
-                    </Button>
-                    <Button name="$parentTab3" inherits="AuxTopTabTemplate" id="3">
-                        <Anchors>
-                            <Anchor point="LEFT" relativeTo="$parentTab2" relativePoint="RIGHT">
-                                <Offset>
-                                    <AbsDimension x="0" y="0"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText('Full')
-                            </OnLoad>
-                            <OnClick>
-                                Aux.item_search_frame.set_view(this:GetID())
-                            </OnClick>
-                        </Scripts>
-                    </Button>
                     <Frame name="$parentBuyListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>

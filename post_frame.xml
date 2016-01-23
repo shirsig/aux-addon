@@ -13,8 +13,6 @@
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
-                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                        this:SetBackdropColor(0.15, 0.15, 0.15)
                         getglobal(this:GetName().."Title"):SetText('Inventory')
                     </OnLoad>
                 </Scripts>
@@ -43,11 +41,9 @@
             </Frame>
 			<frame name="AuxSellParameters" inherits="AuxFrameBoxTemplate">
 				<Size><AbsDimension x="213" y="326"/></Size>
-                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
-                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                        this:SetBackdropColor(0.15, 0.15, 0.15)
                         getglobal(this:GetName().."Title"):SetText('Parameters')
                     </OnLoad>
                 </Scripts>
@@ -268,11 +264,9 @@
 			</frame>
             <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">
                 <Size><AbsDimension x="361" y="326"/></Size>
-                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
-                        this:SetBackdropBorderColor(0.4, 0.4, 0.4)
-                        this:SetBackdropColor(0.15, 0.15, 0.15)
                         getglobal(this:GetName().."Title"):SetText('Existing Auctions')
                     </OnLoad>
                 </Scripts>

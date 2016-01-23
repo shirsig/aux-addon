@@ -6,6 +6,7 @@
 
 slash.lua
 core.xml
+gui.lua
 control.xml
 persistence.lua
 util.lua
