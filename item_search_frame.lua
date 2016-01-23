@@ -533,6 +533,15 @@ function public.on_load()
             this:ClearFocus()
         end)
     end
+    do
+        local status_bar = Aux.gui.status_bar(AuxItemSearchFrame, 15, 'kekbar')
+        status_bar:SetWidth(265)
+        status_bar:SetHeight(30)
+        status_bar:SetPoint('BOTTOMLEFT', AuxItemSearchFrame, 'BOTTOMLEFT', 6, 6)
+        status_bar:update_status(0,0)
+        status_bar:set_text('')
+        private.status_bar = status_bar
+    end
 end
 
 function public.dialog_cancel()
@@ -634,6 +643,9 @@ function public.start_search()
 
     Aux.scan.abort(function()
 
+        private.status_bar:update_status(0,0)
+        private.status_bar:set_text('Scanning auctions...')
+
         AuxItemSearchFrameItemRefreshButton:Hide()
         AuxItemSearchFrameItemStopButton:Show()
 
@@ -658,7 +670,7 @@ function public.start_search()
             usable = item_info.usable,
         }
 
-        Aux.log('Scanning auctions ...')
+--        Aux.log('Scanning auctions ...')
         Aux.scan.start{
             query = search_query,
             page = AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber(),
@@ -666,7 +678,9 @@ function public.start_search()
                 current_page = nil
             end,
             on_page_loaded = function(page, total_pages)
-                Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
+                private.status_bar:update_status(100 * (page + 1) / total_pages, 0)
+                private.status_bar:set_text(string.format('Scanning (Page %d / %d)', page + 1, total_pages))
+--                Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')
                 current_page = page
             end,
             on_read_auction = function(auction_info)
@@ -677,7 +691,9 @@ function public.start_search()
             end,
             on_complete = function()
                 auctions = auctions or {}
-                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+                private.status_bar:update_status(100, 100)
+                private.status_bar:set_text('Done Scanning')
+--                Aux.log('Scan complete: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
 
                 AuxItemSearchFrameItemStopButton:Hide()
                 AuxItemSearchFrameItemRefreshButton:Show()
@@ -685,7 +701,9 @@ function public.start_search()
             end,
             on_abort = function()
                 auctions = auctions or {}
-                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
+                private.status_bar:update_status(100, 100)
+                private.status_bar:set_text('Done Scanning')
+--                Aux.log('Scan aborted: '..getn(auctions)..' '..Aux_PluralizeIf('auction', getn(auctions))..' found.')
                 AuxItemSearchFrameItemStopButton:Hide()
                 AuxItemSearchFrameItemRefreshButton:Show()
                 refresh = true

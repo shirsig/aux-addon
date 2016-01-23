@@ -175,7 +175,7 @@ function public.create(params)
 	local rows = {}
 	local row_index = 1
 	local max_height = content:GetHeight()
-	local total_height = 16
+	local total_height = params.plain and 0 or 16
 	while total_height + 14 < max_height do
 		if getn(params.columns) > 0 then
 			local row = CreateFrame('Button', nil, content)

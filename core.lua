@@ -71,7 +71,7 @@ function Aux_OnLoad()
     end
     do
         local btn = Aux.gui.button(AuxFrame, 12)
-        btn:SetPoint('RIGHT', AuxCloseButton, 'LEFT')
+        btn:SetPoint('TOPRIGHT', 0, 0)
         btn:SetWidth(60)
         btn:SetHeight(17)
         btn:SetText('Default UI')
@@ -83,6 +83,17 @@ function Aux_OnLoad()
                 Aux.blizzard_ui_shown = true
                 ShowUIPanel(AuctionFrame)
             end
+        end)
+    end
+
+    do
+        local btn = Aux.gui.button(AuxFrame, 15)
+        btn:SetPoint('BOTTOMRIGHT', -6, 6)
+        btn:SetWidth(65)
+        btn:SetHeight(24)
+        btn:SetText('Close')
+        btn:SetScript('OnClick',function()
+            HideUIPanel(this:GetParent())
         end)
     end
 
@@ -160,11 +171,7 @@ function Aux.log_frame_update(elapsedSec)
 end
 
 function Aux.log(msg)
-    local info = ChatTypeInfo['SYSTEM']
-    AuxLogFrameMessageFrame:AddMessage(msg, 1, 1, 0)
-    if not AuxLogFrameMessageFrame:IsVisible() and DEFAULT_CHAT_FRAME then
-        DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
-    end
+    DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
 end
 
 function Aux_SetupHookFunctions()

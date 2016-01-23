@@ -335,7 +335,7 @@
 
     <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent">
         <Size>
-            <AbsDimension x="850" y="414"/>
+            <AbsDimension x="850" y="402"/>
         </Size>
         <Anchors>
             <Anchor point="LEFT">
@@ -370,92 +370,5 @@
             <!--24/255-->
             <BorderColor r="1" g="1" b="1" a="0.03"/>
         </Backdrop>
-        <Frames>
-            <Button name="AuxCloseButton" inherits="UIPanelCloseButton">
-                <Anchors>
-                    <Anchor point="TOPRIGHT">
-                        <Offset>
-                            <AbsDimension x="0" y="0"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-            </Button>
-            <!--<Button name="AuxAuctionFrameButton" inherits="UIPanelButtonTemplate" text="Default UI">-->
-                <!--<Size><AbsDimension x="65" y="17"/></Size>-->
-                <!--<Anchors><Anchor point="RIGHT" relativePoint="LEFT" relativeTo="AuxCloseButton"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>-->
-                <!--<Scripts>-->
-                    <!--<OnLoad>-->
-                        <!--this:SetTextFontObject('GameFontNormalSmall')-->
-                        <!--this:SetHighlightFontObject('GameFontHighlightSmall')-->
-                    <!--</OnLoad>-->
-                    <!--<OnClick>-->
-                        <!--if AuctionFrame:IsVisible() then-->
-                            <!--Aux.blizzard_ui_shown = false-->
-                            <!--HideUIPanel(AuctionFrame)-->
-                        <!--else-->
-                        <!--Aux.blizzard_ui_shown = true-->
-                            <!--ShowUIPanel(AuctionFrame)-->
-                        <!--end-->
-                    <!--</OnClick>-->
-                <!--</Scripts>-->
-            <!--</Button>-->
-            <Frame name="AuxLogFrame" inherits="AuxFrameBoxTemplate">
-                <Size><AbsDimension x="400" y="40"/></Size>
-                <Anchors>
-                    <Anchor point="LEFT">
-                        <Offset>
-                            <AbsDimension x="5" y="0"/>
-                        </Offset>
-                    </Anchor>
-                    <Anchor point="RIGHT">
-                        <Offset>
-                            <AbsDimension x="-10" y="0"/>
-                        </Offset>
-                    </Anchor>
-                    <Anchor point="BOTTOM">
-                        <Offset>
-                            <AbsDimension x="0" y="10"/>
-                        </Offset>
-                    </Anchor>
-                </Anchors>
-                <Scripts>
-                    <OnLoad>
-                        this:SetWidth(floor(this:GetParent():GetWidth()/2))
-                    </OnLoad>
-                </Scripts>
-                <Frames>
-                    <ScrollingMessageFrame name="$parentMessageFrame" maxLines="500">
-                        <Anchors>
-                            <Anchor point="TOPLEFT">
-                                <Offset>
-                                    <AbsDimension x="8" y="-15"/>
-                                </Offset>
-                            </Anchor>
-                            <Anchor point="BOTTOMRIGHT">
-                                <Offset>
-                                    <AbsDimension x="-8" y="15"/>
-                                </Offset>
-                            </Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                Aux.log_frame_load()
-                            </OnLoad>
-                            <OnUpdate>
-                                Aux.log_frame_update(arg1)
-                            </OnUpdate>
-                            <OnMouseWheel>
-                                if arg1 == 1 then
-                                this:ScrollUp()
-                                elseif arg1 == -1 then
-                                this:ScrollDown()
-                                end
-                            </OnMouseWheel>
-                        </Scripts>
-                        <FontString inherits="GameFontNormal" justifyH="CENTER"/>
-                    </ScrollingMessageFrame>
-                </Frames>
-            </Frame>
-        </Frames>
     </Frame>
 </Ui>
