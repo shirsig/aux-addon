@@ -3,10 +3,9 @@ Aux.item_search_frame = public
 
 aux_recently_searched = {}
 
-local create_auction_record, show_dialog, find_auction, hide_sheet, update_listing, auction_alpha_setter, group_alpha_setter, create_auction_record
+local create_auction_record, find_auction, hide_sheet, update_listing, auction_alpha_setter, group_alpha_setter, create_auction_record
 local auctions
 local search_query
-local current_page
 local refresh
 
 function auction_alpha_setter(cell, auction)
@@ -464,7 +463,8 @@ public.views = {
 }
 
 function public.on_close()
-	current_page = nil
+    private.selected = nil
+    private.buyout_button:Disable()
 end
 
 function public.on_open()
@@ -659,14 +659,13 @@ function public.start_search()
         AuxItemSearchFrameItemStopButton:Show()
 
         auctions = nil
-
         refresh = true
 
         local item_id = private.item_id
         local item_info = Aux.static.item_info(item_id)
 
 --        local class_index = Aux.item_class_index(item_info.class)
---        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
+--        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass) -- TODO test if needed
 
         search_query = {
             name = item_info.name,
@@ -679,13 +678,11 @@ function public.start_search()
             usable = item_info.usable,
         }
 
---        Aux.log('Scanning auctions ...')
+        local current_page
+
         Aux.scan.start{
             query = search_query,
             page = AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber(),
-            on_submit_query = function()
-                current_page = nil
-            end,
             on_page_loaded = function(page, total_pages)
                 private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages) -- TODO
                 private.status_bar:set_text(string.format('Scanning (Page %d / %d)', page + 1, total_pages))
@@ -729,15 +726,15 @@ function public.start_search()
     end)
 end
 
-function find_auction(entry, buyout_mode, express_mode)
+function find_auction(entry, express_mode, buyout_mode)
 
 	if entry.gone then
-        Aux.log('Auction not available.')
+--        Aux.log('Auction not available.')
 		return
 	end
 	
 	if buyout_mode and not entry.buyout_price then
-        Aux.log('Auction has no buyout price.')
+--        Aux.log('Auction has no buyout price.')
 		return
 	end
 
@@ -748,86 +745,50 @@ function find_auction(entry, buyout_mode, express_mode)
         amount = entry.bid
     end
 
-    private.status_bar:update_status(0, 0)
-    private.status_bar:set_text('Searching auction...')
-	
---	if not express_mode then
---		show_dialog(buyout_mode, entry, amount)
---	end
+    PlaySound('igMainMenuOptionCheckBoxOn')
 
-	PlaySound('igMainMenuOptionCheckBoxOn')
-	
-	local found
-	
-	Aux.scan.start{
-		query = search_query,
-		page = entry.page ~= current_page and entry.page,
-		on_submit_query = function()
-			current_page = nil
-		end,
-		on_page_loaded = function(page)
-			current_page = page
-		end,
-		on_read_auction = function(auction_info, ctrl)
-			local auction_record = create_auction_record(auction_info)
-			if entry.signature == auction_record.signature then
-				ctrl.suspend()
-				found = true
-                private.status_bar:update_status(100, 100)
-                private.status_bar:set_text('Auction found')
+    local function test(index)
+        return create_auction_record(Aux.info.auction(index)).signature == entry.signature
+    end
 
-				if express_mode then
-					if GetMoney() >= amount then
-						PlaceAuctionBid('list', auction_info.index, amount)
-                        Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' ('..auction_record.aux_quantity..').')
-						entry.gone = true
-						refresh = true
-					else
-						Aux.log((buyout_mode and 'Purchase' or 'Bid')..' failed: Not enough money.')
-					end
-					Aux.scan.abort()
-				else
-					private.buyout_button:SetScript('OnClick', function()
-                        if create_auction_record(Aux.info.auction(auction_info.index)).signature == entry.signature then
-                            if GetMoney() >= amount then
-                                PlaceAuctionBid('list', auction_info.index, amount)
-                                Aux.log((buyout_mode and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' ('..auction_record.aux_quantity..').')
-                                entry.gone = true
-                                refresh = true
-                            else
-                                Aux.log('Not enough money.')
-                            end
-                            Aux.scan.abort()
-                            update_listing()
-                        end
-                        private.buyout_button:Disable()
-					end)
-                    private.buyout_button:Enable()
-				end
-			end
-		end,
-		on_complete = function()
-			if not found then
-                Aux.log('No matching auction found. Removing entry from the cache.')
-				entry.gone = true
-				refresh = true
-				public.dialog_cancel()
-			end
-			if express_mode then
-				AuxItemSearchFrameItemRefreshButton:Enable()
-			end
-		end,
-		on_abort = function()
-			if express_mode then
-				AuxItemSearchFrameItemRefreshButton:Enable()
-			end
-		end,
-		next_page = function(page, total_pages)
-			if not page or page == entry.page then
-				return entry.page - 1
-			end
-		end,
-	}
+    Aux.scan_util.find_auction(test, search_query, entry.page, private.status_bar, function(index)
+        if not index then
+            entry.gone = true
+            private.selected = nil
+            refresh = true
+            return
+        end
+
+        if not test(index) then
+            return find_auction(entry, buyout_mode, express_mode) -- try again
+        end
+
+        if express_mode then
+            if GetMoney() >= amount then
+                entry.gone = true
+            end
+            PlaceAuctionBid('list', index, amount)
+            private.selected = nil
+            refresh = true
+        else
+            private.buyout_button:SetScript('OnClick', function()
+                if not test(index) then
+                    private.buyout_button:Disable()
+                    return find_auction(entry, buyout_mode, express_mode) -- try again
+                end
+
+                if GetMoney() >= amount then
+                    entry.gone = true
+                end
+                PlaceAuctionBid('list', index, amount)
+
+                private.buyout_button:Disable()
+                private.selected = nil
+                refresh = true
+            end)
+            private.buyout_button:Enable()
+        end
+    end)
 end
 
 function public.on_row_click(entry)
@@ -845,7 +806,7 @@ function public.on_row_click(entry)
             ChatFrameEditBox:Insert(entry.hyperlink)
         end
 	else
-		find_auction(entry, buyout_mode, express_mode)
+		find_auction(entry, express_mode, buyout_mode)
 	end	
 end
 

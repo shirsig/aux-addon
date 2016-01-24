@@ -12,6 +12,7 @@ persistence.lua
 util.lua
 
 scan.lua
+scan_util.lua
 stack.lua
 post.lua
 sheet.lua
