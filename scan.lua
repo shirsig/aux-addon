@@ -86,7 +86,7 @@ function wait_for_owner_data(k)
 	end, k)
 end
 
-function wait_for_callback(args)
+function wait_for_callback(args) -- the arguments must not be nil!
 	local ok = true
 
     local f = tremove(args, 1)
@@ -145,13 +145,12 @@ function scan_auctions_helper(i, n, k)
 
     local auction_info = Aux.info.auction(i, state.job.type)
     if auction_info then
-        wait_for_callback{state.job.on_read_auction, auction_info, recurse }
-
         local snapshot = Aux.persistence.load_snapshot()
         if not snapshot.contains(auction_info.signature) then
             snapshot.add(auction_info.signature, auction_info.duration)
             Aux.history.process_auction(auction_info)
         end
+        wait_for_callback{state.job.on_read_auction or Aux.util.pass, auction_info, recurse}
     else
         recurse()
     end
@@ -169,7 +168,7 @@ function submit_query(k)
                 local _, total_count = GetNumAuctionItems(state.job.type)
                 state.total_pages = math.ceil(total_count / PAGE_SIZE)
                 if state.total_pages >= state.page + 1 then
-					wait_for_callback{state.job.on_page_loaded, state.page, state.total_pages, function()
+					wait_for_callback{state.job.on_page_loaded or Aux.util.pass, state.page, state.total_pages, function()
 						return k()
 					end}
 				else
