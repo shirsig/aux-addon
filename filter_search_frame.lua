@@ -639,14 +639,22 @@ function find_auction(entry, express_mode, buyout_mode)
         end
 
         if express_mode then
+            if Aux.bid_lock then
+                return
+            end
+            
             if GetMoney() >= amount then
                 entry.gone = true
             end
-            PlaceAuctionBid('list', index, amount)
+            Aux.place_bid('list', index, amount)
             private.selected = nil
             refresh = true
         else
             private.buyout_button:SetScript('OnClick', function()
+                if Aux.bid_lock then
+                    return
+                end
+
                 if not test(index) then
                     private.buyout_button:Disable()
                     return find_auction(entry, express_mode, buyout_mode) -- try again
@@ -655,7 +663,7 @@ function find_auction(entry, express_mode, buyout_mode)
                 if GetMoney() >= amount then
                     entry.gone = true
                 end
-                PlaceAuctionBid('list', index, entry.buyout_price)
+                Aux.place_bid('list', index, entry.buyout_price)
 
                 private.buyout_button:Disable()
                 private.selected = nil

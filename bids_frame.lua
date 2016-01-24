@@ -282,7 +282,7 @@ function private.find_auction(entry, action, express_mode)
 
                 if express_mode then
                     if GetMoney() >= amount then
-                        PlaceAuctionBid('bidder', auction_info.index, amount)
+                        Aux.place_bid('bidder', auction_info.index, amount)
                         Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' ('..auction_record.aux_quantity..').')
                         entry.gone = true
                     else
@@ -293,7 +293,7 @@ function private.find_auction(entry, action, express_mode)
                     public.dialog_action = function()
                         if private.create_record(Aux.info.auction(auction_info.index, 'bidder')).signature == entry.signature then
                             if GetMoney() >= amount then
-                                PlaceAuctionBid('bidder', auction_info.index, action == 'bid' and MoneyInputFrame_GetCopper(AuxBidsFrameListingDialogContentBid) or amount)
+                                Aux.place_bid('bidder', auction_info.index, action == 'bid' and MoneyInputFrame_GetCopper(AuxBidsFrameListingDialogContentBid) or amount)
                                 Aux.log((action == 'buyout' and 'Purchased ' or 'Bid on ')..auction_record.hyperlink..' ('..auction_record.aux_quantity..').')
                                 entry.gone = true
                             else

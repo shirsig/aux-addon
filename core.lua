@@ -129,6 +129,17 @@ function Aux_OnAddonLoaded()
     end
 end
 
+function Aux.place_bid(type, index, bid)
+    local money = GetMoney()
+    if money >= bid then
+        Aux.bid_lock = true
+        Aux.control.as_soon_as(function() return GetMoney() < money end, function()
+            Aux.bid_lock = false
+        end)
+    end
+    PlaceAuctionBid(type, index, bid)
+end
+
 function Aux.log_frame_load()
     this:SetFading(false)
     this:EnableMouseWheel()
