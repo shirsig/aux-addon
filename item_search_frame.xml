@@ -15,11 +15,11 @@
             <Frame name="$parentItem" inherits="AuxFrameBoxTemplate">
                 <Size><AbsDimension x="213" y="120"/></Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnLoad>
-                        getglobal(this:GetName().."Title"):SetText('Item')
-                    </OnLoad>
-                </Scripts>
+                <!--<Scripts>-->
+                    <!--<OnLoad>-->
+                        <!--getglobal(this:GetName().."Title"):SetText('Item')-->
+                    <!--</OnLoad>-->
+                <!--</Scripts>-->
                 <Frames>
                     <Button name="$parentItem" inherits="AuxItemTemplate">
                         <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
@@ -35,30 +35,9 @@
                             </OnClick>
                         </scripts>
                     </Button>
-                    <EditBox name="$parentPageEditBox" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="111" y="15"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Page')
-                                this:SetWidth(30)
-                                this:EnableMouse(false)
-                                this:SetAlpha(0.5)
-                            </OnLoad>
-                            <OnEnterPressed>
-                                this:ClearFocus()
-                            </OnEnterPressed>
-                        </Scripts>
-                    </EditBox>
                     <CheckButton name="$parentAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
                         <Size><AbsDimension x="22" y="22"/></Size>
                         <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="144" y="15"/></Offset></Anchor></Anchors>
-                        <Layers>
-                            <Layer level="OVERLAY">
-                                <FontString inherits="GameFontNormalSmall" text="All" justifyH="LEFT">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
                         <Scripts>
                             <OnClick>
                                 AuxItemSearchFrameItemPageEditBox:EnableMouse(not this:GetChecked())
@@ -71,15 +50,9 @@
             </Frame>
             <Frame name="$parentRecentlySearched" inherits="AuxFrameBoxTemplate">
                 <Size>
-                    <AbsDimension x="213" y="186"/>
+                    <AbsDimension x="213" y="202"/>
                 </Size>
-                <Anchors><Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$parentItem"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
-                <Anchors><Anchor point="BOTTOM" relativePoint="BOTTOM" relativeTo="$parentAuctions"><Offset><AbsDimension x="0" y="-20"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnLoad>
-                        getglobal(this:GetName().."Title"):SetText('Recently Searched')
-                    </OnLoad>
-                </Scripts>
+                <Anchors><Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$parentItem"><Offset><AbsDimension x="0" y="-4"/></Offset></Anchor></Anchors>
                 <Frames>
                     <Frame name="$parentListing">
                         <Anchors>
@@ -94,11 +67,6 @@
                     <AbsDimension x="620" y="326"/>
                 </Size>
                 <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$parentItem"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnLoad>
-                        <!--getglobal(this:GetName().."Title"):SetText('Search Results')-->
-                    </OnLoad>
-                </Scripts>
                 <Frames>
                     <Frame name="$parentBuyListing" hidden="true">
                         <Anchors>

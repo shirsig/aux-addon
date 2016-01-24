@@ -461,6 +461,29 @@ function public.on_load()
         btn:Disable()
         private.buyout_button = btn
     end
+    do
+        local editbox = Aux.gui.editbox(AuxItemSearchFrameItem, '$parentPageEditBox')
+        editbox:SetNumeric(true)
+        editbox:EnableMouse(false)
+        editbox:SetAlpha(0.5)
+        editbox:SetPoint('BOTTOMLEFT', 111, 15)
+        editbox:SetWidth(30)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            Aux.filter_search_frame.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        local label = Aux.gui.label(editbox, 13)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+        label:SetText('Page')
+    end
+    do
+        local label = Aux.gui.label(AuxItemSearchFrameItemAllPagesCheckButton, 13)
+        label:SetPoint('BOTTOMLEFT', AuxItemSearchFrameItemAllPagesCheckButton, 'TOPLEFT', 1, -3)
+        label:SetText('All')
+    end
 end
 
 function public.stop_search()

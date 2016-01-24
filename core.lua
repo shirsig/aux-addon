@@ -133,7 +133,8 @@ function Aux.place_bid(type, index, bid)
     local money = GetMoney()
     if money >= bid then
         Aux.bid_lock = true
-        Aux.control.as_soon_as(function() return GetMoney() < money end, function()
+        local t0 = GetTime()
+        Aux.control.as_soon_as(function() return GetMoney() < money or GetTime() - t0 > 10 end, function()
             Aux.bid_lock = false
         end)
     end

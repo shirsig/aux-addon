@@ -17,49 +17,12 @@
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
                 <Scripts>
                     <OnLoad>
-                        getglobal(this:GetName().."Title"):SetText('Filters')
+                        <!--getglobal(this:GetName().."Title"):SetText('Filters')-->
                     </OnLoad>
                 </Scripts>
                 <Frames>
-                    <EditBox name="$parentNameInputBox" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-20"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Name')
-                                this:SetWidth(150)
-                            </OnLoad>
-                            <OnEnterPressed>
-                                this:ClearFocus()
-                                Aux.filter_search_frame.start_search()
-                            </OnEnterPressed>
-                            <OnEscapePressed>
-                                this:ClearFocus()
-                            </OnEscapePressed>
-                            <OnTabPressed>
-                                if IsShiftKeyDown() then
-                                    getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
-                                else
-                                    getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
-                                end
-                            </OnTabPressed>
-                        </Scripts>
-                    </EditBox>
-
                     <Frame name="$parentCategoryDropDown" inherits="UIDropDownMenuTemplate">
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-55" /></Offset></Anchor></Anchors>
-                        <Layers>
-                            <Layer level="BACKGROUND">
-                                <FontString name="$parentLabel" inherits="GameFontNormalSmall" text="Category">
-                                    <Anchors>
-                                        <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
-                                            <Offset>
-                                                <AbsDimension x="21" y="0"/>
-                                            </Offset>
-                                        </Anchor>
-                                    </Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
                         <Scripts>
                             <OnLoad>
                                 UIDropDownMenu_SetWidth(140)
@@ -82,188 +45,14 @@
                                 UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersQualityDropDown_Initialize)
                             </OnShow>
                         </Scripts>
-                        <Layers>
-                            <Layer level="BACKGROUND">
-                                <FontString name="$parentLabel" inherits="GameFontNormalSmall" text="Rarity">
-                                    <Anchors>
-                                        <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
-                                            <Offset>
-                                                <AbsDimension x="21" y="0"/>
-                                            </Offset>
-                                        </Anchor>
-                                    </Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
                     </Frame>
-
-                    <EditBox name="$parentMinLevel" letters="2" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-135"/></Offset></Anchor>
-                        </Anchors>
-                        <Layers>
-                            <Layer level="ARTWORK">
-                                <FontString inherits="GameFontHighlightSmall" text="-">
-                                    <Anchors><Anchor point="LEFT" relativePoint="RIGHT"><Offset><AbsDimension x="-1" y="0"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Level Range')
-                                this:SetWidth(30)
-                            </OnLoad>
-                            <OnEnterPressed>
-                                this:ClearFocus()
-                                Aux.filter_search_frame.start_search()
-                            </OnEnterPressed>
-                            <OnTabPressed>
-                                if IsShiftKeyDown() then
-                                    getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
-                                else
-                                    getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
-                                end
-                            </OnTabPressed>
-                        </Scripts>
-                    </EditBox>
-                    <EditBox name="$parentMaxLevel" letters="2" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors>
-                            <Anchor point="LEFT" relativeTo="$parentMinLevel" relativePoint="RIGHT"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                this:SetWidth(30)
-                            </OnLoad>
-                            <OnEnterPressed>
-                                this:ClearFocus()
-                                Aux.filter_search_frame.start_search()
-                            </OnEnterPressed>
-                            <OnTabPressed>
-                                if IsShiftKeyDown() then
-                                    getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
-                                else
-                                    getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
-                                end
-                            </OnTabPressed>
-                        </Scripts>
-                    </EditBox>
                     <CheckButton name="$parentUsableCheckButton" inherits="UICheckButtonTemplate">
                         <Size><AbsDimension x="22" y="22"/></Size>
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-135" /></Offset></Anchor></Anchors>
-                        <Layers>
-                            <Layer level="OVERLAY">
-                                <FontString inherits="GameFontNormalSmall" text="Usable" justifyH="LEFT">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
                     </CheckButton>
-
-                    <EditBox name="$parentTooltipInputBox1" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-170"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Tooltip')
-                                this:SetWidth(150)
-                            </OnLoad>
-                            <OnEnterPressed>
-                                this:ClearFocus()
-                                Aux.filter_search_frame.start_search()
-                            </OnEnterPressed>
-                            <OnTabPressed>
-                                if IsShiftKeyDown() then
-                                    getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
-                                else
-                                    getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
-                                end
-                            </OnTabPressed>
-                        </Scripts>
-                    </EditBox>
-                    
-                    <EditBox name="$parentTooltipInputBox2" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-190"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                this:SetWidth(150)
-                            </OnLoad>
-                            <OnEnterPressed>
-                                this:ClearFocus()
-                                Aux.filter_search_frame.start_search()
-                            </OnEnterPressed>
-                            <OnTabPressed>
-                                if IsShiftKeyDown() then
-                                    getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
-                                else
-                                    getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
-                                end
-                            </OnTabPressed>
-                        </Scripts>
-                    </EditBox>
-                    
-                    <EditBox name="$parentTooltipInputBox3" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-210"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                this:SetWidth(150)
-                            </OnLoad>
-                            <OnEnterPressed>
-                                this:ClearFocus()
-                                Aux.filter_search_frame.start_search()
-                            </OnEnterPressed>
-                            <OnTabPressed>
-                                if IsShiftKeyDown() then
-                                    getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
-                                else
-                                    getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
-                                end
-                            </OnTabPressed>
-                        </Scripts>
-                    </EditBox>
-                    
-                    <EditBox name="$parentTooltipInputBox4" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="15" y="-230"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                this:SetWidth(150)
-                            </OnLoad>
-                            <OnEnterPressed>
-                                this:ClearFocus()
-                                Aux.filter_search_frame.start_search()
-                            </OnEnterPressed>
-                            <OnTabPressed>
-                                if IsShiftKeyDown() then
-                                    getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
-                                else
-                                    getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
-                                end
-                            </OnTabPressed>
-                        </Scripts>
-                    </EditBox>
-
-                    <EditBox name="$parentPageEditBox" numeric="true" autoFocus="false" inherits="AuxInputBoxTemplate">
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="111" y="15"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName()..'Label'):SetText('Page')
-                                this:SetWidth(30)
-                                this:EnableMouse(false)
-                                this:SetAlpha(0.5)
-                            </OnLoad>
-                            <OnEnterPressed>
-                                this:ClearFocus()
-                            </OnEnterPressed>
-                        </Scripts>
-                    </EditBox>
                     <CheckButton name="$parentAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
                         <Size><AbsDimension x="22" y="22"/></Size>
                         <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="144" y="15"/></Offset></Anchor></Anchors>
-                        <Layers>
-                            <Layer level="OVERLAY">
-                                <FontString inherits="GameFontNormalSmall" text="All" justifyH="LEFT">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="9"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </Layers>
                         <Scripts>
                             <OnClick>
                                 AuxFilterSearchFrameFiltersPageEditBox:EnableMouse(not this:GetChecked())
@@ -279,11 +68,6 @@
                     <AbsDimension x="655" y="326"/>
                 </Size>
                 <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$parentFilters"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnLoad>
-                        <!--getglobal(this:GetName().."Title"):SetText('Search Results')-->
-                    </OnLoad>
-                </Scripts>
                 <Frames>
                     <Frame name="$parentBuyListing" hidden="true">
                         <Anchors>

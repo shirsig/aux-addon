@@ -295,7 +295,7 @@ function m.status_bar(parent)
         local text_frame = CreateFrame('Frame', nil, self)
         text_frame:SetFrameLevel(level + 4)
         text_frame:SetAllPoints(self)
-        local text = m.create_label(text_frame)
+        local text = m.label(text_frame)
         text:SetTextColor(unpack(m.config.text_color.enabled))
         text:SetPoint('CENTER', 0, 0)
         self.text = text
@@ -327,7 +327,7 @@ function m.status_bar(parent)
     return self
 end
 
-function m.create_label(parent, size)
+function m.label(parent, size)
     local label = parent:CreateFontString()
     label:SetFont(m.config.content_font, size or m.config.normal_font_size)
     label:SetTextColor(unpack(m.config.label_color.enabled))
