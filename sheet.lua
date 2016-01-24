@@ -210,7 +210,7 @@ function public.create(params)
 			
 			row.cells = {}			
 			for i = 1,getn(params.columns) do
-				local cell = CreateFrame('Button', nil, content)
+				local cell = CreateFrame('Frame', nil, row)
 				cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
 				cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
 				

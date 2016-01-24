@@ -290,127 +290,18 @@
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                local config = Aux.filter_search_frame.views[1]
-                                this.sheet = Aux.sheet.create{
-                                    frame = this,
-                                    columns = config.columns,
-                                    sort_order = config.sort_order,
-                                    row_setter = config.row_setter,
-                                    on_row_click = config.on_row_click,
-                                    on_row_enter = config.on_row_enter,
-                                    on_row_leave = config.on_row_leave,
-                                    on_row_update = config.on_row_update,
-                                }
-                            </OnLoad>
-                        </Scripts>
                     </Frame>
                     <Frame name="$parentBidListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                local config = Aux.filter_search_frame.views[2]
-                                this.sheet = Aux.sheet.create{
-                                    frame = this,
-                                    columns = config.columns,
-                                    sort_order = config.sort_order,
-                                    row_setter = config.row_setter,
-                                    on_row_click = config.on_row_click,
-                                    on_row_enter = config.on_row_enter,
-                                    on_row_leave = config.on_row_leave,
-                                    on_row_update = config.on_row_update,
-                                }
-                            </OnLoad>
-                        </Scripts>
                     </Frame>
                     <Frame name="$parentFullListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                local config = Aux.filter_search_frame.views[3]
-                                this.sheet = Aux.sheet.create{
-                                    frame = this,
-                                    columns = config.columns,
-                                    sort_order = config.sort_order,
-                                    row_setter = config.row_setter,
-                                    on_row_click = config.on_row_click,
-                                    on_row_enter = config.on_row_enter,
-                                    on_row_leave = config.on_row_leave,
-                                    on_row_update = config.on_row_update,
-                                }
-                            </OnLoad>
-                        </Scripts>
-                    </Frame>
-                    <Frame name="$parentConfirmation" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
-                        <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnMouseWheel></OnMouseWheel>
-                        </Scripts>
-                        <Frames>
-                            <Frame name="$parentContent">
-                                <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor></Anchors>
-                                <Size><AbsDimension x="193" y="120"/></Size>
-                                <Frames>
-                                    <Frame name="$parentItem" inherits="AuxItemTemplate">
-                                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                    </Frame>
-                                    <Frame name="$parentBid" inherits="MoneyInputFrameTemplate">
-                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="43"/></Offset></Anchor></Anchors>
-                                        <Layers>
-                                            <Layer level="OVERLAY">
-                                                <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
-                                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor></Anchors>
-                                                </FontString>
-                                            </Layer>
-                                        </Layers>
-                                    </Frame>
-                                    <Frame name="$parentBuyoutPrice" inherits="SmallMoneyFrameTemplate">
-                                        <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="30" y="45"/></Offset></Anchor></Anchors>
-                                        <Scripts>
-                                            <OnLoad>
-                                                SmallMoneyFrame_OnLoad()
-                                                MoneyFrame_SetType("STATIC")
-                                            </OnLoad>
-                                        </Scripts>
-                                        <Layers>
-                                            <Layer level="OVERLAY">
-                                                <FontString inherits="GameFontNormal" text="Price:" justifyH="RIGHT">
-                                                    <Anchors><Anchor point="RIGHT" relativePoint="LEFT"><Offset><AbsDimension x="-5" y="0"/></Offset></Anchor></Anchors>
-                                                </FontString>
-                                            </Layer>
-                                        </Layers>
-                                    </Frame>
-                                    <Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
-                                        <Size><AbsDimension x="90" y="26"/>	</Size>
-                                        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                        <Scripts>
-                                            <OnClick>
-                                                Aux.filter_search_frame.dialog_action()
-                                            </OnClick>
-                                        </Scripts>
-                                    </Button>
-                                    <Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
-                                        <Size><AbsDimension x="90" y="26"/></Size>
-                                        <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                        <Scripts>
-                                            <OnClick>
-                                                Aux.filter_search_frame.dialog_cancel()
-                                            </OnClick>
-                                        </Scripts>
-                                    </Button>
-                                </Frames>
-                            </Frame>
-                        </Frames>
                     </Frame>
                 </Frames>
             </Frame>

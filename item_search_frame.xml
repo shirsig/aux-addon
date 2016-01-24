@@ -85,22 +85,7 @@
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                        </Anchors>
-                        <!--<Scripts>-->
-                            <!--<OnLoad>-->
-                                <!--local config = Aux.item_search_frame.recently_searched_config-->
-                                <!--this.sheet = Aux.sheet.create{-->
-                                    <!--frame = this,-->
-                                    <!--columns = config.columns,-->
-                                    <!--sort_order = config.sort_order,-->
-                                    <!--row_setter = config.row_setter,-->
-                                    <!--on_row_click = config.on_row_click,-->
-                                    <!--on_row_enter = config.on_row_enter,-->
-                                    <!--on_row_leave = config.on_row_leave,-->
-                                    <!--plain = true,-->
-                                <!--}-->
-                            <!--</OnLoad>-->
-                        <!--</Scripts>-->
+                        </Anchors>-->
                     </Frame>
                 </Frames>
             </Frame>
@@ -120,63 +105,18 @@
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
-                        <!--<Scripts>-->
-                            <!--<OnLoad>-->
-                                <!--local config = Aux.item_search_frame.views[1]-->
-                                <!--this.sheet = Aux.sheet.create{-->
-                                    <!--frame = this,-->
-                                    <!--columns = config.columns,-->
-                                    <!--sort_order =  config.sort_order,-->
-                                    <!--row_setter = config.row_setter,-->
-                                    <!--on_row_click = config.on_row_click,-->
-                                    <!--on_row_enter = config.on_row_enter,-->
-                                    <!--on_row_leave = config.on_row_leave,-->
-                                    <!--on_row_update = config.on_row_update,-->
-                                <!--}-->
-                            <!--</OnLoad>-->
-                        <!--</Scripts>-->
                     </Frame>
                     <Frame name="$parentBidListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
-                        <!--<Scripts>-->
-                            <!--<OnLoad>-->
-                                <!--local config = Aux.item_search_frame.views[2]-->
-                                <!--this.sheet = Aux.sheet.create{-->
-                                    <!--frame = this,-->
-                                    <!--columns = config.columns,-->
-                                    <!--sort_order = config.sort_order,-->
-                                    <!--row_setter = config.row_setter,-->
-                                    <!--on_row_click = config.on_row_click,-->
-                                    <!--on_row_enter = config.on_row_enter,-->
-                                    <!--on_row_leave = config.on_row_leave,-->
-                                    <!--on_row_update = config.on_row_update,-->
-                                <!--}-->
-                            <!--</OnLoad>-->
-                        <!--</Scripts>-->
                     </Frame>
                     <Frame name="$parentFullListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
-                        <!--<Scripts>-->
-                            <!--<OnLoad>-->
-                                <!--local config = Aux.item_search_frame.views[3]-->
-                                <!--this.sheet = Aux.sheet.create{-->
-                                    <!--frame = this,-->
-                                    <!--columns = config.columns,-->
-                                    <!--sort_order = config.sort_order,-->
-                                    <!--row_setter = config.row_setter,-->
-                                    <!--on_row_click = config.on_row_click,-->
-                                    <!--on_row_enter = config.on_row_enter,-->
-                                    <!--on_row_leave = config.on_row_leave,-->
-                                    <!--on_row_update = config.on_row_update,-->
-                                <!--}-->
-                            <!--</OnLoad>-->
-                        <!--</Scripts>-->
                     </Frame>
                 </Frames>
             </Frame>
