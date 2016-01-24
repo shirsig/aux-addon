@@ -29,7 +29,10 @@ public.views = {
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function (sheet, row_index)
-            sheet.rows[row_index].highlight:SetAlpha(0)
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            if sheet.data[data_index][1].signature ~= Aux.util.safe_index{private.selected, 'signature'} then
+                sheet.rows[row_index].highlight:SetAlpha(0)
+            end
             AuxTooltip:Hide()
             ResetCursor()
         end,
@@ -171,7 +174,10 @@ public.views = {
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function (sheet, row_index)
-            sheet.rows[row_index].highlight:SetAlpha(0)
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            if sheet.data[data_index].signature ~= Aux.util.safe_index{private.selected, 'signature'} then
+                sheet.rows[row_index].highlight:SetAlpha(0)
+            end
             AuxTooltip:Hide()
             ResetCursor()
         end,
@@ -315,7 +321,10 @@ public.views = {
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function (sheet, row_index)
-            sheet.rows[row_index].highlight:SetAlpha(0)
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            if sheet.data[data_index].signature ~= Aux.util.safe_index{private.selected, 'signature'} then
+                sheet.rows[row_index].highlight:SetAlpha(0)
+            end
             AuxTooltip:Hide()
             ResetCursor()
         end,

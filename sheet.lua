@@ -48,6 +48,11 @@ function public.render(sheet)
 
         if datum then
             if sheet.row_setter then
+				if sheet.selected[datum] then
+					row.highlight:SetAlpha(0.5)
+				else
+					row.highlight:SetAlpha(0)
+				end
                 sheet.row_setter(row, datum)
             end
             row:Show()
@@ -183,11 +188,24 @@ function public.create(params)
 			row:SetPoint('TOPRIGHT', labels[getn(params.columns)], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
 			row:RegisterForClicks("LeftButtonDown", "RightButtonDown")
 			row:SetHeight(14)
-			
+
 			local row_idx = row_index
 			row:SetScript('OnClick', function() if sheet.on_row_click then sheet.on_row_click(sheet, row_idx) end end)
-			row:SetScript('OnEnter', function() if sheet.on_row_enter then sheet.on_row_enter(sheet, row_idx) end end)
-			row:SetScript('OnLeave', function() if sheet.on_row_leave then sheet.on_row_leave(sheet, row_idx) end end)
+			row:SetScript('OnEnter', function()
+				sheet.rows[row_idx].highlight:SetAlpha(.5)
+				if sheet.on_row_enter then
+					sheet.on_row_enter(sheet, row_idx)
+				end
+			end)
+			row:SetScript('OnLeave', function()
+				local data_index = row_idx + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+				if not sheet.selected[sheet.data[data_index]] then
+					sheet.rows[row_idx].highlight:SetAlpha(0)
+				end
+				if sheet.on_row_leave then
+					sheet.on_row_leave(sheet, row_idx)
+				end
+			end)
             row:SetScript('OnUpdate', function() if sheet.on_row_update then sheet.on_row_update(sheet, row_idx) end end)
 			
 			row.cells = {}			
@@ -215,7 +233,7 @@ function public.create(params)
 			highlight:SetAlpha(0)
 			highlight:SetTexture(0.8, 0.6, 0)
 			row.highlight = highlight
-			
+
 			rows[row_index] = row
 			row_index = row_index + 1
 			total_height = total_height + 14
@@ -232,6 +250,7 @@ function public.create(params)
 		rows = rows,
         columns = params.columns,
 		data = {},
+		selected = {},
 		sort_order = params.sort_order,
         row_setter = params.row_setter,
 		on_row_click = params.on_row_click,
@@ -240,6 +259,21 @@ function public.create(params)
         on_row_update = params.on_row_update,
 	}
 	scroll_frame.sheet = sheet
+
+	function sheet:clear_selection()
+		self.selected = {}
+		public.render(self)
+	end
+
+	function sheet:select(datum)
+		self.selected[datum] = true
+		public.render(self)
+	end
+
+	function sheet:deselect(datum)
+		self.selected[datum] = false
+		public.render(self)
+	end
 	
 	return sheet
 end
@@ -272,6 +306,7 @@ end
 
 function public.populate(sheet, data)
 	sheet.data = data
+	sheet.selected = {}
 
 	Aux.util.merge_sort(sheet.data, private.row_comparator(sheet))
 

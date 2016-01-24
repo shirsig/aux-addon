@@ -16,18 +16,16 @@ function group_alpha_setter(cell, group)
     cell:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.3 or 1)
 end
 
+function private.clear_selection()
+    private.listings[aux_view]:clear_selection()
+end
+
 public.recently_searched_config = {
     on_row_click = function (sheet, row_index)
         PlaySound('igMainMenuOptionCheckBoxOn')
         local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
         AuxItemSearchFrameItemItemInputBox:Hide()
         public.set_item(sheet.data[data_index].item_id)
-    end,
-    on_row_enter = function(sheet, row_index)
-        sheet.rows[row_index].highlight:SetAlpha(.5)
-    end,
-    on_row_leave = function(sheet, row_index)
-        sheet.rows[row_index].highlight:SetAlpha(0)
     end,
     columns = {
         {
@@ -77,17 +75,14 @@ public.views = {
 		name = 'Buyout',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            sheet:clear_selection()
+            sheet:select(sheet.data[data_index])
             public.on_row_click(Aux.util.filter(sheet.data[data_index], function(auction) return not auction.gone end)[1] or sheet.data[data_index][1])
         end,
         on_row_enter = function (sheet, row_index)
-            sheet.rows[row_index].highlight:SetAlpha(.5)
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function (sheet, row_index)
-            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            if sheet.data[data_index][1].signature ~= Aux.util.safe_index{private.selected, 'signature'} then
-                sheet.rows[row_index].highlight:SetAlpha(0)
-            end
             AuxTooltip:Hide()
             ResetCursor()
         end,
@@ -103,11 +98,6 @@ public.views = {
         row_setter = function(row, group)
             row.itemstring = Aux.info.itemstring(group[1].item_id, group[1].suffix_id, nil, group[1].enchant_id)
             row.EnhTooltip_info = group[1].EnhTooltip_info
-            if group[1].signature == Aux.util.safe_index{private.selected, 'signature'} then
-                row.highlight:SetAlpha(.5)
-            else
-                row.highlight:SetAlpha(0)
-            end
         end,
         columns = {
             {
@@ -185,14 +175,14 @@ public.views = {
 		name = 'Bid',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            sheet:clear_selection()
+            sheet:select(sheet.data[data_index])
             public.on_row_click(sheet.data[data_index])
         end,
         on_row_enter = function (sheet, row_index)
-            sheet.rows[row_index].highlight:SetAlpha(.5)
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function (sheet, row_index)
-            sheet.rows[row_index].highlight:SetAlpha(0)
             AuxTooltip:Hide()
             ResetCursor()
         end,
@@ -287,14 +277,14 @@ public.views = {
 		name = 'Full',
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            sheet:clear_selection()
+            sheet:select(sheet.data[data_index])
             public.on_row_click(sheet.data[data_index])
         end,
         on_row_enter = function (sheet, row_index)
-            sheet.rows[row_index].highlight:SetAlpha(.5)
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function (sheet, row_index)
-            sheet.rows[row_index].highlight:SetAlpha(0)
             AuxTooltip:Hide()
             ResetCursor()
         end,
@@ -463,7 +453,7 @@ public.views = {
 }
 
 function public.on_close()
-    private.selected = nil
+    private.clear_selection()
     private.buyout_button:Disable()
 end
 
@@ -477,6 +467,56 @@ function public.on_open()
 end
 
 function public.on_load()
+    private.listings = {}
+    do
+        local config = public.recently_searched_config
+        private.listings.recently_searched = Aux.sheet.create{
+            frame = AuxItemSearchFrameRecentlySearchedListing,
+            columns = config.columns,
+            sort_order = config.sort_order,
+            row_setter = config.row_setter,
+            on_row_click = config.on_row_click,
+            on_row_enter = config.on_row_enter,
+            on_row_leave = config.on_row_leave,
+            plain = true,
+        }
+    end
+    do
+        local config = public.views[Aux.view.BUYOUT]
+        private.listings[Aux.view.BUYOUT] = Aux.sheet.create{
+            frame = AuxItemSearchFrameAuctionsBuyListing,
+            columns = config.columns,
+            sort_order = config.sort_order,
+            row_setter = config.row_setter,
+            on_row_click = config.on_row_click,
+            on_row_enter = config.on_row_enter,
+            on_row_leave = config.on_row_leave,
+        }
+    end
+    do
+        local config = public.views[Aux.view.BID]
+        private.listings[Aux.view.BID] = Aux.sheet.create{
+            frame = AuxItemSearchFrameAuctionsBidListing,
+            columns = config.columns,
+            sort_order = config.sort_order,
+            row_setter = config.row_setter,
+            on_row_click = config.on_row_click,
+            on_row_enter = config.on_row_enter,
+            on_row_leave = config.on_row_leave,
+        }
+    end
+    do
+        local config = public.views[Aux.view.FULL]
+        private.listings[Aux.view.FULL] = Aux.sheet.create{
+            frame = AuxItemSearchFrameAuctionsFullListing,
+            columns = config.columns,
+            sort_order = config.sort_order,
+            row_setter = config.row_setter,
+            on_row_click = config.on_row_click,
+            on_row_enter = config.on_row_enter,
+            on_row_leave = config.on_row_leave,
+        }
+    end
     do
         local btn = Aux.gui.button(AuxItemSearchFrameItem, 15, '$parentRefreshButton')
         btn:SetPoint('BOTTOMLEFT', 8, 15)
@@ -577,18 +617,18 @@ function update_listing()
     if aux_view == Aux.view.BUYOUT then
 		AuxItemSearchFrameAuctionsBuyListing:Show()
         local buy_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-        Aux.sheet.populate(AuxItemSearchFrameAuctionsBuyListing.sheet, auctions and Aux.util.group_by(buy_records, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
+        Aux.sheet.populate(private.listings[Aux.view.BUYOUT], auctions and Aux.util.group_by(buy_records, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
         AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBuyListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
 	elseif aux_view == Aux.view.BID then
 		AuxItemSearchFrameAuctionsBidListing:Show()
         local bid_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
-        Aux.sheet.populate(AuxItemSearchFrameAuctionsBidListing.sheet, bid_records)
+        Aux.sheet.populate(private.listings[Aux.view.BID], bid_records)
         AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBidListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
 	elseif aux_view == Aux.view.FULL then
 		AuxItemSearchFrameAuctionsFullListing:Show()
-        Aux.sheet.populate(AuxItemSearchFrameAuctionsFullListing.sheet, auctions or {})
+        Aux.sheet.populate(private.listings[Aux.view.FULL], auctions or {})
         AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsFullListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
 	end
@@ -601,12 +641,13 @@ function hide_sheet()
 end
 
 function public.set_view(view)
+    private.clear_selection()
     aux_view = view
     update_listing()
 end
 
 function private.update_recently_searched()
-    Aux.sheet.populate(AuxItemSearchFrameRecentlySearchedListing.sheet, aux_recently_searched)
+    Aux.sheet.populate(private.listings.recently_searched, aux_recently_searched)
 end
 
 function public.set_item(item_id)
@@ -754,7 +795,7 @@ function find_auction(entry, express_mode, buyout_mode)
     Aux.scan_util.find_auction(test, search_query, entry.page, private.status_bar, function(index)
         if not index then
             entry.gone = true
-            private.selected = nil
+            private.clear_selection()
             refresh = true
             return
         end
@@ -768,7 +809,7 @@ function find_auction(entry, express_mode, buyout_mode)
                 entry.gone = true
             end
             PlaceAuctionBid('list', index, amount)
-            private.selected = nil
+            private.clear_selection()
             refresh = true
         else
             private.buyout_button:SetScript('OnClick', function()
@@ -783,7 +824,7 @@ function find_auction(entry, express_mode, buyout_mode)
                 PlaceAuctionBid('list', index, amount)
 
                 private.buyout_button:Disable()
-                private.selected = nil
+                private.clear_selection()
                 refresh = true
             end)
             private.buyout_button:Enable()
@@ -792,9 +833,6 @@ function find_auction(entry, express_mode, buyout_mode)
 end
 
 function public.on_row_click(entry)
-
-    private.selected = entry
-    update_listing()
 
 	local express_mode = IsAltKeyDown()
 	local buyout_mode = arg1 == 'LeftButton'

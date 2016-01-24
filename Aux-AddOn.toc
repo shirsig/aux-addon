@@ -16,6 +16,7 @@ scan_util.lua
 stack.lua
 post.lua
 sheet.lua
+listing_util.lua
 history.lua
 info.xml
 completion.xml
