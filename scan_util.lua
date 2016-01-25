@@ -1,7 +1,7 @@
 local m = {}
 Aux.scan_util = m
 
-function m.find_auction(test, search_query, page, status_bar, callback)
+function m.find_auction(type, test, search_query, page, status_bar, callback)
 
     Aux.scan.abort(function()
 
@@ -11,6 +11,7 @@ function m.find_auction(test, search_query, page, status_bar, callback)
         local pages = page > 0 and { page, page - 1 } or { page }
 
         Aux.scan.start{
+            type = type,
             query = search_query,
             on_read_auction = function(auction_info, ctrl)
                 if test(auction_info.index) then

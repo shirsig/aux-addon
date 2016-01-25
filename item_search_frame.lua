@@ -293,15 +293,7 @@ function public.on_load()
                         cell.text:SetText(text)
                     end,
                 },
-                {
-                    title = 'Owner',
-                    width = 90,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.owner, row2.owner, Aux.util.GT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
-                    cell_setter = function(cell, datum)
-                        cell.text:SetText(datum.owner)
-                    end,
-                },
+                Aux.listing_util.owner_column(function(datum) return datum.owner end),
                 {
                     title = 'Page',
                     width = 40,
@@ -626,7 +618,7 @@ function private.find_auction(entry, express_mode, buyout_mode)
         return private.create_auction_record(Aux.info.auction(index)).signature == entry.signature
     end
 
-    Aux.scan_util.find_auction(test, search_query, entry.page, private.status_bar, function(index)
+    Aux.scan_util.find_auction('list', test, search_query, entry.page, private.status_bar, function(index)
 
         if not index then
             entry.gone = true
@@ -697,7 +689,7 @@ function private.on_row_click(sheet, datum, grouped)
         if ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(entry.hyperlink)
         end
-    elseif not entry.gone then
+    elseif not entry.gone and entry.owner ~= UnitName('player') then
         if not express_mode then
             private.buyout_button:Disable()
             private.bid_button:Disable()

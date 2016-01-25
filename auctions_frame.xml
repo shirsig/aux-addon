@@ -15,21 +15,6 @@
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                local config = Aux.auctions_frame.auction_listing_config
-                                this.sheet = Aux.sheet.create{
-                                    frame = this,
-                                    columns = config.columns,
-                                    sort_order = config.sort_order,
-                                    row_setter = config.row_setter,
-                                    on_row_click = config.on_row_click,
-                                    on_row_enter = config.on_row_enter,
-                                    on_row_leave = config.on_row_leave,
-                                    on_row_update = config.on_row_update,
-                                }
-                            </OnLoad>
-                        </Scripts>
                     </Frame>
                     <Frame name="$parentDialog" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
                         <Anchors>
