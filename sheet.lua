@@ -28,7 +28,7 @@ function public.render(sheet)
 				sheet.labels[i].sort_texture:Show()
 			end
 		else
-			sheet.labels[i].texture:SetTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+			sheet.labels[i].texture:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
 			sheet.labels[i].sort_texture:Hide()
 		end
 	end
@@ -47,12 +47,12 @@ function public.render(sheet)
 		local datum = data[i + offset]
 
         if datum then
+			if sheet.selected[datum] then
+				row.highlight:SetAlpha(0.5)
+			else
+				row.highlight:SetAlpha(0)
+			end
             if sheet.row_setter then
-				if sheet.selected[datum] then
-					row.highlight:SetAlpha(0.5)
-				else
-					row.highlight:SetAlpha(0)
-				end
                 sheet.row_setter(row, datum)
             end
             row:Show()
@@ -130,18 +130,18 @@ function public.create(params)
 		button:SetWidth(column_width)
 		button:SetHeight(16)
 		button:SetID(i)
-		button:SetHighlightTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
-		button:SetScript("OnMouseDown", function() Aux.sheet.sort(sheet, this:GetID()) end)
-		button:RegisterForClicks("LeftButtonDown", "RightButtonDown")
+		button:SetHighlightTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
+		button:SetScript('OnMouseDown', function() Aux.sheet.sort(sheet, this:GetID()) end)
+		button:RegisterForClicks('LeftButtonDown', 'RightButtonDown')
 
 		local texture = content:CreateTexture(nil, 'ARTWORK')
-		texture:SetTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
+		texture:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
 		texture:SetTexCoord(0.1, 0.8, 0, 1)
 		texture:SetAllPoints(button)
 		button.texture = texture
 
 		local sort_texture = button:CreateTexture(nil, 'ARTWORK')
-		sort_texture:SetTexture('Interface\\Buttons\\UI-SortArrow')
+		sort_texture:SetTexture([[Interface\Buttons\UI-SortArrow]])
 		sort_texture:SetPoint('TOPRIGHT', button, 'TOPRIGHT', 0, 0)
 		sort_texture:SetPoint('BOTTOM', button, 'BOTTOM', 0, 0)
 		sort_texture:SetWidth(12)
@@ -149,7 +149,7 @@ function public.create(params)
 		button.sort_texture = sort_texture
 
 		local background = content:CreateTexture(nil, 'ARTWORK')
-		background:SetTexture('Interface\\QuestFrame\\UI-QuestTitleHighlight')
+		background:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
 		-- background:SetTextCoord(0.2, 0.9, 0, 0.9)
 		background:SetPoint('TOPLEFT', button, 'BOTTOMLEFT', 0, 0)
 		background:SetPoint('TOPRIGHT', button, 'BOTTOMRIGHT', 0, 0)
@@ -186,7 +186,7 @@ function public.create(params)
 			local row = CreateFrame('Button', nil, content)
 			row:SetPoint('TOPLEFT', labels[1], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
 			row:SetPoint('TOPRIGHT', labels[getn(params.columns)], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
-			row:RegisterForClicks("LeftButtonDown", "RightButtonDown")
+			row:RegisterForClicks('LeftButtonDown', 'RightButtonDown')
 			row:SetHeight(14)
 
 			local row_idx = row_index
@@ -274,6 +274,18 @@ function public.create(params)
 		self.selected[datum] = false
 		public.render(self)
 	end
+
+	function sheet:get_selection()
+		local selection = {}
+		for datum, _ in pairs(self.selected) do
+			tinsert(selection, datum)
+		end
+		return selection
+	end
+
+	function sheet:get_selected()
+		return self:get_selection()[1]
+	end
 	
 	return sheet
 end
@@ -306,7 +318,7 @@ end
 
 function public.populate(sheet, data)
 	sheet.data = data
-	sheet.selected = {}
+--	sheet.selected = {}
 
 	Aux.util.merge_sort(sheet.data, private.row_comparator(sheet))
 

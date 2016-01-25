@@ -12,6 +12,7 @@ local refresh
 function public.on_close()
     private.clear_selection()
     private.buyout_button:Disable()
+    private.bid_button:Disable()
 end
 
 function public.on_open()
@@ -109,33 +110,7 @@ function public.on_load()
                         cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
                     end,
                 },
-                {
-                    title = 'Pct',
-                    width = 40,
-                    comparator = function(group1, group2)
-                        local market_price1 = Aux.history.market_value(group1[1].item_key)
-                        local market_price2 = Aux.history.market_value(group2[1].item_key)
-                        local factor1 = market_price1 > 0 and group1[1].buyout_price_per_unit / market_price1
-                        local factor2 = market_price2 > 0 and group2[1].buyout_price_per_unit / market_price2
-                        return Aux.util.compare(factor1, factor2, Aux.util.GT)
-                    end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, group)
-                        local market_price = Aux.history.market_value(group[1].item_key)
-
-                        local pct = market_price > 0 and ceil(100 / market_price * group[1].buyout_price_per_unit)
-                        if not pct then
-                            cell.text:SetText('N/A')
-                        elseif pct > 999 then
-                            cell.text:SetText('>999%')
-                        else
-                            cell.text:SetText(pct..'%')
-                        end
-                        if pct then
-                            cell.text:SetTextColor(Aux.price_level_color(pct))
-                        end
-                    end,
-                },
+                Aux.listing_util.percentage_market_column(function(group) return group[1].item_key end, function(group) return group[1].buyout_price_per_unit end),
             },
             sort_order = {{column = 1, order = 'ascending' }, {column = 4, order = 'ascending'}},
         },
@@ -394,33 +369,7 @@ function public.on_load()
                         cell.text:SetText(datum.owner)
                     end,
                 },
-                {
-                    title = 'Pct',
-                    width = 40,
-                    comparator = function(row1, row2)
-                        local market_price1 = Aux.history.market_value(row1.item_key)
-                        local market_price2 = Aux.history.market_value(row2.item_key)
-                        local factor1 = market_price1 > 0 and row1.buyout_price_per_unit and row1.buyout_price_per_unit / market_price1
-                        local factor2 = market_price2 > 0 and row2.buyout_price_per_unit and row2.buyout_price_per_unit / market_price2
-                        return Aux.util.compare(factor1, factor2, Aux.util.GT)
-                    end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, datum)
-                        local market_price = Aux.history.market_value(datum.item_key)
-
-                        local pct = market_price > 0 and datum.buyout_price_per_unit and ceil(100 / market_price * datum.buyout_price_per_unit)
-                        if not pct then
-                            cell.text:SetText('N/A')
-                        elseif pct > 999 then
-                            cell.text:SetText('>999%')
-                        else
-                            cell.text:SetText(pct..'%')
-                        end
-                        if pct then
-                            cell.text:SetTextColor(Aux.price_level_color(pct))
-                        end
-                    end,
-                },
+                Aux.listing_util.percentage_market_column(function(entry) return entry.item_key end, function(entry) return entry.buyout_price_per_unit end),
             },
             sort_order = {{column = 1, order = 'ascending' }, {column = 7, order = 'ascending' }},
         },
@@ -461,7 +410,7 @@ function public.on_load()
         status_bar:SetWidth(265)
         status_bar:SetHeight(30)
         status_bar:SetPoint('BOTTOMLEFT', AuxFilterSearchFrame, 'BOTTOMLEFT', 6, 6)
-        status_bar:update_status(0,0)
+        status_bar:update_status(100, 0)
         status_bar:set_text('')
         private.status_bar = status_bar
     end
@@ -473,6 +422,15 @@ function public.on_load()
         btn:SetText('Buyout')
         btn:Disable()
         private.buyout_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxFilterSearchFrame, 15)
+        btn:SetPoint('TOPLEFT', private.buyout_button, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('Bid')
+        btn:Disable()
+        private.bid_button = btn
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentNameInputBox')
@@ -510,7 +468,7 @@ function public.on_load()
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentMinLevel')
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
-        editbox:SetPoint('TOPLEFT', 14, -135)
+        editbox:SetPoint('TOPLEFT', 14, -140)
         editbox:SetWidth(30)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -534,7 +492,7 @@ function public.on_load()
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentMaxLevel')
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
-        editbox:SetPoint('TOPLEFT', 54, -135)
+        editbox:SetPoint('TOPLEFT', 54, -140)
         editbox:SetWidth(30)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -556,12 +514,12 @@ function public.on_load()
     end
     do
         local label = Aux.gui.label(AuxFilterSearchFrameFiltersUsableCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersUsableCheckButton, 'TOPLEFT', -2, 1)
+        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersUsableCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('Usable')
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentTooltipInputBox1')
-        editbox:SetPoint('TOPLEFT', 14, -170)
+        editbox:SetPoint('TOPLEFT', 14, -177)
         editbox:SetWidth(150)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -583,7 +541,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentTooltipInputBox2')
-        editbox:SetPoint('TOPLEFT', 14, -191)
+        editbox:SetPoint('TOPLEFT', 14, -198)
         editbox:SetWidth(150)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -602,7 +560,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentTooltipInputBox3')
-        editbox:SetPoint('TOPLEFT', 14, -212)
+        editbox:SetPoint('TOPLEFT', 14, -219)
         editbox:SetWidth(150)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -621,7 +579,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentTooltipInputBox4')
-        editbox:SetPoint('TOPLEFT', 14, -233)
+        editbox:SetPoint('TOPLEFT', 14, -240)
         editbox:SetWidth(150)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -699,6 +657,7 @@ end
 
 function public.set_view(view)
     private.buyout_button:Disable()
+    private.bid_button:Disable()
     private.clear_selection()
     aux_view = view
     update_listing()
@@ -816,7 +775,7 @@ function find_auction(entry, express_mode, buyout_mode)
     Aux.scan_util.find_auction(test, search_query, entry.page, private.status_bar, function(index)
         if not index then
             entry.gone = true
-            private.selected = nil
+            private.clear_selection()
             refresh = true
             return
         end
@@ -834,7 +793,8 @@ function find_auction(entry, express_mode, buyout_mode)
                 entry.gone = true
             end
             Aux.place_bid('list', index, amount)
-            private.selected = nil
+
+            private.clear_selection()
             refresh = true
         else
             private.buyout_button:SetScript('OnClick', function()
@@ -844,6 +804,7 @@ function find_auction(entry, express_mode, buyout_mode)
 
                 if not test(index) then
                     private.buyout_button:Disable()
+                    private.bid_button:Disable()
                     return find_auction(entry, express_mode, buyout_mode) -- try again
                 end
 
@@ -853,10 +814,12 @@ function find_auction(entry, express_mode, buyout_mode)
                 Aux.place_bid('list', index, entry.buyout_price)
 
                 private.buyout_button:Disable()
-                private.selected = nil
+                private.bid_button:Disable()
+                private.clear_selection()
                 refresh = true
             end)
             private.buyout_button:Enable()
+            private.bid_button:Enable()
         end
     end)
 end
@@ -882,6 +845,7 @@ function private.on_row_click(sheet, datum, grouped)
     elseif not entry.gone then
         if not express_mode then
             private.buyout_button:Disable()
+            private.bid_button:Disable()
             sheet:clear_selection()
             sheet:select(datum)
         end

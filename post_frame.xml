@@ -11,42 +11,28 @@
             <Frame name="AuxSellInventory" inherits="AuxFrameBoxTemplate">
                 <Size><AbsDimension x="260" y="326"/></Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnLoad>
-                        getglobal(this:GetName().."Title"):SetText('Inventory')
-                    </OnLoad>
-                </Scripts>
+                <!--<Scripts>-->
+                    <!--<OnLoad>-->
+                        <!--getglobal(this:GetName().."Title"):SetText('Inventory')-->
+                    <!--</OnLoad>-->
+                <!--</Scripts>-->
                 <Frames>
                     <Frame name="$parentListing">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                local config = Aux.sell.inventory_listing_config
-                                this.sheet = Aux.sheet.create{
-                                    frame = this,
-                                    columns = config.columns,
-                                    sort_order = config.sort_order,
-                                    row_setter = config.row_setter,
-                                    on_row_click = config.on_row_click,
-                                    on_row_enter = config.on_row_enter,
-                                    on_row_leave = config.on_row_leave,
-                                }
-                            </OnLoad>
-                        </Scripts>
                     </Frame>
                 </Frames>
             </Frame>
 			<frame name="AuxSellParameters" inherits="AuxFrameBoxTemplate">
 				<Size><AbsDimension x="213" y="326"/></Size>
                 <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnLoad>
-                        getglobal(this:GetName().."Title"):SetText('Parameters')
-                    </OnLoad>
-                </Scripts>
+                <!--<Scripts>-->
+                    <!--<OnLoad>-->
+                        <!--getglobal(this:GetName().."Title"):SetText('Parameters')-->
+                    <!--</OnLoad>-->
+                <!--</Scripts>-->
                 <Layers>
                     <Layer level="BACKGROUND">
                         <FontString name="$parentDepositLabel" inherits="GameFontNormal" text="Deposit:">
@@ -247,31 +233,17 @@
             <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">
                 <Size><AbsDimension x="361" y="326"/></Size>
                 <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-                <Scripts>
-                    <OnLoad>
-                        getglobal(this:GetName().."Title"):SetText('Existing Auctions')
-                    </OnLoad>
-                </Scripts>
+                <!--<Scripts>-->
+                    <!--<OnLoad>-->
+                        <!--getglobal(this:GetName().."Title"):SetText('Existing Auctions')-->
+                    <!--</OnLoad>-->
+                <!--</Scripts>-->
                 <Frames>
                 <Frame name="$parentListing">
                     <Anchors>
                         <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                     </Anchors>
-                    <Scripts>
-                        <OnLoad>
-                            local config = Aux.sell.auction_listing_config
-                            this.sheet = Aux.sheet.create{
-                                frame = this,
-                                columns = config.columns,
-                                sort_order = config.sort_order,
-                                row_setter = config.row_setter,
-                                on_row_click = config.on_row_click,
-                                on_row_enter = config.on_row_enter,
-                                on_row_leave = config.on_row_leave,
-                            }
-                        </OnLoad>
-                    </Scripts>
                 </Frame>
                 </Frames>
             </Frame>

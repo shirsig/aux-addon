@@ -22,7 +22,7 @@
                 </Scripts>
                 <Frames>
                     <Frame name="$parentCategoryDropDown" inherits="UIDropDownMenuTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-55" /></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-56" /></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
                                 UIDropDownMenu_SetWidth(140)
@@ -35,7 +35,7 @@
                     </Frame>
 
                     <Frame name="$parentQualityDropDown" inherits="UIDropDownMenuTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-95" /></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-98" /></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
                                 UIDropDownMenu_SetWidth(140)
@@ -48,7 +48,7 @@
                     </Frame>
                     <CheckButton name="$parentUsableCheckButton" inherits="UICheckButtonTemplate">
                         <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-135" /></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-136" /></Offset></Anchor></Anchors>
                     </CheckButton>
                     <CheckButton name="$parentAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
                         <Size><AbsDimension x="22" y="22"/></Size>
