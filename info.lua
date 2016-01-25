@@ -215,7 +215,7 @@ function public.auction_signature(index, type)
     local _, _, count, _, _, _, min_bid, _, buyout_price, _, _, owner = GetAuctionItemInfo('list', index)
     local hyperlink = GetAuctionItemLink(type, index)
     local item_id, suffix_id, unique_id, enchant_id = private.parse_hyperlink(hyperlink)
-    return string.format(
+    return format(
         '%s:%s:%s:%s:%s:%s:%s',
         item_id or 0,
         suffix_id or 0,

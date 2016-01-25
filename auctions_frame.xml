@@ -16,51 +16,6 @@
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
                     </Frame>
-                    <Frame name="$parentDialog" frameStrata="FULLSCREEN_DIALOG" inherits="OptionFrameBoxTemplate" enableMouse="true" enableMouseWheel="true" hidden="true">
-                        <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                        </Anchors>
-                        <Scripts>
-                            <OnMouseWheel></OnMouseWheel>
-                        </Scripts>
-                        <Frames>
-                            <Frame name="$parentContent">
-                                <Anchors><Anchor point="CENTER"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor></Anchors>
-                                <Size><AbsDimension x="193" y="120"/></Size>
-                                <Layers>
-                                    <Layer level="OVERLAY">
-                                        <FontString name="$parentCancelLabel" inherits="GameFontNormal" text="Cancel this auction?" justifyH="RIGHT">
-                                            <Anchors><Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="45"/></Offset></Anchor></Anchors>
-                                        </FontString>
-                                    </Layer>
-                                </Layers>
-                                <Frames>
-                                    <Frame name="$parentItem" inherits="AuxItemTemplate">
-                                        <Anchors><Anchor point="TOP"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                    </Frame>
-                                    <Button name="$parentActionButton" inherits="UIPanelButtonTemplate" text="Buy" disabled="true">
-                                        <Size><AbsDimension x="90" y="26"/>	</Size>
-                                        <Anchors><Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                        <Scripts>
-                                            <OnClick>
-                                                Aux.auctions_frame.dialog_action()
-                                            </OnClick>
-                                        </Scripts>
-                                    </Button>
-                                    <Button name="$parentCancelButton" inherits="UIPanelButtonTemplate" text="Cancel">
-                                        <Size><AbsDimension x="90" y="26"/></Size>
-                                        <Anchors><Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                                        <Scripts>
-                                            <OnClick>
-                                                Aux.auctions_frame.dialog_cancel()
-                                            </OnClick>
-                                        </Scripts>
-                                    </Button>
-                                </Frames>
-                            </Frame>
-                        </Frames>
-                    </Frame>
 				</Frames>
             </Frame>
 		</Frames>

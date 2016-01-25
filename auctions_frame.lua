@@ -9,7 +9,14 @@ function public.on_load()
         frame = AuxAuctionsFrameListingAuctionListing,
         on_row_click = function (sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            public.on_auction_click(sheet, sheet.data[data_index])
+            public.on_auction_click(sheet.data[data_index])
+        end,
+        on_row_enter = function (sheet, row_index)
+            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
+        end,
+        on_row_leave = function (sheet, row_index)
+            AuxTooltip:Hide()
+            ResetCursor()
         end,
         on_row_update = function(sheet, row_index)
             if IsControlKeyDown() then
@@ -63,7 +70,6 @@ function public.on_load()
                     cell.text:SetText('['..datum.tooltip[1][1].text..']')
                     local color = ITEM_QUALITY_COLORS[datum.quality]
                     cell.text:SetTextColor(color.r, color.g, color.b)
-                    private.auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -73,7 +79,6 @@ function public.on_load()
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(datum.aux_quantity)
-                    private.auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -93,7 +98,6 @@ function public.on_load()
                         text = '24h'
                     end
                     cell.text:SetText(text)
-                    private.auction_alpha_setter(cell, datum)
                 end,
             },
             {
@@ -103,7 +107,6 @@ function public.on_load()
                 cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
                 cell_setter = function(cell, auction)
                     cell.text:SetText(auction.current_bid and Aux.util.money_string(auction.current_bid) or RED_FONT_COLOR_CODE..'No Bids'..FONT_COLOR_CODE_CLOSE)
-                    private.auction_alpha_setter(cell, auction)
                 end,
             },
             Aux.listing_util.money_column('Min Bid', function(entry) return entry.min_bid end),
@@ -139,10 +142,8 @@ function public.on_open()
 end
 
 function public.on_close()
-end
-
-function private.auction_alpha_setter(cell, auction)
-    cell:SetAlpha(auction.gone and 0.3 or 1)
+    private.listing:clear_selection()
+    private.cancel_button:Disable()
 end
 
 function public.update_auction_records()
@@ -158,7 +159,7 @@ function public.update_auction_records()
         page = 0,
         on_page_loaded = function(page, total_pages)
             private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages)
-            private.status_bar:set_text(string.format('Scanning (Page %d / %d)', page + 1, total_pages))
+            private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
             current_page = page
         end,
         on_read_auction = function(auction_info)
@@ -277,18 +278,7 @@ function private.find_auction(entry, express_mode)
     end)
 end
 
---function private.find_auction(entry, express_mode)
---
---
---        next_page = function(page, total_pages)
---            if not page or page == entry.page then -- TODO
---                return entry.page - 1
---            end
---        end
---
---end
-
-function public.on_auction_click(listing, auction_record)
+function public.on_auction_click(auction_record)
 
     local express_mode = IsAltKeyDown()
 
@@ -301,8 +291,8 @@ function public.on_auction_click(listing, auction_record)
     elseif not auction_record.gone then
         if not express_mode then
             private.cancel_button:Disable()
-            listing:clear_selection()
-            listing:select(auction_record)
+            private.listing:clear_selection()
+            private.listing:select(auction_record)
         end
         private.find_auction(auction_record, express_mode)
     end

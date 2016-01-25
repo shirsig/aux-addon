@@ -139,7 +139,7 @@ function public.completor(edit_box)
 	function self.next()
 		update_dropdown()
 		if getn(suggestions) > 0 then
-			index = index > 0 and math.mod(index + 1, getn(suggestions) + 1) or 1
+			index = index > 0 and mod(index + 1, getn(suggestions) + 1) or 1
 			update_highlighting()
 			if index == 0 then
 				self.set_quietly(input)
@@ -245,7 +245,7 @@ function public.selector(edit_box)
     function self.next()
         update_dropdown()
         if getn(suggestions) > 0 then
-            index = math.mod(index, getn(suggestions)) + 1
+            index = mod(index, getn(suggestions)) + 1
             update_highlighting()
         end
     end

@@ -101,6 +101,7 @@ function Aux_OnLoad()
     Aux.filter_search_frame.on_load()
     Aux.post_frame.on_load()
     Aux.auctions_frame.on_load()
+    Aux.bids_frame.on_load()
 end
 
 function Aux_OnEvent()
