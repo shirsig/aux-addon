@@ -67,7 +67,7 @@ function Aux_OnLoad()
         tab_group:create_tab('Auctions')
         tab_group:create_tab('Bids')
         tab_group.on_select = Aux.on_tab_click
-        tab_group:set_tab(1)
+        Aux.tab_group = tab_group
     end
     do
         local btn = Aux.gui.button(AuxFrame, 12)
@@ -236,12 +236,7 @@ function Aux_OnAuctionHouseShow()
 
     AuxFrame:Show()
 
-    Aux.on_tab_click(1)
-	if AUX_OPEN_SELL then
-        Aux.on_tab_click(2)
-	elseif AUX_OPEN_BUY then
-
-	end
+    Aux.tab_group:set_tab(1)
 
 end
 
@@ -251,7 +246,7 @@ function Aux_OnAuctionHouseClosed()
 	Aux.scan.abort()
 
     Aux.filter_search_frame.on_close()
-    Aux.sell.on_close()
+    Aux.post_frame.on_close()
 	
 	AuxFrame:Hide()
 end
@@ -262,7 +257,7 @@ function Aux.on_tab_click(index)
     Aux.scan.abort(function()
         Aux.item_search_frame.on_close()
         Aux.filter_search_frame.on_close()
-        Aux.sell.on_close()
+        Aux.post_frame.on_close()
         Aux.auctions_frame.on_close()
         Aux.bids_frame.on_close()
         Aux.history_frame.on_close()
@@ -282,7 +277,7 @@ function Aux.on_tab_click(index)
             Aux.filter_search_frame.on_open()
         elseif index == 3 then
             AuxSellFrame:Show()
-            Aux.sell.on_open()
+            Aux.post_frame.on_open()
         elseif index == 4 then
             AuxAuctionsFrame:Show()
             Aux.auctions_frame.on_open()

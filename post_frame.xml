@@ -48,7 +48,7 @@
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-70"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnValueChanged>
-                                Aux.sell.quantity_update()
+                                Aux.post_frame.quantity_update()
                             </OnValueChanged>
                         </Scripts>
                     </Slider>
@@ -56,7 +56,7 @@
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-100"/></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnValueChanged>
-                                Aux.sell.quantity_update()
+                                Aux.post_frame.quantity_update()
                             </OnValueChanged>
                         </Scripts>
                     </Slider>
@@ -73,7 +73,7 @@
                                 else
                                     AuxSellStackSizeSlider:SetValue(this:GetNumber())
                                 end
-								Aux.sell.quantity_update()
+								Aux.post_frame.quantity_update()
 							</OnTextChanged>
 							<OnTabPressed>
 		<!-- 						if (IsShiftKeyDown()) then
@@ -103,7 +103,7 @@
 								else
 									AuxSellStackCountSlider:SetValue(this:GetNumber())
 								end
-                                Aux.sell.quantity_update()
+                                Aux.post_frame.quantity_update()
 							</OnTextChanged>
 							<OnTabPressed>
 		<!-- 						if (IsShiftKeyDown()) then
@@ -134,7 +134,7 @@
                                 getglobal(this:GetName().."Text"):SetText("2h")
                             </OnLoad>
                             <OnClick>
-                                Aux.sell.duration_radio_button_on_click(1)
+                                Aux.post_frame.duration_radio_button_on_click(1)
                             </OnClick>
                         </Scripts>
                     </CheckButton>
@@ -145,7 +145,7 @@
                                 getglobal(this:GetName()..'Text'):SetText("8h")
                             </OnLoad>
                             <OnClick>
-                                Aux.sell.duration_radio_button_on_click(2)
+                                Aux.post_frame.duration_radio_button_on_click(2)
                             </OnClick>
                         </Scripts>
                     </CheckButton>
@@ -156,7 +156,7 @@
                                 getglobal(this:GetName().."Text"):SetText("24h")
                             </OnLoad>
                             <OnClick>
-                                Aux.sell.duration_radio_button_on_click(3)
+                                Aux.post_frame.duration_radio_button_on_click(3)
                             </OnClick>
                         </Scripts>
                     </CheckButton>
@@ -175,10 +175,10 @@
                         <!--<Scripts>-->
                             <!--<OnLoad>-->
                                 <!--UIDropDownMenu_SetWidth(100)-->
-                                <!--UIDropDownMenu_Initialize(this, Aux.sell.initialize_strategy_dropdown)-->
+                                <!--UIDropDownMenu_Initialize(this, Aux.post_frame.initialize_strategy_dropdown)-->
                             <!--</OnLoad>-->
                             <!--<OnShow>-->
-                                <!--UIDropDownMenu_Initialize(this, Aux.sell.initialize_strategy_dropdown)-->
+                                <!--UIDropDownMenu_Initialize(this, Aux.post_frame.initialize_strategy_dropdown)-->
                             <!--</OnShow>-->
                         <!--</Scripts>-->
                     <!--</Frame>-->
@@ -193,7 +193,7 @@
                         </layers>
                         <Scripts>
                             <OnLoad>
-                                MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.sell.validate_parameters)
+                                MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.post_frame.validate_parameters)
                             </OnLoad>
                         </Scripts>
                     </Frame>
@@ -215,7 +215,7 @@
                                 MoneyInputFrame_SetNextFocus(getglobal(this:GetParent():GetName()..'StartPrice'), getglobal(this:GetName()..'Gold'))
                                 MoneyInputFrame_SetPreviousFocus(this, getglobal(this:GetParent():GetName()..'StartPriceCopper'))
                                 MoneyInputFrame_SetNextFocus(this, getglobal(this:GetParent():GetName()..'StartPriceGold'))
-                                MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.sell.validate_parameters)
+                                MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.post_frame.validate_parameters)
                             </OnLoad>
                         </Scripts>
                     </Frame>

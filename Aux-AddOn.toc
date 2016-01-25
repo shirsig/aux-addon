@@ -10,6 +10,7 @@ gui.lua
 control.xml
 persistence.lua
 util.lua
+money.lua
 
 scan.lua
 scan_util.lua
@@ -27,9 +28,6 @@ post_frame.xml
 auctions_frame.xml
 bids_frame.xml
 scan_frame.xml
-
-options.xml
-about.xml
 
 static.xml
 

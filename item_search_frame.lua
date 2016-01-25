@@ -3,18 +3,10 @@ Aux.item_search_frame = public
 
 aux_recently_searched = {}
 
-local create_auction_record, find_auction, hide_sheet, update_listing, auction_alpha_setter, group_alpha_setter, create_auction_record
+local hide_sheet
 local auctions
 local search_query
 local refresh
-
-function auction_alpha_setter(cell, auction)
-    cell:SetAlpha(auction.gone and 0.3 or 1)
-end
-
-function group_alpha_setter(cell, group)
-    cell:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.3 or 1)
-end
 
 function public.on_close()
     private.clear_selection()
@@ -448,7 +440,7 @@ function public.stop_search()
 	Aux.scan.abort()
 end
 
-function update_listing()
+function private.update_listing()
 
     if not AuxItemSearchFrame:IsVisible() then
         return
@@ -489,7 +481,7 @@ function public.set_view(view)
     private.bid_button:Disable()
     private.clear_selection()
     aux_view = view
-    update_listing()
+    private.update_listing()
 end
 
 function private.update_recently_searched()
@@ -578,7 +570,7 @@ function public.start_search()
             on_read_auction = function(auction_info)
                 if auction_info.item_id == item_id then
                     auctions = auctions or {}
-                    tinsert(auctions, create_auction_record(auction_info, current_page))
+                    tinsert(auctions, private.create_auction_record(auction_info, current_page))
                 end
             end,
             on_complete = function()
@@ -615,8 +607,8 @@ function private.clear_selection()
     private.listings[aux_view]:clear_selection()
 end
 
-function find_auction(entry, express_mode, buyout_mode)
-	
+function private.find_auction(entry, express_mode, buyout_mode)
+
 	if buyout_mode and not entry.buyout_price then
 		return
 	end
@@ -631,7 +623,7 @@ function find_auction(entry, express_mode, buyout_mode)
     PlaySound('igMainMenuOptionCheckBoxOn')
 
     local function test(index)
-        return create_auction_record(Aux.info.auction(index)).signature == entry.signature
+        return private.create_auction_record(Aux.info.auction(index)).signature == entry.signature
     end
 
     Aux.scan_util.find_auction(test, search_query, entry.page, private.status_bar, function(index)
@@ -644,7 +636,7 @@ function find_auction(entry, express_mode, buyout_mode)
         end
 
         if not test(index) then
-            return find_auction(entry, express_mode, buyout_mode) -- try again
+            return private.find_auction(entry, express_mode, buyout_mode) -- try again
         end
 
         if express_mode then
@@ -668,7 +660,7 @@ function find_auction(entry, express_mode, buyout_mode)
                 if not test(index) then
                     private.buyout_button:Disable()
                     private.bid_button:Disable()
-                    return find_auction(entry, express_mode, buyout_mode) -- try again
+                    return private.find_auction(entry, express_mode, buyout_mode) -- try again
                 end
 
                 if GetMoney() >= amount then
@@ -698,8 +690,8 @@ function private.on_row_click(sheet, datum, grouped)
 
 	local express_mode = IsAltKeyDown()
 	local buyout_mode = express_mode and arg1 == 'LeftButton'
-	
-	if IsControlKeyDown() then 
+
+	if IsControlKeyDown() then
 		DressUpItemLink(entry.hyperlink)
     elseif IsShiftKeyDown() then
         if ChatFrameEditBox:IsVisible() then
@@ -712,12 +704,12 @@ function private.on_row_click(sheet, datum, grouped)
             sheet:clear_selection()
             sheet:select(datum)
         end
-        find_auction(entry, express_mode, buyout_mode)
+        private.find_auction(entry, express_mode, buyout_mode)
     end
 end
 
-function create_auction_record(auction_info, current_page)
-	
+function private.create_auction_record(auction_info, current_page)
+
 	local aux_quantity = auction_info.charges or auction_info.count
 	local bid = (auction_info.current_bid > 0 and auction_info.current_bid or auction_info.min_bid) + auction_info.min_increment
 	local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
@@ -764,6 +756,6 @@ end
 function public.on_update()
 	if refresh then
 		refresh = false
-		update_listing()
+		private.update_listing()
 	end
 end

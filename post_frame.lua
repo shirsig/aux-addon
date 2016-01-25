@@ -1,12 +1,8 @@
 local private, public = {}, {}
-Aux.sell = public
 Aux.post_frame = public
 
 local existing_auctions = {}
-
 local inventory_data
-
-local update_auction_listing, undercut, refresh_entries, auction_candidates, charge_classes, get_stack_size_slider_value
 
 --local LIVE, HISTORICAL, FIXED = {}, {}, {}
 
@@ -14,7 +10,7 @@ function private.update_inventory_listing()
     Aux.sheet.populate(private.listings.inventory, Aux.util.filter(inventory_data, function(item) return item.aux_quantity > 0 end))
 end
 
-function update_auction_listing()
+function private.update_auction_listing()
     Aux.sheet.populate(private.listings.auctions, private.current_item() and existing_auctions[private.current_item().key] or {})
 end
 
@@ -147,7 +143,7 @@ function public.on_load()
                 comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, row)
-                    cell.text:SetText(row.stack_size == get_stack_size_slider_value() and GREEN_FONT_COLOR_CODE..row.stack_size..FONT_COLOR_CODE_CLOSE or row.stack_size)
+                    cell.text:SetText(row.stack_size == private.get_stack_size_slider_value() and GREEN_FONT_COLOR_CODE..row.stack_size..FONT_COLOR_CODE_CLOSE or row.stack_size)
                 end,
             },
             {
@@ -204,7 +200,7 @@ function public.on_open()
     AuxFrame:SetWidth(AuxSellInventory:GetWidth() + AuxSellParameters:GetWidth() + AuxSellAuctions:GetWidth() + 15)
 
     --    UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, LIVE)
-    Aux_Sell_SetAuctionDuration(AUX_AUCTION_DURATION)
+    private.set_auction_duration(AUX_AUCTION_DURATION)
 
     AuxSellStackSizeSlider:SetValueStep(1)
     AuxSellStackSizeSliderText:SetText('Stack Size')
@@ -220,12 +216,12 @@ function public.on_open()
     MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 1)
     MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 1)
 
-    Aux.sell.validate_parameters()
+    public.validate_parameters()
 
     private.update_inventory_data()
 
     private.update_inventory_listing()
-    update_auction_listing()
+    private.update_auction_listing()
 
     private.update_recommendation()
 end
@@ -234,7 +230,7 @@ function public.on_close()
 
 end
 
-function Aux.sell.duration_radio_button_on_click(index)
+function public.duration_radio_button_on_click(index)
     AuxSellParametersShortDurationRadio:SetChecked(false)
     AuxSellParametersMediumDurationRadio:SetChecked(false)
     AuxSellParametersLongDurationRadio:SetChecked(false)
@@ -254,20 +250,20 @@ function Aux.sell.duration_radio_button_on_click(index)
     private.update_recommendation()
 end
 
-function Aux_Sell_SetAuctionDuration(duration)
+function private.set_auction_duration(duration)
 	if duration == 'short' then
-        Aux.sell.duration_radio_button_on_click(1)
+        public.duration_radio_button_on_click(1)
 	elseif duration == 'medium' then
-        Aux.sell.duration_radio_button_on_click(2)
+        public.duration_radio_button_on_click(2)
 	elseif duration == 'long' then
-        Aux.sell.duration_radio_button_on_click(3)
+        public.duration_radio_button_on_click(3)
 	end
 end
 
 function private.post_auctions()
     local auction = private.current_item()
 	if auction then
-		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, get_stack_size_slider_value(), MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice), AuxSellStackCountSlider:GetValue()
+		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, private.get_stack_size_slider_value(), MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice), AuxSellStackCountSlider:GetValue()
 		local duration
 		if AuctionFrameAuctions.duration == 120 then
 			duration = 2
@@ -296,7 +292,7 @@ function private.post_auctions()
 						end
 					end
 				end
-				Aux.sell.clear_auction()
+				public.clear_auction()
                 auction.aux_quantity = auction.aux_quantity - (posted * stack_size)
                 local charge_class = auction.charges or 0
                 auction.availability[charge_class] = auction.availability[charge_class] - (posted * (auction.charges and 1 or stack_size))
@@ -322,7 +318,7 @@ function private.select_auction()
 			end
 		end
 
-        local auction = cheapest_for_size[get_stack_size_slider_value()] or cheapest
+        local auction = cheapest_for_size[private.get_stack_size_slider_value()] or cheapest
 
         existing_auctions[private.current_item().key].selected = auction
         private.listings.auctions:clear_selection()
@@ -330,7 +326,7 @@ function private.select_auction()
 	end
 end
 
-function get_stack_size_slider_value()
+function private.get_stack_size_slider_value()
     if private.current_item().charges then
         return AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider:GetValue()]
     else
@@ -338,7 +334,7 @@ function get_stack_size_slider_value()
     end
 end
 
-function Aux.sell.validate_parameters()
+function public.validate_parameters()
     private.post_button:Disable()
     AuxSellParametersBuyoutPriceErrorText:Hide()
 
@@ -393,17 +389,17 @@ function private.update_recommendation()
         private.refresh_button:Enable()
 
         -- TODO neutral AH deposit formula
-		MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', floor(private.current_item().unit_vendor_price * 0.05 * (private.current_item().charges and 1 or get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
+		MoneyFrame_Update('AuxSellParametersDepositMoneyFrame', floor(private.current_item().unit_vendor_price * 0.05 * (private.current_item().charges and 1 or private.get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120)
 
         if existing_auctions[private.current_item().key] then
             private.select_auction()
 
             if private.current_auction() then
 
-                local new_buyout_price = private.current_auction().unit_buyout_price * get_stack_size_slider_value()
+                local new_buyout_price = private.current_auction().unit_buyout_price * private.get_stack_size_slider_value()
 
                 if private.current_auction().yours == 0 then
-                    new_buyout_price = undercut(new_buyout_price)
+                    new_buyout_price = private.undercut(new_buyout_price)
                 end
 
                 MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux.round(new_buyout_price * 0.95)))
@@ -416,8 +412,8 @@ function private.update_recommendation()
                     MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux.round(market_value * 0.95)))
                     MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux.round(market_value)))
                 else
-                    MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux.round(private.current_item().unit_vendor_price * (private.current_item().charges and 1 or get_stack_size_slider_value()) * 1.053)))
-                    MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux.round(private.current_item().unit_vendor_price * (private.current_item().charges and 1 or get_stack_size_slider_value()) * 4)))
+                    MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux.round(private.current_item().unit_vendor_price * (private.current_item().charges and 1 or private.get_stack_size_slider_value()) * 1.053)))
+                    MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux.round(private.current_item().unit_vendor_price * (private.current_item().charges and 1 or private.get_stack_size_slider_value()) * 4)))
                 end
             end
         else -- no search yet
@@ -427,15 +423,15 @@ function private.update_recommendation()
 	end
 end
 
-function Aux.sell.quantity_update()
+function public.quantity_update()
     if private.current_item() then
-        AuxSellStackCountSlider:SetMinMaxValues(1, private.current_item().charges and private.current_item().availability[AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider:GetValue()]] or floor(private.current_item().availability[0] / get_stack_size_slider_value()))
+        AuxSellStackCountSlider:SetMinMaxValues(1, private.current_item().charges and private.current_item().availability[AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider:GetValue()]] or floor(private.current_item().availability[0] / private.get_stack_size_slider_value()))
     end
 	private.update_recommendation()
-    update_auction_listing()
+    private.update_auction_listing()
 end
 
-function Aux.sell.clear_auction()
+function public.clear_auction()
     private.listings.inventory:clear_selection()
 	private.update_recommendation()
 end
@@ -456,26 +452,26 @@ function private.set_item(item)
 
         private.update_inventory_listing()
 
-        local charge_classes = charge_classes(private.current_item().availability)
+        local charge_classes = private.charge_classes(private.current_item().availability)
         AuxSellStackSizeSlider.charge_classes = private.current_item().charges and charge_classes
         local stack_size_slider_max = private.current_item().charges and getn(charge_classes) or min(private.current_item().max_stack, private.current_item().availability[0])
         AuxSellStackSizeSlider:SetMinMaxValues(1, stack_size_slider_max)
 
         AuxSellStackSizeSlider:SetValue(stack_size_slider_max)
-        Aux.sell.quantity_update()
+        public.quantity_update()
         AuxSellStackCountSlider:SetValue(private.current_item().aux_quantity) -- reduced to max possible
 
         if not existing_auctions[private.current_item().key] then
-            refresh_entries()
+            private.refresh_entries()
         end
 
         private.update_recommendation()
-        update_auction_listing()
+        private.update_auction_listing()
     end)
 
 end
 
-function charge_classes(availability)
+function private.charge_classes(availability)
 	local charge_classes = {}
 	for charge_class, _ in availability do
 		tinsert(charge_classes, charge_class)
@@ -566,7 +562,7 @@ function private.update_inventory_data()
     end)
 end
 
-function refresh_entries()
+function private.refresh_entries()
 	if private.current_item() then
 		local item_id, suffix_id = private.current_item().item_id, private.current_item().suffix_id
         local item_key = item_id..':'..suffix_id
@@ -612,7 +608,7 @@ function refresh_entries()
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or { created = time() }
 				private.update_recommendation()
-                update_auction_listing()
+                private.update_auction_listing()
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
             end,
@@ -639,9 +635,9 @@ end
 
 function private.refresh()
 	Aux.scan.abort(function()
-		refresh_entries()
+		private.refresh_entries()
 		private.update_recommendation()
-        update_auction_listing()
+        private.update_auction_listing()
 	end)
 end
 
@@ -672,11 +668,11 @@ function private.record_auction(key, aux_quantity, buyout_price, duration, owner
 	end
 end
 
-function undercut(price)
+function private.undercut(price)
 	return math.max(0, price - 1)
 end
 
---function Aux.sell.initialize_strategy_dropdown()
+--function public.initialize_strategy_dropdown()
 --
 --    local function on_click()
 --        UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, this.value)
@@ -694,9 +690,9 @@ end
 --        func = on_click,
 --    }
 --
-----    UIDropDownMenu_AddButton{
-----        text = 'Fixed',
-----        value = FIXED,
-----        func = on_click,
-----    }
+--    UIDropDownMenu_AddButton{
+--        text = 'Fixed',
+--        value = FIXED,
+--        func = on_click,
+--    }
 --end
