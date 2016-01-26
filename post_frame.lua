@@ -356,8 +356,9 @@ function private.post_auctions()
                 local charge_class = auction.charges or 0
                 auction.availability[charge_class] = auction.availability[charge_class] - (posted * (auction.charges and 1 or stack_size))
 
-                refresh = true
+                selected_item = nil
                 private.update_recommendation()
+                refresh = true
 			end
 		)
 	end
