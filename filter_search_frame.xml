@@ -5,7 +5,7 @@
 	<Frame>
       <Scripts> 
 			<OnUpdate> 
-				Aux.buy.onupdate()
+				Aux.filter_search_frame.on_update()
 			</OnUpdate> 
 		</Scripts> 
 	</Frame>

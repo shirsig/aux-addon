@@ -78,10 +78,11 @@ function public.auction(index, type)
     local item_id, suffix_id, unique_id, enchant_id = private.parse_hyperlink(hyperlink)
     local item_info = public.item(item_id, suffix_id, unique_id, enchant_id)
 
-    local name, texture, count, quality, usable, level, min_bid, min_increment, buyout_price, current_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(type, index)
+    local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(type, index)
 	local duration = GetAuctionItemTimeLeft(type, index)
     local tooltip = public.tooltip(function(tt) tt:SetAuctionItem(type, index) end)
     local charges = private.item_charges(tooltip)
+    local aux_quantity = charges or count
 
     return {
         index = index,
@@ -94,7 +95,7 @@ function public.auction(index, type)
         hyperlink = hyperlink,
         itemstring = item_info.itemstring,
         item_key = item_id..':'..suffix_id,
-        signature = public.auction_signature(index, type),
+        signature = Aux.persistence.serialize({item_id, suffix_id, unique_id, enchant_id, aux_quantity, start_price, buyout_price}, ':'), -- not unique!
 
         name = name,
         texture = texture,
@@ -105,10 +106,13 @@ function public.auction(index, type)
         max_stack = item_info.max_stack,
 
         count = count,
-        min_bid = min_bid,
+        min_bid = start_price, -- deprecated
+        start_price = start_price,
+        high_bid = high_bid,
+        current_bid = high_bid, -- deprecated
         min_increment = min_increment,
+        bid_price = (high_bid > 0 and high_bid or start_price) + min_increment,
         buyout_price = buyout_price,
-        current_bid = current_bid,
         high_bidder = high_bidder,
         owner = owner,
         sale_status = sale_status,
@@ -116,7 +120,7 @@ function public.auction(index, type)
         usable = usable,
         tooltip = tooltip,
         charges = charges,
-        aux_quantity = charges or count,
+        aux_quantity = aux_quantity,
 
         EnhTooltip_info = {
             name = name,
@@ -206,33 +210,6 @@ function private.item_charges(tooltip)
 			return charges
 		end
 	end
-end
-
--- not unique!
-function public.auction_signature(index, type)
-    type = type or 'list'
-    -- owner not used because waiting for it would slow down the scan too much
-    local _, _, count, _, _, _, min_bid, _, buyout_price, _, _, owner = GetAuctionItemInfo('list', index)
-    local hyperlink = GetAuctionItemLink(type, index)
-    local item_id, suffix_id, unique_id, enchant_id = private.parse_hyperlink(hyperlink)
-    return format(
-        '%s:%s:%s:%s:%s:%s:%s',
-        item_id or 0,
-        suffix_id or 0,
-        unique_id or 0,
-        enchant_id or 0,
-        count or 0,
-        min_bid or 0,
-        buyout_price or 0
-    )
-end
-
-function public.break_auction_signature(signature)
-    local parts = strfind(signature, '^(%d+):(%d+):(%d+):(%d+):(%d+):(%d+):(%d+)$')
-    for i=1,2 do
-        tremove(parts, 1)
-    end
-    return unpack(parts)
 end
 
 function public.item_key(hyperlink)

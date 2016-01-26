@@ -47,7 +47,7 @@ function public.render(sheet)
 		local datum = data[i + offset]
 
         if datum then
-			if sheet.selected[datum] then
+			if sheet.selected and sheet.selected(datum) then
 				row.highlight:SetAlpha(0.5)
 			else
 				row.highlight:SetAlpha(0)
@@ -199,7 +199,7 @@ function public.create(params)
 			end)
 			row:SetScript('OnLeave', function()
 				local data_index = row_idx + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-				if not sheet.selected[sheet.data[data_index]] then
+				if not (sheet.selected and sheet.selected(sheet.data[data_index])) then
 					sheet.rows[row_idx].highlight:SetAlpha(0)
 				end
 				if sheet.on_row_leave then
@@ -250,42 +250,15 @@ function public.create(params)
 		rows = rows,
         columns = params.columns,
 		data = {},
-		selected = {},
 		sort_order = params.sort_order,
         row_setter = params.row_setter,
+		selected = params.selected,
 		on_row_click = params.on_row_click,
 		on_row_enter = params.on_row_enter,
 		on_row_leave = params.on_row_leave,
         on_row_update = params.on_row_update,
 	}
 	scroll_frame.sheet = sheet
-
-	function sheet:clear_selection()
-		self.selected = {}
-		public.render(self)
-	end
-
-	function sheet:select(datum)
-		self.selected[datum] = true
-		public.render(self)
-	end
-
-	function sheet:deselect(datum)
-		self.selected[datum] = false
-		public.render(self)
-	end
-
-	function sheet:get_selection()
-		local selection = {}
-		for datum, _ in pairs(self.selected) do
-			tinsert(selection, datum)
-		end
-		return selection
-	end
-
-	function sheet:get_selected()
-		return self:get_selection()[1]
-	end
 	
 	return sheet
 end

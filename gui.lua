@@ -50,7 +50,7 @@ end
 
 
 function m.resize_tab(tab, width, padding)
-    tab:SetWidth(width + padding + 8)
+    tab:SetWidth(width + padding + 10)
 end
 
 function m.update_tab(tab)

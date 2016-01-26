@@ -1,19 +1,35 @@
 local private, public = {}, {}
 Aux.bids_frame = public
 
+local refresh
 local bid_records
+local selected_auction
+
+function private.select_auction(entry)
+    selected_auction = entry
+    refresh = true
+    private.buyout_button:Disable()
+    private.bid_button:Disable()
+end
+
+function private.clear_selection(entry)
+    selected_auction = nil
+    refresh = true
+    private.buyout_button:Disable()
+    private.bid_button:Disable()
+end
 
 function public.on_load()
     private.bid_listing_config = {
         frame = AuxBidsFrameListingBidListing,
         on_row_click = function(sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            public.on_bid_click(sheet.data[data_index])
+            private.on_row_click(sheet.data[data_index])
         end,
-        on_row_enter = function (sheet, row_index)
+        on_row_enter = function(sheet, row_index)
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
-        on_row_leave = function (sheet, row_index)
+        on_row_leave = function(sheet, row_index)
             AuxTooltip:Hide()
             ResetCursor()
         end,
@@ -25,6 +41,9 @@ function public.on_load()
             else
                 ResetCursor()
             end
+        end,
+        selected = function(datum)
+            return datum == selected_auction
         end,
         row_setter = function(row, datum)
             row:SetAlpha(datum.gone and 0.3 or 1)
@@ -111,7 +130,8 @@ function public.on_load()
                 end,
             },
             Aux.listing_util.owner_column(function(datum) return datum.owner end),
-            Aux.listing_util.money_column('Your Bid', function(entry) return entry.current_bid end),
+            Aux.listing_util.money_column('Your Bid', function(entry) return entry.your_bid end),
+            Aux.listing_util.money_column('Bid', function(entry) return entry.bid_price end),
             Aux.listing_util.money_column('Buy', function(entry) return entry.buyout_price end),
         },
         sort_order = {{ column = 1, order = 'ascending' }},
@@ -149,13 +169,11 @@ end
 
 function public.on_open()
     public.update_bid_records()
-    public.update_listing()
+    refresh = true
 end
 
 function public.on_close()
-    private.listing:clear_selection()
-    private.buyout_button:Disable()
-    private.bid_button:Disable()
+    private.clear_selection()
 end
 
 function public.update_bid_records()
@@ -175,12 +193,12 @@ function public.update_bid_records()
             current_page = page
         end,
         on_read_auction = function(auction_info)
-            tinsert(bid_records, private.create_bid_record(auction_info, current_page))
+            tinsert(bid_records, private.create_auction_record(auction_info, current_page))
         end,
         on_complete = function()
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Scanning')
-            public.update_listing()
+            refresh = true
         end,
         on_abort = function()
             private.status_bar:update_status(100, 100)
@@ -195,19 +213,20 @@ function public.update_bid_records()
     }
 end
 
-function public.update_listing()
+function private.update_listing()
+    if not AuxBidsFrame:IsVisible() then
+        return
+    end
+
     AuxBidsFrameListingBidListing:Show()
     Aux.sheet.populate(private.listing, bid_records)
     AuxBidsFrameListing:SetWidth(AuxBidsFrameListingBidListing:GetWidth() + 40)
     AuxFrame:SetWidth(AuxBidsFrameListing:GetWidth() + 15)
 end
 
-function private.create_bid_record(auction_info, page)
+function private.create_auction_record(auction_info, page)
 
-    local aux_quantity = auction_info.charges or auction_info.count
-    local bid = (auction_info.current_bid > 0 and auction_info.current_bid or auction_info.min_bid) + auction_info.min_increment
     local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
-    local buyout_price_per_unit = buyout_price and Aux.round(auction_info.buyout_price / aux_quantity)
 
     local status
     if auction_info.high_bidder then
@@ -220,119 +239,104 @@ function private.create_bid_record(auction_info, page)
         page = page,
 
         item_id = auction_info.item_id,
-        key = auction_info.item_signature,
-        signature = Aux.auction_signature(auction_info.hyperlink, aux_quantity, bid, auction_info.buyout_price),
+        suffix_id = auction_info.suffix_id,
+        unique_id = auction_info.unique_id,
+        enchant_id = auction_info.enchant_id,
+
+        item_id = auction_info.item_id,
+        item_key = auction_info.item_key,
+        signature = auction_info.signature,
 
         name = auction_info.name,
         tooltip = auction_info.tooltip,
-        aux_quantity = aux_quantity,
+        aux_quantity = auction_info.aux_quantity,
         buyout_price = buyout_price,
-        buyout_price_per_unit = buyout_price_per_unit,
         quality = auction_info.quality,
         hyperlink = auction_info.hyperlink,
         itemstring = auction_info.itemstring,
-        bid = bid,
+        bid_price = auction_info.bid_price,
         owner = auction_info.owner,
         duration = auction_info.duration,
         usable = auction_info.usable,
         high_bidder = auction_info.high_bidder,
-        current_bid = auction_info.current_bid > 0 and auction_info.current_bid or nil,
+        your_bid = auction_info.high_bidder and auction_info.high_bid,
         status = status,
 
         EnhTooltip_info = auction_info.EnhTooltip_info,
     }
 end
 
-function private.find_auction(entry, express_mode, buyout_mode)
+function private.process_request(entry, express_mode, buyout_mode)
 
-    if buyout_mode and not entry.buyout_price then
+    if entry.gone or (buyout_mode and not entry.buyout_price) or (express_mode and not buyout_mode and entry.high_bidder) or entry.owner == UnitName('player') then
         return
-    end
-
-    local amount
-    if buyout_mode then
-        amount = entry.buyout_price
-    else
-        amount = entry.bid
     end
 
     PlaySound('igMainMenuOptionCheckBoxOn')
 
     local function test(index)
-        return private.create_bid_record(Aux.info.auction(index, 'bidder')).signature == entry.signature
+        local auction_record = private.create_auction_record(Aux.info.auction(index, 'bidder'))
+        return auction_record.signature == entry.signature and auction_record.bid_price == entry.bid_price and auction_record.owner ~= UnitName('player')
     end
 
-    Aux.scan_util.find_auction('bidder', test, {}, entry.page, private.status_bar, function(index)
+    local function remove_entry()
+        entry.gone = true
+        refresh = true
+        private.clear_selection()
+    end
 
-        if not index then
-            entry.gone = true
-            private.listing:clear_selection()
-            refresh = true
-            return
-        end
+    if express_mode then
+        Aux.scan_util.find('bidder', test, {}, entry.page, private.status_bar, remove_entry, function(index)
+            if not entry.gone then
+                Aux.place_bid('bidder', index, buyout_mode and entry.buyout_price or entry.bid_price, remove_entry)
+            end
+        end)
+    else
+        private.select_auction(entry)
 
-        if not test(index) then
-            return private.find_auction(entry, express_mode, buyout_mode) -- try again
-        end
+        Aux.scan_util.find('bidder', test, {}, entry.page, private.status_bar, remove_entry, function(index)
 
-        if express_mode then
-            if Aux.bid_lock then
-                return
+            if not entry.high_bidder then
+                private.bid_button:SetScript('OnClick', function()
+                    if test(index) and not entry.gone then
+                        Aux.place_bid('bidder', index, entry.bid_price, remove_entry)
+                    end
+                    private.clear_selection()
+                end)
+                private.bid_button:Enable()
             end
 
-            if GetMoney() >= amount then
-                entry.gone = true
+            if entry.buyout_price then
+                private.buyout_button:SetScript('OnClick', function()
+                    if test(index) and not entry.gone then
+                        Aux.place_bid('bidder', index, entry.buyout_price, remove_entry)
+                    end
+                    private.clear_selection()
+                end)
+                private.buyout_button:Enable()
             end
-            Aux.place_bid('bidder', index, amount)
-
-            private.listing:clear_selection()
-            refresh = true
-        else
-            private.buyout_button:SetScript('OnClick', function()
-                if Aux.bid_lock then
-                    return
-                end
-
-                if not test(index) then
-                    private.buyout_button:Disable()
-                    private.bid_button:Disable()
-                    return private.find_auction(entry, express_mode, buyout_mode) -- try again
-                end
-
-                if GetMoney() >= amount then
-                    entry.gone = true
-                end
-                Aux.place_bid('bidder', index, entry.buyout_price)
-
-                private.buyout_button:Disable()
-                private.bid_button:Disable()
-                private.listing:clear_selection()
-                refresh = true
-            end)
-            private.buyout_button:Enable()
-            private.bid_button:Enable()
-        end
-    end)
+        end)
+    end
 end
 
-function public.on_bid_click(bid_record)
-
-    local express_mode = IsAltKeyDown()
-    local buyout_mode = express_mode and arg1 == 'LeftButton'
+function private.on_row_click(datum)
 
     if IsControlKeyDown() then
-        DressUpItemLink(bid_record.hyperlink)
+        DressUpItemLink(datum.hyperlink)
     elseif IsShiftKeyDown() then
         if ChatFrameEditBox:IsVisible() then
-            ChatFrameEditBox:Insert(bid_record.hyperlink)
+            ChatFrameEditBox:Insert(datum.hyperlink)
         end
-    elseif not bid_record.gone then
-        if not express_mode then
-            private.buyout_button:Disable()
-            private.bid_button:Disable()
-            private.listing:clear_selection()
-            private.listing:select(bid_record)
-        end
-        private.find_auction(bid_record, express_mode, buyout_mode)
+    else
+        local express_mode = IsAltKeyDown()
+        local buyout_mode = express_mode and arg1 == 'LeftButton'
+        private.process_request(datum, express_mode, buyout_mode)
+    end
+end
+
+function public.on_update()
+    if refresh then
+        refresh = false
+        private.update_listing()
     end
 end

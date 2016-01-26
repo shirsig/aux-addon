@@ -7,15 +7,6 @@ Aux = {
     blizzard_ui_shown = false,
 	loaded = false,
 	orig = {},
-	elements = {},
-    tabs = {
-        browse = {
-            index = 1
-        },
-        post = {
-            index = 2
-        },
-    },
 	last_picked_up = {},
     view = {
         BUYOUT = 1,
@@ -131,16 +122,28 @@ function Aux_OnAddonLoaded()
     end
 end
 
-function Aux.place_bid(type, index, bid)
-    local money = GetMoney()
-    if money >= bid then
-        Aux.bid_lock = true
-        local t0 = GetTime()
-        Aux.control.as_soon_as(function() return GetMoney() < money or GetTime() - t0 > 10 end, function()
-            Aux.bid_lock = false
-        end)
+do
+    local locked
+
+    function Aux.place_bid(type, index, amount, on_success)
+
+        if locked then
+            return
+        end
+
+        local money = GetMoney()
+        if money >= amount then
+            locked = true
+            local t0 = GetTime()
+            Aux.control.as_soon_as(function() return GetMoney() < money or GetTime() - t0 > 10 end, function()
+                if GetMoney() < money then
+                    on_success()
+                end
+                locked = false
+            end)
+        end
+        PlaceAuctionBid(type, index, amount)
     end
-    PlaceAuctionBid(type, index, bid)
 end
 
 function Aux.log_frame_load()
@@ -372,10 +375,6 @@ function Aux_QualityColor(code)
     elseif code == 6 then
         return "ffe6cc80" -- artifact, pale gold
     end
-end
-
-function Aux.auction_signature(hyperlink, stack_size, bid, amount)
-	return hyperlink .. (stack_size or '0') .. '_' .. (bid or '0') .. '_' .. (amount or '0')
 end
 
 function Aux.item_class_index(item_class)

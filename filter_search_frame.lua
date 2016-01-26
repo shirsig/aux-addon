@@ -1,5 +1,3 @@
-Aux.buy = {}
-
 local private, public = {}, {}
 Aux.filter_search_frame = public
 
@@ -7,11 +5,24 @@ local auctions
 local search_query
 local tooltip_patterns = {}
 local refresh
+local selected_auction
+
+function private.select_auction(entry)
+    selected_auction = entry
+    refresh = true
+    private.buyout_button:Disable()
+    private.bid_button:Disable()
+end
+
+function private.clear_selection(entry)
+    selected_auction = nil
+    refresh = true
+    private.buyout_button:Disable()
+    private.bid_button:Disable()
+end
 
 function public.on_close()
     private.clear_selection()
-    private.buyout_button:Disable()
-    private.bid_button:Disable()
 end
 
 function public.on_open()
@@ -22,14 +33,14 @@ function public.on_load()
     private.views = {
         [Aux.view.BUYOUT] = {
             frame = AuxFilterSearchFrameResultsBuyListing,
-            on_row_click = function (sheet, row_index)
+            on_row_click = function(sheet, row_index)
                 local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-                private.on_row_click(sheet, sheet.data[data_index], true)
+                private.on_row_click(sheet.data[data_index], true)
             end,
-            on_row_enter = function (sheet, row_index)
+            on_row_enter = function(sheet, row_index)
                 Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
             end,
-            on_row_leave = function (sheet, row_index)
+            on_row_leave = function(sheet, row_index)
                 AuxTooltip:Hide()
                 ResetCursor()
             end,
@@ -41,6 +52,9 @@ function public.on_load()
                 else
                     ResetCursor()
                 end
+            end,
+            selected = function(datum)
+                return Aux.util.any(datum, function(entry) return entry == selected_auction end)
             end,
             row_setter = function(row, group)
                 row:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.3 or 1)
@@ -99,7 +113,7 @@ function public.on_load()
                     end,
                 },
                 Aux.listing_util.money_column('Buy', function(group) return group[1].buyout_price end),
-                Aux.listing_util.money_column('Buy/ea', function(group) return group[1].buyout_price_per_unit end),
+                Aux.listing_util.money_column('Buy/ea', function(group) return group[1].unit_buyout_price end),
                 {
                     title = 'Avail',
                     width = 40,
@@ -109,20 +123,20 @@ function public.on_load()
                         cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
                     end,
                 },
-                Aux.listing_util.percentage_market_column(function(group) return group[1].item_key end, function(group) return group[1].buyout_price_per_unit end),
+                Aux.listing_util.percentage_market_column(function(group) return group[1].item_key end, function(group) return group[1].unit_buyout_price end),
             },
             sort_order = {{column = 1, order = 'ascending' }, {column = 4, order = 'ascending'}},
         },
         [Aux.view.BID] = {
             frame = AuxFilterSearchFrameResultsBidListing,
-            on_row_click = function (sheet, row_index)
+            on_row_click = function(sheet, row_index)
                 local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-                private.on_row_click(sheet, sheet.data[data_index])
+                private.on_row_click(sheet.data[data_index])
             end,
-            on_row_enter = function (sheet, row_index)
+            on_row_enter = function(sheet, row_index)
                 Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
             end,
-            on_row_leave = function (sheet, row_index)
+            on_row_leave = function(sheet, row_index)
                 AuxTooltip:Hide()
                 ResetCursor()
             end,
@@ -134,6 +148,9 @@ function public.on_load()
                 else
                     ResetCursor()
                 end
+            end,
+            selected = function(datum)
+                return datum == selected_auction
             end,
             row_setter = function(row, datum)
                 row:SetAlpha(datum.gone and 0.3 or 1)
@@ -191,8 +208,8 @@ function public.on_load()
                         cell.text:SetText(datum.aux_quantity)
                     end,
                 },
-                Aux.listing_util.money_column('Bid', function(entry) return entry.bid end),
-                Aux.listing_util.money_column('Bid/ea', function(entry) return entry.bid_per_unit end),
+                Aux.listing_util.money_column('Bid', function(entry) return entry.bid_price end),
+                Aux.listing_util.money_column('Bid/ea', function(entry) return entry.unit_bid_price end),
                 {
                     title = 'Status',
                     width = 70,
@@ -235,14 +252,14 @@ function public.on_load()
         },
         [Aux.view.FULL] = {
             frame = AuxFilterSearchFrameResultsFullListing,
-            on_row_click = function (sheet, row_index)
+            on_row_click = function(sheet, row_index)
                 local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-                private.on_row_click(sheet, sheet.data[data_index])
+                private.on_row_click(sheet.data[data_index])
             end,
-            on_row_enter = function (sheet, row_index)
+            on_row_enter = function(sheet, row_index)
                 Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
             end,
-            on_row_leave = function (sheet, row_index)
+            on_row_leave = function(sheet, row_index)
                 AuxTooltip:Hide()
                 ResetCursor()
             end,
@@ -254,6 +271,9 @@ function public.on_load()
                 else
                     ResetCursor()
                 end
+            end,
+            selected = function(datum)
+                return datum == selected_auction
             end,
             row_setter = function(row, datum)
                 row:SetAlpha(datum.gone and 0.3 or 1)
@@ -327,10 +347,10 @@ function public.on_load()
                         cell.text:SetText(datum.aux_quantity)
                     end,
                 },
-                Aux.listing_util.money_column('Bid', function(entry) return entry.bid end),
+                Aux.listing_util.money_column('Bid', function(entry) return entry.bid_price end),
                 Aux.listing_util.money_column('Buy', function(entry) return entry.buyout_price end),
-                Aux.listing_util.money_column('Bid/ea', function(entry) return entry.bid_per_unit end),
-                Aux.listing_util.money_column('Buy/ea', function(entry) return entry.buyout_price_per_unit end),
+                Aux.listing_util.money_column('Bid/ea', function(entry) return entry.unit_bid_price end),
+                Aux.listing_util.money_column('Buy/ea', function(entry) return entry.unit_buyout_price end),
                 {
                     title = 'Status',
                     width = 70,
@@ -360,7 +380,7 @@ function public.on_load()
                     end,
                 },
                 Aux.listing_util.owner_column(function(datum) return datum.owner end),
-                Aux.listing_util.percentage_market_column(function(entry) return entry.item_key end, function(entry) return entry.buyout_price_per_unit end),
+                Aux.listing_util.percentage_market_column(function(entry) return entry.item_key end, function(entry) return entry.unit_buyout_price end),
             },
             sort_order = {{column = 1, order = 'ascending' }, {column = 7, order = 'ascending' }},
         },
@@ -647,20 +667,16 @@ function private.update_listing()
 end
 
 function public.set_view(view)
-    private.buyout_button:Disable()
-    private.bid_button:Disable()
     private.clear_selection()
     aux_view = view
-    private.update_listing()
-end
-
-function public.set_item(item_id)
-    private.item_id = item_id
+    refresh = true
 end
 
 function public.start_search()
 
     Aux.scan.abort(function()
+
+        private.clear_selection()
 
         private.status_bar:update_status(0,0)
         private.status_bar:set_text('Scanning auctions...')
@@ -740,82 +756,60 @@ function public.start_search()
     end)
 end
 
-function private.clear_selection()
-    private.listings[aux_view]:clear_selection()
-end
+function private.process_request(entry, express_mode, buyout_mode)
 
-function private.find_auction(entry, express_mode, buyout_mode)
-	
-	if buyout_mode and not entry.buyout_price then
-		return
-	end
-
-    local amount
-    if buyout_mode then
-        amount = entry.buyout_price
-    else
-        amount = entry.bid
+    if entry.gone or (buyout_mode and not entry.buyout_price) or (express_mode and not buyout_mode and entry.high_bidder) or entry.owner == UnitName('player') then
+        return
     end
 
-	PlaySound('igMainMenuOptionCheckBoxOn')
+    PlaySound('igMainMenuOptionCheckBoxOn')
 
     local function test(index)
-        return private.create_auction_record(Aux.info.auction(index)).signature == entry.signature
+        local auction_record = private.create_auction_record(Aux.info.auction(index))
+        return auction_record.signature == entry.signature and auction_record.bid_price == entry.bid_price and auction_record.owner ~= UnitName('player')
     end
 
-    Aux.scan_util.find_auction('list', test, search_query, entry.page, private.status_bar, function(index)
-        if not index then
-            entry.gone = true
-            private.clear_selection()
-            refresh = true
-            return
-        end
+    local function remove_entry()
+        entry.gone = true
+        refresh = true
+        private.clear_selection()
+    end
 
-        if not test(index) then
-            return private.find_auction(entry, express_mode, buyout_mode) -- try again
-        end
+    if express_mode then
+        Aux.scan_util.find('list', test, search_query, entry.page, private.status_bar, remove_entry, function(index)
+            if not entry.gone then
+                Aux.place_bid('list', index, buyout_mode and entry.buyout_price or entry.bid_price, remove_entry)
+            end
+        end)
+    else
+        private.select_auction(entry)
 
-        if express_mode then
-            if Aux.bid_lock then
-                return
+        Aux.scan_util.find('list', test, search_query, entry.page, private.status_bar, remove_entry, function(index)
+
+            if not entry.high_bidder then
+                private.bid_button:SetScript('OnClick', function()
+                    if test(index) and not entry.gone then
+                        Aux.place_bid('list', index, entry.bid_price, remove_entry)
+                    end
+                    private.clear_selection()
+                end)
+                private.bid_button:Enable()
             end
 
-            if GetMoney() >= amount then
-                entry.gone = true
+            if entry.buyout_price then
+                private.buyout_button:SetScript('OnClick', function()
+                    if test(index) and not entry.gone then
+                        Aux.place_bid('list', index, entry.buyout_price, remove_entry)
+                    end
+                    private.clear_selection()
+                end)
+                private.buyout_button:Enable()
             end
-            Aux.place_bid('list', index, amount)
-
-            private.clear_selection()
-            refresh = true
-        else
-            private.buyout_button:SetScript('OnClick', function()
-                if Aux.bid_lock then
-                    return
-                end
-
-                if not test(index) then
-                    private.buyout_button:Disable()
-                    private.bid_button:Disable()
-                    return private.find_auction(entry, express_mode, buyout_mode) -- try again
-                end
-
-                if GetMoney() >= amount then
-                    entry.gone = true
-                end
-                Aux.place_bid('list', index, entry.buyout_price)
-
-                private.buyout_button:Disable()
-                private.bid_button:Disable()
-                private.clear_selection()
-                refresh = true
-            end)
-            private.buyout_button:Enable()
-            private.bid_button:Enable()
-        end
-    end)
+        end)
+    end
 end
 
-function private.on_row_click(sheet, datum, grouped)
+function private.on_row_click(datum, grouped)
 
     local entry
     if grouped then
@@ -824,32 +818,23 @@ function private.on_row_click(sheet, datum, grouped)
         entry = datum
     end
 
-    local express_mode = IsAltKeyDown()
-    local buyout_mode = express_mode and arg1 == 'LeftButton'
-
     if IsControlKeyDown() then
         DressUpItemLink(entry.hyperlink)
     elseif IsShiftKeyDown() then
         if ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(entry.hyperlink)
         end
-    elseif not entry.gone and entry.owner ~= UnitName('player') then
-        if not express_mode then
-            private.buyout_button:Disable()
-            private.bid_button:Disable()
-            sheet:clear_selection()
-            sheet:select(datum)
-        end
-        private.find_auction(entry, express_mode, buyout_mode)
+    else
+        local express_mode = IsAltKeyDown()
+        local buyout_mode = express_mode and arg1 == 'LeftButton'
+        private.process_request(entry, express_mode, buyout_mode)
     end
 end
 
-function private.create_auction_record(auction_info, current_page)
-	
-	local aux_quantity = auction_info.charges or auction_info.count
-	local bid = (auction_info.current_bid > 0 and auction_info.current_bid or auction_info.min_bid) + auction_info.min_increment
+function private.create_auction_record(auction_info, page)
+
 	local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
-	local buyout_price_per_unit = buyout_price and Aux.round(auction_info.buyout_price / aux_quantity)
+	local unit_buyout_price = buyout_price and Aux.round(auction_info.buyout_price / auction_info.aux_quantity)
     local status
     if auction_info.current_bid == 0 then
         status = 'No Bid'
@@ -860,27 +845,27 @@ function private.create_auction_record(auction_info, current_page)
     end
 
     return {
+        page = page,
+
         item_id = auction_info.item_id,
         suffix_id = auction_info.suffix_id,
         unique_id = auction_info.unique_id,
         enchant_id = auction_info.enchant_id,
 
         item_key = auction_info.item_key,
-        key = auction_info.item_signature,
-        signature = Aux.auction_signature(auction_info.hyperlink, aux_quantity, bid, auction_info.buyout_price),
+        signature = auction_info.signature,
 
         name = auction_info.name,
         level = auction_info.level,
         tooltip = auction_info.tooltip,
-        aux_quantity = aux_quantity,
+        aux_quantity = auction_info.aux_quantity,
         buyout_price = buyout_price,
-        buyout_price_per_unit = buyout_price_per_unit,
+        unit_buyout_price = unit_buyout_price,
         quality = auction_info.quality,
         hyperlink = auction_info.hyperlink,
         itemstring = auction_info.itemstring,
-        page = current_page,
-        bid = bid,
-        bid_per_unit = Aux.round(bid / aux_quantity),
+        bid_price = auction_info.bid_price,
+        unit_bid_price = Aux.round(auction_info.bid_price / auction_info.aux_quantity),
         owner = auction_info.owner,
         duration = auction_info.duration,
         usable = auction_info.usable,
@@ -891,7 +876,7 @@ function private.create_auction_record(auction_info, current_page)
     }
 end
 
-function Aux.buy.onupdate()
+function public.on_update()
 	if refresh then
 		refresh = false
 		private.update_listing()
