@@ -361,3 +361,79 @@ function m.CreateVerticalLine(parent, ofsx, relativeFrame, invertedColor)
     end
     return barTex
 end
+
+function m.dropdown()
+    local count = AceGUI:GetNextWidgetNum(Type)
+
+    local frame = CreateFrame("Frame", nil, UIParent)
+    local dropdown = CreateFrame("Frame", "TSMDropDown"..count, frame, "UIDropDownMenuTemplate")
+
+    frame:SetScript("OnHide", Dropdown_OnHide)
+
+    dropdown:ClearAllPoints()
+    dropdown:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -7, 0)
+    dropdown:SetScript("OnHide", nil)
+    dropdown:SetScript("OnEnter", Control_OnEnter)
+    dropdown:SetScript("OnLeave", Control_OnLeave)
+    dropdown:SetScript("OnMouseUp", function(self, button) Dropdown_TogglePullout(self.obj.button, button) end)
+    TSMAPI.Design:SetContentColor(dropdown)
+
+    local left = _G[dropdown:GetName().."Left"]
+    local middle = _G[dropdown:GetName().."Middle"]
+    local right = _G[dropdown:GetName().."Right"]
+
+    middle:ClearAllPoints()
+    right:ClearAllPoints()
+
+    middle:SetPoint("LEFT", left, "RIGHT", 0, 0)
+    middle:SetPoint("RIGHT", right, "LEFT", 0, 0)
+    right:SetPoint("TOPRIGHT", dropdown, "TOPRIGHT", 0, 17)
+
+    local button = _G[dropdown:GetName().."Button"]
+    button:RegisterForClicks("AnyUp")
+    button:SetScript("OnEnter", Control_OnEnter)
+    button:SetScript("OnLeave", Control_OnLeave)
+    button:SetScript("OnClick", Dropdown_TogglePullout)
+    button:ClearAllPoints()
+    button:SetPoint("RIGHT", dropdown, 0, 0)
+
+    local text = _G[dropdown:GetName().."Text"]
+    text:ClearAllPoints()
+    text:SetPoint("RIGHT", button, "LEFT", -2, 0)
+    text:SetPoint("LEFT", dropdown, "LEFT", 8, 0)
+    text:SetFont(TSMAPI.Design:GetContentFont("normal"))
+    text:SetShadowColor(0, 0, 0, 0)
+
+    local label = frame:CreateFontString(nil, "OVERLAY")
+    label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    label:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+    label:SetJustifyH("LEFT")
+    label:SetHeight(18)
+    label:SetFont(TSMAPI.Design:GetContentFont("small"))
+    label:SetShadowColor(0, 0, 0, 0)
+    label:Hide()
+
+    left:Hide()
+    middle:Hide()
+    right:Hide()
+
+    local widget = {
+        frame = frame,
+        label = label,
+        dropdown = dropdown,
+        text = text,
+        button = button,
+        count = count,
+        alignoffset = 30,
+        type = Type,
+    }
+    for method, func in pairs(methods) do
+        widget[method] = func
+    end
+    frame.obj = widget
+    dropdown.obj = widget
+    text.obj = widget
+    button.obj = widget
+
+    return AceGUI:RegisterAsWidget(widget)
+end

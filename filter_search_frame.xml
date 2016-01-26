@@ -22,10 +22,10 @@
                 </Scripts>
                 <Frames>
                     <Frame name="$parentCategoryDropDown" inherits="UIDropDownMenuTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-56" /></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="14" y="-53" /></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                UIDropDownMenu_SetWidth(140)
+                                <!--UIDropDownMenu_SetWidth(100)-->
                                 UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersCategoryDropDown_Initialize)
                             </OnLoad>
                             <OnShow>
@@ -35,10 +35,10 @@
                     </Frame>
 
                     <Frame name="$parentQualityDropDown" inherits="UIDropDownMenuTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="-98" /></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="14" y="-93" /></Offset></Anchor></Anchors>
                         <Scripts>
                             <OnLoad>
-                                UIDropDownMenu_SetWidth(140)
+                                <!--UIDropDownMenu_SetWidth(100)-->
                                 UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersQualityDropDown_Initialize)
                             </OnLoad>
                             <OnShow>

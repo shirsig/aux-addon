@@ -467,12 +467,12 @@ function public.on_load()
     end
     do
         local label = Aux.gui.label(AuxFilterSearchFrameFiltersCategoryDropDown, 13)
-        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersCategoryDropDown, 'TOPLEFT', 20, 1)
+        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersCategoryDropDown, 'TOPLEFT', -2, -4)
         label:SetText('Category')
     end
     do
         local label = Aux.gui.label(AuxFilterSearchFrameFiltersQualityDropDown, 13)
-        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersQualityDropDown, 'TOPLEFT', 20, 1)
+        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersQualityDropDown, 'TOPLEFT', -2, -4)
         label:SetText('Rarity')
     end
     do
@@ -629,6 +629,32 @@ function public.on_load()
         local label = Aux.gui.label(AuxFilterSearchFrameFiltersAllPagesCheckButton, 13)
         label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersAllPagesCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('All')
+    end
+
+    -- TODO replace with real gui dropdown
+--    CreateFrame('Frame', '$parentCategoryDropDown', AuxFilterSearchFrameFilters, 'UIDropDownMenuTemplate')
+--    local dropdown = CreateFrame('Frame', '$parentQualityDropDown', AuxFilterSearchFrameFilters, 'UIDropDownMenuTemplate')
+    for _, dropdown in ipairs({AuxFilterSearchFrameFiltersCategoryDropDown, AuxFilterSearchFrameFiltersQualityDropDown}) do
+        dropdown:SetWidth(150)
+        dropdown:SetHeight(10)
+        dropdown:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size, insets={top=5,bottom=5}})
+        dropdown:SetBackdropColor(unpack(Aux.gui.config.content_color))
+        dropdown:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
+        local left = getglobal(dropdown:GetName()..'Left'):Hide()
+        local middle = getglobal(dropdown:GetName()..'Middle'):Hide()
+        local right = getglobal(dropdown:GetName()..'Right'):Hide()
+
+        local button = getglobal(dropdown:GetName()..'Button')
+--        button:RegisterForClicks('AnyUp')
+        button:ClearAllPoints()
+        button:SetPoint('RIGHT', dropdown, 0, 0)
+
+        local text = getglobal(dropdown:GetName()..'Text')
+        text:ClearAllPoints()
+        text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
+        text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
+        text:SetFont(Aux.gui.config.content_font, 13)
+        text:SetShadowColor(0, 0, 0, 0)
     end
 end
 
