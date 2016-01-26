@@ -357,6 +357,7 @@ function private.post_auctions()
                 auction.availability[charge_class] = auction.availability[charge_class] - (posted * (auction.charges and 1 or stack_size))
 
                 refresh = true
+                private.update_recommendation()
 			end
 		)
 	end
