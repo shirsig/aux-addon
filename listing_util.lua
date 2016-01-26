@@ -8,7 +8,7 @@ function m.money_column(name, getter)
         comparator = function(datum1, datum2) return Aux.util.compare(getter(datum1), getter(datum2), Aux.util.GT) end,
         cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
         cell_setter = function(cell, datum)
-            cell.text:SetText(Aux.util.money_string(getter(datum)))
+            cell.text:SetText(getter(datum) and Aux.util.money_string(getter(datum)) or 'N/A')
 --            group_alpha_setter(cell, getter(datum))
         end,
     }
@@ -51,9 +51,10 @@ function m.percentage_market_column(item_key_getter, value_getter)
         cell_setter = function(cell, datum)
             local market_price = Aux.history.market_value(item_key_getter(datum))
 
-            local pct = market_price and market_price > 0 and ceil(100 / market_price * value_getter(datum))
+            local pct = value_getter(datum) and market_price and market_price > 0 and ceil(100 / market_price * value_getter(datum))
             if not pct then
                 cell.text:SetText('N/A')
+                cell.text:SetTextColor(0.8, 0.8, 0.8)
             elseif pct > 999 then
                 cell.text:SetText('>999%')
             else

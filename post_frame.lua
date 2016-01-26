@@ -191,6 +191,56 @@ function public.on_load()
         btn:SetScript('OnClick', private.refresh)
         private.refresh_button = btn
     end
+    do
+        local editbox = Aux.gui.editbox(AuxSellParameters)
+        editbox:SetPoint('TOPLEFT', 16, -181)
+        editbox:SetWidth(150)
+        editbox:SetScript('OnTextChanged', function()
+            private.validate_parameters()
+        end)
+        editbox:SetScript('OnTabPressed', function()
+            private.buyout_price:SetFocus()
+            private.buyout_price:HighlightText()
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusLost', function()
+            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText())))
+        end)
+        local label = Aux.gui.label(editbox, 13)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+        label:SetText('Starting Stack Price')
+        private.start_price = editbox
+    end
+    do
+        local editbox = Aux.gui.editbox(AuxSellParameters)
+        editbox:SetPoint('TOPLEFT', 16, -216)
+        editbox:SetWidth(150)
+        editbox:SetScript('OnTextChanged', function()
+            private.validate_parameters()
+        end)
+        editbox:SetScript('OnTabPressed', function()
+            private.start_price:SetFocus()
+            private.start_price:HighlightText()
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusLost', function()
+            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText())))
+        end)
+        local label = Aux.gui.label(editbox, 13)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+        label:SetText('Buyout Stack Price |cff808080(optional)|r')
+        private.buyout_price = editbox
+    end
 end
 
 function public.on_open()
@@ -209,14 +259,10 @@ function public.on_open()
     AuxSellStackCountSliderText:SetText('Stack Count')
 
     -- so that it's initialized with zeroes, not sometimes zero, sometimes empty
-    MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 100000)
-    MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 100000)
-    MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 1000)
-    MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 1000)
-    MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 1)
-    MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 1)
+    private.start_price:SetText(Aux.money.to_string(0))
+    private.buyout_price:SetText(Aux.money.to_string(0))
 
-    public.validate_parameters()
+    private.validate_parameters()
 
     private.update_inventory_data()
 
@@ -263,7 +309,7 @@ end
 function private.post_auctions()
     local auction = private.current_item()
 	if auction then
-		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, private.get_stack_size_slider_value(), MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice), AuxSellStackCountSlider:GetValue()
+		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, private.get_stack_size_slider_value(), Aux.money.from_string(private.buyout_price:GetText()), AuxSellStackCountSlider:GetValue()
 		local duration
 		if AuctionFrameAuctions.duration == 120 then
 			duration = 2
@@ -277,7 +323,7 @@ function private.post_auctions()
 			key,
 			stack_size,
 			AuctionFrameAuctions.duration,
-			MoneyInputFrame_GetCopper(AuxSellParametersStartPrice),
+            Aux.money.from_string(private.start_price:GetText()),
 			buyout_price,
 			stack_count,
 			function(posted)
@@ -334,20 +380,19 @@ function private.get_stack_size_slider_value()
     end
 end
 
-function public.validate_parameters()
+function private.validate_parameters()
     private.post_button:Disable()
-    AuxSellParametersBuyoutPriceErrorText:Hide()
 
     if not private.current_item() then
         return
     end
 
-    if MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice) > 0 and MoneyInputFrame_GetCopper(AuxSellParametersStartPrice) > MoneyInputFrame_GetCopper(AuxSellParametersBuyoutPrice) then
+    if Aux.money.from_string(private.buyout_price:GetText()) > 0 and Aux.money.from_string(private.start_price:GetText()) > Aux.money.from_string(private.buyout_price:GetText()) then
 --        AuxSellParametersBuyoutPriceErrorText:Show()
         return
     end
 
-    if MoneyInputFrame_GetCopper(AuxSellParametersStartPrice) < 1 then
+    if Aux.money.from_string(private.start_price:GetText()) < 1 then
         return
     end
 
@@ -363,8 +408,8 @@ function private.update_recommendation()
         AuxSellParametersItemCount:SetText()
         AuxSellParametersItemName:SetText()
 
-		MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
-		MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 0)
+        private.start_price:SetText(Aux.money.to_string(0))
+		private.buyout_price:SetText(Aux.money.to_string(0))
 
         AuxSellStackSizeSlider:SetMinMaxValues(0, 0)
         AuxSellStackSize:SetNumber(0)
@@ -402,23 +447,23 @@ function private.update_recommendation()
                     new_buyout_price = private.undercut(new_buyout_price)
                 end
 
-                MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux.round(new_buyout_price * 0.95)))
-                MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux.round(new_buyout_price)))
+                private.start_price:SetText(Aux.money.to_string(max(1, new_buyout_price * 0.95)))
+                private.buyout_price:SetText(Aux.money.to_string(max(1, new_buyout_price)))
 
             elseif existing_auctions[private.current_item().key] then -- unsuccessful search
 
                 local market_value = Aux.history.market_value(private.current_item().key)
                 if market_value then
-                    MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux.round(market_value * 0.95)))
-                    MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux.round(market_value)))
+                    private.start_price:SetText(Aux.money.to_string(max(1, market_value * 0.95)))
+                    private.buyout_price:SetText(Aux.money.to_string(max(1, market_value)))
                 else
-                    MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, max(1, Aux.round(private.current_item().unit_vendor_price * (private.current_item().charges and 1 or private.get_stack_size_slider_value()) * 1.053)))
-                    MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, max(1, Aux.round(private.current_item().unit_vendor_price * (private.current_item().charges and 1 or private.get_stack_size_slider_value()) * 4)))
+                    private.start_price:SetText(Aux.money.to_string(max(1, private.current_item().unit_vendor_price * (private.current_item().charges and 1 or private.get_stack_size_slider_value()) * 1.053)))
+                    private.buyout_price:SetText(Aux.money.to_string(max(1, private.current_item().unit_vendor_price * (private.current_item().charges and 1 or private.get_stack_size_slider_value()) * 4)))
                 end
             end
         else -- no search yet
-            MoneyInputFrame_SetCopper(AuxSellParametersStartPrice, 0)
-            MoneyInputFrame_SetCopper(AuxSellParametersBuyoutPrice, 0)
+        private.start_price:SetText(Aux.money.to_string(0))
+        private.buyout_price:SetText(Aux.money.to_string(0))
         end
 	end
 end

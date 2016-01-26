@@ -182,43 +182,43 @@
                             <!--</OnShow>-->
                         <!--</Scripts>-->
                     <!--</Frame>-->
-                    <Frame name="$parentStartPrice" inherits="MoneyInputFrameTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-181"/></Offset></Anchor></Anchors>
-                        <layers>
-                            <Layer level="ARTWORK">
-                                <FontString name="$parentText" inherits="GameFontNormalSmall" text="Starting Stack Price">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="12"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </layers>
-                        <Scripts>
-                            <OnLoad>
-                                MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.post_frame.validate_parameters)
-                            </OnLoad>
-                        </Scripts>
-                    </Frame>
-                    <Frame name="$parentBuyoutPrice" inherits="MoneyInputFrameTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-216"/></Offset></Anchor></Anchors>
-                        <layers>
-                            <Layer level="OVERLAY">
-                                <FontString name="$parentText" inherits="GameFontNormalSmall" text="Buyout Stack Price |cff808080(optional)|r">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="12"/></Offset></Anchor></Anchors>
-                                </FontString>
-                                <FontString name="$parentErrorText" inherits="GameFontRedSmall" text="AUCTION_BUYOUT_ERROR">
-                                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="23"/></Offset></Anchor></Anchors>
-                                </FontString>
-                            </Layer>
-                        </layers>
-                        <Scripts>
-                            <OnLoad>
-                                MoneyInputFrame_SetPreviousFocus(getglobal(this:GetParent():GetName()..'StartPrice'), getglobal(this:GetName()..'Copper'))
-                                MoneyInputFrame_SetNextFocus(getglobal(this:GetParent():GetName()..'StartPrice'), getglobal(this:GetName()..'Gold'))
-                                MoneyInputFrame_SetPreviousFocus(this, getglobal(this:GetParent():GetName()..'StartPriceCopper'))
-                                MoneyInputFrame_SetNextFocus(this, getglobal(this:GetParent():GetName()..'StartPriceGold'))
-                                MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.post_frame.validate_parameters)
-                            </OnLoad>
-                        </Scripts>
-                    </Frame>
+                    <!--<Frame name="$parentStartPrice" inherits="MoneyInputFrameTemplate">-->
+                        <!--<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-181"/></Offset></Anchor></Anchors>-->
+                        <!--<layers>-->
+                            <!--<Layer level="ARTWORK">-->
+                                <!--<FontString name="$parentText" inherits="GameFontNormalSmall" text="Starting Stack Price">-->
+                                    <!--<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="12"/></Offset></Anchor></Anchors>-->
+                                <!--</FontString>-->
+                            <!--</Layer>-->
+                        <!--</layers>-->
+                        <!--<Scripts>-->
+                            <!--<OnLoad>-->
+                                <!--MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.post_frame.validate_parameters)-->
+                            <!--</OnLoad>-->
+                        <!--</Scripts>-->
+                    <!--</Frame>-->
+                    <!--<Frame name="$parentBuyoutPrice" inherits="MoneyInputFrameTemplate">-->
+                        <!--<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="16" y="-216"/></Offset></Anchor></Anchors>-->
+                        <!--<layers>-->
+                            <!--<Layer level="OVERLAY">-->
+                                <!--<FontString name="$parentText" inherits="GameFontNormalSmall" text="Buyout Stack Price |cff808080(optional)|r">-->
+                                    <!--<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="12"/></Offset></Anchor></Anchors>-->
+                                <!--</FontString>-->
+                                <!--<FontString name="$parentErrorText" inherits="GameFontRedSmall" text="AUCTION_BUYOUT_ERROR">-->
+                                    <!--<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="23"/></Offset></Anchor></Anchors>-->
+                                <!--</FontString>-->
+                            <!--</Layer>-->
+                        <!--</layers>-->
+                        <!--<Scripts>-->
+                            <!--<OnLoad>-->
+                                <!--MoneyInputFrame_SetPreviousFocus(getglobal(this:GetParent():GetName()..'StartPrice'), getglobal(this:GetName()..'Copper'))-->
+                                <!--MoneyInputFrame_SetNextFocus(getglobal(this:GetParent():GetName()..'StartPrice'), getglobal(this:GetName()..'Gold'))-->
+                                <!--MoneyInputFrame_SetPreviousFocus(this, getglobal(this:GetParent():GetName()..'StartPriceCopper'))-->
+                                <!--MoneyInputFrame_SetNextFocus(this, getglobal(this:GetParent():GetName()..'StartPriceGold'))-->
+                                <!--MoneyInputFrame_SetOnvalueChangedFunc(this, Aux.post_frame.validate_parameters)-->
+                            <!--</OnLoad>-->
+                        <!--</Scripts>-->
+                    <!--</Frame>-->
                     <Frame name="$parentDepositMoneyFrame" inherits="SmallMoneyFrameTemplate">
                         <Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentDepositLabel"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor></Anchors>
                         <Scripts>

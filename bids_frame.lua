@@ -136,6 +136,15 @@ function public.on_load()
         btn:Disable()
         private.buyout_button = btn
     end
+    do
+        local btn = Aux.gui.button(AuxBidsFrame, 15)
+        btn:SetPoint('TOPLEFT', private.buyout_button, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('Bid')
+        btn:Disable()
+        private.bid_button = btn
+    end
 end
 
 function public.on_open()
@@ -146,7 +155,7 @@ end
 function public.on_close()
     private.listing:clear_selection()
     private.buyout_button:Disable()
---    private.bid_button:Disable()
+    private.bid_button:Disable()
 end
 
 function public.update_bid_records()
@@ -286,7 +295,7 @@ function private.find_auction(entry, express_mode, buyout_mode)
 
                 if not test(index) then
                     private.buyout_button:Disable()
---                    private.bid_button:Disable()
+                    private.bid_button:Disable()
                     return private.find_auction(entry, express_mode, buyout_mode) -- try again
                 end
 
@@ -296,12 +305,12 @@ function private.find_auction(entry, express_mode, buyout_mode)
                 Aux.place_bid('bidder', index, entry.buyout_price)
 
                 private.buyout_button:Disable()
---                private.bid_button:Disable()
+                private.bid_button:Disable()
                 private.listing:clear_selection()
                 refresh = true
             end)
             private.buyout_button:Enable()
---            private.bid_button:Enable()
+            private.bid_button:Enable()
         end
     end)
 end
@@ -320,7 +329,7 @@ function public.on_bid_click(bid_record)
     elseif not bid_record.gone then
         if not express_mode then
             private.buyout_button:Disable()
---            private.bid_button:Disable()
+            private.bid_button:Disable()
             private.listing:clear_selection()
             private.listing:select(bid_record)
         end

@@ -1,115 +1,84 @@
 local m = {}
 Aux.money = m
 
-local private =  {textMoneyParts={} }
-
 local GOLD_TEXT = '|cffffd70ag|r'
 local SILVER_TEXT = '|cffc7c7cfs|r'
 local COPPER_TEXT = '|cffeda55fc|r'
 local COPPER_PER_SILVER = 100
 local COPPER_PER_GOLD = 10000
 
+function m.to_string(money, pad, trim, color, no_color)
 
--- ============================================================================
--- TSMAPI Functions
--- ============================================================================
-
-function m:MoneyToString(money) -- ,...)
-	money = tonumber(money)
-	if not money then return end
-	local color, pad, trim, disabled
---	for i=1, select('#', ...) do
---		local opt = select(i, ...)
---		if type(opt) == 'string' then
---			if opt == 'OPT_PAD' then -- left-pad all but the highest denomination with zeros (i.e. "1g 00s 02c" instead of "1g 0s 2c")
---				pad = true
---			elseif opt == 'OPT_TRIM' then -- removes any 0 valued denominations (i.e. "1g" instead of "1g 0s 0c") - 0 will still be represented as "0c"
---				trim = true
---			elseif opt == 'OPT_DISABLE' then -- removes color from denomination text
---				disabled = true
---			elseif strmatch(strlower(opt), '^|c[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$') then -- color the numbers
---				color = opt
---			end
---		end
---	end
-	
-	local isNegative = money < 0
+	local is_negative = money < 0
 	money = abs(money)
 	local gold = floor(money / COPPER_PER_GOLD)
 	local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
-	local copper = floor(mod(money, COPPER_PER_SILVER))
-	local goldText, silverText, copperText = nil, nil, nil
-	if disabled then
-		goldText, silverText, copperText = "g", "s", "c"
+	local copper = Aux.round(mod(money, COPPER_PER_SILVER))
+	local gold_text, silver_text, copper_text
+	if no_color then
+		gold_text, silver_text, copper_text = 'g', 's', 'c'
 	else
-		goldText, silverText, copperText = TSM.GOLD_TEXT, TSM.SILVER_TEXT, TSM.COPPER_TEXT
+		gold_text, silver_text, copper_text = GOLD_TEXT, SILVER_TEXT, COPPER_TEXT
 	end
 	
 	if money == 0 then
-		return private:FormatNumber(0, false, color)..copperText
+		return m.format_number(0, false, color)..copper_text
 	end
 	
-	local text = nil
-	local shouldPad = false
+	local text
 	if trim then
-		wipe(private.textMoneyParts) -- avoid creating a new table every time
-		-- add gold
+		local parts = {}
 		if gold > 0 then
-			tinsert(private.textMoneyParts, private:FormatNumber(gold, false, color)..goldText)
-			shouldPad = pad
+			tinsert(parts, private:format_number(gold, false, color)..gold_text)
 		end
-		-- add silver
 		if silver > 0 then
-			tinsert(private.textMoneyParts, private:FormatNumber(silver, shouldPad, color)..silverText)
-			shouldPad = pad
+			tinsert(parts, private:format_number(silver, pad, color)..silver_text)
 		end
-		-- add copper
 		if copper > 0 then
-			tinsert(private.textMoneyParts, private:FormatNumber(copper, shouldPad, color)..copperText)
-			shouldPad = pad
+			tinsert(parts, private:format_number(copper, pad, color)..copper_text)
 		end
-		text = table.concat(private.textMoneyParts, " ")
+		text = Aux.persistence.serialize(parts, ' ')
 	else
 		if gold > 0 then
-			text = private:FormatNumber(gold, false, color)..goldText.." "..private:FormatNumber(silver, pad, color)..silverText.." "..private:FormatNumber(copper, pad, color)..copperText
+			text = m.format_number(gold, false, color)..gold_text..' '..m.format_number(silver, pad, color)..silver_text..' '..m.format_number(copper, pad, color)..copper_text
 		elseif silver > 0 then
-			text = private:FormatNumber(silver, false, color)..silverText.." "..private:FormatNumber(copper, pad, color)..copperText
+			text = m.format_number(silver, false, color)..silver_text..' '..m.format_number(copper, pad, color)..copper_text
 		else
-			text = private:FormatNumber(copper, false, color)..copperText
+			text = m.format_number(copper, false, color)..copper_text
 		end
 	end
 	
-	if isNegative then
+	if is_negative then
 		if color then
-			return color..'-|r'..text
+			text = color..'-|r'..text
 		else
-			return '-'..text
+			text = '-'..text
 		end
-	else
-		return text
 	end
+
+	return text
 end
 
-function m:MoneyFromString(value)
+function m.from_string(value)
 	-- remove any colors
-	value = gsub(gsub(value:trim(), '\124c([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])', ''), '\124r', '')
-	
+	value = gsub(gsub(value, '\124c([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])', ''), '\124r', '')
+
 	-- extract gold/silver/copper values
-	local gold = tonumber(strmatch(value, '([0-9]+)g'))
-	local silver = tonumber(strmatch(value, '([0-9]+)s'))
-	local copper = tonumber(strmatch(value, '([0-9]+)c'))
-	if not gold and not silver and not copper then return end
-	
+	local gold = tonumber(({strfind(value, '([0-9]+)g')})[3])
+	local silver = tonumber(({strfind(value, '([0-9]+)s')})[3])
+	local copper = tonumber(({strfind(value, '([0-9]+)c')})[3])
+--	if not gold and not silver and not copper then return end
+
 	-- test that there are no extra characters (other than spaces)
 	value = gsub(value, '[0-9]+g', '', 1)
 	value = gsub(value, '[0-9]+s', '', 1)
 	value = gsub(value, '[0-9]+c', '', 1)
-	if value:trim() ~= '' then return end
+	if strfind(value, '%S') then return 0 end
 	
 	return ((gold or 0) * COPPER_PER_GOLD) + ((silver or 0) * COPPER_PER_SILVER) + (copper or 0)
 end
 
-function m:format_number(num, pad, color)
+function m.format_number(num, pad, color)
 	if num < 10 and pad then
 		num = '0'..num
 	end
