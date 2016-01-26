@@ -2,7 +2,15 @@
 
 	<Script file="post_frame.lua"/>
 
-	<Frame name="AuxSellFrame" parent="AuxFrame" hidden="true">
+    <Frame>
+        <Scripts>
+            <OnUpdate>
+                Aux.post_frame.on_update()
+            </OnUpdate>
+        </Scripts>
+    </Frame>
+
+	<Frame name="AuxPostFrame" parent="AuxFrame" hidden="true">
         <Anchors>
             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
             <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
@@ -33,13 +41,13 @@
                         <!--getglobal(this:GetName().."Title"):SetText('Parameters')-->
                     <!--</OnLoad>-->
                 <!--</Scripts>-->
-                <Layers>
-                    <Layer level="BACKGROUND">
-                        <FontString name="$parentDepositLabel" inherits="GameFontNormal" text="Deposit:">
-                            <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="14" y="-255"/></Offset></Anchor></Anchors>
-                        </FontString>
-                    </Layer>
-                </Layers>
+                <!--<Layers>-->
+                    <!--<Layer level="BACKGROUND">-->
+                        <!--<FontString name="$parentDepositLabel" inherits="GameFontNormal" text="Deposit:">-->
+                            <!--<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="14" y="-255"/></Offset></Anchor></Anchors>-->
+                        <!--</FontString>-->
+                    <!--</Layer>-->
+                <!--</Layers>-->
 				<frames>
                     <Frame name="$parentItem" inherits="AuxItemTemplate">
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-10"/></Offset></Anchor></Anchors>
@@ -219,15 +227,6 @@
                             <!--</OnLoad>-->
                         <!--</Scripts>-->
                     <!--</Frame>-->
-                    <Frame name="$parentDepositMoneyFrame" inherits="SmallMoneyFrameTemplate">
-                        <Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentDepositLabel"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                SmallMoneyFrame_OnLoad()
-                                MoneyFrame_SetType('STATIC')
-                            </OnLoad>
-                        </Scripts>
-                    </Frame>
 				</frames>
 			</frame>
             <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">

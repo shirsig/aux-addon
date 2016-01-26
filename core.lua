@@ -250,8 +250,12 @@ function Aux_OnAuctionHouseClosed()
 	Aux.stack.stop()
 	Aux.scan.abort()
 
+    Aux.item_search_frame.on_close()
     Aux.filter_search_frame.on_close()
     Aux.post_frame.on_close()
+    Aux.auctions_frame.on_close()
+    Aux.bids_frame.on_close()
+    Aux.history_frame.on_close()
 	
 	AuxFrame:Hide()
 end
@@ -269,7 +273,7 @@ function Aux.on_tab_click(index)
 
         AuxItemSearchFrame:Hide()
         AuxFilterSearchFrame:Hide()
-        AuxSellFrame:Hide()
+        AuxPostFrame:Hide()
         AuxAuctionsFrame:Hide()
         AuxBidsFrame:Hide()
         AuxHistoryFrame:Hide()
@@ -281,7 +285,7 @@ function Aux.on_tab_click(index)
             AuxFilterSearchFrame:Show()
             Aux.filter_search_frame.on_open()
         elseif index == 3 then
-            AuxSellFrame:Show()
+            AuxPostFrame:Show()
             Aux.post_frame.on_open()
         elseif index == 4 then
             AuxAuctionsFrame:Show()

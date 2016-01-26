@@ -20,14 +20,14 @@ end
 function public.on_load()
     private.auction_listing_config = {
         frame = AuxAuctionsFrameListingAuctionListing,
-        on_row_click = function (sheet, row_index)
+        on_row_click = function(sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
             private.on_row_click(sheet.data[data_index])
         end,
-        on_row_enter = function (sheet, row_index)
+        on_row_enter = function(sheet, row_index)
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
-        on_row_leave = function (sheet, row_index)
+        on_row_leave = function(sheet, row_index)
             AuxTooltip:Hide()
             ResetCursor()
         end,

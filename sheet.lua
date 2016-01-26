@@ -49,7 +49,7 @@ function public.render(sheet)
         if datum then
 			if sheet.selected and sheet.selected(datum) then
 				row.highlight:SetAlpha(0.5)
-			else
+			elseif not row.mouse_over then
 				row.highlight:SetAlpha(0)
 			end
             if sheet.row_setter then
@@ -192,12 +192,14 @@ function public.create(params)
 			local row_idx = row_index
 			row:SetScript('OnClick', function() if sheet.on_row_click then sheet.on_row_click(sheet, row_idx) end end)
 			row:SetScript('OnEnter', function()
+				sheet.rows[row_idx].mouse_over = true
 				sheet.rows[row_idx].highlight:SetAlpha(.5)
 				if sheet.on_row_enter then
 					sheet.on_row_enter(sheet, row_idx)
 				end
 			end)
 			row:SetScript('OnLeave', function()
+				sheet.rows[row_idx].mouse_over = false
 				local data_index = row_idx + FauxScrollFrame_GetOffset(sheet.scroll_frame)
 				if not (sheet.selected and sheet.selected(sheet.data[data_index])) then
 					sheet.rows[row_idx].highlight:SetAlpha(0)
