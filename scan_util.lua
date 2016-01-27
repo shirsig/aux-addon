@@ -40,14 +40,6 @@ function m.find(test, query, page, status_bar, on_failure, on_success)
                 status_bar:set_text('Auction not found')
                 on_failure()
             end,
-            next_page = function()
-                if getn(pages) == 1 then
-                    status_bar:update_status(50, 50)
-                end
-                local page = pages[1]
-                tremove(pages, 1)
-                return page
-            end,
         }
     end)
 end

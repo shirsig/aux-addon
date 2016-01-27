@@ -44,10 +44,11 @@ function public.abort(k)
 end
 
 function on_abort()
-	if state and state.params and state.params.on_abort then
-		state.params.on_abort()
+    local on_abort = Aux.util.safe_index{state, 'params', 'on_abort' }
+    state = nil
+	if on_abort then
+		return on_abort()
 	end
-	state = nil
 end
 
 function wait_for_results(k)
@@ -119,8 +120,10 @@ function private.scan()
         state.page = current_query().start_page
         return private.process_query()
     else
-        if state.params.on_complete then
-            return state.params.on_complete()
+        local on_complete = state.params.on_complete
+        state = nil
+        if on_complete then
+            return on_complete()
         end
     end
 end

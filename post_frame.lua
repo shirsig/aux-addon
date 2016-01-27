@@ -650,7 +650,6 @@ function private.refresh_entries()
 
 		Aux.scan.start{
 			queries = { query },
-			page = 0,
 			on_page_loaded = function(page, total_pages)
                 private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages) -- TODO
                 private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))

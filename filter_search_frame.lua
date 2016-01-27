@@ -745,7 +745,6 @@ function public.start_search()
 
         Aux.scan.start{
             queries = { query },
-            page = AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() and 0 or AuxFilterSearchFrameFiltersPageEditBox:GetNumber(),
             on_submit_query = function()
                 current_page = nil
             end,
