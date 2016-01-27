@@ -78,7 +78,7 @@ function Aux_OnLoad()
     end
 
     do
-        local btn = Aux.gui.button(AuxFrame, 15)
+        local btn = Aux.gui.button(AuxFrame, 16)
         btn:SetPoint('BOTTOMRIGHT', -6, 6)
         btn:SetWidth(65)
         btn:SetHeight(24)

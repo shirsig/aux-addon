@@ -148,7 +148,7 @@ function public.on_load()
         private.status_bar = status_bar
     end
     do
-        local btn = Aux.gui.button(AuxBidsFrame, 15)
+        local btn = Aux.gui.button(AuxBidsFrame, 16)
         btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -157,7 +157,7 @@ function public.on_load()
         private.buyout_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxBidsFrame, 15)
+        local btn = Aux.gui.button(AuxBidsFrame, 16)
         btn:SetPoint('TOPLEFT', private.buyout_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)

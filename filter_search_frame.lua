@@ -392,7 +392,7 @@ function public.on_load()
         [Aux.view.FULL] = Aux.sheet.create(private.views[Aux.view.FULL]),
     }
     do
-        local btn = Aux.gui.button(AuxFilterSearchFrameFilters, 15, '$parentSearchButton')
+        local btn = Aux.gui.button(AuxFilterSearchFrameFilters, 16, '$parentSearchButton')
         btn:SetPoint('BOTTOMLEFT', 8, 15)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -400,7 +400,7 @@ function public.on_load()
         btn:SetScript('OnClick', Aux.filter_search_frame.start_search)
     end
     do
-        local btn = Aux.gui.button(AuxFilterSearchFrameFilters, 15, '$parentStopButton')
+        local btn = Aux.gui.button(AuxFilterSearchFrameFilters, 16, '$parentStopButton')
         btn:SetPoint('BOTTOMLEFT', 8, 15)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -426,7 +426,7 @@ function public.on_load()
         private.status_bar = status_bar
     end
     do
-        local btn = Aux.gui.button(AuxFilterSearchFrame, 15)
+        local btn = Aux.gui.button(AuxFilterSearchFrame, 16)
         btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -435,7 +435,7 @@ function public.on_load()
         private.buyout_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxFilterSearchFrame, 15)
+        local btn = Aux.gui.button(AuxFilterSearchFrame, 16)
         btn:SetPoint('TOPLEFT', private.buyout_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)

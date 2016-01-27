@@ -142,7 +142,7 @@ function public.on_load()
         private.status_bar = status_bar
     end
     do
-        local btn = Aux.gui.button(AuxAuctionsFrame, 15)
+        local btn = Aux.gui.button(AuxAuctionsFrame, 16)
         btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)

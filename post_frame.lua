@@ -184,7 +184,7 @@ function public.on_load()
         private.status_bar = status_bar
     end
     do
-        local btn = Aux.gui.button(AuxSellParameters, 15, '$parentPostButton')
+        local btn = Aux.gui.button(AuxSellParameters, 16, '$parentPostButton')
         btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -193,7 +193,7 @@ function public.on_load()
         private.post_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSellParameters, 15, '$parentRefreshButton')
+        local btn = Aux.gui.button(AuxSellParameters, 16, '$parentRefreshButton')
         btn:SetPoint('TOPLEFT', private.post_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
