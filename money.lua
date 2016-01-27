@@ -64,15 +64,15 @@ function m.from_string(value)
 	value = gsub(gsub(value, '\124c([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])', ''), '\124r', '')
 
 	-- extract gold/silver/copper values
-	local gold = tonumber(({strfind(value, '([0-9]+)g')})[3])
-	local silver = tonumber(({strfind(value, '([0-9]+)s')})[3])
-	local copper = tonumber(({strfind(value, '([0-9]+)c')})[3])
+	local gold = tonumber(({strfind(value, '(%d*%.?%d+)g')})[3])
+	local silver = tonumber(({strfind(value, '(%d*%.?%d+)s')})[3])
+	local copper = tonumber(({strfind(value, '(%d*%.?%d+)c')})[3])
 --	if not gold and not silver and not copper then return end
 
 	-- test that there are no extra characters (other than spaces)
-	value = gsub(value, '[0-9]+g', '', 1)
-	value = gsub(value, '[0-9]+s', '', 1)
-	value = gsub(value, '[0-9]+c', '', 1)
+	value = gsub(value, '%d*%.?%d+g', '', 1)
+	value = gsub(value, '%d*%.?%d+s', '', 1)
+	value = gsub(value, '%d*%.?%d+c', '', 1)
 	if strfind(value, '%S') then return 0 end
 	
 	return ((gold or 0) * COPPER_PER_GOLD) + ((silver or 0) * COPPER_PER_SILVER) + (copper or 0)
