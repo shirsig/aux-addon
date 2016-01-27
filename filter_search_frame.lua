@@ -792,7 +792,7 @@ function private.process_request(entry, express_mode, buyout_mode)
 
     local function test(index)
         local auction_record = private.create_auction_record(Aux.info.auction(index))
-        return auction_record.signature == entry.signature and auction_record.bid_price == entry.bid_price and auction_record.owner ~= UnitName('player')
+        return auction_record.signature == entry.signature and auction_record.bid_price == entry.bid_price and auction_record.duration == entry.duration and auction_record.owner ~= UnitName('player')
     end
 
     local function remove_entry()

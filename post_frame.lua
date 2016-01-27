@@ -356,7 +356,13 @@ function private.post_auctions()
                 local charge_class = auction.charges or 0
                 auction.availability[charge_class] = auction.availability[charge_class] - (posted * (auction.charges and 1 or stack_size))
 
-                selected_item = nil
+                if selected_item == auction then
+                    if auction.aux_quantity > 0 then
+                    private.set_item(auction)
+                    else
+                        selected_item = nil
+                    end
+                end
                 private.update_recommendation()
                 refresh = true
 			end
@@ -366,22 +372,22 @@ end
 
 function private.select_auction()
 	if not existing_auctions[selected_item.key].selected and getn(existing_auctions[selected_item.key]) > 0 then
-		local cheapest_for_size = {}
+--		local cheapest_for_size = {}
 		local cheapest
 
 		for _, auction_entry in ipairs(existing_auctions[selected_item.key]) do
-			if not cheapest_for_size[auction_entry.stack_size] or cheapest_for_size[auction_entry.stack_size].unit_buyout_price >= auction_entry.unit_buyout_price then
-				cheapest_for_size[auction_entry.stack_size] = auction_entry
-			end
+--			if not cheapest_for_size[auction_entry.stack_size] or cheapest_for_size[auction_entry.stack_size].unit_buyout_price >= auction_entry.unit_buyout_price then
+--				cheapest_for_size[auction_entry.stack_size] = auction_entry
+--			end
 
 			if not cheapest or cheapest.unit_buyout_price > auction_entry.unit_buyout_price then
 				cheapest = auction_entry
 			end
 		end
 
-        local auction = cheapest_for_size[private.get_stack_size_slider_value()] or cheapest
+--        local auction = cheapest_for_size[private.get_stack_size_slider_value()] or cheapest
 
-        existing_auctions[selected_item.key].selected = auction
+        existing_auctions[selected_item.key].selected = cheapest
 	end
 end
 
