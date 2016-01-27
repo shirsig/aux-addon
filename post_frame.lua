@@ -618,32 +618,20 @@ function private.refresh_entries()
 	if selected_item then
 		local item_id, suffix_id = selected_item.item_id, selected_item.suffix_id
         local item_key = item_id..':'..suffix_id
-        local item_info = Aux.info.item(item_id, suffix_id)
 
         existing_auctions[item_key] = nil
 
-
-        local class_index = Aux.item_class_index(item_info.class)
-        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
-
-        local query = {
-            type = 'list',
-            start_page = 0,
-            next_page = function(page, total_pages)
+        local query = Aux.scan_util.create_item_query(
+            item_id,
+            'list',
+            0,
+            function(page, total_pages)
                 local last_page = max(total_pages - 1, 0)
                 if page < last_page then
                     return page + 1
                 end
-            end,
-            name = Aux.info.item(item_id).name, -- blizzard doesn't support queries with name suffixes
-            min_level = item_info.level,
-            min_level = item_info.level,
-            slot = item_info.slot,
-            class = class_index,
-            subclass = subclass_index,
-            quality = item_info.quality,
-            usable = item_info.usable,
-        }
+            end
+        )
 
         private.status_bar:update_status(0,0)
         private.status_bar:set_text('Scanning auctions...')

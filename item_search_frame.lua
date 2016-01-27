@@ -548,31 +548,20 @@ function public.start_search()
         refresh = true
 
         local item_id = private.item_id
-        local item_info = Aux.static.item_info(item_id)
 
---        local class_index = Aux.item_class_index(item_info.class)
---        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass) -- TODO test if needed
-
-        local query = {
-            type = 'list',
-            start_page = AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber(),
-            next_page = function(page, total_pages)
+        local query = Aux.scan_util.create_item_query(
+            item_id,
+            'list',
+            AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber(),
+            function(page, total_pages)
                 if AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() then
                     local last_page = max(total_pages - 1, 0)
                     if page < last_page then
                         return page + 1
                     end
                 end
-            end,
-            name = item_info.name,
-            min_level = item_info.level,
-            min_level = item_info.level,
-            slot = item_info.slot,
-            class = Aux.item_class_index(item_info.class),
-            subclass = item_info.subclass,
-            quality = item_info.quality,
-            usable = item_info.usable,
-        }
+            end
+        )
 
         Aux.scan.start{
             queries = { query },
