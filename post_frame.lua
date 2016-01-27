@@ -626,7 +626,15 @@ function private.refresh_entries()
         local class_index = Aux.item_class_index(item_info.class)
         local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
 
-        local search_query = {
+        local query = {
+            type = 'list',
+            start_page = 0,
+            next_page = function(page, total_pages)
+                local last_page = max(total_pages - 1, 0)
+                if page < last_page then
+                    return page + 1
+                end
+            end,
             name = Aux.info.item(item_id).name, -- blizzard doesn't support queries with name suffixes
             min_level = item_info.level,
             min_level = item_info.level,
@@ -641,7 +649,7 @@ function private.refresh_entries()
         private.status_bar:set_text('Scanning auctions...')
 
 		Aux.scan.start{
-			query = search_query,
+			queries = { query },
 			page = 0,
 			on_page_loaded = function(page, total_pages)
                 private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages) -- TODO
@@ -664,12 +672,6 @@ function private.refresh_entries()
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
             end,
-			next_page = function(page, total_pages)
-				local last_page = max(total_pages - 1, 0)
-				if page < last_page then
-					return page + 1
-				end
-			end,
 		}
 	end
 end
