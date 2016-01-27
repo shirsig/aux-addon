@@ -43,8 +43,8 @@ function m.percentage_market_column(item_key_getter, value_getter)
         comparator = function(datum1, datum2)
             local market_price1 = Aux.history.market_value(item_key_getter(datum1))
             local market_price2 = Aux.history.market_value(item_key_getter(datum2))
-            local factor1 = market_price1 > 0 and value_getter(datum1) / market_price1
-            local factor2 = market_price2 > 0 and value_getter(datum2) / market_price2
+            local factor1 = value_getter(datum1) and market_price1 and market_price1 > 0 and value_getter(datum1) / market_price1
+            local factor2 = value_getter(datum2) and market_price2 and market_price2 > 0 and value_getter(datum2) / market_price2
             return Aux.util.compare(factor1, factor2, Aux.util.GT)
         end,
         cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
