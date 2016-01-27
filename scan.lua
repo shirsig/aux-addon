@@ -29,7 +29,7 @@ function Aux.scan.start(job)
 end
 
 function Aux.scan.abort(k)
-    controller().wait(function() return true end, function()
+    return controller().wait(function() return true end, function()
         on_abort()
 
         state = nil

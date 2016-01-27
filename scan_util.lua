@@ -16,15 +16,13 @@ function m.find(type, test, search_query, page, status_bar, on_failure, on_succe
             on_read_auction = function(auction_info, ctrl)
                 if test(auction_info.index) then
                     ctrl.suspend()
-                    Aux.scan.abort(function()
-                        if not test(auction_info.index) then
-                            return on_failure()
-                        else
-                            status_bar:update_status(100, 100)
-                            status_bar:set_text('Auction found')
-                            return on_success(auction_info.index)
-                        end
-                    end)
+                    if not test(auction_info.index) then
+                        return on_failure()
+                    else
+                        status_bar:update_status(100, 100)
+                        status_bar:set_text('Auction found')
+                        return on_success(auction_info.index)
+                    end
                 end
             end,
             on_complete = function()
