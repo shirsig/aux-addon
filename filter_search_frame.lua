@@ -520,7 +520,7 @@ function public.on_load()
             this:ClearFocus()
         end)
         local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('RIGHT', editbox, 'LEFT', -2, 0)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
         label:SetText('-')
     end
     do

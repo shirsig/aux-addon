@@ -60,7 +60,7 @@ end
 
 function Aux.util.without_sound(f)
     local orig = GetCVar('MasterSoundEffects')
-    SetCVar('MasterSoundEffects', false)
+    SetCVar('MasterSoundEffects', 0)
     f()
     SetCVar('MasterSoundEffects', orig)
 end
