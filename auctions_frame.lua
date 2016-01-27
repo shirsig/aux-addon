@@ -166,19 +166,26 @@ function public.update_auction_records()
     private.status_bar:update_status(0,0)
     private.status_bar:set_text('Scanning auctions...')
 
-    local current_page
-
     auction_records = {}
     Aux.scan.start{
-        type = 'owner',
-        page = 0,
+        queries = {
+            {
+                type = 'owner',
+                start_page = 0,
+                next_page = function(page, total_pages)
+                    local last_page = max(total_pages - 1, 0)
+                    if page < last_page then
+                        return page + 1
+                    end
+                end,
+            }
+        },
         on_page_loaded = function(page, total_pages)
             private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages)
             private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
-            current_page = page
         end,
         on_read_auction = function(auction_info)
-            tinsert(auction_records, private.create_auction_record(auction_info, current_page))
+            tinsert(auction_records, private.create_auction_record(auction_info))
         end,
         on_complete = function()
             private.status_bar:update_status(100, 100)
@@ -188,12 +195,6 @@ function public.update_auction_records()
         on_abort = function()
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Scanning')
-        end,
-        next_page = function(page, total_pages)
-            local last_page = max(total_pages - 1, 0)
-            if page < last_page then
-                return page + 1
-            end
         end,
     }
 end
@@ -209,7 +210,7 @@ function private.update_listing()
     AuxFrame:SetWidth(AuxAuctionsFrameListing:GetWidth() + 15)
 end
 
-function private.create_auction_record(auction_info, page)
+function private.create_auction_record(auction_info)
 
     local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
 
@@ -221,7 +222,8 @@ function private.create_auction_record(auction_info, page)
     end
 
     return {
-        page = page,
+        query = auction_info.query,
+        page = auction_info.page,
 
         item_id = auction_info.item_id,
         item_key = auction_info.item_key,
@@ -265,7 +267,7 @@ function private.process_request(entry, express_mode)
     end
 
     if express_mode then
-        Aux.scan_util.find('owner', test, {}, entry.page, private.status_bar, remove_entry, function(index)
+        Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
             if not entry.gone then
                 CancelAuction(index)
                 remove_entry()
@@ -274,7 +276,7 @@ function private.process_request(entry, express_mode)
     else
         private.select_auction(entry)
 
-        Aux.scan_util.find('owner', test, {}, entry.page, private.status_bar, remove_entry, function(index)
+        Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
 
             private.cancel_button:SetScript('OnClick', function()
                 if test(index) and not entry.gone then

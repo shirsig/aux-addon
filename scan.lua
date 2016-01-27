@@ -13,22 +13,25 @@ end)()
 
 local state
 
-local scan, scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, wait_for_owner_data, on_abort
+local scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, wait_for_owner_data, on_abort, current_query
 
-function Aux.scan.start(job)
+function current_query()
+    return state.params.queries[state.query_index]
+end
+
+function public.start(params)
     return controller().wait(function() return true end, function()
         on_abort()
-        job.type = job.type or 'list'
+
         state = {
-            job = job,
-            page = job.page
+            params = params,
         }
 
-        scan()
+        private.scan()
     end)
 end
 
-function Aux.scan.abort(k)
+function public.abort(k)
     return controller().wait(function() return true end, function()
         on_abort()
 
@@ -41,19 +44,19 @@ function Aux.scan.abort(k)
 end
 
 function on_abort()
-	if state and state.job and state.job.on_abort then
-		state.job.on_abort()
+	if state and state.params and state.params.on_abort then
+		state.params.on_abort()
 	end
 	state = nil
 end
 
 function wait_for_results(k)
 	local ok
-    if state.job.type == 'bidder' then
+    if current_query().type == 'bidder' then
         Aux.control.as_soon_as(function() return Aux.bids_loaded end, function()
             ok = true
         end)
-    elseif state.job.type == 'owner' then
+    elseif current_query().type == 'owner' then
         if state.page == Aux.current_owner_page then
             ok = true
         else
@@ -76,9 +79,9 @@ function wait_for_owner_data(k)
 		if time() - t0 > 5 then -- we won't wait longer than 5 seconds
 			return true
 		end
-		local count, _ = GetNumAuctionItems(state.job.type)
+		local count, _ = GetNumAuctionItems(state.params.type)
 		for i=1,count do
-			local auction_info = Aux.info.auction(i, state.job.type)
+			local auction_info = Aux.info.auction(i, state.params.type)
 			if auction_info and not auction_info.owner then
 				return false
 			end
@@ -108,25 +111,36 @@ function wait_for_callback(args) -- the arguments must not be nil!
 	end
 end
 
-function scan()
-	
-	submit_query(function()
-		
-        local count, _ = GetNumAuctionItems(state.job.type)
+
+function private.scan()
+
+    state.query_index = state.query_index and state.query_index + 1 or 1
+    if current_query() then
+        state.page = current_query().start_page
+        return private.process_query()
+    else
+        if state.params.on_complete then
+            return state.params.on_complete()
+        end
+    end
+end
+
+
+function private.process_query()
+
+    submit_query(function()
+
+        local count, _ = GetNumAuctionItems(current_query().type)
 
         scan_auctions(count, function()
 
-            state.page = state.job.next_page and state.job.next_page(state.page, state.total_pages)
+            state.page = current_query().next_page and current_query().next_page(state.page, state.total_pages)
 
             if state.page then
-                return scan()
+                return private.process_query()
             else
-                if state.job.on_complete then
-                    state.job.on_complete()
-                end
-                state = nil
+                return private.scan()
             end
-
         end)
     end)
 end
@@ -144,14 +158,19 @@ function scan_auctions_helper(i, n, k)
         end
     end
 
-    local auction_info = Aux.info.auction(i, state.job.type)
+    local auction_info = Aux.info.auction(i, current_query().type)
     if auction_info then
+        auction_info.index = i
+        auction_info.page = state.page
+        auction_info.query = current_query()
+
         local snapshot = Aux.persistence.load_snapshot()
         if not snapshot.contains(auction_info.signature) then
             snapshot.add(auction_info.signature, auction_info.duration)
             Aux.history.process_auction(auction_info)
         end
-        wait_for_callback{state.job.on_read_auction or Aux.util.pass, auction_info, recurse}
+
+        wait_for_callback{state.params.on_read_auction or Aux.util.pass, auction_info, recurse}
     else
         recurse()
     end
@@ -159,17 +178,17 @@ end
 
 function submit_query(k)
 	if state.page then
-		controller().wait(function() return state.job.type ~= 'list' or CanSendAuctionQuery() end, function()
+		controller().wait(function() return current_query().type ~= 'list' or CanSendAuctionQuery() end, function()
 
-            if state.job.on_submit_query then
-                state.job.on_submit_query()
+            if state.params.on_submit_query then
+                state.params.on_submit_query()
             end
             wait_for_results(function()
                 --wait_for_owner_data(function()
-                local _, total_count = GetNumAuctionItems(state.job.type)
+                local _, total_count = GetNumAuctionItems(current_query().type)
                 state.total_pages = math.ceil(total_count / PAGE_SIZE)
                 if state.total_pages >= state.page + 1 then
-					wait_for_callback{state.job.on_page_loaded or Aux.util.pass, state.page, state.total_pages, function()
+					wait_for_callback{state.params.on_page_loaded or Aux.util.pass, state.page, state.total_pages, function()
 						return k()
 					end}
 				else
@@ -177,21 +196,21 @@ function submit_query(k)
 				end
                 -- end)
             end)
-            if state.job.type == 'bidder' then
+            if current_query().type == 'bidder' then
                 GetBidderAuctionItems(state.page)
-            elseif state.job.type == 'owner' then
+            elseif current_query().type == 'owner' then
                 GetOwnerAuctionItems(state.page)
             else
                 QueryAuctionItems(
-                    state.job.query.name,
-                    state.job.query.min_level,
-                    state.job.query.max_level,
-                    state.job.query.slot,
-                    state.job.query.class,
-                    state.job.query.subclass,
+                    current_query().name,
+                    current_query().min_level,
+                    current_query().max_level,
+                    current_query().slot,
+                    current_query().class,
+                    current_query().subclass,
                     state.page,
-                    state.job.query.usable,
-                    state.job.query.quality
+                    current_query().usable,
+                    current_query().quality
                 )
             end
 		end)

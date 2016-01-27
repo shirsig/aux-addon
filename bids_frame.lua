@@ -181,19 +181,26 @@ function public.update_bid_records()
     private.status_bar:update_status(0,0)
     private.status_bar:set_text('Scanning auctions...')
 
-    local current_page
-
     bid_records = {}
     Aux.scan.start{
-        type = 'bidder',
-        page = 0,
+        queries = {
+            {
+                type = 'bidder',
+                start_page = 0,
+                next_page = function(page, total_pages)
+                    local last_page = max(total_pages - 1, 0)
+                    if page < last_page then
+                        return page + 1
+                    end
+                end,
+            }
+        },
         on_page_loaded = function(page, total_pages)
             private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages)
             private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
-            current_page = page
         end,
         on_read_auction = function(auction_info)
-            tinsert(bid_records, private.create_auction_record(auction_info, current_page))
+            tinsert(bid_records, private.create_auction_record(auction_info))
         end,
         on_complete = function()
             private.status_bar:update_status(100, 100)
@@ -203,12 +210,6 @@ function public.update_bid_records()
         on_abort = function()
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Scanning')
-        end,
-        next_page = function(page, total_pages)
-            local last_page = max(total_pages - 1, 0)
-            if page < last_page then
-                return page + 1
-            end
         end,
     }
 end
@@ -224,7 +225,7 @@ function private.update_listing()
     AuxFrame:SetWidth(AuxBidsFrameListing:GetWidth() + 15)
 end
 
-function private.create_auction_record(auction_info, page)
+function private.create_auction_record(auction_info)
 
     local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
 
@@ -236,7 +237,8 @@ function private.create_auction_record(auction_info, page)
     end
 
     return {
-        page = page,
+        query = auction_info.query,
+        page = auction_info.page,
 
         item_id = auction_info.item_id,
         suffix_id = auction_info.suffix_id,
@@ -286,7 +288,7 @@ function private.process_request(entry, express_mode, buyout_mode)
     end
 
     if express_mode then
-        Aux.scan_util.find('bidder', test, {}, entry.page, private.status_bar, remove_entry, function(index)
+        Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
             if not entry.gone then
                 Aux.place_bid('bidder', index, buyout_mode and entry.buyout_price or entry.bid_price, remove_entry)
             end
@@ -294,7 +296,7 @@ function private.process_request(entry, express_mode, buyout_mode)
     else
         private.select_auction(entry)
 
-        Aux.scan_util.find('bidder', test, {}, entry.page, private.status_bar, remove_entry, function(index)
+        Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
 
             if not entry.high_bidder then
                 private.bid_button:SetScript('OnClick', function()

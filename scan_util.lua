@@ -1,7 +1,7 @@
 local m = {}
 Aux.scan_util = m
 
-function m.find(type, test, search_query, page, status_bar, on_failure, on_success)
+function m.find(test, query, page, status_bar, on_failure, on_success)
 
     Aux.scan.abort(function()
 
@@ -10,9 +10,19 @@ function m.find(type, test, search_query, page, status_bar, on_failure, on_succe
 
         local pages = page > 0 and { page, page - 1 } or { page }
 
+        query = Aux.util.copy_table(query)
+        query.page = page
+        query.next_page = function()
+            if getn(pages) == 1 then
+                status_bar:update_status(50, 50)
+            end
+            local page = pages[1]
+            tremove(pages, 1)
+            return page
+        end
+
         Aux.scan.start{
-            type = type,
-            query = search_query,
+            queries = { query },
             on_read_auction = function(auction_info, ctrl)
                 if test(auction_info.index) then
                     ctrl.suspend()

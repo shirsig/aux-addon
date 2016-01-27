@@ -553,7 +553,17 @@ function public.start_search()
 --        local class_index = Aux.item_class_index(item_info.class)
 --        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass) -- TODO test if needed
 
-        search_query = {
+        local query = {
+            type = 'list',
+            start_page = AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber(),
+            next_page = function(page, total_pages)
+                if AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() then
+                    local last_page = max(total_pages - 1, 0)
+                    if page < last_page then
+                        return page + 1
+                    end
+                end
+            end,
             name = item_info.name,
             min_level = item_info.level,
             min_level = item_info.level,
@@ -564,20 +574,16 @@ function public.start_search()
             usable = item_info.usable,
         }
 
-        local current_page
-
         Aux.scan.start{
-            query = search_query,
-            page = AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber(),
+            queries = { query },
             on_page_loaded = function(page, total_pages)
                 private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages) -- TODO
                 private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
-                current_page = page
             end,
             on_read_auction = function(auction_info)
                 if auction_info.item_id == item_id then
                     auctions = auctions or {}
-                    tinsert(auctions, private.create_auction_record(auction_info, current_page))
+                    tinsert(auctions, private.create_auction_record(auction_info))
                 end
             end,
             on_complete = function()
@@ -597,14 +603,6 @@ function public.start_search()
                 AuxItemSearchFrameItemStopButton:Hide()
                 AuxItemSearchFrameItemRefreshButton:Show()
                 refresh = true
-            end,
-            next_page = function(page, total_pages)
-                if AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() then
-                    local last_page = max(total_pages - 1, 0)
-                    if page < last_page then
-                        return page + 1
-                    end
-                end
             end,
         }
     end)
@@ -630,7 +628,7 @@ function private.process_request(entry, express_mode, buyout_mode)
     end
 
     if express_mode then
-        Aux.scan_util.find('list', test, search_query, entry.page, private.status_bar, remove_entry, function(index)
+        Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
             if not entry.gone then
                 Aux.place_bid('list', index, buyout_mode and entry.buyout_price or entry.bid_price, remove_entry)
             end
@@ -638,7 +636,7 @@ function private.process_request(entry, express_mode, buyout_mode)
     else
         private.select_auction(entry)
 
-        Aux.scan_util.find('list', test, search_query, entry.page, private.status_bar, remove_entry, function(index)
+        Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
 
             if not entry.high_bidder then
                 private.bid_button:SetScript('OnClick', function()
@@ -685,7 +683,7 @@ function private.on_row_click(datum, grouped)
     end
 end
 
-function private.create_auction_record(auction_info, page)
+function private.create_auction_record(auction_info)
 
 	local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
 	local unit_buyout_price = buyout_price and Aux.round(auction_info.buyout_price / auction_info.aux_quantity)
@@ -699,7 +697,8 @@ function private.create_auction_record(auction_info, page)
     end
 
     return {
-        page = page,
+        query = auction_info.query,
+        page = auction_info.page,
 
         item_id = auction_info.item_id,
         suffix_id = auction_info.suffix_id,

@@ -85,8 +85,6 @@ function public.auction(index, type)
     local aux_quantity = charges or count
 
     return {
-        index = index,
-
         item_id = item_id,
         suffix_id = suffix_id,
         unique_id = unique_id,

@@ -1,4 +1,5 @@
-Aux.util = {}
+local private, public = {}, {}
+Aux.util = public
 
 Aux.util.LT = {}
 Aux.util.EQ = {}
@@ -7,6 +8,14 @@ Aux.util.GT = {}
 local merge, copy_array
 
 function Aux.util.pass()
+end
+
+function public.copy_table(table)
+	local copy = {}
+	for k, v in pairs(table) do
+		copy[k] = v
+	end
+	return copy
 end
 
 function Aux.util.inventory_iterator()
