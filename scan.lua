@@ -11,35 +11,36 @@ local controller = (function()
 	end
 end)()
 
-local state, abort, new_job
+local state
 
-local scan, scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, wait_for_owner_data, abort
+local scan, scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, wait_for_owner_data, on_abort
 
 function Aux.scan.start(job)
-	Aux.control.on_next_update(function()
-		abort()
+    return controller().wait(function() return true end, function()
+        on_abort()
         job.type = job.type or 'list'
         state = {
-			job = job,
-			page = job.page
+            job = job,
+            page = job.page
         }
 
-		return scan()
-	end)
+        scan()
+    end)
 end
 
 function Aux.scan.abort(k)
-	Aux.control.on_next_update(function()
-		abort()
-		
-		if k then
-			return k()
-		end
-	end)
+    controller().wait(function() return true end, function()
+        on_abort()
+
+        state = nil
+
+        if k then
+            return k()
+        end
+    end)
 end
 
-function abort()
-	controller().reset()
+function on_abort()
 	if state and state.job and state.job.on_abort then
 		state.job.on_abort()
 	end
