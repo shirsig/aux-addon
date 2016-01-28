@@ -543,10 +543,11 @@ function private.update_recommendation()
 
             elseif existing_auctions[selected_item.key] then -- unsuccessful search
 
-                local market_value = Aux.history.market_value(selected_item.key)
-                if market_value then
-                    private.start_price:SetText(Aux.money.to_string(max(1, market_value * 0.95)))
-                    private.buyout_price:SetText(Aux.money.to_string(max(1, market_value)))
+                local price_suggestion = Aux.history.market_value(selected_item.key) and 1.2 * Aux.history.market_value(selected_item.key) * private.get_stack_size_slider_value()
+
+                if price_suggestion then
+                    private.start_price:SetText(Aux.money.to_string(max(1, price_suggestion * 0.95)))
+                    private.buyout_price:SetText(Aux.money.to_string(max(1, price_suggestion)))
                 else
                     private.start_price:SetText(Aux.money.to_string(max(1, selected_item.unit_vendor_price * (selected_item.charges and 1 or private.get_stack_size_slider_value()) * 1.053)))
                     private.buyout_price:SetText(Aux.money.to_string(max(1, selected_item.unit_vendor_price * (selected_item.charges and 1 or private.get_stack_size_slider_value()) * 4)))
