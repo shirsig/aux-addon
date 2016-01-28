@@ -10,6 +10,7 @@ m.config = {
     content_font = [[Fonts\ARIALN.TTF]],
 --    content_font = [[Interface\AddOns\Aux-Addon\ARIALN.TTF]],
     normal_font_size = 15,
+    normal_button_font_size = 16, -- 15 not working for some clients
     text_color = { enabled = { 255/255, 254/255, 250/255, 1 }, disabled = { 147/255, 151/255, 139/255, 1 } },
     label_color = { enabled = { 216/255, 225/255, 211/255, 1 }, disabled = { 150/255, 148/255, 140/255, 1 } },
 
@@ -437,4 +438,93 @@ function m.dropdown()
     button.obj = widget
 
     return AceGUI:RegisterAsWidget(widget)
+end
+
+function m.slider(frame, name)
+--    local frame = CreateFrame('Frame', nil, UIParent)
+--
+--    frame:EnableMouse(true)
+--    frame:SetScript("OnMouseDown", Frame_OnMouseDown)
+--    frame:SetScript("OnEnter", Control_OnEnter)
+--    frame:SetScript("OnLeave", Control_OnLeave)
+--
+
+    local slider = CreateFrame('Slider', name, frame)
+    slider:SetOrientation('HORIZONTAL')
+    slider:SetHeight(6)
+--    slider:SetHitRectInsets(0, 0, -10, 0)
+--    slider:SetPoint('TOPLEFT', label, 'BOTTOMLEFT', 3, -4)
+--    slider:SetPoint('TOPRIGHT', label, 'BOTTOMRIGHT', -6, -4)
+    slider:SetValue(0)
+    slider:SetBackdrop({ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size })
+    slider:SetBackdropColor(unpack(m.config.frame_color))
+    slider:SetBackdropBorderColor(unpack(m.config.frame_border_color))
+    local thumb_texture = slider:CreateTexture(nil, 'ARTWORK')
+    thumb_texture:SetPoint('CENTER', 0, 0)
+    thumb_texture:SetTexture(unpack(m.config.content_color))
+    thumb_texture:SetHeight(15)
+    thumb_texture:SetWidth(8)
+    slider:SetThumbTexture(thumb_texture)
+
+    local label = slider:CreateFontString(nil, 'OVERLAY')
+    label:SetPoint('BOTTOMLEFT', slider, 'TOPLEFT', -3, 4)
+    label:SetPoint('BOTTOMRIGHT', slider, 'TOPRIGHT', 6, 4)
+    label:SetJustifyH('CENTER')
+    label:SetHeight(15)
+    label:SetFont(m.config.content_font, m.config.normal_font_size)
+
+--    local lowtext = slider:CreateFontString(nil, 'ARTWORK')
+--    lowtext:SetFont(TSMAPI.Design:GetContentFont('small'))
+--    lowtext:SetPoint('TOPLEFT', slider, 'BOTTOMLEFT', 2, -4)
+--
+--    local hightext = slider:CreateFontString(nil, 'ARTWORK')
+--    hightext:SetFont(TSMAPI.Design:GetContentFont('small'))
+--    hightext:SetPoint('TOPRIGHT', slider, 'BOTTOMRIGHT', -2, -4)
+--
+    local editbox = CreateFrame('EditBox', nil, frame)
+    editbox:SetAutoFocus(false)
+    editbox:SetPoint('TOP', slider, 'BOTTOM', 0, -6)
+    editbox:SetHeight(15)
+    editbox:SetWidth(70)
+    editbox:SetJustifyH('CENTER')
+    editbox:EnableMouse(true)
+    editbox:SetBackdrop({ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size })
+    editbox:SetBackdropColor(unpack(m.config.content_color))
+    editbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
+--    editbox:SetScript('OnEnterPressed', EditBox_OnEnterPressed)
+--    editbox:SetScript('OnEscapePressed', EditBox_OnEscapePressed)
+--    editbox:SetScript('OnTextChanged', EditBox_OnTextChanged)
+--    editbox:SetScript('OnEnter', Control_OnEnter)
+--    editbox:SetScript('OnLeave', Control_OnLeave)
+    editbox:SetFont(m.config.content_font, m.config.normal_font_size)
+    editbox:SetShadowColor(0, 0, 0, 0)
+--
+--    local button = CreateFrame('Button', nil, editbox, 'UIPanelButtonTemplate')
+--    button:SetWidth(40)
+--    button:SetHeight(20)
+--    button:SetPoint('LEFT', editbox, 'RIGHT', 2, 0)
+--    button:SetText(OKAY)
+--    button:SetScript('OnClick', Button_OnClick)
+--    button:Hide()
+--
+--    local widget = {
+--        label       = label,
+--        slider      = slider,
+--        lowtext     = lowtext,
+--        hightext    = hightext,
+--        editbox     = editbox,
+--        button		= button,
+--        alignoffset = 25,
+--        frame       = frame,
+--        type        = Type
+--    }
+--    for method, func in pairs(methods) do
+--        widget[method] = func
+--    end
+--    slider.obj, editbox.obj, button.obj, frame.obj = widget, widget, widget, widget
+
+
+    slider.label = label
+    slider.editbox = editbox
+    return slider
 end

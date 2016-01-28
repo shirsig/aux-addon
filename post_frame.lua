@@ -202,6 +202,78 @@ function public.on_load()
         private.refresh_button = btn
     end
     do
+        local slider = Aux.gui.slider(AuxSellParameters)
+        slider:SetValueStep(1)
+        slider:SetPoint('TOPLEFT', 16, -70)
+        slider:SetWidth(170)
+        slider:SetScript('OnValueChanged', function()
+            private.quantity_update()
+        end)
+        slider.editbox:SetScript('OnTextChanged', function()
+            if slider.charge_classes then
+                local charge_slider_value = Aux.util.index_of(this:GetNumber(), slider.charge_classes)
+                if charge_slider_value then
+                    slider:SetValue(charge_slider_value)
+                end
+            else
+                slider:SetValue(this:GetNumber())
+            end
+            private.quantity_update()
+        end)
+        slider.editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        slider.editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
+        end)
+        slider.editbox:SetScript('OnEditFocusLost', function()
+            this:HighlightText(0, 0)
+        end)
+        slider.editbox:SetWidth(50)
+        slider.editbox:SetNumeric(true)
+        slider.editbox:SetMaxLetters(3)
+        slider.label:SetText('Stack Size')
+        private.stack_size_slider = slider
+    end
+    do
+        local slider = Aux.gui.slider(AuxSellParameters)
+        slider:SetValueStep(1)
+        slider:SetPoint('TOPLEFT', 16, -120)
+        slider:SetWidth(170)
+        slider:SetScript('OnValueChanged', function()
+            private.quantity_update()
+        end)
+        slider.editbox:SetScript('OnTextChanged', function()
+            if slider.charge_classes then
+                local index = Aux.util.index_of(this:GetNumber(), slider.charge_classes)
+                if index then
+                    slider:SetValue(index)
+                end
+            else
+                slider:SetValue(this:GetNumber())
+            end
+            private.quantity_update()
+        end)
+        slider.editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        slider.editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
+        end)
+        slider.editbox:SetScript('OnEditFocusLost', function()
+            this:HighlightText(0, 0)
+        end)
+        slider.editbox:SetWidth(50)
+        slider.editbox:SetNumeric(true)
+        slider.label:SetText('Stack Count')
+        private.stack_count_slider = slider
+    end
+    do
+        local label = Aux.gui.label(AuxSellParametersShortDurationRadio, 13)
+        label:SetPoint('BOTTOMLEFT', AuxSellParametersShortDurationRadio, 'TOPLEFT', 1, -2)
+        label:SetText('Duration')
+    end
+    do
         local editbox = Aux.gui.editbox(AuxSellParameters)
         editbox:SetPoint('TOPLEFT', 16, -215)
         editbox:SetWidth(170)
@@ -217,6 +289,9 @@ function public.on_load()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
         end)
         editbox:SetScript('OnEditFocusLost', function()
             this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText())))
@@ -243,6 +318,9 @@ function public.on_load()
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
         end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
+        end)
         editbox:SetScript('OnEditFocusLost', function()
             this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText())))
         end)
@@ -266,12 +344,6 @@ function public.on_open()
 
     --    UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, LIVE)
     private.set_auction_duration(AUX_AUCTION_DURATION)
-
-    AuxSellStackSizeSlider:SetValueStep(1)
-    AuxSellStackSizeSliderText:SetText('Stack Size')
-
-    AuxSellStackCountSlider:SetValueStep(1)
-    AuxSellStackCountSliderText:SetText('Stack Count')
 
     -- so that it's initialized with zeroes, not sometimes zero, sometimes empty
     private.start_price:SetText(Aux.money.to_string(0))
@@ -323,7 +395,7 @@ end
 function private.post_auctions()
     local auction = selected_item
 	if auction then
-		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, private.get_stack_size_slider_value(), Aux.money.from_string(private.buyout_price:GetText()), AuxSellStackCountSlider:GetValue()
+		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, private.get_stack_size_slider_value(), Aux.money.from_string(private.buyout_price:GetText()), private.stack_count_slider:GetValue()
 		local duration
 		if AuctionFrameAuctions.duration == 120 then
 			duration = 2
@@ -393,9 +465,9 @@ end
 
 function private.get_stack_size_slider_value()
     if selected_item.charges then
-        return AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider:GetValue()]
+        return private.stack_size_slider.charge_classes[private.stack_size_slider:GetValue()]
     else
-        return AuxSellStackSizeSlider:GetValue()
+        return private.stack_size_slider:GetValue()
     end
 end
 
@@ -430,15 +502,15 @@ function private.update_recommendation()
         private.start_price:SetText(Aux.money.to_string(0))
 		private.buyout_price:SetText(Aux.money.to_string(0))
 
-        AuxSellStackSizeSlider:SetMinMaxValues(0, 0)
-        AuxSellStackSize:SetNumber(0)
-        AuxSellStackCountSlider:SetMinMaxValues(0, 0)
-        AuxSellStackCount:SetNumber(0)
+        private.stack_size_slider:SetMinMaxValues(0, 0)
+        private.stack_size_slider.editbox:SetNumber(0)
+        private.stack_count_slider:SetMinMaxValues(0, 0)
+        private.stack_count_slider.editbox:SetNumber(0)
 
         private.deposit:SetText('Deposit: '..Aux.money.to_string(0))
     else
-        AuxSellStackSize:SetNumber(selected_item.charges and AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider:GetValue()] or AuxSellStackSizeSlider:GetValue())
-        AuxSellStackCount:SetNumber(AuxSellStackCountSlider:GetValue())
+        private.stack_size_slider.editbox:SetNumber(selected_item.charges and private.stack_size_slider.charge_classes[private.stack_size_slider:GetValue()] or private.stack_size_slider:GetValue())
+        private.stack_count_slider.editbox:SetNumber(private.stack_count_slider:GetValue())
 
         AuxSellParametersItemIconTexture:SetTexture(selected_item.texture)
         AuxSellParametersItemName:SetText(selected_item.name)
@@ -453,7 +525,7 @@ function private.update_recommendation()
         private.refresh_button:Enable()
 
         -- TODO neutral AH deposit formula
-        private.deposit:SetText('Deposit: '..Aux.money.to_string(floor(selected_item.unit_vendor_price * 0.05 * (selected_item.charges and 1 or private.get_stack_size_slider_value())) * AuxSellStackCountSlider:GetValue() * AuctionFrameAuctions.duration / 120))
+        private.deposit:SetText('Deposit: '..Aux.money.to_string(floor(selected_item.unit_vendor_price * 0.05 * (selected_item.charges and 1 or private.get_stack_size_slider_value())) * private.stack_count_slider:GetValue() * AuctionFrameAuctions.duration / 120))
 
         if existing_auctions[selected_item.key] then
             private.select_auction()
@@ -487,9 +559,9 @@ function private.update_recommendation()
 	end
 end
 
-function public.quantity_update()
+function private.quantity_update()
     if selected_item then
-        AuxSellStackCountSlider:SetMinMaxValues(1, selected_item.charges and selected_item.availability[AuxSellStackSizeSlider.charge_classes[AuxSellStackSizeSlider:GetValue()]] or floor(selected_item.availability[0] / private.get_stack_size_slider_value()))
+        private.stack_count_slider:SetMinMaxValues(1, selected_item.charges and selected_item.availability[private.stack_size_slider.charge_classes[private.stack_size_slider:GetValue()]] or floor(selected_item.availability[0] / private.get_stack_size_slider_value()))
     end
 	private.update_recommendation()
     refresh = true
@@ -505,13 +577,13 @@ function private.set_item(item)
     Aux.scan.abort(function()
 
         local charge_classes = private.charge_classes(selected_item.availability)
-        AuxSellStackSizeSlider.charge_classes = selected_item.charges and charge_classes
+        private.stack_size_slider.charge_classes = selected_item.charges and charge_classes
         local stack_size_slider_max = selected_item.charges and getn(charge_classes) or min(selected_item.max_stack, selected_item.availability[0])
-        AuxSellStackSizeSlider:SetMinMaxValues(1, stack_size_slider_max)
+        private.stack_size_slider:SetMinMaxValues(1, stack_size_slider_max)
 
-        AuxSellStackSizeSlider:SetValue(stack_size_slider_max)
-        public.quantity_update()
-        AuxSellStackCountSlider:SetValue(selected_item.aux_quantity) -- reduced to max possible
+        private.stack_size_slider:SetValue(stack_size_slider_max)
+        private.quantity_update()
+        private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
 
         if not existing_auctions[selected_item.key] then
             private.refresh_entries()
