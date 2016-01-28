@@ -104,6 +104,14 @@ function private.daily_market_value(histogram)
 	return sum / limit
 end
 
+function private.daily_min_value(histogram)
+	for i, frequency in ipairs(histogram) do
+		if frequency > 0 then
+			return 1.1 ^ (i - 1) * 1.05
+		end
+	end
+end
+
 function private.push_data()
 	local data = private.load_data()
 	local item_data = data.item_data
@@ -115,6 +123,11 @@ function private.push_data()
 		if getn(item_record.histogram) ~= 0 then
 
 			local daily_market_value = private.daily_market_value(item_record.histogram)
+			local daily_min_value = private.daily_min_value(item_record.histogram)
+
+			if daily_market_value > 2 * public.market_value(item_key) then -- prevent people from poisoning our market value by posting lots of 200k auctions
+				daily_market_value = daily_min_value
+			end
 
 			if item_record.day_count == 0 then
 				item_record.EMA7 = Aux.round(daily_market_value)
