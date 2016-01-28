@@ -11,6 +11,7 @@ function m.find(test, query, page, status_bar, on_failure, on_success)
         local pages = page > 0 and { page, page - 1 } or { page }
 
         query = Aux.util.copy_table(query)
+        query.start_page = nil
         query.next_page = function()
             if getn(pages) == 1 then
                 status_bar:update_status(50, 50)

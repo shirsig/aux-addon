@@ -697,6 +697,31 @@ function public.set_view(view)
     refresh = true
 end
 
+function private.create_filter_query()
+    local category = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown)
+
+    return {
+        type = 'list',
+        start_page = AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() and 0 or AuxFilterSearchFrameFiltersPageEditBox:GetNumber(),
+        next_page = function(page, total_pages)
+            if AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() then
+                local last_page = max(total_pages - 1, 0)
+                if page < last_page then
+                    return page + 1
+                end
+            end
+        end,
+        name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
+        min_level = AuxFilterSearchFrameFiltersMinLevel:GetText(),
+        max_level = AuxFilterSearchFrameFiltersMaxLevel:GetText(),
+        slot = category and category.slot,
+        class = category and category.class,
+        subclass = category and category.subclass,
+        quality = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown),
+        usable = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked()
+    }
+end
+
 function public.start_search()
 
     Aux.scan.abort(function()
@@ -713,7 +738,6 @@ function public.start_search()
 
         refresh = true
 
-        local category = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown)
         local tooltip_patterns = {}
         for i=1,4 do
             local tooltip_pattern = getglobal('AuxFilterSearchFrameFiltersTooltipInputBox'..i):GetText()
@@ -722,40 +746,49 @@ function public.start_search()
             end
         end
 
-        local query = {
-            type = 'list',
-            start_page = AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() and 0 or AuxFilterSearchFrameFiltersPageEditBox:GetNumber(),
-            next_page = function(page, total_pages)
-                if AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() then
-                    local last_page = max(total_pages - 1, 0)
-                    if page < last_page then
-                        return page + 1
+        local group = Aux.groups.parse_group(Aux.groups.test_group)
+
+        local queries
+
+        if false then
+            queries = { private.create_filter_query() }
+        else
+            queries = Aux.util.map(group, function(item_key)
+                return Aux.scan_util.create_item_query(
+                    Aux.groups.parse_item_key(item_key),
+                    'list',
+                    0,
+                    function(page, total_pages)
+                        local last_page = max(total_pages - 1, 0)
+                        if page < last_page then
+                            return page + 1
+                        end
                     end
-                end
-            end,
-            name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
-            min_level = AuxFilterSearchFrameFiltersMinLevel:GetText(),
-            max_level = AuxFilterSearchFrameFiltersMaxLevel:GetText(),
-            slot = category and category.slot,
-            class = category and category.class,
-            subclass = category and category.subclass,
-            quality = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown),
-            usable = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked()
-        }
+                )
+            end)
+        end
+
 
         Aux.scan.start{
-            queries = { query },
-            on_submit_query = function()
-                current_page = nil
-            end,
+            queries = queries,
             on_page_loaded = function(page, total_pages)
-                private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages) -- TODO
+                private.status_bar:update_status(100 * (page + 1) / total_pages) -- TODO
                 private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
             end,
+            on_start_query = function(query_index)
+                private.status_bar:update_status(0, 100 * query_index / getn(queries)) -- TODO
+                private.status_bar:set_text(format('Processing query %d / %d', query_index, getn(queries)))
+            end,
             on_read_auction = function(auction_info)
-                if Aux.info.tooltip_match(tooltip_patterns, auction_info.tooltip) then
-                    auctions = auctions or {}
-                    tinsert(auctions, private.create_auction_record(auction_info))
+                auctions = auctions or {}
+                if false then
+                    if Aux.info.tooltip_match(tooltip_patterns, auction_info.tooltip) then
+                        tinsert(auctions, private.create_auction_record(auction_info))
+                    end
+                else
+                    if Aux.util.any(group, function(item_key) return auction_info.item_id == Aux.groups.parse_item_key(item_key) end) then
+                        tinsert(auctions, private.create_auction_record(auction_info))
+                    end
                 end
             end,
             on_complete = function()

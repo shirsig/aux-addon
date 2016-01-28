@@ -114,11 +114,15 @@ end
 
 
 function private.scan()
+    local start_query_index = state.params.start_query_index or 1
+    local next_query_index = state.params.next_query_index or function(query_index) return query_index + 1 end
 
-    state.query_index = state.query_index and state.query_index + 1 or 1
+    state.query_index = state.query_index and next_query_index(state.query_index) or start_query_index
     if current_query() then
-        state.page = current_query().start_page
-        return private.process_query()
+        wait_for_callback{state.params.on_start_query or Aux.util.pass, state.query_index, function()
+            state.page = current_query().start_page
+            return private.process_query()
+        end }
     else
         local on_complete = state.params.on_complete
         state = nil
@@ -127,7 +131,6 @@ function private.scan()
         end
     end
 end
-
 
 function private.process_query()
 
