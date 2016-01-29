@@ -16,6 +16,14 @@ m.config = {
 
 }
 
+function m.panel(parent)
+    local panel = CreateFrame('Frame', parent)
+    panel:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size})
+    panel:SetBackdropColor(unpack(m.config.frame_color))
+    panel:SetBackdropBorderColor(unpack(m.config.frame_border_color))
+    return panel
+end
+
 function m.button(parent, text_height, name)
     local button = CreateFrame('Button', name, parent)
     button:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size})
@@ -336,32 +344,30 @@ function m.label(parent, size)
     return label
 end
 
-function m.CreateHorizontalLine(parent, ofsy, relativeFrame, invertedColor)
-    relativeFrame = relativeFrame or parent
-    local barTex = parent:CreateTexture()
-    barTex:SetPoint("TOPLEFT", relativeFrame, "TOPLEFT", 2, ofsy)
-    barTex:SetPoint("TOPRIGHT", relativeFrame, "TOPRIGHT", -2, ofsy)
-    barTex:SetHeight(2)
-    if invertedColor then
-        TSMAPI.Design:SetFrameColor(barTex)
+function m.horizontal_line(parent, y_offset, inverted_color)
+    local texture = parent:CreateTexture()
+    texture:SetPoint('TOPLEFT', parent, 'TOPLEFT', 2, y_offset)
+    texture:SetPoint('TOPRIGHT', parent, 'TOPRIGHT', -2, y_offset)
+    texture:SetHeight(2)
+    if inverted_color then
+        texture:SetTexture(unpack(m.config.frame_color))
     else
-        TSMAPI.Design:SetContentColor(barTex)
+        texture:SetTexture(unpack(m.config.content_color))
     end
-    return barTex
+    return texture
 end
 
-function m.CreateVerticalLine(parent, ofsx, relativeFrame, invertedColor)
-    relativeFrame = relativeFrame or parent
-    local barTex = parent:CreateTexture()
-    barTex:SetPoint("TOPLEFT", relativeFrame, "TOPLEFT", ofsx, -2)
-    barTex:SetPoint("BOTTOMLEFT", relativeFrame, "BOTTOMLEFT", ofsx, 2)
-    barTex:SetWidth(2)
-    if invertedColor then
-        TSMAPI.Design:SetFrameColor(barTex)
+function m.vertical_line(parent, x_offset, inverted_color)
+    local texture = parent:CreateTexture()
+    texture:SetPoint('TOPLEFT', parent, 'TOPLEFT', x_offset, -2)
+    texture:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', x_offset, 2)
+    texture:SetWidth(2)
+    if inverted_color then
+        texture:SetTexture(unpack(m.config.frame_color))
     else
-        TSMAPI.Design:SetContentColor(barTex)
+        texture:SetTexture(unpack(m.config.content_color))
     end
-    return barTex
+    return texture
 end
 
 function m.dropdown()

@@ -396,3 +396,12 @@ function Aux.item_subclass_index(class_index, item_subclass)
         end
     end
 end
+
+function Aux.item_quality_index(item_quality)
+    for i=0,4 do
+        local quality = getglobal('ITEM_QUALITY'..i..'_DESC')
+        if strlower(item_quality) == strlower(quality) then
+            return i
+        end
+    end
+end

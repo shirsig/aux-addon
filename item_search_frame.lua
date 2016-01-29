@@ -552,15 +552,7 @@ function public.start_search()
         local query = Aux.scan_util.create_item_query(
             item_id,
             'list',
-            AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber(),
-            function(page, total_pages)
-                if AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() then
-                    local last_page = max(total_pages - 1, 0)
-                    if page < last_page then
-                        return page + 1
-                    end
-                end
-            end
+            AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber()
         )
 
         Aux.scan.start{

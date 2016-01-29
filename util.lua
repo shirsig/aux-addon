@@ -18,6 +18,12 @@ function public.copy_table(table)
 	return copy
 end
 
+function public.trim(string)
+	string = gsub(string, '^%s*', '')
+	string = gsub(string, '%s*$', '')
+	return string
+end
+
 function Aux.util.inventory_iterator()
     local inventory = {}
     for bag = 0, 4 do

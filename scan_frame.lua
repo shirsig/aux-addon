@@ -25,12 +25,6 @@ function public.start_scan()
         queries = {{
             type = 'list',
             start_page = 0,
-            next_page = function(page, total_pages)
-                local last_page = max(total_pages - 1, 0)
-                if page < last_page then
-                    return page + 1
-                end
-            end,
         }},
         on_page_loaded = function(page, total_pages)
             Aux.log('Scanning page '..(page+1)..' out of '..total_pages..' ...')

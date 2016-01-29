@@ -391,6 +391,67 @@ function public.on_load()
         [Aux.view.FULL] = Aux.sheet.create(private.views[Aux.view.FULL]),
     }
     do
+        local btn = Aux.gui.button(AuxFilterSearchFrame, 22)
+        btn:SetPoint('TOPRIGHT', -5, -3)
+        btn:SetWidth(60)
+        btn:SetHeight(25)
+        btn:SetText('Search')
+        btn:SetScript('OnClick', Aux.filter_search_frame.start_search)
+        private.search_button = btn
+    end
+    do
+        local editbox = Aux.gui.editbox(AuxFilterSearchFrame)
+        editbox:SetPoint('TOPLEFT', 5, -3)
+        editbox:SetPoint('TOPRIGHT', private.search_button, 'TOPLEFT', -4, 0)
+        editbox:SetWidth(400)
+        editbox:SetHeight(25)
+--        editbox:SetScript('OnTabPressed', function()
+--            if IsShiftKeyDown() then
+--                getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+--            else
+--                getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
+--            end
+--        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            Aux.filter_search_frame.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        private.search_box = editbox
+    end
+    do
+        Aux.gui.horizontal_line(AuxFilterSearchFrame, -35)
+    end
+    do
+        local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
+        btn:SetPoint('TOPLEFT', 10, -40)
+        btn:SetWidth(220)
+        btn:SetHeight(24)
+        btn:SetText('Search Results')
+        btn:SetScript('OnClick', Aux.filter_search_frame.start_search)
+        private.search_results_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
+        btn:SetPoint('TOPLEFT', private.search_results_button, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(220)
+        btn:SetHeight(24)
+        btn:SetText('Saved Searches')
+        btn:SetScript('OnClick', Aux.filter_search_frame.start_search)
+        private.saved_searches_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
+        btn:SetPoint('TOPLEFT', private.saved_searches_button, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(220)
+        btn:SetHeight(24)
+        btn:SetText('New Filter')
+        btn:SetScript('OnClick', Aux.filter_search_frame.start_search)
+        private.new_filter_button = btn
+    end
+    do
         local btn = Aux.gui.button(AuxFilterSearchFrameFilters, 16, '$parentSearchButton')
         btn:SetPoint('BOTTOMLEFT', 8, 15)
         btn:SetWidth(80)
@@ -703,14 +764,6 @@ function private.create_filter_query()
     return {
         type = 'list',
         start_page = AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() and 0 or AuxFilterSearchFrameFiltersPageEditBox:GetNumber(),
-        next_page = function(page, total_pages)
-            if AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() then
-                local last_page = max(total_pages - 1, 0)
-                if page < last_page then
-                    return page + 1
-                end
-            end
-        end,
         name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
         min_level = AuxFilterSearchFrameFiltersMinLevel:GetText(),
         max_level = AuxFilterSearchFrameFiltersMaxLevel:GetText(),
@@ -750,22 +803,19 @@ function public.start_search()
 
         local queries
 
-        if false then
-            queries = { private.create_filter_query() }
-        else
-            queries = Aux.util.map(group, function(item_key)
-                return Aux.scan_util.create_item_query(
-                    Aux.groups.parse_item_key(item_key),
-                    'list',
-                    0,
-                    function(page, total_pages)
-                        local last_page = max(total_pages - 1, 0)
-                        if page < last_page then
-                            return page + 1
-                        end
-                    end
-                )
+--            queries = { private.create_filter_query() }
+        local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
+        if filters then
+            queries = Aux.util.map(filters, function(filter)
+                return {
+                    type = 'list',
+                    start_page = 0,
+                    blizzard_query = Aux.scan_util.blizzard_query(filter),
+                    validator = Aux.scan_util.validator(filter),
+                }
             end)
+        else
+            return
         end
 
 
@@ -781,15 +831,9 @@ function public.start_search()
             end,
             on_read_auction = function(auction_info)
                 auctions = auctions or {}
-                if false then
-                    if Aux.info.tooltip_match(tooltip_patterns, auction_info.tooltip) then
-                        tinsert(auctions, private.create_auction_record(auction_info))
-                    end
-                else
-                    if Aux.util.any(group, function(item_key) return auction_info.item_id == Aux.groups.parse_item_key(item_key) end) then
-                        tinsert(auctions, private.create_auction_record(auction_info))
-                    end
-                end
+--                if Aux.info.tooltip_match(tooltip_patterns, auction_info.tooltip) then
+                tinsert(auctions, private.create_auction_record(auction_info))
+--                end
             end,
             on_complete = function()
                 auctions = auctions or {}

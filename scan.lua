@@ -15,6 +15,13 @@ local state
 
 local scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, wait_for_owner_data, on_abort, current_query
 
+function private.default_next_page(page, total_pages)
+    local last_page = max(total_pages - 1, 0)
+    if page < last_page then
+        return page + 1
+    end
+end
+
 function current_query()
     return state.params.queries[state.query_index]
 end
@@ -140,7 +147,11 @@ function private.process_query()
 
         scan_auctions(count, function()
 
-            state.page = current_query().next_page and current_query().next_page(state.page, state.total_pages)
+            if current_query().next_page then
+                state.page = current_query().next_page(state.page, state.total_pages)
+            else
+                state.page = private.default_next_page(state.page, state.total_pages)
+            end
 
             if state.page then
                 return private.process_query()
@@ -176,10 +187,12 @@ function scan_auctions_helper(i, n, k)
             Aux.history.process_auction(auction_info)
         end
 
-        wait_for_callback{state.params.on_read_auction or Aux.util.pass, auction_info, recurse}
-    else
-        recurse()
+        if not current_query().validator or current_query().validator(auction_info) then
+            return wait_for_callback{state.params.on_read_auction or Aux.util.pass, auction_info, recurse }
+        end
     end
+
+    return recurse()
 end
 
 function submit_query(k)
@@ -208,15 +221,15 @@ function submit_query(k)
                 GetOwnerAuctionItems(state.page)
             else
                 QueryAuctionItems(
-                    current_query().name,
-                    current_query().min_level,
-                    current_query().max_level,
-                    current_query().slot,
-                    current_query().class,
-                    current_query().subclass,
+                    Aux.util.safe_index{current_query(), 'blizzard_query', 'name'},
+                    Aux.util.safe_index{current_query(), 'blizzard_query', 'min_level'},
+                    Aux.util.safe_index{current_query(), 'blizzard_query', 'max_level'},
+                    Aux.util.safe_index{current_query(), 'blizzard_query', 'slot'},
+                    Aux.util.safe_index{current_query(), 'blizzard_query', 'class'},
+                    Aux.util.safe_index{current_query(), 'blizzard_query', 'subclass'},
                     state.page,
-                    current_query().usable,
-                    current_query().quality
+                    Aux.util.safe_index{current_query(), 'blizzard_query', 'usable'},
+                    Aux.util.safe_index{current_query(), 'blizzard_query', 'quality'}
                 )
             end
 		end)

@@ -697,13 +697,7 @@ function private.refresh_entries()
         local query = Aux.scan_util.create_item_query(
             item_id,
             'list',
-            0,
-            function(page, total_pages)
-                local last_page = max(total_pages - 1, 0)
-                if page < last_page then
-                    return page + 1
-                end
-            end
+            0
         )
 
         private.status_bar:update_status(0,0)
