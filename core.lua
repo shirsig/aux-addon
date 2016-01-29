@@ -24,6 +24,8 @@ function Aux_OnLoad()
     LoadAddOn('EnhTooltip')
     if IsAddOnLoaded('EnhTooltip') then
         Stubby.RegisterFunctionHook('EnhTooltip.AddTooltip', 100, function(_ ,_ ,_ ,_ , link, _, count)
+            if EnhTooltip.LinkType(link) ~= 'item' then return end
+
             local item_id, suffix_id = EnhTooltip.BreakLink(link)
             local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
@@ -383,7 +385,7 @@ end
 
 function Aux.item_class_index(item_class)
     for i, class in ipairs({ GetAuctionItemClasses() }) do
-        if class == item_class then
+        if strlower(class) == strlower(item_class) then
             return i
         end
     end
@@ -391,7 +393,7 @@ end
 
 function Aux.item_subclass_index(class_index, item_subclass)
     for i, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
-        if subclass == item_subclass then
+        if strlower(subclass) == strlower(item_subclass) then
             return i
         end
     end

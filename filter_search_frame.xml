@@ -65,9 +65,9 @@
             </Frame>
             <Frame name="$parentResults" inherits="AuxFrameBoxTemplate">
                 <Size>
-                    <AbsDimension x="655" y="326"/>
+                    <AbsDimension x="655" y="300"/>
                 </Size>
-                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$parentFilters"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
+                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="3" y="-65"/></Offset></Anchor></Anchors>
                 <Frames>
                     <Frame name="$parentBuyListing" hidden="true">
                         <Anchors>
@@ -84,6 +84,26 @@
                     <Frame name="$parentFullListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        </Anchors>
+                    </Frame>
+                </Frames>
+            </Frame>
+            <Frame name="$parentSaved" inherits="AuxFrameBoxTemplate">
+                <Size>
+                    <AbsDimension x="655" y="300"/>
+                </Size>
+                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="3" y="-65"/></Offset></Anchor></Anchors>
+                <Frames>
+                    <Frame name="$parentFavoriteListing" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                        </Anchors>
+                    </Frame>
+                    <Frame name="$parentRecentListing" hidden="true">
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativepoint="TOPRIGHT" relativeto="$parentFavoriteListing"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
                         </Anchors>
                     </Frame>

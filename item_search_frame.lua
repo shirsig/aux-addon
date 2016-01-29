@@ -504,7 +504,7 @@ function public.set_item(item_id)
         end)
         tinsert(updated_recently_searched, 1, { item_id=item_id, time=time() })
         while getn(updated_recently_searched) > 50 do
-            tremove(updated_recently_searched, getn(updated_recently_searched))
+            tremove(updated_recently_searched)
         end
         aux_recently_searched = updated_recently_searched
 
@@ -549,11 +549,7 @@ function public.start_search()
 
         local item_id = private.item_id
 
-        local query = Aux.scan_util.create_item_query(
-            item_id,
-            'list',
-            AuxItemSearchFrameItemAllPagesCheckButton:GetChecked() and 0 or AuxItemSearchFrameItemPageEditBox:GetNumber()
-        )
+        local query = Aux.scan_util.create_item_query(item_id)
 
         Aux.scan.start{
             queries = { query },
@@ -562,10 +558,8 @@ function public.start_search()
                 private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
             end,
             on_read_auction = function(auction_info)
-                if auction_info.item_id == item_id then
-                    auctions = auctions or {}
-                    tinsert(auctions, private.create_auction_record(auction_info))
-                end
+                auctions = auctions or {}
+                tinsert(auctions, private.create_auction_record(auction_info))
             end,
             on_complete = function()
                 auctions = auctions or {}

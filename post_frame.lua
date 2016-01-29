@@ -233,6 +233,7 @@ function public.on_load()
         slider.editbox:SetNumeric(true)
         slider.editbox:SetMaxLetters(3)
         slider.label:SetText('Stack Size')
+        slider.label:SetTextHeight(13)
         private.stack_size_slider = slider
     end
     do
@@ -266,6 +267,7 @@ function public.on_load()
         slider.editbox:SetWidth(50)
         slider.editbox:SetNumeric(true)
         slider.label:SetText('Stack Count')
+        slider.label:SetTextHeight(13)
         private.stack_count_slider = slider
     end
     do
@@ -694,11 +696,7 @@ function private.refresh_entries()
 
         existing_auctions[item_key] = nil
 
-        local query = Aux.scan_util.create_item_query(
-            item_id,
-            'list',
-            0
-        )
+        local query = Aux.scan_util.create_item_query(item_id)
 
         private.status_bar:update_status(0,0)
         private.status_bar:set_text('Scanning auctions...')

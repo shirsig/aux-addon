@@ -1,10 +1,70 @@
 local private, public = {}, {}
 Aux.filter_search_frame = public
 
+aux_favorite_searches = {}
+aux_recent_searches = {}
+
 local auctions
 local tooltip_patterns = {}
 local refresh
 local selected_auction
+
+local RESULTS, SAVED, FILTER = {}, {}, {}
+
+function private.update_search_listings()
+    Aux.sheet.populate(private.listings.favorite_searches, aux_favorite_searches)
+    Aux.sheet.populate(private.listings.recent_searches, aux_recent_searches)
+end
+
+function private.update_tab(tab)
+
+    private.search_results_button:UnlockHighlight()
+    private.saved_searches_button:UnlockHighlight()
+    private.new_filter_button:UnlockHighlight()
+    AuxFilterSearchFrameResults:Hide()
+    AuxFilterSearchFrameSaved:Hide()
+    AuxFilterSearchFrameFilters:Hide()
+
+    if tab == RESULTS then
+        AuxFilterSearchFrameResults:Show()
+        private.search_results_button:LockHighlight()
+    elseif tab == SAVED then
+        AuxFilterSearchFrameSaved:Show()
+    elseif tab == FILTER then
+        AuxFilterSearchFrameFilters:Show()
+        private.new_filter_button:LockHighlight()
+    end
+end
+
+function private.add_filter()
+    local old_filter_string = private.search_box:GetText()
+    old_filter_string = Aux.util.trim(old_filter_string)
+
+    if not string.sub(old_filter_string, strlen(old_filter_string), strlen(old_filter_string)) == ';' then
+        old_filter_string = old_filter_string..';'
+    end
+
+    private.search_box:SetText(old_filter_string..Aux.scan_util.filter_to_string(private.get_form_filter()))
+end
+
+function private.clear_filter()
+
+end
+
+function private.get_form_filter()
+    local category = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown)
+
+    return {
+        name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
+        min_level = tonumber(AuxFilterSearchFrameFiltersMinLevel:GetText()),
+        max_level = tonumber(AuxFilterSearchFrameFiltersMaxLevel:GetText()),
+        slot = category and category.slot,
+        class = category and category.class,
+        subclass = category and category.subclass,
+        quality = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown),
+        usable_only = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked()
+    }
+end
 
 function private.select_auction(entry)
     selected_auction = entry
@@ -25,10 +85,53 @@ function public.on_close()
 end
 
 function public.on_open()
-    private.tab_group:set_tab(aux_view)
+    private.update_search_listings()
+    private.update_tab(RESULTS)
+--    private.tab_group:set_tab(aux_view)
+    Aux.filter_search_frame.set_view(aux_view)
 end
 
 function public.on_load()
+    private.recent_searches_config = {
+        plain = true,
+        frame = AuxFilterSearchFrameSavedFavoriteListing,
+        on_row_click = function (sheet, row_index)
+            PlaySound('igMainMenuOptionCheckBoxOn')
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            --            sheet.data[data_index]
+        end,
+        columns = {
+            {
+                width = 300,
+                comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.LT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
+                cell_setter = function(cell, filter_string)
+                    cell.text:SetText(filter_string)
+                end,
+            },
+        },
+        sort_order = {},
+    }
+    private.favorite_searches_config = {
+        plain = true,
+        frame = AuxFilterSearchFrameSavedRecentListing,
+        on_row_click = function (sheet, row_index)
+            PlaySound('igMainMenuOptionCheckBoxOn')
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+--            sheet.data[data_index]
+        end,
+        columns = {
+            {
+                width = 300,
+                comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.LT) end,
+                cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
+                cell_setter = function(cell, filter_string)
+                    cell.text:SetText(filter_string)
+                end,
+            },
+        },
+        sort_order = {},
+    }
     private.views = {
         [Aux.view.BUYOUT] = {
             frame = AuxFilterSearchFrameResultsBuyListing,
@@ -386,6 +489,8 @@ function public.on_load()
     }
 
     private.listings = {
+        favorite_searches = Aux.sheet.create(private.favorite_searches_config),
+        recent_searches = Aux.sheet.create(private.recent_searches_config),
         [Aux.view.BUYOUT] = Aux.sheet.create(private.views[Aux.view.BUYOUT]),
         [Aux.view.BID] = Aux.sheet.create(private.views[Aux.view.BID]),
         [Aux.view.FULL] = Aux.sheet.create(private.views[Aux.view.FULL]),
@@ -400,9 +505,19 @@ function public.on_load()
         private.search_button = btn
     end
     do
+        local btn = Aux.gui.button(AuxFilterSearchFrame, 22)
+        btn:SetPoint('TOPRIGHT', -5, -3)
+        btn:SetWidth(60)
+        btn:SetHeight(25)
+        btn:SetText('Stop')
+        btn:SetScript('OnClick', Aux.filter_search_frame.stop_search)
+        btn:Hide()
+        private.stop_button = btn
+    end
+    do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrame)
         editbox:SetPoint('TOPLEFT', 5, -3)
-        editbox:SetPoint('TOPRIGHT', private.search_button, 'TOPLEFT', -4, 0)
+        editbox:SetPoint('TOPRIGHT', private.search_button, 'TOPLEFT', -4, -5)
         editbox:SetWidth(400)
         editbox:SetHeight(25)
 --        editbox:SetScript('OnTabPressed', function()
@@ -414,7 +529,7 @@ function public.on_load()
 --        end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            Aux.filter_search_frame.start_search()
+            public.start_search()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
@@ -430,7 +545,7 @@ function public.on_load()
         btn:SetWidth(220)
         btn:SetHeight(24)
         btn:SetText('Search Results')
-        btn:SetScript('OnClick', Aux.filter_search_frame.start_search)
+        btn:SetScript('OnClick', function() private.update_tab(RESULTS) end)
         private.search_results_button = btn
     end
     do
@@ -439,7 +554,7 @@ function public.on_load()
         btn:SetWidth(220)
         btn:SetHeight(24)
         btn:SetText('Saved Searches')
-        btn:SetScript('OnClick', Aux.filter_search_frame.start_search)
+        btn:SetScript('OnClick', function() private.update_tab(SAVED) end)
         private.saved_searches_button = btn
     end
     do
@@ -448,33 +563,45 @@ function public.on_load()
         btn:SetWidth(220)
         btn:SetHeight(24)
         btn:SetText('New Filter')
-        btn:SetScript('OnClick', Aux.filter_search_frame.start_search)
+        btn:SetScript('OnClick', function() private.update_tab(FILTER) end)
         private.new_filter_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxFilterSearchFrameFilters, 16, '$parentSearchButton')
-        btn:SetPoint('BOTTOMLEFT', 8, 15)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('Search')
-        btn:SetScript('OnClick', Aux.filter_search_frame.start_search)
+        local btn1 = Aux.gui.button(AuxFilterSearchFrameFilters, 16)
+        btn1:SetPoint('BOTTOMLEFT', 8, 15)
+        btn1:SetWidth(80)
+        btn1:SetHeight(24)
+        btn1:SetText('Add Filter')
+        btn1:SetScript('OnClick', private.add_filter)
+
+        local btn2 = Aux.gui.button(AuxFilterSearchFrameFilters, 16)
+        btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
+        btn2:SetWidth(80)
+        btn2:SetHeight(24)
+        btn2:SetText('Search Filter')
+        btn2:SetScript('OnClick', function()
+            private.search_box:SetText('')
+            private.add_filter()
+            public.start_search()
+        end)
+
+        local btn3 = Aux.gui.button(AuxFilterSearchFrameFilters, 16)
+        btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
+        btn3:SetWidth(80)
+        btn3:SetHeight(24)
+        btn3:SetText('Clear Filter')
+        btn3:SetScript('OnClick', function()
+            private.clear_filter()
+        end)
     end
     do
-        local btn = Aux.gui.button(AuxFilterSearchFrameFilters, 16, '$parentStopButton')
-        btn:SetPoint('BOTTOMLEFT', 8, 15)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('Stop')
-        btn:SetScript('OnClick', Aux.filter_search_frame.stop_search)
-        btn:Hide()
-    end
-    do
-        local tab_group = Aux.gui.tab_group(AuxFilterSearchFrameResults, 'TOP')
-        tab_group:create_tab('Buy')
-        tab_group:create_tab('Bid')
-        tab_group:create_tab('Full')
-        tab_group.on_select = Aux.filter_search_frame.set_view
-        private.tab_group = tab_group
+--        local tab_group = Aux.gui.tab_group(AuxFilterSearchFrameResults, 'TOP')
+--        tab_group:create_tab('Buy')
+--        tab_group:create_tab('Bid')
+--        tab_group:create_tab('Full')
+--        tab_group.on_select = Aux.filter_search_frame.set_view
+--        private.tab_group = tab_group
+--        tab_group.container:Hide()
     end
     do
         local status_bar = Aux.gui.status_bar(AuxFilterSearchFrame)
@@ -516,7 +643,7 @@ function public.on_load()
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            Aux.filter_search_frame.start_search()
+            public.start_search()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
@@ -550,7 +677,7 @@ function public.on_load()
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            Aux.filter_search_frame.start_search()
+            public.start_search()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
@@ -574,7 +701,7 @@ function public.on_load()
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            Aux.filter_search_frame.start_search()
+            public.start_search()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
@@ -601,7 +728,7 @@ function public.on_load()
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            Aux.filter_search_frame.start_search()
+            public.start_search()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
@@ -623,7 +750,7 @@ function public.on_load()
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            Aux.filter_search_frame.start_search()
+            public.start_search()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
@@ -642,7 +769,7 @@ function public.on_load()
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            Aux.filter_search_frame.start_search()
+            public.start_search()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
@@ -661,7 +788,7 @@ function public.on_load()
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            Aux.filter_search_frame.start_search()
+            public.start_search()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
@@ -676,7 +803,7 @@ function public.on_load()
         editbox:SetWidth(30)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            Aux.filter_search_frame.start_search()
+            public.start_search()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
@@ -737,18 +864,18 @@ function private.update_listing()
         local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
         Aux.sheet.populate(private.listings[Aux.view.BUYOUT], auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBuyListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
+        AuxFrame:SetWidth(AuxFilterSearchFrameResults:GetWidth() + 15)
 	elseif aux_view == Aux.view.BID then
         AuxFilterSearchFrameResultsBidListing:Show()
         local bid_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
         Aux.sheet.populate(private.listings[Aux.view.BID], bid_auctions)
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBidListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
+        AuxFrame:SetWidth(AuxFilterSearchFrameResults:GetWidth() + 15)
 	elseif aux_view == Aux.view.FULL then
         AuxFilterSearchFrameResultsFullListing:Show()
         Aux.sheet.populate(private.listings[Aux.view.FULL], auctions or {})
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsFullListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxFilterSearchFrameFilters:GetWidth() + AuxFilterSearchFrameResults:GetWidth() + 15)
+        AuxFrame:SetWidth(AuxFilterSearchFrameResults:GetWidth() + 15)
 	end
 end
 
@@ -758,34 +885,24 @@ function public.set_view(view)
     refresh = true
 end
 
-function private.create_filter_query()
-    local category = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown)
-
-    return {
-        type = 'list',
-        start_page = AuxFilterSearchFrameFiltersAllPagesCheckButton:GetChecked() and 0 or AuxFilterSearchFrameFiltersPageEditBox:GetNumber(),
-        name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
-        min_level = AuxFilterSearchFrameFiltersMinLevel:GetText(),
-        max_level = AuxFilterSearchFrameFiltersMaxLevel:GetText(),
-        slot = category and category.slot,
-        class = category and category.class,
-        subclass = category and category.subclass,
-        quality = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown),
-        usable = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked()
-    }
-end
-
 function public.start_search()
 
+    tinsert(aux_recent_searches, 1, private.search_box:GetText())
+    while getn(aux_recent_searches) > 50 do
+        tremove(aux_recent_searches)
+    end
+
     Aux.scan.abort(function()
+
+        private.update_tab(RESULTS)
 
         private.clear_selection()
 
         private.status_bar:update_status(0,0)
         private.status_bar:set_text('Scanning auctions...')
 
-        AuxFilterSearchFrameFiltersSearchButton:Hide()
-        AuxFilterSearchFrameFiltersStopButton:Show()
+        private.search_button:Hide()
+        private.stop_button:Show()
 
         auctions = nil
 
@@ -840,16 +957,16 @@ function public.start_search()
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
 
-                AuxFilterSearchFrameFiltersStopButton:Hide()
-                AuxFilterSearchFrameFiltersSearchButton:Show()
+                private.stop_button:Hide()
+                private.search_button:Show()
                 refresh = true
             end,
             on_abort = function()
                 auctions = auctions or {}
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
-                AuxFilterSearchFrameFiltersStopButton:Hide()
-                AuxFilterSearchFrameFiltersSearchButton:Show()
+                private.stop_button:Hide()
+                private.search_button:Show()
                 refresh = true
             end,
         }

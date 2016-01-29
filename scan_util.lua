@@ -47,49 +47,57 @@ function m.find(test, query, page, status_bar, on_failure, on_success)
     end)
 end
 
-function m.create_item_query(item_id, type, start_page, next_page)
+function m.create_item_filter(item_id)
     local item_info = Aux.static.item_info(item_id)
 
-    local function validator(auction_info)
-        return auction_info.item_id == item_id
+    if item_info then
+        local class_index = Aux.item_class_index(item_info.class)
+        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
+
+        return {
+            name = item_info.name,
+            min_level = item_info.level,
+            min_level = item_info.level,
+            slot = item_info.slot,
+            class = class_index,
+            subclass = subclass_index,
+            subclass = item_info.subclass,
+            quality = item_info.quality,
+            usable = item_info.usable,
+        }
     end
---    local class_index = Aux.item_class_index(item_info.class)
---    local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass) -- TODO test if needed
+end
+
+function m.create_item_query(item_id)
+    local item_info = Aux.static.item_info(item_id)
+
+    local filter = m.create_item_filter(item_id)
 
     return item_info and {
-        type = type,
-        start_page = start_page,
-        next_page = next_page,
-        name = item_info.name,
-        min_level = item_info.level,
-        min_level = item_info.level,
-        slot = item_info.slot,
---        class = class_index,
---        subclass = subclass_index,
---        class = Aux.item_class_index(item_info.class),
---        subclass = item_info.subclass,
-        quality = item_info.quality,
-        usable = item_info.usable,
+        type = 'list',
+        start_page = 0,
+        validator = m.validator(filter),
+        blizzard_query = m.blizzard_query(filter),
     }
 end
 
 function m.parse_filter_string(filter_string)
-    local parts = {Aux.persistence.deserialize(filter_string, ';')}
+    local parts = Aux.persistence.deserialize(filter_string, ';')
 
     local filters = {}
     for _, str in ipairs(parts) do
         str = Aux.util.trim(str)
         if tonumber(str) then
-            local filter = Aux.scan_util.create_item_query(tonumber(str))
+            local filter = m.create_item_filter(tonumber(str))
             if filter then
                 tinsert(filters, filter)
             end
         else
-            local filter, error = m.filter(str)
+            local filter, error = m.filter_from_string(str)
 
             if not filter then
                 Aux.log('Invalid filter: '..error)
-            elseif strlen(filter.query_string) > 63 then
+            elseif filter.name and strlen(filter.name) > 63 then
 
             else
                 tinsert(filters, filter)
@@ -100,84 +108,116 @@ function m.parse_filter_string(filter_string)
     return filters
 end
 
-function m.filter(filter_term)
-    local parts = {Aux.persistence.deserialize(filter_term, '/')}
-    local query_string, class, subclass, min_level, max_level, quality, usable_only, exact_only, even_only, min_profit, max_percentage
+function m.filter_from_string(filter_term)
+    local parts = Aux.persistence.deserialize(filter_term, '/')
 
-    if getn(parts) == 0 then
-        return false, 'Invalid Filter'
-    end
-
+    local filter = {}
     for i, str in ipairs(parts) do
         str = Aux.util.trim(str)
 
         if tonumber(str) then
-            if not min_level then
-                min_level = tonumber(str)
-            elseif not max_level then
-                max_level = tonumber(str)
+            if not filter.min_level then
+                filter.min_level = tonumber(str)
+            elseif not filter.max_level then
+                filter.max_level = tonumber(str)
             else
                 return false, 'Invalid Min Level'
             end
-        elseif not class and Aux.item_class_index(str) then
-            if not class then
-                class = Aux.item_class_index(str)
+        elseif not filter.class and Aux.item_class_index(str) then
+            if not filter.class then
+                filter.class = Aux.item_class_index(str)
             else
                 return false, 'Invalid Item Type'
             end
-        elseif Aux.item_subclass_index(class, str) then
-            if not subclass then
-                subclass = Aux.item_subclass_index(class, str)
+        elseif filter.class and Aux.item_subclass_index(filter.class, str) then
+            if not filter.subclass then
+                filter.subclass = Aux.item_subclass_index(filter.class, str)
             else
                 return false, 'Invalid Item SubType'
             end
         elseif Aux.item_quality_index(str) then
-            if not quality then
-                quality = Aux.item_quality_index(str)
+            if not filter.quality then
+                filter.quality = Aux.item_quality_index(str)
             else
                 return false, 'Invalid Item Rarity'
             end
         elseif strlower(str) == 'usable' then
-            if not usable_only then
-                usable_only = true
+            if not filter.usable_only then
+                filter.usable_only = true
             else
                 return false, 'Invalid Usable Only Filter'
             end
         elseif strlower(str) == 'exact' then
-            if not exact_only then
-                exact_only = true
+            if not filter.exact_only then
+                filter.exact_only = true
             else
                 return false, 'Invalid Exact Only Filter'
             end
         elseif strlower(str) == 'even' then
-            if not even_only then
-                even_only = true
+            if not filter.even_only then
+                filter.even_only = true
             else
                 return false, 'Invalid Even Only Filter'
             end
-        elseif Aux.money.from_string(str) then
-            min_profit = Aux.money.from_string(str)
+--        elseif Aux.money.from_string(str) then
+--            filter.min_profit = Aux.money.from_string(str)
         elseif i == 1 then
-            query_string = str
+            filter.name = str
         else
             return false, 'Unknown Filter'
         end
     end
 
-    min_level, max_level = min(min_level, max_level), max(min_level, max_level)
+    if filter.max_level then
+        filter.min_level, filter.max_level = min(filter.min_level, filter.max_level), max(filter.min_level, filter.max_level)
+    end
 
-    return { query_string or '', class or 0, subclass or 0, min_level or 0, max_level or 0, quality or 0, usable_only or 0, exact_only or nil, even_only or nil, min_profit }
+    return filter
+end
+
+function m.filter_to_string(filter)
+
+    local filter_term = filter.name or ''
+
+    if filter.max_level then
+        filter_term = format('%s/%d/%d', filter_term, filter.min_level, filter.max_level)
+    elseif filter.min_level then
+        filter_term = format('%s/%d', filter_term, filter.min_level)
+    end
+
+    if filter.class then
+        local classes = { GetAuctionItemClasses() }
+        filter_term = format('%s/%s', filter_term, classes[filter.class])
+        if filter.subclass then
+            local subclasses = {GetAuctionItemSubClasses(filter.class)}
+            filter_term = format('%s/%s', filter_term, subclasses[filter.subclass])
+        end
+    end
+
+    if filter.quality then
+        filter_term = format('%s/%s', filter_term,  _G["ITEM_QUALITY"..filter.quality.."_DESC"])
+    end
+
+    if filter.usable_only then
+        filter_term = format('%s/usable', filter_term)
+    end
+
+    if filter.exact_only then
+        filter_term = format('%s/exact', filter_term)
+    end
+
+    return filter_term
 end
 
 function m.blizzard_query(filter)
     return {
-        name = filter.query_string,
+        name = filter.name,
         min_level = filter.min_level,
         max_level = filter.max_level,
         slot = filter.slot,
         class = filter.class,
         subclass = filter.subclass,
-        usable = filter.usable_only,
+        usable = filter.usable_only and 1 or 0,
         quality = filter.quality,
     }
 end
@@ -186,7 +226,7 @@ function m.validator(filter)
 
     return function(record)
 
-        if filter.exact_only and record.name ~= record.name then
+        if filter.exact_only and record.name ~= filter.name then
             return
         end
 
@@ -194,11 +234,11 @@ function m.validator(filter)
             return
         end
 
-        if filter.min_level > 0 and record.level < record.min_level then
+        if filter.min_level and record.level < filter.min_level then
             return
         end
 
-        if filter.max_level > 0 and record.level > record.max_level then
+        if filter.max_level and record.level > filter.max_level then
             return
         end
 
