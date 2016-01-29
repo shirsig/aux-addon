@@ -32,7 +32,6 @@ function public.on_open()
     if not private.item_id then
         AuxItemSearchFrameItemRefreshButton:Disable()
     end
-    private.tab_group:set_tab(aux_view)
 end
 
 function public.on_load()
@@ -129,8 +128,37 @@ function public.on_load()
                         cell.text:SetText(group[1].aux_quantity)
                     end,
                 },
+                Aux.listing_util.money_column('Bid', function(group) return group[1].bid_price end),
                 Aux.listing_util.money_column('Buy', function(group) return group[1].buyout_price end),
+                Aux.listing_util.money_column('Bid/ea', function(group) return group[1].unit_bid_price end),
                 Aux.listing_util.money_column('Buy/ea', function(group) return group[1].unit_buyout_price end),
+                {
+                    title = 'Lvl',
+                    width = 25,
+                    comparator = function(group1, group2) return Aux.util.compare(group1[1].level, group2[1].level, Aux.util.GT) end,
+                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
+                    cell_setter = function(cell, group)
+                        local level = max(1, group[1].level)
+                        local text
+                        if level > UnitLevel('player') then
+                            text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
+                        else
+                            text = level
+                        end
+                        cell.text:SetText(text)
+                    end,
+                },
+                {
+                    title = 'Status',
+                    width = 70,
+                    comparator = function(group1, group2) return Aux.util.compare(group1[1].status, group2[1].status, Aux.util.GT) end,
+                    cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
+                    cell_setter = function(cell, auction)
+                        cell.text:SetText(auction.status)
+                    end,
+                },
+                Aux.listing_util.duration_column(function(group) return group[1].duration end),
+                Aux.listing_util.owner_column(function(group) return group[1].owner end),
                 {
                     title = 'Avail',
                     width = 40,
@@ -144,197 +172,11 @@ function public.on_load()
             },
             sort_order = {{column = 3, order = 'ascending' }},
         },
-        [Aux.view.BID] = {
-            frame = AuxItemSearchFrameAuctionsBidListing,
-            on_row_click = function(sheet, row_index)
-                local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-                private.on_row_click(sheet.data[data_index])
-            end,
-            on_row_enter = function(sheet, row_index)
-                Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
-            end,
-            on_row_leave = function(sheet, row_index)
-                AuxTooltip:Hide()
-                ResetCursor()
-            end,
-            on_row_update = function(sheet, row_index)
-                if IsControlKeyDown() then
-                    ShowInspectCursor()
-                elseif IsAltKeyDown() then
-                    SetCursor('BUY_CURSOR')
-                else
-                    ResetCursor()
-                end
-            end,
-            selected = function(datum)
-                return datum == selected_auction
-            end,
-            row_setter = function(row, datum)
-                row:SetAlpha(datum.gone and 0.3 or 1)
-                row.itemstring = Aux.info.itemstring(datum.item_id, datum.suffix_id, datum.unique_id, datum.enchant_id)
-                row.EnhTooltip_info = datum.EnhTooltip_info
-            end,
-            columns = {
-                {
-                    title = 'Qty',
-                    width = 25,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.aux_quantity, row2.aux_quantity, Aux.util.LT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, datum)
-                        cell.text:SetText(datum.aux_quantity)
-                    end,
-                },
-                Aux.listing_util.money_column('Bid', function(entry) return entry.bid_price end),
-                Aux.listing_util.money_column('Bid/ea', function(entry) return entry.unit_bid_price end),
-                {
-                    title = 'Status',
-                    width = 70,
-                    comparator = function(auction1, auction2) return Aux.util.compare(auction1.status, auction2.status, Aux.util.GT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                    cell_setter = function(cell, auction)
-                        cell.text:SetText(auction.status)
-                    end,
-                },
-                {
-                    title = 'Left',
-                    width = 30,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                    cell_setter = function(cell, datum)
-                        local text
-                        if datum.duration == 1 then
-                            text = '30m'
-                        elseif datum.duration == 2 then
-                            text = '2h'
-                        elseif datum.duration == 3 then
-                            text = '8h'
-                        elseif datum.duration == 4 then
-                            text = '24h'
-                        end
-                        cell.text:SetText(text)
-                    end,
-                },
-                {
-                    title = 'Page',
-                    width = 40,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.page, row2.page, Aux.util.LT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, datum)
-                        cell.text:SetText(datum.page)
-                    end,
-                },
-            },
-            sort_order = {{column = 3, order = 'ascending'}, {column = 5, order = 'ascending'}},
-        },
-        [Aux.view.FULL] = {
-            frame = AuxItemSearchFrameAuctionsFullListing,
-            on_row_click = function (sheet, row_index)
-                local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-                private.on_row_click(sheet.data[data_index])
-            end,
-            on_row_enter = function(sheet, row_index)
-                Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
-            end,
-            on_row_leave = function(sheet, row_index)
-                AuxTooltip:Hide()
-                ResetCursor()
-            end,
-            on_row_update = function(sheet, row_index)
-                if IsControlKeyDown() then
-                    ShowInspectCursor()
-                elseif IsAltKeyDown() then
-                    SetCursor('BUY_CURSOR')
-                else
-                    ResetCursor()
-                end
-            end,
-            selected = function(datum)
-                return datum == selected_auction
-            end,
-            row_setter = function(row, datum)
-                row:SetAlpha(datum.gone and 0.3 or 1)
-                row.itemstring = Aux.info.itemstring(datum.item_id, datum.suffix_id, datum.unique_id, datum.enchant_id)
-                row.EnhTooltip_info = datum.EnhTooltip_info
-            end,
-            columns = {
-                {
-                    title = 'Qty',
-                    width = 25,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.aux_quantity, row2.aux_quantity, Aux.util.LT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, datum)
-                        cell.text:SetText(datum.aux_quantity)
-                    end,
-                },
-                Aux.listing_util.money_column('Bid', function(entry) return entry.bid_price end),
-                Aux.listing_util.money_column('Buy', function(entry) return entry.buyout_price end),
-                Aux.listing_util.money_column('Bid/ea', function(entry) return entry.unit_bid_price end),
-                Aux.listing_util.money_column('Buy/ea', function(entry) return entry.unit_buyout_price end),
-                {
-                    title = 'Lvl',
-                    width = 25,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, datum)
-                        local level = max(1, datum.level)
-                        local text
-                        if level > UnitLevel('player') then
-                            text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
-                        else
-                            text = level
-                        end
-                        cell.text:SetText(text)
-                    end,
-                },
-                {
-                    title = 'Status',
-                    width = 70,
-                    comparator = function(auction1, auction2) return Aux.util.compare(auction1.status, auction2.status, Aux.util.GT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                    cell_setter = function(cell, auction)
-                        cell.text:SetText(auction.status)
-                    end,
-                },
-                {
-                    title = 'Left',
-                    width = 30,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                    cell_setter = function(cell, datum)
-                        local text
-                        if datum.duration == 1 then
-                            text = '30m'
-                        elseif datum.duration == 2 then
-                            text = '2h'
-                        elseif datum.duration == 3 then
-                            text = '8h'
-                        elseif datum.duration == 4 then
-                            text = '24h'
-                        end
-                        cell.text:SetText(text)
-                    end,
-                },
-                Aux.listing_util.owner_column(function(datum) return datum.owner end),
-                {
-                    title = 'Page',
-                    width = 40,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.page, row2.page, Aux.util.LT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, datum)
-                        cell.text:SetText(datum.page)
-                    end,
-                },
-                Aux.listing_util.percentage_market_column(function(entry) return entry.item_key end, function(entry) return entry.unit_buyout_price end),
-            },
-            sort_order = {{column = 5, order = 'ascending'}},
-        },
     }
 
     private.listings = {
         recently_searched = Aux.sheet.create(private.recently_searched_config),
         [Aux.view.BUYOUT] = Aux.sheet.create(private.views[Aux.view.BUYOUT]),
-        [Aux.view.BID] = Aux.sheet.create(private.views[Aux.view.BID]),
-        [Aux.view.FULL] = Aux.sheet.create(private.views[Aux.view.FULL]),
     }
     do
         local btn = Aux.gui.button(AuxItemSearchFrameItem, 16, '$parentRefreshButton')
@@ -354,16 +196,8 @@ function public.on_load()
         btn:Hide()
     end
     do
-        local tab_group = Aux.gui.tab_group(AuxItemSearchFrameAuctions, 'TOP')
-        tab_group:create_tab('Buy')
-        tab_group:create_tab('Bid')
-        tab_group:create_tab('Full')
-        tab_group.on_select = Aux.item_search_frame.set_view
-        private.tab_group = tab_group
-    end
-    do
         local editbox = Aux.gui.editbox(AuxItemSearchFrameItem, '$parentItemInputBox')
-        editbox.selector = Aux.completion.selector(editbox)
+        editbox.selector = Aux.completion.selector(editbox, function() AuxItemSearchFrameItemItemInputBox:ClearFocus() end)
         editbox:SetPoint('TOP', 0, -28)
         editbox:SetWidth(185)
         editbox:SetScript('OnTextChanged', function()
@@ -424,29 +258,6 @@ function public.on_load()
         btn:Disable()
         private.bid_button = btn
     end
-    do
-        local editbox = Aux.gui.editbox(AuxItemSearchFrameItem, '$parentPageEditBox')
-        editbox:SetNumeric(true)
-        editbox:EnableMouse(false)
-        editbox:SetAlpha(0.5)
-        editbox:SetPoint('BOTTOMLEFT', 111, 15)
-        editbox:SetWidth(30)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-            Aux.filter_search_frame.start_search()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Page')
-    end
-    do
-        local label = Aux.gui.label(AuxItemSearchFrameItemAllPagesCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', AuxItemSearchFrameItemAllPagesCheckButton, 'TOPLEFT', 1, -3)
-        label:SetText('All')
-    end
 end
 
 function public.stop_search()
@@ -463,30 +274,19 @@ function private.update_listing()
     AuxItemSearchFrameAuctionsBidListing:Hide()
     AuxItemSearchFrameAuctionsFullListing:Hide()
 
-    if aux_view == Aux.view.BUYOUT then
-		AuxItemSearchFrameAuctionsBuyListing:Show()
-        local buy_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-        Aux.sheet.populate(private.listings[Aux.view.BUYOUT], auctions and Aux.util.group_by(buy_records, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
-        AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBuyListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
-	elseif aux_view == Aux.view.BID then
-		AuxItemSearchFrameAuctionsBidListing:Show()
-        local bid_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
-        Aux.sheet.populate(private.listings[Aux.view.BID], bid_records)
-        AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBidListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
-	elseif aux_view == Aux.view.FULL then
-		AuxItemSearchFrameAuctionsFullListing:Show()
-        Aux.sheet.populate(private.listings[Aux.view.FULL], auctions or {})
-        AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsFullListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
-	end
-end
-
-function public.set_view(view)
-    private.clear_selection()
-    aux_view = view
-    refresh = true
+    AuxItemSearchFrameAuctionsBuyListing:Show()
+    local buy_records = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
+    Aux.sheet.populate(private.listings[Aux.view.BUYOUT], auctions and Aux.util.group_by(buy_records, function(a1, a2)
+        return a1.item_id == a2.item_id
+                and a1.suffix_id == a2.suffix_id
+                and a1.enchant_id == a2.enchant_id
+                and a1.aux_quantity == a2.aux_quantity
+                and a1.buyout_price == a2.buyout_price
+                and a1.bid_price == a2.bid_price
+                and a1.owner == a2.owner
+    end) or {})
+    AuxItemSearchFrameAuctions:SetWidth(AuxItemSearchFrameAuctionsBuyListing:GetWidth() + 40)
+    AuxFrame:SetWidth(AuxItemSearchFrameItem:GetWidth() + AuxItemSearchFrameAuctions:GetWidth() + 15)
 end
 
 function private.update_recently_searched()

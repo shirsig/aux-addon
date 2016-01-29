@@ -97,25 +97,7 @@ function public.on_load()
                     cell.text:SetText(datum.aux_quantity)
                 end,
             },
-            {
-                title = 'Left',
-                width = 30,
-                comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                cell_setter = function(cell, datum)
-                    local text
-                    if datum.duration == 1 then
-                        text = '30m'
-                    elseif datum.duration == 2 then
-                        text = '2h'
-                    elseif datum.duration == 3 then
-                        text = '8h'
-                    elseif datum.duration == 4 then
-                        text = '24h'
-                    end
-                    cell.text:SetText(text)
-                end,
-            },
+            Aux.listing_util.duration_column(function(entry) return entry.duration end),
             {
                 title = 'Current Bid',
                 width = 80,

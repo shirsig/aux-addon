@@ -1,15 +1,14 @@
 local m = {}
 Aux.listing_util = m
 
-function m.money_column(name, getter)
+function m.money_column(title, getter)
     return {
-        title = name,
+        title = title,
         width = 80,
         comparator = function(datum1, datum2) return Aux.util.compare(getter(datum1), getter(datum2), Aux.util.GT) end,
         cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
         cell_setter = function(cell, datum)
             cell.text:SetText(getter(datum) and Aux.util.money_string(getter(datum)) or 'N/A')
---            group_alpha_setter(cell, getter(datum))
         end,
     }
 end
@@ -31,7 +30,7 @@ function m.owner_column(getter)
         end,
         cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
         cell_setter = function(cell, datum)
-            cell.text:SetText(getter(datum) == UnitName('player') and GREEN_FONT_COLOR_CODE..'You'..FONT_COLOR_CODE_CLOSE or getter(datum))
+            cell.text:SetText(getter(datum) == UnitName('player') and GREEN_FONT_COLOR_CODE..'You'..FONT_COLOR_CODE_CLOSE or getter(datum) or 'N/A')
         end,
     }
 end
@@ -63,6 +62,28 @@ function m.percentage_market_column(item_key_getter, value_getter)
             if pct then
                 cell.text:SetTextColor(Aux.price_level_color(pct))
             end
+        end,
+    }
+end
+
+function m.duration_column(getter)
+    return {
+        title = 'Left',
+        width = 30,
+        comparator = function(datum1, datum2) return Aux.util.compare(getter(datum1), getter(datum2), Aux.util.GT) end,
+        cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
+        cell_setter = function(cell, datum)
+            local text
+            if getter(datum) == 1 then
+                text = '30m'
+            elseif getter(datum) == 2 then
+                text = '2h'
+            elseif getter(datum) == 3 then
+                text = '8h'
+            elseif getter(datum) == 4 then
+                text = '24h'
+            end
+            cell.text:SetText(text)
         end,
     }
 end

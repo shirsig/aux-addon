@@ -12,7 +12,7 @@ function m.find(test, query, page, status_bar, on_failure, on_success)
 
         local new_query = {
             type = query.type,
-            validator = test,
+            validator = function(auction_info) return test(auction_info.index) end,
             blizzard_query = query.blizzard_query,
             next_page = function()
                 if getn(pages) == 1 then
@@ -21,11 +21,11 @@ function m.find(test, query, page, status_bar, on_failure, on_success)
                 local page = pages[1]
                 tremove(pages, 1)
                 return page
-            end
+            end,
         }
 
         Aux.scan.start{
-            queries = { query },
+            queries = { new_query },
             on_read_auction = function(auction_info, ctrl)
                 if test(auction_info.index) then
                     ctrl.suspend()

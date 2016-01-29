@@ -13,7 +13,7 @@ MoneyTypeInfo['AUX_LIST'] = {
 }
 
 function public.render(sheet)
-	
+
 	for i, column in ipairs(sheet.columns) do
 		local sort_info = sheet.sort_order[1]
 
@@ -32,7 +32,7 @@ function public.render(sheet)
 			sheet.labels[i].sort_texture:Hide()
 		end
 	end
-	
+
 	FauxScrollFrame_Update(sheet.scroll_frame, getn(sheet.data), getn(sheet.rows), 16)
 	sheet.scroll_frame:Show()
 	local offset = FauxScrollFrame_GetOffset(sheet.scroll_frame)

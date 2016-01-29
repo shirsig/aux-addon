@@ -30,6 +30,7 @@ function private.update_tab(tab)
         private.search_results_button:LockHighlight()
     elseif tab == SAVED then
         AuxFilterSearchFrameSaved:Show()
+        private.saved_searches_button:LockHighlight()
     elseif tab == FILTER then
         AuxFilterSearchFrameFilters:Show()
         private.new_filter_button:LockHighlight()
@@ -40,7 +41,7 @@ function private.add_filter()
     local old_filter_string = private.search_box:GetText()
     old_filter_string = Aux.util.trim(old_filter_string)
 
-    if not string.sub(old_filter_string, strlen(old_filter_string), strlen(old_filter_string)) == ';' then
+    if strlen(old_filter_string) > 0 and not strfind(old_filter_string, ';$') then
         old_filter_string = old_filter_string..';'
     end
 
@@ -86,7 +87,7 @@ end
 
 function public.on_open()
     private.update_search_listings()
-    private.update_tab(RESULTS)
+    private.update_tab(SAVED)
 --    private.tab_group:set_tab(aux_view)
     Aux.filter_search_frame.set_view(aux_view)
 end
@@ -94,15 +95,23 @@ end
 function public.on_load()
     private.recent_searches_config = {
         plain = true,
-        frame = AuxFilterSearchFrameSavedFavoriteListing,
+        frame = AuxFilterSearchFrameSavedRecentListing,
         on_row_click = function (sheet, row_index)
-            PlaySound('igMainMenuOptionCheckBoxOn')
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            --            sheet.data[data_index]
+            PlaySound('igMainMenuOptionCheckBoxOn')
+            if arg1 == 'LeftButton' then
+                private.search_box:SetText(sheet.data[data_index])
+                if not IsShiftKeyDown() then
+                    public.start_search()
+                end
+            elseif arg1 == 'RightButton' then
+                tinsert(aux_favorite_searches, sheet.data[data_index])
+                private.update_search_listings()
+            end
         end,
         columns = {
             {
-                width = 300,
+                width = 900,
                 comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
                 cell_setter = function(cell, filter_string)
@@ -114,15 +123,23 @@ function public.on_load()
     }
     private.favorite_searches_config = {
         plain = true,
-        frame = AuxFilterSearchFrameSavedRecentListing,
+        frame = AuxFilterSearchFrameSavedFavoriteListing,
         on_row_click = function (sheet, row_index)
-            PlaySound('igMainMenuOptionCheckBoxOn')
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
---            sheet.data[data_index]
+            PlaySound('igMainMenuOptionCheckBoxOn')
+            if arg1 == 'LeftButton' then
+                private.search_box:SetText(sheet.data[data_index])
+                if not IsShiftKeyDown() then
+                    public.start_search()
+                end
+            elseif arg1 == 'RightButton' then
+                tremove(aux_favorite_searches, Aux.util.index_of(sheet.data[data_index], aux_favorite_searches))
+                private.update_search_listings()
+            end
         end,
         columns = {
             {
-                width = 300,
+                width = 900,
                 comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
                 cell_setter = function(cell, filter_string)
@@ -130,7 +147,7 @@ function public.on_load()
                 end,
             },
         },
-        sort_order = {},
+        sort_order = {{ column = 1, order = 'ascending' }},
     }
     private.views = {
         [Aux.view.BUYOUT] = {
@@ -214,7 +231,9 @@ function public.on_load()
                         cell.text:SetText(group[1].aux_quantity)
                     end,
                 },
+                Aux.listing_util.money_column('Bid', function(group) return group[1].bid_price end),
                 Aux.listing_util.money_column('Buy', function(group) return group[1].buyout_price end),
+                Aux.listing_util.money_column('Bid/ea', function(group) return group[1].unit_bid_price end),
                 Aux.listing_util.money_column('Buy/ea', function(group) return group[1].unit_buyout_price end),
                 {
                     title = 'Avail',
@@ -225,212 +244,13 @@ function public.on_load()
                         cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
                     end,
                 },
-                Aux.listing_util.percentage_market_column(function(group) return group[1].item_key end, function(group) return group[1].unit_buyout_price end),
-            },
-            sort_order = {{column = 1, order = 'ascending' }, {column = 4, order = 'ascending'}},
-        },
-        [Aux.view.BID] = {
-            frame = AuxFilterSearchFrameResultsBidListing,
-            on_row_click = function(sheet, row_index)
-                local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-                private.on_row_click(sheet.data[data_index])
-            end,
-            on_row_enter = function(sheet, row_index)
-                Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
-            end,
-            on_row_leave = function(sheet, row_index)
-                AuxTooltip:Hide()
-                ResetCursor()
-            end,
-            on_row_update = function(sheet, row_index)
-                if IsControlKeyDown() then
-                    ShowInspectCursor()
-                elseif IsAltKeyDown() then
-                    SetCursor('BUY_CURSOR')
-                else
-                    ResetCursor()
-                end
-            end,
-            selected = function(datum)
-                return datum == selected_auction
-            end,
-            row_setter = function(row, datum)
-                row:SetAlpha(datum.gone and 0.3 or 1)
-                row.itemstring = Aux.info.itemstring(datum.item_id, datum.suffix_id, datum.unique_id, datum.enchant_id)
-                row.EnhTooltip_info = datum.EnhTooltip_info
-            end,
-            columns = {
-                {
-                    title = 'Auction Item',
-                    width = 280,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
-                    cell_initializer = function(cell)
-                        local icon = CreateFrame('Button', nil, cell)
-                        icon:EnableMouse(false)
-                        local icon_texture = icon:CreateTexture(nil, 'BORDER')
-                        icon_texture:SetAllPoints(icon)
-                        icon.icon_texture = icon_texture
-                        local normal_texture = icon:CreateTexture(nil)
-                        normal_texture:SetPoint('CENTER', 0, 0)
-                        normal_texture:SetWidth(22)
-                        normal_texture:SetHeight(22)
-                        normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
-                        icon:SetNormalTexture(normal_texture)
-                        icon:SetPoint('LEFT', cell)
-                        icon:SetWidth(12)
-                        icon:SetHeight(12)
-                        local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
-                        text:SetPoint('LEFT', icon, 'RIGHT', 1, 0)
-                        text:SetPoint('TOPRIGHT', cell)
-                        text:SetPoint('BOTTOMRIGHT', cell)
-                        text:SetJustifyV('TOP')
-                        text:SetJustifyH('LEFT')
-                        text:SetTextColor(0.8, 0.8, 0.8)
-                        cell.text = text
-                        cell.icon = icon
-                    end,
-                    cell_setter = function(cell, datum)
-                        cell.icon.icon_texture:SetTexture(Aux.info.item(datum.item_id).texture)
-                        if not datum.usable then
-                            cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
-                        else
-                            cell.icon.icon_texture:SetVertexColor(1.0, 1.0, 1.0)
-                        end
-                        cell.text:SetText('['..datum.tooltip[1][1].text..']')
-                        local color = ITEM_QUALITY_COLORS[datum.quality]
-                        cell.text:SetTextColor(color.r, color.g, color.b)
-                    end,
-                },
-                {
-                    title = 'Qty',
-                    width = 25,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.aux_quantity, row2.aux_quantity, Aux.util.LT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, datum)
-                        cell.text:SetText(datum.aux_quantity)
-                    end,
-                },
-                Aux.listing_util.money_column('Bid', function(entry) return entry.bid_price end),
-                Aux.listing_util.money_column('Bid/ea', function(entry) return entry.unit_bid_price end),
-                {
-                    title = 'Status',
-                    width = 70,
-                    comparator = function(auction1, auction2) return Aux.util.compare(auction1.status, auction2.status, Aux.util.GT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                    cell_setter = function(cell, auction)
-                        cell.text:SetText(auction.status)
-                    end,
-                },
-                {
-                    title = 'Left',
-                    width = 30,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                    cell_setter = function(cell, datum)
-                        local text
-                        if datum.duration == 1 then
-                            text = '30m'
-                        elseif datum.duration == 2 then
-                            text = '2h'
-                        elseif datum.duration == 3 then
-                            text = '8h'
-                        elseif datum.duration == 4 then
-                            text = '24h'
-                        end
-                        cell.text:SetText(text)
-                    end,
-                },
-                {
-                    title = 'Page',
-                    width = 40,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.page, row2.page, Aux.util.LT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, datum)
-                        cell.text:SetText(datum.page)
-                    end,
-                },
-            },
-            sort_order = {{column = 1, order = 'ascending' }, {column = 4, order = 'ascending' }, {column = 6, order = 'ascending'}},
-        },
-        [Aux.view.FULL] = {
-            frame = AuxFilterSearchFrameResultsFullListing,
-            on_row_click = function(sheet, row_index)
-                local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-                private.on_row_click(sheet.data[data_index])
-            end,
-            on_row_enter = function(sheet, row_index)
-                Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
-            end,
-            on_row_leave = function(sheet, row_index)
-                AuxTooltip:Hide()
-                ResetCursor()
-            end,
-            on_row_update = function(sheet, row_index)
-                if IsControlKeyDown() then
-                    ShowInspectCursor()
-                elseif IsAltKeyDown() then
-                    SetCursor('BUY_CURSOR')
-                else
-                    ResetCursor()
-                end
-            end,
-            selected = function(datum)
-                return datum == selected_auction
-            end,
-            row_setter = function(row, datum)
-                row:SetAlpha(datum.gone and 0.3 or 1)
-                row.itemstring = Aux.info.itemstring(datum.item_id, datum.suffix_id, datum.unique_id, datum.enchant_id)
-                row.EnhTooltip_info = datum.EnhTooltip_info
-            end,
-            columns = {
-                {
-                    title = 'Auction Item',
-                    width = 280,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
-                    cell_initializer = function(cell)
-                        local icon = CreateFrame('Button', nil, cell)
-                        icon:EnableMouse(false)
-                        local icon_texture = icon:CreateTexture(nil, 'BORDER')
-                        icon_texture:SetAllPoints(icon)
-                        icon.icon_texture = icon_texture
-                        local normal_texture = icon:CreateTexture(nil)
-                        normal_texture:SetPoint('CENTER', 0, 0)
-                        normal_texture:SetWidth(22)
-                        normal_texture:SetHeight(22)
-                        normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
-                        icon:SetNormalTexture(normal_texture)
-                        icon:SetPoint('LEFT', cell)
-                        icon:SetWidth(12)
-                        icon:SetHeight(12)
-                        local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
-                        text:SetPoint('LEFT', icon, "RIGHT", 1, 0)
-                        text:SetPoint('TOPRIGHT', cell)
-                        text:SetPoint('BOTTOMRIGHT', cell)
-                        text:SetJustifyV('TOP')
-                        text:SetJustifyH('LEFT')
-                        text:SetTextColor(0.8, 0.8, 0.8)
-                        cell.text = text
-                        cell.icon = icon
-                    end,
-                    cell_setter = function(cell, datum)
-                        cell.icon.icon_texture:SetTexture(Aux.info.item(datum.item_id).texture)
-                        if not datum.usable then
-                            cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
-                        else
-                            cell.icon.icon_texture:SetVertexColor(1.0, 1.0, 1.0)
-                        end
-                        cell.text:SetText('['..datum.tooltip[1][1].text..']')
-                        local color = ITEM_QUALITY_COLORS[datum.quality]
-                        cell.text:SetTextColor(color.r, color.g, color.b)
-                    end,
-                },
                 {
                     title = 'Lvl',
                     width = 25,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.level, row2.level, Aux.util.GT) end,
+                    comparator = function(group1, group2) return Aux.util.compare(group1[1].level, group2[1].level, Aux.util.GT) end,
                     cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, datum)
-                        local level = max(1, datum.level)
+                    cell_setter = function(cell, group)
+                        local level = max(1, group[1].level)
                         local text
                         if level > UnitLevel('player') then
                             text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
@@ -441,50 +261,19 @@ function public.on_load()
                     end,
                 },
                 {
-                    title = 'Qty',
-                    width = 25,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.aux_quantity, row2.aux_quantity, Aux.util.LT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                    cell_setter = function(cell, datum)
-                        cell.text:SetText(datum.aux_quantity)
-                    end,
-                },
-                Aux.listing_util.money_column('Bid', function(entry) return entry.bid_price end),
-                Aux.listing_util.money_column('Buy', function(entry) return entry.buyout_price end),
-                Aux.listing_util.money_column('Bid/ea', function(entry) return entry.unit_bid_price end),
-                Aux.listing_util.money_column('Buy/ea', function(entry) return entry.unit_buyout_price end),
-                {
                     title = 'Status',
                     width = 70,
-                    comparator = function(auction1, auction2) return Aux.util.compare(auction1.status, auction2.status, Aux.util.GT) end,
+                    comparator = function(group1, group2) return Aux.util.compare(group1[1].status, group2[1].status, Aux.util.GT) end,
                     cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
                     cell_setter = function(cell, auction)
                         cell.text:SetText(auction.status)
                     end,
                 },
-                {
-                    title = 'Left',
-                    width = 30,
-                    comparator = function(row1, row2) return Aux.util.compare(row1.duration, row2.duration, Aux.util.GT) end,
-                    cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                    cell_setter = function(cell, datum)
-                        local text
-                        if datum.duration == 1 then
-                            text = '30m'
-                        elseif datum.duration == 2 then
-                            text = '2h'
-                        elseif datum.duration == 3 then
-                            text = '8h'
-                        elseif datum.duration == 4 then
-                            text = '24h'
-                        end
-                        cell.text:SetText(text)
-                    end,
-                },
-                Aux.listing_util.owner_column(function(datum) return datum.owner end),
-                Aux.listing_util.percentage_market_column(function(entry) return entry.item_key end, function(entry) return entry.unit_buyout_price end),
+                Aux.listing_util.duration_column(function(group) return group[1].duration end),
+                Aux.listing_util.owner_column(function(group) return group[1].owner end),
+                Aux.listing_util.percentage_market_column(function(group) return group[1].item_key end, function(group) return group[1].unit_buyout_price end),
             },
-            sort_order = {{column = 1, order = 'ascending' }, {column = 7, order = 'ascending' }},
+            sort_order = {{ column = 1, order = 'ascending' }, { column = 4, order = 'ascending' }},
         },
     }
 
@@ -492,8 +281,6 @@ function public.on_load()
         favorite_searches = Aux.sheet.create(private.favorite_searches_config),
         recent_searches = Aux.sheet.create(private.recent_searches_config),
         [Aux.view.BUYOUT] = Aux.sheet.create(private.views[Aux.view.BUYOUT]),
-        [Aux.view.BID] = Aux.sheet.create(private.views[Aux.view.BID]),
-        [Aux.view.FULL] = Aux.sheet.create(private.views[Aux.view.FULL]),
     }
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 22)
@@ -567,6 +354,47 @@ function public.on_load()
         private.new_filter_button = btn
     end
     do
+        local editbox = Aux.gui.editbox(AuxFilterSearchFrameItemFilter)
+        local function add_item_filter(item_id)
+            local old_filter_string = private.search_box:GetText()
+            old_filter_string = Aux.util.trim(old_filter_string)
+
+            if strlen(old_filter_string) > 0 and not strfind(old_filter_string, ';$') then
+                old_filter_string = old_filter_string..';'
+            end
+
+            local item_info = Aux.static.item_info(item_id)
+            private.search_box:SetText(old_filter_string..item_info.name..'/exact')
+            editbox:SetText('')
+        end
+        editbox.selector = Aux.completion.selector(editbox, function()
+            add_item_filter(editbox.selector.selected_value())
+        end)
+        editbox:SetPoint('TOPLEFT', 5, -28)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTextChanged', function()
+            this.selector.suggest()
+        end)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                this.selector.previous()
+            else
+                this.selector.next()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this.selector.close()
+            if this.selector.selected_value() then
+                add_item_filter(this.selector.selected_value())
+--                this:ClearFocus()
+            end
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this.selector.clear()
+            this:ClearFocus()
+        end)
+    end
+    do
         local btn1 = Aux.gui.button(AuxFilterSearchFrameFilters, 16)
         btn1:SetPoint('BOTTOMLEFT', 8, 15)
         btn1:SetWidth(80)
@@ -593,15 +421,6 @@ function public.on_load()
         btn3:SetScript('OnClick', function()
             private.clear_filter()
         end)
-    end
-    do
---        local tab_group = Aux.gui.tab_group(AuxFilterSearchFrameResults, 'TOP')
---        tab_group:create_tab('Buy')
---        tab_group:create_tab('Bid')
---        tab_group:create_tab('Full')
---        tab_group.on_select = Aux.filter_search_frame.set_view
---        private.tab_group = tab_group
---        tab_group.container:Hide()
     end
     do
         local status_bar = Aux.gui.status_bar(AuxFilterSearchFrame)
@@ -633,7 +452,7 @@ function public.on_load()
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentNameInputBox')
         editbox:SetPoint('TOPLEFT', 14, -20)
-        editbox:SetWidth(150)
+        editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
@@ -717,8 +536,8 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentTooltipInputBox1')
-        editbox:SetPoint('TOPLEFT', 14, -177)
-        editbox:SetWidth(150)
+        editbox:SetPoint('TOPLEFT', 300, -20)
+        editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
@@ -739,8 +558,8 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentTooltipInputBox2')
-        editbox:SetPoint('TOPLEFT', 14, -198)
-        editbox:SetWidth(150)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
@@ -758,8 +577,8 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentTooltipInputBox3')
-        editbox:SetPoint('TOPLEFT', 14, -219)
-        editbox:SetWidth(150)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
@@ -777,8 +596,8 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentTooltipInputBox4')
-        editbox:SetPoint('TOPLEFT', 14, -240)
-        editbox:SetWidth(150)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
@@ -793,29 +612,6 @@ function public.on_load()
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
         end)
-    end
-    do
-        local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilters, '$parentPageEditBox')
-        editbox:SetNumeric(true)
-        editbox:EnableMouse(false)
-        editbox:SetAlpha(0.5)
-        editbox:SetPoint('BOTTOMLEFT', 111, 15)
-        editbox:SetWidth(30)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-            public.start_search()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Page')
-    end
-    do
-        local label = Aux.gui.label(AuxFilterSearchFrameFiltersAllPagesCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersAllPagesCheckButton, 'TOPLEFT', 1, -3)
-        label:SetText('All')
     end
 
     -- TODO replace with real gui dropdown
@@ -862,19 +658,16 @@ function private.update_listing()
     if aux_view == Aux.view.BUYOUT then
         AuxFilterSearchFrameResultsBuyListing:Show()
         local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-        Aux.sheet.populate(private.listings[Aux.view.BUYOUT], auctions and Aux.util.group_by(buyout_auctions, function(a1, a2) return a1.item_id == a2.item_id and a1.suffix_id == a2.suffix_id and a1.enchant_id == a2.enchant_id and a1.aux_quantity == a2.aux_quantity and a1.buyout_price == a2.buyout_price end) or {})
+        Aux.sheet.populate(private.listings[Aux.view.BUYOUT], auctions and Aux.util.group_by(buyout_auctions, function(a1, a2)
+            return a1.item_id == a2.item_id
+                    and a1.suffix_id == a2.suffix_id
+                    and a1.enchant_id == a2.enchant_id
+                    and a1.aux_quantity == a2.aux_quantity
+                    and a1.buyout_price == a2.buyout_price
+                    and a1.bid_price == a2.bid_price
+                    and a1.owner == a2.owner
+        end) or {})
         AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBuyListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxFilterSearchFrameResults:GetWidth() + 15)
-	elseif aux_view == Aux.view.BID then
-        AuxFilterSearchFrameResultsBidListing:Show()
-        local bid_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') end) or {}
-        Aux.sheet.populate(private.listings[Aux.view.BID], bid_auctions)
-        AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBidListing:GetWidth() + 40)
-        AuxFrame:SetWidth(AuxFilterSearchFrameResults:GetWidth() + 15)
-	elseif aux_view == Aux.view.FULL then
-        AuxFilterSearchFrameResultsFullListing:Show()
-        Aux.sheet.populate(private.listings[Aux.view.FULL], auctions or {})
-        AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsFullListing:GetWidth() + 40)
         AuxFrame:SetWidth(AuxFilterSearchFrameResults:GetWidth() + 15)
 	end
 end
@@ -891,6 +684,7 @@ function public.start_search()
     while getn(aux_recent_searches) > 50 do
         tremove(aux_recent_searches)
     end
+    private.update_search_listings()
 
     Aux.scan.abort(function()
 

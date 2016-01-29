@@ -165,7 +165,7 @@ function public.completor(edit_box)
 	return self
 end
 
-function public.selector(edit_box)
+function public.selector(edit_box, on_click)
     local self = {}
 
     local suggestions = {}
@@ -183,7 +183,9 @@ function public.selector(edit_box)
                 notCheckable = true,
                 func = function()
                     index = this.value
-                    AuxItemSearchFrameItemItemInputBox:ClearFocus()
+                    if on_click then
+						on_click()
+					end
                 end,
             }
         end
@@ -233,7 +235,7 @@ function public.selector(edit_box)
             suggestions = {}
         else
             suggestions = generate_suggestions(input)
-            UIDropDownMenu_Initialize(AuxCompletionDropDown, function() fill_dropdown() end)
+            UIDropDownMenu_Initialize(AuxCompletionDropDown, fill_dropdown)
         end
 
         index = 1

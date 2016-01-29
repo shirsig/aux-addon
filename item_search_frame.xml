@@ -35,17 +35,6 @@
                             </OnClick>
                         </scripts>
                     </Button>
-                    <CheckButton name="$parentAllPagesCheckButton" inherits="UICheckButtonTemplate" checked="true">
-                        <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="BOTTOMLEFT" ><Offset><AbsDimension x="144" y="15"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnClick>
-                                AuxItemSearchFrameItemPageEditBox:EnableMouse(not this:GetChecked())
-                                AuxItemSearchFrameItemPageEditBox:SetAlpha(this:GetChecked() and 0.5 or 1)
-                                AuxItemSearchFrameItemPageEditBox:ClearFocus()
-                            </OnClick>
-                        </Scripts>
-                    </CheckButton>
                 </Frames>
             </Frame>
             <Frame name="$parentRecentlySearched" inherits="AuxFrameBoxTemplate">
