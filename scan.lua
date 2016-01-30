@@ -147,17 +147,19 @@ function private.process_query()
 
         scan_auctions(count, function()
 
-            if current_query().next_page then
-                state.page = current_query().next_page(state.page, state.total_pages)
-            else
-                state.page = private.default_next_page(state.page, state.total_pages)
-            end
+            wait_for_callback{state.params.on_page_complete or Aux.util.pass, function()
+                if current_query().next_page then
+                    state.page = current_query().next_page(state.page, state.total_pages)
+                else
+                    state.page = private.default_next_page(state.page, state.total_pages)
+                end
 
-            if state.page then
-                return private.process_query()
-            else
-                return private.scan()
-            end
+                if state.page then
+                    return private.process_query()
+                else
+                    return private.scan()
+                end
+            end}
         end)
     end)
 end

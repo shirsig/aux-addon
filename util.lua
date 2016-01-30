@@ -344,3 +344,32 @@ function Aux.util.set()
 
     return self
 end
+
+function public.join(array, separator)
+	local str = ''
+	for i, element in ipairs(array) do
+		if i > 1 then
+			str = str..separator
+		end
+		str = str..element
+	end
+	return str
+end
+
+function public.split(str, separator)
+
+	local array = {}
+	while true do
+		local start_index, _ = strfind(str, separator, 1, true)
+
+		if start_index then
+			local part = string.sub(str, 1, start_index - 1)
+			tinsert(array, part)
+			str = string.sub(str, start_index + 1, strlen(str))
+		else
+			local part = string.sub(str, 1, strlen(str))
+			tinsert(array, part)
+			return array
+		end
+	end
+end

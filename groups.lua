@@ -12,3 +12,9 @@ function m.parse_item_key(item_key)
 end
 
 m.test_group = '13127;9510;4438;16254;12006;13131;13012;4413;1482'
+
+
+function m.test()
+    local array = Aux.persistence.deserialize(';', ';')
+    snipe.log(getn(array))
+end

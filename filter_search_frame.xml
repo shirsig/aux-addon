@@ -44,11 +44,11 @@
                         <Size><AbsDimension x="22" y="22"/></Size>
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-136" /></Offset></Anchor></Anchors>
                     </CheckButton>
+                    <CheckButton name="$parentExactCheckButton" inherits="UICheckButtonTemplate">
+                        <Size><AbsDimension x="22" y="22"/></Size>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="120" y="-136" /></Offset></Anchor></Anchors>
+                    </CheckButton>
                 </Frames>
-            </Frame>
-            <Frame name="$parentItemFilter" inherits="AuxFrameBoxTemplate">
-                <Size><AbsDimension x="300" y="326"/></Size>
-                <Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentFilters"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor></Anchors>
             </Frame>
             <Frame name="$parentResults" inherits="AuxFrameBoxTemplate">
                 <Size>

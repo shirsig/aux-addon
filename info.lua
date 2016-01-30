@@ -93,7 +93,7 @@ function public.auction(index, type)
         hyperlink = hyperlink,
         itemstring = item_info.itemstring,
         item_key = item_id..':'..suffix_id,
-        signature = Aux.persistence.serialize({item_id, suffix_id, unique_id, enchant_id, aux_quantity, start_price, buyout_price}, ':'), -- not unique!
+        signature = Aux.util.join({item_id, suffix_id, unique_id, enchant_id, aux_quantity, start_price, buyout_price}, ':'), -- not unique!
 
         name = name,
         texture = texture,

@@ -37,7 +37,7 @@ function m.to_string(money, pad, trim, color, no_color)
 		if copper > 0 then
 			tinsert(parts, private:format_number(copper, pad, color)..copper_text)
 		end
-		text = Aux.persistence.serialize(parts, ' ')
+		text = Aux.util.join(parts, ' ')
 	else
 		if gold > 0 then
 			text = m.format_number(gold, false, color)..gold_text..' '..m.format_number(silver, pad, color)..silver_text..' '..m.format_number(copper, pad, color)..copper_text

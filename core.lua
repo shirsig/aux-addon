@@ -407,3 +407,15 @@ function Aux.item_quality_index(item_quality)
         end
     end
 end
+
+function Aux.hide_elements(elements)
+    for _, element in pairs(elements) do
+        element:Hide()
+    end
+end
+
+function Aux.show_elements(elements)
+    for _, element in pairs(elements) do
+        element:Show()
+    end
+end

@@ -82,34 +82,34 @@ function m.create_item_query(item_id)
 end
 
 function m.parse_filter_string(filter_string)
-    local parts = Aux.persistence.deserialize(filter_string, ';')
+    local parts = Aux.util.split(filter_string, ';')
 
     local filters = {}
     for _, str in ipairs(parts) do
         str = Aux.util.trim(str)
-        if tonumber(str) then
-            local filter = m.create_item_filter(tonumber(str))
-            if filter then
-                tinsert(filters, filter)
-            end
+--        if tonumber(str) then
+--            local filter = m.create_item_filter(tonumber(str))
+--            if filter then
+--                tinsert(filters, filter)
+--            end
+--        else
+        local filter, error = m.filter_from_string(str)
+
+        if not filter then
+            Aux.log('Invalid filter: '..error)
+        elseif filter.name and strlen(filter.name) > 63 then
+
         else
-            local filter, error = m.filter_from_string(str)
-
-            if not filter then
-                Aux.log('Invalid filter: '..error)
-            elseif filter.name and strlen(filter.name) > 63 then
-
-            else
-                tinsert(filters, filter)
-            end
+            tinsert(filters, filter)
         end
+--        end
     end
 
     return filters
 end
 
 function m.filter_from_string(filter_term)
-    local parts = Aux.persistence.deserialize(filter_term, '/')
+    local parts = Aux.util.split(filter_term, '/')
 
     local filter = {}
     for i, str in ipairs(parts) do
@@ -127,13 +127,13 @@ function m.filter_from_string(filter_term)
             if not filter.class then
                 filter.class = Aux.item_class_index(str)
             else
-                return false, 'Invalid Item Type'
+                return false, 'Invalid Item Class'
             end
         elseif filter.class and Aux.item_subclass_index(filter.class, str) then
             if not filter.subclass then
                 filter.subclass = Aux.item_subclass_index(filter.class, str)
             else
-                return false, 'Invalid Item SubType'
+                return false, 'Invalid Item Subclass'
             end
         elseif Aux.item_quality_index(str) then
             if not filter.quality then
@@ -168,6 +168,18 @@ function m.filter_from_string(filter_term)
         end
     end
 
+    if filter.exact_only then
+        if filter.min_level or filter.max_level or filter.class or filter.subclass or filter.quality or filter.usable_only then
+            return false, 'Invalid Exact Only Filter'
+        end
+        for id, info in pairs(Aux.static.auctionable_items) do
+            if info.name == filter.name then
+                return m.create_item_filter(id)
+            end
+        end
+        return false, 'Invalid Exact Only Filter'
+    end
+
     if filter.max_level then
         filter.min_level, filter.max_level = min(filter.min_level, filter.max_level), max(filter.min_level, filter.max_level)
     end
@@ -195,7 +207,7 @@ function m.filter_to_string(filter)
     end
 
     if filter.quality then
-        filter_term = format('%s/%s', filter_term,  _G["ITEM_QUALITY"..filter.quality.."_DESC"])
+        filter_term = format('%s/%s', filter_term,  getglobal['ITEM_QUALITY'..filter.quality..'_DESC'])
     end
 
     if filter.usable_only then

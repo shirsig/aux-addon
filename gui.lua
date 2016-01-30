@@ -16,8 +16,8 @@ m.config = {
 
 }
 
-function m.panel(parent)
-    local panel = CreateFrame('Frame', parent)
+function m.panel(parent, name)
+    local panel = CreateFrame('Frame', name, parent)
     panel:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size})
     panel:SetBackdropColor(unpack(m.config.frame_color))
     panel:SetBackdropBorderColor(unpack(m.config.frame_border_color))
