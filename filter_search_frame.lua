@@ -95,6 +95,9 @@ end
 function public.on_open()
     private.update_search_listings()
     private.update_tab(SAVED)
+
+    AuxFilterSearchFrameResults:SetWidth(985)
+    AuxFrame:SetWidth(991)
 end
 
 function public.on_load()
@@ -117,7 +120,7 @@ function public.on_load()
         columns = {
             {
                 width = 900,
-                comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.LT) end,
+                comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
                 cell_setter = function(cell, filter_string)
                     cell.text:SetText(filter_string)
@@ -145,7 +148,7 @@ function public.on_load()
         columns = {
             {
                 width = 900,
-                comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.LT) end,
+                comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
                 cell_setter = function(cell, filter_string)
                     cell.text:SetText(filter_string)
@@ -155,7 +158,7 @@ function public.on_load()
         sort_order = {{ column = 1, order = 'ascending' }},
     }
     private.results_config = {
-        frame = AuxFilterSearchFrameResultsBuyListing,
+        frame = AuxFilterSearchFrameResultsListing,
         on_row_click = function(sheet, row_index)
             local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
             private.on_row_click(sheet.data[data_index], true)
@@ -301,7 +304,7 @@ function public.on_load()
     end
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -5, -3)
+        btn:SetPoint('TOPRIGHT', -5, -6)
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Search')
@@ -310,7 +313,7 @@ function public.on_load()
     end
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -5, -3)
+        btn:SetPoint('TOPRIGHT', -5, -6)
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Stop')
@@ -320,8 +323,8 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrame)
-        editbox:SetPoint('TOPLEFT', 5, -3)
-        editbox:SetPoint('TOPRIGHT', private.search_button, 'TOPLEFT', -4, -5)
+        editbox:SetPoint('TOPLEFT', 5, -6)
+        editbox:SetPoint('RIGHT', private.search_button, 'LEFT', -4, 0)
         editbox:SetWidth(400)
         editbox:SetHeight(25)
 --        editbox:SetScript('OnTabPressed', function()
@@ -341,13 +344,13 @@ function public.on_load()
         private.search_box = editbox
     end
     do
-        Aux.gui.horizontal_line(AuxFilterSearchFrame, -35)
+        Aux.gui.horizontal_line(AuxFilterSearchFrame, -37)
     end
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
-        btn:SetPoint('TOPLEFT', 10, -40)
-        btn:SetWidth(330)
-        btn:SetHeight(24)
+        btn:SetPoint('TOPLEFT', 10, -49)
+        btn:SetWidth(310)
+        btn:SetHeight(22)
         btn:SetText('Search Results')
         btn:SetScript('OnClick', function() private.update_tab(RESULTS) end)
         private.search_results_button = btn
@@ -355,8 +358,8 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
         btn:SetPoint('TOPLEFT', private.search_results_button, 'TOPRIGHT', 5, 0)
-        btn:SetWidth(330)
-        btn:SetHeight(24)
+        btn:SetWidth(310)
+        btn:SetHeight(22)
         btn:SetText('Saved Searches')
         btn:SetScript('OnClick', function() private.update_tab(SAVED) end)
         private.saved_searches_button = btn
@@ -364,11 +367,23 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
         btn:SetPoint('TOPLEFT', private.saved_searches_button, 'TOPRIGHT', 5, 0)
-        btn:SetWidth(330)
-        btn:SetHeight(24)
+        btn:SetWidth(310)
+        btn:SetHeight(22)
         btn:SetText('New Filter')
         btn:SetScript('OnClick', function() private.update_tab(FILTER) end)
         private.new_filter_button = btn
+    end
+    do
+        local line = Aux.gui.horizontal_line(AuxFilterSearchFrameSavedRecent, -25)
+        local label = Aux.gui.label(AuxFilterSearchFrameSavedRecent, 13)
+        label:SetPoint('BOTTOM', line, 'TOP', 0, 5)
+        label:SetText('Recent Searches')
+    end
+    do
+        local line = Aux.gui.horizontal_line(AuxFilterSearchFrameSavedFavorite, -25)
+        local label = Aux.gui.label(AuxFilterSearchFrameSavedFavorite, 13)
+        label:SetPoint('BOTTOM', line, 'TOP', 0, 5)
+        label:SetText('Favorite Searches')
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].item_filter)
@@ -489,14 +504,32 @@ function public.on_load()
         label:SetText('Name')
     end
     do
-        local label = Aux.gui.label(AuxFilterSearchFrameFiltersCategoryDropDown, 13)
-        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersCategoryDropDown, 'TOPLEFT', -2, -4)
+        local dropdown = Aux.gui.dropdown(private.elements[FILTER].filters)
+        dropdown:SetPoint('TOPLEFT', 14, -53)
+        dropdown:SetWidth(250)
+        dropdown:SetHeight(10)
+        local label = Aux.gui.label(dropdown, 13)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
         label:SetText('Category')
+        private.category_dropdown = dropdown
+        UIDropDownMenu_Initialize(dropdown, AuxFilterSearchFrameFiltersCategoryDropDown_Initialize)
+        dropdown:SetScript('OnShow', function()
+            UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersQualityDropDown_Initialize)
+        end)
     end
     do
-        local label = Aux.gui.label(AuxFilterSearchFrameFiltersQualityDropDown, 13)
-        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersQualityDropDown, 'TOPLEFT', -2, -4)
-        label:SetText('Rarity')
+        local dropdown = Aux.gui.dropdown(private.elements[FILTER].filters)
+        dropdown:SetPoint('TOPLEFT', 14, -93)
+        dropdown:SetWidth(250)
+        dropdown:SetHeight(10)
+        local label = Aux.gui.label(dropdown, 13)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
+        label:SetText('Min Rarity')
+        private.quality_dropdown = dropdown
+        UIDropDownMenu_Initialize(dropdown, AuxFilterSearchFrameFiltersQualityDropDown_Initialize)
+        dropdown:SetScript('OnShow', function()
+            UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersQualityDropDown_Initialize)
+        end)
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentMinLevel')
@@ -634,28 +667,29 @@ function public.on_load()
     -- TODO replace with real gui dropdown
 --    CreateFrame('Frame', '$parentCategoryDropDown', AuxFilterSearchFrameFilters, 'UIDropDownMenuTemplate')
 --    local dropdown = CreateFrame('Frame', '$parentQualityDropDown', AuxFilterSearchFrameFilters, 'UIDropDownMenuTemplate')
-    for _, dropdown in ipairs({AuxFilterSearchFrameFiltersCategoryDropDown, AuxFilterSearchFrameFiltersQualityDropDown}) do
-        dropdown:SetWidth(250)
-        dropdown:SetHeight(10)
-        dropdown:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size, insets={top=5,bottom=5}})
-        dropdown:SetBackdropColor(unpack(Aux.gui.config.content_color))
-        dropdown:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
-        local left = getglobal(dropdown:GetName()..'Left'):Hide()
-        local middle = getglobal(dropdown:GetName()..'Middle'):Hide()
-        local right = getglobal(dropdown:GetName()..'Right'):Hide()
 
-        local button = getglobal(dropdown:GetName()..'Button')
---        button:RegisterForClicks('AnyUp')
-        button:ClearAllPoints()
-        button:SetPoint('RIGHT', dropdown, 0, 0)
-
-        local text = getglobal(dropdown:GetName()..'Text')
-        text:ClearAllPoints()
-        text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
-        text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
-        text:SetFont(Aux.gui.config.content_font, 13)
-        text:SetShadowColor(0, 0, 0, 0)
-    end
+--    for _, dropdown in ipairs({AuxFilterSearchFrameFiltersCategoryDropDown, AuxFilterSearchFrameFiltersQualityDropDown}) do
+--        dropdown:SetWidth(250)
+--        dropdown:SetHeight(10)
+--        dropdown:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size, insets={top=5,bottom=5}})
+--        dropdown:SetBackdropColor(unpack(Aux.gui.config.content_color))
+--        dropdown:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
+--        local left = getglobal(dropdown:GetName()..'Left'):Hide()
+--        local middle = getglobal(dropdown:GetName()..'Middle'):Hide()
+--        local right = getglobal(dropdown:GetName()..'Right'):Hide()
+--
+--        local button = getglobal(dropdown:GetName()..'Button')
+----        button:RegisterForClicks('AnyUp')
+--        button:ClearAllPoints()
+--        button:SetPoint('RIGHT', dropdown, 0, 0)
+--
+--        local text = getglobal(dropdown:GetName()..'Text')
+--        text:ClearAllPoints()
+--        text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
+--        text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
+--        text:SetFont(Aux.gui.config.content_font, 13)
+--        text:SetShadowColor(0, 0, 0, 0)
+-- end
 end
 
 function public.stop_search()
@@ -668,11 +702,6 @@ function private.update_listing()
         return
     end
 
-	AuxFilterSearchFrameResultsBuyListing:Hide()
-    AuxFilterSearchFrameResultsBidListing:Hide()
-    AuxFilterSearchFrameResultsFullListing:Hide()
-
-    AuxFilterSearchFrameResultsBuyListing:Show()
     local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
     Aux.sheet.populate(private.listings.results, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2)
         return a1.item_id == a2.item_id
@@ -683,33 +712,11 @@ function private.update_listing()
                 and a1.bid_price == a2.bid_price
                 and a1.owner == a2.owner
     end) or {})
-    AuxFilterSearchFrameResults:SetWidth(AuxFilterSearchFrameResultsBuyListing:GetWidth() + 40)
-    AuxFrame:SetWidth(AuxFilterSearchFrameResults:GetWidth() + 15)
 end
 
 function public.start_search()
 
-    tinsert(aux_recent_searches, 1, private.search_box:GetText())
-    while getn(aux_recent_searches) > 50 do
-        tremove(aux_recent_searches)
-    end
-    private.update_search_listings()
-
     Aux.scan.abort(function()
-
-        private.update_tab(RESULTS)
-
-        private.clear_selection()
-
-        private.status_bar:update_status(0,0)
-        private.status_bar:set_text('Scanning auctions...')
-
-        private.search_button:Hide()
-        private.stop_button:Show()
-
-        auctions = nil
-
-        refresh = true
 
         local tooltip_patterns = {}
         for i=1,4 do
@@ -718,8 +725,6 @@ function public.start_search()
                 tinsert(tooltip_patterns, tooltip_pattern)
             end
         end
-
-        local group = Aux.groups.parse_group(Aux.groups.test_group)
 
         local queries
 
@@ -738,6 +743,22 @@ function public.start_search()
             return
         end
 
+        tinsert(aux_recent_searches, 1, private.search_box:GetText())
+        while getn(aux_recent_searches) > 50 do
+            tremove(aux_recent_searches)
+        end
+        private.update_search_listings()
+
+        private.clear_selection()
+        private.search_button:Hide()
+        private.stop_button:Show()
+        auctions = nil
+        refresh = true
+
+        private.update_tab(RESULTS)
+
+        private.status_bar:update_status(0,0)
+        private.status_bar:set_text('Scanning auctions...')
 
         Aux.scan.start{
             queries = queries,
@@ -857,7 +878,7 @@ end
 function private.create_auction_record(auction_info)
 
 	local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
-	local unit_buyout_price = buyout_price and Aux.round(auction_info.buyout_price / auction_info.aux_quantity)
+	local unit_buyout_price = buyout_price and auction_info.buyout_price / auction_info.aux_quantity
     local status
     if auction_info.current_bid == 0 then
         status = 'No Bid'
@@ -889,7 +910,7 @@ function private.create_auction_record(auction_info)
         hyperlink = auction_info.hyperlink,
         itemstring = auction_info.itemstring,
         bid_price = auction_info.bid_price,
-        unit_bid_price = Aux.round(auction_info.bid_price / auction_info.aux_quantity),
+        unit_bid_price = auction_info.bid_price / auction_info.aux_quantity,
         owner = auction_info.owner,
         duration = auction_info.duration,
         usable = auction_info.usable,
@@ -967,15 +988,15 @@ function AuxFilterSearchFrameFiltersCategoryDropDown_OnClick()
 		end
 	end
 
-	UIDropDownMenu_SetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown, this.value)
-	UIDropDownMenu_SetText(qualified_name, AuxFilterSearchFrameFiltersCategoryDropDown)
+	UIDropDownMenu_SetSelectedValue(private.category_dropdown, this.value)
+	UIDropDownMenu_SetText(qualified_name, private.category_dropdown)
 	CloseDropDownMenus(1)
 end
 
 function AuxFilterSearchFrameFiltersQualityDropDown_Initialize()
 
     local function on_click()
-        UIDropDownMenu_SetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown, this.value)
+        UIDropDownMenu_SetSelectedValue(private.quality_dropdown, this.value)
     end
 
 	UIDropDownMenu_AddButton{

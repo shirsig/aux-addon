@@ -55,13 +55,13 @@ function m.create_item_filter(item_id)
         local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
 
         return {
+            exact_only = true,
             name = item_info.name,
             min_level = item_info.level,
             min_level = item_info.level,
             slot = item_info.slot,
             class = class_index,
             subclass = subclass_index,
-            subclass = item_info.subclass,
             quality = item_info.quality,
             usable = item_info.usable,
         }
@@ -87,22 +87,17 @@ function m.parse_filter_string(filter_string)
     local filters = {}
     for _, str in ipairs(parts) do
         str = Aux.util.trim(str)
---        if tonumber(str) then
---            local filter = m.create_item_filter(tonumber(str))
---            if filter then
---                tinsert(filters, filter)
---            end
---        else
+
         local filter, error = m.filter_from_string(str)
 
         if not filter then
             Aux.log('Invalid filter: '..error)
+            return
         elseif filter.name and strlen(filter.name) > 63 then
 
         else
             tinsert(filters, filter)
         end
---        end
     end
 
     return filters
@@ -159,8 +154,12 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Invalid Even Only Filter'
             end
---        elseif Aux.money.from_string(str) then
---            filter.min_profit = Aux.money.from_string(str)
+        elseif Aux.money.from_string(str) > 0 then
+            if not filter.max_price then
+                filter.max_price = Aux.money.from_string(str)
+            else
+                return false, 'Invalid Max Price Filter'
+            end
         elseif i == 1 then
             filter.name = str
         else
@@ -174,7 +173,9 @@ function m.filter_from_string(filter_term)
         end
         for id, info in pairs(Aux.static.auctionable_items) do
             if info.name == filter.name then
-                return m.create_item_filter(id)
+                local item_filter = m.create_item_filter(id)
+                item_filter.even_only = filter.even_only
+                return item_filter
             end
         end
         return false, 'Invalid Exact Only Filter'
@@ -237,23 +238,21 @@ end
 function m.validator(filter)
 
     return function(record)
-
         if filter.exact_only and record.name ~= filter.name then
             return
         end
-
-        if filter.even_only and rem(record.aux_quantity, 5) ~= 0 then
+        if filter.even_only and mod(record.aux_quantity, 5) ~= 0 then
             return
         end
-
         if filter.min_level and record.level < filter.min_level then
             return
         end
-
         if filter.max_level and record.level > filter.max_level then
             return
         end
-
+        if filter.max_price and record.buyout_price > filter.max_price then
+            return
+        end
         return true
     end
 end

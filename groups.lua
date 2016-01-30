@@ -18,3 +18,16 @@ function m.test()
     local array = Aux.persistence.deserialize(';', ';')
     snipe.log(getn(array))
 end
+
+function on_char()
+    for _, data in ipairs(TSM.db.global.savedSearches) do
+        if data.searchMode == "normal" then
+            local prevSearch = strlower(data.filter)
+            if strsub(prevSearch, 1, textLen) == text then
+                self:SetText(prevSearch)
+                self:HighlightText(textLen, -1)
+                break
+            end
+        end
+    end
+end

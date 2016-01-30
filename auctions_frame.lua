@@ -132,10 +132,20 @@ function public.on_load()
         btn:Disable()
         private.cancel_button = btn
     end
+    do
+        local btn = Aux.gui.button(AuxAuctionsFrame, 16)
+        btn:SetPoint('TOPLEFT', private.cancel_button, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('Refresh')
+        btn:SetScript('OnClick', function()
+            public.scan_auctions()
+        end)
+    end
 end
 
 function public.on_open()
-    public.update_auction_records()
+    public.scan_auctions()
     refresh = true
 end
 
@@ -143,7 +153,7 @@ function public.on_close()
     private.clear_selection()
 end
 
-function public.update_auction_records()
+function public.scan_auctions()
 
     private.status_bar:update_status(0,0)
     private.status_bar:set_text('Scanning auctions...')

@@ -62,22 +62,6 @@ function Aux_OnLoad()
         tab_group.on_select = Aux.on_tab_click
         Aux.tab_group = tab_group
     end
-    do
-        local btn = Aux.gui.button(AuxFrame, 12)
-        btn:SetPoint('TOPRIGHT', 0, 0)
-        btn:SetWidth(60)
-        btn:SetHeight(17)
-        btn:SetText('Default UI')
-        btn:SetScript('OnClick',function()
-            if AuctionFrame:IsVisible() then
-                Aux.blizzard_ui_shown = false
-                HideUIPanel(AuctionFrame)
-            else
-                Aux.blizzard_ui_shown = true
-                ShowUIPanel(AuctionFrame)
-            end
-        end)
-    end
 
     do
         local btn = Aux.gui.button(AuxFrame, 16)
@@ -87,6 +71,24 @@ function Aux_OnLoad()
         btn:SetText('Close')
         btn:SetScript('OnClick',function()
             HideUIPanel(this:GetParent())
+        end)
+        Aux.close_button = btn
+    end
+
+    do
+        local btn = Aux.gui.button(AuxFrame, 16)
+        btn:SetPoint('RIGHT', Aux.close_button, 'LEFT' , -5, 0)
+        btn:SetWidth(65)
+        btn:SetHeight(24)
+        btn:SetText('Default UI')
+        btn:SetScript('OnClick',function()
+            if AuctionFrame:IsVisible() then
+                Aux.blizzard_ui_shown = false
+                HideUIPanel(AuctionFrame)
+            else
+                Aux.blizzard_ui_shown = true
+                ShowUIPanel(AuctionFrame)
+            end
         end)
     end
 

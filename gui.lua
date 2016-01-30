@@ -370,80 +370,101 @@ function m.vertical_line(parent, x_offset, inverted_color)
     return texture
 end
 
-function m.dropdown()
-    local count = AceGUI:GetNextWidgetNum(Type)
+do
+    local id = 0
+    function m.dropdown(parent)
+        id = id + 1
 
-    local frame = CreateFrame("Frame", nil, UIParent)
-    local dropdown = CreateFrame("Frame", "TSMDropDown"..count, frame, "UIDropDownMenuTemplate")
+        --    local frame = CreateFrame("Frame", nil, UIParent)
+        local dropdown = CreateFrame('Frame', 'aux_dropdown'..id, parent, 'UIDropDownMenuTemplate')
 
-    frame:SetScript("OnHide", Dropdown_OnHide)
+        dropdown:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size, insets={top=5,bottom=5}})
+        dropdown:SetBackdropColor(unpack(Aux.gui.config.content_color))
+        dropdown:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
+        local left = getglobal(dropdown:GetName()..'Left'):Hide()
+        local middle = getglobal(dropdown:GetName()..'Middle'):Hide()
+        local right = getglobal(dropdown:GetName()..'Right'):Hide()
 
-    dropdown:ClearAllPoints()
-    dropdown:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -7, 0)
-    dropdown:SetScript("OnHide", nil)
-    dropdown:SetScript("OnEnter", Control_OnEnter)
-    dropdown:SetScript("OnLeave", Control_OnLeave)
-    dropdown:SetScript("OnMouseUp", function(self, button) Dropdown_TogglePullout(self.obj.button, button) end)
-    TSMAPI.Design:SetContentColor(dropdown)
+        local button = getglobal(dropdown:GetName()..'Button')
+        button:ClearAllPoints()
+        button:SetPoint('RIGHT', dropdown, 0, 0)
 
-    local left = _G[dropdown:GetName().."Left"]
-    local middle = _G[dropdown:GetName().."Middle"]
-    local right = _G[dropdown:GetName().."Right"]
+        local text = getglobal(dropdown:GetName()..'Text')
+        text:ClearAllPoints()
+        text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
+        text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
+        text:SetFont(Aux.gui.config.content_font, 13)
+        text:SetShadowColor(0, 0, 0, 0)
 
-    middle:ClearAllPoints()
-    right:ClearAllPoints()
+    --    frame:SetScript("OnHide", Dropdown_OnHide)
+    --
+    --    dropdown:ClearAllPoints()
+    --    dropdown:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -7, 0)
+    --    dropdown:SetScript("OnHide", nil)
+    --    dropdown:SetScript("OnEnter", Control_OnEnter)
+    --    dropdown:SetScript("OnLeave", Control_OnLeave)
+    --    dropdown:SetScript("OnMouseUp", function(self, button) Dropdown_TogglePullout(self.obj.button, button) end)
+    --    TSMAPI.Design:SetContentColor(dropdown)
+    --
+    --    local left = _G[dropdown:GetName().."Left"]
+    --    local middle = _G[dropdown:GetName().."Middle"]
+    --    local right = _G[dropdown:GetName().."Right"]
+    --
+    --    middle:ClearAllPoints()
+    --    right:ClearAllPoints()
+    --
+    --    middle:SetPoint("LEFT", left, "RIGHT", 0, 0)
+    --    middle:SetPoint("RIGHT", right, "LEFT", 0, 0)
+    --    right:SetPoint("TOPRIGHT", dropdown, "TOPRIGHT", 0, 17)
+    --
+    --    local button = _G[dropdown:GetName().."Button"]
+    --    button:RegisterForClicks("AnyUp")
+    --    button:SetScript("OnEnter", Control_OnEnter)
+    --    button:SetScript("OnLeave", Control_OnLeave)
+    --    button:SetScript("OnClick", Dropdown_TogglePullout)
+    --    button:ClearAllPoints()
+    --    button:SetPoint("RIGHT", dropdown, 0, 0)
+    --
+    --    local text = _G[dropdown:GetName().."Text"]
+    --    text:ClearAllPoints()
+    --    text:SetPoint("RIGHT", button, "LEFT", -2, 0)
+    --    text:SetPoint("LEFT", dropdown, "LEFT", 8, 0)
+    --    text:SetFont(TSMAPI.Design:GetContentFont("normal"))
+    --    text:SetShadowColor(0, 0, 0, 0)
+    --
+    --    local label = frame:CreateFontString(nil, "OVERLAY")
+    --    label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
+    --    label:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
+    --    label:SetJustifyH("LEFT")
+    --    label:SetHeight(18)
+    --    label:SetFont(TSMAPI.Design:GetContentFont("small"))
+    --    label:SetShadowColor(0, 0, 0, 0)
+    --    label:Hide()
+    --
+    --    left:Hide()
+    --    middle:Hide()
+    --    right:Hide()
+    --
+    --    local widget = {
+    --        frame = frame,
+    --        label = label,
+    --        dropdown = dropdown,
+    --        text = text,
+    --        button = button,
+    --        count = count,
+    --        alignoffset = 30,
+    --        type = Type,
+    --    }
+    --    for method, func in pairs(methods) do
+    --        widget[method] = func
+    --    end
+    --    frame.obj = widget
+    --    dropdown.obj = widget
+    --    text.obj = widget
+    --    button.obj = widget
 
-    middle:SetPoint("LEFT", left, "RIGHT", 0, 0)
-    middle:SetPoint("RIGHT", right, "LEFT", 0, 0)
-    right:SetPoint("TOPRIGHT", dropdown, "TOPRIGHT", 0, 17)
-
-    local button = _G[dropdown:GetName().."Button"]
-    button:RegisterForClicks("AnyUp")
-    button:SetScript("OnEnter", Control_OnEnter)
-    button:SetScript("OnLeave", Control_OnLeave)
-    button:SetScript("OnClick", Dropdown_TogglePullout)
-    button:ClearAllPoints()
-    button:SetPoint("RIGHT", dropdown, 0, 0)
-
-    local text = _G[dropdown:GetName().."Text"]
-    text:ClearAllPoints()
-    text:SetPoint("RIGHT", button, "LEFT", -2, 0)
-    text:SetPoint("LEFT", dropdown, "LEFT", 8, 0)
-    text:SetFont(TSMAPI.Design:GetContentFont("normal"))
-    text:SetShadowColor(0, 0, 0, 0)
-
-    local label = frame:CreateFontString(nil, "OVERLAY")
-    label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-    label:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
-    label:SetJustifyH("LEFT")
-    label:SetHeight(18)
-    label:SetFont(TSMAPI.Design:GetContentFont("small"))
-    label:SetShadowColor(0, 0, 0, 0)
-    label:Hide()
-
-    left:Hide()
-    middle:Hide()
-    right:Hide()
-
-    local widget = {
-        frame = frame,
-        label = label,
-        dropdown = dropdown,
-        text = text,
-        button = button,
-        count = count,
-        alignoffset = 30,
-        type = Type,
-    }
-    for method, func in pairs(methods) do
-        widget[method] = func
+        return dropdown
     end
-    frame.obj = widget
-    dropdown.obj = widget
-    text.obj = widget
-    button.obj = widget
-
-    return AceGUI:RegisterAsWidget(widget)
 end
 
 function m.slider(frame, name)
@@ -534,3 +555,42 @@ function m.slider(frame, name)
     slider.editbox = editbox
     return slider
 end
+
+--function m.checkbox()
+--    local frame = CreateFrame('Button', nil, UIParent)
+--    frame:Hide()
+--    frame:EnableMouse(true)
+--    frame:SetScript("OnEnter", Control_OnEnter)
+--    frame:SetScript("OnLeave", Control_OnLeave)
+--    frame:SetScript("OnMouseDown", CheckBox_OnMouseDown)
+--    frame:SetScript("OnMouseUp", CheckBox_OnMouseUp)
+--
+--    local checkbox = CreateFrame('Button', nil, frame)
+--    checkbox:EnableMouse(false)
+--    checkbox:SetWidth(16)
+--    checkbox:SetHeight(16)
+--    checkbox:SetPoint('TOPLEFT', 4, -4)
+--    checkbox:SetBackdrop({ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size })
+--    checkbox:SetBackdropColor(unpack(m.config.content_color))
+--    checkbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
+--    local highlight = checkbox:CreateTexture(nil, 'HIGHLIGHT')
+--    highlight:SetAllPoints()
+--    highlight:SetTexture(1, 1, 1, .2)
+--    highlight:SetBlendMode('BLEND')
+--
+--    local check = checkbox:CreateTexture(nil, 'OVERLAY')
+--    check:SetTexture([[Interface\Buttons\UI-CheckBox-Check]])
+--    check:SetTexCoord(.12, .88, .12, .88)
+--    check:SetBlendMode('BLEND')
+--    check:SetPoint('BOTTOMRIGHT')
+--
+--    local text = frame:CreateFontString(nil, 'OVERLAY')
+--    text:SetJustifyH('LEFT')
+--    text:SetHeight(18)
+--    text:SetPoint('LEFT', checkbox, 'RIGHT')
+--    text:SetPoint('RIGHT')
+--    text:SetFont(m.config.content_font, m.config.normal_font_size)
+--
+--    checkbox.text = text
+--    return checkbox
+--end

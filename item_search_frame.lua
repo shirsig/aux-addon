@@ -462,7 +462,7 @@ end
 function private.create_auction_record(auction_info)
 
 	local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
-	local unit_buyout_price = buyout_price and Aux.round(auction_info.buyout_price / auction_info.aux_quantity)
+	local unit_buyout_price = buyout_price and auction_info.buyout_price / auction_info.aux_quantity
     local status
     if auction_info.current_bid == 0 then
         status = 'No Bid'
@@ -492,7 +492,7 @@ function private.create_auction_record(auction_info)
         quality = auction_info.quality,
         hyperlink = auction_info.hyperlink,
         bid_price = auction_info.bid_price,
-        unit_bid_price = Aux.round(auction_info.bid_price / auction_info.aux_quantity),
+        unit_bid_price = auction_info.bid_price / auction_info.aux_quantity,
         owner = auction_info.owner,
         duration = auction_info.duration,
         usable = auction_info.usable,

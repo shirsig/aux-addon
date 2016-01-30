@@ -147,10 +147,20 @@ function public.on_load()
         btn:Disable()
         private.bid_button = btn
     end
+    do
+        local btn = Aux.gui.button(AuxBidsFrame, 16)
+        btn:SetPoint('TOPLEFT', private.bid_button, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('Refresh')
+        btn:SetScript('OnClick', function()
+            public.scan_bids()
+        end)
+    end
 end
 
 function public.on_open()
-    public.update_bid_records()
+    public.scan_bids()
     refresh = true
 end
 
@@ -158,7 +168,7 @@ function public.on_close()
     private.clear_selection()
 end
 
-function public.update_bid_records()
+function public.scan_bids()
 
     private.status_bar:update_status(0,0)
     private.status_bar:set_text('Scanning auctions...')
