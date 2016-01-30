@@ -94,7 +94,6 @@ end
 
 function public.on_open()
     private.update_search_listings()
-    private.update_tab(SAVED)
 
     AuxFilterSearchFrameResults:SetWidth(985)
     AuxFrame:SetWidth(991)
@@ -117,13 +116,23 @@ function public.on_load()
                 private.update_search_listings()
             end
         end,
+        on_row_enter = function(sheet, row_index)
+            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+            GameTooltip:AddLine(gsub(sheet.rows[row_index].cells[1].text:GetText(), ';', '\n'), 255/255, 254/255, 250/255)
+            GameTooltip:Show()
+        end,
+        on_row_leave = function(sheet, row_index)
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            GameTooltip:ClearLines()
+            GameTooltip:Hide()
+        end,
         columns = {
             {
-                width = 900,
+                width = 440,
                 comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
                 cell_setter = function(cell, filter_string)
-                    cell.text:SetText(filter_string)
+                    cell.text:SetText(Aux.test.prettify_search(filter_string))
                 end,
             },
         },
@@ -145,13 +154,23 @@ function public.on_load()
                 private.update_search_listings()
             end
         end,
+        on_row_enter = function(sheet, row_index)
+            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+            GameTooltip:AddLine(gsub(sheet.rows[row_index].cells[1].text:GetText(), ';', '\n'), 255/255, 254/255, 250/255)
+            GameTooltip:Show()
+        end,
+        on_row_leave = function(sheet, row_index)
+            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
+            GameTooltip:ClearLines()
+            GameTooltip:Hide()
+        end,
         columns = {
             {
-                width = 900,
+                width = 440,
                 comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
                 cell_setter = function(cell, filter_string)
-                    cell.text:SetText(filter_string)
+                    cell.text:SetText(Aux.test.prettify_search(filter_string))
                 end,
             },
         },
@@ -323,23 +342,36 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrame)
+        editbox:EnableMouse(1)
+        editbox.complete = Aux.test.complete
         editbox:SetPoint('TOPLEFT', 5, -6)
         editbox:SetPoint('RIGHT', private.search_button, 'LEFT', -4, 0)
         editbox:SetWidth(400)
         editbox:SetHeight(25)
---        editbox:SetScript('OnTabPressed', function()
---            if IsShiftKeyDown() then
---                getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
---            else
---                getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
---            end
---        end)
+        editbox:SetScript('OnChar', function()
+            this:complete()
+        end)
+        editbox:SetScript('OnTabPressed', function()
+            this:HighlightText(0, 0)
+        end)
         editbox:SetScript('OnEnterPressed', function()
+            this:HighlightText(0, 0)
             this:ClearFocus()
             public.start_search()
         end)
         editbox:SetScript('OnEscapePressed', function()
+            this:HighlightText(0, 0)
             this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
+        end)
+        editbox:SetScript('OnReceiveDrag', function()
+            local item_info = Aux.cursor_item() and Aux.static.item_info(Aux.cursor_item().item_id)
+            if item_info then
+                this:SetText(item_info.name..'/exact')
+            end
+            ClearCursor()
         end)
         private.search_box = editbox
     end
@@ -349,7 +381,7 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
         btn:SetPoint('TOPLEFT', 10, -49)
-        btn:SetWidth(310)
+        btn:SetWidth(320)
         btn:SetHeight(22)
         btn:SetText('Search Results')
         btn:SetScript('OnClick', function() private.update_tab(RESULTS) end)
@@ -358,7 +390,7 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
         btn:SetPoint('TOPLEFT', private.search_results_button, 'TOPRIGHT', 5, 0)
-        btn:SetWidth(310)
+        btn:SetWidth(320)
         btn:SetHeight(22)
         btn:SetText('Saved Searches')
         btn:SetScript('OnClick', function() private.update_tab(SAVED) end)
@@ -367,21 +399,21 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
         btn:SetPoint('TOPLEFT', private.saved_searches_button, 'TOPRIGHT', 5, 0)
-        btn:SetWidth(310)
+        btn:SetWidth(320)
         btn:SetHeight(22)
         btn:SetText('New Filter')
         btn:SetScript('OnClick', function() private.update_tab(FILTER) end)
         private.new_filter_button = btn
     end
     do
-        local line = Aux.gui.horizontal_line(AuxFilterSearchFrameSavedRecent, -25)
-        local label = Aux.gui.label(AuxFilterSearchFrameSavedRecent, 13)
+        local line = Aux.gui.horizontal_line(AuxFilterSearchFrameSavedRecent, -30)
+        local label = Aux.gui.label(AuxFilterSearchFrameSavedRecent, 15)
         label:SetPoint('BOTTOM', line, 'TOP', 0, 5)
         label:SetText('Recent Searches')
     end
     do
-        local line = Aux.gui.horizontal_line(AuxFilterSearchFrameSavedFavorite, -25)
-        local label = Aux.gui.label(AuxFilterSearchFrameSavedFavorite, 13)
+        local line = Aux.gui.horizontal_line(AuxFilterSearchFrameSavedFavorite, -30)
+        local label = Aux.gui.label(AuxFilterSearchFrameSavedFavorite, 15)
         label:SetPoint('BOTTOM', line, 'TOP', 0, 5)
         label:SetText('Favorite Searches')
     end
@@ -514,7 +546,7 @@ function public.on_load()
         private.category_dropdown = dropdown
         UIDropDownMenu_Initialize(dropdown, AuxFilterSearchFrameFiltersCategoryDropDown_Initialize)
         dropdown:SetScript('OnShow', function()
-            UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersQualityDropDown_Initialize)
+            UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersCategoryDropDown_Initialize)
         end)
     end
     do
@@ -690,6 +722,7 @@ function public.on_load()
 --        text:SetFont(Aux.gui.config.content_font, 13)
 --        text:SetShadowColor(0, 0, 0, 0)
 -- end
+    private.update_tab(SAVED)
 end
 
 function public.stop_search()

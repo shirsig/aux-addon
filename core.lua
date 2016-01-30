@@ -7,7 +7,6 @@ Aux = {
     blizzard_ui_shown = false,
 	loaded = false,
 	orig = {},
-	last_picked_up = {},
     view = {
         BUYOUT = 1,
         BID = 2,
@@ -54,11 +53,11 @@ function Aux_OnLoad()
 
     do
         local tab_group = Aux.gui.tab_group(AuxFrame, 'BOTTOM')
-        tab_group:create_tab('Item Search')
-        tab_group:create_tab('Filter Search')
+        tab_group:create_tab('Search')
         tab_group:create_tab('Post')
         tab_group:create_tab('Auctions')
         tab_group:create_tab('Bids')
+--        tab_group:create_tab('Scan')
         tab_group.on_select = Aux.on_tab_click
         Aux.tab_group = tab_group
     end
@@ -242,11 +241,8 @@ function Aux.AuctionFrameAuctions_OnEvent()
 end
 
 function Aux_OnAuctionHouseShow()
-
     AuxFrame:Show()
-
     Aux.tab_group:set_tab(1)
-
 end
 
 function Aux_OnAuctionHouseClosed()
@@ -254,7 +250,7 @@ function Aux_OnAuctionHouseClosed()
 	Aux.stack.stop()
 	Aux.scan.abort()
 
-    Aux.item_search_frame.on_close()
+--    Aux.item_search_frame.on_close()
     Aux.filter_search_frame.on_close()
     Aux.post_frame.on_close()
     Aux.auctions_frame.on_close()
@@ -268,14 +264,14 @@ function Aux.on_tab_click(index)
     Aux.post.stop()
     Aux.stack.stop()
     Aux.scan.abort(function()
-        Aux.item_search_frame.on_close()
+--        Aux.item_search_frame.on_close()
         Aux.filter_search_frame.on_close()
         Aux.post_frame.on_close()
         Aux.auctions_frame.on_close()
         Aux.bids_frame.on_close()
         Aux.history_frame.on_close()
 
-        AuxItemSearchFrame:Hide()
+--        AuxItemSearchFrame:Hide()
         AuxFilterSearchFrame:Hide()
         AuxPostFrame:Hide()
         AuxAuctionsFrame:Hide()
@@ -283,20 +279,20 @@ function Aux.on_tab_click(index)
         AuxHistoryFrame:Hide()
 
         if index == 1 then
-            AuxItemSearchFrame:Show()
-            Aux.item_search_frame.on_open()
-        elseif index == 2 then
             AuxFilterSearchFrame:Show()
             Aux.filter_search_frame.on_open()
-        elseif index == 3 then
+        elseif index == 2 then
             AuxPostFrame:Show()
             Aux.post_frame.on_open()
-        elseif index == 4 then
+        elseif index == 3 then
             AuxAuctionsFrame:Show()
             Aux.auctions_frame.on_open()
-        elseif index == 5 then
+        elseif index == 4 then
             AuxBidsFrame:Show()
             Aux.bids_frame.on_open()
+--        elseif index == 5 then
+--            AuxItemSearchFrame:Show()
+--            Aux.item_search_frame.on_open()
         end
 
         Aux.active_panel = index
@@ -340,16 +336,24 @@ function Aux_AuctionsButton_OnMouseDown()
 	end
 end
 
-function Aux.PickupContainerItem(bag, item)
-	Aux.last_picked_up = { bag=bag, slot=item }
-	return Aux.orig.PickupContainerItem(bag, item)
+do
+    local last_picked_up
+    function Aux.PickupContainerItem(bag, slot)
+        last_picked_up = { bag, slot }
+        return Aux.orig.PickupContainerItem(bag, slot)
+    end
+    function Aux.cursor_item()
+        if last_picked_up and CursorHasItem() then
+            return Aux.info.container_item(unpack(last_picked_up))
+        end
+    end
 end
 
 function Aux_ContainerFrameItemButton_OnClick(button)
 	local bag, slot = this:GetParent():GetID(), this:GetID()
-	local container_item_info = Aux.info.container_item(bag, slot)
+	local item_info = Aux.info.container_item(bag, slot)
 	
-	if AuxFrame:IsVisible() and button == "LeftButton" and container_item_info then
+	if AuxFrame:IsVisible() and button == "LeftButton" and item_info then
 		if IsAltKeyDown() then
 			if Aux.active_panel ~= 1 then
                 Aux.on_tab_click(1)
@@ -357,7 +361,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 
             Aux.control.as_soon_as(function() return Aux.active_panel == 1 end, function()
                 AuxItemSearchFrameItemItemInputBox:Hide()
-                Aux.item_search_frame.set_item(container_item_info.item_id)
+                Aux.item_search_frame.set_item(item_info.item_id)
             end)
 
             return
@@ -367,7 +371,7 @@ function Aux_ContainerFrameItemButton_OnClick(button)
 	return Aux.orig.ContainerFrameItemButton_OnClick(button)
 end
 
-function Aux_QualityColor(code)
+function Aux.quality_color(code)
 	if code == 0 then
 		return "ff9d9d9d" -- poor, gray
 	elseif code == 1 then

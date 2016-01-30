@@ -51,7 +51,7 @@ function generate_suggestions(input)
 		end
 	end
 
-	return Aux.util.map(best, function(match) return { text=match.name, display_text='|c'..Aux_QualityColor(Aux.static.item_info(match.id).quality)..'['..match.name..']'..'|r', value=match.id } end)
+	return Aux.util.map(best, function(match) return { text=match.name, display_text='|c'..Aux.quality_color(Aux.static.item_info(match.id).quality)..'['..match.name..']'..'|r', value=match.id } end)
 end
 
 function public.completor(edit_box)

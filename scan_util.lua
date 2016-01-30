@@ -51,17 +51,14 @@ function m.create_item_filter(item_id)
     local item_info = Aux.static.item_info(item_id)
 
     if item_info then
-        local class_index = Aux.item_class_index(item_info.class)
-        local subclass_index = class_index and Aux.item_subclass_index(class_index, item_info.subclass)
-
         return {
             exact_only = true,
             name = item_info.name,
             min_level = item_info.level,
             min_level = item_info.level,
             slot = item_info.slot,
-            class = class_index,
-            subclass = subclass_index,
+            class = item_info.class,
+            subclass = item_info.subclass,
             quality = item_info.quality,
             usable = item_info.usable,
         }
@@ -69,16 +66,17 @@ function m.create_item_filter(item_id)
 end
 
 function m.create_item_query(item_id)
-    local item_info = Aux.static.item_info(item_id)
 
     local filter = m.create_item_filter(item_id)
 
-    return item_info and {
+    if filter then
+        return {
         type = 'list',
         start_page = 0,
         validator = m.validator(filter),
         blizzard_query = m.blizzard_query(filter),
-    }
+        }
+    end
 end
 
 function m.parse_filter_string(filter_string)
@@ -154,6 +152,12 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Invalid Even Only Filter'
             end
+        elseif strlower(str) == 'discard' then
+            if not filter.discard then
+                filter.discard = true
+            else
+                return false, 'Invalid Even Only Filter'
+            end
         elseif Aux.money.from_string(str) > 0 then
             if not filter.max_price then
                 filter.max_price = Aux.money.from_string(str)
@@ -171,12 +175,12 @@ function m.filter_from_string(filter_term)
         if filter.min_level or filter.max_level or filter.class or filter.subclass or filter.quality or filter.usable_only then
             return false, 'Invalid Exact Only Filter'
         end
-        for id, info in pairs(Aux.static.auctionable_items) do
-            if info.name == filter.name then
-                local item_filter = m.create_item_filter(id)
-                item_filter.even_only = filter.even_only
-                return item_filter
-            end
+        local id = Aux.static.auctionable_items[strupper(filter.name)]
+        if id then
+            local item_filter = m.create_item_filter(id)
+            item_filter.even_only = filter.even_only
+            item_filter.discard = filter.discard
+            return item_filter
         end
         return false, 'Invalid Exact Only Filter'
     end
@@ -188,7 +192,7 @@ function m.filter_from_string(filter_term)
     return filter
 end
 
-function m.filter_to_string(filter)
+function m.filter_to_string(filter) -- TODO belongs in filter search
 
     local filter_term = filter.name or ''
 
@@ -238,6 +242,9 @@ end
 function m.validator(filter)
 
     return function(record)
+        if filter.discard then
+            return
+        end
         if filter.exact_only and record.name ~= filter.name then
             return
         end
