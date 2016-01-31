@@ -28,11 +28,11 @@
             </Frame>
             <Frame name="$parentResults" inherits="AuxFrameBoxTemplate">
                 <Size>
-                    <AbsDimension x="655" y="278"/>
+                    <AbsDimension x="985" y="278"/>
                 </Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="3" y="-82"/></Offset></Anchor></Anchors>
                 <Frames>
-                    <Frame name="$parentListing">
+                    <Frame name="$parentListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="5"/></Offset></Anchor>
                             <Anchor point="BOTTOM"><Offset><AbsDimension x="-8" y="-15"/></Offset></Anchor>

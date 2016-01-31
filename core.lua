@@ -7,14 +7,7 @@ Aux = {
     blizzard_ui_shown = false,
 	loaded = false,
 	orig = {},
-    view = {
-        BUYOUT = 1,
-        BID = 2,
-        FULL = 3,
-    },
 }
-
-aux_view = Aux.view.BUYOUT
 
 function Aux_OnLoad()
 	Aux.log('Aux v'..AuxVersion..' loaded.')
@@ -433,3 +426,9 @@ function Aux.show_elements(elements)
         element:Show()
     end
 end
+
+function Aux.is_player(name)
+    return UnitName('player') == name -- TODO support multiple chars
+end
+
+Aux.huge = 2^100000

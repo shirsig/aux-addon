@@ -60,6 +60,7 @@ function m.to_string(money, pad, trim, color, no_color)
 end
 
 function m.from_string(value)
+
 	-- remove any colors
 	value = gsub(gsub(value, '\124c([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])', ''), '\124r', '')
 
@@ -75,7 +76,7 @@ function m.from_string(value)
 	value = gsub(value, '%d*%.?%d+c', '', 1)
 	if strfind(value, '%S') then return 0 end
 	
-	return ((gold or 0) * COPPER_PER_GOLD) + ((silver or 0) * COPPER_PER_SILVER) + (copper or 0)
+	return Aux.round(((gold or 0) * COPPER_PER_GOLD) + ((silver or 0) * COPPER_PER_SILVER) + (copper or 0))
 end
 
 function m.format_number(num, pad, color)

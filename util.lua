@@ -10,6 +10,15 @@ local merge, copy_array
 function Aux.util.pass()
 end
 
+function public.wipe(table)
+	while getn(table) > 0 do
+		tremove(table)
+	end
+	for k, _ in pairs(table) do
+		table[k] = nil
+	end
+end
+
 function public.copy_table(table)
 	local copy = {}
 	for k, v in pairs(table) do

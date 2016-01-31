@@ -92,8 +92,6 @@ end
 
 function public.on_open()
     private.update_search_listings()
-
-    AuxFilterSearchFrameResults:SetWidth(985)
     AuxFrame:SetWidth(991)
 end
 
@@ -313,13 +311,6 @@ function public.on_load()
         private.elements[FILTER].filters = panel
     end
     do
-        local panel = Aux.gui.panel(AuxFilterSearchFrame)
-        panel:SetWidth(300)
-        panel:SetHeight(290)
-        panel:SetPoint('TOPLEFT', private.elements[FILTER].filters, 'TOPRIGHT', 5, 0)
-        private.elements[FILTER].item_filter = panel
-    end
-    do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 22)
         btn:SetPoint('TOPRIGHT', -5, -6)
         btn:SetWidth(60)
@@ -414,47 +405,6 @@ function public.on_load()
         local label = Aux.gui.label(AuxFilterSearchFrameSavedFavorite, 15)
         label:SetPoint('BOTTOM', line, 'TOP', 0, 7)
         label:SetText('Favorite Searches')
-    end
-    do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].item_filter)
-        local function add_item_filter(item_id)
-            local old_filter_string = private.search_box:GetText()
-            old_filter_string = Aux.util.trim(old_filter_string)
-
-            if strlen(old_filter_string) > 0 and not strfind(old_filter_string, ';$') then
-                old_filter_string = old_filter_string..';'
-            end
-
-            local item_info = Aux.static.item_info(item_id)
-            private.search_box:SetText(old_filter_string..item_info.name..'/exact')
-            editbox:SetText('')
-        end
-        editbox.selector = Aux.completion.selector(editbox, function()
-            add_item_filter(editbox.selector.selected_value())
-        end)
-        editbox:SetPoint('TOPLEFT', 5, -28)
-        editbox:SetWidth(250)
-        editbox:SetScript('OnTextChanged', function()
-            this.selector.suggest()
-        end)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                this.selector.previous()
-            else
-                this.selector.next()
-            end
-        end)
-        editbox:SetScript('OnEnterPressed', function()
-            this.selector.close()
-            if this.selector.selected_value() then
-                add_item_filter(this.selector.selected_value())
---                this:ClearFocus()
-            end
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this.selector.clear()
-            this:ClearFocus()
-        end)
     end
     do
         local btn1 = Aux.gui.button(private.elements[FILTER].filters, 16)
@@ -642,6 +592,8 @@ function public.on_load()
         label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersUsableCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('Usable')
     end
+
+    -- Tooltip 1
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox1')
         editbox:SetPoint('TOPLEFT', 300, -20)
@@ -722,6 +674,248 @@ function public.on_load()
         end)
     end
 
+    -- Tooltip 2
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox1')
+        editbox:SetPoint('TOPLEFT', 300, -200)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        local label = Aux.gui.label(editbox, 13)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+        label:SetText('Tooltip')
+    end
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+    end
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+    end
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+    end
+
+    -- Tooltip 3
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox1')
+        editbox:SetPoint('TOPLEFT', 600, -20)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        local label = Aux.gui.label(editbox, 13)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+        label:SetText('Tooltip')
+    end
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+    end
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+    end
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+    end
+
+    -- Tooltip 4
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox1')
+        editbox:SetPoint('TOPLEFT', 300, -300)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        local label = Aux.gui.label(editbox, 13)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+        label:SetText('Tooltip')
+    end
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+    end
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+    end
+    do
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetWidth(250)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+    end
     -- TODO replace with real gui dropdown
 --    CreateFrame('Frame', '$parentCategoryDropDown', AuxFilterSearchFrameFilters, 'UIDropDownMenuTemplate')
 --    local dropdown = CreateFrame('Frame', '$parentQualityDropDown', AuxFilterSearchFrameFilters, 'UIDropDownMenuTemplate')
@@ -749,6 +943,12 @@ function public.on_load()
 --        text:SetShadowColor(0, 0, 0, 0)
 -- end
     private.update_tab(SAVED)
+
+
+    private.testlisting = CreateAuctionResultsTable(AuxFilterSearchFrameResults)
+--    private.testlisting:Clear()
+    private.testlisting:Show()
+    private.testlisting:SetSort(9)
 end
 
 function public.stop_search()
@@ -834,6 +1034,7 @@ function public.start_search()
             on_read_auction = function(auction_info)
                 auctions = auctions or {}
                 tinsert(auctions, private.create_auction_record(auction_info))
+                private.testlisting:InsertAuctionRecord(auction_info)
             end,
             on_complete = function()
                 auctions = auctions or {}

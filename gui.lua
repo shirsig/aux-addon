@@ -1,7 +1,41 @@
 local m = {}
 Aux.gui = m
 
+--TSM.designDefaults = {
+--    frameColors = {
+--        frameBG = { backdrop = { 24, 24, 24, .93 }, border = { 30, 30, 30, 1 } },
+--        frame = { backdrop = { 24, 24, 24, 1 }, border = { 255, 255, 255, 0.03 } },
+--        content = { backdrop = { 42, 42, 42, 1 }, border = { 0, 0, 0, 0 } },
+--    },
+--    textColors = {
+--        iconRegion = { enabled = { 249, 255, 247, 1 } },
+--        text = { enabled = { 255, 254, 250, 1 }, disabled = { 147, 151, 139, 1 } },
+--        label = { enabled = { 216, 225, 211, 1 }, disabled = { 150, 148, 140, 1 } },
+--        title = { enabled = { 132, 219, 9, 1 } },
+--        link = { enabled = { 49, 56, 133, 1 } },
+--    },
+--    inlineColors = {
+--        link = { 153, 255, 255, 1 },
+--        link2 = { 153, 255, 255, 1 },
+--        category = { 36, 106, 36, 1 },
+--        category2 = { 85, 180, 8, 1 },
+--        tooltip = { 130, 130, 250, 1 },
+--    },
+--    edgeSize = 1.5,
+--    fonts = {
+--        content = "Fonts\\ARIALN.TTF",
+--        bold = "Interface\\Addons\\TradeSkillMaster\\Media\\DroidSans-Bold.ttf",
+--    },
+--    fontSizes = {
+--        normal = 15,
+--        medium = 13,
+--        small = 12,
+--    },
+--}
+
 m.config = {
+    link_color = { 153, 255, 255, 1 },
+    link_color2 = { 153, 255, 255, 1 }, -- TODO inline color needs 255, others need /255
     edge_size = 1.5,
     frame_color = {24/255, 24/255, 24/255, 1},
     frame_border_color = {1, 1, 1, .03},
@@ -15,6 +49,11 @@ m.config = {
     label_color = { enabled = { 216/255, 225/255, 211/255, 1 }, disabled = { 150/255, 148/255, 140/255, 1 } },
 
 }
+
+function m.inline_color(color)
+    local r, g, b, a = unpack(color)
+    return format("|c%02X%02X%02X%02X", a, r, g, b)
+end
 
 function m.panel(parent, name)
     local panel = CreateFrame('Frame', name, parent)
