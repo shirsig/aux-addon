@@ -391,7 +391,7 @@ end
 
 function Aux.item_class_index(item_class)
     for i, class in ipairs({ GetAuctionItemClasses() }) do
-        if strlower(class) == strlower(item_class) then
+        if strupper(class) == strupper(item_class) then
             return i
         end
     end
@@ -399,8 +399,16 @@ end
 
 function Aux.item_subclass_index(class_index, item_subclass)
     for i, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
-        if strlower(subclass) == strlower(item_subclass) then
+        if strupper(subclass) == strupper(item_subclass) then
             return i
+        end
+    end
+end
+
+function Aux.item_slot(class_index, subclass_index, slot_name)
+    for _, slot in ipairs({ GetAuctionInvTypes(class_index, subclass_index) }) do
+        if strupper(getglobal(slot)) == strupper(slot_name) then
+            return slot
         end
     end
 end
@@ -408,7 +416,7 @@ end
 function Aux.item_quality_index(item_quality)
     for i=0,4 do
         local quality = getglobal('ITEM_QUALITY'..i..'_DESC')
-        if strlower(item_quality) == strlower(quality) then
+        if strupper(item_quality) == strupper(quality) then
             return i
         end
     end

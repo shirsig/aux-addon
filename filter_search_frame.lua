@@ -59,18 +59,16 @@ function private.clear_filter()
 end
 
 function private.get_form_filter()
-    local category = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersCategoryDropDown)
-
     return {
         name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
         min_level = tonumber(AuxFilterSearchFrameFiltersMinLevel:GetText()),
         max_level = tonumber(AuxFilterSearchFrameFiltersMaxLevel:GetText()),
-        slot = category and category.slot,
-        class = category and category.class,
-        subclass = category and category.subclass,
-        quality = UIDropDownMenu_GetSelectedValue(AuxFilterSearchFrameFiltersQualityDropDown),
-        usable_only = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked(),
-        exact_only = AuxFilterSearchFrameFiltersExactCheckButton:GetChecked(),
+        class = UIDropDownMenu_GetSelectedValue(private.class_dropdown),
+        subclass = UIDropDownMenu_GetSelectedValue(private.subclass_dropdown),
+        slot = UIDropDownMenu_GetSelectedValue(private.slot_dropdown),
+        quality = UIDropDownMenu_GetSelectedValue(private.quality_dropdown),
+        usable = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked(),
+        exact = AuxFilterSearchFrameFiltersExactCheckButton:GetChecked(),
     }
 end
 
@@ -408,13 +406,13 @@ function public.on_load()
     do
         local line = Aux.gui.horizontal_line(AuxFilterSearchFrameSavedRecent, -30)
         local label = Aux.gui.label(AuxFilterSearchFrameSavedRecent, 15)
-        label:SetPoint('BOTTOM', line, 'TOP', 0, 5)
+        label:SetPoint('BOTTOM', line, 'TOP', 0, 7)
         label:SetText('Recent Searches')
     end
     do
         local line = Aux.gui.horizontal_line(AuxFilterSearchFrameSavedFavorite, -30)
         local label = Aux.gui.label(AuxFilterSearchFrameSavedFavorite, 15)
-        label:SetPoint('BOTTOM', line, 'TOP', 0, 5)
+        label:SetPoint('BOTTOM', line, 'TOP', 0, 7)
         label:SetText('Favorite Searches')
     end
     do
@@ -542,26 +540,54 @@ function public.on_load()
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
         label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
-        label:SetText('Category')
-        private.category_dropdown = dropdown
-        UIDropDownMenu_Initialize(dropdown, AuxFilterSearchFrameFiltersCategoryDropDown_Initialize)
+        label:SetText('Item Class')
+        UIDropDownMenu_Initialize(dropdown, private.initialize_class_dropdown)
         dropdown:SetScript('OnShow', function()
-            UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersCategoryDropDown_Initialize)
+            UIDropDownMenu_Initialize(this, private.initialize_class_dropdown)
         end)
+        private.class_dropdown = dropdown
     end
     do
         local dropdown = Aux.gui.dropdown(private.elements[FILTER].filters)
-        dropdown:SetPoint('TOPLEFT', 14, -93)
+        dropdown:SetPoint('TOPLEFT', 14, -100)
+        dropdown:SetWidth(250)
+        dropdown:SetHeight(10)
+        local label = Aux.gui.label(dropdown, 13)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
+        label:SetText('Item Subclass')
+        UIDropDownMenu_Initialize(dropdown, private.initialize_subclass_dropdown)
+        dropdown:SetScript('OnShow', function()
+            UIDropDownMenu_Initialize(this, private.initialize_subclass_dropdown)
+        end)
+        private.subclass_dropdown = dropdown
+    end
+    do
+        local dropdown = Aux.gui.dropdown(private.elements[FILTER].filters)
+        dropdown:SetPoint('TOPLEFT', 14, -150)
+        dropdown:SetWidth(250)
+        dropdown:SetHeight(10)
+        local label = Aux.gui.label(dropdown, 13)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
+        label:SetText('Item Slot')
+        UIDropDownMenu_Initialize(dropdown, private.initialize_slot_dropdown)
+        dropdown:SetScript('OnShow', function()
+            UIDropDownMenu_Initialize(this, private.initialize_slot_dropdown)
+        end)
+        private.slot_dropdown = dropdown
+    end
+    do
+        local dropdown = Aux.gui.dropdown(private.elements[FILTER].filters)
+        dropdown:SetPoint('TOPLEFT', 14, -200)
         dropdown:SetWidth(250)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
         label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
         label:SetText('Min Rarity')
-        private.quality_dropdown = dropdown
-        UIDropDownMenu_Initialize(dropdown, AuxFilterSearchFrameFiltersQualityDropDown_Initialize)
+        UIDropDownMenu_Initialize(dropdown, private.initialize_quality_dropdown)
         dropdown:SetScript('OnShow', function()
-            UIDropDownMenu_Initialize(this, AuxFilterSearchFrameFiltersQualityDropDown_Initialize)
+            UIDropDownMenu_Initialize(this, private.initialize_quality_dropdown)
         end)
+        private.quality_dropdown = dropdown
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentMinLevel')
@@ -761,7 +787,6 @@ function public.start_search()
 
         local queries
 
---            queries = { private.create_filter_query() }
         local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
         if filters then
             queries = Aux.util.map(filters, function(filter)
@@ -808,9 +833,7 @@ function public.start_search()
             end,
             on_read_auction = function(auction_info)
                 auctions = auctions or {}
---                if Aux.info.tooltip_match(tooltip_patterns, auction_info.tooltip) then
                 tinsert(auctions, private.create_auction_record(auction_info))
---                end
             end,
             on_complete = function()
                 auctions = auctions or {}
@@ -961,83 +984,93 @@ function public.on_update()
 	end
 end
 
-function AuxFilterSearchFrameFiltersCategoryDropDown_Initialize(arg1)
-	local level = arg1 or 1
+function private.initialize_class_dropdown()
+    local function on_click()
+        if this.value ~= UIDropDownMenu_GetSelectedValue(private.class_dropdown) then
+            UIDropDownMenu_ClearAll(private.subclass_dropdown)
+            UIDropDownMenu_ClearAll(private.slot_dropdown)
+        end
+        UIDropDownMenu_SetSelectedValue(private.class_dropdown, this.value)
+    end
 
-	if level == 1 then
-		local value = {}
-		UIDropDownMenu_AddButton({
-			text = ALL,
-			value = value,
-			func = AuxFilterSearchFrameFiltersCategoryDropDown_OnClick,
-		}, 1)
+    UIDropDownMenu_AddButton{
+        text = ALL,
+        func = on_click,
+    }
 
-		for i, class in pairs({ GetAuctionItemClasses() }) do
-			local value = { class = i }
-			UIDropDownMenu_AddButton({
-				hasArrow = GetAuctionItemSubClasses(value.class),
-				text = class,
-				value = value,
-				func = AuxFilterSearchFrameFiltersCategoryDropDown_OnClick,
-			}, 1)
-		end
-	end
-
-	if level == 2 then
-		local menu_value = UIDROPDOWNMENU_MENU_VALUE
-		for i, subclass in pairs({ GetAuctionItemSubClasses(menu_value.class) }) do
-			local value = { class = menu_value.class, subclass = i }
-			UIDropDownMenu_AddButton({
-				hasArrow = GetAuctionInvTypes(value.class, value.subclass),
-				text = subclass,
-				value = value,
-				func = AuxFilterSearchFrameFiltersCategoryDropDown_OnClick,
-			}, 2)
-		end
-	end
-
-	if level == 3 then
-		local menu_value = UIDROPDOWNMENU_MENU_VALUE
-		for i, slot in pairs({ GetAuctionInvTypes(menu_value.class, menu_value.subclass) }) do
-			local slot_name = getglobal(slot)
-			local value = { class = menu_value.class, subclass = menu_value.subclass, slot = i }
-			UIDropDownMenu_AddButton({
-				text = slot_name,
-				value = value,
-				func = AuxFilterSearchFrameFiltersCategoryDropDown_OnClick,
-			}, 3)
-		end
-	end
+    for i, class in pairs({ GetAuctionItemClasses() }) do
+        UIDropDownMenu_AddButton{
+            text = class,
+            value = i,
+            func = on_click,
+        }
+    end
 end
 
-function AuxFilterSearchFrameFiltersCategoryDropDown_OnClick()
-	local qualified_name = ({ GetAuctionItemClasses() })[this.value.class] or 'All'
-	if this.value.subclass then
-		local subclass_name = ({ GetAuctionItemSubClasses(this.value.class) })[this.value.subclass]
-		qualified_name = qualified_name .. ' - ' .. subclass_name
-		if this.value.slot then
-			local slot_name = getglobal(({ GetAuctionInvTypes(this.value.class, this.value.subclass) })[this.value.slot])
-			qualified_name = qualified_name .. ' - ' .. slot_name
-		end
-	end
+function private.initialize_subclass_dropdown()
 
-	UIDropDownMenu_SetSelectedValue(private.category_dropdown, this.value)
-	UIDropDownMenu_SetText(qualified_name, private.category_dropdown)
-	CloseDropDownMenus(1)
+    local function on_click()
+        if this.value ~= UIDropDownMenu_GetSelectedValue(private.subclass_dropdown) then
+            UIDropDownMenu_ClearAll(private.slot_dropdown)
+        end
+        UIDropDownMenu_SetSelectedValue(private.subclass_dropdown, this.value)
+    end
+
+    local class_index = UIDropDownMenu_GetSelectedValue(private.class_dropdown)
+
+    if class_index and GetAuctionItemSubClasses(class_index) then
+        UIDropDownMenu_AddButton{
+            text = ALL,
+            func = on_click,
+        }
+
+        for i, subclass in pairs({ GetAuctionItemSubClasses(class_index) }) do
+            UIDropDownMenu_AddButton{
+                text = subclass,
+                value = i,
+                func = on_click,
+            }
+        end
+    end
 end
 
-function AuxFilterSearchFrameFiltersQualityDropDown_Initialize()
+function private.initialize_slot_dropdown()
+
+    local function on_click()
+        UIDropDownMenu_SetSelectedValue(private.slot_dropdown, this.value)
+    end
+
+    local class_index = UIDropDownMenu_GetSelectedValue(private.class_dropdown)
+    local subclass_index = UIDropDownMenu_GetSelectedValue(private.subclass_dropdown)
+
+    if class_index and subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
+        UIDropDownMenu_AddButton{
+            text = ALL,
+            func = on_click,
+        }
+
+        for i, slot in pairs({ GetAuctionInvTypes(class_index, subclass_index) }) do
+            local slot_name = getglobal(slot)
+            UIDropDownMenu_AddButton{
+                text = slot_name,
+                value = slot,
+                func = on_click,
+            }
+        end
+    end
+end
+
+function private.initialize_quality_dropdown()
 
     local function on_click()
         UIDropDownMenu_SetSelectedValue(private.quality_dropdown, this.value)
     end
 
 	UIDropDownMenu_AddButton{
-		text = 'All',
-		value = -1,
+		text = ALL,
 		func = on_click,
 	}
-	for i=0,getn(ITEM_QUALITY_COLORS)-2 do
+	for i=0,4 do
 		UIDropDownMenu_AddButton{
 			text = getglobal('ITEM_QUALITY'..i..'_DESC'),
 			value = i,

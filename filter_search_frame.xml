@@ -40,14 +40,13 @@
                     </Frame>
                 </Frames>
             </Frame>
-            <Frame name="$parentSaved">
-                <Size><AbsDimension x="900" y="380"/></Size>
+            <Frame name="$parentSaved" inherits="AuxFrameBoxTemplate">
+                <Size><AbsDimension x="985" y="278"/></Size>
                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="3" y="-82"/></Offset></Anchor></Anchors>
                 <Frames>
                     <Frame name="$parentFavorite" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension x="488" y="280"/></Size>
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-                        <Anchors><Anchor point="TOPRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
+                        <Size><AbsDimension x="484" y="270"/></Size>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="4" y="-4"/></Offset></Anchor></Anchors>
                         <Frames>
                             <Frame name="$parentListing">
                                 <Size><AbsDimension x="0" y="250"/></Size>
@@ -56,8 +55,8 @@
                         </Frames>
                     </Frame>
                     <Frame name="$parentRecent" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension x="488" y="280"/></Size>
-                        <Anchors><Anchor point="TOPLEFT" relativeTo="$parentFavorite" relativePoint="TOPRIGHT"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor></Anchors>
+                        <Size><AbsDimension x="484" y="270"/></Size>
+                        <Anchors><Anchor point="TOPRIGHT"><Offset><AbsDimension x="-4" y="-4"/></Offset></Anchor></Anchors>
                         <Frames>
                             <Frame name="$parentListing">
                                 <Size><AbsDimension x="0" y="250"/></Size>

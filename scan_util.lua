@@ -47,34 +47,17 @@ function m.find(test, query, page, status_bar, on_failure, on_success)
     end)
 end
 
-function m.create_item_filter(item_id)
+function m.create_item_query(item_id)
+
     local item_info = Aux.static.item_info(item_id)
 
     if item_info then
+        local filter = m.filter_from_string(item_info.name..'/exact')
         return {
-            exact_only = true,
-            name = item_info.name,
-            min_level = item_info.level,
-            min_level = item_info.level,
-            slot = item_info.slot,
-            class = item_info.class,
-            subclass = item_info.subclass,
-            quality = item_info.quality,
-            usable = item_info.usable,
-        }
-    end
-end
-
-function m.create_item_query(item_id)
-
-    local filter = m.create_item_filter(item_id)
-
-    if filter then
-        return {
-        type = 'list',
-        start_page = 0,
-        validator = m.validator(filter),
-        blizzard_query = m.blizzard_query(filter),
+            type = 'list',
+            start_page = 0,
+            validator = m.validator(filter),
+            blizzard_query = m.blizzard_query(filter),
         }
     end
 end
@@ -111,10 +94,10 @@ function m.filter_from_string(filter_term)
         if tonumber(str) then
             if not filter.min_level then
                 filter.min_level = tonumber(str)
-            elseif not filter.max_level then
+            elseif not filter.max_level and tonumber(str) >= filter.min_level then
                 filter.max_level = tonumber(str)
             else
-                return false, 'Invalid Min Level'
+                return false, 'Invalid Level Range'
             end
         elseif not filter.class and Aux.item_class_index(str) then
             if not filter.class then
@@ -128,6 +111,12 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Invalid Item Subclass'
             end
+        elseif filter.subclass and Aux.item_slot(filter.class, filter.class, str) then
+            if not filter.slot then
+                filter.slot = Aux.item_slot(filter.class, filter.class, str)
+            else
+                return false, 'Invalid Item Slot'
+            end
         elseif Aux.item_quality_index(str) then
             if not filter.quality then
                 filter.quality = Aux.item_quality_index(str)
@@ -135,28 +124,22 @@ function m.filter_from_string(filter_term)
                 return false, 'Invalid Item Rarity'
             end
         elseif strlower(str) == 'usable' then
-            if not filter.usable_only then
-                filter.usable_only = true
+            if not filter.usable then
+                filter.usable = true
             else
                 return false, 'Invalid Usable Only Filter'
             end
         elseif strlower(str) == 'exact' then
-            if not filter.exact_only then
-                filter.exact_only = true
+            if not filter.exact then
+                filter.exact = true
             else
                 return false, 'Invalid Exact Only Filter'
-            end
-        elseif strlower(str) == 'even' then
-            if not filter.even_only then
-                filter.even_only = true
-            else
-                return false, 'Invalid Even Only Filter'
             end
         elseif strlower(str) == 'discard' then
             if not filter.discard then
                 filter.discard = true
             else
-                return false, 'Invalid Even Only Filter'
+                return false, 'Invalid Discard Filter'
             end
         elseif Aux.money.from_string(str) > 0 then
             if not filter.max_price then
@@ -171,71 +154,75 @@ function m.filter_from_string(filter_term)
         end
     end
 
-    if filter.exact_only then
-        if filter.min_level or filter.max_level or filter.class or filter.subclass or filter.quality or filter.usable_only then
+    if filter.exact then
+        if filter.min_level or filter.max_level or filter.class or filter.subclass or filter.slot or filter.quality or filter.usable or not Aux.static.auctionable_items[strupper(filter.name)] then
             return false, 'Invalid Exact Only Filter'
         end
-        local id = Aux.static.auctionable_items[strupper(filter.name)]
-        if id then
-            local item_filter = m.create_item_filter(id)
-            item_filter.even_only = filter.even_only
-            item_filter.discard = filter.discard
-            return item_filter
-        end
-        return false, 'Invalid Exact Only Filter'
-    end
-
-    if filter.max_level then
-        filter.min_level, filter.max_level = min(filter.min_level, filter.max_level), max(filter.min_level, filter.max_level)
     end
 
     return filter
 end
 
-function m.filter_to_string(filter) -- TODO belongs in filter search
+function m.filter_to_string(filter)
 
     local filter_term = filter.name or ''
 
+    local function add(part)
+        filter_term = filter_term == '' and part or filter_term..'/'..part
+    end
+
+    if filter.min_level then
+        add(filter.min_level)
+    end
+
     if filter.max_level then
-        filter_term = format('%s/%d/%d', filter_term, filter.min_level, filter.max_level)
-    elseif filter.min_level then
-        filter_term = format('%s/%d', filter_term, filter.min_level)
+        add(filter.max_level)
     end
 
     if filter.class then
         local classes = { GetAuctionItemClasses() }
-        filter_term = format('%s/%s', filter_term, classes[filter.class])
+        add(classes[filter.class])
         if filter.subclass then
             local subclasses = {GetAuctionItemSubClasses(filter.class)}
-            filter_term = format('%s/%s', filter_term, subclasses[filter.subclass])
+            add(subclasses[filter.subclass])
+            if filter.slot then
+                add(getglobal(filter.slot))
+            end
         end
     end
 
     if filter.quality then
-        filter_term = format('%s/%s', filter_term,  getglobal['ITEM_QUALITY'..filter.quality..'_DESC'])
+        add(getglobal('ITEM_QUALITY'..filter.quality..'_DESC'))
     end
 
-    if filter.usable_only then
-        filter_term = format('%s/usable', filter_term)
+    if filter.usable then
+        add(filter_term)
     end
 
-    if filter.exact_only then
-        filter_term = format('%s/exact', filter_term)
+    if filter.exact then
+        add(filter_term)
     end
 
     return filter_term
 end
 
 function m.blizzard_query(filter)
+
+    local item_info
+    if filter.exact then
+        local item_id = Aux.static.auctionable_items[strupper(filter.name)]
+        item_info = Aux.static.auctionable_items[item_id]
+    end
+
     return {
         name = filter.name,
-        min_level = filter.min_level,
-        max_level = filter.max_level,
-        slot = filter.slot,
-        class = filter.class,
-        subclass = filter.subclass,
-        usable = filter.usable_only and 1 or 0,
-        quality = filter.quality,
+        min_level = filter.exact and item_info.level or filter.min_level,
+        max_level = filter.exact and item_info.level or filter.max_level,
+        slot = filter.exact and item_info.slot or filter.slot,
+        class = filter.exact and item_info.class or filter.class,
+        subclass = filter.exact and item_info.subclass or filter.subclass,
+        usable = filter.exact and item_info.usable or filter.usable and 1 or 0,
+        quality = filter.exact and item_info.quality or filter.quality,
     }
 end
 
@@ -245,10 +232,7 @@ function m.validator(filter)
         if filter.discard then
             return
         end
-        if filter.exact_only and record.name ~= filter.name then
-            return
-        end
-        if filter.even_only and mod(record.aux_quantity, 5) ~= 0 then
+        if filter.exact and strupper(record.name) ~= strupper(filter.name) then
             return
         end
         if filter.min_level and record.level < filter.min_level then
