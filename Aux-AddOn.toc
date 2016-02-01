@@ -19,6 +19,7 @@ stack.lua
 post.lua
 sheet.lua
 listing.lua
+auction_listing.lua
 listing_util.lua
 history.lua
 info.xml

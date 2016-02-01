@@ -16,8 +16,29 @@ private.elements = {
 }
 
 function private.update_search_listings()
-    Aux.sheet.populate(private.listings.favorite_searches, aux_favorite_searches)
-    Aux.sheet.populate(private.listings.recent_searches, aux_recent_searches)
+    local favorite_search_rows = {}
+    for i, favorite_search in ipairs(aux_favorite_searches) do
+        local name = Aux.test.prettify_search(favorite_search)
+        tinsert(favorite_search_rows, {
+            cols = {{value=name}},
+            search = favorite_search,
+            index = i,
+            name = name,
+        })
+    end
+    private.favorite_searches_listing:SetData(favorite_search_rows)
+
+    local recent_search_rows = {}
+    for i, recent_search in ipairs(aux_recent_searches) do
+        local name = Aux.test.prettify_search(recent_search)
+        tinsert(recent_search_rows, {
+            cols = {{value=name}},
+            search = recent_search,
+            index = i,
+            name = name,
+        })
+    end
+    private.recent_searches_listing:SetData(recent_search_rows)
 end
 
 function private.update_tab(tab)
@@ -92,213 +113,6 @@ function public.on_open()
 end
 
 function public.on_load()
-    private.recent_searches_config = {
-        plain = true,
-        frame = AuxFilterSearchFrameSavedRecentListing,
-        on_row_click = function (sheet, row_index)
-            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            PlaySound('igMainMenuOptionCheckBoxOn')
-            if arg1 == 'LeftButton' then
-                private.search_box:SetText(sheet.data[data_index])
-                if not IsShiftKeyDown() then
-                    public.start_search()
-                end
-            elseif arg1 == 'RightButton' then
-                tinsert(aux_favorite_searches, sheet.data[data_index])
-                private.update_search_listings()
-            end
-        end,
-        on_row_enter = function(sheet, row_index)
-            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:AddLine(gsub(sheet.rows[row_index].cells[1].text:GetText(), ';', '\n'), 255/255, 254/255, 250/255)
-            GameTooltip:Show()
-        end,
-        on_row_leave = function(sheet, row_index)
-            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            GameTooltip:ClearLines()
-            GameTooltip:Hide()
-        end,
-        columns = {
-            {
-                width = 440,
-                comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
-                cell_setter = function(cell, filter_string)
-                    cell.text:SetText(Aux.test.prettify_search(filter_string))
-                end,
-            },
-        },
-        sort_order = {},
-    }
-    private.favorite_searches_config = {
-        plain = true,
-        frame = AuxFilterSearchFrameSavedFavoriteListing,
-        on_row_click = function (sheet, row_index)
-            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            PlaySound('igMainMenuOptionCheckBoxOn')
-            if arg1 == 'LeftButton' then
-                private.search_box:SetText(sheet.data[data_index])
-                if not IsShiftKeyDown() then
-                    public.start_search()
-                end
-            elseif arg1 == 'RightButton' then
-                tremove(aux_favorite_searches, Aux.util.index_of(sheet.data[data_index], aux_favorite_searches))
-                private.update_search_listings()
-            end
-        end,
-        on_row_enter = function(sheet, row_index)
-            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:AddLine(gsub(sheet.rows[row_index].cells[1].text:GetText(), ';', '\n'), 255/255, 254/255, 250/255)
-            GameTooltip:Show()
-        end,
-        on_row_leave = function(sheet, row_index)
-            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            GameTooltip:ClearLines()
-            GameTooltip:Hide()
-        end,
-        columns = {
-            {
-                width = 440,
-                comparator = function(filter_string1, filter_string2) return Aux.util.compare(filter_string1, filter_string2, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('LEFT'),
-                cell_setter = function(cell, filter_string)
-                    cell.text:SetText(Aux.test.prettify_search(filter_string))
-                end,
-            },
-        },
-        sort_order = {{ column = 1, order = 'ascending' }},
-    }
-    private.results_config = {
-        frame = AuxFilterSearchFrameResultsListing,
-        on_row_click = function(sheet, row_index)
-            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            private.on_row_click(sheet.data[data_index], true)
-        end,
-        on_row_enter = function(sheet, row_index)
-            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
-        end,
-        on_row_leave = function(sheet, row_index)
-            AuxTooltip:Hide()
-            ResetCursor()
-        end,
-        on_row_update = function(sheet, row_index)
-            if IsControlKeyDown() then
-                ShowInspectCursor()
-            elseif IsAltKeyDown() then
-                SetCursor('BUY_CURSOR')
-            else
-                ResetCursor()
-            end
-        end,
-        selected = function(datum)
-            return Aux.util.any(datum, function(entry) return entry == selected_auction end)
-        end,
-        row_setter = function(row, group)
-            row:SetAlpha(Aux.util.all(group, function(auction) return auction.gone end) and 0.3 or 1)
-            row.itemstring = Aux.info.itemstring(group[1].item_id, group[1].suffix_id, nil, group[1].enchant_id)
-            row.EnhTooltip_info = group[1].EnhTooltip_info
-        end,
-        columns = {
-            {
-                title = 'Auction Item',
-                width = 280,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].name, group2[1].name, Aux.util.GT) end,
-                cell_initializer = function(cell)
-                    local icon = CreateFrame('Button', nil, cell)
-                    icon:EnableMouse(false)
-                    local icon_texture = icon:CreateTexture(nil, 'BORDER')
-                    icon_texture:SetAllPoints(icon)
-                    icon.icon_texture = icon_texture
-                    local normal_texture = icon:CreateTexture(nil)
-                    normal_texture:SetPoint('CENTER', 0, 0)
-                    normal_texture:SetWidth(22)
-                    normal_texture:SetHeight(22)
-                    normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
-                    icon:SetNormalTexture(normal_texture)
-                    icon:SetPoint('LEFT', cell)
-                    icon:SetWidth(12)
-                    icon:SetHeight(12)
-                    local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
-                    text:SetPoint('LEFT', icon, 'RIGHT', 1, 0)
-                    text:SetPoint('TOPRIGHT', cell)
-                    text:SetPoint('BOTTOMRIGHT', cell)
-                    text:SetJustifyV('TOP')
-                    text:SetJustifyH('LEFT')
-                    text:SetTextColor(0.8, 0.8, 0.8)
-                    cell.text = text
-                    cell.icon = icon
-                end,
-                cell_setter = function(cell, group)
-                    cell.icon.icon_texture:SetTexture(Aux.info.item(group[1].item_id).texture)
-                    if not group[1].usable then
-                        cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
-                    else
-                        cell.icon.icon_texture:SetVertexColor(1.0, 1.0, 1.0)
-                    end
-                    cell.text:SetText('['..group[1].tooltip[1][1].text..']')
-                    local color = ITEM_QUALITY_COLORS[group[1].quality]
-                    cell.text:SetTextColor(color.r, color.g, color.b)
-                end,
-            },
-            {
-                title = 'Qty',
-                width = 25,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].aux_quantity, group2[1].aux_quantity, Aux.util.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, group)
-                    cell.text:SetText(group[1].aux_quantity)
-                end,
-            },
-            Aux.listing_util.money_column('Bid', function(group) return group[1].bid_price end),
-            Aux.listing_util.money_column('Buy', function(group) return group[1].buyout_price end),
-            Aux.listing_util.money_column('Bid/ea', function(group) return group[1].unit_bid_price end),
-            Aux.listing_util.money_column('Buy/ea', function(group) return group[1].unit_buyout_price end),
-            {
-                title = 'Avail',
-                width = 40,
-                comparator = function(group1, group2) return Aux.util.compare(getn(Aux.util.filter(group1, function(auction) return not auction.gone end)), getn(Aux.util.filter(group2, function(auction) return not auction.gone end)), Aux.util.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, group)
-                    cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))
-                end,
-            },
-            {
-                title = 'Lvl',
-                width = 25,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].level, group2[1].level, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, group)
-                    local level = max(1, group[1].level)
-                    local text
-                    if level > UnitLevel('player') then
-                        text = RED_FONT_COLOR_CODE..level..FONT_COLOR_CODE_CLOSE
-                    else
-                        text = level
-                    end
-                    cell.text:SetText(text)
-                end,
-            },
-            {
-                title = 'Status',
-                width = 70,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].status, group2[1].status, Aux.util.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                cell_setter = function(cell, group)
-                    cell.text:SetText(group[1].status)
-                end,
-            },
-            Aux.listing_util.duration_column(function(group) return group[1].duration end),
-            Aux.listing_util.owner_column(function(group) return group[1].owner end),
-            Aux.listing_util.percentage_market_column(function(group) return group[1].item_key end, function(group) return group[1].unit_buyout_price end),
-        },
-        sort_order = {{ column = 1, order = 'ascending' }, { column = 4, order = 'ascending' }},
-    }
-
-    private.listings = {
-        favorite_searches = Aux.sheet.create(private.favorite_searches_config),
-        recent_searches = Aux.sheet.create(private.recent_searches_config),
-        results = Aux.sheet.create(private.results_config),
-    }
     do
         local panel = Aux.gui.panel(AuxFilterSearchFrame, '$parentFilters')
         panel:SetWidth(600)
@@ -391,18 +205,6 @@ function public.on_load()
         private.new_filter_button = btn
     end
     do
-        local line = Aux.gui.horizontal_line(AuxFilterSearchFrameSavedRecent, -30)
-        local label = Aux.gui.label(AuxFilterSearchFrameSavedRecent, 15)
-        label:SetPoint('BOTTOM', line, 'TOP', 0, 7)
-        label:SetText('Recent Searches')
-    end
-    do
-        local line = Aux.gui.horizontal_line(AuxFilterSearchFrameSavedFavorite, -30)
-        local label = Aux.gui.label(AuxFilterSearchFrameSavedFavorite, 15)
-        label:SetPoint('BOTTOM', line, 'TOP', 0, 7)
-        label:SetText('Favorite Searches')
-    end
-    do
         local btn1 = Aux.gui.button(private.elements[FILTER].filters, 16)
         btn1:SetPoint('BOTTOMLEFT', 8, 15)
         btn1:SetWidth(80)
@@ -433,8 +235,8 @@ function public.on_load()
     do
         local status_bar = Aux.gui.status_bar(AuxFilterSearchFrame)
         status_bar:SetWidth(265)
-        status_bar:SetHeight(26)
-        status_bar:SetPoint('BOTTOMLEFT', AuxFilterSearchFrame, 'BOTTOMLEFT', 6, 6)
+        status_bar:SetHeight(25)
+        status_bar:SetPoint('TOPLEFT', AuxFilterSearchFrameResults, 'BOTTOMLEFT', 0, -3)
         status_bar:update_status(100, 0)
         status_bar:set_text('')
         private.status_bar = status_bar
@@ -946,28 +748,83 @@ function public.on_load()
     private.testlisting:SetSort(9)
     private.testlisting:Clear()
     private.testlisting:SetHandler('OnSelectionChanged', private.on_selection_changed)
+
+    local handlers = {
+        OnClick = function(st, data, _, button)
+            if not data then return end
+            if button == 'LeftButton' then
+                if IsShiftKeyDown() then
+--                    private.popupInfo.export = data.search
+--                        TSMAPI.Util:ShowStaticPopupDialog('TSM_SHOPPING_SAVED_EXPORT_POPUP')
+                elseif IsControlKeyDown() then
+--                    private.popupInfo.renameInfo = data.searchInfo
+--                    TSMAPI.Util:ShowStaticPopupDialog('TSM_SHOPPING_SAVED_RENAME_POPUP')
+                else
+                    private.search_box:SetText(data.search)
+                    public.start_search()
+                end
+            elseif button == 'RightButton' then
+                if st == private.recent_searches_listing then
+                    if IsShiftKeyDown() then
+                        tremove(TSM.db.global.savedSearches, data.index)
+--                        TSM:Printf('Removed '%s' from your recent searches.', data.searchInfo.name)
+                        private.UpdateSTData()
+                    else
+                        tinsert(aux_favorite_searches, data.search)
+--                        data.searchInfo.isFavorite = true
+----                        TSM:Printf('Added '%s' to your favorite searches.', data.searchInfo.name)
+--                        private.UpdateSTData()
+                    end
+                elseif st == private.favorite_searches_listing then
+                    tremove(aux_favorite_searches, data.index)
+--                    data.searchInfo.isFavorite = nil
+--                    TSM:Printf('Removed '%s' from your favorite searches.', data.searchInfo.name)
+                end
+                private.update_search_listings()
+            end
+        end,
+        OnEnter = function(st, data, self)
+            if not data then return end
+                        GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+                        GameTooltip:AddLine(gsub(data.name, ';', '\n'), 255/255, 254/255, 250/255)
+                        GameTooltip:Show()
+--            GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
+--            GameTooltip:AddLine(data.search, 1, 1, 1, true)
+--            GameTooltip:AddLine("")
+--            local color = TSMAPI.Design:GetInlineColor("link")
+--            if st == private.frame.saved.recentST then
+--                GameTooltip:AddLine(color..'Left-Click to run this search.', 1, 1, 1, true)
+--                GameTooltip:AddLine(color..'Shift-Left-Click to export this search.', 1, 1, 1, true)
+--                GameTooltip:AddLine(color..'Ctrl-Left-Click to rename this search.', 1, 1, 1, true)
+--                GameTooltip:AddLine(color..'Right-Click to favorite this recent search.', 1, 1, 1, true)
+--                GameTooltip:AddLine(color..'Shift-Right-Click to remove this recent search.', 1, 1, 1, true)
+--            elseif st == private.frame.saved.favoriteST then
+--                GameTooltip:AddLine(color..'Left-Click to run this search.', 1, 1, 1, true)
+--                GameTooltip:AddLine(color..'Shift-Left-Click to export this search.', 1, 1, 1, true)
+--                GameTooltip:AddLine(color..'Ctrl-Left-Click to rename this search.', 1, 1, 1, true)
+--                GameTooltip:AddLine(color..'Right-Click to remove from favorite searches.', 1, 1, 1, true)
+--            end
+            GameTooltip:Show()
+        end,
+        OnLeave = function()
+            GameTooltip:ClearLines()
+            GameTooltip:Hide()
+        end
+    }
+
+    private.recent_searches_listing = CreateScrollingTable(AuxFilterSearchFrameSavedRecent)
+    private.recent_searches_listing:SetColInfo({{name='Recent Searches', width=1}})
+    private.recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
+    private.recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
+
+    private.favorite_searches_listing = CreateScrollingTable(AuxFilterSearchFrameSavedFavorite)
+    private.favorite_searches_listing:SetColInfo({{name='Favorite Searches', width=1}})
+    private.favorite_searches_listing:SetHandler('OnClick', handlers.OnClick)
+    private.favorite_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
 end
 
 function public.stop_search()
 	Aux.scan.abort()
-end
-
-function private.update_listing()
-
---    if not AuxFilterSearchFrame:IsVisible() then
---        return
---    end
---
---    local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
---    Aux.sheet.populate(private.listings.results, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2)
---        return a1.item_id == a2.item_id
---                and a1.suffix_id == a2.suffix_id
---                and a1.enchant_id == a2.enchant_id
---                and a1.aux_quantity == a2.aux_quantity
---                and a1.buyout_price == a2.buyout_price
---                and a1.bid_price == a2.bid_price
---                and a1.owner == a2.owner
---    end) or {})
 end
 
 function public.start_search()

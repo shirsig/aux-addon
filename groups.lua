@@ -8,7 +8,7 @@ function m.prettify_search(search)
         if name then
             search = gsub(search, item_pattern, m.display_name(Aux.static.auctionable_items[strupper(name)])..in_between, 1)
         else
-            return search
+            return Aux.gui.inline_color({216, 225, 211, 1})..search..'|r'
         end
     end
 end

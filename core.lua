@@ -84,9 +84,9 @@ function Aux_OnLoad()
         end)
     end
 
-    AuxFrameContent:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size})
-    AuxFrameContent:SetBackdropColor(unpack(Aux.gui.config.content_color))
-    AuxFrameContent:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
+--    AuxFrameContent:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size})
+--    AuxFrameContent:SetBackdropColor(unpack(Aux.gui.config.content_color))
+--    AuxFrameContent:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
 
 --    Aux.item_search_frame.on_load()
     Aux.filter_search_frame.on_load()
