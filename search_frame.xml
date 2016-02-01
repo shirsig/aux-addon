@@ -12,18 +12,23 @@
 
     <Frame name="AuxFilterSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
-            <Frame name="$parentFilter">
+            <Frame name="$parentFilter" inherits="AuxFrameBoxTemplate">
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="AuxFrameContent"></Anchor>
                     <Anchor point="BOTTOMRIGHT" relativeTo="AuxFrameContent"></Anchor>
-                </Anchors>                <Frames>
-                    <CheckButton name="$parentUsableCheckButton" inherits="UICheckButtonTemplate" hidden="true">
+                </Anchors>
+                <Frames>
+                    <CheckButton name="$parentExactCheckButton" inherits="UICheckButtonTemplate">
                         <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-136" /></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="362" y="-20" /></Offset></Anchor></Anchors>
                     </CheckButton>
-                    <CheckButton name="$parentExactCheckButton" inherits="UICheckButtonTemplate" hidden="true">
+                    <CheckButton name="$parentUsableCheckButton" inherits="UICheckButtonTemplate">
                         <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="120" y="-136" /></Offset></Anchor></Anchors>
+                        <Anchors><Anchor point="TOPLEFT" relativeTo="$parentExactCheckButton" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="-20" /></Offset></Anchor></Anchors>
+                    </CheckButton>
+                    <CheckButton name="$parentDiscardCheckButton" inherits="UICheckButtonTemplate">
+                        <Size><AbsDimension x="22" y="22"/></Size>
+                        <Anchors><Anchor point="TOPLEFT" relativeTo="$parentUsableCheckButton" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="-20" /></Offset></Anchor></Anchors>
                     </CheckButton>
                 </Frames>
             </Frame>
@@ -32,14 +37,6 @@
                     <Anchor point="TOPLEFT" relativeTo="AuxFrameContent"></Anchor>
                     <Anchor point="BOTTOMRIGHT" relativeTo="AuxFrameContent"></Anchor>
                 </Anchors>
-                <Frames>
-                    <Frame name="$parentListing" hidden="true">
-                        <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="5"/></Offset></Anchor>
-                            <!--<Anchor point="BOTTOM"><Offset><AbsDimension x="-8" y="-15"/></Offset></Anchor>-->
-                        </Anchors>
-                    </Frame>
-                </Frames>
             </Frame>
             <Frame name="$parentSaved" inherits="AuxFrameBoxTemplate">
                 <Anchors>

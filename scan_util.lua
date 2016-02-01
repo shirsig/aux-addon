@@ -147,6 +147,12 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Invalid Max Price Filter'
             end
+        elseif strfind(str, '^%d+%%$') then
+            if not filter.max_percent then
+                filter.max_percent = tonumber(({strfind(str, '(%d+)%%')})[3])
+            else
+                return false, 'Invalid Max Percent Filter'
+            end
         elseif i == 1 then
             filter.name = str
         else
@@ -242,6 +248,12 @@ function m.validator(filter)
             return
         end
         if filter.max_price and record.buyout_price > filter.max_price then
+            return
+        end
+        if filter.max_percent and (record.unit_buyout_price == 0
+            or not Aux.history.market_value(record.item_key)
+            or record.unit_buyout_price / Aux.history.market_value(record.item_key) * 100 > filter.max_percent)
+        then
             return
         end
         return true

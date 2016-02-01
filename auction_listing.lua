@@ -1,5 +1,6 @@
-local private, public = {}
+local private, public = {}, {}
 Aux.auction_listing = public
+
 local RT_COUNT = 1
 local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
@@ -340,10 +341,10 @@ local methods = {
                 end
             end
             -- sort the row info
-            for i, info in ipairs(self.rowInfo) do
-                sort(info.children, SortHelperFunc)
-            end
-            sort(self.rowInfo, SortHelperFunc)
+--            for i, info in ipairs(self.rowInfo) do
+--                sort(info.children, SortHelperFunc)
+--            end
+--            sort(self.rowInfo, SortHelperFunc)
             self.sortInfo.isSorted = true
         end
 
@@ -590,7 +591,7 @@ local methods = {
     end,
 }
 
-function CreateAuctionResultsTable(parent)
+function public.CreateAuctionResultsTable(parent)
     local colInfo = {
         {name="Item", width=0.35},
         {name="Lvl", width=0.035, align="CENTER"},
