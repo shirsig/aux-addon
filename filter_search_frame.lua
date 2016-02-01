@@ -48,9 +48,11 @@ function private.update_tab(tab)
     private.new_filter_button:UnlockHighlight()
     AuxFilterSearchFrameResults:Hide()
     AuxFilterSearchFrameSaved:Hide()
+    Aux.hide_elements(RESULTS)
     Aux.hide_elements(private.elements[FILTER])
 
     if tab == RESULTS then
+        Aux.show_elements(RESULTS)
         AuxFilterSearchFrameResults:Show()
         private.search_results_button:LockHighlight()
     elseif tab == SAVED then
@@ -79,27 +81,27 @@ end
 
 function private.get_form_filter()
     return {
-        name = AuxFilterSearchFrameFiltersNameInputBox:GetText(),
-        min_level = tonumber(AuxFilterSearchFrameFiltersMinLevel:GetText()),
-        max_level = tonumber(AuxFilterSearchFrameFiltersMaxLevel:GetText()),
+        name = AuxFilterSearchFrameFilterNameInputBox:GetText(),
+        min_level = tonumber(AuxFilterSearchFrameFilterMinLevel:GetText()),
+        max_level = tonumber(AuxFilterSearchFrameFilterMaxLevel:GetText()),
         class = UIDropDownMenu_GetSelectedValue(private.class_dropdown),
         subclass = UIDropDownMenu_GetSelectedValue(private.subclass_dropdown),
         slot = UIDropDownMenu_GetSelectedValue(private.slot_dropdown),
         quality = UIDropDownMenu_GetSelectedValue(private.quality_dropdown),
-        usable = AuxFilterSearchFrameFiltersUsableCheckButton:GetChecked(),
-        exact = AuxFilterSearchFrameFiltersExactCheckButton:GetChecked(),
+        usable = AuxFilterSearchFrameFilterUsableCheckButton:GetChecked(),
+        exact = AuxFilterSearchFrameFilterExactCheckButton:GetChecked(),
     }
 end
 
 function private.select_auction(entry)
     selected_auction = entry
-    private.buyout_button:Disable()
+    RESULTS.buyout_button:Disable()
     private.bid_button:Disable()
 end
 
 function private.clear_selection(entry)
     selected_auction = nil
-    private.buyout_button:Disable()
+    RESULTS.buyout_button:Disable()
     private.bid_button:Disable()
 end
 
@@ -109,20 +111,17 @@ end
 
 function public.on_open()
     private.update_search_listings()
---    AuxFrame:SetWidth(991)
 end
 
 function public.on_load()
     do
         local panel = Aux.gui.panel(AuxFilterSearchFrame, '$parentFilters')
-        panel:SetWidth(600)
-        panel:SetHeight(290)
-        panel:SetPoint('TOPLEFT', 5, -70)
+        panel:SetAllPoints(AuxFrameContent)
         private.elements[FILTER].filters = panel
     end
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -5, -6)
+        btn:SetPoint('TOPRIGHT', -5, -8)
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Search')
@@ -131,7 +130,7 @@ function public.on_load()
     end
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -5, -6)
+        btn:SetPoint('TOPRIGHT', -5, -8)
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Stop')
@@ -143,7 +142,7 @@ function public.on_load()
         local editbox = Aux.gui.editbox(AuxFilterSearchFrame)
         editbox:EnableMouse(1)
         editbox.complete = Aux.test.complete
-        editbox:SetPoint('TOPLEFT', 5, -6)
+        editbox:SetPoint('TOPLEFT', 5, -8)
         editbox:SetPoint('RIGHT', private.search_button, 'LEFT', -4, 0)
         editbox:SetWidth(400)
         editbox:SetHeight(25)
@@ -175,12 +174,12 @@ function public.on_load()
         private.search_box = editbox
     end
     do
-        Aux.gui.horizontal_line(AuxFilterSearchFrame, -37)
+        Aux.gui.horizontal_line(AuxFilterSearchFrame, -40)
     end
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
-        btn:SetPoint('TOPLEFT', 10, -49)
-        btn:SetWidth(246)
+        btn:SetPoint('BOTTOMLEFT', AuxFrameContent, 'TOPLEFT', 10, 8)
+        btn:SetWidth(243)
         btn:SetHeight(22)
         btn:SetText('Search Results')
         btn:SetScript('OnClick', function() private.update_tab(RESULTS) end)
@@ -189,7 +188,7 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
         btn:SetPoint('TOPLEFT', private.search_results_button, 'TOPRIGHT', 5, 0)
-        btn:SetWidth(246)
+        btn:SetWidth(243)
         btn:SetHeight(22)
         btn:SetText('Saved Searches')
         btn:SetScript('OnClick', function() private.update_tab(SAVED) end)
@@ -198,7 +197,7 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
         btn:SetPoint('TOPLEFT', private.saved_searches_button, 'TOPRIGHT', 5, 0)
-        btn:SetWidth(246)
+        btn:SetWidth(243)
         btn:SetHeight(22)
         btn:SetText('New Filter')
         btn:SetScript('OnClick', function() private.update_tab(FILTER) end)
@@ -248,11 +247,11 @@ function public.on_load()
         btn:SetHeight(24)
         btn:SetText('Buyout')
         btn:Disable()
-        private.buyout_button = btn
+        RESULTS.buyout_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxFilterSearchFrame, 16)
-        btn:SetPoint('TOPLEFT', private.buyout_button, 'TOPRIGHT', 5, 0)
+        local btn = Aux.gui.button(AuxFilterSearchFrameResults, 16)
+        btn:SetPoint('TOPLEFT', RESULTS.buyout_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Bid')
@@ -386,8 +385,8 @@ function public.on_load()
         label:SetText('-')
     end
     do
-        local label = Aux.gui.label(AuxFilterSearchFrameFiltersUsableCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFiltersUsableCheckButton, 'TOPLEFT', 1, -3)
+        local label = Aux.gui.label(AuxFilterSearchFrameFilterUsableCheckButton, 13)
+        label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFilterUsableCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('Usable')
     end
 
@@ -416,7 +415,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -435,7 +434,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -454,7 +453,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -497,7 +496,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -516,7 +515,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -535,7 +534,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -578,7 +577,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -597,7 +596,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -616,7 +615,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -659,7 +658,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -678,7 +677,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -697,7 +696,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFiltersTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -714,34 +713,6 @@ function public.on_load()
             this:ClearFocus()
         end)
     end
-    -- TODO replace with real gui dropdown
---    CreateFrame('Frame', '$parentCategoryDropDown', AuxFilterSearchFrameFilters, 'UIDropDownMenuTemplate')
---    local dropdown = CreateFrame('Frame', '$parentQualityDropDown', AuxFilterSearchFrameFilters, 'UIDropDownMenuTemplate')
-
---    for _, dropdown in ipairs({AuxFilterSearchFrameFiltersCategoryDropDown, AuxFilterSearchFrameFiltersQualityDropDown}) do
---        dropdown:SetWidth(250)
---        dropdown:SetHeight(10)
---        dropdown:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size, insets={top=5,bottom=5}})
---        dropdown:SetBackdropColor(unpack(Aux.gui.config.content_color))
---        dropdown:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
---        local left = getglobal(dropdown:GetName()..'Left'):Hide()
---        local middle = getglobal(dropdown:GetName()..'Middle'):Hide()
---        local right = getglobal(dropdown:GetName()..'Right'):Hide()
---
---        local button = getglobal(dropdown:GetName()..'Button')
-----        button:RegisterForClicks('AnyUp')
---        button:ClearAllPoints()
---        button:SetPoint('RIGHT', dropdown, 0, 0)
---
---        local text = getglobal(dropdown:GetName()..'Text')
---        text:ClearAllPoints()
---        text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
---        text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
---        text:SetFont(Aux.gui.config.content_font, 13)
---        text:SetShadowColor(0, 0, 0, 0)
--- end
-    private.update_tab(SAVED)
-
 
     private.testlisting = CreateAuctionResultsTable(AuxFilterSearchFrameResults)
     private.testlisting:Show()
@@ -817,10 +788,15 @@ function public.on_load()
     private.recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
     private.recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
 
+    Aux.gui.vertical_line(AuxFilterSearchFrameSaved, 379)
+
     private.favorite_searches_listing = CreateScrollingTable(AuxFilterSearchFrameSavedFavorite)
     private.favorite_searches_listing:SetColInfo({{name='Favorite Searches', width=1}})
     private.favorite_searches_listing:SetHandler('OnClick', handlers.OnClick)
     private.favorite_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
+
+
+    private.update_tab(SAVED)
 end
 
 function public.stop_search()
@@ -831,13 +807,13 @@ function public.start_search()
 
     Aux.scan.abort(function()
 
-        local tooltip_patterns = {}
-        for i=1,4 do
-            local tooltip_pattern = getglobal('AuxFilterSearchFrameFiltersTooltipInputBox'..i):GetText()
-            if tooltip_pattern ~= '' then
-                tinsert(tooltip_patterns, tooltip_pattern)
-            end
-        end
+--        local tooltip_patterns = {}
+--        for i=1,4 do
+--            local tooltip_pattern = getglobal('AuxFilterSearchFrameFilterTooltipInputBox'..i):GetText()
+--            if tooltip_pattern ~= '' then
+--                tinsert(tooltip_patterns, tooltip_pattern)
+--            end
+--        end
 
         local queries
 
@@ -891,6 +867,7 @@ function public.start_search()
                 tinsert(scanned_records, auction_info)
             end,
             on_complete = function()
+                private.testlisting:SetDatabase()
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
 
@@ -898,6 +875,7 @@ function public.start_search()
                 private.search_button:Show()
             end,
             on_abort = function()
+                private.testlisting:SetDatabase()
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
                 private.stop_button:Hide()
@@ -947,13 +925,13 @@ function private.process_request(entry, express_mode, buyout_mode)
             end
 
             if entry.buyout_price then
-                private.buyout_button:SetScript('OnClick', function()
+                RESULTS.buyout_button:SetScript('OnClick', function()
                     if test(index) and not entry.gone then
                         Aux.place_bid('list', index, entry.buyout_price, remove_entry)
                     end
                     private.clear_selection()
                 end)
-                private.buyout_button:Enable()
+                RESULTS.buyout_button:Enable()
             end
         end)
     end

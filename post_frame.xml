@@ -35,66 +35,6 @@
                     <Frame name="$parentItem" inherits="AuxItemTemplate">
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-10"/></Offset></Anchor></Anchors>
                     </Frame>
-					<!--<EditBox name="AuxSellStackSize" letters="3" numeric="true" autoFocus="false" inherits="InputBoxTemplate">-->
-						<!--<Size><AbsDimension x="30" y="16"/></Size>-->
-						<!--<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxSellStackSizeSlider"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>-->
-						<!--<Scripts>-->
-							<!--<OnTextChanged>-->
-                                <!--if AuxSellStackSizeSlider.charge_classes then-->
-                                    <!--local charge_slider_value = Aux.util.index_of(this:GetNumber(), AuxSellStackSizeSlider.charge_classes)-->
-                                    <!--if charge_slider_value then-->
-                                        <!--AuxSellStackSizeSlider:SetValue(charge_slider_value)-->
-                                    <!--end-->
-                                <!--else-->
-                                    <!--AuxSellStackSizeSlider:SetValue(this:GetNumber())-->
-                                <!--end-->
-								<!--Aux.post_frame.quantity_update()-->
-							<!--</OnTextChanged>-->
-							<!--<OnTabPressed>-->
-		<!--&lt;!&ndash; 						if (IsShiftKeyDown()) then-->
-									<!--getglobal(this:GetParent():GetName().."BuyoutPriceCopper"):SetFocus();-->
-								<!--else-->
-									<!--getglobal(this:GetParent():GetName().."StackCount"):SetFocus();-->
-								<!--end &ndash;&gt;-->
-							<!--</OnTabPressed>-->
-							<!--<OnEditFocusLost>-->
-								<!--this:HighlightText(0, 0)-->
-							<!--</OnEditFocusLost>-->
-							<!--<OnEditFocusGained>-->
-								<!--this:HighlightText()-->
-							<!--</OnEditFocusGained>-->
-						<!--</Scripts>-->
-					<!--</EditBox>-->
-					<!--<EditBox name="AuxSellStackCount" numeric="true" autoFocus="false" inherits="InputBoxTemplate">-->
-						<!--<Size><AbsDimension x="30" y="16"/></Size>-->
-						<!--<Anchors><Anchor point="LEFT" relativePoint="RIGHT" relativeTo="AuxSellStackCountSlider"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor></Anchors>-->
-						<!--<Scripts>-->
-							<!--<OnTextChanged>-->
-								<!--if AuxSellStackCountSlider.charge_classes then-->
-									<!--local index = Aux.util.index_of(this:GetNumber(), AuxSellStackCountSlider.charge_classes)-->
-									<!--if index then-->
-										<!--AuxSellStackCountSlider:SetValue(index)-->
-									<!--end-->
-								<!--else-->
-									<!--AuxSellStackCountSlider:SetValue(this:GetNumber())-->
-								<!--end-->
-                                <!--Aux.post_frame.quantity_update()-->
-							<!--</OnTextChanged>-->
-							<!--<OnTabPressed>-->
-		<!--&lt;!&ndash; 						if (IsShiftKeyDown()) then-->
-									<!--getglobal(this:GetParent():GetName().."StackSize"):SetFocus();-->
-								<!--else-->
-									<!--getglobal(this:GetParent():GetName().."StartPriceGold"):SetFocus();-->
-								<!--end &ndash;&gt;-->
-							<!--</OnTabPressed>-->
-							<!--<OnEditFocusLost>-->
-								<!--this:HighlightText(0, 0)-->
-							<!--</OnEditFocusLost>-->
-							<!--<OnEditFocusGained>-->
-								<!--this:HighlightText()-->
-							<!--</OnEditFocusGained>-->
-						<!--</Scripts>-->
-					<!--</EditBox>-->
                     <CheckButton name="$parentShortDurationRadio" inherits="AuxRadioButtonTemplate">
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="14" y="-170"/></Offset></Anchor></Anchors>
                         <Scripts>
@@ -128,28 +68,6 @@
                             </OnClick>
                         </Scripts>
                     </CheckButton>
-                    <!--<Frame name="$parentStrategyDropDown" inherits="UIDropDownMenuTemplate">-->
-                        <!--<Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-11" y="-180" /></Offset></Anchor></Anchors>-->
-                        <!--<Layers>-->
-                            <!--<Layer level="BACKGROUND">-->
-                                <!--<FontString name="$parentLabel" inherits="GameFontNormalSmall" text="Suggestion Based On">-->
-                                    <!--<Anchors><Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"><Offset><AbsDimension x="21" y="0"/></Offset></Anchor></Anchors>-->
-                                <!--</FontString>-->
-                                <!--<FontString name="$parentStaleWarning" inherits="GameFontRedSmall">-->
-                                    <!--<Anchors><Anchor point="LEFT" relativePoint="RIGHT"><Offset><AbsDimension x="-6" y="3"/></Offset></Anchor></Anchors>-->
-                                <!--</FontString>-->
-                            <!--</Layer>-->
-                        <!--</Layers>-->
-                        <!--<Scripts>-->
-                            <!--<OnLoad>-->
-                                <!--UIDropDownMenu_SetWidth(100)-->
-                                <!--UIDropDownMenu_Initialize(this, Aux.post_frame.initialize_strategy_dropdown)-->
-                            <!--</OnLoad>-->
-                            <!--<OnShow>-->
-                                <!--UIDropDownMenu_Initialize(this, Aux.post_frame.initialize_strategy_dropdown)-->
-                            <!--</OnShow>-->
-                        <!--</Scripts>-->
-                    <!--</Frame>-->
 				</frames>
 			</frame>
             <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">

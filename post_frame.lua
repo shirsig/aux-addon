@@ -342,7 +342,6 @@ function public.on_open()
     private.deposit:SetText('Deposit: '..Aux.money.to_string(0))
     AuxSellInventory:SetWidth(AuxSellInventoryListing:GetWidth() + 40)
     AuxSellAuctions:SetWidth(AuxSellAuctionsListing:GetWidth() + 40)
-    AuxFrame:SetWidth(AuxSellInventory:GetWidth() + AuxSellParameters:GetWidth() + AuxSellAuctions:GetWidth() + 15)
 
     --    UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, LIVE)
     private.set_auction_duration(AUX_AUCTION_DURATION)

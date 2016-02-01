@@ -4,10 +4,11 @@
 
     <Frame name="AuxFilterSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
-            <Frame name="$parentFilters">
-                <Size><AbsDimension x="600" y="290"/></Size>
-                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-70"/></Offset></Anchor></Anchors>
-                <Frames>
+            <Frame name="$parentFilter">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="AuxFrameContent"></Anchor>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="AuxFrameContent"></Anchor>
+                </Anchors>                <Frames>
                     <CheckButton name="$parentUsableCheckButton" inherits="UICheckButtonTemplate" hidden="true">
                         <Size><AbsDimension x="22" y="22"/></Size>
                         <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="87" y="-136" /></Offset></Anchor></Anchors>
@@ -40,14 +41,14 @@
                 </Anchors>
                 <Frames>
                     <Frame name="$parentFavorite" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension x="370" y="270"/></Size>
+                        <Size><AbsDimension x="373" y="270"/></Size>
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="4" y="-4"/></Offset></Anchor>
                             <Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="4" y="4"/></Offset></Anchor>
                         </Anchors>
                     </Frame>
                     <Frame name="$parentRecent" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension x="370" y="270"/></Size>
+                        <Size><AbsDimension x="373" y="270"/></Size>
                         <Anchors>
                             <Anchor point="TOPRIGHT"><Offset><AbsDimension x="-4" y="-4"/></Offset></Anchor>
                             <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-4" y="4"/></Offset></Anchor>

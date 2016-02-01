@@ -206,6 +206,7 @@ local methods = {
             st.sizes.headHeight = 0
         end
         st.sizes.numRows = max(floor((st:GetParent():GetHeight() - st.sizes.headHeight - ST_HEAD_SPACE) / ST_ROW_HEIGHT), 0)
+        snipe.log(st.sizes.numRows)
 
         -- update the frame
         st.scrollBar:ClearAllPoints()
@@ -236,7 +237,7 @@ local methods = {
         for colNum, col in ipairs(st.headCols) do
             if st.colInfo[colNum] then
                 col:Show()
-                col:SetWidth(st.colInfo[colNum].width*width)
+                col:SetWidth(st.colInfo[colNum].width * width)
                 col:SetHeight(st.sizes.headHeight)
                 col:SetText(st.colInfo[colNum].name or "")
                 col.text:SetJustifyH(st.colInfo[colNum].headAlign or 'CENTER')
@@ -264,7 +265,7 @@ local methods = {
                 for colNum, col in ipairs(row.cols) do
                     if st.headCols[colNum] and st.colInfo[colNum] then
                         col:Show()
-                        col:SetWidth(st.colInfo[colNum].width*width)
+                        col:SetWidth(st.colInfo[colNum].width * width)
                         col.text:SetJustifyH(st.colInfo[colNum].align or 'LEFT')
                     else
                         col:Hide()
@@ -396,7 +397,7 @@ function CreateScrollingTable(parent)
     ST_COUNT = ST_COUNT + 1
     local st = CreateFrame('Frame', 'TSMScrollingTable'..ST_COUNT, parent)
     st:SetAllPoints()
-    st:SetScript('OnSizeChanged', function() st:Redraw() end)
+--    st:SetScript('OnSizeChanged', function() st:Redraw() end)
 
     local contentFrame = CreateFrame('Frame', nil, st)
     contentFrame:SetPoint('TOPLEFT', 0, 0)
@@ -412,7 +413,7 @@ function CreateScrollingTable(parent)
     st.scrollFrame = scrollFrame
 
     -- make the scroll bar consistent with the TSM theme
-    local scrollBar = _G[scrollFrame:GetName()..'ScrollBar']
+    local scrollBar = getglobal(scrollFrame:GetName()..'ScrollBar')
     scrollBar:SetWidth(12)
     st.scrollBar = scrollBar
     local thumbTex = scrollBar:GetThumbTexture()

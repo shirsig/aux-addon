@@ -208,7 +208,6 @@ function private.update_listing()
     AuxBidsFrameListingBidListing:Show()
     Aux.sheet.populate(private.listing, bid_records)
     AuxBidsFrameListing:SetWidth(AuxBidsFrameListingBidListing:GetWidth() + 40)
-    AuxFrame:SetWidth(AuxBidsFrameListing:GetWidth() + 15)
 end
 
 function private.create_auction_record(auction_info)

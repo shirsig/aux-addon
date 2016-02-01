@@ -79,47 +79,6 @@
         <!--</Scripts>-->
     </Frame>
 
-    <EditBox name="AuxInputBoxTemplate" autoFocus="false" inherits="InputBoxTemplate" virtual="true">
-        <Size><AbsDimension x="119" y="22"/></Size>
-        <Layers>
-            <Layer level="OVERLAY">
-                <FontString name="$parentLabel" inherits="GameFontNormalSmall" justifyH="LEFT">
-                    <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="-3" y="9"/></Offset></Anchor></Anchors>
-                </FontString>
-            </Layer>
-        </Layers>
-    </EditBox>
-
-    <Slider name="AuxSliderTemplate" orientation="HORIZONTAL" enableMouse="true" virtual="true">
-        <Size><AbsDimension x="150" y="17"/></Size>
-        <HitRectInsets>
-            <AbsInset left="0" right="0" top="-10" bottom="-10"/>
-        </HitRectInsets>
-        <Backdrop bgFile="Interface\Buttons\UI-SliderBar-Background" edgeFile="Interface\Buttons\UI-SliderBar-Border" tile="true">
-            <EdgeSize>
-                <AbsValue val="8"/>
-            </EdgeSize>
-            <TileSize>
-                <AbsValue val="8"/>
-            </TileSize>
-            <BackgroundInsets>
-                <AbsInset left="3" right="3" top="6" bottom="6"/>
-            </BackgroundInsets>
-        </Backdrop>
-        <Layers>
-            <Layer level="ARTWORK">
-                <FontString name="$parentText" inherits="GameFontNormalSmall">
-                    <Anchors>
-                        <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor>
-                    </Anchors>
-                </FontString>
-            </Layer>
-        </Layers>
-        <ThumbTexture name="$parentThumb" file="Interface\Buttons\UI-SliderBar-Button-Horizontal">
-            <Size><AbsDimension x="32" y="32"/></Size>
-        </ThumbTexture>
-    </Slider>
-
 	<Frame name="AuxItemTemplate" virtual="true">
 		<Size><AbsDimension x="193" y="37"/></Size>
 		<Layers>
