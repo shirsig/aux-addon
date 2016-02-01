@@ -167,21 +167,13 @@ local methods = {
 
     GetRecordPercent = function(self, record)
         if not record then return end
---         cache the market value on the record
---        record.market_value = record.market_value or self.GetMarketValue(record.item_key) or 0
---        if record.marketValue > 0 then
---            if record.itemBuyout > 0 then
---                return Aux.round(100 * record.itemBuyout / record.marketValue, 1)
---            end
---            return nil, Aux.round(100 * record.itemDisplayedBid / record.marketValue, 1)
---        end
-
-        local market_value = Aux.history.market_value(record.item_key)
-        if market_value and market_value > 0 then
+--      cache the market value on the record
+        record.market_value = record.market_value or Aux.history.market_value(record.item_key) or 0
+        if record.market_value > 0 then
             if record.unit_buyout_price > 0 then
-                return Aux.round(100 * record.unit_buyout_price / market_value, 1)
+                return Aux.round(100 * record.unit_buyout_price / record.market_value, 1)
             end
-            return nil, Aux.round(100 * record.unit_bid_price / market_value, 1)
+            return nil, Aux.round(100 * record.unit_bid_price / record.market_value, 1)
         end
     end,
 
@@ -268,28 +260,30 @@ local methods = {
                     aVal = a.record
                     bVal = b.record
                 end
+
+
                 if aVal.isFake then
                     return true
                 elseif bVal.isFake then
                     return false
                 end
-                if sortKey == "percent" then
+                if sortKey == 'percent' then
                     aVal = self:GetRecordPercent(aVal)
                     bVal = self:GetRecordPercent(bVal)
-                elseif sortKey == "numAuctions" then
+                elseif sortKey == 'numAuctions' then
                     aVal = a.totalAuctions
                     bVal = b.totalAuctions
-                elseif sortKey == "itemDisplayedBid" or sortKey == "displayedBid" then
-                    aVal = self.GetRowPrices(aVal, sortKey == "itemDisplayedBid")
-                    bVal = self.GetRowPrices(bVal, sortKey == "itemDisplayedBid")
-                elseif sortKey == "itemBuyout" or sortKey == "buyout" then
-                    aVal = ({ self.GetRowPrices(aVal, sortKey == "itemBuyout") })[2]
-                    bVal = ({ self.GetRowPrices(bVal, sortKey == "itemBuyout") })[2]
+                elseif sortKey == 'unit_bid_price' or sortKey == 'bid_price' then
+                    aVal = self.GetRowPrices(aVal, sortKey == 'unit_bid_price')
+                    bVal = self.GetRowPrices(bVal, sortKey == 'unit_bid_price')
+                elseif sortKey == 'buyout_price' or sortKey == 'buyout' then
+                    aVal = ({ self.GetRowPrices(aVal, sortKey == 'buyout_price') })[2]
+                    bVal = ({ self.GetRowPrices(bVal, sortKey == 'buyout_price') })[2]
                 else
                     aVal = aVal[sortKey]
                     bVal = bVal[sortKey]
                 end
-                if sortKey == 'buyout' or sortKey == 'itemBuyout' then
+                if sortKey == 'buyout' or sortKey == 'buyout_price' then
                     -- for buyout, put bid-only auctions at the bottom
                     if not aVal or aVal == 0 then
                         aVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
@@ -297,29 +291,29 @@ local methods = {
                     if not bVal or bVal == 0 then
                         bVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
                     end
-                elseif sortKey == "percent" then
+                elseif sortKey == 'percent' then
                     -- for percent, put bid-only auctions at the bottom
                     aVal = aVal or ((self.sortInfo.descending and -1 or 1) * Aux.huge)
                     bVal = bVal or ((self.sortInfo.descending and -1 or 1) * Aux.huge)
                 end
-                if type(aVal) == "string" or type(bVal) == "string" then
-                    aVal = aVal or ""
-                    bVal = bVal or ""
+                if type(aVal) == 'string' or type(bVal) == 'string' then
+                    aVal = aVal or ''
+                    bVal = bVal or ''
                 else
                     aVal = tonumber(aVal) or 0
                     bVal = tonumber(bVal) or 0
                 end
                 if aVal == bVal then
-                    if sortKey == "percent" then
+                    if sortKey == 'percent' then
                         -- sort by buyout
-                        sortKey = aux_price_per_unit and "itemBuyout" or "buyout"
+                        sortKey = aux_price_per_unit and 'buyout_price' or 'buyout'
                         local result = SortHelperFunc(a, b, sortKey)
                         if result ~= nil then
                             return result
                         end
-                    elseif sortKey == "buyout" or sortKey == "itemBuyout" then
+                    elseif sortKey == 'buyout' or sortKey == 'buyout_price' then
                         -- sort by bid
-                        sortKey = aux_price_per_unit and "itemDisplayedBid" or "displayedBid"
+                        sortKey = aux_price_per_unit and 'unit_bid_price' or 'bid_price'
                         local result = SortHelperFunc(a, b, sortKey)
                         if result ~= nil then
                             return result
@@ -329,7 +323,7 @@ local methods = {
                         return
                     else
                         -- sort by percent
-                        return SortHelperFunc(a, b, "percent")
+                        return SortHelperFunc(a, b, 'percent')
                     end
                     -- sort arbitrarily, but make sure the sort is stable
                     return tostring(a) < tostring(b)
@@ -341,10 +335,10 @@ local methods = {
                 end
             end
             -- sort the row info
---            for i, info in ipairs(self.rowInfo) do
---                sort(info.children, SortHelperFunc)
---            end
---            sort(self.rowInfo, SortHelperFunc)
+            for i, info in ipairs(self.rowInfo) do
+                sort(info.children, SortHelperFunc)
+            end
+            sort(self.rowInfo, SortHelperFunc)
             self.sortInfo.isSorted = true
         end
 
@@ -388,7 +382,7 @@ local methods = {
             row.cells[1].icon:SetAlpha(1)
             row.cells[1]:GetFontString():SetAlpha(1)
         end
-        row.cells[1]:SetText(gsub(record.hyperlink, "[%[%]]", ""))
+        row.cells[1]:SetText(gsub(record.hyperlink, '[%[%]]', ''))
         row.cells[2]:SetText(record.level)
         if record.isFake then
             row.cells[3]:SetText(0)
@@ -405,11 +399,11 @@ local methods = {
             end
             row.cells[3]:SetText(numAuctionsText)
             row.cells[4]:SetText(record.aux_quantity)
-            row.cells[5]:SetText(TIME_LEFT_STRINGS[record.duration or 0] or "---")
-            row.cells[6]:SetText(Aux.is_player(record.owner) and ("|cffffff00"..record.owner.."|r") or record.owner)
+            row.cells[5]:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
+            row.cells[6]:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or record.owner)
             local bid, buyout, colorBid, colorBuyout = self.GetRowPrices(record, aux_price_per_unit)
-            row.cells[7]:SetText(bid > 0 and Aux.money.to_string(bid, true, false, colorBid) or "---")
-            row.cells[8]:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, colorBuyout) or "---")
+            row.cells[7]:SetText(bid > 0 and Aux.money.to_string(bid, true, false, colorBid) or '---')
+            row.cells[8]:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, colorBuyout) or '---')
             local pct, bidPct = self:GetRecordPercent(record)
             local pctColor = '|cffffffff'
             if pct then
@@ -528,9 +522,9 @@ local methods = {
     SetSort = function(rt, sortIndex)
         local sortIndexLookup
         if aux_price_per_unit then
-            sortIndexLookup = {"name", "itemLevel", "numAuctions", "stackSize", "timeLeft", "seller", "itemDisplayedBid", "itemBuyout", "percent"}
+            sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'unit_bid_price', 'buyout_price', 'percent'}
         else
-            sortIndexLookup = {"name", "itemLevel", "numAuctions", "stackSize", "timeLeft", "seller", "displayedBid", "buyout", "percent"}
+            sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'bid_price', 'buyout', 'percent'}
         end
         if sortIndex then
             if sortIndex == rt.sortInfo.index then return end
@@ -593,18 +587,18 @@ local methods = {
 
 function public.CreateAuctionResultsTable(parent)
     local colInfo = {
-        {name="Item", width=0.35},
-        {name="Lvl", width=0.035, align="CENTER"},
-        {name="Auctions", width=0.06, align="CENTER"},
-        {name="Stack Size", width=0.055, align="CENTER"},
-        {name='Time Left', width=0.04, align="CENTER"},
-        {name='Seller', width=0.13, align="CENTER"},
-        {name={'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'}, width=0.125, align="RIGHT", isPrice=true},
-        {name={'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'}, width=0.125, align="RIGHT", isPrice=true},
-        {name='% Market Value', width=0.08, align="CENTER"},
+        {name='Item', width=0.35},
+        {name='Lvl', width=0.035, align='CENTER'},
+        {name='Auctions', width=0.06, align='CENTER'},
+        {name='Stack Size', width=0.055, align='CENTER'},
+        {name='Time Left', width=0.04, align='CENTER'},
+        {name='Seller', width=0.13, align='CENTER'},
+        {name={'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'}, width=0.125, align='RIGHT', isPrice=true},
+        {name={'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'}, width=0.125, align='RIGHT', isPrice=true},
+        {name='% Market Value', width=0.08, align='CENTER'},
     }
 
-    local rtName = 'TSMAuctionResultsTable'..RT_COUNT
+    local rtName = 'AuxAuctionResultsTable'..RT_COUNT
     RT_COUNT = RT_COUNT + 1
     local rt = CreateFrame('Frame', rtName, parent)
 --    local numRows = TSM.db.profile.auctionResultRows
@@ -798,8 +792,8 @@ function public.CreateAuctionResultsTable(parent)
     end
 
     rt:SetAllPoints()
-    this = contentFrame -- TODO hack
-    arg1 = contentFrame:GetWidth() -- TODO hack
-    rt:OnContentSizeChanged() -- TODO hack
+    this = contentFrame -- TODO change, maybe use for resize without scrollbar?
+    arg1 = contentFrame:GetWidth()
+    rt:OnContentSizeChanged()
     return rt
 end
