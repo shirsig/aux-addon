@@ -4,9 +4,7 @@ Aux.filter_search_frame = public
 aux_favorite_searches = {}
 aux_recent_searches = {}
 
-local auctions
 local tooltip_patterns = {}
-local refresh
 local selected_auction
 
 local RESULTS, SAVED, FILTER = {}, {}, {}
@@ -74,14 +72,12 @@ end
 
 function private.select_auction(entry)
     selected_auction = entry
-    refresh = true
     private.buyout_button:Disable()
     private.bid_button:Disable()
 end
 
 function private.clear_selection(entry)
     selected_auction = nil
-    refresh = true
     private.buyout_button:Disable()
     private.bid_button:Disable()
 end
@@ -92,7 +88,7 @@ end
 
 function public.on_open()
     private.update_search_listings()
-    AuxFrame:SetWidth(991)
+--    AuxFrame:SetWidth(991)
 end
 
 function public.on_load()
@@ -370,7 +366,7 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
         btn:SetPoint('TOPLEFT', 10, -49)
-        btn:SetWidth(320)
+        btn:SetWidth(250)
         btn:SetHeight(22)
         btn:SetText('Search Results')
         btn:SetScript('OnClick', function() private.update_tab(RESULTS) end)
@@ -379,7 +375,7 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
         btn:SetPoint('TOPLEFT', private.search_results_button, 'TOPRIGHT', 5, 0)
-        btn:SetWidth(320)
+        btn:SetWidth(250)
         btn:SetHeight(22)
         btn:SetText('Saved Searches')
         btn:SetScript('OnClick', function() private.update_tab(SAVED) end)
@@ -388,7 +384,7 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxFilterSearchFrame, 18)
         btn:SetPoint('TOPLEFT', private.saved_searches_button, 'TOPRIGHT', 5, 0)
-        btn:SetWidth(320)
+        btn:SetWidth(250)
         btn:SetHeight(22)
         btn:SetText('New Filter')
         btn:SetScript('OnClick', function() private.update_tab(FILTER) end)
@@ -949,6 +945,7 @@ function public.on_load()
 --    private.testlisting:Clear()
     private.testlisting:Show()
     private.testlisting:SetSort(9)
+    private.testlisting:SetHandler('OnSelectionChanged', private.on_selection_changed)
 end
 
 function public.stop_search()
@@ -957,20 +954,20 @@ end
 
 function private.update_listing()
 
-    if not AuxFilterSearchFrame:IsVisible() then
-        return
-    end
-
-    local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
-    Aux.sheet.populate(private.listings.results, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2)
-        return a1.item_id == a2.item_id
-                and a1.suffix_id == a2.suffix_id
-                and a1.enchant_id == a2.enchant_id
-                and a1.aux_quantity == a2.aux_quantity
-                and a1.buyout_price == a2.buyout_price
-                and a1.bid_price == a2.bid_price
-                and a1.owner == a2.owner
-    end) or {})
+--    if not AuxFilterSearchFrame:IsVisible() then
+--        return
+--    end
+--
+--    local buyout_auctions = auctions and Aux.util.filter(auctions, function(auction) return auction.owner ~= UnitName('player') and auction.buyout_price end) or {}
+--    Aux.sheet.populate(private.listings.results, auctions and Aux.util.group_by(buyout_auctions, function(a1, a2)
+--        return a1.item_id == a2.item_id
+--                and a1.suffix_id == a2.suffix_id
+--                and a1.enchant_id == a2.enchant_id
+--                and a1.aux_quantity == a2.aux_quantity
+--                and a1.buyout_price == a2.buyout_price
+--                and a1.bid_price == a2.bid_price
+--                and a1.owner == a2.owner
+--    end) or {})
 end
 
 function public.start_search()
@@ -1010,13 +1007,14 @@ function public.start_search()
         private.clear_selection()
         private.search_button:Hide()
         private.stop_button:Show()
-        auctions = nil
-        refresh = true
 
         private.update_tab(RESULTS)
 
         private.status_bar:update_status(0,0)
         private.status_bar:set_text('Scanning auctions...')
+
+        local scanned_records = {}
+        private.testlisting:SetDatabase(scanned_records)
 
         Aux.scan.start{
             queries = queries,
@@ -1025,33 +1023,28 @@ function public.start_search()
                 private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
             end,
             on_page_complete = function()
-                refresh = true
+                private.testlisting:SetDatabase()
             end,
             on_start_query = function(query_index)
                 private.status_bar:update_status(0, 100 * (query_index - 1) / getn(queries)) -- TODO
                 private.status_bar:set_text(format('Processing query %d / %d', query_index, getn(queries)))
             end,
             on_read_auction = function(auction_info)
-                auctions = auctions or {}
-                tinsert(auctions, private.create_auction_record(auction_info))
-                private.testlisting:InsertAuctionRecord(auction_info)
+--                tinsert(scanned_records, private.create_auction_record(auction_info))
+                tinsert(scanned_records, auction_info)
             end,
             on_complete = function()
-                auctions = auctions or {}
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
 
                 private.stop_button:Hide()
                 private.search_button:Show()
-                refresh = true
             end,
             on_abort = function()
-                auctions = auctions or {}
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
                 private.stop_button:Hide()
                 private.search_button:Show()
-                refresh = true
             end,
         }
     end)
@@ -1066,13 +1059,12 @@ function private.process_request(entry, express_mode, buyout_mode)
     PlaySound('igMainMenuOptionCheckBoxOn')
 
     local function test(index)
-        local auction_record = private.create_auction_record(Aux.info.auction(index))
+        local auction_record = Aux.info.auction(index)
         return auction_record.signature == entry.signature and auction_record.bid_price == entry.bid_price and auction_record.duration == entry.duration and auction_record.owner ~= UnitName('player')
     end
 
     local function remove_entry()
         entry.gone = true
-        refresh = true
         private.clear_selection()
     end
 
@@ -1110,14 +1102,13 @@ function private.process_request(entry, express_mode, buyout_mode)
     end
 end
 
-function private.on_row_click(datum, grouped)
+function private.on_selection_changed(rt, datum)
 
-    local entry
-    if grouped then
-        entry = Aux.util.filter(datum, function(auction) return not auction.gone end)[1] or datum[1]
-    else
-        entry = datum
+    if not datum then
+        return
     end
+
+    local entry = datum.record
 
     if IsControlKeyDown() then
         DressUpItemLink(entry.hyperlink)
@@ -1132,58 +1123,51 @@ function private.on_row_click(datum, grouped)
     end
 end
 
-function private.create_auction_record(auction_info)
-
-	local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
-	local unit_buyout_price = buyout_price and auction_info.buyout_price / auction_info.aux_quantity
-    local status
-    if auction_info.current_bid == 0 then
-        status = 'No Bid'
-    elseif auction_info.high_bidder then
-        status = GREEN_FONT_COLOR_CODE..'Your Bid'..FONT_COLOR_CODE_CLOSE
-    else
-        status = 'Other Bidder'
-    end
-
-    return {
-        query = auction_info.query,
-        page = auction_info.page,
-
-        item_id = auction_info.item_id,
-        suffix_id = auction_info.suffix_id,
-        unique_id = auction_info.unique_id,
-        enchant_id = auction_info.enchant_id,
-
-        item_key = auction_info.item_key,
-        signature = auction_info.signature,
-
-        name = auction_info.name,
-        level = auction_info.level,
-        tooltip = auction_info.tooltip,
-        aux_quantity = auction_info.aux_quantity,
-        buyout_price = buyout_price,
-        unit_buyout_price = unit_buyout_price,
-        quality = auction_info.quality,
-        hyperlink = auction_info.hyperlink,
-        itemstring = auction_info.itemstring,
-        bid_price = auction_info.bid_price,
-        unit_bid_price = auction_info.bid_price / auction_info.aux_quantity,
-        owner = auction_info.owner,
-        duration = auction_info.duration,
-        usable = auction_info.usable,
-        high_bidder = auction_info.high_bidder,
-        status = status,
-
-        EnhTooltip_info = auction_info.EnhTooltip_info,
-    }
-end
-
-function public.on_update()
-	if refresh then
-		refresh = false
-		private.update_listing()
-	end
-end
+--function private.create_auction_record(auction_info)
+--
+--	local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
+--	local unit_buyout_price = buyout_price and auction_info.buyout_price / auction_info.aux_quantity
+--    local status
+--    if auction_info.current_bid == 0 then
+--        status = 'No Bid'
+--    elseif auction_info.high_bidder then
+--        status = GREEN_FONT_COLOR_CODE..'Your Bid'..FONT_COLOR_CODE_CLOSE
+--    else
+--        status = 'Other Bidder'
+--    end
+--
+--    return {
+--        query = auction_info.query,
+--        page = auction_info.page,
+--
+--        item_id = auction_info.item_id,
+--        suffix_id = auction_info.suffix_id,
+--        unique_id = auction_info.unique_id,
+--        enchant_id = auction_info.enchant_id,
+--
+--        item_key = auction_info.item_key,
+--        signature = auction_info.signature,
+--
+--        name = auction_info.name,
+--        level = auction_info.level,
+--        tooltip = auction_info.tooltip,
+--        aux_quantity = auction_info.aux_quantity,
+--        buyout_price = buyout_price,
+--        unit_buyout_price = unit_buyout_price,
+--        quality = auction_info.quality,
+--        hyperlink = auction_info.hyperlink,
+--        itemstring = auction_info.itemstring,
+--        bid_price = auction_info.bid_price,
+--        unit_bid_price = auction_info.bid_price / auction_info.aux_quantity,
+--        owner = auction_info.owner,
+--        duration = auction_info.duration,
+--        usable = auction_info.usable,
+--        high_bidder = auction_info.high_bidder,
+--        status = status,
+--
+--        EnhTooltip_info = auction_info.EnhTooltip_info,
+--    }
+--end
 
 function private.initialize_class_dropdown()
     local function on_click()

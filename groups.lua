@@ -1,10 +1,6 @@
 local m = {}
 Aux.test = m
 
-function m.niltest(object)
-    if not object then snipe.log('eheu')
-        else snipe.log('euge') end
-end
 function m.prettify_search(search)
     local item_pattern = '([^/;]+)([^;]*)/exact'
     while true do

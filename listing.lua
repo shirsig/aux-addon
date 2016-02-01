@@ -4,17 +4,17 @@ local RT_COUNT = 1
 local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
 local AUCTION_PCT_COLORS = {
-    {color="|cff2992ff", value=50}, -- blue
-    {color="|cff16ff16", value=80}, -- green
-    {color="|cffffff00", value=110}, -- yellow
-    {color="|cffff9218", value=135}, -- orange
-    {color="|cffff0000", value=Aux.huge}, -- red
+    {color='|cff2992ff', value=50}, -- blue
+    {color='|cff16ff16', value=80}, -- green
+    {color='|cffffff00', value=110}, -- yellow
+    {color='|cffff9218', value=135}, -- orange
+    {color='|cffff0000', value=Aux.huge}, -- red
 }
 local TIME_LEFT_STRINGS = {
-    "|cffff000030m|r", -- Short
-    "|cffff92182h|r", -- Medium
-    "|cffffff0012h|r", -- Long
-    "|cff2992ff48h|r", -- Very Long
+    '|cffff000030m|r', -- Short
+    '|cffff92182h|r', -- Medium
+    '|cffffff0012h|r', -- Long
+    '|cff2992ff48h|r', -- Very Long
 }
 
 
@@ -111,7 +111,7 @@ local methods = {
     OnCellLeave = function()
         GameTooltip:Hide()
         -- hide highlight if it's not selected
-        if not this.rt.selected or this.rt.selected.hash2 ~= this.row.data.record.hash2 then
+        if not this.rt.selected or this.rt.selected.search_signature ~= this.row.data.record.search_signature then
             this.row.highlight:Hide()
         end
     end,
@@ -138,29 +138,38 @@ local methods = {
     end,
 
 
-
     -- ============================================================================
     -- Internal Results Table Methods
     -- ============================================================================
 
-    -- default functions which will be overridden
-    GetMarketValue = function(itemString) return end,
---    GetRowPrices = function(record, isPerUnit) return end, -- TODO
-    GetRowPrices = function(record, isPerUnit)
-        return record.bid_price, record.buyout_price
+    --    GetRowPrices = function(record, isPerUnit) return end, -- TODO
+    GetRowPrices = function(record, per_unit)
+        if per_unit then
+            return record.unit_bid_price, record.unit_buyout_price
+        else
+            return record.bid_price, record.buyout_price
+        end
     end,
 
 
     GetRecordPercent = function(rt, record)
         if not record then return end
-        -- cache the market value on the record
---        record.marketValue = record.marketValue or rt.GetMarketValue(record.item_key) or 0
+--         cache the market value on the record
+--        record.market_value = record.market_value or rt.GetMarketValue(record.item_key) or 0
 --        if record.marketValue > 0 then
 --            if record.itemBuyout > 0 then
 --                return Aux.round(100 * record.itemBuyout / record.marketValue, 1)
 --            end
 --            return nil, Aux.round(100 * record.itemDisplayedBid / record.marketValue, 1)
 --        end
+
+        local market_value = Aux.history.market_value(record.item_key)
+        if market_value and market_value > 0 then
+            if record.unit_buyout_price > 0 then
+                return Aux.round(100 * record.unit_buyout_price / market_value, 1)
+            end
+            return nil, Aux.round(100 * record.unit_bid_price / market_value, 1)
+        end
     end,
 
     UpdateRowInfo = function(rt)
@@ -169,11 +178,7 @@ local methods = {
         rt.sortInfo.isSorted = nil
         rt:SetSelectedRecord(nil, true)
 
-        local function search_signature(record)
-            return Aux.util.join({record.item_key, record.buyout_price, record.bid_price, record.aux_quantity, record.duration, record.owner}, ':')
-        end
-
-        sort(rt.records, function(a,b) return search_signature(a) < search_signature(b) end)
+        sort(rt.records, function(a,b) return a.search_signature < b.search_signature end)
 
         local records = rt.records
         if getn(records) == 0 then return end
@@ -183,7 +188,7 @@ local methods = {
         for i=1, getn(records) do
             local record = records[i]
             local prevRecord = records[i-1]
-            if prevRecord and search_signature(record) == search_signature(prevRecord) then
+            if prevRecord and record.search_signature == prevRecord.search_signature then
                 -- it's an identical auction to the previous row so increment the number of auctions
                 rt.rowInfo[getn(rt.rowInfo)].children[getn(rt.rowInfo[getn(rt.rowInfo)].children)].numAuctions = rt.rowInfo[getn(rt.rowInfo)].children[getn(rt.rowInfo[getn(rt.rowInfo)].children)].numAuctions + 1
             elseif prevRecord and record.item_key == prevRecord.item_key then
@@ -271,7 +276,7 @@ local methods = {
                     aVal = aVal[sortKey]
                     bVal = bVal[sortKey]
                 end
-                if sortKey == "buyout" or sortKey == "itemBuyout" then
+                if sortKey == 'buyout' or sortKey == 'itemBuyout' then
                     -- for buyout, put bid-only auctions at the bottom
                     if not aVal or aVal == 0 then
                         aVal = (rt.sortInfo.descending and -1 or 1) * Aux.huge
@@ -352,7 +357,7 @@ local methods = {
         local row = rt.rows[rowIndex]
         -- show this row
         row:Show()
-        if rt.selected and record.hash2 == rt.selected.hash2 then
+        if rt.selected and record.search_signature == rt.selected.search_signature then
             row.highlight:Show()
         else
             row.highlight:Hide()
@@ -422,7 +427,7 @@ local methods = {
 
         -- show / hide highlight accordingly
         for _, row in ipairs(rt.rows) do
-            if rt.selected and row.data and row.data.record.hash2 == rt.selected.hash2 then
+            if rt.selected and row.data and row.data.record.search_signature == rt.selected.search_signature then
                 row.highlight:Show()
             else
                 row.highlight:Hide()
@@ -536,22 +541,6 @@ local methods = {
         rt.handlers[event] = handler
     end,
 
-    SetPriceInfo = function(rt, info)
-        -- update the header text
-        rt.headCells[7].info.name = info.headers[1]
-        rt.headCells[8].info.name = info.headers[2]
-        rt.headCells[9].info.name = info.pctHeader
-        for i=7, 9 do
-            if rt.headCells[i].info.isPrice then
-                rt.headCells[i]:SetText(rt.headCells[i].info.name[aux_price_per_unit and 1 or 2])
-            else
-                rt.headCells[i]:SetText(rt.headCells[i].info.name)
-            end
-        end
-        rt.GetRowPrices = info.GetRowPrices
-        rt.GetMarketValue = info.GetMarketValue
-    end,
-
     SetDisabled = function(rt, disabled)
         rt.disabled = disabled
         if not disabled then
@@ -568,19 +557,13 @@ local methods = {
 
     GetSelection = function(rt)
         if not rt.selected then return end
-        local selectedData = nil
-        for i, info in ipairs(rt.rowInfo) do
-            if rt.expanded[info.expandKey] then
-                for _, childInfo in ipairs(info.children) do
-                    if childInfo.record.hash2 == rt.selected.hash2 then
-                        selectedData = childInfo
-                        break
-                    end
+        local selectedData
+        for _, info in ipairs(rt.rowInfo) do
+            for _, childInfo in ipairs(info.children) do
+                if childInfo.record.search_signature == rt.selected.search_signature then
+                    selectedData = childInfo
+                    break
                 end
-                if selectedData then break end
-            elseif info.children[1].record.hash2 == rt.selected.hash2 then
-                selectedData = info.children[1]
-                break
             end
         end
         return selectedData
@@ -605,16 +588,16 @@ function CreateAuctionResultsTable(parent)
         {name="Stack Size", width=0.055, align="CENTER"},
         {name='Time Left', width=0.04, align="CENTER"},
         {name='Seller', width=0.13, align="CENTER"},
-        {name={"??", "??"}, width=0.125, align="RIGHT", isPrice=true},
-        {name={"??", "??"}, width=0.125, align="RIGHT", isPrice=true},
-        {name="", width=0.08, align="CENTER"},
+        {name={'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'}, width=0.125, align="RIGHT", isPrice=true},
+        {name={'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'}, width=0.125, align="RIGHT", isPrice=true},
+        {name='% Market Value', width=0.08, align="CENTER"},
     }
 
     local rtName = 'TSMAuctionResultsTable'..RT_COUNT
     RT_COUNT = RT_COUNT + 1
     local rt = CreateFrame('Frame', rtName, parent)
 --    local numRows = TSM.db.profile.auctionResultRows
-    local numRows = 10
+    local numRows = 16
     rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT-HEAD_SPACE) / numRows
     rt.scrollDisabled = nil
     rt.expanded = {}
@@ -644,9 +627,9 @@ function CreateAuctionResultsTable(parent)
 
     -- frame to hold the header columns and the rows
     local scrollFrame = CreateFrame('ScrollFrame', rtName..'ScrollFrame', rt, 'FauxScrollFrameTemplate')
-    scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
+    scrollFrame:SetScript('OnVerticalScroll', function()
         if not rt.scrollDisabled then
-            FauxScrollFrame_OnVerticalScroll(self, offset, rt.ROW_HEIGHT, function() rt:UpdateRows() end)
+            FauxScrollFrame_OnVerticalScroll(rt.ROW_HEIGHT, function() rt:UpdateRows() end)
         end
     end)
     scrollFrame:SetAllPoints(contentFrame)
@@ -661,7 +644,7 @@ function CreateAuctionResultsTable(parent)
     scrollBar:SetWidth(10)
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
---    TSMAPI.Design:SetContentColor(thumbTex)
+    thumbTex:SetTexture(unpack(Aux.gui.config.content_color))
     thumbTex:SetHeight(150)
     thumbTex:SetWidth(scrollBar:GetWidth())
     getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
@@ -670,7 +653,6 @@ function CreateAuctionResultsTable(parent)
     -- create the header cells
     rt.headCells = {}
     for i, info in ipairs(colInfo) do
-        snipe.log(i)
         local cell = CreateFrame('Button', rtName..'HeadCol'..i, rt.contentFrame)
         cell:SetHeight(HEAD_HEIGHT)
         if i == 1 then

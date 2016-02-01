@@ -2,14 +2,6 @@
 
 	<Script file="filter_search_frame.lua"/>
 
-	<Frame>
-      <Scripts> 
-			<OnUpdate> 
-				Aux.filter_search_frame.on_update()
-			</OnUpdate> 
-		</Scripts> 
-	</Frame>
-
     <Frame name="AuxFilterSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
             <Frame name="$parentFilters">
@@ -26,11 +18,11 @@
                     </CheckButton>
                 </Frames>
             </Frame>
-            <Frame name="$parentResults" inherits="AuxFrameBoxTemplate">
-                <Size>
-                    <AbsDimension x="985" y="278"/>
-                </Size>
-                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="3" y="-82"/></Offset></Anchor></Anchors>
+            <Frame name="$parentResults">
+                <Anchors>
+                    <Anchor point="TOPLEFT" relativeTo="AuxFrameContent"></Anchor>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="AuxFrameContent"></Anchor>
+                </Anchors>
                 <Frames>
                     <Frame name="$parentListing" hidden="true">
                         <Anchors>

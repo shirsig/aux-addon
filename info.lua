@@ -79,10 +79,12 @@ function public.auction(index, type)
     local item_info = public.item(item_id, suffix_id, unique_id, enchant_id)
 
     local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(type, index)
+
 	local duration = GetAuctionItemTimeLeft(type, index)
     local tooltip = public.tooltip(function(tt) tt:SetAuctionItem(type, index) end)
     local charges = private.item_charges(tooltip)
     local aux_quantity = charges or count
+    local bid_price = (high_bid > 0 and high_bid or start_price) + min_increment
 
     return {
         item_id = item_id,
@@ -94,6 +96,7 @@ function public.auction(index, type)
         itemstring = item_info.itemstring,
         item_key = item_id..':'..suffix_id,
         signature = Aux.util.join({item_id, suffix_id, unique_id, enchant_id, aux_quantity, start_price, buyout_price}, ':'), -- not unique!
+        search_signature = Aux.util.join({item_id, suffix_id, enchant_id, buyout_price, bid_price, aux_quantity, duration, owner or ''}, ':'),
 
         name = name,
         texture = texture,
@@ -109,8 +112,10 @@ function public.auction(index, type)
         high_bid = high_bid,
         current_bid = high_bid, -- deprecated
         min_increment = min_increment,
-        bid_price = (high_bid > 0 and high_bid or start_price) + min_increment,
+        bid_price = bid_price,
         buyout_price = buyout_price,
+        unit_bid_price = bid_price / aux_quantity,
+        unit_buyout_price = buyout_price / aux_quantity,
         high_bidder = high_bidder,
         owner = owner,
         sale_status = sale_status,
@@ -124,7 +129,7 @@ function public.auction(index, type)
             name = name,
             hyperlink = hyperlink,
             quality = quality,
-            count = count,
+            count = aux_quantity,
         },
     }
 end

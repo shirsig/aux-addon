@@ -18,156 +18,8 @@
 		</Scripts>
 	</Frame>
 
-    <Button name="AuxTopTabTemplate" virtual="true">
-        <Size>
-            <AbsDimension x="100" y="32"/>
-        </Size>
-        <Layers>
-            <Layer level="BACKGROUND">
-                <Texture name="$parentLeft" file="Interface\ChatFrame\ChatFrameTab">
-                    <Size>
-                        <AbsDimension x="16" y="32"/>
-                    </Size>
-                    <Anchors>
-                        <Anchor point="LEFT"/>
-                    </Anchors>
-                    <TexCoords left="0.0" right="0.25" top="0.0" bottom="1.0"/>
-                </Texture>
-                <Texture name="$parentRight" file="Interface\ChatFrame\ChatFrameTab">
-                    <Size>
-                        <AbsDimension x="16" y="32"/>
-                    </Size>
-                    <Anchors>
-                        <Anchor point="RIGHT"/>
-                    </Anchors>
-                    <TexCoords left="0.75" right="1.0" top="0.0" bottom="1.0"/>
-                </Texture>
-                <Texture name="$parentMiddle" file="Interface\ChatFrame\ChatFrameTab">
-                    <Size>
-                        <AbsDimension x="44" y="32"/>
-                    </Size>
-                    <Anchors>
-                        <Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                        <Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                    </Anchors>
-                    <TexCoords left="0.25" right="0.75" top="0.0" bottom="1.0"/>
-                </Texture>
-            </Layer>
-        </Layers>
-        <Scripts>
-            <OnShow>
-                this:SetWidth(getglobal(this:GetName()..'Text'):GetStringWidth()+40)
-            </OnShow>
-        </Scripts>
-        <NormalText name="$parentText" inherits="GameFontHighlight">
-            <Size>
-                <AbsDimension x="100" y="8"/>
-            </Size>
-            <Anchors>
-                <Anchor point="CENTER">
-                    <Offset>
-                        <AbsDimension x="0" y="-5"/>
-                    </Offset>
-                </Anchor>
-            </Anchors>
-        </NormalText>
-        <HighlightTexture name="$parentHighlight" file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD" setAllPoints="true">
-            <Size>
-                <AbsDimension x="5" y="32"/>
-            </Size>
-            <Anchors>
-                <Anchor point="LEFT" relativeTo="$parentLeft">
-                    <Offset>
-                        <AbsDimension x="0" y="-7"/>
-                    </Offset>
-                </Anchor>
-                <Anchor point="RIGHT" relativeTo="$parentRight">
-                    <Offset>
-                        <AbsDimension x="0" y="-7"/>
-                    </Offset>
-                </Anchor>
-            </Anchors>
-        </HighlightTexture>
-    </Button>
-    <Button name="AuxBottomTabTemplate" virtual="true">
-        <Size>
-            <AbsDimension x="100" y="32"/>
-        </Size>
-        <Layers>
-            <Layer level="BACKGROUND">
-                <Texture name="$parentLeft" file="Interface\ChatFrame\ChatFrameTab">
-                    <Size>
-                        <AbsDimension x="16" y="32"/>
-                    </Size>
-                    <Anchors>
-                        <Anchor point="LEFT"/>
-                    </Anchors>
-                    <TexCoords left="0.0" right="0.25" top="1.0" bottom="0.0"/>
-                </Texture>
-                <Texture name="$parentRight" file="Interface\ChatFrame\ChatFrameTab">
-                    <Size>
-                        <AbsDimension x="16" y="32"/>
-                    </Size>
-                    <Anchors>
-                        <Anchor point="RIGHT"/>
-                    </Anchors>
-                    <TexCoords left="0.75" right="1.0" top="1.0" bottom="0.0"/>
-                </Texture>
-                <Texture name="$parentMiddle" file="Interface\ChatFrame\ChatFrameTab">
-                    <Size>
-                        <AbsDimension x="44" y="32"/>
-                    </Size>
-                    <Anchors>
-                        <Anchor point="LEFT" relativeTo="$parentLeft" relativePoint="RIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                        <Anchor point="RIGHT" relativeTo="$parentRight" relativePoint="LEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                    </Anchors>
-                    <TexCoords left="0.25" right="0.75" top="1.0" bottom="0.0"/>
-                </Texture>
-            </Layer>
-        </Layers>
-        <Scripts>
-            <OnShow>
-                this:SetWidth(getglobal(this:GetName()..'Text'):GetStringWidth()+40)
-            </OnShow>
-            <OnClick>
-                Aux.on_tab_click(this:GetID())
-            </OnClick>
-        </Scripts>
-        <NormalText name="$parentText" inherits="GameFontNormal">
-            <Size>
-                <AbsDimension x="100" y="8"/>
-            </Size>
-            <Anchors>
-                <Anchor point="CENTER">
-                    <Offset>
-                        <AbsDimension x="0" y="5"/>
-                    </Offset>
-                </Anchor>
-            </Anchors>
-        </NormalText>
-        <HighlightTexture name="$parentHighlight" file="Interface\PaperDollInfoFrame\UI-Character-Tab-Highlight" alphaMode="ADD" setAllPoints="true">
-            <Size>
-                <AbsDimension x="5" y="32"/>
-            </Size>
-            <Anchors>
-                <Anchor point="LEFT" relativeTo="$parentLeft">
-                    <Offset>
-                        <AbsDimension x="0" y="7"/>
-                    </Offset>
-                </Anchor>
-                <Anchor point="RIGHT" relativeTo="$parentRight">
-                    <Offset>
-                        <AbsDimension x="0" y="7"/>
-                    </Offset>
-                </Anchor>
-            </Anchors>
-        </HighlightTexture>
-    </Button>
-
     <CheckButton name="AuxRadioButtonTemplate" virtual="true">
-        <Size>
-            <AbsDimension x="16" y="16"/>
-        </Size>
+        <Size><AbsDimension x="16" y="16"/></Size>
         <Layers>
             <Layer level="BACKGROUND">
                 <FontString name="$parentText" inherits="GameFontHighlightSmall">
@@ -239,9 +91,7 @@
     </EditBox>
 
     <Slider name="AuxSliderTemplate" orientation="HORIZONTAL" enableMouse="true" virtual="true">
-        <Size>
-            <AbsDimension x="150" y="17"/>
-        </Size>
+        <Size><AbsDimension x="150" y="17"/></Size>
         <HitRectInsets>
             <AbsInset left="0" right="0" top="-10" bottom="-10"/>
         </HitRectInsets>
@@ -266,9 +116,7 @@
             </Layer>
         </Layers>
         <ThumbTexture name="$parentThumb" file="Interface\Buttons\UI-SliderBar-Button-Horizontal">
-            <Size>
-                <AbsDimension x="32" y="32"/>
-            </Size>
+            <Size><AbsDimension x="32" y="32"/></Size>
         </ThumbTexture>
     </Slider>
 
@@ -334,9 +182,7 @@
 	</Frame>
 
     <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent" clampedToScreen="true">
-        <Size>
-            <AbsDimension x="850" y="402"/>
-        </Size>
+        <Size><AbsDimension x="768" y="447"/></Size>
         <Anchors>
             <Anchor point="LEFT">
                 <Offset>
@@ -362,6 +208,14 @@
                 this:StopMovingOrSizing()
             </OnDragStop>
         </Scripts>
+        <Frames>
+            <Frame name="$parentContent">
+                <Anchors>
+                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="4" y="-80"/></Offset></Anchor>
+                    <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-4" y="35"/></Offset></Anchor>
+                </Anchors>
+            </Frame>
+        </Frames>
         <Backdrop bgFile="Interface\Buttons\WHITE8X8" edgeFile="Interface\Buttons\WHITE8X8" tile="true">
             <EdgeSize>
                 <AbsValue val="1.5"/>
