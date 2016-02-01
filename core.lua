@@ -84,7 +84,11 @@ function Aux_OnLoad()
         end)
     end
 
-    Aux.item_search_frame.on_load()
+    AuxFrameContent:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size})
+    AuxFrameContent:SetBackdropColor(unpack(Aux.gui.config.content_color))
+    AuxFrameContent:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
+
+--    Aux.item_search_frame.on_load()
     Aux.filter_search_frame.on_load()
     Aux.post_frame.on_load()
     Aux.auctions_frame.on_load()
@@ -353,8 +357,8 @@ function Aux_ContainerFrameItemButton_OnClick(button)
             end
 
             Aux.control.as_soon_as(function() return Aux.active_panel == 1 end, function()
-                AuxItemSearchFrameItemItemInputBox:Hide()
-                Aux.item_search_frame.set_item(item_info.item_id)
+--                AuxItemSearchFrameItemItemInputBox:Hide()
+--                Aux.item_search_frame.set_item(item_info.item_id)
             end)
 
             return
