@@ -109,6 +109,27 @@ function m:complete()
     end
 end
 
+function m:complete_item()
+
+    local text = this:GetText()
+
+    local item_names = {}
+    for key, value in Aux.static.auctionable_items do
+        if type(key) == 'number' then
+            tinsert(item_names, value.name)
+        end
+    end
+    sort(item_names)
+
+    for _, item_name in ipairs(item_names) do
+        if string.sub(strupper(item_name), 1, strlen(text)) == strupper(text) then
+            this:SetText(item_name)
+            this:HighlightText(strlen(text), -1)
+            return
+        end
+    end
+end
+
 --StaticPopupDialogs["CANCEL_AUCTION"] = {
 --    text = TEXT(CANCEL_AUCTION_CONFIRMATION),
 --    button1 = TEXT(ACCEPT),

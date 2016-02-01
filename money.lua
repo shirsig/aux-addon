@@ -29,13 +29,13 @@ function m.to_string(money, pad, trim, color, no_color)
 	if trim then
 		local parts = {}
 		if gold > 0 then
-			tinsert(parts, private:format_number(gold, false, color)..gold_text)
+			tinsert(parts, m.format_number(gold, false, color)..gold_text)
 		end
 		if silver > 0 then
-			tinsert(parts, private:format_number(silver, pad, color)..silver_text)
+			tinsert(parts, m.format_number(silver, pad, color)..silver_text)
 		end
 		if copper > 0 then
-			tinsert(parts, private:format_number(copper, pad, color)..copper_text)
+			tinsert(parts, m.format_number(copper, pad, color)..copper_text)
 		end
 		text = Aux.util.join(parts, ' ')
 	else

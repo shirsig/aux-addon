@@ -20,7 +20,7 @@ StaticPopupDialogs['AUX_SEARCH_SAVED_RENAME'] = {
         edit_box:HighlightText()
         edit_box:SetFocus()
         edit_box:SetScript('OnEscapePressed', function() StaticPopup_Hide('AUX_SEARCH_SAVED_RENAME') end)
-        edit_box:SetScript('OnEnterPressed', function() this.button1:Click() end)
+        edit_box:SetScript('OnEnterPressed', function() getglobal(this:GetParent():GetName()..'Button1'):Click() end)
     end,
     OnAccept = function()
         private.popup_info.rename.name = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
@@ -101,20 +101,36 @@ function private.add_filter()
 end
 
 function private.clear_filter()
-
+    AuxFilterSearchFrameFilterNameInputBox:SetText('')
+    AuxFilterSearchFrameFilterExactCheckButton:SetChecked(nil)
+    AuxFilterSearchFrameFilterMinLevel:SetText('')
+    AuxFilterSearchFrameFilterMaxLevel:SetText('')
+    UIDropDownMenu_ClearAll(private.class_dropdown)
+    UIDropDownMenu_ClearAll(private.subclass_dropdown)
+    UIDropDownMenu_ClearAll(private.slot_dropdown)
+    UIDropDownMenu_ClearAll(private.quality_dropdown)
+    AuxFilterSearchFrameFilterUsableCheckButton:SetChecked(nil)
+    AuxFilterSearchFrameFilterDiscardCheckButton:SetChecked(nil)
+    private.max_buyout_price:SetText('')
+    private.max_percent:SetText('')
 end
 
 function private.get_form_filter()
+    local exact = AuxFilterSearchFrameFilterExactCheckButton:GetChecked()
+    local max_price = Aux.money.from_string(private.max_buyout_price:GetText())
     return {
         name = AuxFilterSearchFrameFilterNameInputBox:GetText(),
-        min_level = tonumber(AuxFilterSearchFrameFilterMinLevel:GetText()),
-        max_level = tonumber(AuxFilterSearchFrameFilterMaxLevel:GetText()),
-        class = UIDropDownMenu_GetSelectedValue(private.class_dropdown),
-        subclass = UIDropDownMenu_GetSelectedValue(private.subclass_dropdown),
-        slot = UIDropDownMenu_GetSelectedValue(private.slot_dropdown),
-        quality = UIDropDownMenu_GetSelectedValue(private.quality_dropdown),
-        usable = AuxFilterSearchFrameFilterUsableCheckButton:GetChecked(),
         exact = AuxFilterSearchFrameFilterExactCheckButton:GetChecked(),
+        min_level = not exact and tonumber(AuxFilterSearchFrameFilterMinLevel:GetText()),
+        max_level = not exact and tonumber(AuxFilterSearchFrameFilterMaxLevel:GetText()),
+        class = not exact and UIDropDownMenu_GetSelectedValue(private.class_dropdown),
+        subclass = not exact and UIDropDownMenu_GetSelectedValue(private.subclass_dropdown),
+        slot = not exact and UIDropDownMenu_GetSelectedValue(private.slot_dropdown),
+        quality = not exact and UIDropDownMenu_GetSelectedValue(private.quality_dropdown),
+        usable = not exact and AuxFilterSearchFrameFilterUsableCheckButton:GetChecked(),
+        discard = AuxFilterSearchFrameFilterDiscardCheckButton:GetChecked(),
+        max_price = max_price > 0 and max_price,
+        max_percent = tonumber(private.max_percent:GetText()),
     }
 end
 
@@ -216,34 +232,6 @@ function public.on_load()
         private.new_filter_button = btn
     end
     do
-        local btn1 = Aux.gui.button(AuxFilterSearchFrameFilter, 16)
-        btn1:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
-        btn1:SetWidth(80)
-        btn1:SetHeight(24)
-        btn1:SetText('Add Filter')
-        btn1:SetScript('OnClick', private.add_filter)
-
-        local btn2 = Aux.gui.button(AuxFilterSearchFrameFilter, 16)
-        btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
-        btn2:SetWidth(80)
-        btn2:SetHeight(24)
-        btn2:SetText('Search Filter')
-        btn2:SetScript('OnClick', function()
-            private.search_box:SetText('')
-            private.add_filter()
-            public.start_search()
-        end)
-
-        local btn3 = Aux.gui.button(AuxFilterSearchFrameFilter, 16)
-        btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
-        btn3:SetWidth(80)
-        btn3:SetHeight(24)
-        btn3:SetText('Clear Filter')
-        btn3:SetScript('OnClick', function()
-            private.clear_filter()
-        end)
-    end
-    do
         local status_bar = Aux.gui.status_bar(AuxFilterSearchFrame)
         status_bar:SetWidth(265)
         status_bar:SetHeight(25)
@@ -271,9 +259,43 @@ function public.on_load()
         private.bid_button = btn
     end
     do
+        local btn1 = Aux.gui.button(AuxFilterSearchFrameFilter, 16)
+        btn1:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
+        btn1:SetWidth(80)
+        btn1:SetHeight(24)
+        btn1:SetText('Search')
+        btn1:SetScript('OnClick', function()
+            private.search_box:SetText('')
+            private.add_filter()
+            public.start_search()
+        end)
+
+        local btn2 = Aux.gui.button(AuxFilterSearchFrameFilter, 16)
+        btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
+        btn2:SetWidth(80)
+        btn2:SetHeight(24)
+        btn2:SetText('Add')
+        btn2:SetScript('OnClick', private.add_filter)
+
+        local btn3 = Aux.gui.button(AuxFilterSearchFrameFilter, 16)
+        btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
+        btn3:SetWidth(80)
+        btn3:SetHeight(24)
+        btn3:SetText('Clear')
+        btn3:SetScript('OnClick', function()
+            private.clear_filter()
+        end)
+    end
+    do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilter, '$parentNameInputBox')
+        editbox.complete_item = Aux.test.complete_item
         editbox:SetPoint('TOPLEFT', 14, -20)
         editbox:SetWidth(300)
+        editbox:SetScript('OnChar', function()
+            if AuxFilterSearchFrameFilterExactCheckButton:GetChecked() then
+                this:complete_item()
+            end
+        end)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
@@ -664,7 +686,7 @@ end
         end
     }
 
-    private.recent_searches_listing = CreateScrollingTable(AuxFilterSearchFrameSavedRecent)
+    private.recent_searches_listing = Aux.listing.CreateScrollingTable(AuxFilterSearchFrameSavedRecent)
     private.recent_searches_listing:SetColInfo({{name='Recent Searches', width=1}})
     private.recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
     private.recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
@@ -672,7 +694,7 @@ end
 
     Aux.gui.vertical_line(AuxFilterSearchFrameSaved, 379)
 
-    private.favorite_searches_listing = CreateScrollingTable(AuxFilterSearchFrameSavedFavorite)
+    private.favorite_searches_listing = Aux.listing.CreateScrollingTable(AuxFilterSearchFrameSavedFavorite)
     private.favorite_searches_listing:SetColInfo({{name='Favorite Searches', width=1}})
     private.favorite_searches_listing:SetHandler('OnClick', handlers.OnClick)
     private.favorite_searches_listing:SetHandler('OnEnter', handlers.OnEnter)

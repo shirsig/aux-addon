@@ -177,12 +177,20 @@ function m.filter_to_string(filter)
         filter_term = filter_term == '' and part or filter_term..'/'..part
     end
 
+    if filter.exact then
+        add('/exact')
+    end
+
     if filter.min_level then
         add(filter.min_level)
     end
 
     if filter.max_level then
         add(filter.max_level)
+    end
+
+    if filter.usable then
+        add('/usable')
     end
 
     if filter.class then
@@ -201,12 +209,16 @@ function m.filter_to_string(filter)
         add(getglobal('ITEM_QUALITY'..filter.quality..'_DESC'))
     end
 
-    if filter.usable then
-        add(filter_term)
+    if filter.max_price then
+        add(Aux.money.to_string(filter.max_price, nil, true, nil, true))
     end
 
-    if filter.exact then
-        add(filter_term)
+    if filter.max_percent then
+        add(filter.max_percent..'%')
+    end
+
+    if filter.discard then
+        add('/discard')
     end
 
     return filter_term
