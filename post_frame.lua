@@ -344,7 +344,7 @@ function public.on_open()
     AuxSellAuctions:SetWidth(AuxSellAuctionsListing:GetWidth() + 40)
 
     --    UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, LIVE)
-    private.set_auction_duration(AUX_AUCTION_DURATION)
+    private.set_auction_duration(aux_auction_duration)
 
     -- so that it's initialized with zeroes, not sometimes zero, sometimes empty
     private.start_price:SetText(Aux.money.to_string(0))
@@ -370,15 +370,15 @@ function public.duration_radio_button_on_click(index)
     if index == 1 then
         AuxSellParametersShortDurationRadio:SetChecked(true)
         AuctionFrameAuctions.duration = 120
-        AUX_AUCTION_DURATION = 'short'
+        aux_auction_duration = 'short'
     elseif index == 2 then
         AuxSellParametersMediumDurationRadio:SetChecked(true)
         AuctionFrameAuctions.duration = 480
-        AUX_AUCTION_DURATION = 'medium'
+        aux_auction_duration = 'medium'
     else
         AuxSellParametersLongDurationRadio:SetChecked(true)
         AuctionFrameAuctions.duration = 1440
-        AUX_AUCTION_DURATION = 'long'
+        aux_auction_duration = 'long'
     end
     private.update_recommendation()
 end

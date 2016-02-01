@@ -1,11 +1,34 @@
 local private, public = {}, {}
-Aux.filter_search_frame = public
+Aux.search_frame = public
 
 aux_favorite_searches = {}
 aux_recent_searches = {}
 
-local tooltip_patterns = {}
-local selected_auction
+private.popup_info = {
+    rename = {}
+}
+
+StaticPopupDialogs['AUX_SEARCH_SAVED_RENAME'] = {
+    text = 'Enter a new name for this search.',
+    button1 = 'Accept',
+    button2 = 'Cancel',
+    hasEditBox = 1,
+    OnShow = function()
+        local rename_info = private.popup_info.rename
+        local edit_box = getglobal(this:GetName()..'EditBox')
+        edit_box:SetText(rename_info.name or '')
+        edit_box:HighlightText()
+        edit_box:SetFocus()
+        edit_box:SetScript('OnEscapePressed', function() StaticPopup_Hide('AUX_SEARCH_SAVED_RENAME') end)
+        edit_box:SetScript('OnEnterPressed', function() this.button1:Click() end)
+    end,
+    OnAccept = function()
+        private.popup_info.rename.name = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
+        private.update_search_listings()
+    end,
+    timeout = 0,
+    hideOnEscape = 1,
+}
 
 local RESULTS, SAVED, FILTER = {}, {}, {}
 
@@ -18,7 +41,7 @@ private.elements = {
 function private.update_search_listings()
     local favorite_search_rows = {}
     for i, favorite_search in ipairs(aux_favorite_searches) do
-        local name = Aux.test.prettify_search(favorite_search)
+        local name = favorite_search.name or Aux.test.prettify_search(favorite_search.filter_string)
         tinsert(favorite_search_rows, {
             cols = {{value=name}},
             search = favorite_search,
@@ -30,7 +53,7 @@ function private.update_search_listings()
 
     local recent_search_rows = {}
     for i, recent_search in ipairs(aux_recent_searches) do
-        local name = Aux.test.prettify_search(recent_search)
+        local name = recent_search.name or Aux.test.prettify_search(recent_search.filter_string)
         tinsert(recent_search_rows, {
             cols = {{value=name}},
             search = recent_search,
@@ -93,24 +116,11 @@ function private.get_form_filter()
     }
 end
 
-function private.select_auction(entry)
-    selected_auction = entry
-    RESULTS.buyout_button:Disable()
-    private.bid_button:Disable()
-end
-
-function private.clear_selection(entry)
-    selected_auction = nil
-    RESULTS.buyout_button:Disable()
-    private.bid_button:Disable()
+function public.on_open()
+    private.update_search_listings()
 end
 
 function public.on_close()
-    private.clear_selection()
-end
-
-function public.on_open()
-    private.update_search_listings()
 end
 
 function public.on_load()
@@ -125,7 +135,7 @@ function public.on_load()
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Search')
-        btn:SetScript('OnClick', Aux.filter_search_frame.start_search)
+        btn:SetScript('OnClick', Aux.search_frame.start_search)
         private.search_button = btn
     end
     do
@@ -134,7 +144,7 @@ function public.on_load()
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Stop')
-        btn:SetScript('OnClick', Aux.filter_search_frame.stop_search)
+        btn:SetScript('OnClick', Aux.search_frame.stop_search)
         btn:Hide()
         private.stop_button = btn
     end
@@ -392,14 +402,14 @@ function public.on_load()
 
     -- Tooltip 1
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox1')
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip1InputBox1')
         editbox:SetPoint('TOPLEFT', 300, -20)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip1InputBox2'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -414,14 +424,14 @@ function public.on_load()
         label:SetText('Tooltip')
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip1InputBox2')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip1InputBox1 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip1InputBox1'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip1InputBox3'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -433,14 +443,14 @@ function public.on_load()
         end)
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip1InputBox3')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip1InputBox2 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip1InputBox2'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip1InputBox4'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -452,12 +462,12 @@ function public.on_load()
         end)
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip1InputBox4')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip1InputBox3 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip1InputBox3'):SetFocus()
             else
                 getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
             end
@@ -473,14 +483,14 @@ function public.on_load()
 
     -- Tooltip 2
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox1')
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip2InputBox1')
         editbox:SetPoint('TOPLEFT', 300, -200)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip2InputBox2'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -495,14 +505,14 @@ function public.on_load()
         label:SetText('Tooltip')
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip2InputBox2')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip2InputBox1 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip2InputBox1'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip2InputBox3'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -514,14 +524,14 @@ function public.on_load()
         end)
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip2InputBox3')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip2InputBox2 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip2InputBox2'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip2InputBox4'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -533,12 +543,12 @@ function public.on_load()
         end)
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip2InputBox4')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip2InputBox3 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip2InputBox3'):SetFocus()
             else
                 getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
             end
@@ -554,14 +564,14 @@ function public.on_load()
 
     -- Tooltip 3
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox1')
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip3InputBox1')
         editbox:SetPoint('TOPLEFT', 600, -20)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip3InputBox2'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -576,14 +586,14 @@ function public.on_load()
         label:SetText('Tooltip')
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip3InputBox2')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip3InputBox1 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip3InputBox1'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip3InputBox3'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -595,14 +605,14 @@ function public.on_load()
         end)
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip3InputBox3')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip3InputBox2 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip3InputBox2'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip3InputBox4'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -614,12 +624,12 @@ function public.on_load()
         end)
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip3InputBox4')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip3InputBox3 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip3InputBox3'):SetFocus()
             else
                 getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
             end
@@ -635,14 +645,14 @@ function public.on_load()
 
     -- Tooltip 4
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox1')
-        editbox:SetPoint('TOPLEFT', 300, -300)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip4InputBox1')
+        editbox:SetPoint('TOPLEFT', 600, -200)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip4InputBox2'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -657,14 +667,14 @@ function public.on_load()
         label:SetText('Tooltip')
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox2')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox1 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip4InputBox2')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip4InputBox1 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip4InputBox1'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip4InputBox3'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -676,14 +686,14 @@ function public.on_load()
         end)
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox3')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox2 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip4InputBox3')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip4InputBox2 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox2'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip4InputBox2'):SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip4InputBox4'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -695,12 +705,12 @@ function public.on_load()
         end)
     end
     do
-        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltipInputBox4')
-        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltipInputBox3 , 'BOTTOMLEFT', 0, -3)
+        local editbox = Aux.gui.editbox(private.elements[FILTER].filters, '$parentTooltip4InputBox4')
+        editbox:SetPoint('TOPLEFT', AuxFilterSearchFrameFilterTooltip4InputBox3 , 'BOTTOMLEFT', 0, -3)
         editbox:SetWidth(250)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox3'):SetFocus()
+                getglobal(this:GetParent():GetName()..'Tooltip4InputBox3'):SetFocus()
             else
                 getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
             end
@@ -714,32 +724,41 @@ function public.on_load()
         end)
     end
 
-    private.testlisting = CreateAuctionResultsTable(AuxFilterSearchFrameResults)
-    private.testlisting:Show()
-    private.testlisting:SetSort(9)
-    private.testlisting:Clear()
-    private.testlisting:SetHandler('OnSelectionChanged', private.on_selection_changed)
+    private.results_listing = CreateAuctionResultsTable(AuxFilterSearchFrameResults)
+    private.results_listing:Show()
+    private.results_listing:SetSort(9)
+    private.results_listing:Clear()
+    private.results_listing:SetHandler('OnCellAltClick', function(cell, button)
+        private.find_auction(cell.row.data.record, true, button == 'LeftButton')
+    end)
+    private.results_listing:SetHandler('OnSelectionChanged', function(rt, datum)
+        if not datum then return end
+        private.find_auction(datum.record)
+    end)
 
     local handlers = {
         OnClick = function(st, data, _, button)
             if not data then return end
             if button == 'LeftButton' then
                 if IsShiftKeyDown() then
---                    private.popupInfo.export = data.search
+                    private.search_box:SetText(data.search.filter_string)
+                    --                    private.popupInfo.export = data.search
 --                        TSMAPI.Util:ShowStaticPopupDialog('TSM_SHOPPING_SAVED_EXPORT_POPUP')
                 elseif IsControlKeyDown() then
---                    private.popupInfo.renameInfo = data.searchInfo
---                    TSMAPI.Util:ShowStaticPopupDialog('TSM_SHOPPING_SAVED_RENAME_POPUP')
+
                 else
-                    private.search_box:SetText(data.search)
+                    private.search_box:SetText(data.search.filter_string)
                     public.start_search()
                 end
             elseif button == 'RightButton' then
-                if st == private.recent_searches_listing then
+                if IsShiftKeyDown() then
+                    private.popup_info.rename = data.search
+                    StaticPopup_Show('AUX_SEARCH_SAVED_RENAME')
+                elseif st == private.recent_searches_listing then
                     if IsShiftKeyDown() then
-                        tremove(TSM.db.global.savedSearches, data.index)
+--                        tremove(TSM.db.global.savedSearches, data.index)
 --                        TSM:Printf('Removed '%s' from your recent searches.', data.searchInfo.name)
-                        private.UpdateSTData()
+--                        private.UpdateSTData()
                     else
                         tinsert(aux_favorite_searches, data.search)
 --                        data.searchInfo.isFavorite = true
@@ -757,7 +776,7 @@ function public.on_load()
         OnEnter = function(st, data, self)
             if not data then return end
                         GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-                        GameTooltip:AddLine(gsub(data.name, ';', '\n'), 255/255, 254/255, 250/255)
+                        GameTooltip:AddLine(gsub(Aux.test.prettify_search(data.search.filter_string), ';', '\n'), 255/255, 254/255, 250/255)
                         GameTooltip:Show()
 --            GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
 --            GameTooltip:AddLine(data.search, 1, 1, 1, true)
@@ -787,6 +806,7 @@ function public.on_load()
     private.recent_searches_listing:SetColInfo({{name='Recent Searches', width=1}})
     private.recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
     private.recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
+    private.recent_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
 
     Aux.gui.vertical_line(AuxFilterSearchFrameSaved, 379)
 
@@ -794,6 +814,7 @@ function public.on_load()
     private.favorite_searches_listing:SetColInfo({{name='Favorite Searches', width=1}})
     private.favorite_searches_listing:SetHandler('OnClick', handlers.OnClick)
     private.favorite_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
+    private.favorite_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
 
 
     private.update_tab(SAVED)
@@ -831,13 +852,12 @@ function public.start_search()
             return
         end
 
-        tinsert(aux_recent_searches, 1, private.search_box:GetText())
+        tinsert(aux_recent_searches, 1, { filter_string = private.search_box:GetText() })
         while getn(aux_recent_searches) > 50 do
             tremove(aux_recent_searches)
         end
         private.update_search_listings()
 
-        private.clear_selection()
         private.search_button:Hide()
         private.stop_button:Show()
 
@@ -847,7 +867,7 @@ function public.start_search()
         private.status_bar:set_text('Scanning auctions...')
 
         local scanned_records = {}
-        private.testlisting:SetDatabase(scanned_records)
+        private.results_listing:SetDatabase(scanned_records)
 
         Aux.scan.start{
             queries = queries,
@@ -856,7 +876,7 @@ function public.start_search()
                 private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
             end,
             on_page_complete = function()
-                private.testlisting:SetDatabase()
+                private.results_listing:SetDatabase()
             end,
             on_start_query = function(query_index)
                 private.status_bar:update_status(0, 100 * (query_index - 1) / getn(queries)) -- TODO
@@ -867,7 +887,7 @@ function public.start_search()
                 tinsert(scanned_records, auction_info)
             end,
             on_complete = function()
-                private.testlisting:SetDatabase()
+                private.results_listing:SetDatabase()
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
 
@@ -875,7 +895,7 @@ function public.start_search()
                 private.search_button:Show()
             end,
             on_abort = function()
-                private.testlisting:SetDatabase()
+                private.results_listing:SetDatabase()
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
                 private.stop_button:Hide()
@@ -885,84 +905,80 @@ function public.start_search()
     end)
 end
 
-function private.process_request(entry, express_mode, buyout_mode)
+do
+    local found_index
 
-    if entry.gone or (buyout_mode and not entry.buyout_price) or (express_mode and not buyout_mode and entry.high_bidder) or entry.owner == UnitName('player') then
-        return
-    end
+    function private.find_auction(entry, express_mode, buyout_mode)
 
-    PlaySound('igMainMenuOptionCheckBoxOn')
-
-    local function test(index)
-        local auction_record = Aux.info.auction(index)
-        return auction_record.signature == entry.signature and auction_record.bid_price == entry.bid_price and auction_record.duration == entry.duration and auction_record.owner ~= UnitName('player')
-    end
-
-    local function remove_entry()
-        entry.gone = true
-        private.clear_selection()
-    end
-
-    if express_mode then
-        Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
-            if not entry.gone then
-                Aux.place_bid('list', index, buyout_mode and entry.buyout_price or entry.bid_price, remove_entry)
-            end
-        end)
-    else
-        private.select_auction(entry)
-
-        Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
-
-            if not entry.high_bidder then
-                private.bid_button:SetScript('OnClick', function()
-                    if test(index) and not entry.gone then
-                        Aux.place_bid('list', index, entry.bid_price, remove_entry)
-                    end
-                    private.clear_selection()
-                end)
-                private.bid_button:Enable()
-            end
-
-            if entry.buyout_price then
-                RESULTS.buyout_button:SetScript('OnClick', function()
-                    if test(index) and not entry.gone then
-                        Aux.place_bid('list', index, entry.buyout_price, remove_entry)
-                    end
-                    private.clear_selection()
-                end)
-                RESULTS.buyout_button:Enable()
-            end
-        end)
-    end
-end
-
-function private.on_selection_changed(rt, datum)
-
-    if not datum then
-        return
-    end
-
-    local entry = datum.record
-
-    if IsControlKeyDown() then
-        DressUpItemLink(entry.hyperlink)
-    elseif IsShiftKeyDown() then
-        if ChatFrameEditBox:IsVisible() then
-            ChatFrameEditBox:Insert(entry.hyperlink)
+        if entry.gone or (buyout_mode and not entry.buyout_price) or (express_mode and not buyout_mode and entry.high_bidder) or entry.owner == UnitName('player') then
+            return
         end
-    else
-        local express_mode = IsAltKeyDown()
-        local buyout_mode = express_mode and arg1 == 'LeftButton'
-        private.process_request(entry, express_mode, buyout_mode)
+
+        local function test(index)
+            return Aux.info.auction(index).search_signature == entry.search_signature
+        end
+
+        local function remove_entry()
+            private.results_listing:RemoveSelectedRecord()
+            entry.gone = true
+        end
+
+        if express_mode then
+            Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
+                if not entry.gone then
+                    Aux.place_bid('list', index, buyout_mode and entry.buyout_price or entry.bid_price, remove_entry)
+                end
+            end)
+        else
+            found_index = nil
+
+            Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
+
+                found_index = index
+
+                if not entry.high_bidder then
+                    private.bid_button:SetScript('OnClick', function()
+                        if test(index) and not entry.gone then
+                            Aux.place_bid('list', index, entry.bid_price, remove_entry)
+                        end
+                    end)
+                    private.bid_button:Enable()
+                end
+
+                if entry.buyout_price > 0 then
+                    RESULTS.buyout_button:SetScript('OnClick', function()
+                        if test(index) and not entry.gone then
+                            Aux.place_bid('list', index, entry.buyout_price, remove_entry)
+                        end
+                    end)
+                    RESULTS.buyout_button:Enable()
+                end
+            end)
+        end
+    end
+
+    function public.on_update()
+--        if not (RESULTS.buyout_button:IsEnabled() or private.bid_button:IsEnabled()) then
+--            return
+--        end
+
+        local selection = private.results_listing:GetSelection()
+        if not selection then
+            RESULTS.buyout_button:Disable()
+            private.bid_button:Disable()
+            return
+        end
+
+        if found_index and selection.record.search_signature ~= Aux.info.auction(found_index).search_signature then
+            RESULTS.buyout_button:Disable()
+            private.bid_button:Disable()
+            private.find_auction(selection.record)
+        end
     end
 end
 
 --function private.create_auction_record(auction_info)
 --
---	local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
---	local unit_buyout_price = buyout_price and auction_info.buyout_price / auction_info.aux_quantity
---    local status
 --    if auction_info.current_bid == 0 then
 --        status = 'No Bid'
 --    elseif auction_info.high_bidder then
@@ -971,37 +987,6 @@ end
 --        status = 'Other Bidder'
 --    end
 --
---    return {
---        query = auction_info.query,
---        page = auction_info.page,
---
---        item_id = auction_info.item_id,
---        suffix_id = auction_info.suffix_id,
---        unique_id = auction_info.unique_id,
---        enchant_id = auction_info.enchant_id,
---
---        item_key = auction_info.item_key,
---        signature = auction_info.signature,
---
---        name = auction_info.name,
---        level = auction_info.level,
---        tooltip = auction_info.tooltip,
---        aux_quantity = auction_info.aux_quantity,
---        buyout_price = buyout_price,
---        unit_buyout_price = unit_buyout_price,
---        quality = auction_info.quality,
---        hyperlink = auction_info.hyperlink,
---        itemstring = auction_info.itemstring,
---        bid_price = auction_info.bid_price,
---        unit_bid_price = auction_info.bid_price / auction_info.aux_quantity,
---        owner = auction_info.owner,
---        duration = auction_info.duration,
---        usable = auction_info.usable,
---        high_bidder = auction_info.high_bidder,
---        status = status,
---
---        EnhTooltip_info = auction_info.EnhTooltip_info,
---    }
 --end
 
 function private.initialize_class_dropdown()

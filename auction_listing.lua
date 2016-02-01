@@ -119,7 +119,19 @@ local methods = {
     OnCellClick = function()
         local button = arg1
         if this.rt.disabled then return end
-        this.rt:SetSelectedRecord(this.row.data.record)
+        if IsControlKeyDown() then
+            DressUpItemLink(this.row.data.record.hyperlink)
+        elseif IsShiftKeyDown() then
+            if ChatFrameEditBox:IsVisible() then
+                ChatFrameEditBox:Insert(this.row.data.record.hyperlink)
+            end
+        elseif IsAltKeyDown() then
+            if this.rt.handlers.OnCellAltClick then
+                this.rt.handlers.OnCellAltClick(this, button)
+            end
+        else
+            this.rt:SetSelectedRecord(this.row.data.record)
+        end
     end,
 
     OnCellDoubleClick = function()
@@ -152,10 +164,10 @@ local methods = {
     end,
 
 
-    GetRecordPercent = function(rt, record)
+    GetRecordPercent = function(self, record)
         if not record then return end
 --         cache the market value on the record
---        record.market_value = record.market_value or rt.GetMarketValue(record.item_key) or 0
+--        record.market_value = record.market_value or self.GetMarketValue(record.item_key) or 0
 --        if record.marketValue > 0 then
 --            if record.itemBuyout > 0 then
 --                return Aux.round(100 * record.itemBuyout / record.marketValue, 1)
@@ -172,15 +184,15 @@ local methods = {
         end
     end,
 
-    UpdateRowInfo = function(rt)
-        Aux.util.wipe(rt.rowInfo)
-        rt.rowInfo.numDisplayRows = 0
-        rt.sortInfo.isSorted = nil
-        rt:SetSelectedRecord(nil, true)
+    UpdateRowInfo = function(self)
+        Aux.util.wipe(self.rowInfo)
+        self.rowInfo.numDisplayRows = 0
+        self.sortInfo.isSorted = nil
+        self:SetSelectedRecord(nil, true)
 
-        sort(rt.records, function(a,b) return a.search_signature < b.search_signature end)
+        sort(self.records, function(a,b) return a.search_signature < b.search_signature end)
 
-        local records = rt.records
+        local records = self.records
         if getn(records) == 0 then return end
 
         -- Populate the row info from the database by combining identical auctions and auctions
@@ -190,21 +202,21 @@ local methods = {
             local prevRecord = records[i-1]
             if prevRecord and record.search_signature == prevRecord.search_signature then
                 -- it's an identical auction to the previous row so increment the number of auctions
-                rt.rowInfo[getn(rt.rowInfo)].children[getn(rt.rowInfo[getn(rt.rowInfo)].children)].numAuctions = rt.rowInfo[getn(rt.rowInfo)].children[getn(rt.rowInfo[getn(rt.rowInfo)].children)].numAuctions + 1
+                self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].numAuctions = self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].numAuctions + 1
             elseif prevRecord and record.item_key == prevRecord.item_key then
                 -- it's the same base item as the previous row so insert a new auction
-                tinsert(rt.rowInfo[getn(rt.rowInfo)].children, {numAuctions=1, record=record})
-                if rt.expanded[rt.rowInfo[getn(rt.rowInfo)].expandKey] then
-                    rt.rowInfo.numDisplayRows = rt.rowInfo.numDisplayRows + 1
+                tinsert(self.rowInfo[getn(self.rowInfo)].children, {numAuctions=1, record=record})
+                if self.expanded[self.rowInfo[getn(self.rowInfo)].expandKey] then
+                    self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
                 end
             else
                 -- it's a different base item from the previous row
-                tinsert(rt.rowInfo, {item_key=record.item_key, expandKey=record.item_key, children={{numAuctions=1, record=record}}})
-                rt.rowInfo.numDisplayRows = rt.rowInfo.numDisplayRows + 1
+                tinsert(self.rowInfo, {item_key=record.item_key, expandKey=record.item_key, children={{numAuctions=1, record=record}}})
+                self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
             end
         end
 
-        for _, info in ipairs(rt.rowInfo) do
+        for _, info in ipairs(self.rowInfo) do
             local totalAuctions, totalPlayerAuctions = 0, 0
             for _, childInfo in ipairs(info.children) do
                 totalAuctions = totalAuctions + childInfo.numAuctions
@@ -217,36 +229,36 @@ local methods = {
         end
     end,
 
-    UpdateRows = function(rt)
+    UpdateRows = function(self)
         -- hide all the rows
-        for _, row in ipairs(rt.rows) do row:Hide() end
+        for _, row in ipairs(self.rows) do row:Hide() end
 
         -- update sorting highlights
-        for _, cell in ipairs(rt.headCells) do
+        for _, cell in ipairs(self.headCells) do
             local tex = cell:GetNormalTexture()
             tex:SetTexture([[Interface\AddOns\Aux-AddOn\WorldStateFinalScore-Highlight]])
             tex:SetTexCoord(0.017, 1, 0.083, 0.909)
             tex:SetAlpha(0.5)
         end
-        if rt.sortInfo.descending then
-            rt.headCells[rt.sortInfo.columnIndex]:GetNormalTexture():SetTexture(0.8, 0.6, 1, 0.8)
+        if self.sortInfo.descending then
+            self.headCells[self.sortInfo.columnIndex]:GetNormalTexture():SetTexture(0.8, 0.6, 1, 0.8)
         else
-            rt.headCells[rt.sortInfo.columnIndex]:GetNormalTexture():SetTexture(0.6, 0.8, 1, 0.8)
+            self.headCells[self.sortInfo.columnIndex]:GetNormalTexture():SetTexture(0.6, 0.8, 1, 0.8)
         end
 
         -- update the scroll frame
-        FauxScrollFrame_Update(rt.scrollFrame, rt.rowInfo.numDisplayRows, getn(rt.rows), rt.ROW_HEIGHT)
+        FauxScrollFrame_Update(self.scrollFrame, self.rowInfo.numDisplayRows, getn(self.rows), self.ROW_HEIGHT)
 
         -- make sure the offset is not too high
-        local maxOffset = max(rt.rowInfo.numDisplayRows - getn(rt.rows), 0)
-        if FauxScrollFrame_GetOffset(rt.scrollFrame) > maxOffset then
-            FauxScrollFrame_SetOffset(rt.scrollFrame, maxOffset)
+        local maxOffset = max(self.rowInfo.numDisplayRows - getn(self.rows), 0)
+        if FauxScrollFrame_GetOffset(self.scrollFrame) > maxOffset then
+            FauxScrollFrame_SetOffset(self.scrollFrame, maxOffset)
         end
 
-        if not rt.sortInfo.isSorted then
+        if not self.sortInfo.isSorted then
             local function SortHelperFunc(a, b, sortKey)
                 local hadSortKey = sortKey and true or false
-                sortKey = sortKey or rt.sortInfo.sortKey
+                sortKey = sortKey or self.sortInfo.sortKey
                 local aVal, bVal
                 if a.children then
                     aVal = a.children[1].record
@@ -261,17 +273,17 @@ local methods = {
                     return false
                 end
                 if sortKey == "percent" then
-                    aVal = rt:GetRecordPercent(aVal)
-                    bVal = rt:GetRecordPercent(bVal)
+                    aVal = self:GetRecordPercent(aVal)
+                    bVal = self:GetRecordPercent(bVal)
                 elseif sortKey == "numAuctions" then
                     aVal = a.totalAuctions
                     bVal = b.totalAuctions
                 elseif sortKey == "itemDisplayedBid" or sortKey == "displayedBid" then
-                    aVal = rt.GetRowPrices(aVal, sortKey == "itemDisplayedBid")
-                    bVal = rt.GetRowPrices(bVal, sortKey == "itemDisplayedBid")
+                    aVal = self.GetRowPrices(aVal, sortKey == "itemDisplayedBid")
+                    bVal = self.GetRowPrices(bVal, sortKey == "itemDisplayedBid")
                 elseif sortKey == "itemBuyout" or sortKey == "buyout" then
-                    aVal = ({ rt.GetRowPrices(aVal, sortKey == "itemBuyout") })[2]
-                    bVal = ({ rt.GetRowPrices(bVal, sortKey == "itemBuyout") })[2]
+                    aVal = ({ self.GetRowPrices(aVal, sortKey == "itemBuyout") })[2]
+                    bVal = ({ self.GetRowPrices(bVal, sortKey == "itemBuyout") })[2]
                 else
                     aVal = aVal[sortKey]
                     bVal = bVal[sortKey]
@@ -279,15 +291,15 @@ local methods = {
                 if sortKey == 'buyout' or sortKey == 'itemBuyout' then
                     -- for buyout, put bid-only auctions at the bottom
                     if not aVal or aVal == 0 then
-                        aVal = (rt.sortInfo.descending and -1 or 1) * Aux.huge
+                        aVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
                     end
                     if not bVal or bVal == 0 then
-                        bVal = (rt.sortInfo.descending and -1 or 1) * Aux.huge
+                        bVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
                     end
                 elseif sortKey == "percent" then
                     -- for percent, put bid-only auctions at the bottom
-                    aVal = aVal or ((rt.sortInfo.descending and -1 or 1) * Aux.huge)
-                    bVal = bVal or ((rt.sortInfo.descending and -1 or 1) * Aux.huge)
+                    aVal = aVal or ((self.sortInfo.descending and -1 or 1) * Aux.huge)
+                    bVal = bVal or ((self.sortInfo.descending and -1 or 1) * Aux.huge)
                 end
                 if type(aVal) == "string" or type(bVal) == "string" then
                     aVal = aVal or ""
@@ -321,43 +333,43 @@ local methods = {
                     -- sort arbitrarily, but make sure the sort is stable
                     return tostring(a) < tostring(b)
                 end
-                if rt.sortInfo.descending then
+                if self.sortInfo.descending then
                     return aVal > bVal
                 else
                     return aVal < bVal
                 end
             end
             -- sort the row info
-            for i, info in ipairs(rt.rowInfo) do
+            for i, info in ipairs(self.rowInfo) do
                 sort(info.children, SortHelperFunc)
             end
-            sort(rt.rowInfo, SortHelperFunc)
-            rt.sortInfo.isSorted = true
+            sort(self.rowInfo, SortHelperFunc)
+            self.sortInfo.isSorted = true
         end
 
         -- update all the rows
-        local rowIndex = 1 - FauxScrollFrame_GetOffset(rt.scrollFrame)
-        for i, info in ipairs(rt.rowInfo) do
-            if rt.expanded[info.expandKey] then
+        local rowIndex = 1 - FauxScrollFrame_GetOffset(self.scrollFrame)
+        for i, info in ipairs(self.rowInfo) do
+            if self.expanded[info.expandKey] then
                 -- show each of the rows for this base item since it's expanded
                 for j, childInfo in ipairs(info.children) do
-                    rt:SetRowInfo(rowIndex, childInfo.record, childInfo.numAuctions, 0, j > 1, false, info.expandKey, childInfo.numAuctions)
+                    self:SetRowInfo(rowIndex, childInfo.record, childInfo.numAuctions, 0, j > 1, false, info.expandKey, childInfo.numAuctions)
                     rowIndex = rowIndex + 1
                 end
             else
                 -- just show one row for this base item since it's not expanded
-                rt:SetRowInfo(rowIndex, info.children[1].record, info.totalAuctions, getn(info.children) > 1 and info.totalPlayerAuctions or 0, false, getn(info.children) > 1, info.expandKey, info.children[1].numAuctions)
+                self:SetRowInfo(rowIndex, info.children[1].record, info.totalAuctions, getn(info.children) > 1 and info.totalPlayerAuctions or 0, false, getn(info.children) > 1, info.expandKey, info.children[1].numAuctions)
                 rowIndex = rowIndex + 1
             end
         end
     end,
 
-    SetRowInfo = function(rt, rowIndex, record, displayNumAuctions, numPlayerAuctions, indented, expandable, expandKey, numAuctions)
-        if rowIndex <= 0 or rowIndex > getn(rt.rows) then return end
-        local row = rt.rows[rowIndex]
+    SetRowInfo = function(self, rowIndex, record, displayNumAuctions, numPlayerAuctions, indented, expandable, expandKey, numAuctions)
+        if rowIndex <= 0 or rowIndex > getn(self.rows) then return end
+        local row = self.rows[rowIndex]
         -- show this row
         row:Show()
-        if rt.selected and record.search_signature == rt.selected.search_signature then
+        if self.selected and record.search_signature == self.selected.search_signature then
             row.highlight:Show()
         else
             row.highlight:Hide()
@@ -394,10 +406,10 @@ local methods = {
             row.cells[4]:SetText(record.aux_quantity)
             row.cells[5]:SetText(TIME_LEFT_STRINGS[record.duration or 0] or "---")
             row.cells[6]:SetText(Aux.is_player(record.owner) and ("|cffffff00"..record.owner.."|r") or record.owner)
-            local bid, buyout, colorBid, colorBuyout = rt.GetRowPrices(record, aux_price_per_unit)
+            local bid, buyout, colorBid, colorBuyout = self.GetRowPrices(record, aux_price_per_unit)
             row.cells[7]:SetText(bid > 0 and Aux.money.to_string(bid, true, false, colorBid) or "---")
             row.cells[8]:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, colorBuyout) or "---")
-            local pct, bidPct = rt:GetRecordPercent(record)
+            local pct, bidPct = self:GetRecordPercent(record)
             local pctColor = '|cffffffff'
             if pct then
                 for i=1, getn(AUCTION_PCT_COLORS) do
@@ -417,25 +429,25 @@ local methods = {
         end
     end,
 
-    SetSelectedRecord = function(rt, record, silent)
-        if rt.disabled then return end
+    SetSelectedRecord = function(self, record, silent)
+        if self.disabled then return end
 
         -- make sure the selected record still exists and get the data for the callback
-        rt.selected = record
-        local selectedData = rt:GetSelection()
-        rt.selected = selectedData and rt.selected or nil
+        self.selected = record
+        local selectedData = self:GetSelection()
+        self.selected = selectedData and self.selected or nil
 
         -- show / hide highlight accordingly
-        for _, row in ipairs(rt.rows) do
-            if rt.selected and row.data and row.data.record.search_signature == rt.selected.search_signature then
+        for _, row in ipairs(self.rows) do
+            if self.selected and row.data and row.data.record.search_signature == self.selected.search_signature then
                 row.highlight:Show()
             else
                 row.highlight:Hide()
             end
         end
 
-        if not silent and rt.handlers.OnSelectionChanged and not rt.scrollDisabled then
-            rt.handlers.OnSelectionChanged(rt, selectedData or nil)
+        if not silent and self.handlers.OnSelectionChanged and not self.scrollDisabled then
+            self.handlers.OnSelectionChanged(self, selectedData or nil)
         end
     end,
 
@@ -463,7 +475,7 @@ local methods = {
 --            rt.dbView:SetFilter(filterFunc, filterHash) -- TODO
 
         -- get index of selected row
-        local prevSelectedIndex = nil
+        local prevSelectedIndex
         if rt.selected then
             for index, row in ipairs(rt.rows) do
                 if row:IsVisible() and row.data and row.data.record == rt.selected then
@@ -494,7 +506,6 @@ local methods = {
     end,
 
     RemoveSelectedRecord = function(rt, count)
---        TSMAPI:Assert(rt.selected)
         count = count or 1
         for i=1, count do
             local index = Aux.util.index_of(rt.selected, rt.records)
@@ -537,7 +548,6 @@ local methods = {
     end,
 
     SetHandler = function(rt, event, handler)
---        TSMAPI:Assert(event == "OnSelectionChanged")
         rt.handlers[event] = handler
     end,
 
@@ -718,7 +728,7 @@ function CreateAuctionResultsTable(parent)
             local text = cell:CreateFontString()
             text:SetFont(Aux.gui.config.content_font, min(14, rt.ROW_HEIGHT))
             text:SetJustifyH(colInfo[j].align or 'LEFT')
-            text:SetJustifyV('MIDDLE')
+            text:SetJustifyV('CENTER')
             text:SetPoint('TOPLEFT', 1, -1)
             text:SetPoint('BOTTOMRIGHT', -1, 1)
             cell:SetFontString(text)

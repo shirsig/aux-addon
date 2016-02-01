@@ -13,7 +13,7 @@
                 this:RegisterEvent('AUCTION_OWNED_LIST_UPDATE')
 			</OnLoad>
 			<OnEvent> 
-				Aux_OnEvent()
+				Aux.on_event()
 			</OnEvent> 
 		</Scripts>
 	</Frame>

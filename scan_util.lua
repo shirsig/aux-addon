@@ -232,7 +232,7 @@ function m.validator(filter)
         if filter.discard then
             return
         end
-        if filter.exact and strupper(record.name) ~= strupper(filter.name) then
+        if filter.exact and strupper(Aux.static.item_info(record.item_id).name) ~= strupper(filter.name) then
             return
         end
         if filter.min_level and record.level < filter.min_level then

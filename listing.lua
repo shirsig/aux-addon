@@ -206,7 +206,6 @@ local methods = {
             st.sizes.headHeight = 0
         end
         st.sizes.numRows = max(floor((st:GetParent():GetHeight() - st.sizes.headHeight - ST_HEAD_SPACE) / ST_ROW_HEIGHT), 0)
-        snipe.log(st.sizes.numRows)
 
         -- update the frame
         st.scrollBar:ClearAllPoints()
@@ -347,11 +346,11 @@ local methods = {
         row:SetHeight(ST_ROW_HEIGHT)
         local rowNum = getn(st.rows) + 1
         if rowNum == 1 then
-            row:SetPoint('TOPLEFT', 0, -(st.sizes.headHeight+ST_HEAD_SPACE))
-            row:SetPoint('TOPRIGHT', 0, -(st.sizes.headHeight+ST_HEAD_SPACE))
+            row:SetPoint('TOPLEFT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE))
+            row:SetPoint('TOPRIGHT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE))
         else
-            row:SetPoint('TOPLEFT', st.rows[rowNum-1], 'BOTTOMLEFT')
-            row:SetPoint('TOPRIGHT', st.rows[rowNum-1], 'BOTTOMRIGHT')
+            row:SetPoint('TOPLEFT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
+            row:SetPoint('TOPRIGHT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
         end
         local highlight = row:CreateTexture()
         highlight:SetAllPoints()

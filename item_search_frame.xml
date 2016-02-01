@@ -1,6 +1,6 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="item_search_frame.lua"/>
+	<Script file="search_frame.lua"/>
 
 	<Frame>
       <Scripts> 

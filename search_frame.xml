@@ -1,6 +1,14 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="filter_search_frame.lua"/>
+	<Script file="search_frame.lua"/>
+
+    <Frame name="AuxControlFrame">
+        <Scripts>
+            <OnUpdate>
+                Aux.search_frame.on_update()
+            </OnUpdate>
+        </Scripts>
+    </Frame>
 
     <Frame name="AuxFilterSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
@@ -28,27 +36,26 @@
                     <Frame name="$parentListing" hidden="true">
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="-8" y="5"/></Offset></Anchor>
-                            <Anchor point="BOTTOM"><Offset><AbsDimension x="-8" y="-15"/></Offset></Anchor>
+                            <!--<Anchor point="BOTTOM"><Offset><AbsDimension x="-8" y="-15"/></Offset></Anchor>-->
                         </Anchors>
                     </Frame>
                 </Frames>
             </Frame>
             <Frame name="$parentSaved" inherits="AuxFrameBoxTemplate">
-                <Size><AbsDimension x="985" y="278"/></Size>
                 <Anchors>
                     <Anchor point="TOPLEFT" relativeTo="AuxFrameContent"></Anchor>
                     <Anchor point="BOTTOMRIGHT" relativeTo="AuxFrameContent"></Anchor>
                 </Anchors>
                 <Frames>
                     <Frame name="$parentFavorite" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension x="373" y="270"/></Size>
+                        <Size><AbsDimension x="373"/></Size>
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="4" y="-4"/></Offset></Anchor>
                             <Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="4" y="4"/></Offset></Anchor>
                         </Anchors>
                     </Frame>
                     <Frame name="$parentRecent" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension x="373" y="270"/></Size>
+                        <Size><AbsDimension x="373"/></Size>
                         <Anchors>
                             <Anchor point="TOPRIGHT"><Offset><AbsDimension x="-4" y="-4"/></Offset></Anchor>
                             <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-4" y="4"/></Offset></Anchor>

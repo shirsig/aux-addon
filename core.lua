@@ -1,15 +1,13 @@
 AuxVersion = '2.4.0'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
-local lastRightClickAction = GetTime()
-
 Aux = {
     blizzard_ui_shown = false,
 	loaded = false,
 	orig = {},
 }
 
-function Aux_OnLoad()
+function Aux.on_load()
 	Aux.log('Aux v'..AuxVersion..' loaded.')
 	Aux.loaded = true
     tinsert(UISpecialFrames, 'AuxFrame')
@@ -88,22 +86,21 @@ function Aux_OnLoad()
 --    AuxFrameContent:SetBackdropColor(unpack(Aux.gui.config.content_color))
 --    AuxFrameContent:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
 
---    Aux.item_search_frame.on_load()
-    Aux.filter_search_frame.on_load()
+    Aux.search_frame.on_load()
     Aux.post_frame.on_load()
     Aux.auctions_frame.on_load()
     Aux.bids_frame.on_load()
 end
 
-function Aux_OnEvent()
+function Aux.on_event()
 	if event == 'VARIABLES_LOADED' then
-		Aux_OnLoad()
+		Aux.on_load()
 	elseif event == 'ADDON_LOADED' then
-		Aux_OnAddonLoaded()
+		Aux.on_addon_loaded()
 	elseif event == 'AUCTION_HOUSE_SHOW' then
-		Aux_OnAuctionHouseShow()
+		Aux.on_auction_house_show()
 	elseif event == 'AUCTION_HOUSE_CLOSED' then
-		Aux_OnAuctionHouseClosed()
+		Aux.on_auction_house_closed()
         Aux.bids_loaded = false
         Aux.current_owner_page = nil
     elseif event == 'AUCTION_BIDDER_LIST_UPDATE' then
@@ -113,12 +110,9 @@ function Aux_OnEvent()
     end
 end
 
-function Aux_OnAddonLoaded()
-	if string.lower(arg1) == "blizzard_auctionui" then
-		Aux_SetupHookFunctions()
-    end
-    if string.lower(arg1) == "EnhTooltip" then
-
+function Aux.on_addon_loaded()
+    if string.lower(arg1) == 'blizzard_auctionui' then
+        Aux.setup_hooks()
     end
 end
 
@@ -146,53 +140,11 @@ do
     end
 end
 
-function Aux.log_frame_load()
-    this:SetFading(false)
-    this:EnableMouseWheel()
-    -- this.flashTimer = 0 TODO remove
-end
-
-function Aux.log_frame_update(elapsedSec)
-    if not this:IsVisible() then
-        return
-    end
-
-    local flash = getglobal(this:GetName()..'BottomButtonFlash')
-
-    if not flash then
-        return
-    end
-
-    if this:AtBottom() then
-        if flash:IsVisible() then
-            flash:Hide()
-        end
-        return
-    end
-
-    local flashTimer = this.flashTimer + elapsedSec
-    if flashTimer < CHAT_BUTTON_FLASH_TIME then
-        this.flashTimer = flashTimer
-        return
-    end
-
-    while flashTimer >= CHAT_BUTTON_FLASH_TIME do
-        flashTimer = flashTimer - CHAT_BUTTON_FLASH_TIME
-    end
-    this.flashTimer = flashTimer
-
-    if flash:IsVisible() then
-        flash:Hide()
-    else
-        flash:Show()
-    end
-end
-
 function Aux.log(msg)
     DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
 end
 
-function Aux_SetupHookFunctions()
+function Aux.setup_hooks()
 
     local blizzard_ui_on_hide = function()
         Aux.blizzard_ui_shown = false
@@ -216,7 +168,7 @@ function Aux_SetupHookFunctions()
 	PickupContainerItem = Aux.PickupContainerItem
 	
 	Aux.orig.ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
-	ContainerFrameItemButton_OnClick = Aux_ContainerFrameItemButton_OnClick
+	ContainerFrameItemButton_OnClick = Aux.ContainerFrameItemButton_OnClick
 
     Aux.orig.AuctionFrameAuctions_OnEvent = AuctionFrameAuctions_OnEvent
     AuctionFrameAuctions_OnEvent = Aux.AuctionFrameAuctions_OnEvent
@@ -237,23 +189,21 @@ function Aux.AuctionFrameAuctions_OnEvent()
     end
 end
 
-function Aux_OnAuctionHouseShow()
+function Aux.on_auction_house_show()
     AuxFrame:Show()
     Aux.tab_group:set_tab(1)
 end
 
-function Aux_OnAuctionHouseClosed()
+function Aux.on_auction_house_closed()
 	Aux.post.stop()
 	Aux.stack.stop()
 	Aux.scan.abort()
 
---    Aux.item_search_frame.on_close()
-    Aux.filter_search_frame.on_close()
+    Aux.search_frame.on_close()
     Aux.post_frame.on_close()
     Aux.auctions_frame.on_close()
     Aux.bids_frame.on_close()
-    Aux.history_frame.on_close()
-	
+
 	AuxFrame:Hide()
 end
 
@@ -261,23 +211,19 @@ function Aux.on_tab_click(index)
     Aux.post.stop()
     Aux.stack.stop()
     Aux.scan.abort(function()
---        Aux.item_search_frame.on_close()
-        Aux.filter_search_frame.on_close()
+        Aux.search_frame.on_close()
         Aux.post_frame.on_close()
         Aux.auctions_frame.on_close()
         Aux.bids_frame.on_close()
-        Aux.history_frame.on_close()
 
---        AuxItemSearchFrame:Hide()
         AuxFilterSearchFrame:Hide()
         AuxPostFrame:Hide()
         AuxAuctionsFrame:Hide()
         AuxBidsFrame:Hide()
-        AuxHistoryFrame:Hide()
 
         if index == 1 then
             AuxFilterSearchFrame:Show()
-            Aux.filter_search_frame.on_open()
+            Aux.search_frame.on_open()
         elseif index == 2 then
             AuxPostFrame:Show()
             Aux.post_frame.on_open()
@@ -287,9 +233,6 @@ function Aux.on_tab_click(index)
         elseif index == 4 then
             AuxBidsFrame:Show()
             Aux.bids_frame.on_open()
---        elseif index == 5 then
---            AuxItemSearchFrame:Show()
---            Aux.item_search_frame.on_open()
         end
 
         Aux.active_panel = index
@@ -314,25 +257,6 @@ function Aux.price_level_color(pct)
     end
 end
 
-function Aux_AuctionsButton_OnClick(button)
-	if arg1 == "LeftButton" then -- because we additionally registered right clicks we only let left ones pass here
-		Aux.orig.BrowseButton_OnClick(button)
-	end
-end
-
-function Aux_AuctionsButton_OnMouseDown()
-	if arg1 == "RightButton" and GetTime() - lastRightClickAction > 0.5 then
-		local index = this:GetID() + FauxScrollFrame_GetOffset(AuctionsScrollFrame)
-	
-		SetSelectedAuctionItem("owner", index)
-		
-		CancelAuction(index)
-		
-		AuctionFrameAuctions_Update()
-		lastRightClickAction = GetTime()
-	end
-end
-
 do
     local last_picked_up
     function Aux.PickupContainerItem(bag, slot)
@@ -346,7 +270,7 @@ do
     end
 end
 
-function Aux_ContainerFrameItemButton_OnClick(button)
+function Aux.ContainerFrameItemButton_OnClick(button)
 	local bag, slot = this:GetParent():GetID(), this:GetID()
 	local item_info = Aux.info.container_item(bag, slot)
 	

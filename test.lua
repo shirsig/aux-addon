@@ -22,7 +22,7 @@ function m:complete()
 
     local filter_string = this:GetText()
 
-    local completed_filter_string = ({strfind(filter_string, '([^;]*)/[^/]*$')})[3]
+    local completed_filter_string = ({strfind(filter_string, '([^;]*)/[^/;]*$')})[3]
     local current_filter = completed_filter_string and Aux.scan_util.filter_from_string(completed_filter_string)
 
     local options = {}
@@ -39,6 +39,7 @@ function m:complete()
                 and not current_filter.slot
                 and not current_filter.quality
                 and not current_filter.usable
+                and not current_filter.exact
         then
             tinsert(options, 'exact')
         end
@@ -83,14 +84,14 @@ function m:complete()
 
         -- item names
         if not completed_filter_string then
-            local item_names = {}
+            local item_filters = {}
             for key, value in Aux.static.auctionable_items do
                 if type(key) == 'number' then
-                    tinsert(item_names, value.name)
+                    tinsert(item_filters, value.name..'/exact')
                 end
             end
-            sort(item_names)
-            for _, item_name in ipairs(item_names) do
+            sort(item_filters)
+            for _, item_name in ipairs(item_filters) do
                 tinsert(options, item_name)
             end
         end
@@ -99,7 +100,7 @@ function m:complete()
         current_modifier = current_modifier or ''
 
         for _, option in ipairs(options) do
-            if strfind(strupper(option), '^'..strupper(current_modifier)) then
+            if string.sub(strupper(option), 1, strlen(current_modifier)) == strupper(current_modifier) then
                 this:SetText(string.sub(filter_string, 1, start_index - 1)..option)
                 this:HighlightText(strlen(filter_string), -1)
                 return
@@ -108,27 +109,27 @@ function m:complete()
     end
 end
 
---StaticPopupDialogs["TSM_SHOPPING_SAVED_RENAME_POPUP"] = {
---    text = L["Type in the new name for this saved search and hit the 'Save' button."],
---    button1 = SAVE,
---    OnShow = function(self)
---        local renameInfo = private.popupInfo.renameInfo
---        self.editBox:SetText(renameInfo.name)
---        self.editBox:HighlightText()
---        self.editBox:SetFocus()
---        self.editBox:SetWidth(self.editBox:GetWidth() * 2)
---        self.editBox:SetScript("OnEscapePressed", function() StaticPopup_Hide("TSM_SHOPPING_SAVED_RENAME_POPUP") end)
---        self.editBox:SetScript("OnEnterPressed", function() self.button1:Click() end)
+--StaticPopupDialogs["CANCEL_AUCTION"] = {
+--    text = TEXT(CANCEL_AUCTION_CONFIRMATION),
+--    button1 = TEXT(ACCEPT),
+--    button2 = TEXT(CANCEL),
+--    OnAccept = function()
+--        CancelAuction(GetSelectedAuctionItem("owner"));
 --    end,
---    OnAccept = function(self)
---        private.popupInfo.renameInfo.name = self.editBox:GetText()
---        private.UpdateSTData()
+--    OnShow = function()
+--        MoneyFrame_Update(this:GetName().."MoneyFrame", AuctionFrameAuctions.cancelPrice);
+--        if ( AuctionFrameAuctions.cancelPrice > 0 ) then
+--            getglobal(this:GetName().."Text"):SetText(CANCEL_AUCTION_CONFIRMATION_MONEY);
+--        else
+--            getglobal(this:GetName().."Text"):SetText(CANCEL_AUCTION_CONFIRMATION);
+--        end
+--
 --    end,
---    hasEditBox = true,
+--    hasMoneyFrame = 1,
+--    showAlert = 1,
 --    timeout = 0,
---    hideOnEscape = true,
---    preferredIndex = 3,
---}
+--};
+
 --StaticPopupDialogs["TSM_SHOPPING_SAVED_EXPORT_POPUP"] = {
 --    text = L["Press Ctrl-C to copy this saved search."],
 --    button1 = OKAY,
@@ -180,24 +181,3 @@ end
 --    hideOnEscape = true,
 --    preferredIndex = 3,
 --}
-
---StaticPopupDialogs["CANCEL_AUCTION"] = {
---    text = TEXT(CANCEL_AUCTION_CONFIRMATION),
---    button1 = TEXT(ACCEPT),
---    button2 = TEXT(CANCEL),
---    OnAccept = function()
---        CancelAuction(GetSelectedAuctionItem("owner"));
---    end,
---    OnShow = function()
---        MoneyFrame_Update(this:GetName().."MoneyFrame", AuctionFrameAuctions.cancelPrice);
---        if ( AuctionFrameAuctions.cancelPrice > 0 ) then
---            getglobal(this:GetName().."Text"):SetText(CANCEL_AUCTION_CONFIRMATION_MONEY);
---        else
---            getglobal(this:GetName().."Text"):SetText(CANCEL_AUCTION_CONFIRMATION);
---        end
---
---    end,
---    hasMoneyFrame = 1,
---    showAlert = 1,
---    timeout = 0,
---};
