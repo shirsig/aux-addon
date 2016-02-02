@@ -19,6 +19,9 @@ function m.display_name(item_id)
 end
 
 function m:complete()
+    if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
+        return
+    end
 
     local filter_string = this:GetText()
 
@@ -29,6 +32,11 @@ function m:complete()
 
     if current_filter or not completed_filter_string then
         current_filter = current_filter or {}
+
+        tinsert(options, 'and')
+        tinsert(options, 'or')
+        tinsert(options, 'not')
+        tinsert(options, 'tt')
 
         if current_filter.name
                 and Aux.static.auctionable_items[strupper(current_filter.name)]
@@ -110,6 +118,9 @@ function m:complete()
 end
 
 function m:complete_item()
+    if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
+        return
+    end
 
     local text = this:GetText()
 

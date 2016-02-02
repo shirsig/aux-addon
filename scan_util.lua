@@ -88,87 +88,98 @@ function m.filter_from_string(filter_term)
     local parts = Aux.util.split(filter_term, '/')
 
     local filter = {}
+    local tooltip_counter = 0
     for i, str in ipairs(parts) do
         str = Aux.util.trim(str)
 
-        if strupper(str) == 'AND' or strupper(str) == 'OR' or strupper(str) == 'NOT' or strupper(str) == 'TT' then
-            filter.tooltip = {}
+        if tooltip_counter > 0 or strupper(str) == 'AND' or strupper(str) == 'OR' or strupper(str) == 'NOT' or strupper(str) == 'TT' then
+            filter.tooltip = filter.tooltip or {}
+            tinsert(filter.tooltip, str)
+            tooltip_counter = tooltip_counter == 0 and tooltip_counter + 1 or tooltip_counter
             for j=i,getn(parts) do
                 tinsert(filter.tooltip, parts[j])
             end
-            break
+            if strupper(str) == 'AND' or strupper(str) == 'OR' then
+                tooltip_counter = tooltip_counter + 1
+            elseif not (strupper(str) == 'NOT' or strupper(str) == 'TT' or str == '') then
+                tooltip_counter = tooltip_counter - 1
+            end
         elseif tonumber(str) then
             if not filter.min_level then
                 filter.min_level = tonumber(str)
             elseif not filter.max_level and tonumber(str) >= filter.min_level then
                 filter.max_level = tonumber(str)
             else
-                return false, 'Invalid Level Range'
+                return false, 'Erroneous Level Range Modifier'
             end
         elseif Aux.item_class_index(str) then
             if not filter.class then
                 filter.class = Aux.item_class_index(str)
             else
-                return false, 'Invalid Item Class'
+                return false, 'Erroneous Item Class Modifier'
             end
         elseif filter.class and Aux.item_subclass_index(filter.class, str) then
             if not filter.subclass then
                 filter.subclass = Aux.item_subclass_index(filter.class, str)
             else
-                return false, 'Invalid Item Subclass'
+                return false, 'Erroneous Item Subclass Modifier'
             end
         elseif filter.subclass and Aux.item_slot_index(filter.class, filter.subclass, str) then
             if not filter.slot then
                 filter.slot = Aux.item_slot_index(filter.class, filter.subclass, str)
             else
-                return false, 'Invalid Item Slot'
+                return false, 'Erroneous Item Slot Modifier'
             end
         elseif Aux.item_quality_index(str) then
             if not filter.quality then
                 filter.quality = Aux.item_quality_index(str)
             else
-                return false, 'Invalid Item Rarity'
+                return false, 'Erroneous Rarity Modifier'
             end
         elseif strlower(str) == 'usable' then
             if not filter.usable then
                 filter.usable = true
             else
-                return false, 'Invalid Usable Only Filter'
+                return false, 'Erroneous Usable Only Modifier'
             end
         elseif strlower(str) == 'exact' then
             if not filter.exact then
                 filter.exact = true
             else
-                return false, 'Invalid Exact Only Filter'
+                return false, 'Erroneous Exact Only Modifier'
             end
         elseif strlower(str) == 'discard' then
             if not filter.discard then
                 filter.discard = true
             else
-                return false, 'Invalid Discard Filter'
+                return false, 'Erroneous Discard Modifier'
             end
         elseif Aux.money.from_string(str) > 0 then
             if not filter.max_price then
                 filter.max_price = Aux.money.from_string(str)
             else
-                return false, 'Invalid Max Price Filter'
+                return false, 'Erroneous Max Price Modifier'
             end
         elseif strfind(str, '^%d+%%$') then
             if not filter.max_percent then
                 filter.max_percent = tonumber(({strfind(str, '(%d+)%%')})[3])
             else
-                return false, 'Invalid Max Percent Filter'
+                return false, 'Erroneous Max Percent Modifier'
             end
         elseif i == 1 then
             filter.name = str
         else
-            return false, 'Unknown Filter'
+            return false, 'Unknown Modifier'
         end
+    end
+
+    if tooltip_counter > 0 then
+        return false, 'Erroneous Tooltip Modifier'
     end
 
     if filter.exact then
         if filter.min_level or filter.max_level or filter.class or filter.subclass or filter.slot or filter.quality or filter.usable or not Aux.static.auctionable_items[strupper(filter.name)] then
-            return false, 'Invalid Exact Only Filter'
+            return false, 'Erroneous Exact Only Modifier'
         end
     end
 

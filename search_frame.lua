@@ -188,6 +188,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrame)
+        editbox:SetMaxLetters(Aux.huge)
         editbox:EnableMouse(1)
         editbox.complete = Aux.test.complete
         editbox:SetPoint('TOPLEFT', 5, -8)
