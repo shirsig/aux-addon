@@ -53,8 +53,8 @@ function m:complete()
 
         -- subclasses
         if current_filter.class and not current_filter.subclass then
-            for _, class in ipairs({ GetAuctionItemSubClasses(current_filter.class) }) do
-                tinsert(options, class)
+            for _, subclass in ipairs({ GetAuctionItemSubClasses(current_filter.class) }) do
+                tinsert(options, subclass)
             end
         end
 
@@ -101,7 +101,7 @@ function m:complete()
 
         for _, option in ipairs(options) do
             if string.sub(strupper(option), 1, strlen(current_modifier)) == strupper(current_modifier) then
-                this:SetText(string.sub(filter_string, 1, start_index - 1)..option)
+                this:SetText(strlower(string.sub(filter_string, 1, start_index - 1)..option))
                 this:HighlightText(strlen(filter_string), -1)
                 return
             end
@@ -123,7 +123,7 @@ function m:complete_item()
 
     for _, item_name in ipairs(item_names) do
         if string.sub(strupper(item_name), 1, strlen(text)) == strupper(text) then
-            this:SetText(item_name)
+            this:SetText(strlower(item_name))
             this:HighlightText(strlen(text), -1)
             return
         end
