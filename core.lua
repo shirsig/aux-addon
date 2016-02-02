@@ -326,10 +326,10 @@ function Aux.item_subclass_index(class_index, item_subclass)
     end
 end
 
-function Aux.item_slot(class_index, subclass_index, slot_name)
-    for _, slot in ipairs({ GetAuctionInvTypes(class_index, subclass_index) }) do
+function Aux.item_slot_index(class_index, subclass_index, slot_name)
+    for i, slot in ipairs({ GetAuctionInvTypes(class_index, subclass_index) }) do
         if strupper(getglobal(slot)) == strupper(slot_name) then
-            return slot
+            return i
         end
     end
 end

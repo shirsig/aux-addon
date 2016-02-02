@@ -188,10 +188,10 @@ function public.tooltip(setter)
 		local left, right = {}, {}
 		
 		left.text = getglobal('AuxInfoTooltipTextLeft'..i):GetText()
-		left.r, left.b, left.g = getglobal('AuxInfoTooltipTextLeft'..i):GetTextColor()
+		left.color = { getglobal('AuxInfoTooltipTextLeft'..i):GetTextColor() }
 		
 		right.text = getglobal('AuxInfoTooltipTextRight'..i):GetText()
-		right.r, right.b, right.g = getglobal('AuxInfoTooltipTextRight'..i):GetTextColor()
+		right.color = { getglobal('AuxInfoTooltipTextRight'..i):GetTextColor() }
 		
 		tinsert(tooltip, {left or '', right or ''})
 	end

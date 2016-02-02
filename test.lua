@@ -59,7 +59,7 @@ function m:complete()
         end
 
         -- slots
-        if current_filter.class and current_filter.subclass then
+        if current_filter.class and current_filter.subclass and not current_filter.slot then
             for _, invtype in ipairs({ GetAuctionInvTypes(current_filter.class, current_filter.subclass) }) do
                 tinsert(options, getglobal(invtype))
             end

@@ -113,11 +113,30 @@ function private.clear_filter()
     AuxFilterSearchFrameFilterDiscardCheckButton:SetChecked(nil)
     private.max_buyout_price:SetText('')
     private.max_percent:SetText('')
+    private.tooltip1:SetText('')
+    private.tooltip2:SetText('')
+    private.tooltip3:SetText('')
+    private.tooltip4:SetText('')
+    private.tooltip5:SetText('')
+    private.tooltip6:SetText('')
 end
 
 function private.get_form_filter()
     local exact = AuxFilterSearchFrameFilterExactCheckButton:GetChecked()
     local max_price = Aux.money.from_string(private.max_buyout_price:GetText())
+    local tooltip = Aux.util.filter({
+        private.tooltip1:GetText(),
+        private.tooltip2:GetText(),
+        private.tooltip3:GetText(),
+        private.tooltip4:GetText(),
+        private.tooltip5:GetText(),
+        private.tooltip6:GetText(),
+    }, function(entry) return entry ~= '' end)
+
+    for i=1,getn(tooltip)-1 do
+        tinsert(tooltip, 1, 'and')
+    end
+
     return {
         name = AuxFilterSearchFrameFilterNameInputBox:GetText(),
         exact = AuxFilterSearchFrameFilterExactCheckButton:GetChecked(),
@@ -131,6 +150,7 @@ function private.get_form_filter()
         discard = AuxFilterSearchFrameFilterDiscardCheckButton:GetChecked(),
         max_price = max_price > 0 and max_price,
         max_percent = tonumber(private.max_percent:GetText()),
+        tooltip = getn(tooltip) > 0 and tooltip,
     }
 end
 
@@ -711,14 +731,6 @@ end
 function public.start_search()
 
     Aux.scan.abort(function()
-
---        local tooltip_patterns = {}
---        for i=1,4 do
---            local tooltip_pattern = getglobal('AuxFilterSearchFrameFilterTooltipInputBox'..i):GetText()
---            if tooltip_pattern ~= '' then
---                tinsert(tooltip_patterns, tooltip_pattern)
---            end
---        end
 
         local queries
 

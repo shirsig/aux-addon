@@ -84,7 +84,7 @@ end
 function wait_for_owner_data(k)
 	local t0 = time()
 	return controller().wait(function()
-		if time() - t0 > 10 then -- we won't wait longer than 10 seconds
+		if time() - t0 > 4 then -- we won't wait longer than 4 seconds
 			return true
 		end
 		local count, _ = GetNumAuctionItems(current_query().type)

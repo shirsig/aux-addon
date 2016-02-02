@@ -91,7 +91,13 @@ function m.filter_from_string(filter_term)
     for i, str in ipairs(parts) do
         str = Aux.util.trim(str)
 
-        if tonumber(str) then
+        if strupper(str) == 'AND' or strupper(str) == 'OR' or strupper(str) == 'NOT' or strupper(str) == 'TT' then
+            filter.tooltip = {}
+            for j=i,getn(parts) do
+                tinsert(filter.tooltip, parts[j])
+            end
+            break
+        elseif tonumber(str) then
             if not filter.min_level then
                 filter.min_level = tonumber(str)
             elseif not filter.max_level and tonumber(str) >= filter.min_level then
@@ -99,7 +105,7 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Invalid Level Range'
             end
-        elseif not filter.class and Aux.item_class_index(str) then
+        elseif Aux.item_class_index(str) then
             if not filter.class then
                 filter.class = Aux.item_class_index(str)
             else
@@ -111,9 +117,9 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Invalid Item Subclass'
             end
-        elseif filter.subclass and Aux.item_slot(filter.class, filter.class, str) then
+        elseif filter.subclass and Aux.item_slot_index(filter.class, filter.subclass, str) then
             if not filter.slot then
-                filter.slot = Aux.item_slot(filter.class, filter.class, str)
+                filter.slot = Aux.item_slot_index(filter.class, filter.subclass, str)
             else
                 return false, 'Invalid Item Slot'
             end
@@ -221,6 +227,12 @@ function m.filter_to_string(filter)
         add('/discard')
     end
 
+    if filter.tooltip then
+        for _, part in ipairs(filter.tooltip) do
+            add(part)
+        end
+    end
+
     return filter_term
 end
 
@@ -236,9 +248,9 @@ function m.blizzard_query(filter)
         name = filter.name,
         min_level = filter.exact and item_info.level or filter.min_level,
         max_level = filter.exact and item_info.level or filter.max_level,
-        slot = filter.exact and item_info.slot or filter.slot,
         class = filter.exact and item_info.class or filter.class,
         subclass = filter.exact and item_info.subclass or filter.subclass,
+        slot = filter.exact and (item_info.class and item_info.subclass and Aux.item_slot_index(item_info.class, item_info.subclass, item_info.slot)) or filter.slot,
         usable = filter.exact and item_info.usable or filter.usable and 1 or 0,
         quality = filter.exact and item_info.quality or filter.quality,
     }
@@ -267,6 +279,24 @@ function m.validator(filter)
             or record.unit_buyout_price / Aux.history.market_value(record.item_key) * 100 > filter.max_percent)
         then
             return
+        end
+        if filter.tooltip then
+            local stack = {}
+            for i=getn(filter.tooltip),1,-1 do
+                local op = strupper(filter.tooltip[i])
+                if op == 'AND' then
+                    tinsert(stack, tremove(stack) and tremove(stack))
+                elseif op == 'OR' then
+                    tinsert(stack, tremove(stack) or tremove(stack))
+                elseif op == 'NOT' then
+                    tinsert(stack, not tremove(stack))
+                elseif op ~= 'TT' then
+                    tinsert(stack, Aux.util.any(record.tooltip, function(entry)
+                        return strfind(strupper(entry[1].text or ''), strupper(op), 1, true) or strfind(strupper(entry[2].text or ''), strupper(op), 1, true)
+                    end))
+                end
+            end
+            return tremove(stack)
         end
         return true
     end
