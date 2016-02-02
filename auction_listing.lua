@@ -18,6 +18,30 @@ local TIME_LEFT_STRINGS = {
     '|cff2992ff48h|r', -- Very Long
 }
 
+function public.percentage_market(pct, based_on_bid)
+    local pctColor = '|cffffffff'
+
+    if based_on_bid then
+        pctColor = '|cffbbbbbb'
+    else
+        for i=1, getn(AUCTION_PCT_COLORS) do
+            if pct < AUCTION_PCT_COLORS[i].value then
+                pctColor = AUCTION_PCT_COLORS[i].color
+                break
+            end
+        end
+    end
+
+    if pct > 10000 then
+        pct = '>10000'
+    end
+
+    return format('%s%s%%|r', pctColor, pct)
+end
+
+function public.time_left(code)
+    return TIME_LEFT_STRINGS[code]
+end
 
 local methods = {
 
@@ -404,22 +428,7 @@ local methods = {
             row.cells[7]:SetText(bid > 0 and Aux.money.to_string(bid, true, false, colorBid) or '---')
             row.cells[8]:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, colorBuyout) or '---')
             local pct, bidPct = self:GetRecordPercent(record)
-            local pctColor = '|cffffffff'
-            if pct then
-                for i=1, getn(AUCTION_PCT_COLORS) do
-                    if pct < AUCTION_PCT_COLORS[i].value then
-                        pctColor = AUCTION_PCT_COLORS[i].color
-                        break
-                    end
-                end
-            elseif bidPct then
-                pctColor = '|cffbbbbbb'
-                pct = bidPct
-            end
-            if pct and pct > 10000 then
-                pct = '>10000'
-            end
-            row.cells[9]:SetText(pct and format('%s%s%%|r', pctColor, pct) or '---')
+            row.cells[9]:SetText((pct or bidPct) and public.percentage_market(pct or bidPct, not pct) or '---')
         end
     end,
 

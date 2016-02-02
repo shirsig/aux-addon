@@ -41,15 +41,15 @@
                     <frame name="AuxSellParameters" inherits="AuxFrameBoxTemplate">
                         <Size><AbsDimension x="213" y="326"/></Size>
                         <Anchors>
-                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor>
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
                         </Anchors>
                         <frames>
                             <Frame name="$parentItem" inherits="AuxItemTemplate">
-                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-10"/></Offset></Anchor></Anchors>
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-30"/></Offset></Anchor></Anchors>
                             </Frame>
                             <CheckButton name="$parentShortDurationRadio" inherits="AuxRadioButtonTemplate">
-                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="14" y="-170"/></Offset></Anchor></Anchors>
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="14" y="-210"/></Offset></Anchor></Anchors>
                                 <Scripts>
                                     <OnLoad>
                                         getglobal(this:GetName().."Text"):SetText("2h")
@@ -86,8 +86,8 @@
                     <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">
                         <Size><AbsDimension y="326"/></Size>
                         <Anchors>
-                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor>
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
                             <Anchor point="RIGHT"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor>
                         </Anchors>
                         <Frames>

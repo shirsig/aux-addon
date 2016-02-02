@@ -24,6 +24,7 @@ function private.update_inventory_listing()
             itemstring = Aux.info.itemstring(inventory_record.item_id, inventory_record.suffix_id),
         })
     end
+    sort(inventory_rows, function(a, b) return a.record.name < b.record.name end)
     private.inventory_listing:SetData(inventory_rows)
     private.inventory_listing:SetSelection(function(row) return row.record == selected_item end)
 end
@@ -34,29 +35,23 @@ function private.update_auction_listing()
     end
 
     local auction_rows = {}
-    for i, auction_record in ipairs(selected_item and existing_auctions[selected_item.key] or {}) do
-        local left
-        if auction_record.max_time_left == 1 then
-            left = '30m'
-        elseif auction_record.max_time_left == 2 then
-            left = '2h'
-        elseif auction_record.max_time_left == 3 then
-            left = '8h'
-        elseif auction_record.max_time_left == 4 then
-            left = '24h'
+    if selected_item then
+        for i, auction_record in ipairs(existing_auctions[selected_item.key] or {}) do
+            local stack_size = auction_record.stack_size == private.get_stack_size_slider_value() and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size
+            local market_value = Aux.history.market_value(auction_record.item_key)
+            tinsert(auction_rows, {
+                cols = {
+                    { value=auction_record.count },
+                    { value=auction_record.yours },
+                    { value=Aux.auction_listing.time_left(auction_record.max_time_left) },
+                    { value=stack_size },
+                    { value=Aux.money.to_string(auction_record.unit_buyout_price) },
+                    { value=Aux.auction_listing.percentage_market(market_value and Aux.round(auction_record.unit_buyout_price/market_value * 100) or '---') },
+                },
+                record = auction_record,
+            })
         end
-        local stack_size = auction_record.stack_size == private.get_stack_size_slider_value() and GREEN_FONT_COLOR_CODE..row.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size
-        tinsert(auction_rows, {
-            cols = {
-                { value=auction_record.count },
-                { value=auction_record.yours },
-                { value=left },
-                { value=stack_size },
-                { value=Aux.util.money_string(auction_record.unit_buyout_price) },
-                { value=auction_record.stack_size },
-            },
-            record = auction_record,
-        })
+        sort(auction_rows, function(a, b) return a.record.unit_buyout_price < b.record.unit_buyout_price end)
     end
     private.auction_listing:SetData(auction_rows)
     private.auction_listing:SetSelection(function(row) return row.record == private.selected_auction() end)
@@ -67,16 +62,32 @@ function private.selected_auction()
 end
 
 function public.on_load()
-    private.auction_listing_config = {
-        columns = {
-            Aux.listing_util.percentage_market_column(function(entry) return entry.item_key end, function(entry) return entry.unit_buyout_price end),
-        },
-        sort_order = {{column = 5, order = 'ascending' }},
-    }
+
+    Aux.gui.vertical_line(AuxPostFrameContent, 208)
+    Aux.gui.vertical_line(AuxPostFrameContent, 431)
+
+    do
+        local label = Aux.gui.label(AuxSellParametersItem, 13)
+        label:SetPoint('BOTTOMLEFT', AuxSellParametersItem, 'TOPLEFT', 0, 0)
+        label:SetText('Auction Item')
+    end
+
+    AuxSellParametersItem:SetScript('OnReceiveDrag', function()
+        local item_info = Aux.cursor_item()
+        if item_info then
+            for _, inventory_record in ipairs(Aux.util.filter(inventory_data, function(record) return record.aux_quantity > 0 end)) do
+                if inventory_record.key == item_info.item_key then
+                    private.set_item(inventory_record)
+                    break
+                end
+            end
+        end
+        ClearCursor()
+    end)
 
     private.inventory_listing = Aux.listing.CreateScrollingTable(AuxSellInventory)
     private.inventory_listing:SetColInfo({
-        {name='Qty', width=.15, align='RIGHT'},
+        {name='Qty', width=.15, align='CENTER'},
         {name='Item', width=.85 }
     })
     private.inventory_listing:SetHandler('OnClick', function(table, row_data, column)
@@ -91,18 +102,16 @@ function public.on_load()
 
     private.auction_listing = Aux.listing.CreateScrollingTable(AuxSellAuctions)
     private.auction_listing:SetColInfo({
-        { name='Avail', width=.1, align='RIGHT' },
-        { name='Yours', width=.1, align='RIGHT' },
-        { name='Max Left', width=.2, align='CENTER' },
-        { name='Qty', width=.2, align='RIGHT' },
-        { name='Buy/ea', width=.2, align='RIGHT' },
-        { name='Pct', width=.2, align='RIGHT' }
+        { name='Avail', width=.14, align='CENTER' },
+        { name='Yours', width=.14, align='CENTER' },
+        { name='Left', width=.14, align='CENTER' },
+        { name='Qty', width=.08, align='CENTER' },
+        { name='Buy/ea', width=.3, align='RIGHT' },
+        { name='Pct', width=.2, align='CENTER' }
     })
     private.auction_listing:SetHandler('OnClick', function(table, row_data, column)
         private.set_auction(row_data.record)
     end)
-    --    private.auction_listing:SetHandler('OnEnter', handlers.OnEnter)
-    --    private.auction_listing:SetHandler('OnLeave', handlers.OnLeave)
 
     do
         local status_bar = Aux.gui.status_bar(AuxPostFrame)
@@ -134,7 +143,7 @@ function public.on_load()
     do
         local slider = Aux.gui.slider(AuxSellParameters)
         slider:SetValueStep(1)
-        slider:SetPoint('TOPLEFT', 16, -70)
+        slider:SetPoint('TOPLEFT', 16, -110)
         slider:SetWidth(170)
         slider:SetScript('OnValueChanged', function()
             private.quantity_update()
@@ -169,7 +178,7 @@ function public.on_load()
     do
         local slider = Aux.gui.slider(AuxSellParameters)
         slider:SetValueStep(1)
-        slider:SetPoint('TOPLEFT', 16, -120)
+        slider:SetPoint('TOPLEFT', 16, -160)
         slider:SetWidth(170)
         slider:SetScript('OnValueChanged', function()
             private.quantity_update()
@@ -207,7 +216,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxSellParameters)
-        editbox:SetPoint('TOPLEFT', 16, -215)
+        editbox:SetPoint('TOPLEFT', 16, -255)
         editbox:SetWidth(170)
         editbox:SetScript('OnTextChanged', function()
             private.validate_parameters()
@@ -235,7 +244,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxSellParameters)
-        editbox:SetPoint('TOPLEFT', 16, -255)
+        editbox:SetPoint('TOPLEFT', 16, -295)
         editbox:SetWidth(170)
         editbox:SetScript('OnTextChanged', function()
             private.validate_parameters()
@@ -263,7 +272,7 @@ function public.on_load()
     end
     do
         local label = Aux.gui.label(AuxSellParameters, 15)
-        label:SetPoint('TOPLEFT', AuxSellParameters, 'TOPLEFT', 16, -290)
+        label:SetPoint('TOPLEFT', AuxSellParameters, 'TOPLEFT', 16, -330)
         private.deposit = label
     end
 end
@@ -645,7 +654,7 @@ function private.refresh_entries()
                 private.status_bar:set_text('Done Scanning')
 			end,
 			on_complete = function()
-				existing_auctions[item_key] = existing_auctions[item_key] or { created = time() }
+				existing_auctions[item_key] = existing_auctions[item_key] or {}
 				private.update_recommendation()
                 refresh = true
                 private.status_bar:update_status(100, 100)
@@ -674,10 +683,10 @@ end
 
 function private.record_auction(key, aux_quantity, buyout_price, duration, owner)
 	if buyout_price > 0 then
-		existing_auctions[key] = existing_auctions[key] or { created = GetTime() }
+		existing_auctions[key] = existing_auctions[key] or {}
 		local entry
 		for _, existing_entry in ipairs(existing_auctions[key]) do
-			if buyout_price == existing_entry.buyout_price and aux_quantity == existing_entry.stack_size then
+			if buyout_price == existing_entry.buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration then
 				entry = existing_entry
 			end
 		end
@@ -690,6 +699,7 @@ function private.record_auction(key, aux_quantity, buyout_price, duration, owner
                 item_key = key,
 				stack_size = aux_quantity,
 				buyout_price = buyout_price,
+                duration = duration,
 				unit_buyout_price = buyout_price / aux_quantity,
 				max_time_left = duration,
 				count = 1,

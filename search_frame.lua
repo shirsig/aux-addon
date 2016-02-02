@@ -443,7 +443,7 @@ end
         local label = Aux.gui.label(AuxFilterSearchFrameFilterExactCheckButton, 13)
         label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFilterExactCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('Exact')
-        end
+    end
     do
         local label = Aux.gui.label(AuxFilterSearchFrameFilterDiscardCheckButton, 13)
         label:SetPoint('BOTTOMLEFT', AuxFilterSearchFrameFilterDiscardCheckButton, 'TOPLEFT', 1, -3)
