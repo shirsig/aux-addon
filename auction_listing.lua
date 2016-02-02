@@ -276,14 +276,14 @@ local methods = {
                 elseif sortKey == 'unit_bid_price' or sortKey == 'bid_price' then
                     aVal = self.GetRowPrices(aVal, sortKey == 'unit_bid_price')
                     bVal = self.GetRowPrices(bVal, sortKey == 'unit_bid_price')
-                elseif sortKey == 'buyout_price' or sortKey == 'buyout' then
-                    aVal = ({ self.GetRowPrices(aVal, sortKey == 'buyout_price') })[2]
-                    bVal = ({ self.GetRowPrices(bVal, sortKey == 'buyout_price') })[2]
+                elseif sortKey == 'unit_buyout_price' or sortKey == 'buyout_price' then
+                    aVal = ({ self.GetRowPrices(aVal, sortKey == 'unit_buyout_price') })[2]
+                    bVal = ({ self.GetRowPrices(bVal, sortKey == 'unit_buyout_price') })[2]
                 else
                     aVal = aVal[sortKey]
                     bVal = bVal[sortKey]
                 end
-                if sortKey == 'buyout' or sortKey == 'buyout_price' then
+                if sortKey == 'buyout_price' or sortKey == 'unit_buyout_price' then
                     -- for buyout, put bid-only auctions at the bottom
                     if not aVal or aVal == 0 then
                         aVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
@@ -306,12 +306,12 @@ local methods = {
                 if aVal == bVal then
                     if sortKey == 'percent' then
                         -- sort by buyout
-                        sortKey = aux_price_per_unit and 'buyout_price' or 'buyout'
+                        sortKey = aux_price_per_unit and 'unit_buyout_price' or 'buyout_price'
                         local result = SortHelperFunc(a, b, sortKey)
                         if result ~= nil then
                             return result
                         end
-                    elseif sortKey == 'buyout' or sortKey == 'buyout_price' then
+                    elseif sortKey == 'buyout_price' or sortKey == 'unit_buyout_price' then
                         -- sort by bid
                         sortKey = aux_price_per_unit and 'unit_bid_price' or 'bid_price'
                         local result = SortHelperFunc(a, b, sortKey)
@@ -535,7 +535,7 @@ local methods = {
     SetSort = function(rt, sortIndex)
         local sortIndexLookup
         if aux_price_per_unit then
-            sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'unit_bid_price', 'buyout_price', 'percent'}
+            sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'unit_bid_price', 'unit_buyout_price', 'percent'}
         else
             sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'bid_price', 'buyout_price', 'percent'}
         end

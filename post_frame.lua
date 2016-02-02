@@ -13,7 +13,19 @@ function private.update_inventory_listing()
         return
     end
 
-    Aux.sheet.populate(private.listings.inventory, Aux.util.filter(inventory_data, function(item) return item.aux_quantity > 0 end))
+    local inventory_rows = {}
+    for i, inventory_record in ipairs(Aux.util.filter(inventory_data, function(record) return record.aux_quantity > 0 end)) do
+        tinsert(inventory_rows, {
+            cols = {
+                { value=inventory_record.aux_quantity },
+                { value='|c'..Aux.quality_color(inventory_record.quality)..'['..inventory_record.name..']'..'|r' }
+            },
+            record = inventory_record,
+            itemstring = Aux.info.itemstring(inventory_record.item_id, inventory_record.suffix_id),
+        })
+    end
+    private.inventory_listing:SetData(inventory_rows)
+    private.inventory_listing:SetSelection(function(row) return row.record == selected_item end)
 end
 
 function private.update_auction_listing()
@@ -21,7 +33,33 @@ function private.update_auction_listing()
         return
     end
 
-    Aux.sheet.populate(private.listings.auctions, selected_item and existing_auctions[selected_item.key] or {})
+    local auction_rows = {}
+    for i, auction_record in ipairs(selected_item and existing_auctions[selected_item.key] or {}) do
+        local left
+        if auction_record.max_time_left == 1 then
+            left = '30m'
+        elseif auction_record.max_time_left == 2 then
+            left = '2h'
+        elseif auction_record.max_time_left == 3 then
+            left = '8h'
+        elseif auction_record.max_time_left == 4 then
+            left = '24h'
+        end
+        local stack_size = auction_record.stack_size == private.get_stack_size_slider_value() and GREEN_FONT_COLOR_CODE..row.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size
+        tinsert(auction_rows, {
+            cols = {
+                { value=auction_record.count },
+                { value=auction_record.yours },
+                { value=left },
+                { value=stack_size },
+                { value=Aux.util.money_string(auction_record.unit_buyout_price) },
+                { value=auction_record.stack_size },
+            },
+            record = auction_record,
+        })
+    end
+    private.auction_listing:SetData(auction_rows)
+    private.auction_listing:SetSelection(function(row) return row.record == private.selected_auction() end)
 end
 
 function private.selected_auction()
@@ -29,156 +67,48 @@ function private.selected_auction()
 end
 
 function public.on_load()
-    private.inventory_listing_config = {
-        frame = AuxSellInventoryListing,
-        on_row_click = function(sheet, row_index)
-            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            private.set_item(sheet.data[data_index])
-        end,
-
-        on_row_enter = function(sheet, row_index)
-            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, nil, this, 'ANCHOR_LEFT', 0, 0)
-        end,
-
-        on_row_leave = function(sheet, row_index)
-            AuxTooltip:Hide()
-        end,
-        selected = function(datum)
-            return datum == selected_item
-        end,
-        row_setter = function(row, datum)
-            row.itemstring = Aux.info.itemstring(datum.item_id, datum.suffix_id)
-        end,
-
-        columns = {
-            {
-                title = 'Qty',
-                width = 25,
-                comparator = function(datum1, datum2) return Aux.sort.compare(datum1.aux_quantity, datum2.aux_quantity, Aux.sort.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.aux_quantity)
-                end,
-            },
-            {
-                title = 'Item',
-                width = 186,
-                comparator = function(row1, row2) return Aux.sort.compare(row1.name, row2.name, Aux.sort.GT) end,
-                cell_initializer = function(cell)
-                    local icon = CreateFrame('Button', nil, cell)
-                    icon:EnableMouse(false)
-                    local icon_texture = icon:CreateTexture(nil, 'BORDER')
-                    icon_texture:SetAllPoints(icon)
-                    icon.icon_texture = icon_texture
-                    local normal_texture = icon:CreateTexture(nil)
-                    normal_texture:SetPoint('CENTER', 0, 0)
-                    normal_texture:SetWidth(22)
-                    normal_texture:SetHeight(22)
-                    normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
-                    icon:SetNormalTexture(normal_texture)
-                    icon:SetPoint('LEFT', cell)
-                    icon:SetWidth(12)
-                    icon:SetHeight(12)
-                    local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
-                    text:SetPoint('LEFT', icon, 'RIGHT', 1, 0)
-                    text:SetPoint('TOPRIGHT', cell)
-                    text:SetPoint('BOTTOMRIGHT', cell)
-                    text:SetJustifyV('TOP')
-                    text:SetJustifyH('LEFT')
-                    text:SetTextColor(0.8, 0.8, 0.8)
-                    cell.text = text
-                    cell.icon = icon
-                end,
-                cell_setter = function(cell, datum)
-                    cell.icon.icon_texture:SetTexture(datum.texture)
-                    cell.text:SetText('['..datum.name..']')
-                    local color = ITEM_QUALITY_COLORS[datum.quality]
-                    cell.text:SetTextColor(color.r, color.g, color.b)
-                end,
-            },
-        },
-        sort_order = {{column = 2, order = 'ascending' }},
-    }
-
     private.auction_listing_config = {
-        frame = AuxSellAuctionsListing,
-        on_row_click = function (sheet, row_index, column_index)
-            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            private.set_auction(sheet.data[data_index])
-        end,
-        selected = function(datum)
-            return datum == private.selected_auction()
-        end,
         columns = {
-            {
-                title = 'Avail',
-                width = 40,
-                comparator = function(row1, row2) return Aux.sort.compare(row1.count, row2.count, Aux.sort.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, row)
-                    cell.text:SetText(row.count)
-                end,
-            },
-            {
-                title = 'Yours',
-                width = 40,
-                comparator = function(row1, row2) return Aux.sort.compare(row1.yours, row2.yours, Aux.sort.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, row)
-                    cell.text:SetText(row.yours)
-                end,
-            },
-            {
-                title = 'Max Left',
-                width = 55,
-                comparator = function(row1, row2) return Aux.sort.compare(row1.max_time_left, row2.max_time_left, Aux.sort.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                cell_setter = function(cell, datum)
-                    local text
-                    if datum.max_time_left == 1 then
-                        text = '30m'
-                    elseif datum.max_time_left == 2 then
-                        text = '2h'
-                    elseif datum.max_time_left == 3 then
-                        text = '8h'
-                    elseif datum.max_time_left == 4 then
-                        text = '24h'
-                    end
-                    cell.text:SetText(text)
-                end,
-            },
-            {
-                title = 'Qty',
-                width = 25,
-                comparator = function(row1, row2) return Aux.sort.compare(row1.stack_size, row2.stack_size, Aux.sort.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, row)
-                    cell.text:SetText(row.stack_size == private.get_stack_size_slider_value() and GREEN_FONT_COLOR_CODE..row.stack_size..FONT_COLOR_CODE_CLOSE or row.stack_size)
-                end,
-            },
-            {
-                title = 'Buy/ea',
-                width = 80,
-                comparator = function(row1, row2) return Aux.sort.compare(row1.unit_buyout_price, row2.unit_buyout_price, Aux.sort.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, row)
-                    cell.text:SetText(Aux.util.money_string(row.unit_buyout_price))
-                end,
-            },
             Aux.listing_util.percentage_market_column(function(entry) return entry.item_key end, function(entry) return entry.unit_buyout_price end),
         },
         sort_order = {{column = 5, order = 'ascending' }},
     }
 
-    private.listings = {
-        inventory = Aux.sheet.create(private.inventory_listing_config),
-        auctions = Aux.sheet.create(private.auction_listing_config),
-    }
+    private.inventory_listing = Aux.listing.CreateScrollingTable(AuxSellInventory)
+    private.inventory_listing:SetColInfo({
+        {name='Qty', width=.15, align='RIGHT'},
+        {name='Item', width=.85 }
+    })
+    private.inventory_listing:SetHandler('OnClick', function(table, row_data, column)
+        private.set_item(row_data.record)
+    end)
+    private.inventory_listing:SetHandler('OnEnter', function(table, row_data, column)
+        Aux.info.set_tooltip(row_data.itemstring, nil, column.row, 'ANCHOR_LEFT', 0, 0)
+    end)
+    private.inventory_listing:SetHandler('OnLeave', function()
+        AuxTooltip:Hide()
+    end)
+
+    private.auction_listing = Aux.listing.CreateScrollingTable(AuxSellAuctions)
+    private.auction_listing:SetColInfo({
+        { name='Avail', width=.1, align='RIGHT' },
+        { name='Yours', width=.1, align='RIGHT' },
+        { name='Max Left', width=.2, align='CENTER' },
+        { name='Qty', width=.2, align='RIGHT' },
+        { name='Buy/ea', width=.2, align='RIGHT' },
+        { name='Pct', width=.2, align='RIGHT' }
+    })
+    private.auction_listing:SetHandler('OnClick', function(table, row_data, column)
+        private.set_auction(row_data.record)
+    end)
+    --    private.auction_listing:SetHandler('OnEnter', handlers.OnEnter)
+    --    private.auction_listing:SetHandler('OnLeave', handlers.OnLeave)
+
     do
         local status_bar = Aux.gui.status_bar(AuxPostFrame)
         status_bar:SetWidth(265)
-        status_bar:SetHeight(30)
-        status_bar:SetPoint('BOTTOMLEFT', AuxPostFrame, 'BOTTOMLEFT', 6, 6)
+        status_bar:SetHeight(25)
+        status_bar:SetPoint('TOPLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, -6)
         status_bar:update_status(100, 0)
         status_bar:set_text('')
         private.status_bar = status_bar
@@ -340,8 +270,6 @@ end
 
 function public.on_open()
     private.deposit:SetText('Deposit: '..Aux.money.to_string(0))
-    AuxSellInventory:SetWidth(AuxSellInventoryListing:GetWidth() + 40)
-    AuxSellAuctions:SetWidth(AuxSellAuctionsListing:GetWidth() + 40)
 
     --    UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, LIVE)
     private.set_auction_duration(aux_auction_duration)

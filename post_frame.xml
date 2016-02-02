@@ -16,70 +16,89 @@
             <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
         </Anchors>
 		<Frames>
-            <Frame name="AuxSellInventory" inherits="AuxFrameBoxTemplate">
-                <Size><AbsDimension x="260" y="326"/></Size>
-                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
+            <Frame name="$parentContent" inherits="AuxFrameBoxTemplate">
+                <Anchors>
+                    <Anchor point="TOP" relativeTo="AuxFrame"><Offset><AbsDimension x="0" y="-8"/></Offset></Anchor>
+                    <Anchor point="BOTTOMLEFT" relativeTo="AuxFrameContent"></Anchor>
+                    <Anchor point="BOTTOMRIGHT" relativeTo="AuxFrameContent"></Anchor>
+                </Anchors>
                 <Frames>
-                    <Frame name="$parentListing">
+                    <Frame name="AuxSellInventory" inherits="AuxFrameBoxTemplate">
+                        <Size><AbsDimension x="200"/></Size>
                         <Anchors>
-                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                            <Anchor point="TOPLEFT"><Offset><AbsDimension x="4" y="-4"/></Offset></Anchor>
+                            <Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="4" y="4"/></Offset></Anchor>
                         </Anchors>
+                        <Frames>
+                            <Frame name="$parentListing" hidden="true">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                    <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                </Anchors>
+                            </Frame>
+                        </Frames>
                     </Frame>
-                </Frames>
-            </Frame>
-			<frame name="AuxSellParameters" inherits="AuxFrameBoxTemplate">
-				<Size><AbsDimension x="213" y="326"/></Size>
-                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-				<frames>
-                    <Frame name="$parentItem" inherits="AuxItemTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-10"/></Offset></Anchor></Anchors>
+                    <frame name="AuxSellParameters" inherits="AuxFrameBoxTemplate">
+                        <Size><AbsDimension x="213" y="326"/></Size>
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <frames>
+                            <Frame name="$parentItem" inherits="AuxItemTemplate">
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-10"/></Offset></Anchor></Anchors>
+                            </Frame>
+                            <CheckButton name="$parentShortDurationRadio" inherits="AuxRadioButtonTemplate">
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="14" y="-170"/></Offset></Anchor></Anchors>
+                                <Scripts>
+                                    <OnLoad>
+                                        getglobal(this:GetName().."Text"):SetText("2h")
+                                    </OnLoad>
+                                    <OnClick>
+                                        Aux.post_frame.duration_radio_button_on_click(1)
+                                    </OnClick>
+                                </Scripts>
+                            </CheckButton>
+                            <CheckButton name="$parentMediumDurationRadio" inherits="AuxRadioButtonTemplate">
+                                <Anchors><Anchor point="LEFT" relativeTo="$parentShortDurationRadio" relativePoint="RIGHT"><Offset><AbsDimension x="30" y="0"/></Offset></Anchor></Anchors>
+                                <Scripts>
+                                    <OnLoad>
+                                        getglobal(this:GetName()..'Text'):SetText("8h")
+                                    </OnLoad>
+                                    <OnClick>
+                                        Aux.post_frame.duration_radio_button_on_click(2)
+                                    </OnClick>
+                                </Scripts>
+                            </CheckButton>
+                            <CheckButton name="$parentLongDurationRadio" inherits="AuxRadioButtonTemplate">
+                                <Anchors><Anchor point="LEFT" relativeTo="$parentMediumDurationRadio" relativePoint="RIGHT"><Offset><AbsDimension x="30" y="0"/></Offset></Anchor></Anchors>
+                                <Scripts>
+                                    <OnLoad>
+                                        getglobal(this:GetName().."Text"):SetText("24h")
+                                    </OnLoad>
+                                    <OnClick>
+                                        Aux.post_frame.duration_radio_button_on_click(3)
+                                    </OnClick>
+                                </Scripts>
+                            </CheckButton>
+                        </frames>
+                    </frame>
+                    <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">
+                        <Size><AbsDimension y="326"/></Size>
+                        <Anchors>
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="5" y="0"/></Offset></Anchor>
+                            <Anchor point="RIGHT"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor>
+                        </Anchors>
+                        <Frames>
+                            <Frame name="$parentListing" hidden="true">
+                                <Anchors>
+                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                    <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
+                                </Anchors>
+                            </Frame>
+                        </Frames>
                     </Frame>
-                    <CheckButton name="$parentShortDurationRadio" inherits="AuxRadioButtonTemplate">
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="14" y="-170"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText("2h")
-                            </OnLoad>
-                            <OnClick>
-                                Aux.post_frame.duration_radio_button_on_click(1)
-                            </OnClick>
-                        </Scripts>
-                    </CheckButton>
-                    <CheckButton name="$parentMediumDurationRadio" inherits="AuxRadioButtonTemplate">
-                        <Anchors><Anchor point="LEFT" relativeTo="$parentShortDurationRadio" relativePoint="RIGHT"><Offset><AbsDimension x="30" y="0"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName()..'Text'):SetText("8h")
-                            </OnLoad>
-                            <OnClick>
-                                Aux.post_frame.duration_radio_button_on_click(2)
-                            </OnClick>
-                        </Scripts>
-                    </CheckButton>
-                    <CheckButton name="$parentLongDurationRadio" inherits="AuxRadioButtonTemplate">
-                        <Anchors><Anchor point="LEFT" relativeTo="$parentMediumDurationRadio" relativePoint="RIGHT"><Offset><AbsDimension x="30" y="0"/></Offset></Anchor></Anchors>
-                        <Scripts>
-                            <OnLoad>
-                                getglobal(this:GetName().."Text"):SetText("24h")
-                            </OnLoad>
-                            <OnClick>
-                                Aux.post_frame.duration_radio_button_on_click(3)
-                            </OnClick>
-                        </Scripts>
-                    </CheckButton>
-				</frames>
-			</frame>
-            <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">
-                <Size><AbsDimension x="361" y="326"/></Size>
-                <Anchors><Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="3" y="0"/></Offset></Anchor></Anchors>
-                <Frames>
-                <Frame name="$parentListing">
-                    <Anchors>
-                        <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                        <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                    </Anchors>
-                </Frame>
                 </Frames>
             </Frame>
 		</Frames>

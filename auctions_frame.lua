@@ -117,8 +117,8 @@ function public.on_load()
     do
         local status_bar = Aux.gui.status_bar(AuxAuctionsFrame)
         status_bar:SetWidth(265)
-        status_bar:SetHeight(30)
-        status_bar:SetPoint('BOTTOMLEFT', AuxAuctionsFrame, 'BOTTOMLEFT', 6, 6)
+        status_bar:SetHeight(25)
+        status_bar:SetPoint('TOPLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, -6)
         status_bar:update_status(100, 0)
         status_bar:set_text('')
         private.status_bar = status_bar
