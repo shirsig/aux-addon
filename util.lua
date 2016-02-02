@@ -6,6 +6,10 @@ local merge, copy_array
 function Aux.util.pass()
 end
 
+function public.id(object)
+	return object
+end
+
 function public.wipe(table)
 	while getn(table) > 0 do
 		tremove(table)

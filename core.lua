@@ -141,7 +141,7 @@ do
 end
 
 function Aux.log(msg)
-    DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
+    DEFAULT_CHAT_FRAME:AddMessage('[aux] '..msg, 1, 1, 0)
 end
 
 function Aux.setup_hooks()

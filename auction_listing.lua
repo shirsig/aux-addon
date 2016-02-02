@@ -82,22 +82,19 @@ local methods = {
         rt:SetSort((descending and -1 or 1) * this.columnIndex)
     end,
 
---    OnIconEnter = function()
---        local rt = this:GetParent().row.rt
---        local rowData = this:GetParent().row.data
---        if rowData and rowData.record then
---            GameTooltip:SetOwner(this, "ANCHOR_RIGHT")
---            TSMAPI.Util:SafeTooltipLink(rowData.record.rawItemLink)
---            GameTooltip:Show()
---            rt.isShowingItemTooltip = true
---        end
---    end,
---
---    OnIconLeave = function()
---        GameTooltip:ClearLines()
---        GameTooltip:Hide()
---        this:GetParent().row.rt.isShowingItemTooltip = nil
---    end,
+    OnIconEnter = function()
+        local rt = this:GetParent().row.rt
+        local rowData = this:GetParent().row.data
+        if rowData and rowData.record then
+            Aux.info.set_tooltip(rowData.record.itemstring, rowData.record.EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
+            rt.isShowingItemTooltip = true
+        end
+    end,
+
+    OnIconLeave = function()
+        AuxTooltip:Hide()
+        this:GetParent().row.rt.isShowingItemTooltip = nil
+    end,
 
 --    OnIconClick = function(self, ...)
 --        if IsModifiedClick() then

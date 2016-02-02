@@ -96,9 +96,6 @@ function m.filter_from_string(filter_term)
             filter.tooltip = filter.tooltip or {}
             tinsert(filter.tooltip, str)
             tooltip_counter = tooltip_counter == 0 and tooltip_counter + 1 or tooltip_counter
-            for j=i,getn(parts) do
-                tinsert(filter.tooltip, parts[j])
-            end
             if strupper(str) == 'AND' or strupper(str) == 'OR' then
                 tooltip_counter = tooltip_counter + 1
             elseif not (strupper(str) == 'NOT' or strupper(str) == 'TT' or str == '') then
@@ -291,25 +288,23 @@ function m.validator(filter)
         then
             return
         end
-
-        local TRUE, FALSE = 1, 0
         if filter.tooltip then
             local stack = {}
             for i=getn(filter.tooltip),1,-1 do
                 local op = strupper(filter.tooltip[i])
                 if op == 'AND' then
-                    tinsert(stack, tremove(stack) * tremove(stack))
+                    tinsert(stack, tremove(stack) and tremove(stack))
                 elseif op == 'OR' then
-                    tinsert(stack, max(1, tremove(stack) + tremove(stack)))
+                    tinsert(stack, tremove(stack) or tremove(stack))
                 elseif op == 'NOT' then
-                    tinsert(stack, mod(tremove(stack), 2))
+                    tinsert(stack, not tremove(stack))
                 elseif op ~= 'TT' then
                     tinsert(stack, Aux.util.any(record.tooltip, function(entry)
                         return strfind(strupper(entry[1].text or ''), strupper(op), 1, true) or strfind(strupper(entry[2].text or ''), strupper(op), 1, true)
-                    end) and TRUE or FALSE)
+                    end) and true or false)
                 end
             end
-            return Aux.util.all(stack, function(x) return x == TRUE end)
+            return Aux.util.all(stack, Aux.util.id)
         end
         return true
     end
