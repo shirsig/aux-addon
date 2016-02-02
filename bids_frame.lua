@@ -54,7 +54,7 @@ function public.on_load()
             {
                 title = 'Auction Item',
                 width = 280,
-                comparator = function(row1, row2) return Aux.util.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.util.GT) end,
+                comparator = function(row1, row2) return Aux.sort.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.sort.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
                     icon:EnableMouse(false)
@@ -95,7 +95,7 @@ function public.on_load()
             {
                 title = 'Qty',
                 width = 25,
-                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                comparator = function(row1, row2) return Aux.sort.compare(row1.stack_size, row2.stack_size, Aux.sort.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(datum.aux_quantity)
@@ -104,7 +104,7 @@ function public.on_load()
             {
                 title = 'Status',
                 width = 70,
-                comparator = function(auction1, auction2) return Aux.util.compare(auction1.status, auction2.status, Aux.util.GT) end,
+                comparator = function(auction1, auction2) return Aux.sort.compare(auction1.status, auction2.status, Aux.sort.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
                 cell_setter = function(cell, auction)
                     cell.text:SetText(auction.status)

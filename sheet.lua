@@ -271,12 +271,12 @@ function private.row_comparator(sheet)
 			local column = sheet.columns[sort_info.column]
 			if column.comparator then
 				local ordering = column.comparator(row1, row2)
-				if ordering ~= Aux.util.EQ then
-					return sort_info.order == 'ascending' and ordering or Aux.util.invert_order(ordering)
+				if ordering ~= Aux.sort.EQ then
+					return sort_info.order == 'ascending' and ordering or Aux.sort.invert_order(ordering)
 				end
 			end
 		end
-		return Aux.util.EQ
+		return Aux.sort.EQ
 	end
 end
 
@@ -295,7 +295,7 @@ function public.populate(sheet, data)
 	sheet.data = data
 --	sheet.selected = {}
 
-	Aux.util.merge_sort(sheet.data, private.row_comparator(sheet))
+	Aux.sort.merge_sort(sheet.data, private.row_comparator(sheet))
 
 	public.render(sheet)
 end
@@ -309,7 +309,7 @@ function Aux.sheet.sort(sheet, column_index)
         tinsert(sheet.sort_order, 1, {column=column_index, order = 'ascending'})
 	end
 	
-	Aux.util.merge_sort(sheet.data, private.row_comparator(sheet))
+	Aux.sort.merge_sort(sheet.data, private.row_comparator(sheet))
 
 	public.render(sheet)
 end

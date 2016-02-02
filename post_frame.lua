@@ -54,7 +54,7 @@ function public.on_load()
             {
                 title = 'Qty',
                 width = 25,
-                comparator = function(datum1, datum2) return Aux.util.compare(datum1.aux_quantity, datum2.aux_quantity, Aux.util.LT) end,
+                comparator = function(datum1, datum2) return Aux.sort.compare(datum1.aux_quantity, datum2.aux_quantity, Aux.sort.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, datum)
                     cell.text:SetText(datum.aux_quantity)
@@ -63,7 +63,7 @@ function public.on_load()
             {
                 title = 'Item',
                 width = 186,
-                comparator = function(row1, row2) return Aux.util.compare(row1.name, row2.name, Aux.util.GT) end,
+                comparator = function(row1, row2) return Aux.sort.compare(row1.name, row2.name, Aux.sort.GT) end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
                     icon:EnableMouse(false)
@@ -113,7 +113,7 @@ function public.on_load()
             {
                 title = 'Avail',
                 width = 40,
-                comparator = function(row1, row2) return Aux.util.compare(row1.count, row2.count, Aux.util.LT) end,
+                comparator = function(row1, row2) return Aux.sort.compare(row1.count, row2.count, Aux.sort.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, row)
                     cell.text:SetText(row.count)
@@ -122,7 +122,7 @@ function public.on_load()
             {
                 title = 'Yours',
                 width = 40,
-                comparator = function(row1, row2) return Aux.util.compare(row1.yours, row2.yours, Aux.util.LT) end,
+                comparator = function(row1, row2) return Aux.sort.compare(row1.yours, row2.yours, Aux.sort.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, row)
                     cell.text:SetText(row.yours)
@@ -131,7 +131,7 @@ function public.on_load()
             {
                 title = 'Max Left',
                 width = 55,
-                comparator = function(row1, row2) return Aux.util.compare(row1.max_time_left, row2.max_time_left, Aux.util.GT) end,
+                comparator = function(row1, row2) return Aux.sort.compare(row1.max_time_left, row2.max_time_left, Aux.sort.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
                 cell_setter = function(cell, datum)
                     local text
@@ -150,7 +150,7 @@ function public.on_load()
             {
                 title = 'Qty',
                 width = 25,
-                comparator = function(row1, row2) return Aux.util.compare(row1.stack_size, row2.stack_size, Aux.util.LT) end,
+                comparator = function(row1, row2) return Aux.sort.compare(row1.stack_size, row2.stack_size, Aux.sort.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, row)
                     cell.text:SetText(row.stack_size == private.get_stack_size_slider_value() and GREEN_FONT_COLOR_CODE..row.stack_size..FONT_COLOR_CODE_CLOSE or row.stack_size)
@@ -159,7 +159,7 @@ function public.on_load()
             {
                 title = 'Buy/ea',
                 width = 80,
-                comparator = function(row1, row2) return Aux.util.compare(row1.unit_buyout_price, row2.unit_buyout_price, Aux.util.GT) end,
+                comparator = function(row1, row2) return Aux.sort.compare(row1.unit_buyout_price, row2.unit_buyout_price, Aux.sort.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, row)
                     cell.text:SetText(Aux.util.money_string(row.unit_buyout_price))

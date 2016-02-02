@@ -325,7 +325,6 @@ local methods = {
                         -- sort by percent
                         return SortHelperFunc(a, b, 'percent')
                     end
-                    -- sort arbitrarily, but make sure the sort is stable
                     return tostring(a) < tostring(b)
                 end
                 if self.sortInfo.descending then
@@ -400,7 +399,7 @@ local methods = {
             row.cells[3]:SetText(numAuctionsText)
             row.cells[4]:SetText(record.aux_quantity)
             row.cells[5]:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
-            row.cells[6]:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or record.owner)
+            row.cells[6]:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
             local bid, buyout, colorBid, colorBuyout = self.GetRowPrices(record, aux_price_per_unit)
             row.cells[7]:SetText(bid > 0 and Aux.money.to_string(bid, true, false, colorBid) or '---')
             row.cells[8]:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, colorBuyout) or '---')
@@ -500,6 +499,14 @@ local methods = {
         end
     end,
 
+    RemoveAuctionRecord = function(rt, record)
+        local index = Aux.util.index_of(record, rt.records)
+        if index then
+            tremove(rt.records, index)
+        end
+        rt:SetDatabase()
+    end,
+
     RemoveSelectedRecord = function(rt, count)
         count = count or 1
         for i=1, count do
@@ -519,12 +526,18 @@ local methods = {
         rt:SetDatabase()
     end,
 
+    ContainsRecord = function(rt, record)
+        if Aux.util.index_of(record, rt.records) then
+            return true
+        end
+    end,
+
     SetSort = function(rt, sortIndex)
         local sortIndexLookup
         if aux_price_per_unit then
             sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'unit_bid_price', 'buyout_price', 'percent'}
         else
-            sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'bid_price', 'buyout', 'percent'}
+            sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'bid_price', 'buyout_price', 'percent'}
         end
         if sortIndex then
             if sortIndex == rt.sortInfo.index then return end

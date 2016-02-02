@@ -49,7 +49,7 @@ function public.on_load()
                 title = 'Item',
                 width = 163,
                 comparator = function(datum1, datum2)
-                    return Aux.util.compare(datum1.time, datum2.time, Aux.util.GT)
+                    return Aux.sort.compare(datum1.time, datum2.time, Aux.sort.GT)
                 end,
                 cell_initializer = function(cell)
                     local icon = CreateFrame('Button', nil, cell)
@@ -121,7 +121,7 @@ function public.on_load()
             {
                 title = 'Qty',
                 width = 25,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].aux_quantity, group2[1].aux_quantity, Aux.util.LT) end,
+                comparator = function(group1, group2) return Aux.sort.compare(group1[1].aux_quantity, group2[1].aux_quantity, Aux.sort.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
                     cell.text:SetText(group[1].aux_quantity)
@@ -134,7 +134,7 @@ function public.on_load()
             {
                 title = 'Lvl',
                 width = 25,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].level, group2[1].level, Aux.util.GT) end,
+                comparator = function(group1, group2) return Aux.sort.compare(group1[1].level, group2[1].level, Aux.sort.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
                     local level = max(1, group[1].level)
@@ -150,7 +150,7 @@ function public.on_load()
             {
                 title = 'Status',
                 width = 70,
-                comparator = function(group1, group2) return Aux.util.compare(group1[1].status, group2[1].status, Aux.util.GT) end,
+                comparator = function(group1, group2) return Aux.sort.compare(group1[1].status, group2[1].status, Aux.sort.GT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
                 cell_setter = function(cell, group)
                     cell.text:SetText(group[1].status)
@@ -161,7 +161,7 @@ function public.on_load()
             {
                 title = 'Avail',
                 width = 40,
-                comparator = function(group1, group2) return Aux.util.compare(getn(Aux.util.filter(group1, function(auction) return not auction.gone end)), getn(Aux.util.filter(group2, function(auction) return not auction.gone end)), Aux.util.LT) end,
+                comparator = function(group1, group2) return Aux.sort.compare(getn(Aux.util.filter(group1, function(auction) return not auction.gone end)), getn(Aux.util.filter(group2, function(auction) return not auction.gone end)), Aux.sort.LT) end,
                 cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
                 cell_setter = function(cell, group)
                     cell.text:SetText(getn(Aux.util.filter(group, function(auction) return not auction.gone end)))

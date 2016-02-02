@@ -10,6 +10,7 @@ gui.lua
 control.xml
 persistence.lua
 util.lua
+sort.lua
 money.lua
 
 scan.lua

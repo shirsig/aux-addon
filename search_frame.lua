@@ -633,7 +633,7 @@ end
     private.results_listing:SetSort(9)
     private.results_listing:Clear()
     private.results_listing:SetHandler('OnCellAltClick', function(cell, button)
-        private.find_auction(cell.row.data.record, true, button == 'LeftButton')
+        private.find_auction_and_bid(cell.row.data.record, button == 'LeftButton')
     end)
     private.results_listing:SetHandler('OnSelectionChanged', function(rt, datum)
         if not datum then return end
@@ -707,6 +707,7 @@ end
     }
 
     private.recent_searches_listing = Aux.listing.CreateScrollingTable(AuxFilterSearchFrameSavedRecent)
+    private.recent_searches_listing:DisableSelection(true)
     private.recent_searches_listing:SetColInfo({{name='Recent Searches', width=1}})
     private.recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
     private.recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
@@ -715,6 +716,7 @@ end
     Aux.gui.vertical_line(AuxFilterSearchFrameSaved, 379)
 
     private.favorite_searches_listing = Aux.listing.CreateScrollingTable(AuxFilterSearchFrameSavedFavorite)
+    private.favorite_searches_listing:DisableSelection(true)
     private.favorite_searches_listing:SetColInfo({{name='Favorite Searches', width=1}})
     private.favorite_searches_listing:SetHandler('OnClick', handlers.OnClick)
     private.favorite_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
@@ -801,62 +803,75 @@ function public.start_search()
     end)
 end
 
+
+function private.test(record)
+    return function(index)
+        return Aux.info.auction(index).search_signature == record.search_signature
+    end
+end
+
+function private.record_remover(record)
+    return function()
+        private.results_listing:RemoveAuctionRecord(record)
+    end
+end
+
+function private.find_auction_and_bid(record, buyout_mode)
+    if not private.results_listing:ContainsRecord(record) or (buyout_mode and not record.buyout_price) or (not buyout_mode and record.high_bidder) or Aux.is_player(record.owner) then
+        return
+    end
+
+    Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, private.record_remover(record), function(index)
+        if private.results_listing:ContainsRecord(record) then
+            Aux.place_bid('list', index, buyout_mode and record.buyout_price or record.bid_price, private.record_remover(record))
+        end
+    end)
+end
+
 do
     local found_index
 
-    function private.find_auction(entry, express_mode, buyout_mode)
-
-        if entry.gone or (buyout_mode and not entry.buyout_price) or (express_mode and not buyout_mode and entry.high_bidder) or entry.owner == UnitName('player') then
+    function private.find_auction(record)
+        if not private.results_listing:ContainsRecord(record) or Aux.is_player(record.owner) then
             return
         end
 
-        local function test(index)
-            return Aux.info.auction(index).search_signature == entry.search_signature
-        end
+        found_index = nil
 
-        local function remove_entry()
-            private.results_listing:RemoveSelectedRecord()
-            entry.gone = true
-        end
+        Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, private.record_remover(record), function(index)
 
-        if express_mode then
-            Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
-                if not entry.gone then
-                    Aux.place_bid('list', index, buyout_mode and entry.buyout_price or entry.bid_price, remove_entry)
-                end
-            end)
-        else
-            found_index = nil
+            found_index = index
 
-            Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
+            if not record.high_bidder then
+                private.bid_button:SetScript('OnClick', function()
+                    if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
+                        Aux.place_bid('list', index, record.bid_price, private.record_remover(record))
+                    end
+                end)
+                private.bid_button:Enable()
+            end
 
-                found_index = index
-
-                if not entry.high_bidder then
-                    private.bid_button:SetScript('OnClick', function()
-                        if test(index) and not entry.gone then
-                            Aux.place_bid('list', index, entry.bid_price, remove_entry)
-                        end
-                    end)
-                    private.bid_button:Enable()
-                end
-
-                if entry.buyout_price > 0 then
-                    RESULTS.buyout_button:SetScript('OnClick', function()
-                        if test(index) and not entry.gone then
-                            Aux.place_bid('list', index, entry.buyout_price, remove_entry)
-                        end
-                    end)
-                    RESULTS.buyout_button:Enable()
-                end
-            end)
-        end
+            if record.buyout_price > 0 then
+                RESULTS.buyout_button:SetScript('OnClick', function()
+                    if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
+                        Aux.place_bid('list', index, record.buyout_price, private.record_remover(record))
+                    end
+                end)
+                RESULTS.buyout_button:Enable()
+            end
+        end)
     end
 
     function public.on_update()
---        if not (RESULTS.buyout_button:IsEnabled() or private.bid_button:IsEnabled()) then
---            return
---        end
+        if not (RESULTS.buyout_button:IsEnabled() or private.bid_button:IsEnabled()) then
+            return
+        end
+
+        if not found_index then
+            RESULTS.buyout_button:Disable()
+            private.bid_button:Disable()
+            return
+        end
 
         local selection = private.results_listing:GetSelection()
         if not selection then
@@ -865,7 +880,7 @@ do
             return
         end
 
-        if found_index and selection.record.search_signature ~= Aux.info.auction(found_index).search_signature then
+        if found_index and (not Aux.info.auction(found_index) or selection.record.search_signature ~= Aux.info.auction(found_index).search_signature) then
             RESULTS.buyout_button:Disable()
             private.bid_button:Disable()
             private.find_auction(selection.record)
