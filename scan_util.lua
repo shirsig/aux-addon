@@ -291,23 +291,25 @@ function m.validator(filter)
         then
             return
         end
+
+        local TRUE, FALSE = 1, 0
         if filter.tooltip then
             local stack = {}
             for i=getn(filter.tooltip),1,-1 do
                 local op = strupper(filter.tooltip[i])
                 if op == 'AND' then
-                    tinsert(stack, tremove(stack) and tremove(stack))
+                    tinsert(stack, tremove(stack) * tremove(stack))
                 elseif op == 'OR' then
-                    tinsert(stack, tremove(stack) or tremove(stack))
+                    tinsert(stack, max(1, tremove(stack) + tremove(stack)))
                 elseif op == 'NOT' then
-                    tinsert(stack, not tremove(stack))
+                    tinsert(stack, mod(tremove(stack), 2))
                 elseif op ~= 'TT' then
                     tinsert(stack, Aux.util.any(record.tooltip, function(entry)
                         return strfind(strupper(entry[1].text or ''), strupper(op), 1, true) or strfind(strupper(entry[2].text or ''), strupper(op), 1, true)
-                    end))
+                    end) and TRUE or FALSE)
                 end
             end
-            return tremove(stack)
+            return Aux.util.all(stack, function(x) return x == TRUE end)
         end
         return true
     end
