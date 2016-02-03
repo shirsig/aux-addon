@@ -118,7 +118,7 @@ function public.on_load()
         status_bar:SetWidth(265)
         status_bar:SetHeight(25)
         status_bar:SetPoint('TOPLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, -6)
-        status_bar:update_status(100, 0)
+        status_bar:update_status(100, 100)
         status_bar:set_text('')
         private.status_bar = status_bar
     end

@@ -313,6 +313,13 @@ function m.status_bar(parent)
         status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
         status_bar:SetStatusBarColor(.42, .42, .42, .7)
         status_bar:SetFrameLevel(level + 2)
+        status_bar:SetScript('OnUpdate', function()
+            if this:GetValue() < 100 then
+                this:SetAlpha(1 - ((math.sin(GetTime()*math.pi)+1)/2)/2)
+            else
+                this:SetAlpha(1)
+            end
+        end)
 --        local ag = status_bar:CreateAnimationGroup()
 --        local alpha = ag:CreateAnimation('Alpha')
 --        alpha:SetDuration(1)
@@ -331,6 +338,13 @@ function m.status_bar(parent)
         status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
         status_bar:SetStatusBarColor(.19, .22, .33, .9)
         status_bar:SetFrameLevel(level + 3)
+        status_bar:SetScript('OnUpdate', function()
+            if this:GetValue() < 100 then
+                this:SetAlpha(1 - ((math.sin(GetTime()*math.pi)+1)/2)/2)
+            else
+                this:SetAlpha(1)
+            end
+        end)
 --        local ag = status_bar:CreateAnimationGroup()
 --        local alpha = ag:CreateAnimation('Alpha')
 --        alpha:SetDuration(1)

@@ -159,6 +159,9 @@ function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor, x_offset
     local item_id = tonumber(({strfind(itemstring, '^item:(%d+)')})[3])
     local item_info = Aux.static.item_info(item_id)
     local slot_index = item_info.class and item_info.subclass and Aux.item_slot_index(item_info.class, item_info.subclass, item_info.slot)
+    snipe.log(item_info.class)
+    snipe.log(item_info.subclass)
+
     snipe.log(slot_index)
     if slot_index then
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
