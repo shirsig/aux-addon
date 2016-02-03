@@ -133,8 +133,12 @@ function private.get_form_filter()
         private.tooltip6:GetText(),
     }, function(entry) return entry ~= '' end)
 
-    for i=1,getn(tooltip)-1 do
-        tinsert(tooltip, 1, 'and')
+    if getn(tooltip) == 1 then
+        tinsert(tooltip, 1, 'tt')
+    else
+        for i=1,getn(tooltip)-1 do
+            tinsert(tooltip, 1, 'and')
+        end
     end
 
     return {
