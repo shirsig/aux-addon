@@ -3,6 +3,34 @@ local TOOLTIP_LENGTH = 30
 local private, public = {}, {}
 Aux.info = public
 
+function public.inventory_index(slot)
+    local inventory_index_map = {
+        INVTYPE_HEAD = {1},
+        INVTYPE_NECK = {2},
+        INVTYPE_SHOULDER = {3},
+        INVTYPE_BODY = {4},
+        INVTYPE_CHEST = {5},
+        INVTYPE_ROBE = {5},
+        INVTYPE_WAIST = {6},
+        INVTYPE_LEGS = {7},
+        INVTYPE_FEET = {8},
+        INVTYPE_WRIST = {9},
+        INVTYPE_HAND = {10},
+        INVTYPE_FINGER = {11, 12},
+        INVTYPE_TRINKET = {13, 14},
+        INVTYPE_HEAD = {1},
+        INVTYPE_HEAD = {1},
+        INVTYPE_HEAD = {1},
+        INVTYPE_HEAD = {1},
+        INVTYPE_HEAD = {1},
+        INVTYPE_HEAD = {1},
+        INVTYPE_HEAD = {1},
+        INVTYPE_HEAD = {1},
+    }
+
+    return unpack(inventory_index_map[slot] or {})
+end
+
 function public.container_item(bag, slot)
 	local hyperlink = GetContainerItemLink(bag, slot)
 	
@@ -158,23 +186,23 @@ function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor, x_offset
 
     local item_id = tonumber(({strfind(itemstring, '^item:(%d+)')})[3])
     local item_info = Aux.static.item_info(item_id)
-    local slot_index = item_info.class and item_info.subclass and Aux.item_slot_index(item_info.class, item_info.subclass, item_info.slot)
-    snipe.log(item_info.class)
-    snipe.log(item_info.subclass)
+    local index1, index2 = public.inventory_index(item_info.slot)
 
-    snipe.log(slot_index)
-    if slot_index then
+    if index1 then
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
-        ShoppingTooltip1:SetInventoryItem('player', slot_index)
+        ShoppingTooltip1:SetInventoryItem('player', index1)
         Aux.control.on_next_update(function()
             ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
         end)
-    end
 
---    ShoppingTooltip2:SetOwner(ShoppingTooltip1, "ANCHOR_BOTTOMRIGHT");
---    ShoppingTooltip2:SetPoint("TOPLEFT", "ShoppingTooltip1", "TOPRIGHT", 0, 0);
---    ShoppingTooltip2:SetAuctionCompareItem(type, index, 2);
---    ShoppingTooltip2:Show();
+        if index2 then
+            ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
+            ShoppingTooltip2:SetInventoryItem('player', index2)
+            Aux.control.on_next_update(function()
+                ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
+            end)
+        end
+    end
 
 	if EnhTooltip and EnhTooltip_info then
 		EnhTooltip.TooltipCall(GameTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)

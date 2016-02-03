@@ -109,7 +109,7 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Erroneous Level Range Modifier'
             end
-        elseif Aux.item_class_index(str) then
+        elseif Aux.item_class_index(str) and not (filter.class and not filter.subclass and strlower(str) == 'miscellaneous')then
             if not filter.class then
                 filter.class = Aux.item_class_index(str)
             else

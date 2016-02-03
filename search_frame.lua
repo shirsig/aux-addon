@@ -93,7 +93,7 @@ function private.add_filter()
     local old_filter_string = private.search_box:GetText()
     old_filter_string = Aux.util.trim(old_filter_string)
 
-    if strlen(old_filter_string) > 0 and not strfind(old_filter_string, ';$') then
+    if strlen(old_filter_string) > 0 then
         old_filter_string = old_filter_string..';'
     end
 
@@ -216,7 +216,8 @@ function public.on_load()
         editbox:SetScript('OnReceiveDrag', function()
             local item_info = Aux.cursor_item() and Aux.static.item_info(Aux.cursor_item().item_id)
             if item_info then
-                this:SetText(item_info.name..'/exact')
+                this:SetText(strlower(item_info.name)..'/exact')
+                public.start_search()
             end
             ClearCursor()
         end)
