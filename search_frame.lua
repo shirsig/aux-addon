@@ -263,22 +263,22 @@ function public.on_load()
         private.status_bar = status_bar
     end
     do
-        local btn = Aux.gui.button(AuxFilterSearchFrame, 16)
+    local btn = Aux.gui.button(AuxFilterSearchFrameResults, 16)
         btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('Buyout')
-        btn:Disable()
-        RESULTS.buyout_button = btn
-    end
-    do
-        local btn = Aux.gui.button(AuxFilterSearchFrameResults, 16)
-        btn:SetPoint('TOPLEFT', RESULTS.buyout_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Bid')
         btn:Disable()
         private.bid_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxFilterSearchFrame, 16)
+        btn:SetPoint('TOPLEFT', private.bid_button, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('Buyout')
+        btn:Disable()
+        RESULTS.buyout_button = btn
     end
     do
         local btn1 = Aux.gui.button(AuxFilterSearchFrameFilter, 16)
@@ -773,7 +773,7 @@ function public.start_search()
             on_page_loaded = function(page, total_pages)
                 current_page = page + 1
                 current_total_pages = total_pages
-                private.status_bar:update_status(100 * (current_page - 1) / current_total_pages, 100 * (current_query - 1) / getn(queries)) -- TODO
+                private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / current_total_pages) -- TODO
                 private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
             end,
             on_page_scanned = function()
@@ -782,10 +782,10 @@ function public.start_search()
             on_start_query = function(query_index)
                 current_query = query_index
                 if current_page then
-                    private.status_bar:update_status(100 * (current_page - 1) / current_total_pages, 100 * (current_query - 1) / getn(queries)) -- TODO
+                    private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / current_total_pages) -- TODO
                     private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
                 else
-                    private.status_bar:update_status(0, 100 * (current_query - 1) / getn(queries)) -- TODO
+                    private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 0) -- TODO
                     private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
                 end
             end,
