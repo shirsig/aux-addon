@@ -62,6 +62,7 @@ function public.container_item(bag, slot)
         level = item_info.level,
         type = item_info.type,
         subtype = item_info.subtype,
+        slot = item_info.slot,
         quality = item_info.quality,
         max_stack = item_info.max_stack,
 
@@ -134,6 +135,7 @@ function public.auction(index, type)
         level = item_info.level,
         type = item_info.type,
         subtype = item_info.subtype,
+        slot = item_info.slot,
         quality = quality,
         max_stack = item_info.max_stack,
 
@@ -187,9 +189,13 @@ function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor, x_offset
     GameTooltip:SetOwner(owner, anchor)
     GameTooltip:SetHyperlink(itemstring)
 
-    local item_id = tonumber(({strfind(itemstring, '^item:(%d+)')})[3])
-    local item_info = Aux.static.item_info(item_id)
-    local index1, index2 = public.inventory_index(item_info.slot)
+	if EnhTooltip and EnhTooltip_info then
+		EnhTooltip.TooltipCall(GameTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
+	end
+end
+
+function public.set_shopping_tooltip(slot)
+    local index1, index2 = public.inventory_index(slot)
 
     if index1 then
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
@@ -210,10 +216,6 @@ function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor, x_offset
             end)
         end
     end
-
-	if EnhTooltip and EnhTooltip_info then
-		EnhTooltip.TooltipCall(GameTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
-	end
 end
 
 function public.tooltip_match(patterns, tooltip)
