@@ -192,7 +192,7 @@ function m.filter_to_string(filter)
     end
 
     if filter.exact then
-        add('/exact')
+        add('exact')
     end
 
     if filter.min_level then
@@ -204,7 +204,7 @@ function m.filter_to_string(filter)
     end
 
     if filter.usable then
-        add('/usable')
+        add('usable')
     end
 
     if filter.class then
@@ -232,7 +232,7 @@ function m.filter_to_string(filter)
     end
 
     if filter.discard then
-        add('/discard')
+        add('discard')
     end
 
     if filter.tooltip then

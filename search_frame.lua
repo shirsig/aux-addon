@@ -785,7 +785,7 @@ function public.start_search()
                     private.status_bar:update_status(100 * (current_page - 1) / current_total_pages, 100 * (current_query - 1) / getn(queries)) -- TODO
                     private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
                 else
-                    private.status_bar:update_status(0, 100 * current_query / getn(queries)) -- TODO
+                    private.status_bar:update_status(0, 100 * (current_query - 1) / getn(queries)) -- TODO
                     private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
                 end
             end,

@@ -5,6 +5,7 @@ Aux.info = public
 
 function public.inventory_index(slot)
     local inventory_index_map = {
+        INVTYPE_AMMO = {0},
         INVTYPE_HEAD = {1},
         INVTYPE_NECK = {2},
         INVTYPE_SHOULDER = {3},
@@ -18,14 +19,16 @@ function public.inventory_index(slot)
         INVTYPE_HAND = {10},
         INVTYPE_FINGER = {11, 12},
         INVTYPE_TRINKET = {13, 14},
-        INVTYPE_HEAD = {1},
-        INVTYPE_HEAD = {1},
-        INVTYPE_HEAD = {1},
-        INVTYPE_HEAD = {1},
-        INVTYPE_HEAD = {1},
-        INVTYPE_HEAD = {1},
-        INVTYPE_HEAD = {1},
-        INVTYPE_HEAD = {1},
+        INVTYPE_CLOAK = {15},
+        INVTYPE_2HWEAPON = {16},
+        INVTYPE_WEAPONMAINHAND = {16},
+        INVTYPE_WEAPON = {16, 17},
+        INVTYPE_WEAPONOFFHAND = {17},
+        INVTYPE_HOLDABLE = {17},
+        INVTYPE_SHIELD = {17},
+        INVTYPE_RANGED = {18},
+        INVTYPE_RANGEDRIGHT = {18},
+        INVTYPE_TABARD = {19},
     }
 
     return unpack(inventory_index_map[slot] or {})
@@ -191,15 +194,19 @@ function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor, x_offset
     if index1 then
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
         ShoppingTooltip1:SetInventoryItem('player', index1)
+        ShoppingTooltip1:SetAlpha(0)
         Aux.control.on_next_update(function()
             ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
+            ShoppingTooltip1:SetAlpha(1)
         end)
 
         if index2 then
             ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
             ShoppingTooltip2:SetInventoryItem('player', index2)
+            ShoppingTooltip2:SetAlpha(0)
             Aux.control.on_next_update(function()
                 ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
+                ShoppingTooltip2:SetAlpha(1)
             end)
         end
     end
