@@ -111,7 +111,7 @@ function public.create(params)
 	content:SetPoint('TOPLEFT', scroll_frame, 'TOPLEFT', 5, 0)
 
 	local total_width = 0
-	
+
 	local rows = {}
 	local row_index = 1
 	local max_height = content:GetHeight()
@@ -145,18 +145,18 @@ function public.create(params)
 			end)
             row:SetScript('OnUpdate', function() if sheet.on_row_update then sheet.on_row_update(sheet, row_idx) end end)
 			
-			row.cells = {}			
-			for i = 1,getn(params.columns) do
-				local cell = CreateFrame('Frame', nil, row)
-				cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
-				cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
-				
-				cell:SetHeight(14)
-
-                params.columns[i].cell_initializer(cell)
-				
-				row.cells[i] = cell
-			end
+--			row.cells = {}
+--			for i = 1,getn(params.columns) do
+--				local cell = CreateFrame('Frame', nil, row)
+--				cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
+--				cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
+--
+--				cell:SetHeight(14)
+--
+--                params.columns[i].cell_initializer(cell)
+--
+--				row.cells[i] = cell
+--			end
 			
 			local color_texture = row:CreateTexture()
 			color_texture:SetPoint('TOPLEFT', row, 'TOPLEFT', 0, 0)

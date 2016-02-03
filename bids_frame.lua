@@ -35,15 +35,6 @@ function public.on_load()
         btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
-        btn:SetText('Buyout')
-        btn:Disable()
-        private.buyout_button = btn
-    end
-    do
-        local btn = Aux.gui.button(AuxBidsFrame, 16)
-        btn:SetPoint('TOPLEFT', private.buyout_button, 'TOPRIGHT', 5, 0)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
         btn:SetText('Bid')
         btn:Disable()
         private.bid_button = btn
@@ -51,6 +42,15 @@ function public.on_load()
     do
         local btn = Aux.gui.button(AuxBidsFrame, 16)
         btn:SetPoint('TOPLEFT', private.bid_button, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('Buyout')
+        btn:Disable()
+        private.buyout_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxBidsFrame, 16)
+        btn:SetPoint('TOPLEFT', private.buyout_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Refresh')
