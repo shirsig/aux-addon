@@ -71,11 +71,11 @@ function public.compare(a, b, nil_ordering)
     end
 end
 
-function public.compare_from_lt(comp)
+function public.compare_from_lt(lt)
     return function(a, b)
-        if comp(a, b) then
+        if lt(a, b) then
             return public.LT
-        elseif comp(b, a) then
+        elseif lt(b, a) then
             return public.GT
         else
             return public.EQ
