@@ -200,20 +200,23 @@ function public.set_shopping_tooltip(slot)
     if index1 then
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
         ShoppingTooltip1:SetInventoryItem('player', index1)
-        ShoppingTooltip1:SetAlpha(0)
-        Aux.control.on_next_update(function()
-            ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
-            ShoppingTooltip1:SetAlpha(1)
-        end)
+        ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
+
+        --        for i = TOOLTIP_LENGTH-1,1,-1 do
+--            for _, side in ipairs({'Left', 'Right'}) do
+--                getglobal('ShoppingTooltip1Text'..side..(i + 1)):SetWidth(getglobal('ShoppingTooltip1Text'..side..i):GetWidth())
+--                getglobal('ShoppingTooltip1Text'..side..(i + 1)):SetText(getglobal('ShoppingTooltip1Text'..side..i):GetText())
+--                getglobal('ShoppingTooltip1Text'..side..(i + 1)):SetTextColor(getglobal('ShoppingTooltip1Text'..side..i):GetTextColor())
+--            end
+--        end
+--
+--        ShoppingTooltip1TextLeft1:SetText('Currently Equipped')
+--        ShoppingTooltip1TextLeft1:SetTextColor(0.5, 0.5, 0.5)
 
         if index2 then
             ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
             ShoppingTooltip2:SetInventoryItem('player', index2)
-            ShoppingTooltip2:SetAlpha(0)
-            Aux.control.on_next_update(function()
-                ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
-                ShoppingTooltip2:SetAlpha(1)
-            end)
+            ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
         end
     end
 end
