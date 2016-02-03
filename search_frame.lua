@@ -812,10 +812,10 @@ function public.start_search()
     end)
 end
 
-
 function private.test(record)
     return function(index)
-        return Aux.info.auction(index).search_signature == record.search_signature
+        local auction_info = Aux.info.auction(index)
+        return auction_info and auction_info.search_signature == record.search_signature
     end
 end
 
@@ -889,7 +889,7 @@ do
             return
         end
 
-        if found_index and (not Aux.info.auction(found_index) or selection.record.search_signature ~= Aux.info.auction(found_index).search_signature) then
+        if found_index and not private.test(selection.record)(found_index) then
             RESULTS.buyout_button:Disable()
             private.bid_button:Disable()
             private.find_auction(selection.record)

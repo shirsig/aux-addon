@@ -12,15 +12,13 @@
 
     <Frame name="AuxAuctionsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
-			<Frames>
-				<Frame name="$parentListing" inherits="AuxFrameBoxTemplate">
-					<Anchors>
-						<Anchor point="TOP" relativeTo="AuxFrame"><Offset><AbsDimension x="0" y="-8"/></Offset></Anchor>
-						<Anchor point="BOTTOMLEFT" relativeTo="AuxFrameContent"></Anchor>
-						<Anchor point="BOTTOMRIGHT" relativeTo="AuxFrameContent"></Anchor>
-					</Anchors>
-				</Frame>
-			</Frames>
+			<Frame name="$parentListing" inherits="AuxFrameBoxTemplate">
+				<Anchors>
+					<Anchor point="TOP" relativeTo="AuxFrame"><Offset><AbsDimension x="0" y="-8"/></Offset></Anchor>
+					<Anchor point="BOTTOMLEFT" relativeTo="AuxFrameContent"></Anchor>
+					<Anchor point="BOTTOMRIGHT" relativeTo="AuxFrameContent"></Anchor>
+				</Anchors>
+			</Frame>
 		</Frames>
 	</Frame>
 </Ui>

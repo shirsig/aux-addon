@@ -1,28 +1,15 @@
 local private, public = {}, {}
 Aux.auctions_frame = public
 
-local refresh
 local auction_records
 local selected_auction
-
-function private.select_auction(entry)
-    selected_auction = entry
-    refresh = true
-    private.cancel_button:Disable()
-end
-
-function private.clear_selection(entry)
-    selected_auction = nil
-    refresh = true
-    private.cancel_button:Disable()
-end
 
 function public.on_load()
     private.listing = Aux.listing.CreateScrollingTable(AuxAuctionsFrameListing)
     private.listing:SetColInfo({
         { name='Item', width=.4 },
-        { name='Qty', width=.5, align='CENTER' },
-        { name='Left', width=.1, align='CENTER' },
+        { name='Qty', width=.075, align='CENTER' },
+        { name='Left', width=.075, align='CENTER' },
         { name='High Bid', width=.15, align='RIGHT' },
         { name='Start Price', width=.15, align='RIGHT' },
         { name='Buy', width=.15, align='RIGHT' },
@@ -31,78 +18,6 @@ function public.on_load()
         private.on_row_click(row_data.record)
     end)
 
-    private.auction_listing_config = {
-        frame = AuxAuctionsFrameListingAuctionListing,
-        on_row_click = function(sheet, row_index)
-            local data_index = row_index + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-            private.on_row_click(sheet.data[data_index])
-        end,
-        on_row_enter = function(sheet, row_index)
-            Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
-        end,
-        on_row_leave = function(sheet, row_index)
-            GameTooltip:Hide()
-            ResetCursor()
-        end,
-        on_row_update = function(sheet, row_index)
-            if IsControlKeyDown() then
-                ShowInspectCursor()
-            else
-                ResetCursor()
-            end
-        end,
-        selected = function(datum)
-            return datum == selected_auction
-        end,
-        row_setter = function(row, datum)
-            row:SetAlpha(datum.gone and 0.3 or 1)
-            row.itemstring = Aux.info.itemstring(datum.item_id, datum.suffix_id, nil, datum.enchant_id)
-            row.EnhTooltip_info = datum.EnhTooltip_info
-        end,
-        columns = {
-            {
-                title = 'Auction Item',
-                width = 280,
-                comparator = function(row1, row2) return Aux.sort.compare(row1.tooltip[1][1].text, row2.tooltip[1][1].text, Aux.sort.GT) end,
-                cell_initializer = function(cell)
-                    local icon = CreateFrame('Button', nil, cell)
-                    icon:EnableMouse(false)
-                    local icon_texture = icon:CreateTexture(nil, 'BORDER')
-                    icon_texture:SetAllPoints(icon)
-                    icon.icon_texture = icon_texture
-                    local normal_texture = icon:CreateTexture(nil)
-                    normal_texture:SetPoint('CENTER', 0, 0)
-                    normal_texture:SetWidth(22)
-                    normal_texture:SetHeight(22)
-                    normal_texture:SetTexture('Interface\\Buttons\\UI-Quickslot2')
-                    icon:SetNormalTexture(normal_texture)
-                    icon:SetPoint('LEFT', cell)
-                    icon:SetWidth(12)
-                    icon:SetHeight(12)
-                    local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
-                    text:SetPoint("LEFT", icon, "RIGHT", 1, 0)
-                    text:SetPoint('TOPRIGHT', cell)
-                    text:SetPoint('BOTTOMRIGHT', cell)
-                    text:SetJustifyV('TOP')
-                    text:SetJustifyH('LEFT')
-                    text:SetTextColor(0.8, 0.8, 0.8)
-                    cell.text = text
-                    cell.icon = icon
-                end,
-                cell_setter = function(cell, datum)
-                    cell.icon.icon_texture:SetTexture(Aux.info.item(datum.item_id).texture)
-                    if not datum.usable then
-                        cell.icon.icon_texture:SetVertexColor(1.0, 0.1, 0.1)
-                    else
-                        cell.icon.icon_texture:SetVertexColor(1.0, 1.0, 1.0)
-                    end
-                    cell.text:SetText('['..datum.tooltip[1][1].text..']')
-                    local color = ITEM_QUALITY_COLORS[datum.quality]
-                    cell.text:SetTextColor(color.r, color.g, color.b)
-                end,
-            },
-        },
-    }
     do
         local status_bar = Aux.gui.status_bar(AuxAuctionsFrame)
         status_bar:SetWidth(265)
@@ -154,7 +69,7 @@ function private.update_listing()
             record = auction_record,
         })
     end
-    sort(auction_rows, function(a, b) return a.record.unit_buyout_price < b.record.unit_buyout_price end)
+    sort(auction_rows, function(a, b) return a.record.search_signature < b.record.search_signature end)
 
     private.listing:SetData(auction_rows)
     private.listing:SetSelection(function(row) return row.record == selected_auction end)
@@ -162,11 +77,9 @@ end
 
 function public.on_open()
     public.scan_auctions()
-    refresh = true
 end
 
 function public.on_close()
-    private.clear_selection()
 end
 
 function public.scan_auctions()
@@ -175,6 +88,8 @@ function public.scan_auctions()
     private.status_bar:set_text('Scanning auctions...')
 
     auction_records = {}
+    selected_auction = nil
+    private.update_listing()
     Aux.scan.start{
         queries = {
             {
@@ -192,7 +107,7 @@ function public.scan_auctions()
         on_complete = function()
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Scanning')
-            refresh = true
+            private.update_listing()
         end,
         on_abort = function()
             private.status_bar:update_status(100, 100)
@@ -201,69 +116,101 @@ function public.scan_auctions()
     }
 end
 
-function private.process_request(entry, express_mode)
+function private.test(record)
+    return function(index)
+        local auction_info = Aux.info.auction(index, 'owner')
+        return auction_info and auction_info.search_signature == record.search_signature
+    end
+end
 
-    if entry.gone then
+function private.record_remover(record)
+    return function()
+        local index = Aux.util.index_of(record, auction_records)
+        if index then
+            tremove(auction_records, index)
+        end
+        private.update_listing()
+    end
+end
+
+function private.find_auction_and_cancel(record)
+    if not Aux.util.index_of(record, auction_records) then
         return
     end
 
-    PlaySound('igMainMenuOptionCheckBoxOn')
+    Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, private.record_remover(record), function(index)
+        if Aux.util.index_of(record, auction_records) then
+            CancelAuction(index)
+            private.record_remover(record)()
+        end
+    end)
+end
 
-    local function test(index)
-        local auction_record = Aux.info.auction(index, 'owner')
-        return auction_record.signature == entry.signature and auction_record.bid_price == entry.bid_price and auction_record.duration == entry.duration
-    end
+do
+    local found_index
 
-    local function remove_entry()
-        entry.gone = true
-        refresh = true
-        private.clear_selection()
-    end
+    function private.find_auction(record)
+        if not Aux.util.index_of(record, auction_records) then
+            return
+        end
 
-    if express_mode then
-        Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
-            if not entry.gone then
-                CancelAuction(index)
-                remove_entry()
-            end
-        end)
-    else
-        private.select_auction(entry)
+        found_index = nil
 
-        Aux.scan_util.find(test, entry.query, entry.page, private.status_bar, remove_entry, function(index)
+        Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, private.record_remover(record), function(index)
+
+            found_index = index
 
             private.cancel_button:SetScript('OnClick', function()
-                if test(index) and not entry.gone then
+                if private.test(record)(index) and Aux.util.index_of(record, auction_records) then
                     CancelAuction(index)
-                    remove_entry()
-                else
-                    private.clear_selection()
+                    private.record_remover(record)()
                 end
             end)
             private.cancel_button:Enable()
+
         end)
     end
-end
 
-function private.on_row_click(datum)
-
-    if IsControlKeyDown() then
-        DressUpItemLink(datum.hyperlink)
-    elseif IsShiftKeyDown() then
-        if ChatFrameEditBox:IsVisible() then
-            ChatFrameEditBox:Insert(datum.hyperlink)
+    function public.on_update()
+        if not private.cancel_button:IsEnabled() then
+            return
         end
-    else
-        local express_mode = IsAltKeyDown()
-        private.process_request(datum, express_mode)
+
+        if not found_index then
+            private.cancel_button:Disable()
+            return
+        end
+
+        if not selected_auction then
+            private.cancel_button:Disable()
+            return
+        end
+
+        if found_index and not private.test(selected_auction)(found_index) then
+            private.cancel_button:Disable()
+            private.find_auction(selected_auction)
+        end
     end
 end
 
-function public.on_update()
-    if refresh then
-        refresh = false
-        private.update_listing()
+function private.on_row_click(auction_record)
+
+--    if IsControlKeyDown() then
+--        DressUpItemLink(datum.hyperlink)
+--    elseif IsShiftKeyDown() then
+--        if ChatFrameEditBox:IsVisible() then
+--            ChatFrameEditBox:Insert(datum.hyperlink)
+--        end
+--    else
+    local express_mode = IsAltKeyDown()
+    if express_mode then
+        selected_auction = nil
+        private.find_auction_and_cancel(auction_record)
+    else
+        selected_auction = auction_record
+        private.find_auction(auction_record)
     end
+--    end
 end
 
 
