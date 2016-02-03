@@ -140,10 +140,8 @@ function public.auction(index, type)
         max_stack = item_info.max_stack,
 
         count = count,
-        min_bid = start_price, -- deprecated
         start_price = start_price,
         high_bid = high_bid,
-        current_bid = high_bid, -- deprecated
         min_increment = min_increment,
         bid_price = bid_price,
         buyout_price = buyout_price,
@@ -210,7 +208,7 @@ function public.set_shopping_tooltip(slot)
 --            end
 --        end
 --
---        ShoppingTooltip1TextLeft1:SetText('Currently Equipped')
+--        ShoppingTooltip1TextLeft1:SetText('Currently Equipped') -- TODO
 --        ShoppingTooltip1TextLeft1:SetTextColor(0.5, 0.5, 0.5)
 
         if index2 then

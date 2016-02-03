@@ -13,19 +13,12 @@
     <Frame name="AuxBidsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
 			<Frame name="$parentListing" inherits="AuxFrameBoxTemplate">
-				<Size>
-					<AbsDimension x="400" y="326"/>
-				</Size>
-                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="5" y="-35"/></Offset></Anchor></Anchors>
-				<Frames>
-					<Frame name="$parentBidListing">
-						<Anchors>
-							<Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-						</Anchors>
-					</Frame>
-				</Frames>
-            </Frame>
+				<Anchors>
+					<Anchor point="TOP" relativeTo="AuxFrame"><Offset><AbsDimension x="0" y="-8"/></Offset></Anchor>
+					<Anchor point="BOTTOMLEFT" relativeTo="AuxFrameContent"></Anchor>
+					<Anchor point="BOTTOMRIGHT" relativeTo="AuxFrameContent"></Anchor>
+				</Anchors>
+			</Frame>
 		</Frames>
 	</Frame>
 </Ui>

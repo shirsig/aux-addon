@@ -18,6 +18,19 @@ function private.clear_selection(entry)
 end
 
 function public.on_load()
+    private.listing = Aux.listing.CreateScrollingTable(AuxAuctionsFrameListing)
+    private.listing:SetColInfo({
+        { name='Item', width=.4 },
+        { name='Qty', width=.5, align='CENTER' },
+        { name='Left', width=.1, align='CENTER' },
+        { name='High Bid', width=.15, align='RIGHT' },
+        { name='Start Price', width=.15, align='RIGHT' },
+        { name='Buy', width=.15, align='RIGHT' },
+    })
+    private.listing:SetHandler('OnClick', function(table, row_data, column)
+        private.on_row_click(row_data.record)
+    end)
+
     private.auction_listing_config = {
         frame = AuxAuctionsFrameListingAuctionListing,
         on_row_click = function(sheet, row_index)
@@ -88,32 +101,8 @@ function public.on_load()
                     cell.text:SetTextColor(color.r, color.g, color.b)
                 end,
             },
-            {
-                title = 'Qty',
-                width = 25,
-                comparator = function(row1, row2) return Aux.sort.compare(row1.stack_size, row2.stack_size, Aux.sort.LT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('RIGHT'),
-                cell_setter = function(cell, datum)
-                    cell.text:SetText(datum.aux_quantity)
-                end,
-            },
-            Aux.listing_util.duration_column(function(entry) return entry.duration end),
-            {
-                title = 'Current Bid',
-                width = 80,
-                comparator = function(auction1, auction2) return Aux.sort.compare(auction1.high_bid, auction2.high_bid, Aux.sort.GT) end,
-                cell_initializer = Aux.sheet.default_cell_initializer('CENTER'),
-                cell_setter = function(cell, auction)
-                    cell.text:SetText(auction.high_bid and Aux.util.money_string(auction.high_bid) or RED_FONT_COLOR_CODE..'No Bids'..FONT_COLOR_CODE_CLOSE)
-                end,
-            },
-            Aux.listing_util.money_column('Min Bid', function(entry) return entry.start_price end),
-            Aux.listing_util.money_column('Buy', function(entry) return entry.buyout_price end),
         },
-        sort_order = {{ column = 1, order = 'ascending' }},
     }
-
-    private.listing =  Aux.sheet.create(private.auction_listing_config)
     do
         local status_bar = Aux.gui.status_bar(AuxAuctionsFrame)
         status_bar:SetWidth(265)
@@ -144,6 +133,33 @@ function public.on_load()
     end
 end
 
+function private.update_listing()
+    if not AuxAuctionsFrame:IsVisible() then
+        return
+    end
+
+    local auction_rows = {}
+    for i, auction_record in auction_records or {} do
+        local market_value = Aux.history.market_value(auction_record.item_key)
+        tinsert(auction_rows, {
+            cols = {
+                { value='|c'..Aux.quality_color(auction_record.quality)..'['..auction_record.name..']'..'|r' },
+                { value=auction_record.aux_quantity },
+                { value=Aux.auction_listing.time_left(auction_record.duration) },
+                { value=auction_record.high_bid > 0 and Aux.money.to_string(auction_record.high_bid, true, false) or RED_FONT_COLOR_CODE..'No Bids'..FONT_COLOR_CODE_CLOSE },
+                { value=Aux.money.to_string(auction_record.start_price, true, false) },
+                { value=auction_record.buyout_price > 0 and Aux.money.to_string(auction_record.buyout_price, true, false) or '---' },
+                --                { value=Aux.auction_listing.percentage_market(market_value and Aux.round(auction_record.unit_buyout_price/market_value * 100) or '---') },
+            },
+            record = auction_record,
+        })
+    end
+    sort(auction_rows, function(a, b) return a.record.unit_buyout_price < b.record.unit_buyout_price end)
+
+    private.listing:SetData(auction_rows)
+    private.listing:SetSelection(function(row) return row.record == selected_auction end)
+end
+
 function public.on_open()
     public.scan_auctions()
     refresh = true
@@ -171,7 +187,7 @@ function public.scan_auctions()
             private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
         end,
         on_read_auction = function(auction_info)
-            tinsert(auction_records, private.create_auction_record(auction_info))
+            tinsert(auction_records, auction_info)
         end,
         on_complete = function()
             private.status_bar:update_status(100, 100)
@@ -185,53 +201,6 @@ function public.scan_auctions()
     }
 end
 
-function private.update_listing()
-    if not AuxAuctionsFrame:IsVisible() then
-        return
-    end
-
-    AuxAuctionsFrameListingAuctionListing:Show()
-    Aux.sheet.populate(private.listing, auction_records)
-    AuxAuctionsFrameListing:SetWidth(AuxAuctionsFrameListingAuctionListing:GetWidth() + 40)
-end
-
-function private.create_auction_record(auction_info)
-
-    local buyout_price = auction_info.buyout_price > 0 and auction_info.buyout_price or nil
-
-    local status
-    if auction_info.high_bidder then
-        status = GREEN_FONT_COLOR_CODE..'High Bidder'..FONT_COLOR_CODE_CLOSE
-    else
-        status = RED_FONT_COLOR_CODE..'Outbid'..FONT_COLOR_CODE_CLOSE
-    end
-
-    return {
-        query = auction_info.query,
-        page = auction_info.page,
-
-        item_id = auction_info.item_id,
-        item_key = auction_info.item_key,
-        signature = auction_info.signature,
-
-        name = auction_info.name,
-        tooltip = auction_info.tooltip,
-        aux_quantity = auction_info.aux_quantity,
-        buyout_price = buyout_price,
-        quality = auction_info.quality,
-        hyperlink = auction_info.hyperlink,
-        itemstring = auction_info.itemstring,
-        duration = auction_info.duration,
-        usable = auction_info.usable,
-        high_bidder = auction_info.high_bidder,
-        high_bid = auction_info.high_bid > 0 and auction_info.high_bid or nil,
-        start_price = auction_info.start_price,
-        status = status,
-
-        EnhTooltip_info = auction_info.EnhTooltip_info,
-    }
-end
-
 function private.process_request(entry, express_mode)
 
     if entry.gone then
@@ -241,7 +210,7 @@ function private.process_request(entry, express_mode)
     PlaySound('igMainMenuOptionCheckBoxOn')
 
     local function test(index)
-        local auction_record = private.create_auction_record(Aux.info.auction(index, 'owner'))
+        local auction_record = Aux.info.auction(index, 'owner')
         return auction_record.signature == entry.signature and auction_record.bid_price == entry.bid_price and auction_record.duration == entry.duration
     end
 

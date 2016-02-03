@@ -43,9 +43,9 @@ function private.update_auction_listing()
                 cols = {
                     { value=auction_record.count },
                     { value=auction_record.yours },
-                    { value=Aux.auction_listing.time_left(auction_record.max_time_left) },
+                    { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=stack_size },
-                    { value=Aux.money.to_string(auction_record.unit_buyout_price) },
+                    { value=Aux.money.to_string(auction_record.unit_buyout_price, true, false) },
                     { value=Aux.auction_listing.percentage_market(market_value and Aux.round(auction_record.unit_buyout_price/market_value * 100) or '---') },
                 },
                 record = auction_record,
@@ -694,7 +694,7 @@ function private.record_auction(key, aux_quantity, buyout_price, duration, owner
 		if entry then
 			entry.count = entry.count + 1
 			entry.yours = entry.yours + (owner == UnitName('player') and 1 or 0)
-			entry.max_time_left = max(entry.max_time_left, duration)
+			entry.duration = max(entry.duration, duration)
         else
 			tinsert(existing_auctions[key], {
                 item_key = key,
@@ -702,7 +702,7 @@ function private.record_auction(key, aux_quantity, buyout_price, duration, owner
 				buyout_price = buyout_price,
                 duration = duration,
 				unit_buyout_price = buyout_price / aux_quantity,
-				max_time_left = duration,
+				duration = duration,
 				count = 1,
 				yours = owner == UnitName('player') and 1 or 0,
 			})

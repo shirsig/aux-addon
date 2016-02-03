@@ -33,11 +33,6 @@ function m:complete()
     if current_filter or not completed_filter_string then
         current_filter = current_filter or {}
 
-        tinsert(options, 'and')
-        tinsert(options, 'or')
-        tinsert(options, 'not')
-        tinsert(options, 'tt')
-
         if current_filter.name
                 and Aux.static.auctionable_items[strupper(current_filter.name)]
                 and not current_filter.min_level
@@ -51,6 +46,11 @@ function m:complete()
         then
             tinsert(options, 'exact')
         end
+
+        tinsert(options, 'and')
+        tinsert(options, 'or')
+        tinsert(options, 'not')
+        tinsert(options, 'tt')
 
         -- classes
         if not current_filter.class and not current_filter.exact then
