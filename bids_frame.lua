@@ -89,7 +89,7 @@ function private.update_listing()
             record = auction_record,
         })
     end
-    sort(auction_rows, function(a, b) return a.record.name < b.record.name or (b.record.name == b.record.name and a.record.search_signature < b.record.search_signature) end)
+    sort(auction_rows, function(a, b) return Aux.sort.multi_lt(a.record.name, b.record.name, a.record.search_signature, b.record.search_signature, tostring(a.record), tostring(b.record)) end)
 
     private.listing:SetData(auction_rows)
     private.listing:SetSelection(function(row) return row.record == selected_auction end)
@@ -236,7 +236,6 @@ function private.on_row_click(auction_record)
     local express_mode = IsAltKeyDown()
     local buyout_mode = express_mode and arg1 == 'LeftButton'
     if express_mode then
-        selected_auction = nil
         private.find_auction_and_bid(auction_record, buyout_mode)
     else
         selected_auction = auction_record

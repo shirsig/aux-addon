@@ -82,3 +82,12 @@ function public.compare_from_lt(lt)
         end
     end
 end
+
+function public.multi_lt(...)
+    for i=1,arg.n-1,2 do
+        if arg[i] ~= arg[i+1] then
+            return arg[i] < arg[i+1]
+        end
+    end
+    return false
+end

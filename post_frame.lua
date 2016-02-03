@@ -51,7 +51,7 @@ function private.update_auction_listing()
                 record = auction_record,
             })
         end
-        sort(auction_rows, function(a, b) return a.record.unit_buyout_price < b.record.unit_buyout_price end)
+        sort(auction_rows, function(a, b) return Aux.sort.multi_lt(a.record.unit_buyout_price, b.record.unit_buyout_price, tostring(a.record), tostring(b.record)) end)
     end
     private.auction_listing:SetData(auction_rows)
     private.auction_listing:SetSelection(function(row) return row.record == private.selected_auction() end)
