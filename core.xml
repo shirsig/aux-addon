@@ -133,7 +133,7 @@
 			</OnEnter>
 			<OnLeave>
 				if this.itemstring then
-                    AuxTooltip:Hide()
+                    GameTooltip:Hide()
 				end
 			</OnLeave>
 		</Scripts>

@@ -92,7 +92,7 @@ local methods = {
     end,
 
     OnIconLeave = function()
-        AuxTooltip:Hide()
+        GameTooltip:Hide()
         this:GetParent().row.rt.isShowingItemTooltip = nil
     end,
 

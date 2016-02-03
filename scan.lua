@@ -82,6 +82,9 @@ function wait_for_results(k)
 end
 
 function wait_for_owner_data(k)
+    if state.params.no_wait_owners then
+        return k()
+    end
 	local t0 = time()
 	return controller().wait(function()
 		if time() - t0 > 4 then -- we won't wait longer than 4 seconds
@@ -147,7 +150,7 @@ function private.process_query()
 
         scan_auctions(count, function()
 
-            wait_for_callback{state.params.on_page_complete or Aux.util.pass, function()
+            wait_for_callback{state.params.on_page_scanned or Aux.util.pass, function()
                 if current_query().next_page then
                     state.page = current_query().next_page(state.page, state.total_pages)
                 else

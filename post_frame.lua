@@ -97,7 +97,7 @@ function public.on_load()
         Aux.info.set_tooltip(row_data.itemstring, nil, column.row, 'ANCHOR_LEFT', 0, 0)
     end)
     private.inventory_listing:SetHandler('OnLeave', function()
-        AuxTooltip:Hide()
+        GameTooltip:Hide()
     end)
 
     private.auction_listing = Aux.listing.CreateScrollingTable(AuxSellAuctions)
@@ -638,10 +638,11 @@ function private.refresh_entries()
         private.status_bar:set_text('Scanning auctions...')
 
 		Aux.scan.start{
+            no_wait_owners = true,
 			queries = { query },
 			on_page_loaded = function(page, total_pages)
                 private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages) -- TODO
-                private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
+                private.status_bar:set_text(format('Scanning Page %d / %d', page + 1, total_pages))
 			end,
 			on_read_auction = function(auction_info)
 				if auction_info.item_key == item_key then

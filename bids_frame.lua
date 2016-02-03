@@ -30,7 +30,7 @@ function public.on_load()
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function(sheet, row_index)
-            AuxTooltip:Hide()
+            GameTooltip:Hide()
             ResetCursor()
         end,
         on_row_update = function(sheet, row_index)

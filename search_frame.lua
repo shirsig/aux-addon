@@ -188,7 +188,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrame)
-        editbox:SetMaxLetters(Aux.huge)
+        editbox:SetMaxLetters(nil)
         editbox:EnableMouse(1)
         editbox.complete = Aux.test.complete
         editbox:SetPoint('TOPLEFT', 5, -8)
@@ -672,8 +672,6 @@ end
                     end
                 elseif st == private.favorite_searches_listing then
                     tremove(aux_favorite_searches, data.index)
---                    data.searchInfo.isFavorite = nil
---                    TSM:Printf('Removed '%s' from your favorite searches.', data.searchInfo.name)
                 end
                 private.update_search_listings()
             end
@@ -768,18 +766,27 @@ function public.start_search()
         local scanned_records = {}
         private.results_listing:SetDatabase(scanned_records)
 
+        local current_page, current_total_pages, current_query
         Aux.scan.start{
             queries = queries,
             on_page_loaded = function(page, total_pages)
-                private.status_bar:update_status(100 * (page + 1) / total_pages) -- TODO
-                private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
+                current_page = page + 1
+                current_total_pages = total_pages
+                private.status_bar:update_status(100 * (current_page - 1) / current_total_pages, 100 * (current_query - 1) / getn(queries)) -- TODO
+                private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
             end,
-            on_page_complete = function()
+            on_page_scanned = function()
                 private.results_listing:SetDatabase()
             end,
             on_start_query = function(query_index)
-                private.status_bar:update_status(0, 100 * (query_index - 1) / getn(queries)) -- TODO
-                private.status_bar:set_text(format('Processing query %d / %d', query_index, getn(queries)))
+                current_query = query_index
+                if current_page then
+                    private.status_bar:update_status(100 * (current_page - 1) / current_total_pages, 100 * (current_query - 1) / getn(queries)) -- TODO
+                    private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
+                else
+                    private.status_bar:update_status(0, 100 * current_query / getn(queries)) -- TODO
+                    private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
+                end
             end,
             on_read_auction = function(auction_info)
 --                tinsert(scanned_records, private.create_auction_record(auction_info))
@@ -889,8 +896,7 @@ do
     end
 end
 
---function private.create_auction_record(auction_info)
---
+
 --    if auction_info.current_bid == 0 then
 --        status = 'No Bid'
 --    elseif auction_info.high_bidder then
@@ -898,8 +904,7 @@ end
 --    else
 --        status = 'Other Bidder'
 --    end
---
---end
+
 
 function private.initialize_class_dropdown()
     local function on_click()

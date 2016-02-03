@@ -97,7 +97,7 @@ function public.on_load()
             Aux.info.set_tooltip(sheet.rows[row_index].itemstring, sheet.rows[row_index].EnhTooltip_info, this, 'ANCHOR_RIGHT', 0, 0)
         end,
         on_row_leave = function(sheet, row_index)
-            AuxTooltip:Hide()
+            GameTooltip:Hide()
             ResetCursor()
         end,
         on_row_update = function(sheet, row_index)
@@ -355,7 +355,7 @@ function public.start_search()
                 private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages) -- TODO
                 private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
             end,
-            on_page_complete = function()
+            on_page_scanned = function()
                 refresh = true
             end,
             on_read_auction = function(auction_info)

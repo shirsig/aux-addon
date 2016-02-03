@@ -152,14 +152,29 @@ function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor, x_offset
     else
         private.anchor_cursor = false
     end
---    GameTooltip_SetDefaultAnchor(AuxTooltip, UIParent)
-    AuxTooltip:SetOwner(owner, anchor)
 
-    AuxTooltip:SetHyperlink(itemstring)
+    GameTooltip:SetOwner(owner, anchor)
+    GameTooltip:SetHyperlink(itemstring)
 
-    AuxTooltip:Show()
+    local item_id = tonumber(({strfind(itemstring, '^item:(%d+)')})[3])
+    local item_info = Aux.static.item_info(item_id)
+    local slot_index = item_info.class and item_info.subclass and Aux.item_slot_index(item_info.class, item_info.subclass, item_info.slot)
+    snipe.log(slot_index)
+    if slot_index then
+        ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
+        ShoppingTooltip1:SetInventoryItem('player', slot_index)
+        Aux.control.on_next_update(function()
+            ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
+        end)
+    end
+
+--    ShoppingTooltip2:SetOwner(ShoppingTooltip1, "ANCHOR_BOTTOMRIGHT");
+--    ShoppingTooltip2:SetPoint("TOPLEFT", "ShoppingTooltip1", "TOPRIGHT", 0, 0);
+--    ShoppingTooltip2:SetAuctionCompareItem(type, index, 2);
+--    ShoppingTooltip2:Show();
+
 	if EnhTooltip and EnhTooltip_info then
-		EnhTooltip.TooltipCall(AuxTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
+		EnhTooltip.TooltipCall(GameTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
 	end
 end
 
