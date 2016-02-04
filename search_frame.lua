@@ -146,10 +146,10 @@ function private.get_form_filter()
         exact = AuxFilterSearchFrameFilterExactCheckButton:GetChecked(),
         min_level = not exact and tonumber(AuxFilterSearchFrameFilterMinLevel:GetText()),
         max_level = not exact and tonumber(AuxFilterSearchFrameFilterMaxLevel:GetText()),
-        class = not exact and UIDropDownMenu_GetSelectedValue(private.class_dropdown),
-        subclass = not exact and UIDropDownMenu_GetSelectedValue(private.subclass_dropdown),
-        slot = not exact and UIDropDownMenu_GetSelectedValue(private.slot_dropdown),
-        quality = not exact and UIDropDownMenu_GetSelectedValue(private.quality_dropdown),
+        class = not exact and UIDropDownMenu_GetSelectedValue(private.class_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.class_dropdown),
+        subclass = not exact and UIDropDownMenu_GetSelectedValue(private.subclass_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.subclass_dropdown),
+        slot = not exact and UIDropDownMenu_GetSelectedValue(private.slot_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.slot_dropdown),
+        quality = not exact and UIDropDownMenu_GetSelectedValue(private.quality_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.quality_dropdown),
         usable = not exact and AuxFilterSearchFrameFilterUsableCheckButton:GetChecked(),
         discard = AuxFilterSearchFrameFilterDiscardCheckButton:GetChecked(),
         max_price = max_price > 0 and max_price,
@@ -324,7 +324,7 @@ function public.on_load()
         end)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'TooltipInputBox4'):SetFocus()
+                private.tooltip6:SetFocus()
             else
                 getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
             end
@@ -335,6 +335,9 @@ function public.on_load()
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -360,6 +363,9 @@ do
     editbox:SetScript('OnEscapePressed', function()
         this:ClearFocus()
     end)
+    editbox:SetScript('OnEditFocusGained', function()
+        this:HighlightText()
+    end)
     local label = Aux.gui.label(editbox, 13)
     label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
     label:SetText('Level Range')
@@ -374,7 +380,7 @@ do
         if IsShiftKeyDown() then
             getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
         else
-            getglobal(this:GetParent():GetName()..'TooltipInputBox1'):SetFocus()
+            private.max_buyout_price:SetFocus()
         end
     end)
     editbox:SetScript('OnEnterPressed', function()
@@ -383,6 +389,9 @@ do
     end)
     editbox:SetScript('OnEscapePressed', function()
         this:ClearFocus()
+    end)
+    editbox:SetScript('OnEditFocusGained', function()
+        this:HighlightText()
     end)
     local label = Aux.gui.label(editbox, 13)
     label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
@@ -466,8 +475,11 @@ end
         editbox:SetPoint('TOPRIGHT', -14, -20)
         editbox:SetWidth(300)
         editbox:SetScript('OnTabPressed', function()
-            private.start_price:SetFocus()
-            private.start_price:HighlightText()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+            else
+                private.max_percent:SetFocus()
+            end
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
@@ -493,9 +505,9 @@ end
         editbox:SetWidth(300)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+                private.max_buyout_price:SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+                private.tooltip1:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -504,6 +516,9 @@ end
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -516,9 +531,9 @@ end
         editbox:SetWidth(300)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+                private.max_percent:SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'Tooltip1InputBox2'):SetFocus()
+                private.tooltip2:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -527,6 +542,9 @@ end
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -539,9 +557,9 @@ end
         editbox:SetWidth(300)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'Tooltip1InputBox1'):SetFocus()
+                private.tooltip1:SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'Tooltip1InputBox3'):SetFocus()
+                private.tooltip3:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -550,6 +568,9 @@ end
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
         end)
         private.tooltip2 = editbox
     end
@@ -559,9 +580,9 @@ end
         editbox:SetWidth(300)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'Tooltip1InputBox2'):SetFocus()
+                private.tooltip2:SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'Tooltip1InputBox4'):SetFocus()
+                private.tooltip4:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -570,6 +591,9 @@ end
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
         end)
         private.tooltip3 = editbox
     end
@@ -579,9 +603,9 @@ end
         editbox:SetWidth(300)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'Tooltip1InputBox3'):SetFocus()
+                private.tooltip3:SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+                private.tooltip5:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -590,6 +614,9 @@ end
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
         end)
         private.tooltip4 = editbox
     end
@@ -599,9 +626,9 @@ end
         editbox:SetWidth(300)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'Tooltip1InputBox3'):SetFocus()
+                private.tooltip4:SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+                private.tooltip6:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -610,6 +637,9 @@ end
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
         end)
         private.tooltip5 = editbox
     end
@@ -619,7 +649,7 @@ end
         editbox:SetWidth(300)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'Tooltip1InputBox3'):SetFocus()
+                private.tooltip5:SetFocus()
             else
                 getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
             end
@@ -630,6 +660,9 @@ end
         end)
         editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
         end)
         private.tooltip6 = editbox
     end
@@ -922,6 +955,7 @@ function private.initialize_class_dropdown()
 
     UIDropDownMenu_AddButton{
         text = ALL,
+        value = 0,
         func = on_click,
     }
 
@@ -948,6 +982,7 @@ function private.initialize_subclass_dropdown()
     if class_index and GetAuctionItemSubClasses(class_index) then
         UIDropDownMenu_AddButton{
             text = ALL,
+            value = 0,
             func = on_click,
         }
 
@@ -973,6 +1008,7 @@ function private.initialize_slot_dropdown()
     if class_index and subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
         UIDropDownMenu_AddButton{
             text = ALL,
+            value = 0,
             func = on_click,
         }
 
@@ -995,6 +1031,7 @@ function private.initialize_quality_dropdown()
 
 	UIDropDownMenu_AddButton{
 		text = ALL,
+        value = 0,
 		func = on_click,
 	}
 	for i=0,4 do

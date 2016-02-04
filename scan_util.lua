@@ -175,7 +175,16 @@ function m.filter_from_string(filter_term)
     end
 
     if filter.exact then
-        if filter.min_level or filter.max_level or filter.class or filter.subclass or filter.slot or filter.quality or filter.usable or not Aux.static.auctionable_items[strupper(filter.name)] then
+        if filter.min_level
+                or filter.max_level
+                or filter.class
+                or filter.subclass
+                or filter.slot
+                or filter.quality
+                or filter.usable
+                or not filter.name
+                or not Aux.static.auctionable_items[strupper(filter.name)]
+        then
             return false, 'Erroneous Exact Only Modifier'
         end
     end
