@@ -2,7 +2,7 @@ local private, public = {}, {}
 Aux.history = public
 
 private.PUSH_INTERVAL = 57600
-private.NEW_RECORD = '0#0#0#'
+private.NEW_RECORD = '0#0##'
 
 function private.load_data()
 	local dataset = Aux.persistence.load_dataset()
@@ -16,7 +16,9 @@ function private.read_record(item_key)
 	return {
 		auction_count = tonumber(record[1]),
 		day_count = tonumber(record[2]),
-		EMA7 = tonumber(record[3]),
+		balanced_list = Aux.util.map(Aux.persistence.deserialize(record[3], ';'), function(value)
+			return tonumber(value)
+		end),
 		histogram = Aux.util.map(Aux.persistence.deserialize(record[4], ';', 'x'), function(value)
 			return tonumber(value)
 		end),
@@ -28,7 +30,7 @@ function private.write_record(item_key, record)
 	data.item_data[item_key] = Aux.persistence.serialize({
 		record.auction_count,
 		record.day_count,
-		record.EMA7,
+		Aux.persistence.serialize(record.balanced_list, ';'),
 		Aux.persistence.serialize(record.histogram, ';', 'x'),
 	},'#')
 end
@@ -64,18 +66,18 @@ end
 
 function public.price_data(item_key)
 	local item_record = private.read_record(item_key)
-	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), item_record.EMA7
+	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), private.median(item_record.balanced_list)
 end
 
 function public.market_value(item_key)
-	local auction_count, day_count, daily_market_value, EMA7 = public.price_data(item_key)
+	local auction_count, day_count, daily_market_value, median = public.price_data(item_key)
 
 	if auction_count == 0 then
 		return nil
 	elseif day_count == 0 then
 		return daily_market_value
 	else
-		return EMA7
+		return median
 	end
 end
 
@@ -104,12 +106,46 @@ function private.daily_market_value(histogram)
 	return sum / limit
 end
 
-function private.daily_min_value(histogram)
-	for i, frequency in ipairs(histogram) do
-		if frequency > 0 then
-			return 1.1 ^ (i - 1) * 1.05
+function private.balanced_list_insert(list, value, max_size)
+
+	local left = 1
+	local right = getn(list)
+	local middle
+	local middle_value
+	local insert_position
+
+	while left <= right do
+		middle = floor((left + right) / 2)
+		middle_value = list[middle]
+		if value < middle_value then
+			right = middle - 1
+		elseif value > middle_value then
+			left = middle + 1
+		else
+			insert_position = middle
+			break
 		end
 	end
+	insert_position = insert_position or left
+
+	tinsert(list, insert_position, value)
+
+	if max_size and getn(list) > max_size then
+		if insert_position <= floor(max_size / 2) + 1 then
+			tremove(list)
+		else
+			tremove(list, 1)
+		end
+	end
+end
+
+function private.median(list)
+	if getn(list) == 0 then
+		return
+	end
+	
+	local middle = (getn(list) + 1) / 2
+	return (list[floor(middle)] + list[ceil(middle)]) / 2
 end
 
 function private.push_data()
@@ -123,17 +159,8 @@ function private.push_data()
 		if getn(item_record.histogram) ~= 0 then
 
 			local daily_market_value = private.daily_market_value(item_record.histogram)
-			local daily_min_value = private.daily_min_value(item_record.histogram)
 
-			if daily_market_value > 2 * public.market_value(item_key) then -- prevent people from poisoning our market value by posting lots of 200k auctions
-				daily_market_value = daily_min_value
-			end
-
-			if item_record.day_count == 0 then
-				item_record.EMA7 = Aux.round(daily_market_value)
-			else
-				item_record.EMA7 = Aux.round(3/4 * item_record.EMA7 + 1/4 * daily_market_value)
-			end
+			private.balanced_list_insert(item_record.balanced_list, daily_market_value, 7)
 
 			item_record.day_count = item_record.day_count + 1
 			item_record.histogram = {}

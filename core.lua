@@ -19,7 +19,7 @@ function Aux.on_load()
             local item_id, suffix_id = EnhTooltip.BreakLink(link)
             local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
-            local auction_count, day_count, TDA, EMA7 = Aux.history.price_data(item_key)
+            local auction_count, day_count, daily_market_value, median = Aux.history.price_data(item_key)
 
             if auction_count == 0 then
                 EnhTooltip.AddLine('Never seen at auction', nil, true)
