@@ -24,80 +24,30 @@
                 </Anchors>
                 <Frames>
                     <Frame name="AuxSellInventory" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension x="215"/></Size>
+                        <Size><AbsDimension x="212"/></Size>
                         <Anchors>
                             <Anchor point="TOPLEFT"><Offset><AbsDimension x="4" y="-4"/></Offset></Anchor>
                             <Anchor point="BOTTOMLEFT"><Offset><AbsDimension x="4" y="4"/></Offset></Anchor>
                         </Anchors>
-                        <Frames>
-                            <Frame name="$parentListing" hidden="true">
-                                <Anchors>
-                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                    <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                </Anchors>
-                            </Frame>
-                        </Frames>
                     </Frame>
                     <frame name="AuxSellParameters" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension x="204" y="326"/></Size>
+                        <Size><AbsDimension y="187"/></Size>
                         <Anchors>
-                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor>
+                            <Anchor point="TOPRIGHT"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor>
                         </Anchors>
                         <frames>
                             <Frame name="$parentItem" inherits="AuxItemTemplate">
-                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="6" y="-30"/></Offset></Anchor></Anchors>
+                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-10"/></Offset></Anchor></Anchors>
                             </Frame>
-                            <CheckButton name="$parentShortDurationRadio" inherits="AuxRadioButtonTemplate">
-                                <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="14" y="-210"/></Offset></Anchor></Anchors>
-                                <Scripts>
-                                    <OnLoad>
-                                        getglobal(this:GetName().."Text"):SetText("2h")
-                                    </OnLoad>
-                                    <OnClick>
-                                        Aux.post_frame.duration_radio_button_on_click(1)
-                                    </OnClick>
-                                </Scripts>
-                            </CheckButton>
-                            <CheckButton name="$parentMediumDurationRadio" inherits="AuxRadioButtonTemplate">
-                                <Anchors><Anchor point="LEFT" relativeTo="$parentShortDurationRadio" relativePoint="RIGHT"><Offset><AbsDimension x="30" y="0"/></Offset></Anchor></Anchors>
-                                <Scripts>
-                                    <OnLoad>
-                                        getglobal(this:GetName()..'Text'):SetText("8h")
-                                    </OnLoad>
-                                    <OnClick>
-                                        Aux.post_frame.duration_radio_button_on_click(2)
-                                    </OnClick>
-                                </Scripts>
-                            </CheckButton>
-                            <CheckButton name="$parentLongDurationRadio" inherits="AuxRadioButtonTemplate">
-                                <Anchors><Anchor point="LEFT" relativeTo="$parentMediumDurationRadio" relativePoint="RIGHT"><Offset><AbsDimension x="30" y="0"/></Offset></Anchor></Anchors>
-                                <Scripts>
-                                    <OnLoad>
-                                        getglobal(this:GetName().."Text"):SetText("24h")
-                                    </OnLoad>
-                                    <OnClick>
-                                        Aux.post_frame.duration_radio_button_on_click(3)
-                                    </OnClick>
-                                </Scripts>
-                            </CheckButton>
                         </frames>
                     </frame>
                     <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension y="320"/></Size>
+                        <Size><AbsDimension y="207"/></Size>
                         <Anchors>
-                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
-                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="AuxSellParameters"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
-                            <Anchor point="RIGHT"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor>
+                            <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor>
                         </Anchors>
-                        <Frames>
-                            <Frame name="$parentListing" hidden="true">
-                                <Anchors>
-                                    <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                    <Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
-                                </Anchors>
-                            </Frame>
-                        </Frames>
                     </Frame>
                 </Frames>
             </Frame>

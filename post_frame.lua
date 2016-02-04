@@ -6,14 +6,33 @@ local existing_auctions = {}
 local inventory_records
 local selected_item
 
---local LIVE, HISTORICAL, FIXED = {}, {}, {}
+local AUTO, UNDERCUT, MARKET, FIXED = 1, 2, 3, 4
+local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
+
+function private.load_settings(item_record)
+    local item_record = item_record or selected_item
+    local dataset = Aux.persistence.load_dataset()
+    dataset.post = dataset.post or {}
+    dataset.post[item_record.key] = dataset.post[item_record.key] or {
+        duration = DURATION_24,
+        stack_size = item_record.max_stack,
+        start_price = 0,
+        buyout_price = 0,
+        hidden = false,
+        pricing_model = AUTO,
+    }
+    return dataset.post[item_record.key]
+end
 
 function private.update_inventory_listing()
     if not AuxPostFrame:IsVisible() then
         return
     end
 
-    Aux.item_listing.populate(private.item_listing, Aux.util.filter(inventory_records, function(record) return record.aux_quantity > 0 end))
+    Aux.item_listing.populate(private.item_listing, Aux.util.filter(inventory_records, function(record)
+        local settings = private.load_settings(record)
+        return record.aux_quantity > 0 and (not settings.hidden or private.show_hidden_checkbox:GetChecked())
+    end))
 end
 
 function private.update_auction_listing()
@@ -50,14 +69,7 @@ end
 
 function public.on_load()
 
-    Aux.gui.vertical_line(AuxPostFrameContent, 223)
-    Aux.gui.vertical_line(AuxPostFrameContent, 437)
-
-    do
-        local label = Aux.gui.label(AuxSellParametersItem, 13)
-        label:SetPoint('BOTTOMLEFT', AuxSellParametersItem, 'TOPLEFT', 0, 0)
-        label:SetText('Auction Item')
-    end
+    Aux.gui.vertical_line(AuxPostFrameContent, 219)
 
     AuxSellParametersItem:EnableMouse()
     AuxSellParametersItem:SetScript('OnReceiveDrag', function()
@@ -72,6 +84,22 @@ function public.on_load()
         end
         ClearCursor()
     end)
+
+    do
+        local checkbox = CreateFrame('CheckButton', nil, AuxSellInventory, 'UICheckButtonTemplate')
+        checkbox:SetWidth(22)
+        checkbox:SetHeight(22)
+        checkbox:SetPoint('TOPLEFT', 45, -15)
+        checkbox:SetScript('OnClick', function()
+            refresh = true
+        end)
+        local label = Aux.gui.label(checkbox, 13)
+        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
+        label:SetText('Show hidden items')
+        private.show_hidden_checkbox = checkbox
+    end
+
+    Aux.gui.horizontal_line(AuxSellInventory, -48)
 
     private.item_listing = Aux.item_listing.create(
         AuxSellInventory,
@@ -133,8 +161,8 @@ function public.on_load()
     do
         local slider = Aux.gui.slider(AuxSellParameters)
         slider:SetValueStep(1)
-        slider:SetPoint('TOPLEFT', 16, -110)
-        slider:SetWidth(170)
+        slider:SetPoint('TOPLEFT', 16, -75)
+        slider:SetWidth(190)
         slider:SetScript('OnValueChanged', function()
             private.quantity_update()
         end)
@@ -168,8 +196,8 @@ function public.on_load()
     do
         local slider = Aux.gui.slider(AuxSellParameters)
         slider:SetValueStep(1)
-        slider:SetPoint('TOPLEFT', 16, -160)
-        slider:SetWidth(170)
+        slider:SetPoint('TOPLEFT', private.stack_size_slider, 'BOTTOMLEFT', 0, -30)
+        slider:SetWidth(190)
         slider:SetScript('OnValueChanged', function()
             private.quantity_update()
         end)
@@ -200,15 +228,58 @@ function public.on_load()
         private.stack_count_slider = slider
     end
     do
-        local label = Aux.gui.label(AuxSellParametersShortDurationRadio, 13)
-        label:SetPoint('BOTTOMLEFT', AuxSellParametersShortDurationRadio, 'TOPLEFT', 1, -2)
+        local dropdown = Aux.gui.dropdown(AuxSellParameters)
+        dropdown:SetPoint('TOPLEFT', private.stack_count_slider, 'BOTTOMLEFT', 0, -25)
+        dropdown:SetWidth(90)
+        dropdown:SetHeight(10)
+        local label = Aux.gui.label(dropdown, 13)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
         label:SetText('Duration')
+        UIDropDownMenu_Initialize(dropdown, private.initialize_duration_dropdown)
+        dropdown:SetScript('OnShow', function()
+            UIDropDownMenu_Initialize(this, private.initialize_duration_dropdown)
+        end)
+        local label = Aux.gui.label(dropdown, 15)
+        label:SetPoint('LEFT', dropdown, 'RIGHT', 25, 0)
+        private.deposit = label
+        private.duration_dropdown = dropdown
     end
     do
+        local checkbox = CreateFrame('CheckButton', nil, AuxSellParameters, 'UICheckButtonTemplate')
+        checkbox:SetWidth(22)
+        checkbox:SetHeight(22)
+        checkbox:SetPoint('TOPRIGHT', -85, -6)
+        checkbox:SetScript('OnClick', function()
+            local settings = private.load_settings()
+            settings.hidden = this:GetChecked()
+            refresh = true
+        end)
+        local label = Aux.gui.label(checkbox, 13)
+        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
+        label:SetText('Hide this item')
+        private.hide_checkbox = checkbox
+    end
+--    do
+--        local checkbox = CreateFrame('CheckButton', nil, AuxSellParameters, 'UICheckButtonTemplate')
+--        checkbox:SetWidth(22)
+--        checkbox:SetHeight(22)
+--        checkbox:SetPoint('TOPRIGHT', -110, -25)
+--        local label = Aux.gui.label(checkbox, 13)
+--        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 2)
+--        label:SetText('Enable batch posting')
+--        private.batch_posting_checkbox = checkbox
+--    end
+    do
         local editbox = Aux.gui.editbox(AuxSellParameters)
-        editbox:SetPoint('TOPLEFT', 16, -255)
+        editbox:SetPoint('TOPRIGHT', -30, -58)
         editbox:SetWidth(170)
         editbox:SetScript('OnTextChanged', function()
+            if selected_item then
+                local settings = private.load_settings()
+                if settings.pricing_model == FIXED then
+                    settings.start_price = Aux.money.from_string(this:GetText())
+                end
+            end
             private.validate_parameters()
         end)
         editbox:SetScript('OnTabPressed', function()
@@ -234,9 +305,15 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxSellParameters)
-        editbox:SetPoint('TOPLEFT', 16, -295)
+        editbox:SetPoint('TOP', private.start_price, 'BOTTOM', 0, -25)
         editbox:SetWidth(170)
         editbox:SetScript('OnTextChanged', function()
+            if selected_item then
+                local settings = private.load_settings()
+                if settings.pricing_model == FIXED then
+                    settings.buyout_price = Aux.money.from_string(this:GetText())
+                end
+            end
             private.validate_parameters()
         end)
         editbox:SetScript('OnTabPressed', function()
@@ -257,23 +334,28 @@ function public.on_load()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Buyout Stack Price |cff808080(optional)|r')
+        label:SetText('Buyout Stack Price')
         private.buyout_price = editbox
     end
     do
-        local label = Aux.gui.label(AuxSellParameters, 15)
-        label:SetPoint('TOPLEFT', AuxSellParameters, 'TOPLEFT', 16, -330)
-        private.deposit = label
+        local dropdown = Aux.gui.dropdown(AuxSellParameters)
+        dropdown:SetPoint('TOPRIGHT', private.buyout_price, 'BOTTOMRIGHT', 0, -20)
+        dropdown:SetWidth(120)
+        dropdown:SetHeight(10)
+        local label = Aux.gui.label(dropdown, 13)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
+        label:SetText('Pricing Model')
+        UIDropDownMenu_Initialize(dropdown, private.initialize_pricing_model_dropdown)
+        dropdown:SetScript('OnShow', function()
+            UIDropDownMenu_Initialize(this, private.initialize_pricing_model_dropdown)
+        end)
+        private.pricing_model_dropdown = dropdown
     end
 end
 
 function public.on_open()
     private.deposit:SetText('Deposit: '..Aux.money.to_string(0))
 
-    --    UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, LIVE)
-    private.set_auction_duration(aux_auction_duration)
-
-    -- so that it's initialized with zeroes, not sometimes zero, sometimes empty
     private.start_price:SetText(Aux.money.to_string(0))
     private.buyout_price:SetText(Aux.money.to_string(0))
 
@@ -290,53 +372,23 @@ function public.on_close()
     selected_item = nil
 end
 
-function public.duration_radio_button_on_click(index)
-    AuxSellParametersShortDurationRadio:SetChecked(false)
-    AuxSellParametersMediumDurationRadio:SetChecked(false)
-    AuxSellParametersLongDurationRadio:SetChecked(false)
-    if index == 1 then
-        AuxSellParametersShortDurationRadio:SetChecked(true)
-        AuctionFrameAuctions.duration = 120
-        aux_auction_duration = 'short'
-    elseif index == 2 then
-        AuxSellParametersMediumDurationRadio:SetChecked(true)
-        AuctionFrameAuctions.duration = 480
-        aux_auction_duration = 'medium'
-    else
-        AuxSellParametersLongDurationRadio:SetChecked(true)
-        AuctionFrameAuctions.duration = 1440
-        aux_auction_duration = 'long'
-    end
-    private.update_recommendation()
-end
-
-function private.set_auction_duration(duration)
-	if duration == 'short' then
-        public.duration_radio_button_on_click(1)
-	elseif duration == 'medium' then
-        public.duration_radio_button_on_click(2)
-	elseif duration == 'long' then
-        public.duration_radio_button_on_click(3)
-	end
-end
-
 function private.post_auctions()
     local auction = selected_item
 	if auction then
 		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, private.get_stack_size_slider_value(), Aux.money.from_string(private.buyout_price:GetText()), private.stack_count_slider:GetValue()
 		local duration
-		if AuctionFrameAuctions.duration == 120 then
+		if UIDropDownMenu_GetSelectedValue(private.duration_dropdown) == DURATION_4 then
 			duration = 2
-		elseif AuctionFrameAuctions.duration == 480 then
+		elseif UIDropDownMenu_GetSelectedValue(private.duration_dropdown) == DURATION_8 then
 			duration = 3
-		elseif AuctionFrameAuctions.duration == 1440 then
+		elseif UIDropDownMenu_GetSelectedValue(private.duration_dropdown) == DURATION_24 then
 			duration = 4
 		end
 
 		Aux.post.start(
 			key,
 			stack_size,
-			AuctionFrameAuctions.duration,
+			UIDropDownMenu_GetSelectedValue(private.duration_dropdown),
             Aux.money.from_string(private.start_price:GetText()),
 			buyout_price,
 			stack_count,
@@ -388,6 +440,7 @@ function private.select_auction()
 --        local auction = cheapest_for_size[private.get_stack_size_slider_value()] or cheapest
 
         existing_auctions[selected_item.key].selected = cheapest
+        refresh = true
 	end
 end
 
@@ -437,9 +490,6 @@ function private.update_recommendation()
 
         private.deposit:SetText('Deposit: '..Aux.money.to_string(0))
     else
-        private.stack_size_slider.editbox:SetNumber(selected_item.charges and private.stack_size_slider.charge_classes[private.stack_size_slider:GetValue()] or private.stack_size_slider:GetValue())
-        private.stack_count_slider.editbox:SetNumber(private.stack_count_slider:GetValue())
-
         AuxSellParametersItemIconTexture:SetTexture(selected_item.texture)
         AuxSellParametersItemName:SetText(selected_item.name)
         local color = ITEM_QUALITY_COLORS[selected_item.quality]
@@ -448,44 +498,62 @@ function private.update_recommendation()
             AuxSellParametersItemCount:SetText(selected_item.aux_quantity)
 		else
             AuxSellParametersItemCount:SetText()
-		end
+        end
+
+        private.stack_size_slider.editbox:SetNumber(selected_item.charges and private.stack_size_slider.charge_classes[private.stack_size_slider:GetValue()] or private.stack_size_slider:GetValue())
+        private.stack_count_slider.editbox:SetNumber(private.stack_count_slider:GetValue())
+
+        -- TODO neutral AH deposit formula
+        private.deposit:SetText('Deposit: '..Aux.money.to_string(floor(selected_item.unit_vendor_price * 0.05 * (selected_item.charges and 1 or private.get_stack_size_slider_value())) * private.stack_count_slider:GetValue() * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120))
 
         private.refresh_button:Enable()
 
-        -- TODO neutral AH deposit formula
-        private.deposit:SetText('Deposit: '..Aux.money.to_string(floor(selected_item.unit_vendor_price * 0.05 * (selected_item.charges and 1 or private.get_stack_size_slider_value())) * private.stack_count_slider:GetValue() * AuctionFrameAuctions.duration / 120))
+        local settings = private.load_settings()
 
-        if existing_auctions[selected_item.key] then
-            private.select_auction()
+        local start_price, buyout_price
 
-            if existing_auctions[selected_item.key].selected then
-
-                local new_buyout_price = existing_auctions[selected_item.key].selected.unit_buyout_price * private.get_stack_size_slider_value()
-
-                if existing_auctions[selected_item.key].selected.yours == 0 then
-                    new_buyout_price = private.undercut(new_buyout_price)
-                end
-
-                private.start_price:SetText(Aux.money.to_string(max(1, new_buyout_price * 0.95)))
-                private.buyout_price:SetText(Aux.money.to_string(max(1, new_buyout_price)))
-
-            elseif existing_auctions[selected_item.key] then -- unsuccessful search
-
-                local price_suggestion = Aux.history.market_value(selected_item.key) and 1.2 * Aux.history.market_value(selected_item.key) * private.get_stack_size_slider_value()
-
-                if price_suggestion then
-                    private.start_price:SetText(Aux.money.to_string(max(1, price_suggestion * 0.95)))
-                    private.buyout_price:SetText(Aux.money.to_string(max(1, price_suggestion)))
-                else
-                    private.start_price:SetText(Aux.money.to_string(max(1, selected_item.unit_vendor_price * (selected_item.charges and 1 or private.get_stack_size_slider_value()) * 1.053)))
-                    private.buyout_price:SetText(Aux.money.to_string(max(1, selected_item.unit_vendor_price * (selected_item.charges and 1 or private.get_stack_size_slider_value()) * 4)))
-                end
+        if settings.pricing_model == FIXED then
+            start_price, buyout_price = settings.start_price, settings.buyout_price
+        elseif settings.pricing_model == MARKET then
+            start_price, buyout_price = private.market_value_suggestion()
+        elseif settings.pricing_model == UNDERCUT then
+            start_price, buyout_price = private.undercutting_suggestion()
+        elseif settings.pricing_model == AUTO then
+            start_price, buyout_price = private.undercutting_suggestion()
+            if existing_auctions[selected_item.key] and not existing_auctions[selected_item.key].selected then
+                start_price, buyout_price = private.market_value_suggestion()
             end
-        else -- no search yet
-        private.start_price:SetText(Aux.money.to_string(0))
-        private.buyout_price:SetText(Aux.money.to_string(0))
         end
+
+        private.start_price:SetText(Aux.money.to_string(start_price))
+        private.buyout_price:SetText(Aux.money.to_string(buyout_price))
 	end
+end
+
+function private.undercutting_suggestion()
+    if existing_auctions[selected_item.key] then
+        private.select_auction()
+
+        if existing_auctions[selected_item.key].selected then
+
+            local price_suggestion = existing_auctions[selected_item.key].selected.unit_buyout_price * private.get_stack_size_slider_value()
+
+            if existing_auctions[selected_item.key].selected.yours == 0 then
+                price_suggestion = private.undercut(price_suggestion)
+            end
+
+            return price_suggestion * 0.95, price_suggestion
+        end
+    end
+    return 0, 0
+end
+
+function private.market_value_suggestion()
+    local price_suggestion = Aux.history.market_value(selected_item.key) and 1.2 * Aux.history.market_value(selected_item.key) * private.get_stack_size_slider_value()
+    if not price_suggestion then
+        return 0, 0
+    end
+    return price_suggestion * 0.95, price_suggestion
 end
 
 function private.quantity_update()
@@ -498,19 +566,27 @@ end
 
 function private.set_item(item)
 
-    selected_item = item
-    refresh = true
-
     PlaySound('igMainMenuOptionCheckBoxOn')
 
     Aux.scan.abort(function()
 
+        selected_item = item
+        refresh = true
+        local settings = private.load_settings()
+
+        UIDropDownMenu_Initialize(private.duration_dropdown, private.initialize_duration_dropdown) -- TODO, wtf, why is this needed
+        UIDropDownMenu_SetSelectedValue(private.duration_dropdown, settings.duration)
+
+        UIDropDownMenu_Initialize(private.pricing_model_dropdown, private.initialize_pricing_model_dropdown)
+        UIDropDownMenu_SetSelectedValue(private.pricing_model_dropdown, settings.pricing_model)
+
         local charge_classes = private.charge_classes(selected_item.availability)
         private.stack_size_slider.charge_classes = selected_item.charges and charge_classes
-        local stack_size_slider_max = selected_item.charges and getn(charge_classes) or min(selected_item.max_stack, selected_item.availability[0])
+        local stack_size_slider_max = selected_item.charges and getn(charge_classes) or selected_item.max_stack
         private.stack_size_slider:SetMinMaxValues(1, stack_size_slider_max)
+        private.hide_checkbox:SetChecked(settings.hidden)
 
-        private.stack_size_slider:SetValue(stack_size_slider_max)
+        private.stack_size_slider:SetValue(settings.stack_size)
         private.quantity_update()
         private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
 
@@ -554,23 +630,24 @@ function private.update_inventory_records()
 
                 local charge_class = item_info.charges or 0
 
-                local auction_sell_item
+--                local auction_sell_item
+--
+--                Aux.util.without_errors(function()
+--                    Aux.util.without_sound(function()
+--
+--                        ClearCursor()
+--                        PickupContainerItem(slot.bag, slot.bag_slot)
+--                        ClickAuctionSellItemButton()
+--                        auction_sell_item = Aux.info.auction_sell_item()
+--                        ClearCursor()
+--                        ClickAuctionSellItemButton()
+--                        ClearCursor()
+--
+--                    end)
+--                end)
 
-                Aux.util.without_errors(function()
-                    Aux.util.without_sound(function()
-
-                        ClearCursor()
-                        PickupContainerItem(slot.bag, slot.bag_slot)
-                        ClickAuctionSellItemButton()
-                        auction_sell_item = Aux.info.auction_sell_item()
-                        ClearCursor()
-                        ClickAuctionSellItemButton()
-                        ClearCursor()
-
-                    end)
-                end)
-
-                if auction_sell_item then
+                if Aux.static.item_info(item_info.item_id) then
+--                if auction_sell_item then
                     if not auction_candidate_map[item_info.item_key] then
 
                         auction_candidate_map[item_info.item_key] = {
@@ -585,7 +662,7 @@ function private.update_inventory_records()
                             quality = item_info.quality,
                             class = item_info.type,
                             subclass = item_info.subtype,
-                            unit_vendor_price = auction_sell_item.unit_vendor_price,
+                            unit_vendor_price = 0,
                             charges = item_info.charges,
                             aux_quantity = item_info.charges or item_info.count,
                             max_stack = item_info.max_stack,
@@ -712,27 +789,64 @@ function public.on_update()
     end
 end
 
---function public.initialize_strategy_dropdown()
---
---    local function on_click()
---        UIDropDownMenu_SetSelectedValue(AuxSellParametersStrategyDropDown, this.value)
---    end
---
---    UIDropDownMenu_AddButton{
---        text = 'Live scan',
---        value = LIVE,
---        func = on_click,
---    }
---
---    UIDropDownMenu_AddButton{
---        text = 'Historical price',
---        value = HISTORICAL,
---        func = on_click,
---    }
---
---    UIDropDownMenu_AddButton{
---        text = 'Fixed',
---        value = FIXED,
---        func = on_click,
---    }
---end
+function private.initialize_pricing_model_dropdown()
+
+    local function on_click()
+        UIDropDownMenu_SetSelectedValue(private.pricing_model_dropdown, this.value)
+        local settings = private.load_settings()
+        settings.pricing_model = this.value
+        private.update_recommendation()
+    end
+
+    UIDropDownMenu_AddButton{
+        text = 'Automatic',
+        value = AUTO,
+        func = on_click,
+    }
+
+    UIDropDownMenu_AddButton{
+        text = 'Undercutting',
+        value = UNDERCUT,
+        func = on_click,
+    }
+
+    UIDropDownMenu_AddButton{
+        text = 'Market Price',
+        value = MARKET,
+        func = on_click,
+    }
+
+    UIDropDownMenu_AddButton{
+        text = 'Fixed',
+        value = FIXED,
+        func = on_click,
+    }
+end
+
+function private.initialize_duration_dropdown()
+
+    local function on_click()
+        UIDropDownMenu_SetSelectedValue(private.duration_dropdown, this.value)
+        local settings = private.load_settings()
+        settings.duration = this.value
+        private.update_recommendation()
+    end
+
+    UIDropDownMenu_AddButton{
+        text = '2 Hours',
+        value = DURATION_4,
+        func = on_click,
+    }
+
+    UIDropDownMenu_AddButton{
+        text = '8 Hours',
+        value = DURATION_8,
+        func = on_click,
+    }
+
+    UIDropDownMenu_AddButton{
+        text = '24 Hours',
+        value = DURATION_24,
+        func = on_click,
+    }
+end

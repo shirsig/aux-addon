@@ -48,14 +48,14 @@ function public.create(parent, on_click, selected)
 	name = name..id
 
 	local content = CreateFrame('Frame', nil, parent)
-	content:SetPoint('TOPLEFT', 0, -8)
+	content:SetPoint('TOPLEFT', 0, -51)
 	content:SetPoint('BOTTOMRIGHT', -15, 0)
 
 	local scroll_frame = CreateFrame('ScrollFrame', name..'ScrollFrame', parent, 'FauxScrollFrameTemplate')
 	scroll_frame:SetScript('OnVerticalScroll', function(self, offset)
 		FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() public.render(this.item_listing) end)
 	end)
-	scroll_frame:SetPoint('TOPLEFT', content, 'TOPLEFT', 0, 23)
+	scroll_frame:SetPoint('TOPLEFT', content, 'TOPLEFT', 0, 15)
 	scroll_frame:SetPoint('BOTTOMRIGHT', content, 'BOTTOMRIGHT', -4, -15)
 
 	local scrollBar = getglobal(scroll_frame:GetName()..'ScrollBar')
