@@ -143,7 +143,7 @@ function private.median(list)
 	if getn(list) == 0 then
 		return
 	end
-	
+
 	local middle = (getn(list) + 1) / 2
 	return (list[floor(middle)] + list[ceil(middle)]) / 2
 end
@@ -160,7 +160,7 @@ function private.push_data()
 
 			local daily_market_value = private.daily_market_value(item_record.histogram)
 
-			private.balanced_list_insert(item_record.balanced_list, daily_market_value, 7)
+			private.balanced_list_insert(item_record.balanced_list, Aux.round(daily_market_value), 9)
 
 			item_record.day_count = item_record.day_count + 1
 			item_record.histogram = {}

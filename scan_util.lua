@@ -293,9 +293,11 @@ function m.validator(filter)
             for i=getn(filter.tooltip),1,-1 do
                 local op = strupper(filter.tooltip[i])
                 if op == 'AND' then
-                    tinsert(stack, tremove(stack) and tremove(stack))
+                    local a, b = tremove(stack), tremove(stack)
+                    tinsert(stack, a and b)
                 elseif op == 'OR' then
-                    tinsert(stack, tremove(stack) or tremove(stack))
+                    local a, b = tremove(stack), tremove(stack)
+                    tinsert(stack, a or b)
                 elseif op == 'NOT' then
                     tinsert(stack, not tremove(stack))
                 elseif op ~= 'TT' then
