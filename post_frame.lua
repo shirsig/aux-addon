@@ -59,6 +59,7 @@ function public.on_load()
         label:SetText('Auction Item')
     end
 
+    AuxSellParametersItem:EnableMouse()
     AuxSellParametersItem:SetScript('OnReceiveDrag', function()
         local item_info = Aux.cursor_item()
         if item_info then
