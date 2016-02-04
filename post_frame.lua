@@ -3,7 +3,7 @@ Aux.post_frame = public
 
 local refresh
 local existing_auctions = {}
-local inventory_data
+local inventory_records
 local selected_item
 
 --local LIVE, HISTORICAL, FIXED = {}, {}, {}
@@ -13,20 +13,7 @@ function private.update_inventory_listing()
         return
     end
 
-    local inventory_rows = {}
-    for i, inventory_record in ipairs(Aux.util.filter(inventory_data, function(record) return record.aux_quantity > 0 end)) do
-        tinsert(inventory_rows, {
-            cols = {
-                { value=inventory_record.aux_quantity },
-                { value='|c'..Aux.quality_color(inventory_record.quality)..'['..inventory_record.name..']'..'|r' }
-            },
-            record = inventory_record,
-            itemstring = Aux.info.itemstring(inventory_record.item_id, inventory_record.suffix_id),
-        })
-    end
-    sort(inventory_rows, function(a, b) return a.record.name < b.record.name end)
-    private.inventory_listing:SetData(inventory_rows)
-    private.inventory_listing:SetSelection(function(row) return row.record == selected_item end)
+    Aux.item_listing.populate(private.item_listing, inventory_records)
 end
 
 function private.update_auction_listing()
@@ -63,8 +50,8 @@ end
 
 function public.on_load()
 
-    Aux.gui.vertical_line(AuxPostFrameContent, 208)
-    Aux.gui.vertical_line(AuxPostFrameContent, 431)
+    Aux.gui.vertical_line(AuxPostFrameContent, 223)
+    Aux.gui.vertical_line(AuxPostFrameContent, 437)
 
     do
         local label = Aux.gui.label(AuxSellParametersItem, 13)
@@ -75,7 +62,7 @@ function public.on_load()
     AuxSellParametersItem:SetScript('OnReceiveDrag', function()
         local item_info = Aux.cursor_item()
         if item_info then
-            for _, inventory_record in ipairs(Aux.util.filter(inventory_data, function(record) return record.aux_quantity > 0 end)) do
+            for _, inventory_record in ipairs(Aux.util.filter(inventory_records, function(record) return record.aux_quantity > 0 end)) do
                 if inventory_record.key == item_info.item_key then
                     private.set_item(inventory_record)
                     break
@@ -85,20 +72,22 @@ function public.on_load()
         ClearCursor()
     end)
 
-    private.inventory_listing = Aux.listing.CreateScrollingTable(AuxSellInventory)
-    private.inventory_listing:SetColInfo({
-        {name='Qty', width=.15, align='CENTER'},
-        {name='Item', width=.85 }
-    })
-    private.inventory_listing:SetHandler('OnClick', function(table, row_data, column)
-        private.set_item(row_data.record)
-    end)
-    private.inventory_listing:SetHandler('OnEnter', function(table, row_data, column)
-        Aux.info.set_tooltip(row_data.itemstring, nil, column.row, 'ANCHOR_LEFT', 0, 0)
-    end)
-    private.inventory_listing:SetHandler('OnLeave', function()
-        GameTooltip:Hide()
-    end)
+    private.item_listing = Aux.item_listing.create(
+        AuxSellInventory,
+        function()
+            private.set_item(this.item_record)
+        end,
+        function(item_record)
+            return item_record == selected_item
+        end
+    )
+
+--    private.inventory_listing:SetHandler('OnEnter', function(table, row_data, column)
+--        Aux.info.set_tooltip(row_data.itemstring, nil, column.row, 'ANCHOR_LEFT', 0, 0)
+--    end)
+--    private.inventory_listing:SetHandler('OnLeave', function()
+--        GameTooltip:Hide()
+--    end)
 
     private.auction_listing = Aux.listing.CreateScrollingTable(AuxSellAuctions)
     private.auction_listing:SetColInfo({
@@ -289,7 +278,7 @@ function public.on_open()
 
     private.validate_parameters()
 
-    private.update_inventory_data()
+    private.update_inventory_records()
 
     refresh = true
 
@@ -543,8 +532,8 @@ function private.charge_classes(availability)
 	return charge_classes
 end
 
-function private.update_inventory_data()
-    inventory_data = {}
+function private.update_inventory_records()
+    inventory_records = {}
     refresh = true
 
     local auction_candidate_map = {}
@@ -616,11 +605,11 @@ function private.update_inventory_data()
     end
 
     process_inventory(Aux.util.inventory_iterator(), function()
-        local auction_candidates = {}
+        inventory_records = {}
         for _, auction_candidate in pairs(auction_candidate_map) do
-            tinsert(auction_candidates, auction_candidate)
+            tinsert(inventory_records, auction_candidate)
         end
-        inventory_data = auction_candidates
+        sort(inventory_records, function(a, b) return a.name < b.name end)
         refresh = true
     end)
 end

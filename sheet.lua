@@ -1,250 +1,119 @@
 local private, public = {}, {}
-Aux.sheet = public
 
-Aux.list = {}
+Aux.item_listing = public
 
-MoneyTypeInfo['AUX_LIST'] = {
-	UpdateFunc = function()
-		return this.staticMoney
-	end,
-	collapse = 1,
-	fixedWidth = 1,
-	showSmallerCoins = 1,
-}
+local ROW_HEIGHT = 38
 
-function public.render(sheet)
+function public.render(item_listing)
 
-	for i, column in ipairs(sheet.columns) do
-		local sort_info = sheet.sort_order[1]
+	FauxScrollFrame_Update(item_listing.scroll_frame, getn(item_listing.item_records), getn(item_listing.rows), ROW_HEIGHT)
+	item_listing.scroll_frame:Show()
+	local offset = FauxScrollFrame_GetOffset(item_listing.scroll_frame)
 
-		if sort_info and sort_info.column == i then
-			if sort_info.order == 'ascending' then
-				sheet.labels[i].sort_texture:SetTexCoord(0,0.55,0.2,0.9)
-				sheet.labels[i].sort_texture:SetVertexColor(0.2,1,0)
-				sheet.labels[i].sort_texture:Show()
-			else
-				sheet.labels[i].sort_texture:SetTexCoord(0,0.55,0.9,0.2)
-				sheet.labels[i].sort_texture:SetVertexColor(1,0.2,0)
-				sheet.labels[i].sort_texture:Show()
-			end
-		else
-			sheet.labels[i].texture:SetTexture([[Interface\QuestFrame\UI-QuestTitleHighlight]])
-			sheet.labels[i].sort_texture:Hide()
-		end
-	end
-
-	FauxScrollFrame_Update(sheet.scroll_frame, getn(sheet.data), getn(sheet.rows), 16)
-	sheet.scroll_frame:Show()
-	local offset = FauxScrollFrame_GetOffset(sheet.scroll_frame)
-	--local vSize = self.panel.vSize
-	local hSize = getn(sheet.columns)
-
-	local rows = sheet.rows
-	local data = sheet.data
+	local rows = item_listing.rows
 
 	for i, row in ipairs(rows) do
-		local direction, rowR, rowG, rowB, rowA1, rowA2 = 'Horizontal', 1, 1, 1, 0, 0 --row level coloring used for gradients
-		local datum = data[i + offset]
+		local item_record = item_listing.item_records[i + offset]
 
-        if datum then
-			if sheet.selected and sheet.selected(datum) then
-				row.highlight:SetAlpha(0.5)
+        if item_record then
+			row.item_record = item_record
+			if item_listing.selected and item_listing.selected(item_record) then
+				row.highlight:Show()
 			elseif not row.mouse_over then
-				row.highlight:SetAlpha(0)
+				row.highlight:Hide()
 			end
-            if sheet.row_setter then
-                sheet.row_setter(row, datum)
-            end
+			getglobal(row.item:GetName()..'IconTexture'):SetTexture(item_record.texture)
+			getglobal(row.item:GetName()..'Name'):SetText(item_record.name)
+			local color = ITEM_QUALITY_COLORS[item_record.quality]
+			getglobal(row.item:GetName()..'Name'):SetTextColor(color.r, color.g, color.b)
+			if item_record.aux_quantity > 1 then
+				getglobal(row.item:GetName()..'Count'):SetText(item_record.aux_quantity)
+			else
+				getglobal(row.item:GetName()..'Count'):SetText()
+			end
             row:Show()
         else
             row:Hide()
         end
-		for j, column in sheet.columns do
-			local cell = row.cells[j]
-			if datum then
-                column.cell_setter(cell, datum)
-				cell:Show()
-			else
-				cell:Hide()
-			end
-		end
-		rows[i].color_texture:SetGradientAlpha(direction, rowR, rowG, rowB, rowA1, rowR, rowG, rowB, rowA2)--row color to apply
 	end
 end
 
-function public.create(params)
-	local sheet
-	local name = (params.frame:GetName() or '')..'ScrollSheet'
-	
+function public.create(parent, on_click, selected)
+	local name = (parent:GetName() or '')..'aux_item_list'
+
 	local id = 1
 	while getglobal(name..id) do
 		id = id + 1
 	end
 	name = name..id
 
-	local scroll_frame = CreateFrame('ScrollFrame', name..'ScrollFrame', params.frame, 'FauxScrollFrameTemplate')
+	local content = CreateFrame('Frame', nil, parent)
+	content:SetPoint('TOPLEFT', 0, -8)
+	content:SetPoint('BOTTOMRIGHT', -15, 0)
 
-	local scrollbar = getglobal(scroll_frame:GetName()..'ScrollBar')
-	scrollbar:SetPoint('TOPLEFT', scroll_frame, 'TOPRIGHT', 6, 0)
-	scrollbar:SetPoint('BOTTOMLEFT', scroll_frame, 'BOTTOMRIGHT', 6, 0)
-	scrollbar:SetWidth(12)
-	local thumbTex = scrollbar:GetThumbTexture()
+	local scroll_frame = CreateFrame('ScrollFrame', name..'ScrollFrame', parent, 'FauxScrollFrameTemplate')
+	scroll_frame:SetScript('OnVerticalScroll', function(self, offset)
+		FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() public.render(this.item_listing) end)
+	end)
+	scroll_frame:SetPoint('TOPLEFT', content, 'TOPLEFT', 0, 23)
+	scroll_frame:SetPoint('BOTTOMRIGHT', content, 'BOTTOMRIGHT', -4, -15)
+
+	local scrollBar = getglobal(scroll_frame:GetName()..'ScrollBar')
+	scrollBar:SetWidth(12)
+	local thumbTex = scrollBar:GetThumbTexture()
 	thumbTex:SetPoint('CENTER', 0, 0)
-	thumbTex:SetTexture(42/255, 42/255, 42/255, 1)
+	thumbTex:SetTexture(unpack(Aux.gui.config.content_color))
 	thumbTex:SetHeight(50)
 	thumbTex:SetWidth(12)
-	local scrollbg = scrollbar:CreateTexture(nil, 'BACKGROUND')
-	scrollbg:SetAllPoints(scrollbar)
-	scrollbg:SetTexture(24/255, 24/255, 24/255, 1)
-	getglobal(scroll_frame:GetName()..'ScrollBarScrollUpButton'):Hide()
-	getglobal(scroll_frame:GetName()..'ScrollBarScrollDownButton'):Hide()
-
-	scroll_frame:SetScript('OnVerticalScroll', function()
-		FauxScrollFrame_OnVerticalScroll(16, function() public.render(this.sheet) end)
-	end)
-	scroll_frame:SetPoint('TOPLEFT', params.frame, 'TOPLEFT', 5, -10)
-	scroll_frame:SetPoint('BOTTOMRIGHT', params.frame, 'BOTTOMRIGHT', 5, 19)
-	
-	local parent_height = params.frame:GetHeight()
-	local content = CreateFrame('Frame', name..'Content', params.frame)
-	content:SetHeight(parent_height - 30)
-	content:SetPoint('TOPLEFT', scroll_frame, 'TOPLEFT', 5, 0)
-
-	local total_width = 0
+	getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
+	getglobal(scrollBar:GetName()..'ScrollDownButton'):Hide()
 
 	local rows = {}
 	local row_index = 1
 	local max_height = content:GetHeight()
-	local total_height = params.plain and 0 or 16
-	while total_height + 14 < max_height do
-		if getn(params.columns) > 0 then
+	local total_height = 0
+	while total_height + ROW_HEIGHT < max_height do
 			local row = CreateFrame('Button', nil, content)
-			row:SetPoint('TOPLEFT', labels[1], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
-			row:SetPoint('TOPRIGHT', labels[getn(params.columns)], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
-			row:RegisterForClicks('LeftButtonDown', 'RightButtonDown')
-			row:SetHeight(14)
-
-			local row_idx = row_index
-			row:SetScript('OnClick', function() if sheet.on_row_click then sheet.on_row_click(sheet, row_idx) end end)
+			row:SetHeight(ROW_HEIGHT)
+			row:SetWidth(193)
+			row:SetPoint('TOPLEFT', content, 0, -((row_index-1) * ROW_HEIGHT))
+			row:SetScript('OnClick', on_click)
 			row:SetScript('OnEnter', function()
-				sheet.rows[row_idx].mouse_over = true
-				sheet.rows[row_idx].highlight:SetAlpha(.5)
-				if sheet.on_row_enter then
-					sheet.on_row_enter(sheet, row_idx)
-				end
+				row.highlight:Show()
 			end)
 			row:SetScript('OnLeave', function()
-				sheet.rows[row_idx].mouse_over = false
-				local data_index = row_idx + FauxScrollFrame_GetOffset(sheet.scroll_frame)
-				if not (sheet.selected and sheet.selected(sheet.data[data_index])) then
-					sheet.rows[row_idx].highlight:SetAlpha(0)
-				end
-				if sheet.on_row_leave then
-					sheet.on_row_leave(sheet, row_idx)
+				if not selected(row.item_record) then
+					row.highlight:Hide()
 				end
 			end)
-            row:SetScript('OnUpdate', function() if sheet.on_row_update then sheet.on_row_update(sheet, row_idx) end end)
-			
---			row.cells = {}
---			for i = 1,getn(params.columns) do
---				local cell = CreateFrame('Frame', nil, row)
---				cell:SetPoint('TOPLEFT', labels[i], 'BOTTOMLEFT', 0, -((row_index-1) * 14))
---				cell:SetPoint('TOPRIGHT', labels[i], 'BOTTOMRIGHT', 0, -((row_index-1) * 14))
---
---				cell:SetHeight(14)
---
---                params.columns[i].cell_initializer(cell)
---
---				row.cells[i] = cell
---			end
-			
-			local color_texture = row:CreateTexture()
-			color_texture:SetPoint('TOPLEFT', row, 'TOPLEFT', 0, 0)
-			color_texture:SetPoint('BOTTOMRIGHT', row, 'BOTTOMRIGHT', 0, 1)
-			color_texture:SetTexture(1, 1, 1)
-			row.color_texture = color_texture
+
+			local item = CreateFrame('Frame', name..'_item'..row_index, row, 'AuxItemTemplate')
+			row.item = item
+			item:SetPoint('CENTER', 4, 0)
+--			row:RegisterForClicks('LeftButtonDown', 'RightButtonDown')
 			
 			local highlight = row:CreateTexture()
-			highlight:SetPoint('TOPLEFT', row, 'TOPLEFT', 0, 0)
-			highlight:SetPoint('BOTTOMRIGHT', row, 'BOTTOMRIGHT', 0, 1)
-			highlight:SetAlpha(0)
-			highlight:SetTexture(0.8, 0.6, 0)
+			highlight:SetAllPoints(item)
+			highlight:Hide()
+			highlight:SetTexture(1, .9, .9, .1)
 			row.highlight = highlight
 
 			rows[row_index] = row
 			row_index = row_index + 1
-			total_height = total_height + 14
-		end
+			total_height = total_height + ROW_HEIGHT
 	end
 	
-	content:SetWidth(total_width)
-	
-	sheet = {
-		name = name,
-		content = content,
+	local item_listing = {
+		selected = selected,
 		scroll_frame = scroll_frame,
-		labels = labels,
 		rows = rows,
-        columns = params.columns,
-		data = {},
-		sort_order = params.sort_order,
-        row_setter = params.row_setter,
-		selected = params.selected,
-		on_row_click = params.on_row_click,
-		on_row_enter = params.on_row_enter,
-		on_row_leave = params.on_row_leave,
-        on_row_update = params.on_row_update,
 	}
-	scroll_frame.sheet = sheet
+	scroll_frame.item_listing = item_listing
 	
-	return sheet
+	return item_listing
 end
 
-function private.row_comparator(sheet)
-	return function(row1, row2)
-		for _, sort_info in ipairs(sheet.sort_order) do
-			local column = sheet.columns[sort_info.column]
-			if column.comparator then
-				local ordering = column.comparator(row1, row2)
-				if ordering ~= Aux.sort.EQ then
-					return sort_info.order == 'ascending' and ordering or Aux.sort.invert_order(ordering)
-				end
-			end
-		end
-		return Aux.sort.EQ
-	end
-end
-
-function public.default_cell_initializer(alignment)
-	return function(cell)
-		local text = cell:CreateFontString(nil, 'OVERLAY', 'GameFontHighlightSmall')
-		text:SetAllPoints(cell)
-		text:SetJustifyV('TOP')
-		text:SetJustifyH(alignment)
-		text:SetTextColor(0.8, 0.8, 0.8)
-		cell.text = text
-	end
-end
-
-function public.populate(sheet, data)
-	sheet.data = data
---	sheet.selected = {}
-
-	Aux.sort.merge_sort(sheet.data, private.row_comparator(sheet))
-
-	public.render(sheet)
-end
-
-function Aux.sheet.sort(sheet, column_index)
-			
-	if sheet.sort_order[1] and sheet.sort_order[1].column == column_index then
-		sheet.sort_order[1].order = sheet.sort_order[1].order == 'ascending' and 'descending' or 'ascending'
-	else
-        sheet.sort_order = Aux.util.filter(sheet.sort_order, function(sort_info) return not sort_info.column == column_index end)
-        tinsert(sheet.sort_order, 1, {column=column_index, order = 'ascending'})
-	end
-	
-	Aux.sort.merge_sort(sheet.data, private.row_comparator(sheet))
-
-	public.render(sheet)
+function public.populate(item_listing, item_records)
+	item_listing.item_records = item_records
+	public.render(item_listing)
 end

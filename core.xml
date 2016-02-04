@@ -71,12 +71,6 @@
             <!--24/255-->
             <BorderColor r="1" g="1" b="1" a="0.03"/>
         </Backdrop>
-        <!--<Scripts>-->
-            <!--<OnLoad>-->
-                <!--this:SetBackdropBorderColor(0.4, 0.4, 0.4)-->
-                <!--this:SetBackdropColor(24/255, 24/255, 24/255)-->
-            <!--</OnLoad>-->
-        <!--</Scripts>-->
     </Frame>
 
 	<Frame name="AuxItemTemplate" virtual="true">
@@ -125,19 +119,6 @@
 				</Texture>
 			</Layer>
 		</Layers>
-		<Scripts>
-			<OnEnter>
-				if this.itemstring then
-					Aux.info.set_tooltip(this.itemstring, this.EnhTooltip_info, this, 'ANCHOR_LEFT')
-				end
-			</OnEnter>
-			<OnLeave>
-				if this.itemstring then
-                    GameTooltip:Hide()
-				end
-			</OnLeave>
-		</Scripts>
-		<HighlightTexture alphaMode="ADD" file="Interface\Buttons\ButtonHilight-Square"/>
 	</Frame>
 
     <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent" clampedToScreen="true">
