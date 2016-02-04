@@ -638,8 +638,7 @@ function public.CreateAuctionResultsTable(parent)
     rt:SetScript('OnShow', function()
         for i, cell in ipairs(this.headCells) do
             if cell.info.isPrice then
---                cell:SetText(cell.info.name[TSM.db.profile.pricePerUnit and 1 or 2])
-                cell:SetText(cell.info.name[2])
+                cell:SetText(cell.info.name[aux_price_per_unit and 1 or 2])
             end
         end
     end)
