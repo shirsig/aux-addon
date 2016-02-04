@@ -13,7 +13,7 @@ function private.update_inventory_listing()
         return
     end
 
-    Aux.item_listing.populate(private.item_listing, inventory_records)
+    Aux.item_listing.populate(private.item_listing, Aux.util.filter(inventory_records, function(record) return record.aux_quantity > 0 end))
 end
 
 function private.update_auction_listing()
