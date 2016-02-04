@@ -17,9 +17,9 @@ scan.lua
 scan_util.lua
 stack.lua
 post.lua
-sheet.lua
 listing.lua
 auction_listing.lua
+item_listing.lua
 history.lua
 info.xml
 completion.xml
