@@ -497,7 +497,8 @@ function private.update_recommendation()
 
 		AuxSellParametersItemIconTexture:SetTexture(nil)
         AuxSellParametersItemCount:SetText()
-        AuxSellParametersItemName:SetText()
+        AuxSellParametersItemName:SetTextColor(1, 1, 1)
+        AuxSellParametersItemName:SetText('No item selected')
 
         private.start_price:Hide()
 		private.buyout_price:Hide()
@@ -591,23 +592,53 @@ function private.quantity_update()
     refresh = true
 end
 
+function private.unit_vendor_price(item_key)
+    local inventory_iterator = Aux.util.inventory_iterator()
+
+    while true do
+        local slot = inventory_iterator()
+        if not slot then
+            break
+        end
+
+        local item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
+        if item_info and item_info.item_key == item_key then
+
+            if Aux.static.item_info(item_info.item_id)
+                    and not Aux.info.tooltip_match('soulbound', item_info.tooltip)
+                    and not Aux.info.tooltip_match('conjured item', item_info.tooltip)
+                    and not item_info.lootable
+            then
+                ClearCursor()
+                PickupContainerItem(slot.bag, slot.bag_slot)
+                ClickAuctionSellItemButton()
+                local auction_sell_item = Aux.info.auction_sell_item()
+                ClearCursor()
+                ClickAuctionSellItemButton()
+                ClearCursor()
+
+                if auction_sell_item then
+                    return auction_sell_item.unit_vendor_price
+                end
+            end
+        end
+    end
+end
+
 function private.set_item(item)
+    local settings = private.load_settings(item)
 
---    ClearCursor() -- TODO
---    PickupContainerItem(slot.bag, slot.bag_slot)
---    ClickAuctionSellItemButton()
---    auction_sell_item = Aux.info.auction_sell_item()
---    ClearCursor()
---    ClickAuctionSellItemButton()
---    ClearCursor()
-
-    PlaySound('igMainMenuOptionCheckBoxOn')
+    item.unit_vendor_price = private.unit_vendor_price(item.key)
+    if not item.unit_vendor_price then
+        settings.hidden = true
+        refresh = true
+        return
+    end
 
     Aux.scan.abort(function()
 
         selected_item = item
         refresh = true
-        local settings = private.load_settings()
 
         UIDropDownMenu_Initialize(private.duration_dropdown, private.initialize_duration_dropdown) -- TODO, wtf, why is this needed
         UIDropDownMenu_SetSelectedValue(private.duration_dropdown, settings.duration)
@@ -680,7 +711,6 @@ function private.update_inventory_records()
                         quality = item_info.quality,
                         class = item_info.type,
                         subclass = item_info.subtype,
-                        unit_vendor_price = 0,
                         charges = item_info.charges,
                         aux_quantity = item_info.charges or item_info.count,
                         max_stack = item_info.max_stack,
