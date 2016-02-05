@@ -15,7 +15,7 @@ function private.load_settings(item_record)
     dataset.post = dataset.post or {}
     dataset.post[item_record.key] = dataset.post[item_record.key] or {
         duration = DURATION_24,
-        stack_size = item_record.max_stack,
+        stack_size = item_record.charges and 5 or item_record.max_stack,
         start_price = 0,
         buyout_price = 0,
         hidden = false,
@@ -414,17 +414,16 @@ function private.post_auctions()
 						end
 					end
 				end
-                auction.aux_quantity = auction.aux_quantity - (posted * stack_size)
-                local charge_class = auction.charges or 0
-                auction.availability[charge_class] = auction.availability[charge_class] - (posted * (auction.charges and 1 or stack_size))
 
-                if selected_item == auction then
-                    if auction.aux_quantity > 0 then
-                    private.set_item(auction)
-                    else
-                        selected_item = nil
+                private.update_inventory_records()
+
+                selected_item = nil
+                for _, record in ipairs(inventory_records) do
+                    if record.key == auction.key then
+                        private.set_item(record)
                     end
                 end
+
                 private.update_recommendation()
                 refresh = true
 			end
@@ -669,6 +668,9 @@ function private.update_inventory_records()
             then
                 if not auction_candidate_map[item_info.item_key] then
 
+                    local availability = { [0]=0, [1]=0, [2]=0, [3]=0, [4]=0, [5]=0 }
+                    availability[charge_class] = item_info.count
+
                     auction_candidate_map[item_info.item_key] = {
                         item_id = item_info.item_id,
                         suffix_id = item_info.suffix_id,
@@ -684,7 +686,7 @@ function private.update_inventory_records()
                         charges = item_info.charges,
                         aux_quantity = item_info.charges or item_info.count,
                         max_stack = item_info.max_stack,
-                        availability = { [charge_class]=item_info.count },
+                        availability = availability,
                     }
                 else
                     local candidate = auction_candidate_map[item_info.item_key]
