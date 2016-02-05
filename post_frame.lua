@@ -18,6 +18,7 @@ function private.load_settings(item_record)
         stack_size = item_record.charges and 5 or item_record.max_stack,
         start_price = 0,
         buyout_price = 0,
+        partial_stacks = true,
         hidden = false,
         pricing_model = AUTO,
     }
@@ -161,7 +162,7 @@ function public.on_load()
     do
         local slider = Aux.gui.slider(AuxSellParameters)
         slider:SetValueStep(1)
-        slider:SetPoint('TOPLEFT', 16, -75)
+        slider:SetPoint('TOPLEFT', 16, -74)
         slider:SetWidth(190)
         slider:SetScript('OnValueChanged', function()
             private.quantity_update()
@@ -232,8 +233,24 @@ function public.on_load()
         private.stack_count_slider = slider
     end
     do
+        local checkbox = CreateFrame('CheckButton', nil, AuxSellInventory, 'UICheckButtonTemplate')
+        checkbox:SetWidth(22)
+        checkbox:SetHeight(22)
+        checkbox:SetPoint('TOPLEFT', private.stack_count_slider, 'BOTTOMLEFT', -3, -7)
+        checkbox:SetScript('OnClick', function()
+            local settings = private.load_settings()
+            settings.partial_stacks = this:GetChecked()
+            private.update_recommendation()
+            refresh = true
+        end)
+        local label = Aux.gui.label(checkbox, 13)
+        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
+        label:SetText('Allow partial stacks')
+        private.partial_stacks_checkbox = checkbox
+    end
+    do
         local dropdown = Aux.gui.dropdown(AuxSellParameters)
-        dropdown:SetPoint('TOPLEFT', private.stack_count_slider, 'BOTTOMLEFT', 0, -25)
+        dropdown:SetPoint('TOPLEFT', private.stack_count_slider, 'BOTTOMLEFT', 0, -41)
         dropdown:SetWidth(90)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
@@ -284,7 +301,6 @@ function public.on_load()
                     settings.start_price = Aux.money.from_string(this:GetText())
                 end
             end
-            private.validate_parameters()
         end)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -321,7 +337,6 @@ function public.on_load()
                     settings.buyout_price = Aux.money.from_string(this:GetText())
                 end
             end
-            private.validate_parameters()
         end)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -369,8 +384,6 @@ function public.on_open()
     private.start_price:SetText(Aux.money.to_string(0))
     private.buyout_price:SetText(Aux.money.to_string(0))
 
-    private.validate_parameters()
-
     private.update_inventory_records()
 
     refresh = true
@@ -383,43 +396,46 @@ function public.on_close()
 end
 
 function private.post_auctions()
-    local auction = selected_item
-	if auction then
-		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, private.stack_size_slider:GetValue(), Aux.money.from_string(private.buyout_price:GetText()), private.stack_count_slider:GetValue()
-		local duration
-		if UIDropDownMenu_GetSelectedValue(private.duration_dropdown) == DURATION_4 then
-			duration = 2
-		elseif UIDropDownMenu_GetSelectedValue(private.duration_dropdown) == DURATION_8 then
-			duration = 3
-		elseif UIDropDownMenu_GetSelectedValue(private.duration_dropdown) == DURATION_24 then
-			duration = 4
+	if selected_item then
+        local unit_start_price = Aux.money.from_string(private.start_price:GetText()) / private.stack_size_slider:GetValue()
+        local unit_buyout_price = Aux.money.from_string(private.buyout_price:GetText()) / private.stack_size_slider:GetValue()
+        local stack_size = private.stack_size_slider:GetValue()
+        local stack_count = private.stack_count_slider:GetValue()
+        local duration = UIDropDownMenu_GetSelectedValue(private.duration_dropdown)
+		local key = selected_item.key
+
+        local duration_code
+		if duration == DURATION_4 then
+            duration_code = 2
+		elseif duration == DURATION_8 then
+            duration_code = 3
+		elseif duration == DURATION_24 then
+            duration_code = 4
 		end
 
 		Aux.post.start(
 			key,
 			stack_size,
-			UIDropDownMenu_GetSelectedValue(private.duration_dropdown),
-            Aux.money.from_string(private.start_price:GetText()),
-			buyout_price,
+			duration,
+            unit_start_price,
+            unit_buyout_price,
 			stack_count,
-			function(posted)
+            not selected_item.charges and private.partial_stacks_checkbox:GetChecked(),
+			function(posted, partial)
+                local new_auction_record
 				for i = 1, posted do
-					private.record_auction(key, stack_size, buyout_price, duration, UnitName('player'))
-				end
-				if existing_auctions[key] then
-					for _, entry in ipairs(existing_auctions[key]) do
-						if entry.buyout_price == buyout_price and entry.stack_size == stack_size then
-							existing_auctions[key].selected = entry
-                            refresh = true
-						end
-					end
-				end
-
+                    new_auction_record = private.record_auction(key, stack_size, unit_buyout_price, duration_code, UnitName('player'))
+                end
+                if partial then
+                    new_auction_record = private.record_auction(key, partial, unit_buyout_price, duration_code, UnitName('player'))
+                end
+                if existing_auctions[key] then
+                    existing_auctions[key].selected = new_auction_record
+                end
                 private.update_inventory_records()
-
                 selected_item = nil
                 for _, record in ipairs(inventory_records) do
-                    if record.key == auction.key then
+                    if record.key == key then
                         private.set_item(record)
                     end
                 end
@@ -454,17 +470,24 @@ function private.select_auction()
 end
 
 function private.validate_parameters()
-    private.post_button:Disable()
 
     if not selected_item then
+        private.post_button:Disable()
         return
     end
 
     if Aux.money.from_string(private.buyout_price:GetText()) > 0 and Aux.money.from_string(private.start_price:GetText()) > Aux.money.from_string(private.buyout_price:GetText()) then
+        private.post_button:Disable()
         return
     end
 
     if Aux.money.from_string(private.start_price:GetText()) < 1 then
+        private.post_button:Disable()
+        return
+    end
+
+    if private.stack_count_slider:GetValue() == 0 and (selected_item.charges or not private.partial_stacks_checkbox:GetChecked()) then
+        private.post_button:Disable()
         return
     end
 
@@ -485,6 +508,7 @@ function private.update_recommendation()
 		private.buyout_price:Hide()
         private.stack_size_slider:Hide()
         private.stack_count_slider:Hide()
+        private.partial_stacks_checkbox:Hide()
         private.deposit:Hide()
         private.duration_dropdown:Hide()
         private.pricing_model_dropdown:Hide()
@@ -494,6 +518,7 @@ function private.update_recommendation()
         private.buyout_price:Show()
         private.stack_size_slider:Show()
         private.stack_count_slider:Show()
+        private.partial_stacks_checkbox:Show()
         private.deposit:Show()
         private.duration_dropdown:Show()
         private.pricing_model_dropdown:Show()
@@ -512,8 +537,18 @@ function private.update_recommendation()
         private.stack_size_slider.editbox:SetNumber(private.stack_size_slider:GetValue())
         private.stack_count_slider.editbox:SetNumber(private.stack_count_slider:GetValue())
 
-        -- TODO neutral AH deposit formula
-        private.deposit:SetText('Deposit: '..Aux.money.to_string(floor(selected_item.unit_vendor_price * 0.05 * (selected_item.charges and 1 or private.stack_size_slider:GetValue())) * private.stack_count_slider:GetValue() * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120))
+        do
+            -- TODO neutral AH deposit formula
+            local stack_size = private.stack_size_slider:GetValue()
+            local stack_count = private.stack_count_slider:GetValue()
+            local deposit = floor(selected_item.unit_vendor_price * 0.05 * (selected_item.charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
+            if selected_item.aux_quantity < (stack_size * (stack_count + 1)) and private.partial_stacks_checkbox:GetChecked() and not selected_item.charges then
+                local partial_stack = mod(selected_item.aux_quantity, stack_size)
+                deposit = deposit + floor(selected_item.unit_vendor_price * 0.05 * partial_stack) * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
+            end
+
+            private.deposit:SetText('Deposit: '..Aux.money.to_string(deposit))
+        end
 
         private.refresh_button:Enable()
 
@@ -627,9 +662,10 @@ function private.set_item(item)
         UIDropDownMenu_Initialize(private.pricing_model_dropdown, private.initialize_pricing_model_dropdown)
         UIDropDownMenu_SetSelectedValue(private.pricing_model_dropdown, settings.pricing_model)
 
-        private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 5 or selected_item.max_stack)
         private.hide_checkbox:SetChecked(settings.hidden)
+        private.partial_stacks_checkbox:SetChecked(settings.partial_stacks)
 
+        private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 5 or selected_item.max_stack)
         private.stack_size_slider:SetValue(settings.stack_size)
         private.quantity_update()
         private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
@@ -726,7 +762,13 @@ function private.refresh_entries()
 			end,
 			on_read_auction = function(auction_info)
 				if auction_info.item_key == item_key then
-                    private.record_auction(auction_info.item_key, auction_info.aux_quantity, auction_info.buyout_price, auction_info.duration, auction_info.owner)
+                    private.record_auction(
+                        auction_info.item_key,
+                        auction_info.aux_quantity,
+                        auction_info.buyout_price / auction_info.aux_quantity,
+                        auction_info.duration,
+                        auction_info.owner
+                    )
 				end
 			end,
 			on_abort = function()
@@ -762,31 +804,33 @@ function private.refresh()
 	end)
 end
 
-function private.record_auction(key, aux_quantity, buyout_price, duration, owner)
-	if buyout_price > 0 then
+function private.record_auction(key, aux_quantity, unit_buyout_price, duration, owner)
+	if unit_buyout_price > 0 then
 		existing_auctions[key] = existing_auctions[key] or {}
 		local entry
 		for _, existing_entry in ipairs(existing_auctions[key]) do
-			if buyout_price == existing_entry.buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration then
+			if unit_buyout_price == existing_entry.unit_buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration then
 				entry = existing_entry
 			end
-		end
-		if entry then
-			entry.count = entry.count + 1
-			entry.yours = entry.yours + (owner == UnitName('player') and 1 or 0)
-			entry.duration = max(entry.duration, duration)
-        else
-			tinsert(existing_auctions[key], {
+        end
+
+        if not entry then
+            entry = {
                 item_key = key,
-				stack_size = aux_quantity,
-				buyout_price = buyout_price,
+                stack_size = aux_quantity,
+                unit_buyout_price = unit_buyout_price,
                 duration = duration,
-				unit_buyout_price = buyout_price / aux_quantity,
-				duration = duration,
-				count = 1,
-				yours = owner == UnitName('player') and 1 or 0,
-			})
-		end
+                count = 0,
+                yours = 0,
+            }
+            tinsert(existing_auctions[key], entry)
+        end
+
+        entry.count = entry.count + 1
+        entry.yours = entry.yours + (owner == UnitName('player') and 1 or 0)
+        entry.duration = max(entry.duration, duration)
+
+        return entry
 	end
 end
 
@@ -800,6 +844,8 @@ function public.on_update()
         private.update_inventory_listing()
         private.update_auction_listing()
     end
+
+    private.validate_parameters()
 end
 
 function private.initialize_pricing_model_dropdown()

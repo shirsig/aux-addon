@@ -41,8 +41,8 @@ end
 function private.move_item(from_slot, to_slot, amount, k)
 	local size_before = private.stack_size(to_slot)
 		
-	amount = min(private.max_stack(from_slot) - private.stack_size(to_slot), amount)
-	
+	amount = min(private.max_stack(from_slot) - private.stack_size(to_slot), private.stack_size(from_slot), amount)
+
 	ClearCursor()
 	SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
 	PickupContainerItem(to_slot.bag, to_slot.bag_slot)
@@ -99,7 +99,8 @@ function private.process()
 				state.target_size - private.stack_size(state.target_slot),
 				function()
 					return private.process()
-			end)
+				end
+			)
 		end
 	end
 		
@@ -124,11 +125,8 @@ end
 function private.stop()
 	controller().reset()
 	if state then
-		local slot
-		if state.target_slot and (private.stack_size(state.target_slot) == state.target_size or private.item_charges(state.target_slot) == state.target_size) then
-			slot = state.target_slot
-		end
-		local callback = state.callback
+
+		local callback, slot = state.callback, state.target_slot
 		
 		state = nil
 		

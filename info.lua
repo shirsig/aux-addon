@@ -46,6 +46,8 @@ function public.container_item(bag, slot)
 
     local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
     local tooltip = public.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
+    local charges = private.item_charges(tooltip)
+    local aux_quantity = charges or count
 
     return {
         item_id = item_id,
@@ -65,6 +67,7 @@ function public.container_item(bag, slot)
         slot = item_info.slot,
         quality = item_info.quality,
         max_stack = item_info.max_stack,
+        aux_quantity = aux_quantity,
 
         count = count,
         locked = locked,
@@ -72,7 +75,7 @@ function public.container_item(bag, slot)
         lootable = lootable,
 
         tooltip = tooltip,
-        charges = private.item_charges(tooltip),
+        charges = charges,
     }
 end
 

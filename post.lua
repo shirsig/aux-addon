@@ -11,10 +11,12 @@ end)()
 
 local state
 
-local post_auction, stop, process
+function private.process()
+	if state.posted < state.count or state.partial then
+		if state.posted == state.count then
+			state.partial = false
+		end
 
-function process()
-	if state.posted < state.count then
 		local stacking_complete
 		local stack_slot
 		
@@ -28,23 +30,25 @@ function process()
 		)
 		
 		controller().wait(function() return stacking_complete end, function()
-		if stack_slot then
-			post_auction(stack_slot, function()
-				state.posted = state.posted + 1
-				return process()
-			end)
-		else
-			return stop()
-		end
+
+			if stack_slot and Aux.info.container_item(stack_slot.bag, stack_slot.bag_slot).aux_quantity <= state.stack_size then
+				private.post_auction(stack_slot, function()
+					state.posted = state.posted + 1
+					return private.process()
+				end)
+			else
+				return private.stop()
+			end
+
 		end)
 	else
-		return stop()
+		return private.stop()
 	end
 end
 
 function public.stop(k)
 	Aux.control.on_next_update(function()
-		stop()
+		private.stop()
 		
 		if k then
 			return k()
@@ -52,7 +56,7 @@ function public.stop(k)
 	end)
 end
 
-function stop()
+function private.stop()
 	controller().reset()
 	if state then
 		local callback = state.callback
@@ -66,36 +70,34 @@ function stop()
 	end
 end
 
-function post_auction(slot, k)
+function private.post_auction(slot, k)
 	ClearCursor()
 	ClickAuctionSellItemButton()
 	ClearCursor()
 	PickupContainerItem(slot.bag, slot.bag_slot)
 	ClickAuctionSellItemButton()
 	ClearCursor()
-	StartAuction(state.bid, state.buyout, state.duration)
+	local stack_size = Aux.info.container_item(slot.bag, slot.bag_slot).aux_quantity
+	StartAuction(max(1, state.unit_start_price * stack_size), state.unit_buyout_price * stack_size, state.duration)
 	controller().wait(function() return not GetContainerItemInfo(slot.bag, slot.bag_slot) end, k)
 end
 
-function public.start(item_key, stack_size, duration, bid, buyout, count, callback)
+function public.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, allow_partial, callback)
 	Aux.control.on_next_update(function()
-		stop()
-		
-		ClearCursor()
-		ClickAuctionSellItemButton()
-		ClearCursor()
+		private.stop()
 		
 		state = {
             item_key = item_key,
 			stack_size = stack_size,
 			duration = duration,
-			bid = bid,
-			buyout = buyout,
+			unit_start_price = unit_start_price,
+			unit_buyout_price = unit_buyout_price,
 			count = count,
+			partial = allow_partial,
 			posted = 0,
 			callback = callback,
 		}
 		
-		return process()
+		return private.process()
 	end)
 end
