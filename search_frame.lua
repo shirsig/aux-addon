@@ -41,7 +41,7 @@ private.elements = {
 function private.update_search_listings()
     local favorite_search_rows = {}
     for i, favorite_search in ipairs(aux_favorite_searches) do
-        local name = favorite_search.name or Aux.test.prettify_search(favorite_search.filter_string)
+        local name = favorite_search.name or favorite_search.prettified
         tinsert(favorite_search_rows, {
             cols = {{value=name}},
             search = favorite_search,
@@ -53,7 +53,7 @@ function private.update_search_listings()
 
     local recent_search_rows = {}
     for i, recent_search in ipairs(aux_recent_searches) do
-        local name = recent_search.name or Aux.test.prettify_search(recent_search.filter_string)
+        local name = recent_search.name or recent_search.prettified
         tinsert(recent_search_rows, {
             cols = {{value=name}},
             search = recent_search,
@@ -717,7 +717,7 @@ end
         OnEnter = function(st, data, self)
             if not data then return end
                         GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-                        GameTooltip:AddLine(gsub(Aux.test.prettify_search(data.search.filter_string), ';', '\n'), 255/255, 254/255, 250/255)
+                        GameTooltip:AddLine(gsub(data.search.prettified, ';', '\n'), 255/255, 254/255, 250/255)
                         GameTooltip:Show()
 --            GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
 --            GameTooltip:AddLine(data.search, 1, 1, 1, true)
@@ -787,7 +787,7 @@ function public.start_search()
             return
         end
 
-        tinsert(aux_recent_searches, 1, { filter_string = private.search_box:GetText() })
+        tinsert(aux_recent_searches, 1, { filter_string = private.search_box:GetText(), prettified = Aux.test.prettify_search(private.search_box:GetText()) })
         while getn(aux_recent_searches) > 50 do
             tremove(aux_recent_searches)
         end
