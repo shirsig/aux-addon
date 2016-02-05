@@ -43,7 +43,7 @@ function private.update_auction_listing()
     local auction_rows = {}
     if selected_item then
         for i, auction_record in ipairs(existing_auctions[selected_item.key] or {}) do
-            local stack_size = auction_record.stack_size == private.get_stack_size_slider_value() and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size
+            local stack_size = auction_record.stack_size == private.stack_size_slider:GetValue() and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size
             local market_value = Aux.history.market_value(auction_record.item_key)
             tinsert(auction_rows, {
                 cols = {
@@ -167,15 +167,12 @@ function public.on_load()
             private.quantity_update()
         end)
         slider.editbox:SetScript('OnTextChanged', function()
-            if slider.charge_classes then
-                local charge_slider_value = Aux.util.index_of(this:GetNumber(), slider.charge_classes)
-                if charge_slider_value then
-                    slider:SetValue(charge_slider_value)
-                end
-            else
-                slider:SetValue(this:GetNumber())
-            end
+            slider:SetValue(this:GetNumber())
             private.quantity_update()
+            if selected_item then
+                local settings = private.load_settings()
+                settings.stack_size = this:GetNumber()
+            end
         end)
         slider.editbox:SetScript('OnEscapePressed', function()
             this:ClearFocus()
@@ -209,14 +206,7 @@ function public.on_load()
             private.quantity_update()
         end)
         slider.editbox:SetScript('OnTextChanged', function()
-            if slider.charge_classes then
-                local index = Aux.util.index_of(this:GetNumber(), slider.charge_classes)
-                if index then
-                    slider:SetValue(index)
-                end
-            else
-                slider:SetValue(this:GetNumber())
-            end
+            slider:SetValue(this:GetNumber())
             private.quantity_update()
         end)
         slider.editbox:SetScript('OnEscapePressed', function()
@@ -395,7 +385,7 @@ end
 function private.post_auctions()
     local auction = selected_item
 	if auction then
-		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, private.get_stack_size_slider_value(), Aux.money.from_string(private.buyout_price:GetText()), private.stack_count_slider:GetValue()
+		local key, hyperlink, stack_size, buyout_price, stack_count = auction.key, auction.hyperlink, private.stack_size_slider:GetValue(), Aux.money.from_string(private.buyout_price:GetText()), private.stack_count_slider:GetValue()
 		local duration
 		if UIDropDownMenu_GetSelectedValue(private.duration_dropdown) == DURATION_4 then
 			duration = 2
@@ -457,19 +447,11 @@ function private.select_auction()
 			end
 		end
 
-        local auction = cheapest_for_size[private.get_stack_size_slider_value()] or cheapest
+        local auction = cheapest_for_size[private.stack_size_slider:GetValue()] or cheapest
 
         existing_auctions[selected_item.key].selected = auction
         refresh = true
 	end
-end
-
-function private.get_stack_size_slider_value()
-    if selected_item.charges then
-        return private.stack_size_slider.charge_classes[private.stack_size_slider:GetValue()]
-    else
-        return private.stack_size_slider:GetValue()
-    end
 end
 
 function private.validate_parameters()
@@ -528,11 +510,11 @@ function private.update_recommendation()
             AuxSellParametersItemCount:SetText()
         end
 
-        private.stack_size_slider.editbox:SetNumber(selected_item.charges and private.stack_size_slider.charge_classes[private.stack_size_slider:GetValue()] or private.stack_size_slider:GetValue())
+        private.stack_size_slider.editbox:SetNumber(private.stack_size_slider:GetValue())
         private.stack_count_slider.editbox:SetNumber(private.stack_count_slider:GetValue())
 
         -- TODO neutral AH deposit formula
-        private.deposit:SetText('Deposit: '..Aux.money.to_string(floor(selected_item.unit_vendor_price * 0.05 * (selected_item.charges and 1 or private.get_stack_size_slider_value())) * private.stack_count_slider:GetValue() * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120))
+        private.deposit:SetText('Deposit: '..Aux.money.to_string(floor(selected_item.unit_vendor_price * 0.05 * (selected_item.charges and 1 or private.stack_size_slider:GetValue())) * private.stack_count_slider:GetValue() * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120))
 
         private.refresh_button:Enable()
 
@@ -564,7 +546,7 @@ function private.undercutting_suggestion()
 
         if existing_auctions[selected_item.key].selected then
 
-            local price_suggestion = existing_auctions[selected_item.key].selected.unit_buyout_price * private.get_stack_size_slider_value()
+            local price_suggestion = existing_auctions[selected_item.key].selected.unit_buyout_price * private.stack_size_slider:GetValue()
 
             if existing_auctions[selected_item.key].selected.yours == 0 then
                 price_suggestion = private.undercut(price_suggestion)
@@ -577,7 +559,7 @@ function private.undercutting_suggestion()
 end
 
 function private.market_value_suggestion()
-    local price_suggestion = Aux.history.market_value(selected_item.key) and 1.2 * Aux.history.market_value(selected_item.key) * private.get_stack_size_slider_value()
+    local price_suggestion = Aux.history.market_value(selected_item.key) and 1.2 * Aux.history.market_value(selected_item.key) * private.stack_size_slider:GetValue()
     if not price_suggestion then
         return 0, 0
     end
@@ -586,7 +568,7 @@ end
 
 function private.quantity_update()
     if selected_item then
-        private.stack_count_slider:SetMinMaxValues(1, selected_item.charges and selected_item.availability[private.stack_size_slider.charge_classes[private.stack_size_slider:GetValue()]] or floor(selected_item.availability[0] / private.get_stack_size_slider_value()))
+        private.stack_count_slider:SetMinMaxValues(1, selected_item.charges and selected_item.availability[private.stack_size_slider:GetValue()] or floor(selected_item.availability[0] / private.stack_size_slider:GetValue()))
     end
 	private.update_recommendation()
     refresh = true
@@ -646,10 +628,7 @@ function private.set_item(item)
         UIDropDownMenu_Initialize(private.pricing_model_dropdown, private.initialize_pricing_model_dropdown)
         UIDropDownMenu_SetSelectedValue(private.pricing_model_dropdown, settings.pricing_model)
 
-        local charge_classes = private.charge_classes(selected_item.availability)
-        private.stack_size_slider.charge_classes = selected_item.charges and charge_classes
-        local stack_size_slider_max = selected_item.charges and getn(charge_classes) or selected_item.max_stack
-        private.stack_size_slider:SetMinMaxValues(1, stack_size_slider_max)
+        private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 5 or selected_item.max_stack)
         private.hide_checkbox:SetChecked(settings.hidden)
 
         private.stack_size_slider:SetValue(settings.stack_size)
@@ -664,15 +643,6 @@ function private.set_item(item)
         refresh = true
     end)
 
-end
-
-function private.charge_classes(availability)
-	local charge_classes = {}
-	for charge_class, _ in availability do
-		tinsert(charge_classes, charge_class)
-	end
-	sort(charge_classes, function(c1, c2) return c1 < c2 end)
-	return charge_classes
 end
 
 function private.update_inventory_records()
