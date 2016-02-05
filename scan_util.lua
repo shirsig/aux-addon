@@ -218,18 +218,18 @@ function m.filter_to_string(filter)
 
     if filter.class then
         local classes = { GetAuctionItemClasses() }
-        add(classes[filter.class])
+        add(strlower(classes[filter.class]))
         if filter.subclass then
             local subclasses = {GetAuctionItemSubClasses(filter.class)}
-            add(subclasses[filter.subclass])
+            add(strlower(subclasses[filter.subclass]))
             if filter.slot then
-                add(getglobal(filter.slot))
+                add(strlower(getglobal(filter.slot)))
             end
         end
     end
 
     if filter.quality then
-        add(getglobal('ITEM_QUALITY'..filter.quality..'_DESC'))
+        add(strlower(getglobal('ITEM_QUALITY'..filter.quality..'_DESC')))
     end
 
     if filter.max_price then
