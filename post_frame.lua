@@ -187,8 +187,10 @@ function public.on_load()
         slider.editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
                 private.buyout_price:SetFocus()
-            else
+            elseif private.stack_count_slider.editbox:IsVisible() then
                 private.stack_count_slider.editbox:SetFocus()
+            else
+                private.start_price:SetFocus()
             end
         end)
         slider.editbox:SetWidth(50)
@@ -303,8 +305,10 @@ function public.on_load()
             end
         end)
         editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
+            if IsShiftKeyDown() and private.stack_count_slider.editbox:IsVisible() then
                 private.stack_count_slider.editbox:SetFocus()
+            elseif IsShiftKeyDown() then
+                private.stack_size_slider.editbox:SetFocus()
             else
                 private.buyout_price:SetFocus()
             end
