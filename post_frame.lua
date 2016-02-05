@@ -18,7 +18,7 @@ function private.load_settings(item_record)
         stack_size = item_record.charges and 5 or item_record.max_stack,
         start_price = 0,
         buyout_price = 0,
-        partial_stacks = true,
+        post_all = true,
         hidden = false,
         pricing_model = AUTO,
     }
@@ -199,9 +199,25 @@ function public.on_load()
         private.stack_size_slider = slider
     end
     do
+        local checkbox = CreateFrame('CheckButton', nil, AuxSellInventory, 'UICheckButtonTemplate')
+        checkbox:SetWidth(22)
+        checkbox:SetHeight(22)
+        checkbox:SetPoint('TOPLEFT', private.stack_size_slider, 'BOTTOMLEFT', -3, -7)
+        checkbox:SetScript('OnClick', function()
+            local settings = private.load_settings()
+            settings.post_all = this:GetChecked()
+            private.update_recommendation()
+            refresh = true
+        end)
+        local label = Aux.gui.label(checkbox, 13)
+        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
+        label:SetText('Post all')
+        private.post_all_checkbox = checkbox
+    end
+    do
         local slider = Aux.gui.slider(AuxSellParameters)
         slider:SetValueStep(1)
-        slider:SetPoint('TOPLEFT', private.stack_size_slider, 'BOTTOMLEFT', 0, -30)
+        slider:SetPoint('TOPLEFT', private.stack_size_slider, 'BOTTOMLEFT', 0, -51)
         slider:SetWidth(190)
         slider:SetScript('OnValueChanged', function()
             private.quantity_update()
@@ -233,24 +249,8 @@ function public.on_load()
         private.stack_count_slider = slider
     end
     do
-        local checkbox = CreateFrame('CheckButton', nil, AuxSellInventory, 'UICheckButtonTemplate')
-        checkbox:SetWidth(22)
-        checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPLEFT', private.stack_count_slider, 'BOTTOMLEFT', -3, -7)
-        checkbox:SetScript('OnClick', function()
-            local settings = private.load_settings()
-            settings.partial_stacks = this:GetChecked()
-            private.update_recommendation()
-            refresh = true
-        end)
-        local label = Aux.gui.label(checkbox, 13)
-        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
-        label:SetText('Allow partial stacks')
-        private.partial_stacks_checkbox = checkbox
-    end
-    do
         local dropdown = Aux.gui.dropdown(AuxSellParameters)
-        dropdown:SetPoint('TOPLEFT', private.stack_count_slider, 'BOTTOMLEFT', 0, -41)
+        dropdown:SetPoint('TOPLEFT', private.stack_count_slider, 'BOTTOMLEFT', 0, -19)
         dropdown:SetWidth(90)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
@@ -400,7 +400,12 @@ function private.post_auctions()
         local unit_start_price = Aux.money.from_string(private.start_price:GetText()) / private.stack_size_slider:GetValue()
         local unit_buyout_price = Aux.money.from_string(private.buyout_price:GetText()) / private.stack_size_slider:GetValue()
         local stack_size = private.stack_size_slider:GetValue()
-        local stack_count = private.stack_count_slider:GetValue()
+        local stack_count
+        if private.post_all_checkbox:GetChecked() and not selected_item.charges then
+            stack_count = floor(selected_item.aux_quantity / stack_size)
+        else
+            stack_count = private.stack_count_slider:GetValue()
+        end
         local duration = UIDropDownMenu_GetSelectedValue(private.duration_dropdown)
 		local key = selected_item.key
 
@@ -420,7 +425,7 @@ function private.post_auctions()
             unit_start_price,
             unit_buyout_price,
 			stack_count,
-            not selected_item.charges and private.partial_stacks_checkbox:GetChecked(),
+            private.post_all_checkbox:GetChecked() and not selected_item.charges,
 			function(posted, partial)
                 local new_auction_record
 				for i = 1, posted do
@@ -486,7 +491,7 @@ function private.validate_parameters()
         return
     end
 
-    if private.stack_count_slider:GetValue() == 0 and (selected_item.charges or not private.partial_stacks_checkbox:GetChecked()) then
+    if private.stack_count_slider:GetValue() == 0 and (selected_item.charges or not private.post_all_checkbox:GetChecked()) then
         private.post_button:Disable()
         return
     end
@@ -507,8 +512,8 @@ function private.update_recommendation()
         private.start_price:Hide()
 		private.buyout_price:Hide()
         private.stack_size_slider:Hide()
+        private.post_all_checkbox:Hide()
         private.stack_count_slider:Hide()
-        private.partial_stacks_checkbox:Hide()
         private.deposit:Hide()
         private.duration_dropdown:Hide()
         private.pricing_model_dropdown:Hide()
@@ -517,8 +522,12 @@ function private.update_recommendation()
         private.start_price:Show()
         private.buyout_price:Show()
         private.stack_size_slider:Show()
-        private.stack_count_slider:Show()
-        private.partial_stacks_checkbox:Show()
+        private.post_all_checkbox:Show()
+        if private.post_all_checkbox:GetChecked() then
+            private.stack_count_slider:Hide()
+        else
+            private.stack_count_slider:Show()
+        end
         private.deposit:Show()
         private.duration_dropdown:Show()
         private.pricing_model_dropdown:Show()
@@ -540,9 +549,14 @@ function private.update_recommendation()
         do
             -- TODO neutral AH deposit formula
             local stack_size = private.stack_size_slider:GetValue()
-            local stack_count = private.stack_count_slider:GetValue()
+            local stack_count
+            if private.post_all_checkbox:GetChecked() and not selected_item.charges then
+                stack_count = floor(selected_item.aux_quantity / stack_size)
+            else
+                stack_count = private.stack_count_slider:GetValue()
+            end
             local deposit = floor(selected_item.unit_vendor_price * 0.05 * (selected_item.charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
-            if selected_item.aux_quantity < (stack_size * (stack_count + 1)) and private.partial_stacks_checkbox:GetChecked() and not selected_item.charges then
+            if private.post_all_checkbox:GetChecked() and not selected_item.charges then
                 local partial_stack = mod(selected_item.aux_quantity, stack_size)
                 deposit = deposit + floor(selected_item.unit_vendor_price * 0.05 * partial_stack) * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
             end
@@ -663,7 +677,7 @@ function private.set_item(item)
         UIDropDownMenu_SetSelectedValue(private.pricing_model_dropdown, settings.pricing_model)
 
         private.hide_checkbox:SetChecked(settings.hidden)
-        private.partial_stacks_checkbox:SetChecked(settings.partial_stacks)
+        private.post_all_checkbox:SetChecked(settings.post_all)
 
         private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 5 or selected_item.max_stack)
         private.stack_size_slider:SetValue(settings.stack_size)

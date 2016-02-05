@@ -12,9 +12,9 @@ end)()
 local state
 
 function private.process()
-	if state.posted < state.count or state.partial then
+	if state.posted < state.count or state.allow_partial then
 		if state.posted == state.count then
-			state.partial = false
+			state.allow_partial = false
 		end
 
 		local stacking_complete
@@ -32,7 +32,10 @@ function private.process()
 		controller().wait(function() return stacking_complete end, function()
 
 			if stack_slot and Aux.info.container_item(stack_slot.bag, stack_slot.bag_slot).aux_quantity <= state.stack_size then
-				private.post_auction(stack_slot, function()
+				private.post_auction(stack_slot, function(stack_size)
+					if state.posted == state.count then
+						state.partial_stack = stack_size
+					end
 					state.posted = state.posted + 1
 					return private.process()
 				end)
@@ -61,11 +64,12 @@ function private.stop()
 	if state then
 		local callback = state.callback
 		local posted = state.posted
+		local partial_stack = state.partial_stack
 
 		state = nil
 		
 		if callback then
-			callback(posted)
+			callback(posted, partial_stack)
 		end
 	end
 end
@@ -79,7 +83,9 @@ function private.post_auction(slot, k)
 	ClearCursor()
 	local stack_size = Aux.info.container_item(slot.bag, slot.bag_slot).aux_quantity
 	StartAuction(max(1, state.unit_start_price * stack_size), state.unit_buyout_price * stack_size, state.duration)
-	controller().wait(function() return not GetContainerItemInfo(slot.bag, slot.bag_slot) end, k)
+	controller().wait(function() return not GetContainerItemInfo(slot.bag, slot.bag_slot) end, function()
+		return k(stack_size)
+	end)
 end
 
 function public.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, allow_partial, callback)
@@ -93,7 +99,7 @@ function public.start(item_key, stack_size, duration, unit_start_price, unit_buy
 			unit_start_price = unit_start_price,
 			unit_buyout_price = unit_buyout_price,
 			count = count,
-			partial = allow_partial,
+			allow_partial = allow_partial,
 			posted = 0,
 			callback = callback,
 		}
