@@ -219,13 +219,11 @@ function public.set_shopping_tooltip(slot)
     end
 end
 
-function public.tooltip_match(patterns, tooltip)
-    return Aux.util.all(patterns, function(pattern)
-        return Aux.util.any(tooltip, function(line)
-            local left_match = line[1].text and strfind(strupper(line[1].text), strupper(pattern), 1, true)
-            local right_match = line[2].text and strfind(strupper(line[2].text), strupper(pattern), 1, true)
-            return left_match or right_match
-        end)
+function public.tooltip_match(pattern, tooltip)
+    return Aux.util.any(tooltip, function(line)
+        local left_match = line[1].text and strupper(line[1].text) == strupper(pattern)
+        local right_match = line[2].text and strupper(line[2].text) == strupper(pattern)
+        return left_match or right_match
     end)
 end
 

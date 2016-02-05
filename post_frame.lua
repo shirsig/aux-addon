@@ -186,6 +186,13 @@ function public.on_load()
         slider.editbox:SetScript('OnEditFocusLost', function()
             this:HighlightText(0, 0)
         end)
+        slider.editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                private.buyout_price:SetFocus()
+            else
+                private.stack_count_slider.editbox:SetFocus()
+            end
+        end)
         slider.editbox:SetWidth(50)
         slider.editbox:SetNumeric(true)
         slider.editbox:SetMaxLetters(3)
@@ -220,6 +227,13 @@ function public.on_load()
         end)
         slider.editbox:SetScript('OnEditFocusLost', function()
             this:HighlightText(0, 0)
+        end)
+        slider.editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                private.stack_size_slider.editbox:SetFocus()
+            else
+                private.start_price:SetFocus()
+            end
         end)
         slider.editbox:SetWidth(50)
         slider.editbox:SetNumeric(true)
@@ -283,8 +297,11 @@ function public.on_load()
             private.validate_parameters()
         end)
         editbox:SetScript('OnTabPressed', function()
-            private.buyout_price:SetFocus()
-            private.buyout_price:HighlightText()
+            if IsShiftKeyDown() then
+                private.stack_count_slider.editbox:SetFocus()
+            else
+                private.buyout_price:SetFocus()
+            end
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
@@ -317,8 +334,11 @@ function public.on_load()
             private.validate_parameters()
         end)
         editbox:SetScript('OnTabPressed', function()
-            private.start_price:SetFocus()
-            private.start_price:HighlightText()
+            if IsShiftKeyDown() then
+                private.start_price:SetFocus()
+            else
+                private.stack_size_slider.editbox:SetFocus()
+            end
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
@@ -424,22 +444,22 @@ end
 
 function private.select_auction()
 	if not existing_auctions[selected_item.key].selected and getn(existing_auctions[selected_item.key]) > 0 then
---		local cheapest_for_size = {}
+		local cheapest_for_size = {}
 		local cheapest
 
 		for _, auction_entry in ipairs(existing_auctions[selected_item.key]) do
---			if not cheapest_for_size[auction_entry.stack_size] or cheapest_for_size[auction_entry.stack_size].unit_buyout_price >= auction_entry.unit_buyout_price then
---				cheapest_for_size[auction_entry.stack_size] = auction_entry
---			end
+			if not cheapest_for_size[auction_entry.stack_size] or cheapest_for_size[auction_entry.stack_size].unit_buyout_price >= auction_entry.unit_buyout_price then
+				cheapest_for_size[auction_entry.stack_size] = auction_entry
+			end
 
 			if not cheapest or cheapest.unit_buyout_price > auction_entry.unit_buyout_price then
 				cheapest = auction_entry
 			end
 		end
 
---        local auction = cheapest_for_size[private.get_stack_size_slider_value()] or cheapest
+        local auction = cheapest_for_size[private.get_stack_size_slider_value()] or cheapest
 
-        existing_auctions[selected_item.key].selected = cheapest
+        existing_auctions[selected_item.key].selected = auction
         refresh = true
 	end
 end
@@ -460,7 +480,6 @@ function private.validate_parameters()
     end
 
     if Aux.money.from_string(private.buyout_price:GetText()) > 0 and Aux.money.from_string(private.start_price:GetText()) > Aux.money.from_string(private.buyout_price:GetText()) then
---        AuxSellParametersBuyoutPriceErrorText:Show()
         return
     end
 
@@ -480,16 +499,24 @@ function private.update_recommendation()
         AuxSellParametersItemCount:SetText()
         AuxSellParametersItemName:SetText()
 
-        private.start_price:SetText(Aux.money.to_string(0))
-		private.buyout_price:SetText(Aux.money.to_string(0))
-
-        private.stack_size_slider:SetMinMaxValues(0, 0)
-        private.stack_size_slider.editbox:SetNumber(0)
-        private.stack_count_slider:SetMinMaxValues(0, 0)
-        private.stack_count_slider.editbox:SetNumber(0)
-
-        private.deposit:SetText('Deposit: '..Aux.money.to_string(0))
+        private.start_price:Hide()
+		private.buyout_price:Hide()
+        private.stack_size_slider:Hide()
+        private.stack_count_slider:Hide()
+        private.deposit:Hide()
+        private.duration_dropdown:Hide()
+        private.pricing_model_dropdown:Hide()
+        private.hide_checkbox:Hide()
     else
+        private.start_price:Show()
+        private.buyout_price:Show()
+        private.stack_size_slider:Show()
+        private.stack_count_slider:Show()
+        private.deposit:Show()
+        private.duration_dropdown:Show()
+        private.pricing_model_dropdown:Show()
+        private.hide_checkbox:Show()
+
         AuxSellParametersItemIconTexture:SetTexture(selected_item.texture)
         AuxSellParametersItemName:SetText(selected_item.name)
         local color = ITEM_QUALITY_COLORS[selected_item.quality]
@@ -566,6 +593,14 @@ end
 
 function private.set_item(item)
 
+--    ClearCursor() -- TODO
+--    PickupContainerItem(slot.bag, slot.bag_slot)
+--    ClickAuctionSellItemButton()
+--    auction_sell_item = Aux.info.auction_sell_item()
+--    ClearCursor()
+--    ClickAuctionSellItemButton()
+--    ClearCursor()
+
     PlaySound('igMainMenuOptionCheckBoxOn')
 
     Aux.scan.abort(function()
@@ -615,81 +650,57 @@ function private.update_inventory_records()
 
     local auction_candidate_map = {}
 
-    local function process_inventory(inventory_iterator, k)
+    local inventory_iterator = Aux.util.inventory_iterator()
+    while true do
         local slot = inventory_iterator()
-
         if not slot then
-            return k()
+            break
         end
 
         local item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
-
         if item_info then
+            local charge_class = item_info.charges or 0
 
-            return Aux.control.on_next_update(function()
+            if Aux.static.item_info(item_info.item_id)
+                    and not Aux.info.tooltip_match('soulbound', item_info.tooltip)
+                    and not Aux.info.tooltip_match('conjured item', item_info.tooltip)
+                    and not item_info.lootable
+            then
+                if not auction_candidate_map[item_info.item_key] then
 
-                local charge_class = item_info.charges or 0
+                    auction_candidate_map[item_info.item_key] = {
+                        item_id = item_info.item_id,
+                        suffix_id = item_info.suffix_id,
 
---                local auction_sell_item
---
---                Aux.util.without_errors(function()
---                    Aux.util.without_sound(function()
---
---                        ClearCursor()
---                        PickupContainerItem(slot.bag, slot.bag_slot)
---                        ClickAuctionSellItemButton()
---                        auction_sell_item = Aux.info.auction_sell_item()
---                        ClearCursor()
---                        ClickAuctionSellItemButton()
---                        ClearCursor()
---
---                    end)
---                end)
+                        key = item_info.item_key,
+                        hyperlink = item_info.hyperlink,
 
-                if Aux.static.item_info(item_info.item_id) then
---                if auction_sell_item then
-                    if not auction_candidate_map[item_info.item_key] then
-
-                        auction_candidate_map[item_info.item_key] = {
-                            item_id = item_info.item_id,
-                            suffix_id = item_info.suffix_id,
-
-                            key = item_info.item_key,
-                            hyperlink = item_info.hyperlink,
-
-                            name = item_info.name,
-                            texture = item_info.texture,
-                            quality = item_info.quality,
-                            class = item_info.type,
-                            subclass = item_info.subtype,
-                            unit_vendor_price = 0,
-                            charges = item_info.charges,
-                            aux_quantity = item_info.charges or item_info.count,
-                            max_stack = item_info.max_stack,
-                            availability = { [charge_class]=item_info.count },
-                        }
-                    else
-                        local candidate = auction_candidate_map[item_info.item_key]
-                        candidate.availability[charge_class] = (candidate.availability[charge_class] or 0) + item_info.count
-                        candidate.aux_quantity = candidate.aux_quantity + (item_info.charges or item_info.count)
-                    end
+                        name = item_info.name,
+                        texture = item_info.texture,
+                        quality = item_info.quality,
+                        class = item_info.type,
+                        subclass = item_info.subtype,
+                        unit_vendor_price = 0,
+                        charges = item_info.charges,
+                        aux_quantity = item_info.charges or item_info.count,
+                        max_stack = item_info.max_stack,
+                        availability = { [charge_class]=item_info.count },
+                    }
+                else
+                    local candidate = auction_candidate_map[item_info.item_key]
+                    candidate.availability[charge_class] = (candidate.availability[charge_class] or 0) + item_info.count
+                    candidate.aux_quantity = candidate.aux_quantity + (item_info.charges or item_info.count)
                 end
-
-                return process_inventory(inventory_iterator, k)
-            end)
+            end
         end
-
-        return process_inventory(inventory_iterator, k)
     end
 
-    process_inventory(Aux.util.inventory_iterator(), function()
-        inventory_records = {}
-        for _, auction_candidate in pairs(auction_candidate_map) do
-            tinsert(inventory_records, auction_candidate)
-        end
-        sort(inventory_records, function(a, b) return a.name < b.name end)
-        refresh = true
-    end)
+    inventory_records = {}
+    for _, auction_candidate in pairs(auction_candidate_map) do
+        tinsert(inventory_records, auction_candidate)
+    end
+    sort(inventory_records, function(a, b) return a.name < b.name end)
+    refresh = true
 end
 
 function private.refresh_entries()

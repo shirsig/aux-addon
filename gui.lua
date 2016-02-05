@@ -563,7 +563,7 @@ function m.slider(frame, name)
 --    hightext:SetFont(TSMAPI.Design:GetContentFont('small'))
 --    hightext:SetPoint('TOPRIGHT', slider, 'BOTTOMRIGHT', -2, -4)
 --
-    local editbox = CreateFrame('EditBox', nil, frame)
+    local editbox = CreateFrame('EditBox', nil, slider)
     editbox:SetAutoFocus(false)
     editbox:SetPoint('LEFT', slider, 'RIGHT', 5, 0)
     editbox:SetHeight(15)

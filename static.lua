@@ -79,7 +79,7 @@ function public.find_auctionable_items() -- requires a full wdb item cache
 			local name, _, quality = GetItemInfo('item:'..j)
 			if name then
 				local tooltip = Aux.info.tooltip(function(tt) tt:SetHyperlink('item:'..j) end)
-				if not Aux.info.tooltip_match({'binds when picked up'}, tooltip) and not Aux.info.tooltip_match({'quest item'}, tooltip) and not quality == 6 then
+				if not Aux.info.tooltip_match('binds when picked up', tooltip) and not Aux.info.tooltip_match('quest item', tooltip) and not quality == 6 then
 					aux_auctionable_items[j] = true
 				end
 			end

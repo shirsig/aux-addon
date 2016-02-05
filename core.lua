@@ -1,4 +1,4 @@
-AuxVersion = '2.4.7'
+AuxVersion = '2.4.8'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 Aux = {
