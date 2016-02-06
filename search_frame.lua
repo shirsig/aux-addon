@@ -158,6 +158,23 @@ function private.get_form_filter()
     }
 end
 
+function private.prettify_search(search)
+    local item_pattern = '([^/;]+)([^;]*)/exact'
+    while true do
+        local _, _, name, in_between = strfind(search, item_pattern)
+        if name then
+            search = gsub(search, item_pattern, private.display_name(Aux.static.auctionable_items[strupper(name)])..in_between, 1)
+        else
+            return Aux.gui.inline_color({216, 225, 211, 1})..search..'|r'
+        end
+    end
+end
+
+function private.display_name(item_id)
+    local item_info = Aux.static.item_info(item_id)
+    return '|c'..Aux.quality_color(item_info.quality)..'['..item_info.name..']'..'|r'
+end
+
 function public.on_open()
     private.update_search_listings()
 end
@@ -177,7 +194,7 @@ function public.on_load()
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Search')
-        btn:SetScript('OnClick', Aux.search_frame.start_search)
+        btn:SetScript('OnClick', public.start_search)
         private.search_button = btn
     end
     do
@@ -194,7 +211,7 @@ function public.on_load()
         local editbox = Aux.gui.editbox(AuxFilterSearchFrame)
         editbox:SetMaxLetters(nil)
         editbox:EnableMouse(1)
-        editbox.complete = Aux.test.complete
+        editbox.complete = Aux.completion.complete
         editbox:SetPoint('TOPLEFT', 5, -8)
         editbox:SetPoint('RIGHT', private.search_button, 'LEFT', -4, 0)
         editbox:SetWidth(400)
@@ -314,7 +331,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxFilterSearchFrameFilter, '$parentNameInputBox')
-        editbox.complete_item = Aux.test.complete_item
+        editbox.complete_item = Aux.completion.complete_item
         editbox:SetPoint('TOPLEFT', 14, -20)
         editbox:SetWidth(300)
         editbox:SetScript('OnChar', function()
@@ -767,9 +784,12 @@ function public.stop_search()
 	Aux.scan.abort()
 end
 
-function public.start_search()
+function public.start_search(filter_string)
 
     Aux.scan.abort(function()
+        if filter_string then
+            private.search_box:SetText(filter_string)
+        end
 
         local queries
 
@@ -787,7 +807,7 @@ function public.start_search()
             return
         end
 
-        tinsert(aux_recent_searches, 1, { filter_string = private.search_box:GetText(), prettified = Aux.test.prettify_search(private.search_box:GetText()) })
+        tinsert(aux_recent_searches, 1, { filter_string = private.search_box:GetText(), prettified = private.prettify_search(private.search_box:GetText()) })
         while getn(aux_recent_searches) > 50 do
             tremove(aux_recent_searches)
         end

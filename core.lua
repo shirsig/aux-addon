@@ -1,4 +1,4 @@
-AuxVersion = '2.4.13'
+AuxVersion = '2.4.14'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 Aux = {
@@ -174,8 +174,8 @@ function Aux.setup_hooks()
     Aux.orig.AuctionFrameAuctions_OnEvent = AuctionFrameAuctions_OnEvent
     AuctionFrameAuctions_OnEvent = Aux.AuctionFrameAuctions_OnEvent
 
-    Aux.orig.UIDropDownMenu_StartCounting = UIDropDownMenu_StartCounting
-    UIDropDownMenu_StartCounting = Aux.completion.UIDropDownMenu_StartCounting
+--    Aux.orig.UIDropDownMenu_StartCounting = UIDropDownMenu_StartCounting
+--    UIDropDownMenu_StartCounting = Aux.completion.UIDropDownMenu_StartCounting
 
 end
 

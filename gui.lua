@@ -274,7 +274,6 @@ function m.editbox(parent, name)
 --        frame:Hide()
 
     local editbox = CreateFrame('EditBox', name, parent)
-    editbox.selector = Aux.completion.selector(editbox)
     editbox:SetAutoFocus(false)
     editbox:SetTextInsets(0, 0, 3, 3)
     editbox:SetMaxLetters(256)

@@ -147,6 +147,8 @@ local methods = {
         elseif IsShiftKeyDown() then
             if ChatFrameEditBox:IsVisible() then
                 ChatFrameEditBox:Insert(this.row.data.record.hyperlink)
+            else
+                Aux.search_frame.start_search(strlower(Aux.static.item_info(this.row.data.record.item_id).name)..'/exact')
             end
         elseif IsAltKeyDown() then
             if this.rt.handlers.OnCellAltClick then
