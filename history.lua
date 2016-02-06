@@ -135,7 +135,7 @@ function private.push_data()
 
 			tinsert(item_record.last_daily_values, Aux.round(daily_market_value))
 			while getn(item_record.last_daily_values) > 9 do
-				tremove(1, item_record.last_daily_values)
+				tremove(item_record.last_daily_values, 1)
 			end
 
 			item_record.day_count = item_record.day_count + 1
