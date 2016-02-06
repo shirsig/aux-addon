@@ -86,6 +86,7 @@ function Aux.on_load()
 --    AuxFrameContent:SetBackdropColor(unpack(Aux.gui.config.content_color))
 --    AuxFrameContent:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
 
+    Aux.persistence.on_load()
     Aux.search_frame.on_load()
     Aux.post_frame.on_load()
     Aux.auctions_frame.on_load()
