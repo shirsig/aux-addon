@@ -8,7 +8,9 @@ aux_database = {}
 function public.on_load()
     private.perform_migration(aux_database)
     aux_database.version = DATABASE_VERSION
-    public.load_snapshot().compact()
+    Aux.control.as_soon_as(function() return UnitFactionGroup('player') end, function()
+        public.load_snapshot().compact()
+    end)
 end
 
 function private.perform_migration()

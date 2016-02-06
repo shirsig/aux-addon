@@ -1,6 +1,48 @@
 local m = {}
 Aux.test = m
 
+--function m.intervals(frequencies, median)
+--    local intervals = {}
+--    for i=1,30 do
+--        tinsert(intervals, {
+--            index = i,
+--            lower = median + 2 ^ (i-1),
+--            upper = median + 2 ^ i,
+--            value = 2 ^ i * 1.5,
+--            frequency = frequencies[i]
+--        })
+--    end
+--end
+--
+--function m.new_histogram(old_histogram, old_median, new_value)
+--
+--    local new_median
+--
+--    local new_histogram = {}
+--    for _, interval in ipairs(m.intervals({}, new_median)) do
+--        for _, old_interval in m.intervals(old_histogram, old_median) do
+--            local share = m.share(old_interval, interval)
+--            new_histogram[interval.index] = new_histogram[interval.index] and new_histogram[interval.index] + share or share
+--        end
+--    end
+--    return new_histogram
+--end
+--
+--function m.new_median(histogram, old_median)
+--
+--end
+--
+--function m.share(old_interval, new_interval)
+--    local upper = min(old_interval.upper, new_interval.upper)
+--    local lower = max(old_interval.lower, new_interval.lower)
+--    if upper < lower then
+--        return 0
+--    else
+--        return (upper - lower) / (old_interval.upper - old_interval.lower) * old_interval.frequency
+--    end
+--end
+
+
 --StaticPopupDialogs["CANCEL_AUCTION"] = {
 --    text = TEXT(CANCEL_AUCTION_CONFIRMATION),
 --    button1 = TEXT(ACCEPT),
