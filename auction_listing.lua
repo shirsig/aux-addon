@@ -180,7 +180,7 @@ local methods = {
     --    GetRowPrices = function(record, isPerUnit) return end, -- TODO
     GetRowPrices = function(record, per_unit)
         if per_unit then
-            return record.unit_bid_price, record.unit_buyout_price
+            return ceil(record.unit_bid_price), ceil(record.unit_buyout_price)
         else
             return record.bid_price, record.buyout_price
         end

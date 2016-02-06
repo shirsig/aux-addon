@@ -52,7 +52,7 @@ function private.update_auction_listing()
                     { value=auction_record.yours },
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=stack_size },
-                    { value=Aux.money.to_string(auction_record.unit_buyout_price, true, false) },
+                    { value=Aux.money.to_string(tonumber(format('%.3f', auction_record.unit_buyout_price)), true, false) },
                     { value=Aux.auction_listing.percentage_market(market_value and Aux.round(auction_record.unit_buyout_price/market_value * 100) or '---') },
                 },
                 record = auction_record,
@@ -186,11 +186,11 @@ function public.on_load()
         end)
         slider.editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                private.buyout_price:SetFocus()
+                private.unit_buyout_price:SetFocus()
             elseif private.stack_count_slider.editbox:IsVisible() then
                 private.stack_count_slider.editbox:SetFocus()
             else
-                private.start_price:SetFocus()
+                private.unit_start_price:SetFocus()
             end
         end)
         slider.editbox:SetWidth(50)
@@ -241,7 +241,7 @@ function public.on_load()
             if IsShiftKeyDown() then
                 private.stack_size_slider.editbox:SetFocus()
             else
-                private.start_price:SetFocus()
+                private.unit_start_price:SetFocus()
             end
         end)
         slider.editbox:SetWidth(50)
@@ -310,7 +310,7 @@ function public.on_load()
             elseif IsShiftKeyDown() then
                 private.stack_size_slider.editbox:SetFocus()
             else
-                private.buyout_price:SetFocus()
+                private.unit_buyout_price:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -327,12 +327,12 @@ function public.on_load()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Starting Stack Price')
-        private.start_price = editbox
+        label:SetText('Unit Starting Price')
+        private.unit_start_price = editbox
     end
     do
         local editbox = Aux.gui.editbox(AuxSellParameters)
-        editbox:SetPoint('TOP', private.start_price, 'BOTTOM', 0, -25)
+        editbox:SetPoint('TOP', private.unit_start_price, 'BOTTOM', 0, -25)
         editbox:SetWidth(170)
         editbox:SetScript('OnTextChanged', function()
             if selected_item then
@@ -344,7 +344,7 @@ function public.on_load()
         end)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                private.start_price:SetFocus()
+                private.unit_start_price:SetFocus()
             else
                 private.stack_size_slider.editbox:SetFocus()
             end
@@ -363,12 +363,12 @@ function public.on_load()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Buyout Stack Price')
-        private.buyout_price = editbox
+        label:SetText('Unit Buyout Price')
+        private.unit_buyout_price = editbox
     end
     do
         local dropdown = Aux.gui.dropdown(AuxSellParameters)
-        dropdown:SetPoint('TOPRIGHT', private.buyout_price, 'BOTTOMRIGHT', 0, -20)
+        dropdown:SetPoint('TOPRIGHT', private.unit_buyout_price, 'BOTTOMRIGHT', 0, -20)
         dropdown:SetWidth(120)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
@@ -385,8 +385,8 @@ end
 function public.on_open()
     private.deposit:SetText('Deposit: '..Aux.money.to_string(0))
 
-    private.start_price:SetText(Aux.money.to_string(0))
-    private.buyout_price:SetText(Aux.money.to_string(0))
+    private.unit_start_price:SetText(Aux.money.to_string(0))
+    private.unit_buyout_price:SetText(Aux.money.to_string(0))
 
     private.update_inventory_records()
 
@@ -401,8 +401,8 @@ end
 
 function private.post_auctions()
 	if selected_item then
-        local unit_start_price = Aux.money.from_string(private.start_price:GetText()) / private.stack_size_slider:GetValue()
-        local unit_buyout_price = Aux.money.from_string(private.buyout_price:GetText()) / private.stack_size_slider:GetValue()
+        local unit_start_price = Aux.money.from_string(private.unit_start_price:GetText())
+        local unit_buyout_price = Aux.money.from_string(private.unit_buyout_price:GetText())
         local stack_size = private.stack_size_slider:GetValue()
         local stack_count
         if private.post_all_checkbox:GetChecked() and not selected_item.charges then
@@ -485,12 +485,12 @@ function private.validate_parameters()
         return
     end
 
-    if Aux.money.from_string(private.buyout_price:GetText()) > 0 and Aux.money.from_string(private.start_price:GetText()) > Aux.money.from_string(private.buyout_price:GetText()) then
+    if Aux.money.from_string(private.unit_buyout_price:GetText()) > 0 and Aux.money.from_string(private.unit_start_price:GetText()) > Aux.money.from_string(private.unit_buyout_price:GetText()) then
         private.post_button:Disable()
         return
     end
 
-    if Aux.money.from_string(private.start_price:GetText()) < 1 then
+    if Aux.money.from_string(private.unit_start_price:GetText()) < 1 then
         private.post_button:Disable()
         return
     end
@@ -513,8 +513,8 @@ function private.update_recommendation()
         AuxSellParametersItemName:SetTextColor(1, 1, 1)
         AuxSellParametersItemName:SetText('No item selected')
 
-        private.start_price:Hide()
-		private.buyout_price:Hide()
+        private.unit_start_price:Hide()
+		private.unit_buyout_price:Hide()
         private.stack_size_slider:Hide()
         private.post_all_checkbox:Hide()
         private.stack_count_slider:Hide()
@@ -523,8 +523,8 @@ function private.update_recommendation()
         private.pricing_model_dropdown:Hide()
         private.hide_checkbox:Hide()
     else
-        private.start_price:Show()
-        private.buyout_price:Show()
+        private.unit_start_price:Show()
+        private.unit_buyout_price:Show()
         private.stack_size_slider:Show()
         private.post_all_checkbox:Show()
         if private.post_all_checkbox:GetChecked() then
@@ -587,8 +587,8 @@ function private.update_recommendation()
             end
         end
 
-        private.start_price:SetText(Aux.money.to_string(start_price))
-        private.buyout_price:SetText(Aux.money.to_string(buyout_price))
+        private.unit_start_price:SetText(Aux.money.to_string(tonumber(format('%.3f', start_price))))
+        private.unit_buyout_price:SetText(Aux.money.to_string(tonumber(format('%.3f', buyout_price))))
 	end
 end
 
@@ -598,12 +598,13 @@ function private.undercutting_suggestion()
 
         if existing_auctions[selected_item.key].selected then
 
-            local price_suggestion = existing_auctions[selected_item.key].selected.unit_buyout_price * private.stack_size_slider:GetValue()
+            local basis_price = existing_auctions[selected_item.key].selected.unit_buyout_price * private.stack_size_slider:GetValue()
 
             if existing_auctions[selected_item.key].selected.yours == 0 then
-                price_suggestion = private.undercut(price_suggestion)
+                basis_price = private.undercut(basis_price)
             end
 
+            local price_suggestion = basis_price / private.stack_size_slider:GetValue()
             return price_suggestion * 0.95, price_suggestion
         end
     end
@@ -611,7 +612,7 @@ function private.undercutting_suggestion()
 end
 
 function private.market_value_suggestion()
-    local price_suggestion = Aux.history.market_value(selected_item.key) and 1.2 * Aux.history.market_value(selected_item.key) * private.stack_size_slider:GetValue()
+    local price_suggestion = Aux.history.market_value(selected_item.key) and 1.2 * Aux.history.market_value(selected_item.key)
     if not price_suggestion then
         return 0, 0
     end

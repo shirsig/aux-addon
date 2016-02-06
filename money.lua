@@ -13,7 +13,9 @@ function m.to_string(money, pad, trim, color, no_color)
 	money = abs(money)
 	local gold = floor(money / COPPER_PER_GOLD)
 	local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
-	local copper = Aux.round(mod(money, COPPER_PER_SILVER))
+--	local copper = Aux.round(mod(money, COPPER_PER_SILVER))
+	local copper = mod(money, COPPER_PER_SILVER)
+
 	local gold_text, silver_text, copper_text
 	if no_color then
 		gold_text, silver_text, copper_text = 'g', 's', 'c'
