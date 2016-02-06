@@ -19,14 +19,7 @@ end
 
 function private.get_dataset_key()
 	local realm = GetCVar('realmName')
-	local zone = GetMinimapZoneText()
-	local faction
-    -- TODO use UnitFactionGroup(unit) or race with auctioneer instead to work for all locales
-	if zone == 'Gadgetzan' or zone == 'Everlook' or zone == 'Booty Bay' then
-		faction = 'Neutral'
-	else
-		faction = UnitFactionGroup('player')
-	end
+	local faction = UnitFactionGroup('player')
 	return realm..'|'..faction
 end
 
