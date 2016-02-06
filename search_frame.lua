@@ -909,6 +909,10 @@ do
     end
 
     function public.on_update()
+        if not AuxFilterSearchFrame:IsVisible() then
+            return
+        end
+        
         if not (RESULTS.buyout_button:IsEnabled() or private.bid_button:IsEnabled()) then
             return
         end
