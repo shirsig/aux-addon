@@ -8,6 +8,7 @@ aux_database = {}
 function public.on_load()
     private.perform_migration(aux_database)
     aux_database.version = DATABASE_VERSION
+    public.load_snapshot().compact()
 end
 
 function private.perform_migration()
@@ -108,6 +109,14 @@ function private.snapshot(data)
 
     function self.contains(signature)
         return data[signature] ~= nil and data[signature] >= time()
+    end
+
+    function self.compact()
+        for signature, expiration in pairs(data) do
+            if expiration < time() then
+                data[signature] = nil
+            end
+        end
     end
 
     function self.signatures()
