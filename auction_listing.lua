@@ -14,8 +14,8 @@ local AUCTION_PCT_COLORS = {
 local TIME_LEFT_STRINGS = {
     '|cffff000030m|r', -- Short
     '|cffff92182h|r', -- Medium
-    '|cffffff0012h|r', -- Long
-    '|cff2992ff48h|r', -- Very Long
+    '|cffffff008h|r', -- Long
+    '|cff2992ff24h|r', -- Very Long
 }
 
 function public.percentage_market(pct, based_on_bid)
