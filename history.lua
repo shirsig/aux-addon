@@ -16,7 +16,7 @@ function private.read_record(item_key)
 	return {
 		auction_count = tonumber(record[1]),
 		day_count = tonumber(record[2]),
-		balanced_list = Aux.util.map(Aux.persistence.deserialize(record[3], ';'), function(value)
+		last_daily_values = Aux.util.map(Aux.persistence.deserialize(record[3], ';'), function(value)
 			return tonumber(value)
 		end),
 		histogram = Aux.util.map(Aux.persistence.deserialize(record[4], ';', 'x'), function(value)
@@ -30,7 +30,7 @@ function private.write_record(item_key, record)
 	data.item_data[item_key] = Aux.persistence.serialize({
 		record.auction_count,
 		record.day_count,
-		Aux.persistence.serialize(record.balanced_list, ';'),
+		Aux.persistence.serialize(record.last_daily_values, ';'),
 		Aux.persistence.serialize(record.histogram, ';', 'x'),
 	},'#')
 end
@@ -66,7 +66,7 @@ end
 
 function public.price_data(item_key)
 	local item_record = private.read_record(item_key)
-	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), private.median(item_record.balanced_list)
+	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), private.median(item_record.last_daily_values)
 end
 
 function public.market_value(item_key)
@@ -106,46 +106,19 @@ function private.daily_market_value(histogram)
 	return sum / limit
 end
 
-function private.balanced_list_insert(list, value, max_size)
-
-	local left = 1
-	local right = getn(list)
-	local middle
-	local middle_value
-	local insert_position
-
-	while left <= right do
-		middle = floor((left + right) / 2)
-		middle_value = list[middle]
-		if value < middle_value then
-			right = middle - 1
-		elseif value > middle_value then
-			left = middle + 1
-		else
-			insert_position = middle
-			break
-		end
-	end
-	insert_position = insert_position or left
-
-	tinsert(list, insert_position, value)
-
-	if max_size and getn(list) > max_size then
-		if insert_position <= floor(max_size / 2) + 1 then
-			tremove(list)
-		else
-			tremove(list, 1)
-		end
-	end
-end
-
 function private.median(list)
 	if getn(list) == 0 then
 		return
 	end
 
-	local middle = (getn(list) + 1) / 2
-	return (list[floor(middle)] + list[ceil(middle)]) / 2
+	local sorted_list = {}
+	for _, v in ipairs(list) do
+		tinsert(sorted_list, v)
+	end
+	sort(sorted_list)
+
+	local middle = (getn(sorted_list) + 1) / 2
+	return (sorted_list[floor(middle)] + sorted_list[ceil(middle)]) / 2
 end
 
 function private.push_data()
@@ -160,7 +133,10 @@ function private.push_data()
 
 			local daily_market_value = private.daily_market_value(item_record.histogram)
 
-			private.balanced_list_insert(item_record.balanced_list, Aux.round(daily_market_value), 9)
+			tinsert(item_record.last_daily_values, Aux.round(daily_market_value))
+			while getn(item_record.last_daily_values) > 9 do
+				tremove(1, item_record.last_daily_values)
+			end
 
 			item_record.day_count = item_record.day_count + 1
 			item_record.histogram = {}

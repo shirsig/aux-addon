@@ -1,8 +1,6 @@
 local private, public = {}, {}
 Aux.util = public
 
-local merge, copy_array
-
 function Aux.util.pass()
 end
 
