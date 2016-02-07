@@ -425,8 +425,8 @@ local methods = {
             row.cells[5]:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
             row.cells[6]:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
             local bid, buyout, colorBid, colorBuyout = self.GetRowPrices(record, aux_price_per_unit)
-            row.cells[7]:SetText(bid > 0 and Aux.money.to_string(bid, true, false, colorBid) or '---')
-            row.cells[8]:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, colorBuyout) or '---')
+            row.cells[7]:SetText(bid > 0 and Aux.money.to_string(bid, true, false, nil, colorBid) or '---')
+            row.cells[8]:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
             local pct, bidPct = self:GetRecordPercent(record)
             row.cells[9]:SetText((pct or bidPct) and public.percentage_market(pct or bidPct, not pct) or '---')
         end

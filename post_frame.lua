@@ -52,7 +52,7 @@ function private.update_auction_listing()
                     { value=auction_record.yours },
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=stack_size },
-                    { value=Aux.money.to_string(tonumber(format('%.3f', auction_record.unit_buyout_price)), true, false) },
+                    { value=Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3) },
                     { value=Aux.auction_listing.percentage_market(market_value and Aux.round(auction_record.unit_buyout_price/market_value * 100) or '---') },
                 },
                 record = auction_record,
@@ -587,8 +587,8 @@ function private.update_recommendation()
             end
         end
 
-        private.unit_start_price:SetText(Aux.money.to_string(tonumber(format('%.3f', start_price))))
-        private.unit_buyout_price:SetText(Aux.money.to_string(tonumber(format('%.3f', buyout_price))))
+        private.unit_start_price:SetText(Aux.money.to_string(start_price, nil, nil, settings.pricing_model ~= FIXED and 3))
+        private.unit_buyout_price:SetText(Aux.money.to_string(buyout_price, nil, nil, settings.pricing_model ~= FIXED and 3))
 	end
 end
 
@@ -598,13 +598,13 @@ function private.undercutting_suggestion()
 
         if existing_auctions[selected_item.key].selected then
 
-            local basis_price = existing_auctions[selected_item.key].selected.unit_buyout_price * private.stack_size_slider:GetValue()
+            local basis_price = existing_auctions[selected_item.key].selected.unit_buyout_price * existing_auctions[selected_item.key].selected.stack_size
 
             if existing_auctions[selected_item.key].selected.yours == 0 then
                 basis_price = private.undercut(basis_price)
             end
 
-            local price_suggestion = basis_price / private.stack_size_slider:GetValue()
+            local price_suggestion = basis_price / existing_auctions[selected_item.key].selected.stack_size
             return price_suggestion * 0.95, price_suggestion
         end
     end

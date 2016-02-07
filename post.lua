@@ -82,7 +82,7 @@ function private.post_auction(slot, k)
 	ClickAuctionSellItemButton()
 	ClearCursor()
 	local stack_size = Aux.info.container_item(slot.bag, slot.bag_slot).aux_quantity
-	StartAuction(ceil(state.unit_start_price * stack_size), ceil(state.unit_buyout_price * stack_size), state.duration)
+	StartAuction(max(1, Aux.round(state.unit_start_price * stack_size)), Aux.round(state.unit_buyout_price * stack_size), state.duration)
 	controller().wait(function() return not GetContainerItemInfo(slot.bag, slot.bag_slot) end, function()
 		return k(stack_size)
 	end)

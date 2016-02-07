@@ -233,7 +233,7 @@ function m.filter_to_string(filter)
     end
 
     if filter.max_price then
-        add(Aux.money.to_string(filter.max_price, nil, true, nil, true))
+        add(Aux.money.to_string(filter.max_price, nil, true, nil, nil, true))
     end
 
     if filter.max_percent then
