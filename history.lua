@@ -83,18 +83,18 @@ end
 
 function private.daily_market_value(histogram)
 
-	local daily_auction_count = 0
+	local auction_count = 0
 	for _, frequency in ipairs(histogram) do
-		daily_auction_count = daily_auction_count + frequency
+		auction_count = auction_count + frequency
 	end
 
-	if daily_auction_count == 0 then
+	if auction_count == 0 then
 		return 0
 	end
 
 	-- average of lowest 25%
 	local sum, count = 0, 0
-	local limit = daily_auction_count * 0.25
+	local limit = auction_count * 0.25
 	for i, frequency in ipairs(histogram) do
 		local limited_frequency = min(frequency, limit - count)
 		sum = sum + 1.1 ^ (i - 1) * 1.05 * limited_frequency
@@ -134,7 +134,7 @@ function private.push_data()
 			local daily_market_value = private.daily_market_value(item_record.histogram)
 
 			tinsert(item_record.last_daily_values, Aux.round(daily_market_value))
-			while getn(item_record.last_daily_values) > 9 do
+			while getn(item_record.last_daily_values) > 11 do
 				tremove(item_record.last_daily_values, 1)
 			end
 
@@ -147,34 +147,3 @@ function private.push_data()
 
 	data.next_push = time() + private.PUSH_INTERVAL
 end
-
---function private.max_heap(array) -- might use a max heap to keep track of the n smallest values of the day instead of the histogram calculation
---	local self = {}
---
---	local ROOT = 1
---
---	local function parent(i)
---		return floor((i - 2) / 2) + 1
---	end
---
---	local function left_child(i)
---		return 2 * (i - 1) + 2
---	end
---
---	local function right_child(i)
---		return 2 * (i - 1) + 3
---	end
---
---	function self.insert(value)
---		local index = getn(array) + 1
---
---		while index > ROOT and array[index - 1] > 0 do
---			index = index - 1
---		end
---	end
---
---	function self.extract(signature)
---	end
---
---	return self
---end
