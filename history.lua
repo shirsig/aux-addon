@@ -19,6 +19,11 @@ function private.read_record(item_key)
 		last_daily_values = Aux.util.map(Aux.persistence.deserialize(record[3], ';'), function(value)
 			return tonumber(value)
 		end),
+		-- auction count
+		-- latest_buyout_dailies
+		-- latest_bid_dailies
+		-- current_day_max_bid
+		-- current_day_buyout_histogram
 		histogram = Aux.util.map(Aux.persistence.deserialize(record[4], ';', 'x'), function(value)
 			return tonumber(value)
 		end),
@@ -36,6 +41,21 @@ function private.write_record(item_key, record)
 end
 
 function public.process_auction(auction_info)
+
+	-- experimental
+	local unit_high_bid = auction_info.high_bid/auction_info.aux_quantity
+	aux_max_bids[auction_info.item_key] = max(aux_max_bids[auction_info.item_key] or 0, unit_high_bid)
+	if aux_max_bids[auction_info.item_key] > 0 then
+		snipe.log(auction_info.hyperlink..': '..Aux.money.to_string(aux_max_bids[auction_info.item_key]))
+	end
+	-- experimental
+
+	local snapshot = Aux.persistence.load_snapshot()
+	if not snapshot.contains(auction_info.signature) then
+		return
+	end
+	snapshot.add(auction_info.signature, auction_info.duration)
+
 
 	if auction_info.buyout_price == 0 then
 		return

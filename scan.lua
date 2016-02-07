@@ -1,6 +1,8 @@
 local private , public = {}, {}
 Aux.scan = public
 
+aux_max_bids = {}
+
 local PAGE_SIZE = 50
 
 local controller = (function()
@@ -186,11 +188,7 @@ function scan_auctions_helper(i, n, k)
         auction_info.page = state.page
         auction_info.query = current_query()
 
-        local snapshot = Aux.persistence.load_snapshot()
-        if not snapshot.contains(auction_info.signature) then
-            snapshot.add(auction_info.signature, auction_info.duration)
-            Aux.history.process_auction(auction_info)
-        end
+        Aux.history.process_auction(auction_info)
 
         if not current_query().validator or current_query().validator(auction_info) then
             return wait_for_callback{state.params.on_read_auction or Aux.util.pass, auction_info, recurse }
