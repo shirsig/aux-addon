@@ -292,8 +292,8 @@ function m.validator(filter)
             return
         end
         if filter.max_percent and (record.unit_buyout_price == 0
-            or not aux_max_bids
-            or record.unit_buyout_price / aux_max_bids[record.item_key] * 100 > filter.max_percent)
+            or not Aux.history.market_value(record.item_key)
+            or record.unit_buyout_price / Aux.history.market_value(record.item_key) * 100 > filter.max_percent)
         then
             return
         end

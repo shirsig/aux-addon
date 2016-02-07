@@ -252,31 +252,31 @@ function Aux.util.set()
 
     local data = {}
 
-    function self.add(value)
+    function self:add(value)
         data[value] = true
     end
 
-    function self.add_all(values)
+    function self:add_all(values)
         for _, value in ipairs(values) do
             self.add(value)
         end
     end
 
-    function self.remove(value)
+    function self:remove(value)
         data[value] = nil
     end
 
-    function self.remove_all(values)
+    function self:remove_all(values)
         for _, value in ipairs(values) do
             self.remove(value)
         end
     end
 
-    function self.contains(value)
+    function self:contains(value)
         return data[value] ~= nil
     end
 
-    function self.values()
+    function self:values()
         local values = {}
         for value, _ in pairs(data) do
             tinsert(values, value)

@@ -1,0 +1,19 @@
+<Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
+	<Script file="history.lua"/> 
+
+	<Frame>
+	  <Scripts>
+			<OnLoad>
+				this:RegisterEvent('PLAYER_LOGIN')
+				this:RegisterEvent('PLAYER_LOGOUT')
+			</OnLoad>
+			<OnEvent> 
+				if event == 'PLAYER_LOGIN' then
+				Aux.history.on_login()
+				elseif event == 'PLAYER_LOGOUT' then
+					Aux.history.on_logout()
+				end
+			</OnEvent> 
+		</Scripts>
+	</Frame>
+</Ui>

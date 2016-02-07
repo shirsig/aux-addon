@@ -1,9 +1,6 @@
 SLASH_AUX1 = '/aux'
 function SlashCmdList.AUX(parameter)
-    if parameter == 'clear snapshot' then
-        Aux.persistence.load_dataset().snapshot = {}
-        Aux.log('Snapshot cleared.')
-    elseif parameter == 'clear history' then
+    if parameter == 'clear history' then
         Aux.persistence.load_dataset().history = {}
         Aux.log('History cleared.')
     elseif parameter == 'clear' then

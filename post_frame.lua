@@ -53,7 +53,7 @@ function private.update_auction_listing()
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=stack_size },
                     { value=Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3) },
-                    { value=Aux.auction_listing.percentage_market(market_value and Aux.round(auction_record.unit_buyout_price/market_value * 100) or '---') },
+                    { value=market_value and Aux.auction_listing.percentage_market(Aux.round(auction_record.unit_buyout_price / market_value * 100)) or '---' },
                 },
                 record = auction_record,
             })

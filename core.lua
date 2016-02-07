@@ -19,26 +19,28 @@ function Aux.on_load()
             local item_id, suffix_id = EnhTooltip.BreakLink(link)
             local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
-            local auction_count, day_count, daily_market_value, median = Aux.history.price_data(item_key)
+--            local auction_count, day_count, daily_market_value, median = Aux.history.price_data(item_key)
 
-            if auction_count == 0 then
-                EnhTooltip.AddLine('Never seen at auction', nil, true)
-                EnhTooltip.LineColor(0.5, 0.8, 0.5)
-            else
-                EnhTooltip.AddLine('Seen '..auction_count..' '..Aux_PluralizeIf('time', auction_count)..' at auction', nil, true)
-                EnhTooltip.LineColor(0.5, 0.8, 0.1)
+--            if auction_count == 0 then
+--                EnhTooltip.AddLine('Never seen at auction', nil, true)
+--                EnhTooltip.LineColor(0.5, 0.8, 0.5)
+--            else
+--                EnhTooltip.AddLine('Seen '..auction_count..' '..Aux_PluralizeIf('time', auction_count)..' at auction', nil, true)
+--                EnhTooltip.LineColor(0.5, 0.8, 0.1)
 
                 local market_value = Aux.history.market_value(item_key)
-                local market_value_line
-                if count == 1 then
-                    market_value_line = 'Market Value: '..EnhTooltip.GetTextGSC(market_value)
-                else
-                    market_value_line = 'Market Value: '..EnhTooltip.GetTextGSC(market_value * count)..' / '..EnhTooltip.GetTextGSC(market_value)
-                end
+                if market_value then
+                    local market_value_line
+                    if count == 1 then
+                        market_value_line = 'Market Value: '..EnhTooltip.GetTextGSC(market_value)
+                    else
+                        market_value_line = 'Market Value: '..EnhTooltip.GetTextGSC(market_value * count)..' / '..EnhTooltip.GetTextGSC(market_value)
+                    end
 
-                EnhTooltip.AddLine(market_value_line, nil, true)
-                EnhTooltip.LineColor(0.1,0.8,0.5)
-            end
+                    EnhTooltip.AddLine(market_value_line, nil, true)
+                    EnhTooltip.LineColor(0.1,0.8,0.5)
+                end
+--            end
         end)
     end
 

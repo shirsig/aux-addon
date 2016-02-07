@@ -1,8 +1,6 @@
 local private , public = {}, {}
 Aux.scan = public
 
-aux_max_bids = {}
-
 local PAGE_SIZE = 50
 
 local controller = (function()

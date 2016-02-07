@@ -2,129 +2,173 @@ local private, public = {}, {}
 Aux.history = public
 
 private.PUSH_INTERVAL = 57600
-private.NEW_RECORD = '0#0##'
 
-function private.load_data()
-	local dataset = Aux.persistence.load_dataset()
-	dataset.history = dataset.history or { next_push = time() + private.PUSH_INTERVAL, item_data = {} }
-	return dataset.history
+local item_records, next_push
+
+function private.encode_item_records(item_records)
+	local record_strings = {}
+	for item_key, record in pairs(item_records) do
+		tinsert(record_strings, private.encode_item_record(item_key, record))
+	end
+	return  Aux.persistence.serialize(record_strings, '|')
 end
 
-function private.read_record(item_key)
-	local data = private.load_data()
-	local record = Aux.persistence.deserialize(data.item_data[item_key] or private.NEW_RECORD, '#')
-	return {
-		auction_count = tonumber(record[1]),
-		day_count = tonumber(record[2]),
-		last_daily_values = Aux.util.map(Aux.persistence.deserialize(record[3], ';'), function(value)
+function private.encode_item_record(item_key, record)
+	return Aux.persistence.serialize({
+		item_key,
+		Aux.persistence.serialize(record.daily_bid_values, ';'),
+		Aux.persistence.serialize(record.daily_buyout_values, ';'),
+		Aux.persistence.serialize(record.bids_of_today:values(), ';'),
+		Aux.persistence.serialize(record.buyouts_of_today:values(), ';'),
+	}, '#')
+end
+
+function private.decode_item_records(data_string)
+	local item_records = {}
+	for _, record_string in Aux.persistence.deserialize(data_string, '|') do
+		local item_key, record = private.decode_item_record(record_string)
+		item_records[item_key] = record
+	end
+	return item_records
+end
+
+function private.decode_item_record(data_string)
+	local fields = Aux.persistence.deserialize(data_string, '#')
+
+	local bids_of_today = Aux.util.set()
+	bids_of_today:add_all(Aux.util.map(Aux.persistence.deserialize(fields[4], ';'), function(value)
+		return tonumber(value)
+	end))
+
+	local buyouts_of_today = Aux.util.set()
+	buyouts_of_today:add_all(Aux.util.map(Aux.persistence.deserialize(fields[5], ';'), function(value)
+		return tonumber(value)
+	end))
+
+	return fields[1], {
+		daily_bid_values = Aux.util.map(Aux.persistence.deserialize(fields[2], ';'), function(value)
 			return tonumber(value)
 		end),
-		-- auction count
-		-- latest_buyout_dailies
-		-- latest_bid_dailies
-		-- current_day_max_bid
-		-- current_day_buyout_histogram
-		histogram = Aux.util.map(Aux.persistence.deserialize(record[4], ';', 'x'), function(value)
+		daily_buyout_values = Aux.util.map(Aux.persistence.deserialize(fields[3], ';'), function(value)
 			return tonumber(value)
 		end),
+		bids_of_today = bids_of_today,
+		buyouts_of_today = buyouts_of_today,
 	}
 end
 
-function private.write_record(item_key, record)
-	local data = private.load_data()
-	data.item_data[item_key] = Aux.persistence.serialize({
-		record.auction_count,
-		record.day_count,
-		Aux.persistence.serialize(record.last_daily_values, ';'),
-		Aux.persistence.serialize(record.histogram, ';', 'x'),
-	},'#')
+function public.on_login()
+	local dataset = Aux.persistence.load_dataset()
+	local fields = Aux.persistence.deserialize(dataset.history, '/')
+	next_push = tonumber(fields[1]) or time() + private.PUSH_INTERVAL
+	item_records = private.decode_item_records(fields[2])
+end
+
+function public.on_logout()
+	local dataset = Aux.persistence.load_dataset()
+	dataset.history = Aux.util.join({ next_push, private.encode_item_records(item_records) }, '/')
+end
+
+function private.new_item_record()
+	return { daily_bid_values = {}, daily_buyout_values = {}, bids_of_today = Aux.util.set(), buyouts_of_today = Aux.util.set() }
 end
 
 function public.process_auction(auction_info)
 
-	-- experimental
-	local unit_high_bid = auction_info.high_bid/auction_info.aux_quantity
-	aux_max_bids[auction_info.item_key] = max(aux_max_bids[auction_info.item_key] or 0, unit_high_bid)
-	if aux_max_bids[auction_info.item_key] > 0 then
-		snipe.log(auction_info.hyperlink..': '..Aux.money.to_string(aux_max_bids[auction_info.item_key]))
-	end
-	-- experimental
-
-	local snapshot = Aux.persistence.load_snapshot()
-	if not snapshot.contains(auction_info.signature) then
-		return
-	end
-	snapshot.add(auction_info.signature, auction_info.duration)
-
-
-	if auction_info.buyout_price == 0 then
-		return
-	end
-
-	local data = private.load_data()
-
-	if data.next_push < time() then
+	if next_push < time() then
 		private.push_data()
 	end
 
-	local buyout = auction_info.buyout_price / auction_info.aux_quantity
-
-	local item_record = private.read_record(auction_info.item_key)
-
-	item_record.auction_count = item_record.auction_count + 1
-
-	for i=1,225 do
-		item_record.histogram[i] = item_record.histogram[i] or 0
-		if buyout < 1.1 ^ i then
-			item_record.histogram[i] = item_record.histogram[i] + 1
-			break
-		end
+	if auction_info.high_bid > 0 then
+		item_records[auction_info.item_key] = item_records[auction_info.item_key] or private.new_item_record()
+		local bid = Aux.round(auction_info.high_bid / auction_info.aux_quantity)
+		item_records[auction_info.item_key].bids_of_today:add(bid)
 	end
 
-	private.write_record(auction_info.item_key, item_record)
+	if auction_info.buyout_price > 0 then
+		item_records[auction_info.item_key] = item_records[auction_info.item_key] or private.new_item_record()
+		local buyout = Aux.round(auction_info.buyout_price / auction_info.aux_quantity)
+		item_records[auction_info.item_key].buyouts_of_today:add(buyout)
+	end
 end
 
-function public.price_data(item_key)
-	local item_record = private.read_record(item_key)
-	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), private.median(item_record.last_daily_values)
-end
+--function public.price_data(item_key)
+--	local item_record = private.read_record(item_key)
+--	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), private.median(item_record.last_daily_values)
+--end
 
 function public.market_value(item_key)
-	local auction_count, day_count, daily_market_value, median = public.price_data(item_key)
+	local record = item_records[item_key]
 
-	if auction_count == 0 then
-		return nil
-	elseif day_count == 0 then
-		return daily_market_value
+	if not record then
+		return
+	end
+
+	if getn(record.daily_buyout_values) == 0 then
+		return private.daily_buyout_value(item_key)
 	else
-		return median
+		return private.median(record.daily_buyout_values)
 	end
 end
 
-function private.daily_market_value(histogram)
+function private.daily_bid_value(item_key)
+	local prices = item_records[item_key].bids_of_today:values()
 
-	local auction_count = 0
-	for _, frequency in ipairs(histogram) do
-		auction_count = auction_count + frequency
+	if getn(prices) == 0 then
+		return
+	end
+	sort(prices, function(a,b) return b < a end)
+
+	local acc = 0
+	local cutoff = ceil(getn(prices) * 0.2)
+	for i=1,cutoff do
+		acc = acc + prices[i]
 	end
 
-	if auction_count == 0 then
-		return 0
-	end
-
-	-- average of lowest 25%
-	local sum, count = 0, 0
-	local limit = auction_count * 0.25
-	for i, frequency in ipairs(histogram) do
-		local limited_frequency = min(frequency, limit - count)
-		sum = sum + 1.1 ^ (i - 1) * 1.05 * limited_frequency
-		count = count + limited_frequency
-		if count >= limit then
-			break
-		end
-	end
-	return sum / limit
+	return acc / cutoff
 end
+
+function private.daily_buyout_value(item_key)
+	local prices = item_records[item_key].buyouts_of_today:values()
+
+	if getn(prices) == 0 then
+		return
+	end
+	sort(prices)
+
+	local acc = 0
+	local cutoff = ceil(getn(prices) * 0.2)
+	for i=1,cutoff do
+		acc = acc + prices[i]
+	end
+
+	return acc / cutoff
+end
+
+--function private.daily_market_value(histogram)
+--
+--	local auction_count = 0
+--	for _, frequency in ipairs(histogram) do
+--		auction_count = auction_count + frequency
+--	end
+--
+--	if auction_count == 0 then
+--		return 0
+--	end
+--
+--	-- average of lowest 25%
+--	local sum, count = 0, 0
+--	local limit = auction_count * 0.25
+--	for i, frequency in ipairs(histogram) do
+--		local limited_frequency = min(frequency, limit - count)
+--		sum = sum + 1.1 ^ (i - 1) * 1.05 * limited_frequency
+--		count = count + limited_frequency
+--		if count >= limit then
+--			break
+--		end
+--	end
+--	return sum / limit
+--end
 
 function private.median(list)
 	if getn(list) == 0 then
@@ -142,28 +186,28 @@ function private.median(list)
 end
 
 function private.push_data()
-	local data = private.load_data()
-	local item_data = data.item_data
 
-	for item_key, _ in pairs(item_data) do
+	for item_key, record in pairs(item_records) do
 
-		local item_record = private.read_record(item_key)
-
-		if getn(item_record.histogram) ~= 0 then
-
-			local daily_market_value = private.daily_market_value(item_record.histogram)
-
-			tinsert(item_record.last_daily_values, Aux.round(daily_market_value))
-			while getn(item_record.last_daily_values) > 11 do
-				tremove(item_record.last_daily_values, 1)
-			end
-
-			item_record.day_count = item_record.day_count + 1
-			item_record.histogram = {}
-
-			private.write_record(item_key, item_record)
+		local daily_bid_value = private.daily_bid_value(item_key)
+		if daily_bid_value then
+			tinsert(record.daily_bid_values, Aux.round(daily_bid_value))
 		end
+		while getn(record.daily_bid_values) > 11 do
+			tremove(record.daily_bid_values, 1)
+		end
+		record.bids_of_today = {}
+
+		local daily_buyout_value = private.daily_buyout_value(item_key)
+		if daily_buyout_value then
+			tinsert(record.daily_buyout_values, Aux.round(daily_buyout_value))
+		end
+		while getn(record.daily_buyout_values) > 11 do
+			tremove(record.daily_buyout_values, 1)
+		end
+		record.buyouts_of_today = {}
+
 	end
 
-	data.next_push = time() + private.PUSH_INTERVAL
+	next_push = time() + private.PUSH_INTERVAL
 end
