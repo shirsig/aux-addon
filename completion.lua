@@ -1,6 +1,22 @@
 local m = {}
 Aux.completion = m
 
+do
+	local sorted_item_names
+	function m.sorted_item_names()
+		if not sorted_item_names then
+			sorted_item_names = {}
+			for key, value in Aux.static.auctionable_items do
+				if type(key) == 'number' then
+					tinsert(sorted_item_names, value.name)
+				end
+			end
+			sort(sorted_item_names, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
+		end
+		return sorted_item_names
+	end
+end
+
 function m:complete()
 	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
 	return
@@ -75,15 +91,8 @@ function m:complete()
 
 		-- item names
 		if not completed_filter_string then
-			local item_filters = {}
-			for key, value in Aux.static.auctionable_items do
-				if type(key) == 'number' then
-					tinsert(item_filters, value.name..'/exact')
-				end
-			end
-			sort(item_filters)
-			for _, item_name in ipairs(item_filters) do
-				tinsert(options, item_name)
+			for _, name in ipairs(m.sorted_item_names()) do
+				tinsert(options, name..'/exact')
 			end
 		end
 
@@ -107,15 +116,7 @@ function m:complete_item()
 
 	local text = this:GetText()
 
-	local item_names = {}
-	for key, value in Aux.static.auctionable_items do
-		if type(key) == 'number' then
-			tinsert(item_names, value.name)
-		end
-	end
-	sort(item_names)
-
-	for _, item_name in ipairs(item_names) do
+	for _, item_name in ipairs(m.sorted_item_names()) do
 		if string.sub(strupper(item_name), 1, strlen(text)) == strupper(text) then
 			this:SetText(strlower(item_name))
 			this:HighlightText(strlen(text), -1)

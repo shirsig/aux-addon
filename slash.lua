@@ -11,5 +11,11 @@ function SlashCmdList.AUX(parameter)
     elseif parameter == 'delete item cache' then
         aux_auctionable_items = nil
         Aux.log('Item cache deleted; falling back to the default.')
+    elseif parameter == 'market bid' then
+        aux_market_value_type = 'bid'
+        Aux.log('Set Market Value to bid based.')
+    elseif parameter == 'market buyout' then
+        aux_market_value_type = 'buyout'
+        Aux.log('Set Market Value to buyout based.')
     end
 end

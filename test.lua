@@ -1,6 +1,22 @@
 local m = {}
 Aux.test = m
 
+function m.test_history()
+    for i=1,5000 do
+        for j=1, 100 do
+            Aux.history.process_auction({item_key = i..':0', buyout_price = j, high_bid = j, aux_quantity=1})
+        end
+    end
+end
+
+function m.key_count(table)
+    local count = 0
+    for _, _ in pairs(table) do
+        count = count + 1
+    end
+    return count
+end
+
 --StaticPopupDialogs["CANCEL_AUCTION"] = {
 --    text = TEXT(CANCEL_AUCTION_CONFIRMATION),
 --    button1 = TEXT(ACCEPT),

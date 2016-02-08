@@ -258,7 +258,7 @@ function Aux.util.set()
 
     function self:add_all(values)
         for _, value in ipairs(values) do
-            self.add(value)
+            self:add(value)
         end
     end
 
@@ -268,7 +268,7 @@ function Aux.util.set()
 
     function self:remove_all(values)
         for _, value in ipairs(values) do
-            self.remove(value)
+            self:remove(value)
         end
     end
 

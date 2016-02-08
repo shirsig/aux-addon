@@ -1,17 +1,9 @@
-local DATABASE_VERSION = 0
-
 local private, public = {}, {}
 Aux.persistence = public
 
 aux_database = {}
 
 function public.on_load()
-    private.perform_migration(aux_database)
-    aux_database.version = DATABASE_VERSION
-end
-
-function private.perform_migration()
-
 end
 
 function private.get_dataset_key()
@@ -30,13 +22,14 @@ function public.serialize(data, separator, compactor)
     local data_string = ''
     local i = 1
     while i <= getn(data) do
-        local element, count = data[i], 0
-        repeat
+        local element, count = data[i], 1
+        while compactor and data[i + 1] == element do
             count = count + 1
             i = i + 1
-        until (not compactor) or data[i] ~= element
-        local part = (count > 1 and compactor) and element..compactor..count or element
-        data_string = data_string..(data_string == '' and '' or separator)..part
+        end
+        local part = count > 1 and element..compactor..count or element
+        data_string = data_string..(i == 1 and '' or separator)..part
+        i = i + 1
     end
 
     return data_string
