@@ -13,9 +13,9 @@ function SlashCmdList.AUX(parameter)
         Aux.log('Item cache deleted; falling back to the default.')
     elseif parameter == 'market bid' then
         aux_market_value_type = 'bid'
-        Aux.log('Set Market Value to bid based.')
+        Aux.log('Set market value to bid based.')
     elseif parameter == 'market buyout' then
         aux_market_value_type = 'buyout'
-        Aux.log('Set Market Value to buyout based.')
+        Aux.log('Set market value to buyout based.')
     end
 end

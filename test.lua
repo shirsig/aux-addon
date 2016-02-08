@@ -1,10 +1,14 @@
 local m = {}
 Aux.test = m
 
-function m.test_history()
-    for i=1,5000 do
-        for j=1, 100 do
-            Aux.history.process_auction({item_key = i..':0', buyout_price = j, high_bid = j, aux_quantity=1})
+do
+    local id = 0
+    function m.test_history()
+        for i=1,500 do
+            for j=1, 100 do
+                Aux.history.process_auction({item_key = id..':0', buyout_price = j, high_bid = j, aux_quantity=1})
+            end
+            id = id + 1
         end
     end
 end

@@ -38,6 +38,7 @@ end
 
 local defaultColScripts = {
     OnEnter = function()
+        this.row.mouseover = true
         if not this.row.data then return end
         if not this.st.highlightDisabled then
             this.row.highlight:Show()
@@ -50,6 +51,7 @@ local defaultColScripts = {
     end,
 
     OnLeave = function()
+        this.row.mouseover = false
         if not this.row.data then return end
         if this.st.selectionDisabled or not this.st.selected or this.st.selected ~= GetTableIndex(this.st.rowData, this.row.data) then
             this.row.highlight:Hide()
@@ -116,7 +118,10 @@ local methods = {
                 if not data then break end
                 st.rows[i].data = data
 
-                if (st.selected == GetTableIndex(st.rowData, data) and not st.selectionDisabled) or (st.highlighted and st.highlighted == GetTableIndex(st.rowData, data)) then
+                if (st.selected == GetTableIndex(st.rowData, data) and not st.selectionDisabled)
+                        or (st.highlighted and st.highlighted == GetTableIndex(st.rowData, data))
+                        or st.rows[i].mouseover
+                then
                     st.rows[i].highlight:Show()
                 else
                     st.rows[i].highlight:Hide()

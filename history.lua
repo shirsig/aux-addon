@@ -67,13 +67,13 @@ function private.new_item_record()
 	return { daily_bid_values = {}, daily_buyout_values = {}, bids_of_today = Aux.util.set(), buyouts_of_today = Aux.util.set() }
 end
 
-function private.price_class(price)
-	return Aux.round(math.log(price) / math.log(1.1))
-end
-
-function private.price_class_price(class)
-	return 1.1^class
-end
+--function private.price_class(price)
+--	return Aux.round(math.log(price) / math.log(1.1))
+--end
+--
+--function private.price_class_price(class)
+--	return 1.1^class
+--end
 
 function public.process_auction(auction_info)
 
@@ -127,6 +127,7 @@ function private.daily_bid_value(item_key)
 	if getn(prices) == 0 then
 		return
 	end
+
 	sort(prices, function(a,b) return b < a end)
 
 	local acc = 0
@@ -140,12 +141,12 @@ function private.daily_bid_value(item_key)
 end
 
 function private.daily_buyout_value(item_key)
-	local data = private.load_data()
 	local prices = data.item_records[item_key].buyouts_of_today:values()
 
 	if getn(prices) == 0 then
 		return
 	end
+
 	sort(prices)
 
 	local acc = 0
@@ -173,7 +174,7 @@ function private.median(list)
 	return (sorted_list[floor(middle)] + sorted_list[ceil(middle)]) / 2
 end
 
-function public.push_data()
+function private.push_data()
 
 	for item_key, record in pairs(data.item_records) do
 
