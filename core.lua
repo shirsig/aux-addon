@@ -32,13 +32,13 @@ function Aux.on_load()
                 if market_value then
                     local market_value_line = 'Value'..(aux_conservative_value and ' (Cons): ' or ': ')
                     if count == 1 then
-                        market_value_line = market_value_line..EnhTooltip.GetTextGSC(market_value)
+                        market_value_line = market_value_line..Aux.money.to_string(market_value, nil, true, nil, '|cffffffff')
                     else
-                        market_value_line = market_value_line..EnhTooltip.GetTextGSC(market_value * count)..' / '..EnhTooltip.GetTextGSC(market_value)
+                        market_value_line = market_value_line..Aux.money.to_string(market_value * count, nil, true, nil, '|cffffffff')..' / '..Aux.money.to_string(market_value, nil, true, nil, '|cffffffff')
                     end
 
                     EnhTooltip.AddLine(market_value_line, nil, true)
-                    EnhTooltip.LineColor(0.1,0.8,0.5)
+                    EnhTooltip.LineColor(130/255,130/255,250/255)
                 end
 --            end
         end)
