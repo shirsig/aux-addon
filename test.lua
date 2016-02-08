@@ -21,6 +21,23 @@ function m.key_count(table)
     return count
 end
 
+do
+
+    local table = {}
+
+    function m.insert()
+        for i=1,1000000 do
+            tinsert(table, i)
+        end
+    end
+    function m.getn()
+        for i=1,100 do
+            snipe.log(getn(table))
+        end
+    end
+
+end
+
 --StaticPopupDialogs["CANCEL_AUCTION"] = {
 --    text = TEXT(CANCEL_AUCTION_CONFIRMATION),
 --    button1 = TEXT(ACCEPT),

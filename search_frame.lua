@@ -159,6 +159,10 @@ function private.get_form_filter()
 end
 
 function private.prettify_search(search)
+    if search == '' then
+        return NORMAL_FONT_COLOR_CODE..'No filter'..FONT_COLOR_CODE_CLOSE
+    end
+
     local item_pattern = '([^/;]+)([^;]*)/exact'
     while true do
         local _, _, name, in_between = strfind(search, item_pattern)
@@ -847,8 +851,9 @@ function public.start_search(filter_string)
                 end
             end,
             on_read_auction = function(auction_info)
---                tinsert(scanned_records, private.create_auction_record(auction_info))
-                tinsert(scanned_records, auction_info)
+                if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
+                    tinsert(scanned_records, auction_info)
+                end
             end,
             on_complete = function()
                 private.results_listing:SetDatabase()
