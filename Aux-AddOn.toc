@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: Aux
 ## Notes: A lightweight addon designed to help manage auctions
-## SavedVariablesPerCharacter: aux_recent_searches, aux_favorite_searches, aux_price_per_unit, aux_market_value_type, aux_scale
+## SavedVariablesPerCharacter: aux_recent_searches, aux_favorite_searches, aux_price_per_unit, aux_conservative_value, aux_scale
 ## SavedVariables: aux_database, aux_auctionable_items
 
 slash.lua
@@ -20,7 +20,7 @@ post.lua
 listing.lua
 auction_listing.lua
 item_listing.lua
-history.xml
+history.lua
 info.xml
 completion.xml
 

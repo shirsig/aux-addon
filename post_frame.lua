@@ -45,7 +45,7 @@ function private.update_auction_listing()
     if selected_item then
         for i, auction_record in ipairs(existing_auctions[selected_item.key] or {}) do
             local stack_size = auction_record.stack_size == private.stack_size_slider:GetValue() and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size
-            local market_value = Aux.history.market_value(auction_record.item_key)
+            local market_value = Aux.history.value(auction_record.item_key)
             tinsert(auction_rows, {
                 cols = {
                     { value=auction_record.count },
@@ -612,7 +612,7 @@ function private.undercutting_suggestion()
 end
 
 function private.market_value_suggestion()
-    local price_suggestion = Aux.history.market_value(selected_item.key) and 1.2 * Aux.history.market_value(selected_item.key)
+    local price_suggestion = Aux.history.value(selected_item.key) and 1.2 * Aux.history.value(selected_item.key)
     if not price_suggestion then
         return 0, 0
     end

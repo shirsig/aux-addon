@@ -11,11 +11,11 @@ function SlashCmdList.AUX(parameter)
     elseif parameter == 'delete item cache' then
         aux_auctionable_items = nil
         Aux.log('Item cache deleted; falling back to the default.')
-    elseif parameter == 'market bid' then
-        aux_market_value_type = 'bid'
-        Aux.log('Set market value to bid based.')
-    elseif parameter == 'market buyout' then
-        aux_market_value_type = 'buyout'
-        Aux.log('Set market value to buyout based.')
+    elseif parameter == 'conservative value on' then
+        aux_conservative_value = true
+        Aux.log('Conservative value activated')
+    elseif parameter == 'conservative value off' then
+        aux_conservative_value = false
+        Aux.log('Conservative value deactivated.')
     end
 end

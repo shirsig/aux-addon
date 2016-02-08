@@ -73,7 +73,7 @@ function private.update_listing()
         else
             status = RED_FONT_COLOR_CODE..'Outbid'..FONT_COLOR_CODE_CLOSE
         end
-        local market_value = Aux.history.market_value(auction_record.item_key)
+        local market_value = Aux.history.value(auction_record.item_key)
         tinsert(auction_rows, {
             cols = {
                 { value='|c'..Aux.quality_color(auction_record.quality)..'['..auction_record.name..']'..'|r' },

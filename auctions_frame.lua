@@ -55,7 +55,7 @@ function private.update_listing()
 
     local auction_rows = {}
     for i, auction_record in auction_records or {} do
-        local market_value = Aux.history.market_value(auction_record.item_key)
+        local market_value = Aux.history.value(auction_record.item_key)
         tinsert(auction_rows, {
             cols = {
                 { value='|c'..Aux.quality_color(auction_record.quality)..'['..auction_record.name..']'..'|r' },

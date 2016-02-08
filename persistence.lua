@@ -19,6 +19,7 @@ function public.load_dataset()
 end
 
 function public.serialize(data, separator, compactor)
+
     local data_string = ''
     local i = 1
     while i <= getn(data) do

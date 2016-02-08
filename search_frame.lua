@@ -198,7 +198,10 @@ function public.on_load()
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Search')
-        btn:SetScript('OnClick', public.start_search)
+        btn:SetScript('OnClick', function()
+            private.search_box:ClearFocus()
+            public.start_search()
+        end)
         private.search_button = btn
     end
     do
