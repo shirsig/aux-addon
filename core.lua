@@ -30,11 +30,11 @@ function Aux.on_load()
 
                 local market_value = Aux.history.value(item_key)
                 if market_value then
-                    local market_value_line
+                    local market_value_line = 'Value'..(aux_conservative_value and ' (Cons): ' or ': ')
                     if count == 1 then
-                        market_value_line = 'Value: '..EnhTooltip.GetTextGSC(market_value)
+                        market_value_line = market_value_line..EnhTooltip.GetTextGSC(market_value)
                     else
-                        market_value_line = 'Value: '..EnhTooltip.GetTextGSC(market_value * count)..' / '..EnhTooltip.GetTextGSC(market_value)
+                        market_value_line = market_value_line..EnhTooltip.GetTextGSC(market_value * count)..' / '..EnhTooltip.GetTextGSC(market_value)
                     end
 
                     EnhTooltip.AddLine(market_value_line, nil, true)

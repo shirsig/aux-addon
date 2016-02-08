@@ -8,7 +8,7 @@ private.NEW_RECORD = '####'
 
 function private.load_data()
 	local dataset = Aux.persistence.load_dataset()
-	dataset.history = dataset.history or { next_push = time() + private.PUSH_INTERVAL, item_data = {} }
+	dataset.history = dataset.history or { next_push = time() + private.PUSH_INTERVAL, item_records = {} }
 	return dataset.history
 end
 
@@ -20,7 +20,7 @@ function private.read_record(item_key)
 		private.push_data()
 	end
 
-	local fields = Aux.persistence.deserialize(data.item_data[item_key] or private.NEW_RECORD, '#')
+	local fields = Aux.persistence.deserialize(data.item_records[item_key] or private.NEW_RECORD, '#')
 	return {
 --		auction_count = tonumber(record[1]),
 --		day_count = tonumber(record[2]),
@@ -38,7 +38,7 @@ end
 
 function private.write_record(item_key, record)
 	local data = private.load_data()
-	data.item_data[item_key] = Aux.persistence.serialize({
+	data.item_records[item_key] = Aux.persistence.serialize({
 		record.daily_max_bid or '',
 		record.daily_min_buyout or '',
 		record.daily_max_buyout or '',
@@ -49,11 +49,9 @@ end
 
 function public.process_auction(auction_info)
 
---	item_record.auction_count = item_record.auction_count + 1
-
-	local data = private.load_data()
-
 	local item_record = private.read_record(auction_info.item_key)
+
+	--	item_record.auction_count = item_record.auction_count + 1
 
 	if auction_info.high_bid > 0 then
 		local unit_high_bid = ceil(auction_info.high_bid / auction_info.aux_quantity)
@@ -96,17 +94,19 @@ end
 function private.market_value(item_key)
 	local item_record = private.read_record(item_key)
 
-	if item_record.daily_max_bid and item_record.daily_min_buyout then
-		return max(item_record.daily_max_bid, item_record.daily_min_buyout)
-	elseif item_record.daily_min_buyout then
-		return max(ceil(item_record.daily_min_buyout * 1.15), item_record.daily_max_buyout)
-	elseif item_record.daily_max_bid then
+	local buyout_estimate = item_record.daily_min_buyout and min(ceil(item_record.daily_min_buyout * 1.15), item_record.daily_max_buyout)
+
+	if buyout_estimate and item_record.daily_max_bid then
+		return max(item_record.daily_max_bid, buyout_estimate)
+	elseif buyout_estimate then
+		return buyout_estimate
+	else
 		return item_record.daily_max_bid
 	end
 end
 
 function private.conservative_market_value(item_key)
-	local item_record = private.read_record[item_key]
+	local item_record = private.read_record(item_key)
 
 	if item_record.daily_max_bid and item_record.daily_min_buyout then
 		return min(item_record.daily_max_bid, item_record.daily_min_buyout)
@@ -132,9 +132,8 @@ end
 
 function private.push_data()
 	local data = private.load_data()
-	local item_data = data.item_data
 
-	for item_key, _ in pairs(item_data) do
+	for item_key, _ in pairs(data.item_records) do
 
 		local item_record = private.read_record(item_key)
 
