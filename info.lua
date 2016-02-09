@@ -198,36 +198,59 @@ end
 function public.set_shopping_tooltip(slot)
     local index1, index2 = public.inventory_index(slot)
 
+    local tooltips = {}
     if index1 then
-        ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
-        ShoppingTooltip1:SetInventoryItem('player', index1)
-        ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
-
-        --        for i = TOOLTIP_LENGTH-1,1,-1 do
---            for _, side in ipairs({'Left', 'Right'}) do
---                getglobal('ShoppingTooltip1Text'..side..(i + 1)):SetWidth(getglobal('ShoppingTooltip1Text'..side..i):GetWidth())
---                getglobal('ShoppingTooltip1Text'..side..(i + 1)):SetText(getglobal('ShoppingTooltip1Text'..side..i):GetText())
---                getglobal('ShoppingTooltip1Text'..side..(i + 1)):SetTextColor(getglobal('ShoppingTooltip1Text'..side..i):GetTextColor())
---            end
---        end
---
---        ShoppingTooltip1TextLeft1:SetText('Currently Equipped') -- TODO
---        ShoppingTooltip1TextLeft1:SetTextColor(0.5, 0.5, 0.5)
-
-        if index2 then
-            ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
-            ShoppingTooltip2:SetInventoryItem('player', index2)
-            ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
+        local tooltip = public.tooltip(function(tt) tt:SetInventoryItem('player', index1) end)
+        if getn(tooltip) > 0 then
+            tinsert(tooltips, tooltip)
         end
+    end
+    if index2 then
+        local tooltip = public.tooltip(function(tt) tt:SetInventoryItem('player', index2) end)
+        if getn(tooltip) > 0 then
+            tinsert(tooltips, tooltip)
+        end
+    end
+
+    if tooltips[1] then
+        tinsert(tooltips[1], 1, { left_text = 'Currently Equipped', left_color = { 0.5, 0.5, 0.5 } })
+
+        ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
+        public.load_tooltip(ShoppingTooltip1, tooltips[1])
+        ShoppingTooltip1:Show()
+        ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
+    end
+
+    if tooltips[2] then
+        tinsert(tooltips[2], 1, { left_text = 'Currently Equipped', left_color = { 0.5, 0.5, 0.5 } })
+
+        ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
+        public.load_tooltip(ShoppingTooltip2, tooltips[2])
+        ShoppingTooltip2:Show()
+        ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
     end
 end
 
 function public.tooltip_match(pattern, tooltip)
     return Aux.util.any(tooltip, function(line)
-        local left_match = line[1].text and strupper(line[1].text) == strupper(pattern)
-        local right_match = line[2].text and strupper(line[2].text) == strupper(pattern)
+        local left_match = line.left.text and strupper(line.left_text) == strupper(pattern)
+        local right_match = line.left.text and strupper(line.right_text) == strupper(pattern)
         return left_match or right_match
     end)
+end
+
+function public.load_tooltip(frame, tooltip)
+    for _, line in ipairs(tooltip) do
+        if line.right_text then
+            frame:AddDoubleLine(line.left_text, line.right_text, line.left_color[1], line.left_color[2], line.left_color[3], line.right_color[1], line.right_color[2], line.right_color[3])
+        else
+            frame:AddLine(line.left_text, line.left_color[1], line.left_color[2], line.left_color[3], true)
+        end
+    end
+    for i = 1,TOOLTIP_LENGTH do -- TODO why is this needed?
+        getglobal(frame:GetName()..'TextLeft'..i):SetJustifyH('LEFT')
+        getglobal(frame:GetName()..'TextRight'..i):SetJustifyH('LEFT')
+    end
 end
 
 function public.tooltip(setter)
@@ -242,15 +265,21 @@ function public.tooltip(setter)
 	
 	local tooltip = {}
 	for i = 1, TOOLTIP_LENGTH do
-		local left, right = {}, {}
+
+		local left_text = getglobal('AuxInfoTooltipTextLeft'..i):GetText()
+		local left_color = { getglobal('AuxInfoTooltipTextLeft'..i):GetTextColor() }
 		
-		left.text = getglobal('AuxInfoTooltipTextLeft'..i):GetText()
-		left.color = { getglobal('AuxInfoTooltipTextLeft'..i):GetTextColor() }
-		
-		right.text = getglobal('AuxInfoTooltipTextRight'..i):GetText()
-		right.color = { getglobal('AuxInfoTooltipTextRight'..i):GetTextColor() }
-		
-		tinsert(tooltip, {left or '', right or ''})
+		local right_text = getglobal('AuxInfoTooltipTextRight'..i):GetText()
+		local right_color = { getglobal('AuxInfoTooltipTextRight'..i):GetTextColor() }
+
+        if left_text or right_text then
+		    tinsert(tooltip, {
+                left_text = left_text,
+                left_color = left_color,
+                right_text = right_text,
+                right_color = right_color,
+            })
+        end
 	end
 	
 	for i = 1, TOOLTIP_LENGTH do
@@ -263,8 +292,8 @@ end
 
 function private.item_charges(tooltip)
 	for _, line in ipairs(tooltip) do
-		local _, _, left_charges_string = strfind(line[1].text or '', "^(%d+) Charges")
-		local _, _, right_charges_string = strfind(line[2].text or '', "^(%d+) Charges$")
+		local _, _, left_charges_string = strfind(line.left_text or '', '^(%d+) Charges')
+		local _, _, right_charges_string = strfind(line.right_text or '', '^(%d+) Charges$')
 		local charges = tonumber(left_charges_string) or tonumber(right_charges_string)
 		if charges then
 			return charges

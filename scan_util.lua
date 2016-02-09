@@ -311,7 +311,7 @@ function m.validator(filter)
                     tinsert(stack, not tremove(stack))
                 elseif op ~= 'TT' then
                     tinsert(stack, Aux.util.any(record.tooltip, function(entry)
-                        return strfind(strupper(entry[1].text or ''), strupper(op), 1, true) or strfind(strupper(entry[2].text or ''), strupper(op), 1, true)
+                        return strfind(strupper(entry.left_text or ''), strupper(op), 1, true) or strfind(strupper(entry.right_text or ''), strupper(op), 1, true)
                     end) and true or false)
                 end
             end
