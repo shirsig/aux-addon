@@ -19,28 +19,25 @@ function Aux.on_load()
             local item_id, suffix_id = EnhTooltip.BreakLink(link)
             local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
---            local auction_count, day_count, daily_market_value, median = Aux.history.price_data(item_key)
+            local value = Aux.history.value(item_key)
 
---            if auction_count == 0 then
---                EnhTooltip.AddLine('Never seen at auction', nil, true)
---                EnhTooltip.LineColor(0.5, 0.8, 0.5)
---            else
---                EnhTooltip.AddLine('Seen '..auction_count..' '..Aux_PluralizeIf('time', auction_count)..' at auction', nil, true)
---                EnhTooltip.LineColor(0.5, 0.8, 0.1)
+            if value then
+                local value_line = 'Value: '
 
-                local market_value = Aux.history.value(item_key)
-                if market_value then
-                    local market_value_line = 'Value'..(aux_conservative_value and ' (Cons): ' or ': ')
-                    if count == 1 then
-                        market_value_line = market_value_line..Aux.money.to_string(market_value, nil, true, nil, '|cffffffff')
-                    else
-                        market_value_line = market_value_line..Aux.money.to_string(market_value * count, nil, true, nil, '|cffffffff')..' / '..Aux.money.to_string(market_value, nil, true, nil, '|cffffffff')
-                    end
-
-                    EnhTooltip.AddLine(market_value_line, nil, true)
-                    EnhTooltip.LineColor(130/255,130/255,250/255)
+                if count == 1 then
+                    value_line = value_line..EnhTooltip.GetTextGSC(value)
+                else
+                    value_line = value_line..EnhTooltip.GetTextGSC(value * count)..' / '..EnhTooltip.GetTextGSC(value)
                 end
---            end
+
+                local _, _, _, market_values, max_bids = Aux.history.price_data()
+                if getn(aux_conservative_history and max_bids or market_values) < 5 then
+                    value_line = value_line..' (?)'
+                end
+
+                EnhTooltip.AddLine(value_line, nil, true)
+                EnhTooltip.LineColor(0.1,0.8,0.5)
+            end
         end)
     end
 

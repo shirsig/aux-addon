@@ -1,41 +1,12 @@
 local m = {}
 Aux.test = m
 
-do
-    local id = 0
-    function m.test_history()
-        for i=1,500 do
-            for j=1, 100 do
-                Aux.history.process_auction({item_key = id..':0', buyout_price = j, high_bid = j, aux_quantity=1})
-            end
-            id = id + 1
-        end
-    end
-end
-
 function m.key_count(table)
     local count = 0
     for _, _ in pairs(table) do
         count = count + 1
     end
     return count
-end
-
-do
-
-    local table = {}
-
-    function m.insert()
-        for i=1,1000000 do
-            tinsert(table, i)
-        end
-    end
-    function m.getn()
-        for i=1,100 do
-            snipe.log(getn(table))
-        end
-    end
-
 end
 
 --StaticPopupDialogs["CANCEL_AUCTION"] = {

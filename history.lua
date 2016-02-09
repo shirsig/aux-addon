@@ -22,8 +22,6 @@ function private.read_record(item_key)
 	if data.item_records[item_key] then
 		local fields = Aux.persistence.deserialize(data.item_records[item_key], '#')
 		record = {
-	--		auction_count = tonumber(record[1]),
-	--		day_count = tonumber(record[2]),
 			next_push = tonumber(fields[1]),
 			daily_max_bid = tonumber(fields[2]),
 			daily_min_buyout = tonumber(fields[3]),
@@ -79,27 +77,46 @@ function public.process_auction(auction_info)
 	private.write_record(auction_info.item_key, item_record)
 end
 
---function public.price_data(item_key)
---	local item_record = private.read_record(item_key)
---	return item_record.auction_count, item_record.day_count, private.daily_market_value(item_record.histogram), private.median(item_record.last_daily_values)
---end
+function public.price_data(item_key)
+	local item_record = private.read_record(item_key)
+	return item_record.daily_max_bid, item_record.daily_min_buyout, item_record.daily_max_buyout, item_record.market_values, item_record.max_bids
+end
 
-function public.value(item_key)
+function public.conservative_value(item_key)
 	local item_record = private.read_record(item_key)
 
-	local past_market_values
-	if aux_conservative_value then
-		past_market_values = item_record.max_bids
+	if getn(item_record.max_bids) > 0 then
+		return private.median(item_record.max_bids)
 	else
-		past_market_values = item_record.market_values
-	end
-
-	if getn(past_market_values) > 0 then
-		return private.median(past_market_values)
-	elseif aux_conservative_value then
 		return item_record.daily_max_bid
+	end
+end
+
+function public.value(item_key)
+	if aux_conservative_history then
+		return private.conservative_historical_value(item_key)
+	else
+		return private.historical_value(item_key)
+	end
+end
+
+function private.historical_value(item_key)
+	local item_record = private.read_record(item_key)
+
+	if getn(item_record.market_values) > 0 then
+		return private.median(item_record.market_values)
 	else
 		return private.market_value(item_key)
+	end
+end
+
+function private.conservative_historical_value(item_key)
+	local item_record = private.read_record(item_key)
+
+	if getn(item_record.max_bids) > 0 then
+		return private.median(item_record.max_bids)
+	else
+		return item_record.daily_max_bid
 	end
 end
 
@@ -116,7 +133,7 @@ function private.market_value(item_key)
 		estimate = item_record.daily_max_bid
 	end
 
-	if item_record.daily_max_buyout then
+	if item_record.daily_max_buyout and item_record.daily_max_buyout > estimate then
 		estimate = min(ceil(estimate * 1.15), item_record.daily_max_buyout)
 	end
 
@@ -158,54 +175,4 @@ function private.push_record(item_record)
 	item_record.daily_min_buyout = nil
 	item_record.daily_max_buyout = nil
 	item_record.next_push = time() + private.PUSH_INTERVAL
-end
-
-function private.snapshot(data)
-	local self = {}
-
-	function self.add(signature, duration)
-		local HOUR = 60 * 60 * 60
-		local seconds
-		if duration == 1 then
-			seconds = HOUR / 2
-		elseif duration == 2 then
-			seconds = HOUR * 2
-		elseif duration == 3 then
-			seconds = HOUR * 8
-		elseif duration == 4 then
-			seconds = HOUR * 24
-		end
-		data[signature] = time() + seconds
-	end
-
-	function self.contains(signature)
-		return data[signature] ~= nil and data[signature] >= time()
-	end
-
-	function self.compact()
-		for signature, expiration in pairs(data) do
-			if expiration < time() then
-				data[signature] = nil
-			end
-		end
-	end
-
-	function self.signatures()
-		local signatures = {}
-		for signature, _ in pairs(data) do
-			if data[signature] >= time() then
-				tinsert(signatures, signature)
-			end
-		end
-		return signatures
-	end
-
-	return self
-end
-
-function public.load_snapshot()
-	local dataset = public.load_dataset()
-	dataset.snapshot = dataset.snapshot or {}
-	local snapshot = private.snapshot(dataset.snapshot)
-	return snapshot
 end
