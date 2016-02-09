@@ -233,8 +233,8 @@ end
 
 function public.tooltip_match(pattern, tooltip)
     return Aux.util.any(tooltip, function(line)
-        local left_match = line.left.text and strupper(line.left_text) == strupper(pattern)
-        local right_match = line.left.text and strupper(line.right_text) == strupper(pattern)
+        local left_match = line.left_text and strupper(line.left_text) == strupper(pattern)
+        local right_match = line.right_text and strupper(line.right_text) == strupper(pattern)
         return left_match or right_match
     end)
 end
