@@ -1,8 +1,6 @@
 local private, public = {}, {}
 Aux.history = public
 
-aux_conservative_value = false
-
 private.PUSH_INTERVAL = 57600
 
 function private.new_record()
@@ -82,16 +80,6 @@ function public.price_data(item_key)
 	return item_record.daily_max_bid, item_record.daily_min_buyout, item_record.daily_max_buyout, item_record.market_values, item_record.max_bids
 end
 
-function public.conservative_value(item_key)
-	local item_record = private.read_record(item_key)
-
-	if getn(item_record.max_bids) > 0 then
-		return private.median(item_record.max_bids)
-	else
-		return item_record.daily_max_bid
-	end
-end
-
 function public.value(item_key)
 	if aux_conservative_history then
 		return private.conservative_historical_value(item_key)
@@ -106,7 +94,7 @@ function private.historical_value(item_key)
 	if getn(item_record.market_values) > 0 then
 		return private.median(item_record.market_values)
 	else
-		return private.market_value(item_key)
+		return private.market_value(item_record)
 	end
 end
 
@@ -120,9 +108,7 @@ function private.conservative_historical_value(item_key)
 	end
 end
 
-function private.market_value(item_key)
-	local item_record = private.read_record(item_key)
-
+function private.market_value(item_record)
 	local estimate
 
 	if item_record.daily_min_buyout and item_record.daily_max_bid then
@@ -156,7 +142,7 @@ function private.median(list)
 end
 
 function private.push_record(item_record)
-	local market_value = private.market_value(item_key)
+	local market_value = private.market_value(item_record)
 	if market_value then
 		tinsert(item_record.market_values, market_value)
 		while getn(item_record.market_values) > 11 do
