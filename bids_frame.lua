@@ -20,6 +20,12 @@ function public.on_load()
     private.listing:SetHandler('OnClick', function(table, row_data, column)
         private.on_row_click(row_data.record)
     end)
+    private.listing:SetHandler('OnEnter', function(table, row_data, column)
+        Aux.info.set_tooltip(row_data.record.itemstring, row_data.record.EnhTooltip_info, column.row, 'ANCHOR_RIGHT', 0, 0)
+    end)
+    private.listing:SetHandler('OnLeave', function(table, row_data, column)
+        GameTooltip:Hide()
+    end)
 
     do
         local status_bar = Aux.gui.status_bar(AuxBidsFrame)
