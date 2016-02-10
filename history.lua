@@ -4,7 +4,7 @@ Aux.history = public
 private.PUSH_INTERVAL = 57600
 
 function private.new_record()
-	return { next_push = time() + private.PUSH_INTERVAL, market_values = {}, max_bids = {} }
+	return { next_push = time() + private.PUSH_INTERVAL, market_values = {} }
 end
 
 function private.load_data()
@@ -98,9 +98,7 @@ function private.market_value(item_record)
 		estimate = item_record.daily_max_bid
 	end
 
-	if item_record.daily_max_price and item_record.daily_max_price > estimate then
-		estimate = min(ceil(estimate * 1.15), item_record.daily_max_price)
-	end
+	estimate = min(ceil(estimate * 1.15), item_record.daily_max_price)
 
 	return estimate
 end
@@ -121,6 +119,7 @@ function private.median(list)
 end
 
 function private.push_record(item_record)
+
 	local market_value = private.market_value(item_record)
 	if market_value then
 		tinsert(item_record.market_values, market_value)
