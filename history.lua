@@ -27,9 +27,6 @@ function private.read_record(item_key)
 			market_values = Aux.util.map(Aux.persistence.deserialize(fields[5], ';'), function(value)
 				return tonumber(value)
 			end),
-			max_bids = Aux.util.map(Aux.persistence.deserialize(fields[6], ';'), function(value)
-				return tonumber(value)
-			end),
 		}
 	else
 		record = private.new_record()
@@ -51,7 +48,6 @@ function private.write_record(item_key, record)
 		record.daily_min_buyout or '',
 		record.daily_max_price or '',
 		Aux.persistence.serialize(record.market_values, ';'),
-		Aux.persistence.serialize(record.max_bids, ';', 'x'),
 	},'#')
 end
 
@@ -78,34 +74,16 @@ end
 
 function public.price_data(item_key)
 	local item_record = private.read_record(item_key)
-	return item_record.daily_max_bid, item_record.daily_min_buyout, item_record.daily_max_price, item_record.market_values, item_record.max_bids
+	return item_record.daily_max_bid, item_record.daily_min_buyout, item_record.daily_max_price, item_record.market_values
 end
 
 function public.value(item_key)
-	if aux_conservative_history then
-		return private.conservative_historical_value(item_key)
-	else
-		return private.historical_value(item_key)
-	end
-end
-
-function private.historical_value(item_key)
 	local item_record = private.read_record(item_key)
 
 	if getn(item_record.market_values) > 0 then
 		return private.median(item_record.market_values)
 	else
 		return private.market_value(item_record)
-	end
-end
-
-function private.conservative_historical_value(item_key)
-	local item_record = private.read_record(item_key)
-
-	if getn(item_record.max_bids) > 0 then
-		return private.median(item_record.max_bids)
-	else
-		return item_record.daily_max_bid
 	end
 end
 
@@ -148,13 +126,6 @@ function private.push_record(item_record)
 		tinsert(item_record.market_values, market_value)
 		while getn(item_record.market_values) > 11 do
 			tremove(item_record.market_values, 1)
-		end
-	end
-
-	if item_record.daily_max_bid then
-		tinsert(item_record.max_bids, item_record.daily_max_bid)
-		while getn(item_record.max_bids) > 11 do
-			tremove(item_record.max_bids, 1)
 		end
 	end
 

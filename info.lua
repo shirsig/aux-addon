@@ -119,7 +119,7 @@ function public.auction(index, type)
     local tooltip = public.tooltip(function(tt) tt:SetAuctionItem(type, index) end)
     local charges = private.item_charges(tooltip)
     local aux_quantity = charges or count
-    local bid_price = (high_bid > 0 and high_bid or start_price) + min_increment
+    local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
 
     return {
         item_id = item_id,
