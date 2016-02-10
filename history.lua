@@ -98,7 +98,7 @@ function private.market_value(item_record)
 		estimate = item_record.daily_max_bid
 	end
 
-	estimate = min(ceil(estimate * 1.15), item_record.daily_max_price)
+	estimate = estimate and min(ceil(estimate * 1.15), item_record.daily_max_price)
 
 	return estimate
 end
