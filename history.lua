@@ -23,7 +23,7 @@ function private.read_record(item_key)
 			next_push = tonumber(fields[1]),
 			daily_max_bid = tonumber(fields[2]),
 			daily_min_buyout = tonumber(fields[3]),
-			daily_max_buyout = tonumber(fields[4]),
+			daily_max_price = tonumber(fields[4]),
 			market_values = Aux.util.map(Aux.persistence.deserialize(fields[5], ';'), function(value)
 				return tonumber(value)
 			end),
@@ -49,7 +49,7 @@ function private.write_record(item_key, record)
 		record.next_push or '',
 		record.daily_max_bid or '',
 		record.daily_min_buyout or '',
-		record.daily_max_buyout or '',
+		record.daily_max_price or '',
 		Aux.persistence.serialize(record.market_values, ';'),
 		Aux.persistence.serialize(record.max_bids, ';', 'x'),
 	},'#')
@@ -59,25 +59,26 @@ function public.process_auction(auction_info)
 
 	local item_record = private.read_record(auction_info.item_key)
 
-	--	item_record.auction_count = item_record.auction_count + 1
+	local unit_high_bid = ceil(auction_info.high_bid / auction_info.aux_quantity)
+	local unit_bid_price = ceil(auction_info.bid_price / auction_info.aux_quantity)
+	local unit_buyout_price = ceil(auction_info.buyout_price / auction_info.aux_quantity)
 
 	if auction_info.high_bid > 0 then
-		local unit_high_bid = ceil(auction_info.high_bid / auction_info.aux_quantity)
 		item_record.daily_max_bid = item_record.daily_max_bid and max(item_record.daily_max_bid, unit_high_bid) or unit_high_bid
 	end
 
 	if auction_info.buyout_price > 0 then
-		local unit_buyout_price = ceil(auction_info.buyout_price / auction_info.aux_quantity)
-		item_record.daily_max_buyout = item_record.daily_max_buyout and max(item_record.daily_max_buyout, unit_buyout_price) or unit_buyout_price
 		item_record.daily_min_buyout = item_record.daily_min_buyout and min(item_record.daily_min_buyout, unit_buyout_price) or unit_buyout_price
 	end
+
+	item_record.daily_max_price = max(item_record.daily_price or 0, unit_buyout_price, unit_bid_price)
 
 	private.write_record(auction_info.item_key, item_record)
 end
 
 function public.price_data(item_key)
 	local item_record = private.read_record(item_key)
-	return item_record.daily_max_bid, item_record.daily_min_buyout, item_record.daily_max_buyout, item_record.market_values, item_record.max_bids
+	return item_record.daily_max_bid, item_record.daily_min_buyout, item_record.daily_max_price, item_record.market_values, item_record.max_bids
 end
 
 function public.value(item_key)
@@ -119,8 +120,8 @@ function private.market_value(item_record)
 		estimate = item_record.daily_max_bid
 	end
 
-	if item_record.daily_max_buyout and item_record.daily_max_buyout > estimate then
-		estimate = min(ceil(estimate * 1.15), item_record.daily_max_buyout)
+	if item_record.daily_max_price and item_record.daily_max_price > estimate then
+		estimate = min(ceil(estimate * 1.15), item_record.daily_max_price)
 	end
 
 	return estimate
@@ -159,6 +160,6 @@ function private.push_record(item_record)
 
 	item_record.daily_max_bid = nil
 	item_record.daily_min_buyout = nil
-	item_record.daily_max_buyout = nil
+	item_record.daily_max_price = nil
 	item_record.next_push = time() + private.PUSH_INTERVAL
 end

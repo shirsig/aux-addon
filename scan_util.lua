@@ -24,18 +24,22 @@ function m.find(test, query, page, status_bar, on_failure, on_success)
             end,
         }
 
+        local found
         Aux.scan.start{
             queries = { new_query },
             on_read_auction = function(auction_info, ctrl)
                 if test(auction_info.index) then
+                    found = true
                     ctrl.suspend()
-                    if not test(auction_info.index) then
-                        return on_failure()
-                    else
-                        status_bar:update_status(100, 100)
-                        status_bar:set_text('Auction found')
-                        return on_success(auction_info.index)
-                    end
+                    status_bar:update_status(100, 100)
+                    status_bar:set_text('Auction found')
+                    return on_success(auction_info.index)
+                end
+            end,
+            on_abort = function()
+                if not found then
+                    status_bar:update_status(100, 100)
+                    status_bar:set_text('Auction not found')
                 end
             end,
             on_complete = function()
