@@ -1,18 +1,14 @@
 local private, public = {}, {}
 Aux.history = public
 
-private.PUSH_INTERVAL = 57600
-
-function private.hours_left_in_day()
-	return 24 - tonumber(date('%H'))
-end
-
-function private.time_until_next_push()
-	return time() + private.hours_left_in_day * 3600
+function private.next_push()
+	local date = date('*t')
+	date.hour, date.min, date.sec = 24, 0, 0
+	return time(date)
 end
 
 function private.new_record()
-	return { next_push = time() + private.PUSH_INTERVAL, market_values = {} }
+	return { next_push = private.next_push(), market_values = {} }
 end
 
 function private.load_data()
@@ -139,5 +135,5 @@ function private.push_record(item_record)
 	item_record.daily_max_bid = nil
 	item_record.daily_min_buyout = nil
 	item_record.daily_max_price = nil
-	item_record.next_push = time() + private.PUSH_INTERVAL
+	item_record.next_push = private.next_push()
 end
