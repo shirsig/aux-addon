@@ -3,6 +3,14 @@ Aux.history = public
 
 private.PUSH_INTERVAL = 57600
 
+function private.hours_left_in_day()
+	return 24 - tonumber(date('%H'))
+end
+
+function private.time_until_next_push()
+	return time() + private.hours_left_in_day * 3600
+end
+
 function private.new_record()
 	return { next_push = time() + private.PUSH_INTERVAL, market_values = {} }
 end

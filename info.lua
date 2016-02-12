@@ -130,7 +130,7 @@ function public.auction(index, type)
         hyperlink = hyperlink,
         itemstring = item_info.itemstring,
         item_key = item_id..':'..suffix_id,
-        search_signature = Aux.util.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, owner or ''}, ':'),
+        search_signature = Aux.util.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, high_bidder and 1 or 0, owner or '?'}, ':'),
 
         name = name,
         texture = texture,
