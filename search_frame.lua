@@ -714,15 +714,16 @@ end
             elseif button == 'LeftButton' and IsAltKeyDown() then
                 private.popup_info.rename = data.search
                 StaticPopup_Show('AUX_SEARCH_SAVED_RENAME')
-            elseif button == 'RightButton' and st == private.recent_searches_listing then
-                tinsert(aux_favorite_searches, data.search)
-                private.update_search_listings()
-            elseif button == 'RightButton' and st == private.favorite_searches_listing then
-                tremove(aux_favorite_searches, data.index)
-                private.update_search_listings()
             elseif button == 'LeftButton' then
                 private.search_box:SetText(data.search.filter_string)
                 public.start_search()
+            elseif button == 'RightButton' then
+                if st == private.recent_searches_listing then
+                    tinsert(aux_favorite_searches, data.search)
+                elseif st == private.favorite_searches_listing then
+                    tremove(aux_favorite_searches, data.index)
+                end
+                private.update_search_listings()
             end
         end,
         OnEnter = function(st, data, self)
