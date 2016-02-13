@@ -89,7 +89,8 @@ function private.update_tab(tab)
     end
 end
 
-function private.add_filter()
+function private.add_filter(filter_string)
+    filter_string = filter_string or Aux.scan_util.filter_to_string(private.get_form_filter())
     local old_filter_string = private.search_box:GetText()
     old_filter_string = Aux.util.trim(old_filter_string)
 
@@ -97,7 +98,7 @@ function private.add_filter()
         old_filter_string = old_filter_string..';'
     end
 
-    private.search_box:SetText(old_filter_string..Aux.scan_util.filter_to_string(private.get_form_filter()))
+    private.search_box:SetText(old_filter_string..filter_string)
 end
 
 function private.clear_filter()
@@ -706,36 +707,22 @@ end
     local handlers = {
         OnClick = function(st, data, _, button)
             if not data then return end
-            if button == 'LeftButton' then
-                if IsShiftKeyDown() then
-                    private.search_box:SetText(data.search.filter_string)
-                    --                    private.popupInfo.export = data.search
---                        TSMAPI.Util:ShowStaticPopupDialog('TSM_SHOPPING_SAVED_EXPORT_POPUP')
-                elseif IsControlKeyDown() then
-
-                else
-                    private.search_box:SetText(data.search.filter_string)
-                    public.start_search()
-                end
-            elseif button == 'RightButton' then
-                if IsShiftKeyDown() then
-                    private.popup_info.rename = data.search
-                    StaticPopup_Show('AUX_SEARCH_SAVED_RENAME')
-                elseif st == private.recent_searches_listing then
-                    if IsShiftKeyDown() then
---                        tremove(TSM.db.global.savedSearches, data.index)
---                        TSM:Printf('Removed '%s' from your recent searches.', data.searchInfo.name)
---                        private.UpdateSTData()
-                    else
-                        tinsert(aux_favorite_searches, data.search)
---                        data.searchInfo.isFavorite = true
-----                        TSM:Printf('Added '%s' to your favorite searches.', data.searchInfo.name)
---                        private.UpdateSTData()
-                    end
-                elseif st == private.favorite_searches_listing then
-                    tremove(aux_favorite_searches, data.index)
-                end
+            if button == 'LeftButton' and IsShiftKeyDown() then
+                private.search_box:SetText(data.search.filter_string)
+            elseif button == 'RightButton' and IsShiftKeyDown() then
+                private.add_filter(data.search.filter_string)
+            elseif button == 'LeftButton' and IsAltKeyDown() then
+                private.popup_info.rename = data.search
+                StaticPopup_Show('AUX_SEARCH_SAVED_RENAME')
+            elseif button == 'RightButton' and st == private.recent_searches_listing then
+                tinsert(aux_favorite_searches, data.search)
                 private.update_search_listings()
+            elseif button == 'RightButton' and st == private.favorite_searches_listing then
+                tremove(aux_favorite_searches, data.index)
+                private.update_search_listings()
+            elseif button == 'LeftButton' then
+                private.search_box:SetText(data.search.filter_string)
+                public.start_search()
             end
         end,
         OnEnter = function(st, data, self)
