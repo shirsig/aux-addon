@@ -72,11 +72,8 @@ function private.update_tab(tab)
     AuxSearchFrameResults:Hide()
     AuxSearchFrameSaved:Hide()
     AuxSearchFrameFilter:Hide()
-    Aux.hide_elements(RESULTS)
-    Aux.hide_elements(private.elements[FILTER])
 
     if tab == RESULTS then
-        Aux.show_elements(RESULTS)
         AuxSearchFrameResults:Show()
         private.search_results_button:LockHighlight()
     elseif tab == SAVED then
@@ -84,7 +81,6 @@ function private.update_tab(tab)
         private.saved_searches_button:LockHighlight()
     elseif tab == FILTER then
         AuxSearchFrameFilter:Show()
-        Aux.show_elements(private.elements[FILTER])
         private.new_filter_button:LockHighlight()
     end
 end
@@ -192,11 +188,6 @@ function public.on_close()
 end
 
 function public.on_load()
---    do
---        local panel = Aux.gui.panel(AuxSearchFrame, '$parentFilters')
---        panel:SetAllPoints(AuxFrameContent)
---        private.elements[FILTER].filters = panel
---    end
     do
         local btn = Aux.gui.button(AuxSearchFrame, 22)
         btn:SetPoint('TOPRIGHT', -5, -8)
@@ -305,13 +296,13 @@ function public.on_load()
         private.bid_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 16)
+        local btn = Aux.gui.button(AuxSearchFrameResults, 16)
         btn:SetPoint('TOPLEFT', private.bid_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Buyout')
         btn:Disable()
-        RESULTS.buyout_button = btn
+        private.buyout_button = btn
     end
     do
         local btn1 = Aux.gui.button(AuxSearchFrameFilter, 16)
@@ -918,12 +909,12 @@ do
             end
 
             if record.buyout_price > 0 then
-                RESULTS.buyout_button:SetScript('OnClick', function()
+                private.buyout_button:SetScript('OnClick', function()
                     if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
                         Aux.place_bid('list', index, record.buyout_price, private.record_remover(record))
                     end
                 end)
-                RESULTS.buyout_button:Enable()
+                private.buyout_button:Enable()
             end
         end)
     end
@@ -933,25 +924,21 @@ do
             return
         end
 
-        if not (RESULTS.buyout_button:IsEnabled() or private.bid_button:IsEnabled()) then
-            return
-        end
-
         if not found_index then
-            RESULTS.buyout_button:Disable()
+            private.buyout_button:Disable()
             private.bid_button:Disable()
             return
         end
 
         local selection = private.results_listing:GetSelection()
         if not selection then
-            RESULTS.buyout_button:Disable()
+            private.buyout_button:Disable()
             private.bid_button:Disable()
             return
         end
 
         if found_index and not private.test(selection.record)(found_index) then
-            RESULTS.buyout_button:Disable()
+            private.buyout_button:Disable()
             private.bid_button:Disable()
             private.find_auction(selection.record)
         end
