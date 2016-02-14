@@ -274,7 +274,7 @@ do
 end
 
 function Aux.SetItemRef(itemstring)
-    if IsShiftKeyDown() and AuxSearchFrame:IsVisible() then
+    if IsAltKeyDown() and AuxSearchFrame:IsVisible() then
         local item_info = Aux.static.item_info(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
             Aux.search_frame.set_filter(item_info.name..'/exact')
