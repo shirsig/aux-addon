@@ -1,4 +1,4 @@
-AuxVersion = '2.4.19'
+AuxVersion = '2.4.20'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 Aux = {
@@ -166,7 +166,10 @@ function Aux.setup_hooks()
 
     Aux.orig.PickupContainerItem = PickupContainerItem
 	PickupContainerItem = Aux.PickupContainerItem
-	
+
+    Aux.orig.SetItemRef = SetItemRef
+    SetItemRef = Aux.SetItemRef
+
 	Aux.orig.ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
 	ContainerFrameItemButton_OnClick = Aux.ContainerFrameItemButton_OnClick
 
@@ -216,13 +219,13 @@ function Aux.on_tab_click(index)
         Aux.auctions_frame.on_close()
         Aux.bids_frame.on_close()
 
-        AuxFilterSearchFrame:Hide()
+        AuxSearchFrame:Hide()
         AuxPostFrame:Hide()
         AuxAuctionsFrame:Hide()
         AuxBidsFrame:Hide()
 
         if index == 1 then
-            AuxFilterSearchFrame:Show()
+            AuxSearchFrame:Show()
             Aux.search_frame.on_open()
         elseif index == 2 then
             AuxPostFrame:Show()
@@ -270,43 +273,55 @@ do
     end
 end
 
+function Aux.SetItemRef(itemstring)
+    if IsShiftKeyDown() and AuxSearchFrame:IsVisible() then
+        local item_info = Aux.static.item_info(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
+        if item_info then
+            Aux.search_frame.set_filter(item_info.name..'/exact')
+            Aux.search_frame.start_search()
+            return
+        end
+    end
+    return Aux.orig.SetItemRef(itemstring)
+end
+
 function Aux.ContainerFrameItemButton_OnClick(button)
 	local bag, slot = this:GetParent():GetID(), this:GetID()
 	local item_info = Aux.info.container_item(bag, slot)
 	
-	if AuxFrame:IsVisible() and button == "LeftButton" and item_info then
-		if IsAltKeyDown() then
-			if Aux.active_panel ~= 1 then
-                Aux.on_tab_click(1)
-            end
-
-            Aux.control.as_soon_as(function() return Aux.active_panel == 1 end, function()
+--	if AuxFrame:IsVisible() and button == 'LeftButton' and item_info then
+--		if IsAltKeyDown() then
+--			if Aux.active_panel ~= 1 then
+--                Aux.on_tab_click(1)
+--            end
+--
+--            Aux.control.as_soon_as(function() return Aux.active_panel == 1 end, function()
 --                AuxItemSearchFrameItemItemInputBox:Hide()
 --                Aux.item_search_frame.set_item(item_info.item_id)
-            end)
-
-            return
-		end
-    end
+--            end)
+--
+--            return
+--		end
+--    end
 
 	return Aux.orig.ContainerFrameItemButton_OnClick(button)
 end
 
 function Aux.quality_color(code)
 	if code == 0 then
-		return "ff9d9d9d" -- poor, gray
+		return 'ff9d9d9d' -- poor, gray
 	elseif code == 1 then
-		return "ffffffff" -- common, white
+		return 'ffffffff' -- common, white
 	elseif code == 2 then
-		return "ff1eff00" -- uncommon, green
+		return 'ff1eff00' -- uncommon, green
 	elseif code == 3 then -- rare, blue
-		return "ff0070dd"
+		return 'ff0070dd'
 	elseif code == 4 then
-		return "ffa335ee" -- epic, purple
+		return 'ffa335ee' -- epic, purple
 	elseif code == 5 then
-		return "ffff8000" -- legendary, orange
+		return 'ffff8000' -- legendary, orange
     elseif code == 6 then
-        return "ffe6cc80" -- artifact, pale gold
+        return 'ffe6cc80' -- artifact, pale gold
     end
 end
 

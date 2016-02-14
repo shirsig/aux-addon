@@ -10,7 +10,7 @@
         </Scripts>
     </Frame>
 
-    <Frame name="AuxFilterSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
+    <Frame name="AuxSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
             <Frame name="$parentFilter" inherits="AuxFrameBoxTemplate">
                 <Anchors>

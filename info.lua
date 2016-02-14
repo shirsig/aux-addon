@@ -41,7 +41,7 @@ function public.container_item(bag, slot)
 		return
     end
 
-    local item_id, suffix_id, unique_id, enchant_id = private.parse_hyperlink(hyperlink)
+    local item_id, suffix_id, unique_id, enchant_id = public.parse_hyperlink(hyperlink)
     local item_info = public.item(item_id, suffix_id, unique_id, enchant_id)
 
     local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
@@ -110,7 +110,7 @@ function public.auction(index, type)
 		return
 	end
 
-    local item_id, suffix_id, unique_id, enchant_id = private.parse_hyperlink(hyperlink)
+    local item_id, suffix_id, unique_id, enchant_id = public.parse_hyperlink(hyperlink)
     local item_info = public.item(item_id, suffix_id, unique_id, enchant_id)
 
     local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(type, index)
@@ -301,11 +301,11 @@ function private.item_charges(tooltip)
 end
 
 function public.item_key(hyperlink)
-    local item_id, suffix_id = private.parse_hyperlink(hyperlink)
+    local item_id, suffix_id = public.parse_hyperlink(hyperlink)
     return item_id..':'..suffix_id
 end
 
-function private.parse_hyperlink(hyperlink)
+function public.parse_hyperlink(hyperlink)
     local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(hyperlink, '|Hitem:(%d+):(%d+):(%d+):(%d+)|h[[]([^]]+)[]]|h')
     return tonumber(item_id) or 0, tonumber(suffix_id) or 0, tonumber(unique_id) or 0, tonumber(enchant_id) or 0, name
 end
