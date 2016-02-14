@@ -291,13 +291,27 @@ end
 
 function private.item_charges(tooltip)
 	for _, line in ipairs(tooltip) do
-		local _, _, left_charges_string = strfind(line.left_text or '', '^(%d+) Charges')
-		local _, _, right_charges_string = strfind(line.right_text or '', '^(%d+) Charges$')
+        local pattern = '^(%d+) Charges$'
+		local _, _, left_charges_string = strfind(line.left_text or '', pattern)
+		local _, _, right_charges_string = strfind(line.right_text or '', pattern)
 		local charges = tonumber(left_charges_string) or tonumber(right_charges_string)
 		if charges then
 			return charges
 		end
 	end
+end
+
+function public.durability(tooltip)
+    for _, line in ipairs(tooltip) do
+        local pattern = '^Durability (%d+) / (%d+)$'
+        local _, _, left_durability_string, left_max_durability_string = strfind(line.left_text or '', pattern)
+        local _, _, right_durability_string, right_max_durability_string = strfind(line.right_text or '', pattern)
+        local durability = tonumber(left_durability_string) or tonumber(right_durability_string)
+        local max_durability = tonumber(left_max_durability_string) or tonumber(right_max_durability_string)
+        if durability then
+            return durability, max_durability
+        end
+    end
 end
 
 function public.item_key(hyperlink)

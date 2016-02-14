@@ -121,7 +121,7 @@ function public.on_load()
 
     private.auction_listing = Aux.listing.CreateScrollingTable(AuxSellAuctions)
     private.auction_listing:SetColInfo({
-        { name='Avail', width=.14, align='CENTER' },
+        { name='Auctions', width=.14, align='CENTER' },
         { name='Yours', width=.14, align='CENTER' },
         { name='Left', width=.14, align='CENTER' },
         { name='Qty', width=.08, align='CENTER' },
@@ -627,6 +627,15 @@ function private.quantity_update()
     refresh = true
 end
 
+function private.auctionable(item_info)
+    local durability, max_durability = Aux.info.durability(item_info.tooltip)
+    return Aux.static.item_info(item_info.item_id)
+            and not Aux.info.tooltip_match('soulbound', item_info.tooltip)
+            and not Aux.info.tooltip_match('conjured item', item_info.tooltip)
+            and not item_info.lootable
+            and not (durability and durability < max_durability)
+end
+
 function private.unit_vendor_price(item_key)
     local inventory_iterator = Aux.util.inventory_iterator()
 
@@ -639,11 +648,7 @@ function private.unit_vendor_price(item_key)
         local item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
         if item_info and item_info.item_key == item_key then
 
-            if Aux.static.item_info(item_info.item_id)
-                    and not Aux.info.tooltip_match('soulbound', item_info.tooltip)
-                    and not Aux.info.tooltip_match('conjured item', item_info.tooltip)
-                    and not item_info.lootable
-            then
+            if private.auctionable(item_info) then
                 ClearCursor()
                 PickupContainerItem(slot.bag, slot.bag_slot)
                 ClickAuctionSellItemButton()
@@ -716,11 +721,7 @@ function private.update_inventory_records()
         if item_info then
             local charge_class = item_info.charges or 0
 
-            if Aux.static.item_info(item_info.item_id)
-                    and not Aux.info.tooltip_match('soulbound', item_info.tooltip)
-                    and not Aux.info.tooltip_match('conjured item', item_info.tooltip)
-                    and not item_info.lootable
-            then
+            if private.auctionable(item_info) then
                 if not auction_candidate_map[item_info.item_key] then
 
                     local availability = { [0]=0, [1]=0, [2]=0, [3]=0, [4]=0, [5]=0 }

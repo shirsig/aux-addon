@@ -1,4 +1,4 @@
-AuxVersion = '2.4.20'
+AuxVersion = '2.4.21'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 Aux = {
@@ -260,7 +260,7 @@ function Aux.price_level_color(pct)
     end
 end
 
-do
+do -- TODO make it work for other ways to pick up things
     local last_picked_up
     function Aux.PickupContainerItem(bag, slot)
         last_picked_up = { bag, slot }
