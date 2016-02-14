@@ -28,29 +28,29 @@ function m.to_string(money, pad, trim, decimal_points, color, no_color)
 	end
 	
 	if money == 0 then
-		return m.format_number(0, false, color)..copper_text
+		return m.format_number(0, false, nil, color)..copper_text
 	end
 	
 	local text
 	if trim then
 		local parts = {}
 		if gold > 0 then
-			tinsert(parts, m.format_number(gold, false, color)..gold_text)
+			tinsert(parts, m.format_number(gold, false, nil, color)..gold_text)
 		end
 		if silver > 0 then
-			tinsert(parts, m.format_number(silver, pad, color)..silver_text)
+			tinsert(parts, m.format_number(silver, pad, nil, color)..silver_text)
 		end
 		if copper > 0 then
-			tinsert(parts, m.format_number(copper, pad, color)..copper_text)
+			tinsert(parts, m.format_number(copper, pad, decimal_points, color)..copper_text)
 		end
 		text = Aux.util.join(parts, ' ')
 	else
 		if gold > 0 then
-			text = m.format_number(gold, false, color)..gold_text..' '..m.format_number(silver, pad, color)..silver_text..' '..m.format_number(copper, pad, color)..copper_text
+			text = m.format_number(gold, false, nil, color)..gold_text..' '..m.format_number(silver, pad, nil, color)..silver_text..' '..m.format_number(copper, pad, decimal_points, color)..copper_text
 		elseif silver > 0 then
-			text = m.format_number(silver, false, color)..silver_text..' '..m.format_number(copper, pad, color)..copper_text
+			text = m.format_number(silver, false, nil, color)..silver_text..' '..m.format_number(copper, pad, decimal_points, color)..copper_text
 		else
-			text = m.format_number(copper, false, color)..copper_text
+			text = m.format_number(copper, false, nil, color)..copper_text
 		end
 	end
 	
@@ -85,10 +85,10 @@ function m.from_string(value)
 	return ((gold or 0) * COPPER_PER_GOLD) + ((silver or 0) * COPPER_PER_SILVER) + (copper or 0)
 end
 
-function m.format_number(num, pad, color)
-	if num < 10 and pad then
-		num = '0'..num
-	end
+function m.format_number(num, pad, decimal_padding, color)
+
+	local padding = pad and 2 + (decimal_padding and decimal_padding + 1 or 0) or 0
+	num = format('%0'..padding..'.0'..(decimal_padding or 0)..'f', num)
 	
 	if color then
 		return color..num..'|r'
