@@ -1,7 +1,7 @@
 local m = {}
 Aux.scan_util = m
 
-function m.find(test, query, page, status_bar, on_failure, on_success)
+function m.find(test, query, page, status_bar, on_abort, on_failure, on_success)
 
     Aux.scan.abort(function()
 
@@ -40,12 +40,13 @@ function m.find(test, query, page, status_bar, on_failure, on_success)
                 if not found then
                     status_bar:update_status(100, 100)
                     status_bar:set_text('Auction not found')
+                    return on_abort()
                 end
             end,
             on_complete = function()
                 status_bar:update_status(100, 100)
                 status_bar:set_text('Auction not found')
-                on_failure()
+                return on_failure()
             end,
         }
     end)

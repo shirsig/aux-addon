@@ -694,10 +694,6 @@ end
     private.results_listing:SetHandler('OnCellAltClick', function(cell, button)
         private.find_auction_and_bid(cell.row.data.record, button == 'LeftButton')
     end)
-    private.results_listing:SetHandler('OnSelectionChanged', function(rt, datum)
-        if not datum then return end
-        private.find_auction(datum.record)
-    end)
 
     local handlers = {
         OnClick = function(st, data, _, button)
@@ -878,7 +874,9 @@ function private.find_auction_and_bid(record, buyout_mode)
         return
     end
 
-    Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, private.record_remover(record), function(index)
+    private.results_listing:SetSelectedRecord(nil)
+
+    Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
         if private.results_listing:ContainsRecord(record) then
             Aux.place_bid('list', index, buyout_mode and record.buyout_price or record.bid_price, private.record_remover(record))
         end
@@ -886,6 +884,8 @@ function private.find_auction_and_bid(record, buyout_mode)
 end
 
 do
+    local IDLE, SEARCHING, FOUND = {}, {}, {}
+    local state = IDLE
     local found_index
 
     function private.find_auction(record)
@@ -893,30 +893,41 @@ do
             return
         end
 
-        found_index = nil
+        Aux.scan_util.find(
+            private.test(record),
+            record.query,
+            record.page,
+            private.status_bar,
+            function()
+                state = IDLE
+            end,
+            function()
+                state = IDLE
+                private.record_remover(record)()
+            end,
+            function(index)
+                state = FOUND
+                found_index = index
 
-        Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, private.record_remover(record), function(index)
+                if not record.high_bidder then
+                    private.bid_button:SetScript('OnClick', function()
+                        if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
+                            Aux.place_bid('list', index, record.bid_price, private.record_remover(record))
+                        end
+                    end)
+                    private.bid_button:Enable()
+                end
 
-            found_index = index
-
-            if not record.high_bidder then
-                private.bid_button:SetScript('OnClick', function()
-                    if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
-                        Aux.place_bid('list', index, record.bid_price, private.record_remover(record))
-                    end
-                end)
-                private.bid_button:Enable()
+                if record.buyout_price > 0 then
+                    private.buyout_button:SetScript('OnClick', function()
+                        if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
+                            Aux.place_bid('list', index, record.buyout_price, private.record_remover(record))
+                        end
+                    end)
+                    private.buyout_button:Enable()
+                end
             end
-
-            if record.buyout_price > 0 then
-                private.buyout_button:SetScript('OnClick', function()
-                    if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
-                        Aux.place_bid('list', index, record.buyout_price, private.record_remover(record))
-                    end
-                end)
-                private.buyout_button:Enable()
-            end
-        end)
+        )
     end
 
     function public.on_update()
@@ -924,23 +935,23 @@ do
             return
         end
 
-        if not found_index then
+        if state == IDLE or state == SEARCHING then
             private.buyout_button:Disable()
             private.bid_button:Disable()
+        end
+
+        if state == SEARCHING then
             return
         end
 
         local selection = private.results_listing:GetSelection()
         if not selection then
-            private.buyout_button:Disable()
-            private.bid_button:Disable()
-            return
-        end
-
-        if found_index and not private.test(selection.record)(found_index) then
-            private.buyout_button:Disable()
-            private.bid_button:Disable()
+           state = IDLE
+        elseif selection and state == IDLE then
+            state = SEARCHING
             private.find_auction(selection.record)
+        elseif state == FOUND and not private.test(selection.record)(found_index) then
+            state = IDLE
         end
     end
 end

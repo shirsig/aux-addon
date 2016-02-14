@@ -164,7 +164,7 @@ function private.find_auction_and_bid(record, buyout_mode)
         return
     end
 
-    Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, private.record_remover(record), function(index)
+    Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
         if Aux.util.index_of(record, auction_records) then
             Aux.place_bid('bidder', index, buyout_mode and record.buyout_price or record.bid_price, private.record_remover(record))
         end
@@ -181,7 +181,7 @@ do
 
         found_index = nil
 
-        Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, private.record_remover(record), function(index)
+        Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
 
             found_index = index
 

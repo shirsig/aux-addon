@@ -508,31 +508,31 @@ local methods = {
         end
     end,
 
-    RemoveAuctionRecord = function(rt, record)
-        local index = Aux.util.index_of(record, rt.records)
+    RemoveAuctionRecord = function(self, record)
+        local index = Aux.util.index_of(record, self.records)
         if index then
-            tremove(rt.records, index)
+            tremove(self.records, index)
         end
-        rt:SetDatabase()
+        self:SetDatabase()
     end,
 
-    RemoveSelectedRecord = function(rt, count)
+    RemoveSelectedRecord = function(self, count)
         count = count or 1
         for i=1, count do
-            local index = Aux.util.index_of(rt.selected, rt.records)
+            local index = Aux.util.index_of(self.selected, self.records)
             if index then
-                tremove(rt.records, index)
+                tremove(self.records, index)
             end
         end
-        rt:SetDatabase()
+        self:SetDatabase()
     end,
 
-    InsertAuctionRecord = function(rt, record, count)
+    InsertAuctionRecord = function(self, record, count)
         count = count or 1
         for i=1, count do
-            tinsert(rt.records, record)
+            tinsert(self.records, record)
         end
-        rt:SetDatabase()
+        self:SetDatabase()
     end,
 
     ContainsRecord = function(rt, record)
@@ -541,7 +541,7 @@ local methods = {
         end
     end,
 
-    SetSort = function(rt, sortIndex)
+    SetSort = function(self, sortIndex)
         local sortIndexLookup
         if aux_price_per_unit then
             sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'unit_bid_price', 'unit_buyout_price', 'percent'}
@@ -549,45 +549,45 @@ local methods = {
             sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'bid_price', 'buyout_price', 'percent'}
         end
         if sortIndex then
-            if sortIndex == rt.sortInfo.index then return end
-            rt.sortInfo.descending = sortIndex < 0
-            rt.sortInfo.columnIndex = abs(sortIndex)
+            if sortIndex == self.sortInfo.index then return end
+            self.sortInfo.descending = sortIndex < 0
+            self.sortInfo.columnIndex = abs(sortIndex)
         end
---        TSMAPI:Assert(rt.sortInfo.columnIndex > 0 and rt.sortInfo.columnIndex <= getn(rt.headCells))
-        rt.sortInfo.sortKey = sortIndexLookup[rt.sortInfo.columnIndex]
-        rt.sortInfo.isSorted = nil
-        rt.sortInfo.index = sortIndex
-        rt:UpdateRows()
+--        TSMAPI:Assert(self.sortInfo.columnIndex > 0 and self.sortInfo.columnIndex <= getn(self.headCells))
+        self.sortInfo.sortKey = sortIndexLookup[self.sortInfo.columnIndex]
+        self.sortInfo.isSorted = nil
+        self.sortInfo.index = sortIndex
+        self:UpdateRows()
     end,
 
-    SetScrollDisabled = function(rt, disabled)
-        rt.scrollDisabled = disabled
+    SetScrollDisabled = function(self, disabled)
+        self.scrollDisabled = disabled
     end,
 
-    SetHandler = function(rt, event, handler)
-        rt.handlers[event] = handler
+    SetHandler = function(self, event, handler)
+        self.handlers[event] = handler
     end,
 
-    SetDisabled = function(rt, disabled)
-        rt.disabled = disabled
+    SetDisabled = function(self, disabled)
+        self.disabled = disabled
         if not disabled then
             -- if there's only one item in the result, expand it
-            if getn(rt.rowInfo) == 1 and rt.expanded[rt.rowInfo[1].expandKey] == nil then
-                rt.expanded[rt.rowInfo[1].expandKey] = true
-                rt.rowInfo.numDisplayRows = getn(rt.rowInfo[1].children)
+            if getn(self.rowInfo) == 1 and self.expanded[self.rowInfo[1].expandKey] == nil then
+                self.expanded[self.rowInfo[1].expandKey] = true
+                self.rowInfo.numDisplayRows = getn(self.rowInfo[1].children)
             end
-            rt:UpdateRows()
+            self:UpdateRows()
             -- select the first row
-            rt:SetSelectedRecord(getn(rt.rowInfo) > 0 and rt.rowInfo[1].children[1].record)
+            self:SetSelectedRecord(getn(self.rowInfo) > 0 and self.rowInfo[1].children[1].record)
         end
     end,
 
-    GetSelection = function(rt)
-        if not rt.selected then return end
+    GetSelection = function(self)
+        if not self.selected then return end
         local selectedData
-        for _, info in ipairs(rt.rowInfo) do
+        for _, info in ipairs(self.rowInfo) do
             for _, childInfo in ipairs(info.children) do
-                if childInfo.record.search_signature == rt.selected.search_signature then
+                if childInfo.record.search_signature == self.selected.search_signature then
                     selectedData = childInfo
                     break
                 end
@@ -596,9 +596,9 @@ local methods = {
         return selectedData
     end,
 
-    GetTotalAuctions = function(rt)
+    GetTotalAuctions = function(self)
         local numResults = 0
-        for _, info in ipairs(rt.rowInfo) do
+        for _, info in ipairs(self.rowInfo) do
             for _, childInfo in ipairs(info.children) do
                 numResults = numResults + childInfo.numAuctions
             end
