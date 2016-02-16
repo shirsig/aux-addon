@@ -30,7 +30,7 @@ function Aux.on_load()
                     value_line = value_line..EnhTooltip.GetTextGSC(value * count)..' / '..EnhTooltip.GetTextGSC(value)
                 end
 
-                local _, _, _, market_values = Aux.history.price_data()
+                local _, _, _, market_values = Aux.history.price_data(item_key)
                 if getn(market_values) < 5 then
                     value_line = value_line..' (?)'
                 end
