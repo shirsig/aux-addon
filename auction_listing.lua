@@ -115,13 +115,11 @@ local methods = {
         if rt.disabled then return end
         if this ~= row.cells[1] or not rt.isShowingItemTooltip then
             if rt.expanded[row.data.expandKey] then
-                GameTooltip:SetOwner(this, 'ANCHOR_NONE')
-                GameTooltip:SetPoint('BOTTOMLEFT', this, 'TOPLEFT')
+                GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
                 GameTooltip:AddLine('Double-click to collapse this item and show only the cheapest auction.', 1, 1, 1, true)
                 GameTooltip:Show()
             elseif row.data.expandable then
-                GameTooltip:SetOwner(this, 'ANCHOR_NONE')
-                GameTooltip:SetPoint('BOTTOMLEFT', this, 'TOPLEFT')
+                GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
                 GameTooltip:AddLine('Double-click to expand this item and show all the auctions.', 1, 1, 1, true)
                 GameTooltip:Show()
             end
