@@ -1,4 +1,4 @@
-AuxVersion = '2.4.24'
+AuxVersion = '2.4.25'
 AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 Aux = {
@@ -273,7 +273,7 @@ do -- TODO make it work for other ways to pick up things
     end
 end
 
-function Aux.SetItemRef(itemstring)
+function Aux.SetItemRef(itemstring, text, button)
     if IsAltKeyDown() and AuxSearchFrame:IsVisible() then
         local item_info = Aux.static.item_info(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
@@ -282,7 +282,7 @@ function Aux.SetItemRef(itemstring)
             return
         end
     end
-    return Aux.orig.SetItemRef(itemstring)
+    return Aux.orig.SetItemRef(itemstring, text, button)
 end
 
 function Aux.ContainerFrameItemButton_OnClick(button)
