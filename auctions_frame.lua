@@ -210,6 +210,7 @@ function private.on_row_click(auction_record)
 --    else
     local express_mode = IsAltKeyDown()
     if express_mode then
+        selected_auction = nil
         private.find_auction_and_cancel(auction_record)
     else
         selected_auction = auction_record

@@ -692,6 +692,7 @@ end
     private.results_listing:SetSort(9)
     private.results_listing:Clear()
     private.results_listing:SetHandler('OnCellAltClick', function(cell, button)
+        private.results_listing:SetSelectedRecord(nil)
         private.find_auction_and_bid(cell.row.data.record, button == 'LeftButton')
     end)
 
@@ -873,8 +874,6 @@ function private.find_auction_and_bid(record, buyout_mode)
     if not private.results_listing:ContainsRecord(record) or (buyout_mode and not record.buyout_price) or (not buyout_mode and record.high_bidder) or Aux.is_player(record.owner) then
         return
     end
-
-    private.results_listing:SetSelectedRecord(nil)
 
     Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
         if private.results_listing:ContainsRecord(record) then

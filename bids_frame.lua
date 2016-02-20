@@ -242,6 +242,7 @@ function private.on_row_click(auction_record)
     local express_mode = IsAltKeyDown()
     local buyout_mode = express_mode and arg1 == 'LeftButton'
     if express_mode then
+        selected_auction = nil
         private.find_auction_and_bid(auction_record, buyout_mode)
     else
         selected_auction = auction_record
