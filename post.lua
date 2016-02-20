@@ -49,31 +49,6 @@ function private.process()
 	end
 end
 
-function public.stop(k)
-	Aux.control.on_next_update(function()
-		private.stop()
-		
-		if k then
-			return k()
-		end
-	end)
-end
-
-function private.stop()
-	controller().reset()
-	if state then
-		local callback = state.callback
-		local posted = state.posted
-		local partial_stack = state.partial_stack
-
-		state = nil
-		
-		if callback then
-			callback(posted, partial_stack)
-		end
-	end
-end
-
 function private.post_auction(slot, k)
 	ClearCursor()
 	ClickAuctionSellItemButton()
@@ -88,8 +63,33 @@ function private.post_auction(slot, k)
 	end)
 end
 
+function private.stop()
+	controller().reset()
+	if state then
+		local callback = state.callback
+		local posted = state.posted
+		local partial_stack = state.partial_stack
+
+		state = nil
+
+		if callback then
+			callback(posted, partial_stack)
+		end
+	end
+end
+
+function public.stop(k)
+	controller().wait(function()
+		private.stop()
+
+		if k then
+			return k()
+		end
+	end)
+end
+
 function public.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, allow_partial, callback)
-	Aux.control.on_next_update(function()
+	controller().wait(function()
 		private.stop()
 		
 		state = {

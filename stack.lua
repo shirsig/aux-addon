@@ -112,20 +112,9 @@ function private.max_stack(slot)
     return container_item_info and container_item_info.max_stack
 end
 
-function public.stop(k)
-	Aux.control.on_next_update(function()
-		private.stop()
-		
-		if k then
-			return k()
-		end
-	end)
-end
-
 function private.stop()
 	controller().reset()
 	if state then
-
 		local callback, slot = state.callback, state.target_slot
 		
 		state = nil
@@ -136,8 +125,18 @@ function private.stop()
 	end
 end
 
+function public.stop(k)
+	controller().wait(function()
+		private.stop()
+
+		if k then
+			return k()
+		end
+	end)
+end
+
 function public.start(item_key, size, callback)
-	Aux.control.on_next_update(function()
+	controller().wait(function()
 		private.stop()
 		
 		local slots = private.item_slots(item_key)

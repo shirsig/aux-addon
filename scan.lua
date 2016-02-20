@@ -13,7 +13,7 @@ end)()
 
 local state
 
-local scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, wait_for_owner_data, on_abort, current_query
+local scan_auctions, scan_auctions_helper, submit_query, wait_for_callback, wait_for_results, wait_for_owner_data, abort, current_query
 
 function private.default_next_page(page, total_pages)
     local last_page = max(total_pages - 1, 0)
@@ -28,7 +28,7 @@ end
 
 function public.start(params)
     return controller().wait(function() return true end, function()
-        on_abort()
+        abort()
 
         state = {
             params = params,
@@ -40,9 +40,7 @@ end
 
 function public.abort(k)
     return controller().wait(function() return true end, function()
-        on_abort()
-
-        state = nil
+        abort()
 
         if k then
             return k()
@@ -50,7 +48,7 @@ function public.abort(k)
     end)
 end
 
-function on_abort()
+function abort()
     local on_abort = Aux.util.safe_index{state, 'params', 'on_abort' }
     state = nil
 	if on_abort then
