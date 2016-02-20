@@ -807,6 +807,7 @@ function public.start_search(filter_string)
         private.status_bar:update_status(0,0)
         private.status_bar:set_text('Scanning auctions...')
 
+        private.results_listing:Clear()
         local scanned_records = {}
         private.results_listing:SetDatabase(scanned_records)
 
