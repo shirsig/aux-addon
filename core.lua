@@ -2,13 +2,11 @@ AuxVersion = '2.4.27'
 
 Aux = {
     blizzard_ui_shown = false,
-	loaded = false,
 	orig = {},
 }
 
 function Aux.on_load()
 	Aux.log('Aux v'..AuxVersion..' loaded.')
-	Aux.loaded = true
     tinsert(UISpecialFrames, 'AuxFrame')
     LoadAddOn('EnhTooltip')
     if IsAddOnLoaded('EnhTooltip') then
