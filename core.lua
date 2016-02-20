@@ -279,23 +279,21 @@ end
 
 function Aux.UseContainerItem(bag, slot)
 
-    if arg1 == 'RightButton' then
-        if AuxSearchFrame:IsVisible() then
-            local item_info = Aux.info.container_item(bag, slot)
-            item_info = item_info and Aux.static.item_info(item_info.item_id)
-            if item_info then
-                Aux.search_frame.start_search(strlower(item_info.name)..'/exact')
-            end
-            return
+    if AuxSearchFrame:IsVisible() then
+        local item_info = Aux.info.container_item(bag, slot)
+        item_info = item_info and Aux.static.item_info(item_info.item_id)
+        if item_info then
+            Aux.search_frame.start_search(strlower(item_info.name)..'/exact')
         end
+        return
+    end
 
-        if AuxPostFrame:IsVisible() then
-            local item_info = Aux.info.container_item(bag, slot)
-            if item_info then
-                Aux.post_frame.select_item(item_info.item_key)
-            end
-            return
+    if AuxPostFrame:IsVisible() then
+        local item_info = Aux.info.container_item(bag, slot)
+        if item_info then
+            Aux.post_frame.select_item(item_info.item_key)
         end
+        return
     end
 
 	return Aux.orig.UseContainerItem(bag, slot)
