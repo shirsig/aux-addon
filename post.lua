@@ -64,7 +64,6 @@ function private.post_auction(slot, k)
 end
 
 function private.stop()
-	controller().reset()
 	if state then
 		local callback = state.callback
 		local posted = state.posted

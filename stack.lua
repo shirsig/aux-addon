@@ -113,7 +113,6 @@ function private.max_stack(slot)
 end
 
 function private.stop()
-	controller().reset()
 	if state then
 		local callback, slot = state.callback, state.target_slot
 		
