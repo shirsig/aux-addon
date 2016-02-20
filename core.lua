@@ -1,5 +1,4 @@
 AuxVersion = '2.4.26'
-AuxAuthors = 'shirsig; Zerf; Zirco (Auctionator); Nimeral (Auctionator backport)'
 
 Aux = {
     blizzard_ui_shown = false,
