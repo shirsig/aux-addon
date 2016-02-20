@@ -387,7 +387,7 @@ function public.on_load()
 end
 
 function public.on_open()
-    private.deposit:SetText('Deposit: '..Aux.money.to_string(0))
+    private.deposit:SetText('Deposit: '..Aux.money.to_string(0, nil, nil, nil, Aux.gui.inline_color({255, 254, 250, 1})))
 
     private.unit_start_price:SetText(Aux.money.to_string(0))
     private.unit_buyout_price:SetText(Aux.money.to_string(0))
@@ -569,7 +569,7 @@ function private.update_recommendation()
                 deposit = deposit + floor(selected_item.unit_vendor_price * deposit_factor * partial_stack) * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
             end
 
-            private.deposit:SetText('Deposit: '..Aux.money.to_string(deposit))
+            private.deposit:SetText('Deposit: '..Aux.money.to_string(deposit, nil, nil, nil, Aux.gui.inline_color({255, 254, 250, 1})))
         end
 
         private.refresh_button:Enable()
