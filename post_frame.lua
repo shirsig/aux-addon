@@ -514,7 +514,7 @@ function private.update_recommendation()
 
 		AuxSellParametersItemIconTexture:SetTexture(nil)
         AuxSellParametersItemCount:SetText()
-        AuxSellParametersItemName:SetTextColor(1, 1, 1)
+        AuxSellParametersItemName:SetTextColor(unpack(Aux.gui.config.label_color.enabled))
         AuxSellParametersItemName:SetText('No item selected')
 
         private.unit_start_price:Hide()

@@ -88,7 +88,10 @@
 				<FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT">
 					<Anchors><Anchor point="BOTTOMRIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="-5" y="2"/></Offset></Anchor></Anchors>
 				</FontString>
-				<FontString name="$parentName" inherits="GameFontNormal" justifyH="LEFT">
+				<FontString name="$parentName" font="Fonts\ARIALN.TTF" justifyH="LEFT">
+                    <FontHeight>
+                        <AbsValue val="14"/>
+                    </FontHeight>
 					<Anchors>
 						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
 						<Anchor point="RIGHT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor>
