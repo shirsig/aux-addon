@@ -168,7 +168,7 @@ function private.prettify_search(search)
     while true do
         local _, _, name, in_between = strfind(search, item_pattern)
         if name then
-            search = gsub(search, item_pattern, private.display_name(Aux.static.auctionable_items[strupper(name)])..in_between, 1)
+            search = gsub(search, item_pattern, private.display_name(Aux.static.item_id(strupper(name)))..in_between, 1)
         else
             return Aux.gui.inline_color({216, 225, 211, 1})..search..'|r'
         end
@@ -240,8 +240,7 @@ function public.on_load()
         editbox:SetScript('OnReceiveDrag', function()
             local item_info = Aux.cursor_item() and Aux.static.item_info(Aux.cursor_item().item_id)
             if item_info then
-                this:SetText(strlower(item_info.name)..'/exact')
-                public.start_search()
+                public.start_search(strlower(item_info.name)..'/exact')
             end
             ClearCursor()
         end)

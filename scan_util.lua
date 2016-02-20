@@ -188,7 +188,7 @@ function m.filter_from_string(filter_term)
                 or filter.quality
                 or filter.usable
                 or not filter.name
-                or not Aux.static.auctionable_items[strupper(filter.name)]
+                or not Aux.static.item_id(strupper(filter.name))
         then
             return false, 'Erroneous Exact Only Modifier'
         end
@@ -262,8 +262,8 @@ function m.blizzard_query(filter)
 
     local item_info
     if filter.exact then
-        local item_id = Aux.static.auctionable_items[strupper(filter.name)]
-        item_info = Aux.static.auctionable_items[item_id]
+        local item_id = Aux.static.item_id(strupper(filter.name))
+        item_info = Aux.static.item_info(item_id)
     end
 
     return {

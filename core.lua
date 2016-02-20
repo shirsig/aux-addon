@@ -169,8 +169,8 @@ function Aux.setup_hooks()
     Aux.orig.SetItemRef = SetItemRef
     SetItemRef = Aux.SetItemRef
 
-	Aux.orig.ContainerFrameItemButton_OnClick = ContainerFrameItemButton_OnClick
-	ContainerFrameItemButton_OnClick = Aux.ContainerFrameItemButton_OnClick
+	Aux.orig.UseContainerItem = UseContainerItem
+    UseContainerItem = Aux.UseContainerItem
 
     Aux.orig.AuctionFrameAuctions_OnEvent = AuctionFrameAuctions_OnEvent
     AuctionFrameAuctions_OnEvent = Aux.AuctionFrameAuctions_OnEvent
@@ -287,26 +287,28 @@ function Aux.SetItemRef(itemstring, text, button)
     return Aux.orig.SetItemRef(itemstring, text, button)
 end
 
-function Aux.ContainerFrameItemButton_OnClick(button)
-	local bag, slot = this:GetParent():GetID(), this:GetID()
-	local item_info = Aux.info.container_item(bag, slot)
-	
---	if AuxFrame:IsVisible() and button == 'LeftButton' and item_info then
---		if IsAltKeyDown() then
---			if Aux.active_panel ~= 1 then
---                Aux.on_tab_click(1)
---            end
---
---            Aux.control.as_soon_as(function() return Aux.active_panel == 1 end, function()
---                AuxItemSearchFrameItemItemInputBox:Hide()
---                Aux.item_search_frame.set_item(item_info.item_id)
---            end)
---
---            return
---		end
---    end
+function Aux.UseContainerItem(bag, slot)
 
-	return Aux.orig.ContainerFrameItemButton_OnClick(button)
+    if arg1 == 'RightButton' then
+        if AuxSearchFrame:IsVisible() then
+            local item_info = Aux.info.container_item(bag, slot)
+            item_info = item_info and Aux.static.item_info(item_info.item_id)
+            if item_info then
+                Aux.search_frame.start_search(strlower(item_info.name)..'/exact')
+            end
+            return
+        end
+
+        if AuxPostFrame:IsVisible() then
+            local item_info = Aux.info.container_item(bag, slot)
+            if item_info then
+                Aux.post_frame.select_item(item_info.item_key)
+            end
+            return
+        end
+    end
+
+	return Aux.orig.UseContainerItem(bag, slot)
 end
 
 function Aux.quality_color(code)

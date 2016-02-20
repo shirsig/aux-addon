@@ -3,31 +3,45 @@ Aux.static = public
 
 aux_auctionable_items = nil
 
-function public.item_ids()
-	local ids = {}
+function public.items()
+	local items = {}
 	
-	local cache = aux_auctionable_items or public.auctionable_items
-	
-	for key, _ in pairs(cache) do
+	for key, value in pairs(aux_auctionable_items or private.auctionable_items) do
 		if type(key) == 'number' then
-			tinsert(ids, key)
+			tinsert(items, value)
 		end
 	end
 	
-	return ids
+	return items
+end
+
+function public.item_id(item_name)
+	if type(item_name) ~= 'string' then
+		return
+	end
+
+	if aux_auctionable_items and aux_auctionable_items[item_name] then
+		return aux_auctionable_items[item_name]
+	else
+		return private.auctionable_items[item_name]
+	end
 end
 
 function public.item_info(item_id)
+	if type(item_id) ~= 'number' then
+		return
+	end
+
 	if aux_auctionable_items and aux_auctionable_items[item_id] then
 		return aux_auctionable_items[item_id]
 	else
-		return public.auctionable_items[item_id]
+		return private.auctionable_items[item_id]
 	end
 end
 
 function public.generate_cache()
 	local ids = {}
-	for id, _ in pairs(public.auctionable_items) do
+	for id, _ in pairs(private.auctionable_items) do
 		tinsert(ids, id)
 	end
 	local n = getn(ids)
@@ -96,7 +110,7 @@ function public.find_auctionable_items() -- requires a full wdb item cache
 	helper(1)
 end
 
-public.auctionable_items = {
+private.auctionable_items = {
 	[7932] = {
 		["max_stack"] = 1,
 		["id"] = 7932,

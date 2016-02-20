@@ -6,10 +6,8 @@ do
 	function m.sorted_item_names()
 		if not sorted_item_names then
 			sorted_item_names = {}
-			for key, value in Aux.static.auctionable_items do
-				if type(key) == 'number' then
-					tinsert(sorted_item_names, value.name)
-				end
+			for _, item_info in ipairs(Aux.static.items()) do
+				tinsert(sorted_item_names, item_info.name)
 			end
 			sort(sorted_item_names, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 		end
@@ -33,7 +31,7 @@ function m:complete()
 		current_filter = current_filter or {}
 
 		if current_filter.name
-				and Aux.static.auctionable_items[strupper(current_filter.name)]
+				and Aux.static.item_id(strupper(current_filter.name))
 				and not current_filter.min_level
 				and not current_filter.max_level
 				and not current_filter.class

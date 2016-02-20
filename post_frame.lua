@@ -68,6 +68,15 @@ function private.selected_auction()
     return selected_item and existing_auctions[selected_item.key] and existing_auctions[selected_item.key].selected
 end
 
+function public.select_item(item_key)
+    for _, inventory_record in ipairs(Aux.util.filter(inventory_records, function(record) return record.aux_quantity > 0 end)) do
+        if inventory_record.key == item_key then
+            private.set_item(inventory_record)
+            break
+        end
+    end
+end
+
 function public.on_load()
 
     Aux.gui.vertical_line(AuxPostFrameContent, 219)
@@ -76,12 +85,7 @@ function public.on_load()
     AuxSellParametersItem:SetScript('OnReceiveDrag', function()
         local item_info = Aux.cursor_item()
         if item_info then
-            for _, inventory_record in ipairs(Aux.util.filter(inventory_records, function(record) return record.aux_quantity > 0 end)) do
-                if inventory_record.key == item_info.item_key then
-                    private.set_item(inventory_record)
-                    break
-                end
-            end
+            public.select_item(item_info.item_key)
         end
         ClearCursor()
     end)
