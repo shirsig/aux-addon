@@ -46,7 +46,6 @@ function Aux.on_load()
         tab_group:create_tab('Post')
         tab_group:create_tab('Auctions')
         tab_group:create_tab('Bids')
---        tab_group:create_tab('Scan')
         tab_group.on_select = Aux.on_tab_click
         Aux.tab_group = tab_group
     end
@@ -79,10 +78,6 @@ function Aux.on_load()
             end
         end)
     end
-
---    AuxFrameContent:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size})
---    AuxFrameContent:SetBackdropColor(unpack(Aux.gui.config.content_color))
---    AuxFrameContent:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
 
     Aux.persistence.on_load()
     Aux.search_frame.on_load()
@@ -174,9 +169,6 @@ function Aux.setup_hooks()
 
     Aux.orig.AuctionFrameAuctions_OnEvent = AuctionFrameAuctions_OnEvent
     AuctionFrameAuctions_OnEvent = Aux.AuctionFrameAuctions_OnEvent
-
---    Aux.orig.UIDropDownMenu_StartCounting = UIDropDownMenu_StartCounting
---    UIDropDownMenu_StartCounting = Aux.completion.UIDropDownMenu_StartCounting
 
 end
 
