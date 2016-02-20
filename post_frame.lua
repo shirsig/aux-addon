@@ -551,7 +551,7 @@ function private.update_recommendation()
         private.stack_count_slider.editbox:SetNumber(private.stack_count_slider:GetValue())
 
         do
-            -- TODO neutral AH deposit formula
+            local deposit_factor = Aux.neutral and 0.25 or 0.05
             local stack_size = private.stack_size_slider:GetValue()
             local stack_count
             if private.post_all_checkbox:GetChecked() and not selected_item.charges then
@@ -559,10 +559,10 @@ function private.update_recommendation()
             else
                 stack_count = private.stack_count_slider:GetValue()
             end
-            local deposit = floor(selected_item.unit_vendor_price * 0.05 * (selected_item.charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
+            local deposit = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
             if private.post_all_checkbox:GetChecked() and not selected_item.charges then
                 local partial_stack = mod(selected_item.aux_quantity, stack_size)
-                deposit = deposit + floor(selected_item.unit_vendor_price * 0.05 * partial_stack) * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
+                deposit = deposit + floor(selected_item.unit_vendor_price * deposit_factor * partial_stack) * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
             end
 
             private.deposit:SetText('Deposit: '..Aux.money.to_string(deposit))

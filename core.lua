@@ -193,6 +193,9 @@ function Aux.AuctionFrameAuctions_OnEvent()
 end
 
 function Aux.on_auction_house_show()
+    if not UnitFactionGroup('target') then
+        Aux.neutral = true
+    end
     AuxFrame:Show()
     Aux.tab_group:set_tab(1)
 end
