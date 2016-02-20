@@ -179,10 +179,17 @@ local methods = {
 
     --    GetRowPrices = function(record, isPerUnit) return end, -- TODO
     GetRowPrices = function(record, per_unit)
+        local bid_color
+        if record.high_bidder then
+            bid_color = '|cff16ff16'
+        elseif record.high_bid ~= 0 then
+            bid_color = '|cffff9218'
+        end
+
         if per_unit then
-            return ceil(record.unit_bid_price), ceil(record.unit_buyout_price), record.high_bidder and '|cff16ff16'
+            return ceil(record.unit_bid_price), ceil(record.unit_buyout_price), bid_color
         else
-            return record.bid_price, record.buyout_price, record.high_bidder and '|cff16ff16'
+            return record.bid_price, record.buyout_price, bid_color
         end
     end,
 
