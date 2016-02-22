@@ -302,8 +302,13 @@ local methods = {
                     aVal = self:GetRecordPercent(record_a)
                     bVal = self:GetRecordPercent(record_b)
                 elseif sortKey == 'numAuctions' then
-                    aVal = a.totalAuctions
-                    bVal = b.totalAuctions
+                    if a.children then
+                        aVal = a.totalAuctions
+                        bVal = b.totalAuctions
+                    else
+                        aVal = a.numAuctions
+                        bVal = b.numAuctions
+                    end
                 elseif sortKey == 'unit_bid_price' or sortKey == 'bid_price' then
                     aVal = self.GetRowPrices(record_a, sortKey == 'unit_bid_price')
                     bVal = self.GetRowPrices(record_b, sortKey == 'unit_bid_price')
