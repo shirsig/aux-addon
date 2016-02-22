@@ -212,7 +212,7 @@ local methods = {
         self.sortInfo.isSorted = nil
         self:SetSelectedRecord(nil, true)
 
-        sort(self.records, function(a,b) return a.search_signature < b.search_signature end)
+        sort(self.records, function(a, b) return Aux.sort.multi_lt(a.search_signature, b.search_signature, tostring(a), tostring(b)) end)
 
         local records = self.records
         if getn(records) == 0 then return end
@@ -281,36 +281,38 @@ local methods = {
             local function SortHelperFunc(a, b, sortKey)
                 local hadSortKey = sortKey and true or false
                 sortKey = sortKey or self.sortInfo.sortKey
-                local aVal, bVal
+
+                local record_a, record_b
                 if a.children then
-                    aVal = a.children[1].record
-                    bVal = b.children[1].record
+                    record_a = a.children[1].record
+                    record_b = b.children[1].record
                 else
-                    aVal = a.record
-                    bVal = b.record
+                    record_a = a.record
+                    record_b = b.record
                 end
 
-
-                if aVal.isFake then
+                if record_a.isFake then
                     return true
-                elseif bVal.isFake then
+                elseif record_b.isFake then
                     return false
                 end
+
+                local aVal, bVal
                 if sortKey == 'percent' then
-                    aVal = self:GetRecordPercent(aVal)
-                    bVal = self:GetRecordPercent(bVal)
+                    aVal = self:GetRecordPercent(record_a)
+                    bVal = self:GetRecordPercent(record_b)
                 elseif sortKey == 'numAuctions' then
                     aVal = a.totalAuctions
                     bVal = b.totalAuctions
                 elseif sortKey == 'unit_bid_price' or sortKey == 'bid_price' then
-                    aVal = self.GetRowPrices(aVal, sortKey == 'unit_bid_price')
-                    bVal = self.GetRowPrices(bVal, sortKey == 'unit_bid_price')
+                    aVal = self.GetRowPrices(record_a, sortKey == 'unit_bid_price')
+                    bVal = self.GetRowPrices(record_b, sortKey == 'unit_bid_price')
                 elseif sortKey == 'unit_buyout_price' or sortKey == 'buyout_price' then
-                    aVal = ({ self.GetRowPrices(aVal, sortKey == 'unit_buyout_price') })[2]
-                    bVal = ({ self.GetRowPrices(bVal, sortKey == 'unit_buyout_price') })[2]
+                    aVal = ({ self.GetRowPrices(record_a, sortKey == 'unit_buyout_price') })[2]
+                    bVal = ({ self.GetRowPrices(record_b, sortKey == 'unit_buyout_price') })[2]
                 else
-                    aVal = aVal[sortKey]
-                    bVal = bVal[sortKey]
+                    aVal = record_a[sortKey]
+                    bVal = record_b[sortKey]
                 end
                 if sortKey == 'buyout_price' or sortKey == 'unit_buyout_price' then
                     -- for buyout, put bid-only auctions at the bottom
@@ -354,7 +356,8 @@ local methods = {
                         -- sort by percent
                         return SortHelperFunc(a, b, 'percent')
                     end
-                    return tostring(a) < tostring(b)
+                    -- as a last resort compare table ids to ensure a total order
+                    return tostring(record_a) < tostring(record_b)
                 end
                 if self.sortInfo.descending then
                     return aVal > bVal
