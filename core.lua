@@ -1,4 +1,4 @@
-AuxVersion = '2.4.29'
+AuxVersion = '2.4.30'
 
 Aux = {
     blizzard_ui_shown = false,
