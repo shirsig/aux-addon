@@ -356,8 +356,8 @@ local methods = {
                         -- sort by percent
                         return SortHelperFunc(a, b, 'percent')
                     end
-                    -- as a last resort compare table ids to ensure a total order
-                    return tostring(record_a) < tostring(record_b)
+                    -- as a last resort compare search signatures to ensure a total order
+                    return record_a.search_signature < record_b.search_signature
                 end
                 if self.sortInfo.descending then
                     return aVal > bVal
