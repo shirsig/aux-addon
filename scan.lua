@@ -71,32 +71,39 @@ function wait_for_results(k)
             end)
         end
     else
-        Aux.control.on_next_event('AUCTION_ITEM_LIST_UPDATE', function()
+        local last_update
+        local listener = Aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE')
+        listener:set_action(function()
+            private.request_owner_data()
+            last_update = GetTime()
+        end)
+        listener:start()
+        Aux.control.as_soon_as(function() return last_update and GetTime() - last_update > 3 end, function()
+            listener:stop()
             ok = true
         end)
     end
 
-	return controller().wait(function() return ok end, k)
+    local t0 = GetTime()
+	return controller().wait(function() return ok or GetTime() - t0 > 30 end, k)
 end
 
-function wait_for_owner_data(k)
-    if state.params.no_wait_owners then
-        return k()
+function private.owner_data_complete()
+    local count, _ = GetNumAuctionItems(current_query().type)
+    for i=1,count do
+        local auction_info = Aux.info.auction(i, current_query().type)
+        if auction_info and not auction_info.owner then
+            return false
+        end
     end
-	local t0 = time()
-	return controller().wait(function()
-		if time() - t0 > 30 then -- we won't wait longer than 30 seconds
-			return true
-		end
-		local count, _ = GetNumAuctionItems(current_query().type)
-		for i=1,count do
-			local auction_info = Aux.info.auction(i, current_query().type)
-			if auction_info and not auction_info.owner then
-				return false
-			end
-		end
-		return true
-	end, k)
+    return true
+end
+
+function private.request_owner_data()
+    local count, _ = GetNumAuctionItems(current_query().type)
+    for i=1,count do
+        Aux.info.auction(i, current_query().type)
+    end
 end
 
 function wait_for_callback(args) -- the arguments must not be nil!
@@ -202,17 +209,15 @@ function submit_query(k)
                 state.params.on_submit_query()
             end
             wait_for_results(function()
-                wait_for_owner_data(function()
-                    local _, total_count = GetNumAuctionItems(current_query().type)
-                    state.total_pages = math.ceil(total_count / PAGE_SIZE)
-                    if state.total_pages >= state.page + 1 then
-                        wait_for_callback{state.params.on_page_loaded or Aux.util.pass, state.page, state.total_pages, function()
-                            return k()
-                        end}
-                    else
+                local _, total_count = GetNumAuctionItems(current_query().type)
+                state.total_pages = math.ceil(total_count / PAGE_SIZE)
+                if state.total_pages >= state.page + 1 then
+                    wait_for_callback{state.params.on_page_loaded or Aux.util.pass, state.page, state.total_pages, function()
                         return k()
-                    end
-                end)
+                    end}
+                else
+                    return k()
+                end
             end)
             if current_query().type == 'bidder' then
                 GetBidderAuctionItems(state.page)

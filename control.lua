@@ -29,21 +29,19 @@ function Aux.control.event_listener(event, action)
 	
 	local listener = { event=event, action=action }
 	
-	function self.set_action(action)
+	function self:set_action(action)
 		listener.action = action
 	end
 	
-	function self.start()
+	function self:start()
 		Aux.util.set_add(event_listeners, listener)
-		if not Aux.util.any(event_listeners, function(l) return l.event == event end) then
-			AuxControlFrame:RegisterEvent(event)
-		end
+		AuxControlFrame:RegisterEvent(event)
 		return self
 	end
 	
-	function self.stop()
+	function self:stop()
 		listener.deleted = true
-		if not Aux.util.any(event_listeners, function(l) return l.event == event end) then
+		if not Aux.util.any(Aux.util.set_to_array(event_listeners), function(l) return l.event == event end) then
 			AuxControlFrame:UnregisterEvent(event)
 		end
 		return self
@@ -57,16 +55,16 @@ function Aux.control.update_listener(action)
 	
 	local listener = { action=action }
 
-	function self.set_action(action)
+	function self:set_action(action)
 		listener.action = action
 	end
 	
-	function self.start()
+	function self:start()
 		Aux.util.set_add(update_listeners, listener)
 		return self
 	end
 	
-	function self.stop()
+	function self:stop()
 		listener.deleted = true
 		return self
 	end
@@ -79,36 +77,36 @@ end
 function Aux.control.on_next_update(callback)
 	local listener = Aux.control.update_listener()
 	
-	listener.set_action(function()
+	listener:set_action(function()
 		listener:stop()
 		return callback()
 	end)
 	
-	listener.start()
+	listener:start()
 end
 
 function Aux.control.on_next_event(event, callback)
 	local listener = Aux.control.event_listener(event)
 	
-	listener.set_action(function()
+	listener:set_action(function()
 		listener:stop()
 		return callback()
 	end)
 	
-	listener.start()
+	listener:start()
 end
 
 function Aux.control.as_soon_as(p, callback)
 	local listener = Aux.control.update_listener()	
 	
-	listener.set_action(function()
+	listener:set_action(function()
 		if p() then
-			listener.stop()
+			listener:stop()
 			return callback()
 		end
 	end)
 	
-	listener.start()
+	listener:start()
 end
 
 
@@ -119,14 +117,14 @@ function Aux.control.controller()
 	local state
 	
 	local listener = Aux.control.update_listener()
-	listener.set_action(function()
+	listener:set_action(function()
 		if state and state.p() then
 			local k = state.k
 			state = nil
 			return k()
 		end
 	end)
-	listener.start()
+	listener:start()
 	
 	function self.wait(p, k)
 		state = {
@@ -135,11 +133,11 @@ function Aux.control.controller()
 		}
 	end
 	
-	function self.reset()
+	function self:reset()
 		state = nil
 	end
 	
-	function self.cleanup()
+	function self:cleanup()
 		listener.stop()
 	end
 	
