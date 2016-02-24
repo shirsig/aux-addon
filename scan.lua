@@ -31,7 +31,6 @@ function public.start(params)
         abort()
 
         state = {
-            first_page = true,
             params = params,
         }
 
@@ -58,8 +57,6 @@ function abort()
 end
 
 function wait_for_results(k)
-    local first_page = state.first_page
-    state.first_page = false
 
 	local ok
     if current_query().type == 'bidder' then
@@ -83,14 +80,13 @@ function wait_for_results(k)
             last_update = GetTime()
         end)
         listener:start()
-        Aux.control.as_soon_as(function() return last_update and GetTime() - last_update > 3 or state and first_page and owner_data_complete end, function()
+        Aux.control.as_soon_as(function() return last_update and GetTime() - last_update > 3 or owner_data_complete end, function()
             listener:stop()
             ok = true
         end)
     end
-
-    local t0 = GetTime()
-	return controller().wait(function() return ok or GetTime() - t0 > 30 end, k)
+    
+	return controller().wait(function() return ok end, k)
 end
 
 function private.owner_data_complete()
