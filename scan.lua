@@ -80,7 +80,7 @@ function wait_for_results(k)
             last_update = GetTime()
         end)
         listener:start()
-        Aux.control.as_soon_as(function() return last_update and GetTime() - last_update > 5 or owner_data_complete end, function()
+        Aux.control.as_soon_as(function() return owner_data_complete or last_update and GetTime() - last_update > 5 end, function()
             listener:stop()
             ok = true
         end)
