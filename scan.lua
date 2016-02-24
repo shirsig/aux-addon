@@ -80,16 +80,19 @@ function wait_for_results(k)
             last_update = GetTime()
         end)
         listener:start()
-        Aux.control.as_soon_as(function() return last_update and GetTime() - last_update > 3 or owner_data_complete end, function()
+        Aux.control.as_soon_as(function() return last_update and GetTime() - last_update > 5 or owner_data_complete end, function()
             listener:stop()
             ok = true
         end)
     end
-    
+
 	return controller().wait(function() return ok end, k)
 end
 
 function private.owner_data_complete()
+    if state.params.no_wait_owner then
+        return true
+    end
     local count, _ = GetNumAuctionItems(current_query().type)
     for i=1,count do
         local auction_info = Aux.info.auction(i, current_query().type)
