@@ -31,6 +31,7 @@ function public.start(params)
         abort()
 
         state = {
+            first_page = true,
             params = params,
         }
 
@@ -57,6 +58,9 @@ function abort()
 end
 
 function wait_for_results(k)
+    local first_page = state.first_page
+    state.first_page = false
+
 	local ok
     if current_query().type == 'bidder' then
         Aux.control.as_soon_as(function() return Aux.bids_loaded end, function()
@@ -72,13 +76,14 @@ function wait_for_results(k)
         end
     else
         local last_update
+        local owner_data_complete
         local listener = Aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE')
         listener:set_action(function()
-            private.request_owner_data()
+            owner_data_complete = state and private.owner_data_complete()
             last_update = GetTime()
         end)
         listener:start()
-        Aux.control.as_soon_as(function() return last_update and GetTime() - last_update > 3 end, function()
+        Aux.control.as_soon_as(function() return last_update and GetTime() - last_update > 3 or state and first_page and owner_data_complete end, function()
             listener:stop()
             ok = true
         end)
@@ -208,17 +213,6 @@ function submit_query(k)
             if state.params.on_submit_query then
                 state.params.on_submit_query()
             end
-            wait_for_results(function()
-                local _, total_count = GetNumAuctionItems(current_query().type)
-                state.total_pages = math.ceil(total_count / PAGE_SIZE)
-                if state.total_pages >= state.page + 1 then
-                    wait_for_callback{state.params.on_page_loaded or Aux.util.pass, state.page, state.total_pages, function()
-                        return k()
-                    end}
-                else
-                    return k()
-                end
-            end)
             if current_query().type == 'bidder' then
                 GetBidderAuctionItems(state.page)
             elseif current_query().type == 'owner' then
@@ -236,6 +230,17 @@ function submit_query(k)
                     Aux.util.safe_index{current_query(), 'blizzard_query', 'quality'}
                 )
             end
+            wait_for_results(function()
+                local _, total_count = GetNumAuctionItems(current_query().type)
+                state.total_pages = math.ceil(total_count / PAGE_SIZE)
+                if state.total_pages >= state.page + 1 then
+                    wait_for_callback{state.params.on_page_loaded or Aux.util.pass, state.page, state.total_pages, function()
+                        return k()
+                    end}
+                else
+                    return k()
+                end
+            end)
 		end)
 	else
 		return k()
