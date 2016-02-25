@@ -1,13 +1,13 @@
 local private, public = {}, {}
 Aux.stack = public
 
-local controller = (function()
-	local controller
-	return function()
-		controller = controller or Aux.control.controller()
-		return controller
+function private.as_soon_as(p, k)
+	if p() then
+		return k()
+	else
+		return Aux.control.wait(private.as_soon_as, p, k)
 	end
-end)()
+end
 
 local state
 
@@ -47,7 +47,7 @@ function private.move_item(from_slot, to_slot, amount, k)
 	SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
 	PickupContainerItem(to_slot.bag, to_slot.bag_slot)
 	
-	return controller().wait(function() return private.stack_size(to_slot) == size_before + amount end, k)
+	return private.as_soon_as(function() return private.stack_size(to_slot) == size_before + amount end, k)
 end
 
 function private.item_key(slot)
@@ -104,7 +104,7 @@ function private.process()
 		end
 	end
 		
-	return private.stop()
+	return public.stop()
 end
 
 function private.max_stack(slot)
@@ -112,8 +112,10 @@ function private.max_stack(slot)
     return container_item_info and container_item_info.max_stack
 end
 
-function private.stop()
+function public.stop()
 	if state then
+		Aux.control.kill(state.thread_id)
+
 		local callback, slot = state.callback, state.target_slot
 		
 		state = nil
@@ -124,24 +126,17 @@ function private.stop()
 	end
 end
 
-function public.stop(k)
-	controller().wait(function()
-		private.stop()
-
-		if k then
-			return k()
-		end
-	end)
-end
-
 function public.start(item_key, size, callback)
-	controller().wait(function()
-		private.stop()
+	private.as_soon_as(function()
+		public.stop()
 		
 		local slots = private.item_slots(item_key)
 		local target_slot = slots()
-		
+
+		local thread_id = Aux.control.new(private.process)
+
 		state = {
+			thread_id = thread_id,
 			target_size = size,
 			target_slot = target_slot,
 			other_slots = slots,
@@ -149,12 +144,10 @@ function public.start(item_key, size, callback)
 		}
 		
 		if not target_slot then
-			return private.stop()
+			public.stop()
 		elseif private.item_charges(target_slot) then
 			state.target_slot = private.find_charges_item_slot(item_key, size)
-			return private.stop()
-		else
-			return private.process()
+			public.stop()
 		end
 	end)
 end

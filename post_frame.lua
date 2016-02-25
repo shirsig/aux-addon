@@ -679,32 +679,31 @@ function private.set_item(item)
         return
     end
 
-    Aux.scan.abort(function()
+    Aux.scan.abort('list')
 
-        selected_item = item
-        refresh = true
+    selected_item = item
+    refresh = true
 
-        UIDropDownMenu_Initialize(private.duration_dropdown, private.initialize_duration_dropdown) -- TODO, wtf, why is this needed
-        UIDropDownMenu_SetSelectedValue(private.duration_dropdown, settings.duration)
+    UIDropDownMenu_Initialize(private.duration_dropdown, private.initialize_duration_dropdown) -- TODO, wtf, why is this needed
+    UIDropDownMenu_SetSelectedValue(private.duration_dropdown, settings.duration)
 
-        UIDropDownMenu_Initialize(private.pricing_model_dropdown, private.initialize_pricing_model_dropdown)
-        UIDropDownMenu_SetSelectedValue(private.pricing_model_dropdown, settings.pricing_model)
+    UIDropDownMenu_Initialize(private.pricing_model_dropdown, private.initialize_pricing_model_dropdown)
+    UIDropDownMenu_SetSelectedValue(private.pricing_model_dropdown, settings.pricing_model)
 
-        private.hide_checkbox:SetChecked(settings.hidden)
-        private.post_all_checkbox:SetChecked(settings.post_all)
+    private.hide_checkbox:SetChecked(settings.hidden)
+    private.post_all_checkbox:SetChecked(settings.post_all)
 
-        private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 5 or selected_item.max_stack)
-        private.stack_size_slider:SetValue(settings.stack_size)
-        private.quantity_update()
-        private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
+    private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 5 or selected_item.max_stack)
+    private.stack_size_slider:SetValue(settings.stack_size)
+    private.quantity_update()
+    private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
 
-        if not existing_auctions[selected_item.key] then
-            private.refresh_entries()
-        end
+    if not existing_auctions[selected_item.key] then
+        private.refresh_entries()
+    end
 
-        private.update_recommendation()
-        refresh = true
-    end)
+    private.update_recommendation()
+    refresh = true
 
 end
 
@@ -822,11 +821,10 @@ function private.set_auction(entry)
 end
 
 function private.refresh()
-	Aux.scan.abort(function()
-		private.refresh_entries()
-		private.update_recommendation()
-        refresh = true
-	end)
+	Aux.scan.abort('list')
+    private.refresh_entries()
+    private.update_recommendation()
+    refresh = true
 end
 
 function private.record_auction(key, aux_quantity, unit_buyout_price, duration, owner)

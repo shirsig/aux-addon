@@ -28,7 +28,7 @@ function current_thread()
 end
 
 function public.start(params)
-    private.abort(params.type)
+    public.abort(params.type)
 
     local thread_id = Aux.control.new(private.scan)
     threads[params.type] = {
@@ -37,15 +37,7 @@ function public.start(params)
     }
 end
 
-function public.abort(k)
-    private.abort()
-
-    if k then
-        return k()
-    end
-end
-
-function private.abort(type)
+function public.abort(type)
     for t, thread in pairs(threads) do
         if not type or type == t then
             if thread.params.on_abort then
