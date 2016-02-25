@@ -1,7 +1,9 @@
-Aux.control = {}
+local private, public = {}, {}
+Aux.control = public
 
 local event_listeners = {}
 local update_listeners = {}
+private.threads = {}
 
 function Aux.control.on_event()
 	for listener, _ in pairs(event_listeners) do
@@ -19,6 +21,13 @@ function Aux.control.on_update()
 		if not listener.deleted then
 			listener.action()
 		end
+	end
+
+	for thread_id, k in pairs(private.threads) do
+		private.threads[thread_id] = nil
+		public.thread_id = thread_id
+		k()
+		public.thread_id = nil
 	end
 end
 
@@ -142,4 +151,23 @@ function Aux.control.controller()
 	end
 	
 	return self
+end
+
+do
+	local next_thread_id = 1
+	function public.new(k)
+		local thread_id = next_thread_id
+		next_thread_id = next_thread_id + 1
+		private.threads[thread_id] = k
+		return thread_id
+	end
+end
+
+function public.kill(thread_id)
+	private.threads[thread_id] = nil
+end
+
+function public.wait(...)
+	local k = tremove(arg, 1)
+	private.threads[public.thread_id] = function() return k(unpack(arg)) end
 end

@@ -783,7 +783,6 @@ function public.start_search(filter_string)
         if filters then
             queries = Aux.util.map(filters, function(filter)
                 return {
-                    type = 'list',
                     start_page = 0,
                     blizzard_query = Aux.scan_util.blizzard_query(filter),
                     validator = Aux.scan_util.validator(filter),
@@ -813,6 +812,7 @@ function public.start_search(filter_string)
 
         local current_page, current_total_pages, current_query
         Aux.scan.start{
+            type = 'list',
             queries = queries,
             on_page_loaded = function(page, total_pages)
                 current_page = page + 1
