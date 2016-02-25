@@ -394,7 +394,9 @@ function public.on_open()
 
     private.update_inventory_records()
 
-    refresh = true
+--    if selected_item then
+--        public.select_item(selected_item.key)
+--    end
 
     private.update_recommendation()
 end
@@ -704,7 +706,6 @@ function private.set_item(item)
 
     private.update_recommendation()
     refresh = true
-
 end
 
 function private.update_inventory_records()

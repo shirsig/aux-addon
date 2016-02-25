@@ -119,27 +119,25 @@ function public.stop()
 end
 
 function public.start(item_key, size, callback)
-	Aux.control.wait_until(function()
+	public.stop()
+
+	local slots = private.item_slots(item_key)
+	local target_slot = slots()
+
+	local thread_id = Aux.control.new_thread(private.process)
+
+	state = {
+		thread_id = thread_id,
+		target_size = size,
+		target_slot = target_slot,
+		other_slots = slots,
+		callback = callback,
+	}
+
+	if not target_slot then
 		public.stop()
-		
-		local slots = private.item_slots(item_key)
-		local target_slot = slots()
-
-		local thread_id = Aux.control.new_thread(private.process)
-
-		state = {
-			thread_id = thread_id,
-			target_size = size,
-			target_slot = target_slot,
-			other_slots = slots,
-			callback = callback,
-		}
-		
-		if not target_slot then
-			public.stop()
-		elseif private.item_charges(target_slot) then
-			state.target_slot = private.find_charges_item_slot(item_key, size)
-			public.stop()
-		end
-	end)
+	elseif private.item_charges(target_slot) then
+		state.target_slot = private.find_charges_item_slot(item_key, size)
+		public.stop()
+	end
 end
