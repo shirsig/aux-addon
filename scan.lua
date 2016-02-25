@@ -49,19 +49,11 @@ end
 
 function private.wait_for_results(k)
     if private.current_thread().params.type == 'bidder' then
-        return private.wait_for_bidder_results(k)
+        return Aux.control.wait_until(function() return Aux.bids_loaded end, k)
     elseif private.current_thread().params.type == 'owner' then
         return private.wait_for_owner_results(k)
     elseif private.current_thread().params.type == 'list' then
         return private.wait_for_list_results(k)
-    end
-end
-
-function private.wait_for_bidder_results(k)
-    if Aux.bids_loaded then
-        return k()
-    else -- recurse on the next update
-        return Aux.control.wait(private.wait_for_bidder_results, k)
     end
 end
 
