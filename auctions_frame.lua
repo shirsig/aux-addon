@@ -97,9 +97,9 @@ function public.scan_auctions()
     selected_auction = nil
     private.update_listing()
     Aux.scan.start{
+        type = 'owner',
         queries = {
             {
-                type = 'owner',
                 start_page = 0,
             }
         },
@@ -144,7 +144,7 @@ function private.find_auction_and_cancel(record)
         return
     end
 
-    Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
+    Aux.scan_util.find(record, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
         if Aux.util.index_of(record, auction_records) then
             CancelAuction(index)
             private.record_remover(record)()
@@ -162,7 +162,7 @@ do
 
         found_index = nil
 
-        Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
+        Aux.scan_util.find(record, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
 
             found_index = index
 

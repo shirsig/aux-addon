@@ -22,8 +22,8 @@ function public.start_scan()
 
     Aux.log('Scanning auctions ...')
     Aux.scan.start{
+        type = 'list',
         queries = {{
-            type = 'list',
             start_page = 0,
         }},
         on_page_loaded = function(page, total_pages)

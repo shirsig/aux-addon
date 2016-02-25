@@ -1,55 +1,59 @@
 local m = {}
 Aux.scan_util = m
 
-function m.find(test, query, page, status_bar, on_abort, on_failure, on_success)
+function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
-    Aux.scan.abort(function()
+    local function test(index)
+        local auction_info = Aux.info.auction(index, auction_record.query_type)
+        return auction_info and auction_info.search_signature == auction_record.search_signature
+    end
 
-        status_bar:update_status(0, 0)
-        status_bar:set_text('Searching auction...')
+    Aux.scan.abort(auction_record.query_type)
 
-        local pages = page > 0 and { page, page - 1 } or { page }
+    status_bar:update_status(0, 0)
+    status_bar:set_text('Searching auction...')
 
-        local new_query = {
-            type = query.type,
-            validator = function(auction_info) return test(auction_info.index) end,
-            blizzard_query = query.blizzard_query,
-            next_page = function()
-                if getn(pages) == 1 then
-                    status_bar:update_status(50, 50)
-                end
-                local page = pages[1]
-                tremove(pages, 1)
-                return page
-            end,
-        }
+    local pages = auction_record.page > 0 and { auction_record.page, auction_record.page - 1 } or { auction_record.page }
 
-        local found
-        Aux.scan.start{
-            queries = { new_query },
-            on_read_auction = function(auction_info, ctrl)
-                if test(auction_info.index) then
-                    found = true
-                    ctrl.suspend()
-                    status_bar:update_status(100, 100)
-                    status_bar:set_text('Auction found')
-                    return on_success(auction_info.index)
-                end
-            end,
-            on_abort = function()
-                if not found then
-                    status_bar:update_status(100, 100)
-                    status_bar:set_text('Auction not found')
-                    return on_abort()
-                end
-            end,
-            on_complete = function()
+    local query = {
+        validator = function(auction_info) return test(auction_info.index) end,
+        blizzard_query = auction_record.query.blizzard_query,
+        next_page = function()
+            if getn(pages) == 1 then
+                status_bar:update_status(50, 50)
+            end
+            local page = pages[1]
+            tremove(pages, 1)
+            return page
+        end,
+    }
+
+    local found
+    Aux.scan.start{
+        type = auction_record.query_type,
+        queries = { query },
+        on_read_auction = function(auction_info, ctrl)
+            if test(auction_info.index) then
+                found = true
+                ctrl.suspend()
+                status_bar:update_status(100, 100)
+                status_bar:set_text('Auction found')
+                return on_success(auction_info.index)
+            end
+        end,
+        on_abort = function()
+            if not found then
                 status_bar:update_status(100, 100)
                 status_bar:set_text('Auction not found')
-                return on_failure()
-            end,
-        }
-    end)
+                return on_abort()
+            end
+        end,
+        on_complete = function()
+            status_bar:update_status(100, 100)
+            status_bar:set_text('Auction not found')
+            return on_failure()
+        end,
+    }
 end
 
 function m.create_item_query(item_id)
@@ -59,7 +63,6 @@ function m.create_item_query(item_id)
     if item_info then
         local filter = m.filter_from_string(item_info.name..'/exact')
         return {
-            type = 'list',
             start_page = 0,
             validator = m.validator(filter),
             blizzard_query = m.blizzard_query(filter),

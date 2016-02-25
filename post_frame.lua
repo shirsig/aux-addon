@@ -778,6 +778,7 @@ function private.refresh_entries()
         private.status_bar:set_text('Scanning auctions...')
 
 		Aux.scan.start{
+            type = 'list',
             no_wait_owner = true,
 			queries = { query },
 			on_page_loaded = function(page, total_pages)

@@ -767,94 +767,94 @@ end
 end
 
 function public.stop_search()
-	Aux.scan.abort()
+	Aux.scan.abort('list')
 end
 
 function public.start_search(filter_string)
 
-    Aux.scan.abort(function()
-        if filter_string then
-            private.search_box:SetText(filter_string)
-        end
+    Aux.scan.abort('list')
 
-        local queries
+    if filter_string then
+        private.search_box:SetText(filter_string)
+    end
 
-        local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
-        if filters then
-            queries = Aux.util.map(filters, function(filter)
-                return {
-                    start_page = 0,
-                    blizzard_query = Aux.scan_util.blizzard_query(filter),
-                    validator = Aux.scan_util.validator(filter),
-                }
-            end)
-        else
-            return
-        end
+    local queries
 
-        tinsert(aux_recent_searches, 1, { filter_string = private.search_box:GetText(), prettified = private.prettify_search(private.search_box:GetText()) })
-        while getn(aux_recent_searches) > 50 do
-            tremove(aux_recent_searches)
-        end
-        private.update_search_listings()
+    local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
+    if filters then
+        queries = Aux.util.map(filters, function(filter)
+            return {
+                start_page = 0,
+                blizzard_query = Aux.scan_util.blizzard_query(filter),
+                validator = Aux.scan_util.validator(filter),
+            }
+        end)
+    else
+        return
+    end
 
-        private.search_button:Hide()
-        private.stop_button:Show()
+    tinsert(aux_recent_searches, 1, { filter_string = private.search_box:GetText(), prettified = private.prettify_search(private.search_box:GetText()) })
+    while getn(aux_recent_searches) > 50 do
+        tremove(aux_recent_searches)
+    end
+    private.update_search_listings()
 
-        private.update_tab(RESULTS)
+    private.search_button:Hide()
+    private.stop_button:Show()
 
-        private.status_bar:update_status(0,0)
-        private.status_bar:set_text('Scanning auctions...')
+    private.update_tab(RESULTS)
 
-        private.results_listing:Clear()
-        local scanned_records = {}
-        private.results_listing:SetDatabase(scanned_records)
+    private.status_bar:update_status(0,0)
+    private.status_bar:set_text('Scanning auctions...')
 
-        local current_page, current_total_pages, current_query
-        Aux.scan.start{
-            type = 'list',
-            queries = queries,
-            on_page_loaded = function(page, total_pages)
-                current_page = page + 1
-                current_total_pages = total_pages
+    private.results_listing:Clear()
+    local scanned_records = {}
+    private.results_listing:SetDatabase(scanned_records)
+
+    local current_page, current_total_pages, current_query
+    Aux.scan.start{
+        type = 'list',
+        queries = queries,
+        on_page_loaded = function(page, total_pages)
+            current_page = page + 1
+            current_total_pages = total_pages
+            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / current_total_pages) -- TODO
+            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
+        end,
+        on_page_scanned = function()
+            private.results_listing:SetDatabase()
+        end,
+        on_start_query = function(query_index)
+            current_query = query_index
+            if current_page then
                 private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / current_total_pages) -- TODO
                 private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
-            end,
-            on_page_scanned = function()
-                private.results_listing:SetDatabase()
-            end,
-            on_start_query = function(query_index)
-                current_query = query_index
-                if current_page then
-                    private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / current_total_pages) -- TODO
-                    private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
-                else
-                    private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 0) -- TODO
-                    private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
-                end
-            end,
-            on_read_auction = function(auction_info)
-                if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
-                    tinsert(scanned_records, auction_info)
-                end
-            end,
-            on_complete = function()
-                private.results_listing:SetDatabase()
-                private.status_bar:update_status(100, 100)
-                private.status_bar:set_text('Done Scanning')
+            else
+                private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 0) -- TODO
+                private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
+            end
+        end,
+        on_read_auction = function(auction_info)
+            if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
+                tinsert(scanned_records, auction_info)
+            end
+        end,
+        on_complete = function()
+            private.results_listing:SetDatabase()
+            private.status_bar:update_status(100, 100)
+            private.status_bar:set_text('Done Scanning')
 
-                private.stop_button:Hide()
-                private.search_button:Show()
-            end,
-            on_abort = function()
-                private.results_listing:SetDatabase()
-                private.status_bar:update_status(100, 100)
-                private.status_bar:set_text('Done Scanning')
-                private.stop_button:Hide()
-                private.search_button:Show()
-            end,
-        }
-    end)
+            private.stop_button:Hide()
+            private.search_button:Show()
+        end,
+        on_abort = function()
+            private.results_listing:SetDatabase()
+            private.status_bar:update_status(100, 100)
+            private.status_bar:set_text('Done Scanning')
+            private.stop_button:Hide()
+            private.search_button:Show()
+        end,
+    }
 end
 
 function private.test(record)
@@ -875,7 +875,7 @@ function private.find_auction_and_bid(record, buyout_mode)
         return
     end
 
-    Aux.scan_util.find(private.test(record), record.query, record.page, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
+    Aux.scan_util.find(record, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
         if private.results_listing:ContainsRecord(record) then
             Aux.place_bid('list', index, buyout_mode and record.buyout_price or record.bid_price, private.record_remover(record))
         end
@@ -893,9 +893,7 @@ do
         end
 
         Aux.scan_util.find(
-            private.test(record),
-            record.query,
-            record.page,
+            record,
             private.status_bar,
             function()
                 state = IDLE

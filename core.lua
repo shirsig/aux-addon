@@ -203,35 +203,31 @@ function Aux.on_auction_house_closed()
 end
 
 function Aux.on_tab_click(index)
-    Aux.post.stop()
-    Aux.stack.stop()
-    Aux.scan.abort(function()
-        Aux.search_frame.on_close()
-        Aux.post_frame.on_close()
-        Aux.auctions_frame.on_close()
-        Aux.bids_frame.on_close()
+    Aux.search_frame.on_close()
+    Aux.post_frame.on_close()
+    Aux.auctions_frame.on_close()
+    Aux.bids_frame.on_close()
 
-        AuxSearchFrame:Hide()
-        AuxPostFrame:Hide()
-        AuxAuctionsFrame:Hide()
-        AuxBidsFrame:Hide()
+    AuxSearchFrame:Hide()
+    AuxPostFrame:Hide()
+    AuxAuctionsFrame:Hide()
+    AuxBidsFrame:Hide()
 
-        if index == 1 then
-            AuxSearchFrame:Show()
-            Aux.search_frame.on_open()
-        elseif index == 2 then
-            AuxPostFrame:Show()
-            Aux.post_frame.on_open()
-        elseif index == 3 then
-            AuxAuctionsFrame:Show()
-            Aux.auctions_frame.on_open()
-        elseif index == 4 then
-            AuxBidsFrame:Show()
-            Aux.bids_frame.on_open()
-        end
+    if index == 1 then
+        AuxSearchFrame:Show()
+        Aux.search_frame.on_open()
+    elseif index == 2 then
+        AuxPostFrame:Show()
+        Aux.post_frame.on_open()
+    elseif index == 3 then
+        AuxAuctionsFrame:Show()
+        Aux.auctions_frame.on_open()
+    elseif index == 4 then
+        AuxBidsFrame:Show()
+        Aux.bids_frame.on_open()
+    end
 
-        Aux.active_panel = index
-    end)
+    Aux.active_panel = index
 end
 
 function Aux.round(v)

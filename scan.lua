@@ -20,14 +20,19 @@ function current_query()
 end
 
 function current_thread()
-    return threads[Aux.control.thread_id]
+    for _, thread in pairs(threads) do
+        if thread.id == Aux.control.thread_id then
+            return thread
+        end
+    end
 end
 
 function public.start(params)
     private.abort(params.type)
 
     local thread_id = Aux.control.new(private.scan)
-    threads[thread_id] = {
+    threads[params.type] = {
+        id = thread_id,
         params = params,
     }
 end
@@ -41,13 +46,13 @@ function public.abort(k)
 end
 
 function private.abort(type)
-    for thread_id, thread in pairs(threads) do
-        if not type or type == thread.type then
-            if thread.on_abort then
-                thread.on_abort()
+    for t, thread in pairs(threads) do
+        if not type or type == t then
+            if thread.params.on_abort then
+                thread.params.on_abort()
             end
-            threads[thread_id] = nil
-            Aux.control.kill(thread_id)
+            threads[t] = nil
+            Aux.control.kill(thread.id)
         end
     end
 end
@@ -61,11 +66,11 @@ function private.as_soon_as(p, k)
 end
 
 function private.wait_for_results(k)
-    if current_thread().type == 'bidder' then
+    if current_thread().params.type == 'bidder' then
         return private.wait_for_bidder_results(k)
-    elseif current_thread().type == 'owner' then
+    elseif current_thread().params.type == 'owner' then
         return private.wait_for_owner_results(k)
-    elseif current_thread().type == 'list' then
+    elseif current_thread().params.type == 'list' then
         return private.wait_for_list_results(k)
     end
 end
@@ -80,9 +85,13 @@ end
 
 function private.wait_for_owner_results(k)
     local updated
-    Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', function()
+    if current_thread().page == Aux.current_owner_page then
         updated = true
-    end)
+    else
+        Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', function()
+            updated = true
+        end)
+    end
 
     private.as_soon_as(function() return updated end, k)
 end
@@ -109,9 +118,9 @@ function private.owner_data_complete()
     if current_thread().params.no_wait_owner then
         return true
     end
-    local count, _ = GetNumAuctionItems(current_thread().type)
+    local count, _ = GetNumAuctionItems(current_thread().params.type)
     for i=1,count do
-        local auction_info = Aux.info.auction(i, current_thread().type)
+        local auction_info = Aux.info.auction(i, current_thread().params.type)
         if auction_info and not auction_info.owner then
             return false
         end
@@ -164,7 +173,7 @@ function private.process_query()
 
     submit_query(function()
 
-        local count, _ = GetNumAuctionItems(current_thread().type)
+        local count, _ = GetNumAuctionItems(current_thread().params.type)
 
         scan_auctions(count, function()
 
@@ -198,11 +207,12 @@ function scan_auctions_helper(i, n, k)
         end
     end
 
-    local auction_info = Aux.info.auction(i, current_thread().type)
+    local auction_info = Aux.info.auction(i, current_thread().params.type)
     if auction_info then
         auction_info.index = i
         auction_info.page = current_thread().page
         auction_info.query = current_query()
+        auction_info.query_type = current_thread().params.type
 
         Aux.history.process_auction(auction_info)
 
@@ -216,14 +226,14 @@ end
 
 function submit_query(k)
 	if current_thread().page then
-        private.as_soon_as(function() return current_thread().type ~= 'list' or CanSendAuctionQuery() end, function()
+        private.as_soon_as(function() return current_thread().params.type ~= 'list' or CanSendAuctionQuery() end, function()
 
             if current_thread().params.on_submit_query then
                 current_thread().params.on_submit_query()
             end
-            if current_thread().type == 'bidder' then
+            if current_thread().params.type == 'bidder' then
                 GetBidderAuctionItems(current_thread().page)
-            elseif current_thread().type == 'owner' then
+            elseif current_thread().params.type == 'owner' then
                 GetOwnerAuctionItems(current_thread().page)
             else
                 QueryAuctionItems(
@@ -239,7 +249,7 @@ function submit_query(k)
                 )
             end
             private.wait_for_results(function()
-                local _, total_count = GetNumAuctionItems(current_thread().type)
+                local _, total_count = GetNumAuctionItems(current_thread().params.type)
                 current_thread().total_pages = math.ceil(total_count / PAGE_SIZE)
                 if current_thread().total_pages >= current_thread().page + 1 then
                     wait_for_callback{current_thread().params.on_page_loaded or Aux.util.pass, current_thread().page, current_thread().total_pages, function()
