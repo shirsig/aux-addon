@@ -2,19 +2,16 @@
 
 	<Script file="post_frame.lua"/>
 
-    <Frame>
-        <Scripts>
-            <OnUpdate>
-                Aux.post_frame.on_update()
-            </OnUpdate>
-        </Scripts>
-    </Frame>
-
 	<Frame name="AuxPostFrame" parent="AuxFrame" hidden="true">
         <Anchors>
             <Anchor point="TOPLEFT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
             <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor>
         </Anchors>
+        <Scripts>
+            <OnUpdate>
+                Aux.post_frame.on_update()
+            </OnUpdate>
+        </Scripts>
 		<Frames>
             <Frame name="$parentContent" inherits="AuxFrameBoxTemplate">
                 <Anchors>

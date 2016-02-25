@@ -1,7 +1,7 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="core.lua"/> 
-  
+	<Script file="core.lua"/>
+
 	<Frame>
       <Scripts>
 			<OnLoad>
@@ -12,9 +12,9 @@
                 this:RegisterEvent('AUCTION_BIDDER_LIST_UPDATE')
                 this:RegisterEvent('AUCTION_OWNED_LIST_UPDATE')
 			</OnLoad>
-			<OnEvent> 
+			<OnEvent>
 				Aux.on_event()
-			</OnEvent> 
+			</OnEvent>
 		</Scripts>
 	</Frame>
 

@@ -1,14 +1,6 @@
 local private, public = {}, {}
 Aux.stack = public
 
-function private.as_soon_as(p, k)
-	if p() then
-		return k()
-	else
-		return Aux.control.wait(private.as_soon_as, p, k)
-	end
-end
-
 local state
 
 function private.item_slots(item_key)
@@ -47,7 +39,7 @@ function private.move_item(from_slot, to_slot, amount, k)
 	SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
 	PickupContainerItem(to_slot.bag, to_slot.bag_slot)
 	
-	return private.as_soon_as(function() return private.stack_size(to_slot) == size_before + amount end, k)
+	return Aux.control.wait_until(function() return private.stack_size(to_slot) == size_before + amount end, k)
 end
 
 function private.item_key(slot)
@@ -114,7 +106,7 @@ end
 
 function public.stop()
 	if state then
-		Aux.control.kill(state.thread_id)
+		Aux.control.kill_thread(state.thread_id)
 
 		local callback, slot = state.callback, state.target_slot
 		
@@ -127,13 +119,13 @@ function public.stop()
 end
 
 function public.start(item_key, size, callback)
-	private.as_soon_as(function()
+	Aux.control.wait_until(function()
 		public.stop()
 		
 		local slots = private.item_slots(item_key)
 		local target_slot = slots()
 
-		local thread_id = Aux.control.new(private.process)
+		local thread_id = Aux.control.new_thread(private.process)
 
 		state = {
 			thread_id = thread_id,

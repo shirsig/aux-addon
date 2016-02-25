@@ -2,15 +2,12 @@
 
 	<Script file="search_frame.lua"/>
 
-    <Frame name="AuxControlFrame">
+    <Frame name="AuxSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
         <Scripts>
             <OnUpdate>
                 Aux.search_frame.on_update()
             </OnUpdate>
         </Scripts>
-    </Frame>
-
-    <Frame name="AuxSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
             <Frame name="$parentFilter" inherits="AuxFrameBoxTemplate">
                 <Anchors>

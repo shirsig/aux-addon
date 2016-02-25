@@ -2,15 +2,12 @@
 
 	<Script file="bids_frame.lua"/>
 
-	<Frame>
+    <Frame name="AuxBidsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Scripts>
 			<OnUpdate>
 				Aux.bids_frame.on_update()
 			</OnUpdate>
 		</Scripts>
-	</Frame>
-
-    <Frame name="AuxBidsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Frames>
 			<Frame name="$parentListing" inherits="AuxFrameBoxTemplate">
 				<Anchors>

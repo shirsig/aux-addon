@@ -30,7 +30,7 @@ end
 function public.start(params)
     public.abort(params.type)
 
-    local thread_id = Aux.control.new(private.scan)
+    local thread_id = Aux.control.new_thread(private.scan)
     threads[params.type] = {
         id = thread_id,
         params = params,
@@ -44,16 +44,8 @@ function public.abort(type)
                 thread.params.on_abort()
             end
             threads[t] = nil
-            Aux.control.kill(thread.id)
+            Aux.control.kill_thread(thread.id)
         end
-    end
-end
-
-function private.as_soon_as(p, k)
-    if p() then
-        return k()
-    else
-        return Aux.control.wait(private.as_soon_as, p, k)
     end
 end
 
@@ -85,7 +77,7 @@ function private.wait_for_owner_results(k)
         end)
     end
 
-    private.as_soon_as(function() return updated end, k)
+    Aux.control.wait_until(function() return updated end, k)
 end
 
 function private.wait_for_list_results(k)
@@ -95,7 +87,7 @@ function private.wait_for_list_results(k)
         updated = true
     end)
     listener:start()
-    private.as_soon_as(function()
+    Aux.control.wait_until(function()
         -- order important, owner_data_complete must be called after an update to request missing data
         local ok = updated and private.owner_data_complete() or last_update and GetTime() - last_update > 5
         updated = false
@@ -137,7 +129,7 @@ function wait_for_callback(args) -- the arguments must not be nil!
 	if ok then
 		return k()
     else
-        return private.as_soon_as(function() return ok end, k)
+        return Aux.control.wait_until(function() return ok end, k)
 	end
 end
 
@@ -218,7 +210,7 @@ end
 
 function submit_query(k)
 	if current_thread().page then
-        private.as_soon_as(function() return current_thread().params.type ~= 'list' or CanSendAuctionQuery() end, function()
+        Aux.control.wait_until(function() return current_thread().params.type ~= 'list' or CanSendAuctionQuery() end, function()
 
             if current_thread().params.on_submit_query then
                 current_thread().params.on_submit_query()

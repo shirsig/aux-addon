@@ -3,14 +3,6 @@ Aux.post = public
 
 local state
 
-function private.as_soon_as(p, k)
-	if p() then
-		return k()
-	else
-		return Aux.control.wait(private.as_soon_as, p, k)
-	end
-end
-
 function private.process()
 	if state.posted < state.count or state.allow_partial then
 		if state.posted == state.count then
@@ -29,7 +21,7 @@ function private.process()
 			end
 		)
 
-		private.as_soon_as(function() return stacking_complete end, function()
+		Aux.control.wait_until(function() return stacking_complete end, function()
 
 			if stack_slot and Aux.info.container_item(stack_slot.bag, stack_slot.bag_slot).aux_quantity <= state.stack_size then
 				private.post_auction(stack_slot, function(stack_size)
@@ -58,14 +50,14 @@ function private.post_auction(slot, k)
 	ClearCursor()
 	local stack_size = Aux.info.container_item(slot.bag, slot.bag_slot).aux_quantity
 	StartAuction(max(1, Aux.round(state.unit_start_price * stack_size)), Aux.round(state.unit_buyout_price * stack_size), state.duration)
-	private.as_soon_as(function() return not GetContainerItemInfo(slot.bag, slot.bag_slot) end, function()
+	Aux.control.wait_until(function() return not GetContainerItemInfo(slot.bag, slot.bag_slot) end, function()
 		return k(stack_size)
 	end)
 end
 
 function public.stop()
 	if state then
-		Aux.control.kill(state.thread_id)
+		Aux.control.kill_thread(state.thread_id)
 
 		local callback = state.callback
 		local posted = state.posted
@@ -82,7 +74,7 @@ end
 function public.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, allow_partial, callback)
 	public.stop()
 
-	local thread_id = Aux.control.new(private.process)
+	local thread_id = Aux.control.new_thread(private.process)
 
 	state = {
 		thread_id = thread_id,
