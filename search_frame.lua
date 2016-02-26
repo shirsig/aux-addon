@@ -947,7 +947,7 @@ do
         elseif selection and state == IDLE then
             state = SEARCHING
             private.find_auction(selection.record)
-        elseif state == FOUND and not private.test(selection.record)(found_index) then
+        elseif state == FOUND and not private.test(selection.record)(found_index) and not Aux.bid_in_progress() then
             state = IDLE
         end
     end

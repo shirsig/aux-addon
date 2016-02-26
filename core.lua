@@ -110,6 +110,10 @@ end
 do
     local locked
 
+    function Aux.bid_in_progress()
+        return locked
+    end
+
     function Aux.place_bid(type, index, amount, on_success)
 
         if locked then
