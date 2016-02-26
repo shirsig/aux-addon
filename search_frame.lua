@@ -694,6 +694,10 @@ end
         private.results_listing:SetSelectedRecord(nil)
         private.find_auction_and_bid(cell.row.data.record, button == 'LeftButton')
     end)
+    private.results_listing:SetHandler('OnSelectionChanged', function(rt, datum)
+        if not datum then return end
+        private.find_auction(datum.record)
+    end)
 
     local handlers = {
         OnClick = function(st, data, _, button)
@@ -947,8 +951,12 @@ do
         elseif selection and state == IDLE then
             state = SEARCHING
             private.find_auction(selection.record)
-        elseif state == FOUND and not private.test(selection.record)(found_index) and not Aux.bid_in_progress() then
-            state = IDLE
+        elseif state == FOUND and not private.test(selection.record)(found_index) then
+            private.buyout_button:Disable()
+            private.bid_button:Disable()
+            if not Aux.bid_in_progress() then
+                state = IDLE
+            end
         end
     end
 end
