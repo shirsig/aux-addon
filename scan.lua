@@ -36,13 +36,18 @@ function public.start(params)
 end
 
 function public.abort(type)
+    local aborted_threads = {}
     for t, thread in pairs(threads) do
         if not type or type == t then
-            if thread.params.on_abort then
-                thread.params.on_abort()
-            end
-            threads[t] = nil
             Aux.control.kill_thread(thread.id)
+            threads[t] = nil
+            tinsert(aborted_threads, thread)
+        end
+    end
+
+    for _, thread in ipairs(aborted_threads) do
+        if thread.params.on_abort then
+            thread.params.on_abort()
         end
     end
 end

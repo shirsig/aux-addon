@@ -896,6 +896,7 @@ do
             return
         end
 
+        state = SEARCHING
         Aux.scan_util.find(
             record,
             private.status_bar,
@@ -949,7 +950,6 @@ do
         if not selection then
            state = IDLE
         elseif selection and state == IDLE then
-            state = SEARCHING
             private.find_auction(selection.record)
         elseif state == FOUND and not private.test(selection.record)(found_index) then
             private.buyout_button:Disable()
