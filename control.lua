@@ -14,12 +14,25 @@ end
 
 function public.on_update()
 	private.event_listeners = Aux.util.set_filter(private.event_listeners, function(l) return not l.deleted end)
+	local threads = {}
+	for thread_id, thread in pairs(private.threads) do
+		if not thread.killed then
+			threads[thread_id] = thread
+		end
+	end
+	private.threads = threads
 
-	for thread_id, k in pairs(private.threads) do
-		private.threads[thread_id] = nil
-		public.thread_id = thread_id
-		k()
-		public.thread_id = nil
+	for thread_id, thread in pairs(private.threads) do
+		if not thread.killed then
+			local k = thread.k
+			thread.k = nil
+			public.thread_id = thread_id
+			k()
+			public.thread_id = nil
+			if not thread.k then
+				thread.killed = true
+			end
+		end
 	end
 end
 
@@ -75,18 +88,18 @@ do
 	function public.new_thread(k)
 		local thread_id = next_thread_id
 		next_thread_id = next_thread_id + 1
-		private.threads[thread_id] = k
+		private.threads[thread_id] = { k = k }
 		return thread_id
 	end
 end
 
 function public.kill_thread(thread_id)
-	private.threads[thread_id] = nil
+	private.threads[thread_id].killed = true
 end
 
 function public.wait(...)
 	local k = tremove(arg, 1)
-	private.threads[public.thread_id] = function() return k(unpack(arg)) end
+	private.threads[public.thread_id].k = function() return k(unpack(arg)) end
 end
 
 function public.wait_until(p, ...)

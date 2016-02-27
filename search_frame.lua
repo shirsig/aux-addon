@@ -839,9 +839,20 @@ function public.start_search(filter_string)
             end
         end,
         on_read_auction = function(auction_info)
-            if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
+            if getn(scanned_records) == 0 then
+                SetCVar('MasterSoundEffects', 0)
+                SetCVar('MasterSoundEffects', 1)
+                PlaySoundFile([[Interface\AddOns\Aux-AddOn\Event_wardrum_ogre.ogg]], 'Master')
+                PlaySoundFile([[Interface\AddOns\Aux-AddOn\scourge_horn.ogg]], 'Master')
                 tinsert(scanned_records, auction_info)
+                private.results_listing:SetDatabase()
+                Aux.control.on_next_update(function()
+                    Aux.scan.abort('list')
+                end)
             end
+--            if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
+--                tinsert(scanned_records, auction_info)
+--            end
         end,
         on_complete = function()
             private.results_listing:SetDatabase()
@@ -850,6 +861,8 @@ function public.start_search(filter_string)
 
             private.stop_button:Hide()
             private.search_button:Show()
+
+            public.start_search(filter_string)
         end,
         on_abort = function()
             private.results_listing:SetDatabase()
