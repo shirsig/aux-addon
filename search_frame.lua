@@ -834,19 +834,19 @@ function public.start_search(filter_string)
             private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
         end,
         on_read_auction = function(auction_info, ctrl)
-            if getn(scanned_records) == 0 then
-                SetCVar('MasterSoundEffects', 0)
-                SetCVar('MasterSoundEffects', 1)
-                PlaySoundFile([[Interface\AddOns\Aux-AddOn\Event_wardrum_ogre.ogg]], 'Master')
-                PlaySoundFile([[Interface\AddOns\Aux-AddOn\scourge_horn.ogg]], 'Master')
-                tinsert(scanned_records, auction_info)
-                private.results_listing:SetDatabase()
-                ctrl.suspend()
-                Aux.scan.abort('list')
-            end
---            if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
+--            if getn(scanned_records) == 0 then
+--                SetCVar('MasterSoundEffects', 0)
+--                SetCVar('MasterSoundEffects', 1)
+--                PlaySoundFile([[Interface\AddOns\Aux-AddOn\Event_wardrum_ogre.ogg]], 'Master')
+--                PlaySoundFile([[Interface\AddOns\Aux-AddOn\scourge_horn.ogg]], 'Master')
 --                tinsert(scanned_records, auction_info)
+--                private.results_listing:SetDatabase()
+--                ctrl.suspend()
+--                Aux.scan.abort('list')
 --            end
+            if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
+                tinsert(scanned_records, auction_info)
+            end
         end,
         on_complete = function()
             private.results_listing:SetDatabase()
@@ -856,7 +856,7 @@ function public.start_search(filter_string)
             private.stop_button:Hide()
             private.search_button:Show()
 
-            public.start_search(filter_string)
+--            public.start_search(filter_string)
         end,
         on_abort = function()
             private.results_listing:SetDatabase()
