@@ -1,5 +1,5 @@
 Aux = {
-    version = '2.5.1',
+    version = '2.5.2',
     blizzard_ui_shown = false,
 	orig = {},
 }
@@ -286,6 +286,9 @@ function Aux.SetItemRef(itemstring, text, button)
 end
 
 function Aux.UseContainerItem(bag, slot)
+    if IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() then
+        return Aux.orig.UseContainerItem(bag, slot)
+    end
 
     if AuxSearchFrame:IsVisible() then
         local item_info = Aux.info.container_item(bag, slot)
