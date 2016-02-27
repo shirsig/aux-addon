@@ -45,7 +45,7 @@ function private.update_auction_listing()
     if selected_item then
         for i, auction_record in ipairs(existing_auctions[selected_item.key] or {}) do
             local stack_size = auction_record.stack_size == private.stack_size_slider:GetValue() and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size
-            local market_value = Aux.history.value(auction_record.item_key)
+            local historical_value = Aux.history.value(auction_record.item_key)
             tinsert(auction_rows, {
                 cols = {
                     { value=auction_record.count },
@@ -53,7 +53,7 @@ function private.update_auction_listing()
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=stack_size },
                     { value=Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3) },
-                    { value=market_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_buyout_price / market_value * 100)) or '---' },
+                    { value=historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_buyout_price / historical_value * 100)) or '---' },
                 },
                 record = auction_record,
             })
@@ -583,13 +583,13 @@ function private.update_recommendation()
         if settings.pricing_model == FIXED then
             start_price, buyout_price = settings.start_price, settings.buyout_price
         elseif settings.pricing_model == MARKET then
-            start_price, buyout_price = private.market_value_suggestion()
+            start_price, buyout_price = private.historical_value_suggestion()
         elseif settings.pricing_model == UNDERCUT then
             start_price, buyout_price = private.undercutting_suggestion()
         elseif settings.pricing_model == AUTO then
             start_price, buyout_price = private.undercutting_suggestion()
             if existing_auctions[selected_item.key] and not existing_auctions[selected_item.key].selected then
-                start_price, buyout_price = private.market_value_suggestion()
+                start_price, buyout_price = private.historical_value_suggestion()
             end
         end
 
@@ -617,7 +617,7 @@ function private.undercutting_suggestion()
     return 0, 0
 end
 
-function private.market_value_suggestion()
+function private.historical_value_suggestion()
     local price_suggestion = Aux.history.value(selected_item.key) and 1.2 * Aux.history.value(selected_item.key)
     if not price_suggestion then
         return 0, 0
@@ -894,7 +894,7 @@ function private.initialize_pricing_model_dropdown()
     }
 
     UIDropDownMenu_AddButton{
-        text = 'Market Price',
+        text = 'Historical Price',
         value = MARKET,
         func = on_click,
     }
