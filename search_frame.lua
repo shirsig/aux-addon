@@ -815,13 +815,13 @@ function public.start_search(filter_string)
     local scanned_records = {}
     private.results_listing:SetDatabase(scanned_records)
 
-    local current_page, current_total_pages, current_query
+    local current_query
     Aux.scan.start{
         type = 'list',
         queries = queries,
         on_page_loaded = function(page, total_pages)
-            current_page = page + 1
-            current_total_pages = total_pages
+            local current_page = page + 1
+            local current_total_pages = total_pages
             private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / current_total_pages) -- TODO
             private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
         end,
@@ -830,15 +830,10 @@ function public.start_search(filter_string)
         end,
         on_start_query = function(query_index)
             current_query = query_index
-            if current_page then
-                private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / current_total_pages) -- TODO
-                private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
-            else
-                private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 0) -- TODO
-                private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
-            end
+            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 0) -- TODO
+            private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
         end,
-        on_read_auction = function(auction_info)
+        on_read_auction = function(auction_info, ctrl)
             if getn(scanned_records) == 0 then
                 SetCVar('MasterSoundEffects', 0)
                 SetCVar('MasterSoundEffects', 1)
@@ -846,9 +841,8 @@ function public.start_search(filter_string)
                 PlaySoundFile([[Interface\AddOns\Aux-AddOn\scourge_horn.ogg]], 'Master')
                 tinsert(scanned_records, auction_info)
                 private.results_listing:SetDatabase()
-                Aux.control.on_next_update(function()
-                    Aux.scan.abort('list')
-                end)
+                ctrl.suspend()
+                Aux.scan.abort('list')
             end
 --            if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
 --                tinsert(scanned_records, auction_info)

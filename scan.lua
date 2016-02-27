@@ -138,7 +138,7 @@ function private.scan()
         private.wait_for_callback{private.current_thread().params.on_start_query or Aux.util.pass, private.current_thread().query_index, function()
             private.current_thread().page = private.current_query().start_page
             return private.process_query()
-        end }
+        end}
     else
         local on_complete = private.current_thread().params.on_complete
         threads[private.current_thread().params.type] = nil
