@@ -1,5 +1,5 @@
 Aux = {
-    version = '2.5.6',
+    version = '2.5.7',
     blizzard_ui_shown = false,
 	orig = {},
 }
@@ -38,7 +38,7 @@ function Aux.on_load()
                 local market_value = Aux.history.market_value(item_key)
 
                 local market_value_line = 'Today: '
-                market_value_line = market_value_line..(market_value and Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..' ('..EnhTooltip.GetTextGSC(market_value)..')' or '---')
+                market_value_line = market_value_line..(market_value and EnhTooltip.GetTextGSC(market_value)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or '---')
 
                 EnhTooltip.AddLine(market_value_line, nil, true)
                 EnhTooltip.LineColor(0.1, 0.8, 0.5)
