@@ -630,7 +630,7 @@ function public.CreateAuctionResultsTable(parent)
         {name='Seller', width=0.13, align='CENTER'},
         {name={'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'}, width=0.125, align='RIGHT', isPrice=true},
         {name={'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'}, width=0.125, align='RIGHT', isPrice=true},
-        {name='% Market Value', width=0.08, align='CENTER'},
+        {name='% Hist. Value', width=0.08, align='CENTER'},
     }
 
     local rtName = 'AuxAuctionResultsTable'..RT_COUNT

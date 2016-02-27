@@ -91,6 +91,11 @@ function public.value(item_key)
 	end
 end
 
+function public.market_value(item_key)
+	local item_record = private.read_record(item_key)
+	return private.market_value(item_record)
+end
+
 function private.market_value(item_record)
 	local estimate
 

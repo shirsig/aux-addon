@@ -13,27 +13,36 @@ function Aux.on_load()
             if EnhTooltip.LinkType(link) ~= 'item' then return end
 
             local item_id, suffix_id = EnhTooltip.BreakLink(link)
+
+            if not Aux.static.item_info(item_id) then
+                return
+            end
+
             local item_key = (item_id or 0)..':'..(suffix_id or 0)
+
+            if aux_tooltip_market then
+                local market_value = Aux.history.market_value(item_key)
+
+                local market_value_line = 'Mkt. Value: '
+                market_value_line = market_value_line..(market_value and EnhTooltip.GetTextGSC(market_value) or '---')
+
+                EnhTooltip.AddLine(market_value_line, nil, true)
+                EnhTooltip.LineColor(0.1, 0.8, 0.5)
+            end
 
             local value = Aux.history.value(item_key)
 
-            if value then
-                local value_line = 'Value: '
+            local value_line = aux_tooltip_market and 'Hist. Value: ' or 'Value: '
 
-                if count == 1 then
-                    value_line = value_line..EnhTooltip.GetTextGSC(value)
-                else
-                    value_line = value_line..EnhTooltip.GetTextGSC(value * count)..' / '..EnhTooltip.GetTextGSC(value)
-                end
+            value_line = value_line..(value and EnhTooltip.GetTextGSC(value) or '---')
 
-                local _, _, _, market_values = Aux.history.price_data(item_key)
-                if getn(market_values) < 5 then
-                    value_line = value_line..' (?)'
-                end
-
-                EnhTooltip.AddLine(value_line, nil, true)
-                EnhTooltip.LineColor(0.1,0.8,0.5)
+            local _, _, _, market_values = Aux.history.price_data(item_key)
+            if value and getn(market_values) < 5 then
+                value_line = value_line..' (?)'
             end
+
+            EnhTooltip.AddLine(value_line, nil, true)
+            EnhTooltip.LineColor(0.1, 0.8, 0.5)
         end)
     end
 
