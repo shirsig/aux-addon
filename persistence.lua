@@ -4,12 +4,12 @@ Aux.persistence = public
 aux_database = {}
 
 function public.on_load()
+    Aux.control.as_soon_as(function() private.faction = UnitFactionGroup('player') return private.faction end, Aux.util.pass)
+    private.realm = GetCVar('realmName')
 end
 
 function private.get_dataset_key()
-	local realm = GetCVar('realmName')
-	local faction = UnitFactionGroup('player')
-	return realm..'|'..faction
+	return private.realm..'|'..private.faction
 end
 
 function public.load_dataset()
