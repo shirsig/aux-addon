@@ -1,5 +1,5 @@
 Aux = {
-    version = '2.5.2',
+    version = '2.5.3',
     blizzard_ui_shown = false,
 	orig = {},
 }
@@ -20,19 +20,9 @@ function Aux.on_load()
 
             local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
-            if aux_tooltip_market then
-                local market_value = Aux.history.market_value(item_key)
-
-                local market_value_line = 'Mkt. Value: '
-                market_value_line = market_value_line..(market_value and EnhTooltip.GetTextGSC(market_value) or '---')
-
-                EnhTooltip.AddLine(market_value_line, nil, true)
-                EnhTooltip.LineColor(0.1, 0.8, 0.5)
-            end
-
             local value = Aux.history.value(item_key)
 
-            local value_line = aux_tooltip_market and 'Hist. Value: ' or 'Value: '
+            local value_line = 'Value: '
 
             value_line = value_line..(value and EnhTooltip.GetTextGSC(value) or '---')
 
@@ -43,6 +33,16 @@ function Aux.on_load()
 
             EnhTooltip.AddLine(value_line, nil, true)
             EnhTooltip.LineColor(0.1, 0.8, 0.5)
+
+            if aux_tooltip_daily then
+                local market_value = Aux.history.market_value(item_key)
+
+                local market_value_line = 'Today: '
+                market_value_line = market_value_line..(market_value and Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..' ('..EnhTooltip.GetTextGSC(market_value)..')' or '---')
+
+                EnhTooltip.AddLine(market_value_line, nil, true)
+                EnhTooltip.LineColor(0.1, 0.8, 0.5)
+            end
         end)
     end
 

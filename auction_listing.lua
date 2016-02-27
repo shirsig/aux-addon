@@ -18,7 +18,7 @@ local TIME_LEFT_STRINGS = {
     '|cff2992ff24h|r', -- Very Long
 }
 
-function public.percentage_market(pct, based_on_bid)
+function public.percentage_historical(pct, based_on_bid)
     local pctColor = '|cffffffff'
 
     if based_on_bid then
@@ -441,7 +441,7 @@ local methods = {
             row.cells[7]:SetText(bid > 0 and Aux.money.to_string(bid, true, false, nil, colorBid) or '---')
             row.cells[8]:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
             local pct, bidPct = self:GetRecordPercent(record)
-            row.cells[9]:SetText((pct or bidPct) and public.percentage_market(pct or bidPct, not pct) or '---')
+            row.cells[9]:SetText((pct or bidPct) and public.percentage_historical(pct or bidPct, not pct) or '---')
         end
     end,
 

@@ -11,8 +11,8 @@ function SlashCmdList.AUX(parameter)
     elseif parameter == 'delete item cache' then
         aux_auctionable_items = nil
         Aux.log('Item cache deleted; falling back to the default.')
-    elseif parameter == 'tooltip market' then
-        aux_tooltip_market = not aux_tooltip_market
-        Aux.log('Market value in tooltip '..(aux_tooltip_market and 'enabled' or 'disabled')..'.')
+    elseif parameter == 'tooltip daily' then
+        aux_tooltip_daily = not aux_tooltip_daily
+        Aux.log('Market value in tooltip '..(aux_tooltip_daily and 'enabled' or 'disabled')..'.')
     end
 end

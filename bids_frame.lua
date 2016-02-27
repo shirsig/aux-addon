@@ -90,7 +90,7 @@ function private.update_listing()
                 { value=auction_record.high_bidder and Aux.money.to_string(auction_record.high_bid, true, false) or '---' },
                 { value=Aux.money.to_string(auction_record.bid_price, true, false) },
                 { value=auction_record.buyout_price > 0 and Aux.money.to_string(auction_record.buyout_price, true, false) or '---' },
-                --                { value=Aux.auction_listing.percentage_market(market_value and Aux.round(auction_record.unit_buyout_price/market_value * 100) or '---') },
+                --                { value=Aux.auction_listing.percentage_historical(market_value and Aux.round(auction_record.unit_buyout_price/market_value * 100) or '---') },
             },
             record = auction_record,
         })
