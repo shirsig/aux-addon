@@ -294,6 +294,11 @@ end
 
 function private.item_charges(tooltip)
 	for _, line in ipairs(tooltip) do
+        -- recipes also contain the charges tooltip for the item they teach so we have to ignore them
+        local ignore_pattern = '^Use: Teaches you how to create'
+        if strfind(line.left_text or '', ignore_pattern) or strfind(line.right_text or '', ignore_pattern) then
+            return
+        end
         local pattern = '^(%d+) Charges$'
 		local _, _, left_charges_string = strfind(line.left_text or '', pattern)
 		local _, _, right_charges_string = strfind(line.right_text or '', pattern)
