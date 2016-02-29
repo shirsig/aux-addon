@@ -119,6 +119,7 @@ function public.auction(index, type)
     local tooltip = public.tooltip(function(tt) tt:SetAuctionItem(type, index) end)
     local charges = private.item_charges(tooltip)
     local aux_quantity = charges or count
+    local blizzard_bid = high_bid > 0 and high_bid or start_price
     local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
 
     return {
@@ -145,8 +146,10 @@ function public.auction(index, type)
         start_price = start_price,
         high_bid = high_bid,
         min_increment = min_increment,
+        blizzard_bid = blizzard_bid,
         bid_price = bid_price,
         buyout_price = buyout_price,
+        unit_blizzard_bid = blizzard_bid / aux_quantity,
         unit_bid_price = bid_price / aux_quantity,
         unit_buyout_price = buyout_price / aux_quantity,
         high_bidder = high_bidder,

@@ -52,6 +52,7 @@ function private.update_auction_listing()
                     { value=auction_record.yours },
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=stack_size },
+                    { value=Aux.money.to_string(auction_record.min_unit_blizzard_bid, true, nil, 3) },
                     { value=Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3) },
                     { value=historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_buyout_price / historical_value * 100)) or '---' },
                 },
@@ -125,12 +126,13 @@ function public.on_load()
 
     private.auction_listing = Aux.listing.CreateScrollingTable(AuxSellAuctions)
     private.auction_listing:SetColInfo({
-        { name='Auctions', width=.14, align='CENTER' },
-        { name='Yours', width=.14, align='CENTER' },
-        { name='Left', width=.14, align='CENTER' },
+        { name='Auctions', width=.12, align='CENTER' },
+        { name='Yours', width=.12, align='CENTER' },
+        { name='Left', width=.1, align='CENTER' },
         { name='Qty', width=.08, align='CENTER' },
-        { name='Buy/ea', width=.3, align='RIGHT' },
-        { name='Pct', width=.2, align='CENTER' }
+        { name='Min Bid/ea', width=.23, align='RIGHT' },
+        { name='Buy/ea', width=.23, align='RIGHT' },
+        { name='Pct', width=.12, align='CENTER' }
     })
     private.auction_listing:SetHandler('OnClick', function(table, row_data, column)
         private.set_auction(row_data.record)
@@ -439,10 +441,10 @@ function private.post_auctions()
 			function(posted, partial)
                 local new_auction_record
 				for i = 1, posted do
-                    new_auction_record = private.record_auction(key, stack_size, unit_buyout_price, duration_code, UnitName('player'))
+                    new_auction_record = private.record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
                 end
                 if partial then
-                    new_auction_record = private.record_auction(key, partial, unit_buyout_price, duration_code, UnitName('player'))
+                    new_auction_record = private.record_auction(key, partial, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
                 end
                 if existing_auctions[key] then
                     existing_auctions[key].selected = new_auction_record
@@ -790,7 +792,8 @@ function private.refresh_entries()
                     private.record_auction(
                         auction_info.item_key,
                         auction_info.aux_quantity,
-                        auction_info.buyout_price / auction_info.aux_quantity,
+                        auction_info.unit_blizzard_bid,
+                        auction_info.unit_buyout_price,
                         auction_info.duration,
                         auction_info.owner
                     )
@@ -828,7 +831,7 @@ function private.refresh()
     refresh = true
 end
 
-function private.record_auction(key, aux_quantity, unit_buyout_price, duration, owner)
+function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
 	if unit_buyout_price > 0 then
 		existing_auctions[key] = existing_auctions[key] or {}
 		local entry
@@ -852,7 +855,7 @@ function private.record_auction(key, aux_quantity, unit_buyout_price, duration, 
 
         entry.count = entry.count + 1
         entry.yours = entry.yours + (owner == UnitName('player') and 1 or 0)
-        entry.duration = max(entry.duration, duration)
+        entry.min_unit_blizzard_bid = entry.min_unit_blizzard_bid and min(entry.min_unit_blizzard_bid, unit_blizzard_bid) or unit_blizzard_bid
 
         return entry
 	end
