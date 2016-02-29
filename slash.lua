@@ -10,6 +10,7 @@ function SlashCmdList.AUX(parameter)
         Aux.static.generate_cache()
     elseif parameter == 'delete item cache' then
         aux_auctionable_items = nil
+        aux_auctionable_item_ids = nil
         Aux.log('Item cache deleted; falling back to the default.')
     elseif parameter == 'tooltip daily' then
         aux_tooltip_daily = not aux_tooltip_daily
