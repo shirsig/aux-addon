@@ -79,26 +79,29 @@ function private.update_auction_listing()
 
             local stack_size = private.stack_size_slider:GetValue()
             local historical_value = Aux.history.value(auction_record.item_key)
+
             local bid_color
-            if blizzard_bid_undercut < unit_start_price then
-                if auction_record.stack_size == stack_size then
-                    bid_color = '|cffff0000'
-                else
-                    bid_color = '|cffff9218'
-                end
+            if blizzard_bid_undercut < unit_start_price and auction_record.stack_size == stack_size then
+                bid_color = '|cffff0000'
+            elseif blizzard_bid_undercut < unit_start_price and stack_blizzard_bid_undercut < unit_start_price then
+                bid_color = '|cffff9218'
             elseif stack_blizzard_bid_undercut < unit_start_price then
                 bid_color = '|cffffff00'
+            elseif blizzard_bid_undercut < unit_start_price then
+                bid_color = '|cff2992ff'
             end
+
             local buyout_color
-            if buyout_price_undercut < unit_buyout_price then
-                if auction_record.stack_size == stack_size then
-                    buyout_color = '|cffff0000'
-                else
-                    buyout_color = '|cffff9218'
-                end
+            if buyout_price_undercut < unit_buyout_price and auction_record.stack_size == stack_size then
+                buyout_color = '|cffff0000'
+            elseif buyout_price_undercut < unit_buyout_price and stack_buyout_price_undercut < unit_buyout_price then
+                buyout_color = '|cffff9218'
             elseif stack_buyout_price_undercut < unit_buyout_price then
                 buyout_color = '|cffffff00'
+            elseif buyout_price_undercut < unit_buyout_price then
+                buyout_color = '|cff2992ff'
             end
+
             tinsert(auction_rows, {
                 cols = {
                     { value=auction_record.count },
