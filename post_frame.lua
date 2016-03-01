@@ -6,7 +6,6 @@ local existing_auctions = {}
 local inventory_records
 local selected_item
 
-local AUTO, UNDERCUT, MARKET, FIXED = 1, 2, 3, 4
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 
 function private.load_settings(item_record)
@@ -21,7 +20,6 @@ function private.load_settings(item_record)
         post_all = true,
         no_bidding = true,
         hidden = false,
-        pricing_model = AUTO,
     }
     return dataset.post[item_record.key]
 end
@@ -447,7 +445,7 @@ function public.on_load()
     end
     do
         local btn = Aux.gui.button(AuxSellParameters, 16, '$parentPostButton')
-        btn:SetPoint('TOPRIGHT', private.unit_start_price, 'BOTTOMRIGHT', 0, -28)
+        btn:SetPoint('TOPRIGHT', private.unit_start_price, 'BOTTOMRIGHT', 0, -33)
         btn:SetWidth(150)
         btn:SetHeight(20)
         btn:GetFontString():SetTextHeight(15)
