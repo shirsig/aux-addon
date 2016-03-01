@@ -43,17 +43,46 @@ function private.update_auction_listing()
 
     local auction_rows = {}
     if selected_item then
+        local unit_start_price = Aux.money.from_string(private.unit_start_price:GetText())
+        local unit_buyout_price = Aux.money.from_string(private.unit_buyout_price:GetText())
+
         for i, auction_record in ipairs(existing_auctions[selected_item.key] or {}) do
-            local stack_size = auction_record.stack_size == private.stack_size_slider:GetValue() and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size
+
+            local start_price_undercut, buyout_price_undercut = private.undercut(auction_record, private.stack_size_slider:GetValue())
+            local stack_size = private.stack_size_slider:GetValue()
             local historical_value = Aux.history.value(auction_record.item_key)
+            local bid_color
+            if unit_start_price == start_price_undercut then
+                bid_color = '|cff2992ff'
+            elseif auction_record.min_unit_blizzard_bid < unit_start_price then
+                if auction_record.stack_size == stack_size then
+                    bid_color = '|cffff0000'
+                else
+                    bid_color = '|cffff9218'
+                end
+            elseif auction_record.min_unit_blizzard_bid * auction_record.stack_size < unit_start_price * stack_size then
+                bid_color = '|cffffff00'
+            end
+            local buyout_color
+            if unit_buyout_price == buyout_price_undercut then
+                buyout_color = '|cff2992ff'
+            elseif auction_record.unit_buyout_price < unit_buyout_price then
+                if auction_record.stack_size == stack_size then
+                    buyout_color = '|cffff0000'
+                else
+                    buyout_color = '|cffff9218'
+                end
+            elseif auction_record.unit_buyout_price * auction_record.stack_size < unit_buyout_price * stack_size then
+                buyout_color = '|cffffff00'
+            end
             tinsert(auction_rows, {
                 cols = {
                     { value=auction_record.count },
                     { value=auction_record.yours },
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
-                    { value=stack_size },
-                    { value=Aux.money.to_string(auction_record.min_unit_blizzard_bid, true, nil, 3) },
-                    { value=Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3) },
+                    { value=auction_record.stack_size == stack_size and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size },
+                    { value=Aux.money.to_string(auction_record.min_unit_blizzard_bid, true, nil, 3, bid_color) },
+                    { value=Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) },
                     { value=historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_buyout_price / historical_value * 100)) or '---' },
                 },
                 record = auction_record,
@@ -134,8 +163,15 @@ function public.on_load()
         { name='Buy/ea', width=.23, align='RIGHT' },
         { name='Pct', width=.12, align='CENTER' }
     })
-    private.auction_listing:SetHandler('OnClick', function(table, row_data, column)
-        private.set_auction(row_data.record)
+    private.auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
+        local column_index = Aux.util.index_of(column, column.row.cols)
+--        private.set_auction(row_data.record)
+        local unit_start_price, unit_buyout_price = private.undercut(row_data.record, private.stack_size_slider:GetValue(), button == 'RightButton')
+        if column_index == 5 then
+            private.unit_start_price:SetText(Aux.money.to_string(unit_start_price, nil, nil, 3))
+        elseif column_index == 6 then
+            private.unit_buyout_price:SetText(Aux.money.to_string(unit_buyout_price, nil, nil, 3))
+        end
     end)
 
     do
@@ -305,10 +341,9 @@ function public.on_load()
         editbox:SetScript('OnTextChanged', function()
             if selected_item then
                 local settings = private.load_settings()
-                if settings.pricing_model == FIXED then
-                    settings.start_price = Aux.money.from_string(this:GetText())
-                end
+                settings.start_price = Aux.money.from_string(this:GetText())
             end
+            refresh = true
         end)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() and private.stack_count_slider.editbox:IsVisible() then
@@ -343,10 +378,9 @@ function public.on_load()
         editbox:SetScript('OnTextChanged', function()
             if selected_item then
                 local settings = private.load_settings()
-                if settings.pricing_model == FIXED then
-                    settings.buyout_price = Aux.money.from_string(this:GetText())
-                end
+                settings.buyout_price = Aux.money.from_string(this:GetText())
             end
+            refresh = true
         end)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
@@ -578,45 +612,38 @@ function private.update_recommendation()
 
         private.refresh_button:Enable()
 
-        local settings = private.load_settings()
-
-        local start_price, buyout_price
-
-        if settings.pricing_model == FIXED then
-            start_price, buyout_price = settings.start_price, settings.buyout_price
-        elseif settings.pricing_model == MARKET then
-            start_price, buyout_price = private.historical_value_suggestion()
-        elseif settings.pricing_model == UNDERCUT then
-            start_price, buyout_price = private.undercutting_suggestion()
-        elseif settings.pricing_model == AUTO then
-            start_price, buyout_price = private.undercutting_suggestion()
-            if existing_auctions[selected_item.key] and not existing_auctions[selected_item.key].selected then
-                start_price, buyout_price = private.historical_value_suggestion()
-            end
-        end
-
-        private.unit_start_price:SetText(Aux.money.to_string(start_price, nil, nil, settings.pricing_model ~= FIXED and 3))
-        private.unit_buyout_price:SetText(Aux.money.to_string(buyout_price, nil, nil, settings.pricing_model ~= FIXED and 3))
+--        local settings = private.load_settings()
+--
+--        local start_price, buyout_price
+--
+--        if settings.pricing_model == FIXED then
+--            start_price, buyout_price = settings.start_price, settings.buyout_price
+--        elseif settings.pricing_model == MARKET then
+--            start_price, buyout_price = private.historical_value_suggestion()
+--        elseif settings.pricing_model == UNDERCUT then
+--            start_price, buyout_price = private.undercutting_suggestion()
+--        elseif settings.pricing_model == AUTO then
+--            start_price, buyout_price = private.undercutting_suggestion()
+--            if existing_auctions[selected_item.key] and not existing_auctions[selected_item.key].selected then
+--                start_price, buyout_price = private.historical_value_suggestion()
+--            end
+--        end
+--
+--        private.unit_start_price:SetText(Aux.money.to_string(start_price, nil, nil, settings.pricing_model ~= FIXED and 3))
+--        private.unit_buyout_price:SetText(Aux.money.to_string(buyout_price, nil, nil, settings.pricing_model ~= FIXED and 3))
 	end
 end
 
-function private.undercutting_suggestion()
-    if existing_auctions[selected_item.key] then
-        private.select_auction()
+function private.undercut(record, stack_size, stack)
+    local start_price = record.min_unit_blizzard_bid * (stack and record.stack_size or stack_size)
+    local buyout_price = record.unit_buyout_price * (stack and record.stack_size or stack_size)
 
-        if existing_auctions[selected_item.key].selected then
-
-            local basis_price = existing_auctions[selected_item.key].selected.unit_buyout_price * existing_auctions[selected_item.key].selected.stack_size
-
-            if existing_auctions[selected_item.key].selected.yours == 0 then
-                basis_price = private.undercut(basis_price)
-            end
-
-            local price_suggestion = basis_price / existing_auctions[selected_item.key].selected.stack_size
-            return price_suggestion * 0.95, price_suggestion
-        end
+    if record.yours < record.count then
+        start_price = max(0, start_price - 1)
+        buyout_price = max(0, buyout_price - 1)
     end
-    return 0, 0
+
+    return start_price / stack_size, buyout_price / stack_size
 end
 
 function private.historical_value_suggestion()
@@ -701,6 +728,9 @@ function private.set_item(item)
     private.stack_size_slider:SetValue(settings.stack_size)
     private.quantity_update()
     private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
+
+    private.unit_start_price:SetText(Aux.money.to_string(settings.start_price, nil, nil, 3))
+    private.unit_buyout_price:SetText(Aux.money.to_string(settings.buyout_price, nil, nil, 3))
 
     if not existing_auctions[selected_item.key] then
         private.refresh_entries()
@@ -815,14 +845,14 @@ function private.refresh_entries()
 	end
 end
 	
-function private.set_auction(entry)
-
-    existing_auctions[selected_item.key].selected = entry
-    refresh = true
-	private.update_recommendation()
-
-	PlaySound('igMainMenuOptionCheckBoxOn')
-end
+--function private.set_auction(entry)
+--
+--    existing_auctions[selected_item.key].selected = entry
+--    refresh = true
+--	private.update_recommendation()
+--
+--	PlaySound('igMainMenuOptionCheckBoxOn')
+--end
 
 function private.refresh()
 	Aux.scan.abort('list')
@@ -859,10 +889,6 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
 
         return entry
 	end
-end
-
-function private.undercut(price)
-	return math.max(0, price - 1)
 end
 
 function public.on_update()
