@@ -13,9 +13,9 @@ function m.to_string(money, pad, trim, decimal_points, color, no_color)
 	money = abs(money)
 	local gold = floor(money / COPPER_PER_GOLD)
 	local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
---	local copper = Aux.round(mod(money, COPPER_PER_SILVER))
 	local copper = mod(money, COPPER_PER_SILVER)
 
+	-- rounding
 	if decimal_points then
 		copper = tonumber(format('%.'..decimal_points..'f', copper))
 	end
@@ -27,10 +27,6 @@ function m.to_string(money, pad, trim, decimal_points, color, no_color)
 		gold_text, silver_text, copper_text = GOLD_TEXT, SILVER_TEXT, COPPER_TEXT
 	end
 	
-	if money == 0 then
-		return m.format_number(0, false, nil, color)..copper_text
-	end
-	
 	local text
 	if trim then
 		local parts = {}
@@ -40,7 +36,7 @@ function m.to_string(money, pad, trim, decimal_points, color, no_color)
 		if silver > 0 then
 			tinsert(parts, m.format_number(silver, pad, nil, color)..silver_text)
 		end
-		if copper > 0 then
+		if copper > 0 or gold == 0 and silver == 0 then
 			tinsert(parts, m.format_number(copper, pad, decimal_points, color)..copper_text)
 		end
 		text = Aux.util.join(parts, ' ')
@@ -50,7 +46,7 @@ function m.to_string(money, pad, trim, decimal_points, color, no_color)
 		elseif silver > 0 then
 			text = m.format_number(silver, false, nil, color)..silver_text..' '..m.format_number(copper, pad, decimal_points, color)..copper_text
 		else
-			text = m.format_number(copper, false, nil, color)..copper_text
+			text = m.format_number(copper, false, decimal_points, color)..copper_text
 		end
 	end
 	
