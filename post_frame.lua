@@ -19,10 +19,33 @@ function private.load_settings(item_record)
         start_price = 0,
         buyout_price = 0,
         post_all = true,
+        no_bidding = true,
         hidden = false,
         pricing_model = AUTO,
     }
     return dataset.post[item_record.key]
+end
+
+function private.get_unit_start_price()
+    if private.no_bidding_checkbox:GetChecked() then
+        return Aux.money.from_string(private.unit_buyout_price:GetText())
+    else
+        return Aux.money.from_string(private.unit_start_price:GetText())
+    end
+end
+
+function private.set_unit_start_price(amount)
+    if not private.no_bidding_checkbox:GetChecked() then
+        private.unit_start_price:SetText(Aux.money.to_string(amount, true, nil, 3))
+    end
+end
+
+function private.get_unit_buyout_price()
+    return Aux.money.from_string(private.unit_buyout_price:GetText())
+end
+
+function private.set_unit_buyout_price(amount)
+    private.unit_buyout_price:SetText(Aux.money.to_string(amount, true, nil, 3))
 end
 
 function private.update_inventory_listing()
@@ -43,36 +66,39 @@ function private.update_auction_listing()
 
     local auction_rows = {}
     if selected_item then
-        local unit_start_price = Aux.money.from_string(private.unit_start_price:GetText())
-        local unit_buyout_price = Aux.money.from_string(private.unit_buyout_price:GetText())
+        local unit_start_price = private.get_unit_start_price()
+        local unit_buyout_price = private.get_unit_buyout_price()
 
         for i, auction_record in ipairs(existing_auctions[selected_item.key] or {}) do
 
-            local start_price_undercut, buyout_price_undercut = private.undercut(auction_record, private.stack_size_slider:GetValue())
+            local blizzard_bid_undercut, buyout_price_undercut = private.undercut(auction_record, private.stack_size_slider:GetValue())
+            blizzard_bid_undercut = Aux.money.from_string(Aux.money.to_string(blizzard_bid_undercut, true, nil, 3))
+            buyout_price_undercut = Aux.money.from_string(Aux.money.to_string(buyout_price_undercut, true, nil, 3))
+
+            local stack_blizzard_bid_undercut, stack_buyout_price_undercut = private.undercut(auction_record, private.stack_size_slider:GetValue(), true)
+            stack_blizzard_bid_undercut = Aux.money.from_string(Aux.money.to_string(stack_blizzard_bid_undercut, true, nil, 3))
+            stack_buyout_price_undercut = Aux.money.from_string(Aux.money.to_string(stack_buyout_price_undercut, true, nil, 3))
+
             local stack_size = private.stack_size_slider:GetValue()
             local historical_value = Aux.history.value(auction_record.item_key)
             local bid_color
-            if unit_start_price == start_price_undercut then
-                bid_color = '|cff2992ff'
-            elseif auction_record.min_unit_blizzard_bid < unit_start_price then
+            if blizzard_bid_undercut < unit_start_price then
                 if auction_record.stack_size == stack_size then
                     bid_color = '|cffff0000'
                 else
                     bid_color = '|cffff9218'
                 end
-            elseif auction_record.min_unit_blizzard_bid * auction_record.stack_size < unit_start_price * stack_size then
+            elseif stack_blizzard_bid_undercut < unit_start_price then
                 bid_color = '|cffffff00'
             end
             local buyout_color
-            if unit_buyout_price == buyout_price_undercut then
-                buyout_color = '|cff2992ff'
-            elseif auction_record.unit_buyout_price < unit_buyout_price then
+            if buyout_price_undercut < unit_buyout_price then
                 if auction_record.stack_size == stack_size then
                     buyout_color = '|cffff0000'
                 else
                     buyout_color = '|cffff9218'
                 end
-            elseif auction_record.unit_buyout_price * auction_record.stack_size < unit_buyout_price * stack_size then
+            elseif stack_buyout_price_undercut < unit_buyout_price then
                 buyout_color = '|cffffff00'
             end
             tinsert(auction_rows, {
@@ -81,7 +107,7 @@ function private.update_auction_listing()
                     { value=auction_record.yours },
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=auction_record.stack_size == stack_size and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size },
-                    { value=Aux.money.to_string(auction_record.min_unit_blizzard_bid, true, nil, 3, bid_color) },
+                    { value=Aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
                     { value=Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) },
                     { value=historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_buyout_price / historical_value * 100)) or '---' },
                 },
@@ -91,11 +117,6 @@ function private.update_auction_listing()
         sort(auction_rows, function(a, b) return Aux.sort.multi_lt(a.record.unit_buyout_price, b.record.unit_buyout_price, tostring(a.record), tostring(b.record)) end)
     end
     private.auction_listing:SetData(auction_rows)
-    private.auction_listing:SetSelection(function(row) return row.record == private.selected_auction() end)
-end
-
-function private.selected_auction()
-    return selected_item and existing_auctions[selected_item.key] and existing_auctions[selected_item.key].selected
 end
 
 function public.select_item(item_key)
@@ -159,18 +180,18 @@ function public.on_load()
         { name='Yours', width=.12, align='CENTER' },
         { name='Left', width=.1, align='CENTER' },
         { name='Qty', width=.08, align='CENTER' },
-        { name='Min Bid/ea', width=.23, align='RIGHT' },
+        { name='Bid/ea', width=.23, align='RIGHT' },
         { name='Buy/ea', width=.23, align='RIGHT' },
         { name='Pct', width=.12, align='CENTER' }
     })
+    private.auction_listing:DisableSelection(true)
     private.auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
         local column_index = Aux.util.index_of(column, column.row.cols)
---        private.set_auction(row_data.record)
         local unit_start_price, unit_buyout_price = private.undercut(row_data.record, private.stack_size_slider:GetValue(), button == 'RightButton')
         if column_index == 5 then
-            private.unit_start_price:SetText(Aux.money.to_string(unit_start_price, nil, nil, 3))
+            private.set_unit_start_price(unit_start_price)
         elseif column_index == 6 then
-            private.unit_buyout_price:SetText(Aux.money.to_string(unit_buyout_price, nil, nil, 3))
+            private.set_unit_buyout_price(unit_buyout_price)
         end
     end)
 
@@ -336,8 +357,61 @@ function public.on_load()
 --    end
     do
         local editbox = Aux.gui.editbox(AuxSellParameters)
-        editbox:SetPoint('TOPRIGHT', -30, -58)
-        editbox:SetWidth(170)
+        editbox:SetJustifyH('RIGHT')
+        editbox:SetPoint('TOPRIGHT', -30, -50)
+        editbox:SetWidth(150)
+        editbox:SetScript('OnTextChanged', function()
+            if selected_item then
+                local settings = private.load_settings()
+                settings.buyout_price = Aux.money.from_string(this:GetText())
+            end
+            refresh = true
+        end)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                private.unit_start_price:SetFocus()
+            else
+                private.stack_size_slider.editbox:SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
+        end)
+        editbox:SetScript('OnEditFocusLost', function()
+            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText()), true, nil, 3))
+        end)
+        local label = Aux.gui.label(editbox, 13)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+        label:SetText('Unit Buyout Price')
+        private.unit_buyout_price = editbox
+    end
+    do
+        local checkbox = CreateFrame('CheckButton', nil, AuxSellInventory, 'UICheckButtonTemplate')
+        checkbox:SetWidth(22)
+        checkbox:SetHeight(22)
+        checkbox:SetPoint('TOPLEFT', private.unit_buyout_price, 'BOTTOMLEFT', -3, -4)
+        checkbox:SetScript('OnClick', function()
+            local settings = private.load_settings()
+            settings.no_bidding = this:GetChecked()
+            private.update_recommendation()
+            refresh = true
+        end)
+        local label = Aux.gui.label(checkbox, 13)
+        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
+        label:SetText('No Bidding')
+        private.no_bidding_checkbox = checkbox
+    end
+    do
+        local editbox = Aux.gui.editbox(AuxSellParameters)
+        editbox:SetJustifyH('RIGHT')
+        editbox:SetPoint('TOP', private.unit_buyout_price, 'BOTTOM', 0, -42)
+        editbox:SetWidth(150)
         editbox:SetScript('OnTextChanged', function()
             if selected_item then
                 local settings = private.load_settings()
@@ -364,7 +438,7 @@ function public.on_load()
             this:HighlightText()
         end)
         editbox:SetScript('OnEditFocusLost', function()
-            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText())))
+            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText()), true, nil, 3))
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -372,61 +446,29 @@ function public.on_load()
         private.unit_start_price = editbox
     end
     do
-        local editbox = Aux.gui.editbox(AuxSellParameters)
-        editbox:SetPoint('TOP', private.unit_start_price, 'BOTTOM', 0, -25)
-        editbox:SetWidth(170)
-        editbox:SetScript('OnTextChanged', function()
-            if selected_item then
-                local settings = private.load_settings()
-                settings.buyout_price = Aux.money.from_string(this:GetText())
-            end
-            refresh = true
+        local btn = Aux.gui.button(AuxSellParameters, 16, '$parentPostButton')
+        btn:SetPoint('TOPRIGHT', private.unit_start_price, 'BOTTOMRIGHT', 0, -28)
+        btn:SetWidth(150)
+        btn:SetHeight(20)
+        btn:GetFontString():SetTextHeight(15)
+        btn:GetFontString():SetJustifyH('RIGHT')
+        btn:GetFontString():SetPoint('RIGHT', 0, 0)
+        btn:SetScript('OnClick', function()
+            private.set_unit_start_price(this.amount)
+            private.set_unit_buyout_price(this.amount)
         end)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                private.unit_start_price:SetFocus()
-            else
-                private.stack_size_slider.editbox:SetFocus()
-            end
-        end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-        end)
-        editbox:SetScript('OnEditFocusLost', function()
-            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText())))
-        end)
-        local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Unit Buyout Price')
-        private.unit_buyout_price = editbox
-    end
-    do
-        local dropdown = Aux.gui.dropdown(AuxSellParameters)
-        dropdown:SetPoint('TOPRIGHT', private.unit_buyout_price, 'BOTTOMRIGHT', 0, -20)
-        dropdown:SetWidth(120)
-        dropdown:SetHeight(10)
-        local label = Aux.gui.label(dropdown, 13)
-        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
-        label:SetText('Pricing Model')
-        UIDropDownMenu_Initialize(dropdown, private.initialize_pricing_model_dropdown)
-        dropdown:SetScript('OnShow', function()
-            UIDropDownMenu_Initialize(this, private.initialize_pricing_model_dropdown)
-        end)
-        private.pricing_model_dropdown = dropdown
+        local label = Aux.gui.label(btn, 13)
+        label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
+        label:SetText('Historical Value')
+        private.historical_value_button = btn
     end
 end
 
 function public.on_open()
     private.deposit:SetText('Deposit: '..Aux.money.to_string(0, nil, nil, nil, Aux.gui.inline_color({255, 254, 250, 1})))
 
-    private.unit_start_price:SetText(Aux.money.to_string(0))
-    private.unit_buyout_price:SetText(Aux.money.to_string(0))
+    private.set_unit_start_price(0)
+    private.set_unit_buyout_price(0)
 
     private.update_inventory_records()
 
@@ -443,8 +485,8 @@ end
 
 function private.post_auctions()
 	if selected_item then
-        local unit_start_price = Aux.money.from_string(private.unit_start_price:GetText())
-        local unit_buyout_price = Aux.money.from_string(private.unit_buyout_price:GetText())
+        local unit_start_price = private.get_unit_start_price()
+        local unit_buyout_price = private.get_unit_buyout_price()
         local stack_size = private.stack_size_slider:GetValue()
         local stack_count
         if private.post_all_checkbox:GetChecked() and not selected_item.charges then
@@ -480,9 +522,7 @@ function private.post_auctions()
                 if partial then
                     new_auction_record = private.record_auction(key, partial, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
                 end
-                if existing_auctions[key] then
-                    existing_auctions[key].selected = new_auction_record
-                end
+
                 private.update_inventory_records()
                 selected_item = nil
                 for _, record in ipairs(inventory_records) do
@@ -498,27 +538,27 @@ function private.post_auctions()
 	end
 end
 
-function private.select_auction()
-	if not existing_auctions[selected_item.key].selected and getn(existing_auctions[selected_item.key]) > 0 then
-		local cheapest_for_size = {}
-		local cheapest
-
-		for _, auction_entry in ipairs(existing_auctions[selected_item.key]) do
-			if not cheapest_for_size[auction_entry.stack_size] or cheapest_for_size[auction_entry.stack_size].unit_buyout_price >= auction_entry.unit_buyout_price then
-				cheapest_for_size[auction_entry.stack_size] = auction_entry
-			end
-
-			if not cheapest or cheapest.unit_buyout_price > auction_entry.unit_buyout_price then
-				cheapest = auction_entry
-			end
-		end
-
-        local auction = cheapest_for_size[private.stack_size_slider:GetValue()] or cheapest
-
-        existing_auctions[selected_item.key].selected = auction
-        refresh = true
-	end
-end
+--function private.select_auction()
+--	if not existing_auctions[selected_item.key].selected and getn(existing_auctions[selected_item.key]) > 0 then
+--		local cheapest_for_size = {}
+--		local cheapest
+--
+--		for _, auction_entry in ipairs(existing_auctions[selected_item.key]) do
+--			if not cheapest_for_size[auction_entry.stack_size] or cheapest_for_size[auction_entry.stack_size].unit_buyout_price >= auction_entry.unit_buyout_price then
+--				cheapest_for_size[auction_entry.stack_size] = auction_entry
+--			end
+--
+--			if not cheapest or cheapest.unit_buyout_price > auction_entry.unit_buyout_price then
+--				cheapest = auction_entry
+--			end
+--		end
+--
+--        local auction = cheapest_for_size[private.stack_size_slider:GetValue()] or cheapest
+--
+--        existing_auctions[selected_item.key].selected = auction
+--        refresh = true
+--	end
+--end
 
 function private.validate_parameters()
 
@@ -527,12 +567,12 @@ function private.validate_parameters()
         return
     end
 
-    if Aux.money.from_string(private.unit_buyout_price:GetText()) > 0 and Aux.money.from_string(private.unit_start_price:GetText()) > Aux.money.from_string(private.unit_buyout_price:GetText()) then
+    if private.get_unit_buyout_price() > 0 and private.get_unit_start_price() > private.get_unit_buyout_price() then
         private.post_button:Disable()
         return
     end
 
-    if Aux.money.from_string(private.unit_start_price:GetText()) < 1 then
+    if private.get_unit_start_price() < 1 then
         private.post_button:Disable()
         return
     end
@@ -555,18 +595,24 @@ function private.update_recommendation()
         AuxSellParametersItemName:SetTextColor(unpack(Aux.gui.config.label_color.enabled))
         AuxSellParametersItemName:SetText('No item selected')
 
-        private.unit_start_price:Hide()
 		private.unit_buyout_price:Hide()
+        private.no_bidding_checkbox:Hide()
+        private.unit_start_price:Hide()
         private.stack_size_slider:Hide()
         private.post_all_checkbox:Hide()
         private.stack_count_slider:Hide()
         private.deposit:Hide()
         private.duration_dropdown:Hide()
-        private.pricing_model_dropdown:Hide()
+        private.historical_value_button:Hide()
         private.hide_checkbox:Hide()
     else
-        private.unit_start_price:Show()
         private.unit_buyout_price:Show()
+        private.no_bidding_checkbox:Show()
+        if private.no_bidding_checkbox:GetChecked() then
+            private.unit_start_price:Hide()
+        else
+            private.unit_start_price:Show()
+        end
         private.stack_size_slider:Show()
         private.post_all_checkbox:Show()
         if private.post_all_checkbox:GetChecked() then
@@ -576,7 +622,7 @@ function private.update_recommendation()
         end
         private.deposit:Show()
         private.duration_dropdown:Show()
-        private.pricing_model_dropdown:Show()
+        private.historical_value_button:Show()
         private.hide_checkbox:Show()
 
         AuxSellParametersItemIconTexture:SetTexture(selected_item.texture)
@@ -611,32 +657,12 @@ function private.update_recommendation()
         end
 
         private.refresh_button:Enable()
-
---        local settings = private.load_settings()
---
---        local start_price, buyout_price
---
---        if settings.pricing_model == FIXED then
---            start_price, buyout_price = settings.start_price, settings.buyout_price
---        elseif settings.pricing_model == MARKET then
---            start_price, buyout_price = private.historical_value_suggestion()
---        elseif settings.pricing_model == UNDERCUT then
---            start_price, buyout_price = private.undercutting_suggestion()
---        elseif settings.pricing_model == AUTO then
---            start_price, buyout_price = private.undercutting_suggestion()
---            if existing_auctions[selected_item.key] and not existing_auctions[selected_item.key].selected then
---                start_price, buyout_price = private.historical_value_suggestion()
---            end
---        end
---
---        private.unit_start_price:SetText(Aux.money.to_string(start_price, nil, nil, settings.pricing_model ~= FIXED and 3))
---        private.unit_buyout_price:SetText(Aux.money.to_string(buyout_price, nil, nil, settings.pricing_model ~= FIXED and 3))
 	end
 end
 
 function private.undercut(record, stack_size, stack)
-    local start_price = record.min_unit_blizzard_bid * (stack and record.stack_size or stack_size)
-    local buyout_price = record.unit_buyout_price * (stack and record.stack_size or stack_size)
+    local start_price = Aux.round(record.unit_blizzard_bid * (stack and record.stack_size or stack_size))
+    local buyout_price = Aux.round(record.unit_buyout_price * (stack and record.stack_size or stack_size))
 
     if record.yours < record.count then
         start_price = max(0, start_price - 1)
@@ -644,14 +670,6 @@ function private.undercut(record, stack_size, stack)
     end
 
     return start_price / stack_size, buyout_price / stack_size
-end
-
-function private.historical_value_suggestion()
-    local price_suggestion = Aux.history.value(selected_item.key) and 1.2 * Aux.history.value(selected_item.key)
-    if not price_suggestion then
-        return 0, 0
-    end
-    return price_suggestion * 0.95, price_suggestion
 end
 
 function private.quantity_update()
@@ -718,19 +736,21 @@ function private.set_item(item)
     UIDropDownMenu_Initialize(private.duration_dropdown, private.initialize_duration_dropdown) -- TODO, wtf, why is this needed
     UIDropDownMenu_SetSelectedValue(private.duration_dropdown, settings.duration)
 
-    UIDropDownMenu_Initialize(private.pricing_model_dropdown, private.initialize_pricing_model_dropdown)
-    UIDropDownMenu_SetSelectedValue(private.pricing_model_dropdown, settings.pricing_model)
-
     private.hide_checkbox:SetChecked(settings.hidden)
     private.post_all_checkbox:SetChecked(settings.post_all)
+    private.no_bidding_checkbox:SetChecked(settings.no_bidding)
 
     private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 5 or selected_item.max_stack)
     private.stack_size_slider:SetValue(settings.stack_size)
     private.quantity_update()
     private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
 
-    private.unit_start_price:SetText(Aux.money.to_string(settings.start_price, nil, nil, 3))
-    private.unit_buyout_price:SetText(Aux.money.to_string(settings.buyout_price, nil, nil, 3))
+    private.set_unit_start_price(settings.start_price)
+    private.set_unit_buyout_price(settings.buyout_price)
+
+    local historical_value = Aux.history.value(selected_item.key)
+    private.historical_value_button.amount = historical_value
+    private.historical_value_button:SetText(Aux.money.to_string(historical_value or 0, true, nil, 3))
 
     if not existing_auctions[selected_item.key] then
         private.refresh_entries()
@@ -844,15 +864,6 @@ function private.refresh_entries()
 		}
 	end
 end
-	
---function private.set_auction(entry)
---
---    existing_auctions[selected_item.key].selected = entry
---    refresh = true
---	private.update_recommendation()
---
---	PlaySound('igMainMenuOptionCheckBoxOn')
---end
 
 function private.refresh()
 	Aux.scan.abort('list')
@@ -866,7 +877,7 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
 		existing_auctions[key] = existing_auctions[key] or {}
 		local entry
 		for _, existing_entry in ipairs(existing_auctions[key]) do
-			if unit_buyout_price == existing_entry.unit_buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration then
+			if unit_blizzard_bid == existing_entry.unit_blizzard_bid and unit_buyout_price == existing_entry.unit_buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration then
 				entry = existing_entry
 			end
         end
@@ -875,6 +886,7 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
             entry = {
                 item_key = key,
                 stack_size = aux_quantity,
+                unit_blizzard_bid = unit_blizzard_bid,
                 unit_buyout_price = unit_buyout_price,
                 duration = duration,
                 count = 0,
@@ -885,7 +897,6 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
 
         entry.count = entry.count + 1
         entry.yours = entry.yours + (owner == UnitName('player') and 1 or 0)
-        entry.min_unit_blizzard_bid = entry.min_unit_blizzard_bid and min(entry.min_unit_blizzard_bid, unit_blizzard_bid) or unit_blizzard_bid
 
         return entry
 	end
@@ -899,40 +910,6 @@ function public.on_update()
     end
 
     private.validate_parameters()
-end
-
-function private.initialize_pricing_model_dropdown()
-
-    local function on_click()
-        UIDropDownMenu_SetSelectedValue(private.pricing_model_dropdown, this.value)
-        local settings = private.load_settings()
-        settings.pricing_model = this.value
-        private.update_recommendation()
-    end
-
-    UIDropDownMenu_AddButton{
-        text = 'Automatic',
-        value = AUTO,
-        func = on_click,
-    }
-
-    UIDropDownMenu_AddButton{
-        text = 'Undercutting',
-        value = UNDERCUT,
-        func = on_click,
-    }
-
-    UIDropDownMenu_AddButton{
-        text = 'Historical Price',
-        value = MARKET,
-        func = on_click,
-    }
-
-    UIDropDownMenu_AddButton{
-        text = 'Fixed',
-        value = FIXED,
-        func = on_click,
-    }
 end
 
 function private.initialize_duration_dropdown()
