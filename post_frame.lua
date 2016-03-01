@@ -81,25 +81,21 @@ function private.update_auction_listing()
             local historical_value = Aux.history.value(auction_record.item_key)
 
             local bid_color
-            if blizzard_bid_undercut < unit_start_price and auction_record.stack_size == stack_size then
+            if blizzard_bid_undercut < unit_start_price and stack_blizzard_bid_undercut < unit_start_price then
                 bid_color = '|cffff0000'
-            elseif blizzard_bid_undercut < unit_start_price and stack_blizzard_bid_undercut < unit_start_price then
+            elseif blizzard_bid_undercut < unit_start_price then
                 bid_color = '|cffff9218'
             elseif stack_blizzard_bid_undercut < unit_start_price then
                 bid_color = '|cffffff00'
-            elseif blizzard_bid_undercut < unit_start_price then
-                bid_color = '|cff2992ff'
             end
 
             local buyout_color
-            if buyout_price_undercut < unit_buyout_price and auction_record.stack_size == stack_size then
+            if buyout_price_undercut < unit_buyout_price and stack_buyout_price_undercut < unit_buyout_price then
                 buyout_color = '|cffff0000'
-            elseif buyout_price_undercut < unit_buyout_price and stack_buyout_price_undercut < unit_buyout_price then
+            elseif buyout_price_undercut < unit_buyout_price then
                 buyout_color = '|cffff9218'
             elseif stack_buyout_price_undercut < unit_buyout_price then
                 buyout_color = '|cffffff00'
-            elseif buyout_price_undercut < unit_buyout_price then
-                buyout_color = '|cff2992ff'
             end
 
             tinsert(auction_rows, {
