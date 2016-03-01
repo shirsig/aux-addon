@@ -71,7 +71,7 @@ function public.process_auction(auction_info)
 		item_record.daily_min_buyout = item_record.daily_min_buyout and min(item_record.daily_min_buyout, unit_buyout_price) or unit_buyout_price
 	end
 
-	item_record.daily_max_price = max(item_record.daily_price or 0, unit_buyout_price, unit_bid_price)
+	item_record.daily_max_price = max(item_record.daily_max_price or 0, unit_buyout_price, unit_bid_price)
 
 	private.write_record(auction_info.item_key, item_record)
 end
