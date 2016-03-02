@@ -15,12 +15,12 @@ function private.load_settings(item_record)
     dataset.post = dataset.post or {}
     dataset.post[item_record.key] = dataset.post[item_record.key] or {
         duration = DURATION_24,
-        stack_size = item_record.charges and 5 or item_record.max_stack,
+        stack_size = 1,
         start_price = 0,
         buyout_price = 0,
         post_all = true,
         hidden = false,
-        mode = BUYOUT_MODE,
+        mode = FULL_MODE,
     }
     return dataset.post[item_record.key]
 end
