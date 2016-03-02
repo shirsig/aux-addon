@@ -97,8 +97,9 @@ function m.filter_from_string(filter_term)
 
     local filter = {}
     local tooltip_counter = 0
-    for i, str in ipairs(parts) do
-        str = Aux.util.trim(str)
+    for i=1,getn(parts) do
+        local str = Aux.util.trim(parts[i])
+        i = i + 1
 
         if tooltip_counter > 0 or strupper(str) == 'AND' or strupper(str) == 'OR' or strupper(str) == 'NOT' or strupper(str) == 'TT' then
             filter.tooltip = filter.tooltip or {}
@@ -141,6 +142,22 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Erroneous Rarity Modifier'
             end
+        elseif strlower(str) == 'bid-profit' then
+            local amount = Aux.money.from_string(parts[i] or '')
+            if not filter.bid_profit and amount > 0 then
+                filter.bid_profit = amount
+            else
+                return false, 'Erroneous Bid Profit Modifier'
+            end
+            i = i + 1
+        elseif strlower(str) == 'buyout-profit' then
+            local amount = Aux.money.from_string(parts[i] or '')
+            if not filter.buyout_profit and amount > 0 then
+                filter.buyout_profit = amount
+            else
+                return false, 'Erroneous Buyout Profit Modifier'
+            end
+            i = i + 1
         elseif strlower(str) == 'usable' then
             if not filter.usable then
                 filter.usable = true
@@ -294,6 +311,12 @@ function m.validator(filter)
             return
         end
         if filter.max_level and record.level > filter.max_level then
+            return
+        end
+        if filter.bid_profit and (not Aux.history.value(record.item_key) or Aux.history.value(record.item_key) * record.aux_quantity - record.bid_price < filter.bid_profit) then
+            return
+        end
+        if filter.buyout_profit and (not Aux.history.value(record.item_key) or Aux.history.value(record.item_key) * record.aux_quantity - record.buyout_price < filter.buyout_profit) then
             return
         end
         if filter.max_price and record.buyout_price > filter.max_price then
