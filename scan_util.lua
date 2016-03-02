@@ -97,7 +97,8 @@ function m.filter_from_string(filter_term)
 
     local filter = {}
     local tooltip_counter = 0
-    for i=1,getn(parts) do
+    local i = 1
+    while i <= getn(parts) do
         local str = Aux.util.trim(parts[i])
         i = i + 1
 
