@@ -7,6 +7,7 @@ local inventory_records
 local selected_item
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
+local BUYOUT_MODE, BID_MODE, FULL_MODE = 1, 2, 3
 
 function private.load_settings(item_record)
     local item_record = item_record or selected_item
@@ -18,14 +19,14 @@ function private.load_settings(item_record)
         start_price = 0,
         buyout_price = 0,
         post_all = true,
-        no_bidding = true,
         hidden = false,
+        mode = BUYOUT_MODE,
     }
     return dataset.post[item_record.key]
 end
 
 function private.get_unit_start_price()
-    if private.no_bidding_checkbox:GetChecked() then
+    if UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == BUYOUT_MODE then
         return Aux.money.from_string(private.unit_buyout_price:GetText())
     else
         return Aux.money.from_string(private.unit_start_price:GetText())
@@ -33,17 +34,23 @@ function private.get_unit_start_price()
 end
 
 function private.set_unit_start_price(amount)
-    if not private.no_bidding_checkbox:GetChecked() then
+    if UIDropDownMenu_GetSelectedValue(private.mode_dropdown) ~= BUYOUT_MODE then
         private.unit_start_price:SetText(Aux.money.to_string(amount, true, nil, 3))
     end
 end
 
 function private.get_unit_buyout_price()
-    return Aux.money.from_string(private.unit_buyout_price:GetText())
+    if UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == BUYOUT_MODE or UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == FULL_MODE then
+        return Aux.money.from_string(private.unit_buyout_price:GetText())
+    else
+        return 0
+    end
 end
 
 function private.set_unit_buyout_price(amount)
-    private.unit_buyout_price:SetText(Aux.money.to_string(amount, true, nil, 3))
+    if UIDropDownMenu_GetSelectedValue(private.mode_dropdown) ~= BID_MODE then
+        private.unit_buyout_price:SetText(Aux.money.to_string(amount, true, nil, 3))
+    end
 end
 
 function private.update_inventory_listing()
@@ -353,66 +360,29 @@ function public.on_load()
 --        private.batch_posting_checkbox = checkbox
 --    end
     do
-        local editbox = Aux.gui.editbox(AuxSellParameters)
-        editbox:SetJustifyH('RIGHT')
-        editbox:SetPoint('TOPRIGHT', -30, -50)
-        editbox:SetWidth(150)
-        editbox:SetScript('OnTextChanged', function()
-            if selected_item then
-                local settings = private.load_settings()
-                settings.buyout_price = Aux.money.from_string(this:GetText())
-            end
-            refresh = true
+        local dropdown = Aux.gui.dropdown(AuxSellParameters)
+        dropdown:SetPoint('TOPRIGHT', -15, -42)
+        dropdown:SetWidth(120)
+        dropdown:SetHeight(10)
+        local label = Aux.gui.label(dropdown, 13)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
+        label:SetText('Mode')
+        UIDropDownMenu_Initialize(dropdown, private.initialize_mode_dropdown)
+        dropdown:SetScript('OnShow', function()
+            UIDropDownMenu_Initialize(this, private.initialize_mode_dropdown)
         end)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                private.unit_start_price:SetFocus()
-            else
-                private.stack_size_slider.editbox:SetFocus()
-            end
-        end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-        end)
-        editbox:SetScript('OnEditFocusLost', function()
-            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText()), true, nil, 3))
-        end)
-        local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Unit Buyout Price')
-        private.unit_buyout_price = editbox
-    end
-    do
-        local checkbox = CreateFrame('CheckButton', nil, AuxSellInventory, 'UICheckButtonTemplate')
-        checkbox:SetWidth(22)
-        checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPLEFT', private.unit_buyout_price, 'BOTTOMLEFT', -3, -4)
-        checkbox:SetScript('OnClick', function()
-            local settings = private.load_settings()
-            settings.no_bidding = this:GetChecked()
-            private.update_recommendation()
-            refresh = true
-        end)
-        local label = Aux.gui.label(checkbox, 13)
-        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
-        label:SetText('No Bidding')
-        private.no_bidding_checkbox = checkbox
+        private.mode_dropdown = dropdown
     end
     do
         local editbox = Aux.gui.editbox(AuxSellParameters)
         editbox:SetJustifyH('RIGHT')
-        editbox:SetPoint('TOP', private.unit_buyout_price, 'BOTTOM', 0, -42)
         editbox:SetWidth(150)
         editbox:SetScript('OnTextChanged', function()
             if selected_item then
                 local settings = private.load_settings()
                 settings.start_price = Aux.money.from_string(this:GetText())
+                local historical_value = Aux.history.value(selected_item.key)
+                private.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(settings.start_price / historical_value * 100)) or '---')
             end
             refresh = true
         end)
@@ -437,14 +407,69 @@ function public.on_load()
         editbox:SetScript('OnEditFocusLost', function()
             this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText()), true, nil, 3))
         end)
-        local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Unit Starting Price')
+        do
+            local label = Aux.gui.label(editbox, 13)
+            label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+            label:SetText('Unit Starting Price')
+        end
+        do
+            local label = Aux.gui.label(editbox, 13)
+            label:SetPoint('LEFT', editbox, 'RIGHT', 3, 0)
+            label:SetWidth(50)
+            label:SetJustifyH('CENTER')
+            private.start_price_percentage = label
+        end
         private.unit_start_price = editbox
     end
     do
+        local editbox = Aux.gui.editbox(AuxSellParameters)
+        editbox:SetJustifyH('RIGHT')
+        editbox:SetWidth(150)
+        editbox:SetScript('OnTextChanged', function()
+            if selected_item then
+                local settings = private.load_settings()
+                settings.buyout_price = Aux.money.from_string(this:GetText())
+                local historical_value = Aux.history.value(selected_item.key)
+                private.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(settings.buyout_price / historical_value * 100)) or '---')
+            end
+            refresh = true
+        end)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                private.unit_start_price:SetFocus()
+            else
+                private.stack_size_slider.editbox:SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
+        end)
+        editbox:SetScript('OnEditFocusLost', function()
+            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText()), true, nil, 3))
+        end)
+        do
+            local label = Aux.gui.label(editbox, 13)
+            label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+            label:SetText('Unit Buyout Price')
+        end
+        do
+            local label = Aux.gui.label(editbox, 13)
+            label:SetPoint('LEFT', editbox, 'RIGHT', 3, 0)
+            label:SetWidth(50)
+            label:SetJustifyH('CENTER')
+            private.buyout_price_percentage = label
+        end
+        private.unit_buyout_price = editbox
+    end
+    do
         local btn = Aux.gui.button(AuxSellParameters, 16, '$parentPostButton')
-        btn:SetPoint('TOPRIGHT', private.unit_start_price, 'BOTTOMRIGHT', 0, -33)
+        btn:SetPoint('TOPRIGHT', -15, -163)
         btn:SetWidth(150)
         btn:SetHeight(20)
         btn:GetFontString():SetTextHeight(15)
@@ -592,9 +617,10 @@ function private.update_recommendation()
         AuxSellParametersItemName:SetTextColor(unpack(Aux.gui.config.label_color.enabled))
         AuxSellParametersItemName:SetText('No item selected')
 
-		private.unit_buyout_price:Hide()
-        private.no_bidding_checkbox:Hide()
+        private.mode_dropdown:Hide()
         private.unit_start_price:Hide()
+        private.unit_buyout_price:Hide()
+
         private.stack_size_slider:Hide()
         private.post_all_checkbox:Hide()
         private.stack_count_slider:Hide()
@@ -603,13 +629,24 @@ function private.update_recommendation()
         private.historical_value_button:Hide()
         private.hide_checkbox:Hide()
     else
-        private.unit_buyout_price:Show()
-        private.no_bidding_checkbox:Show()
-        if private.no_bidding_checkbox:GetChecked() then
-            private.unit_start_price:Hide()
-        else
+        private.mode_dropdown:Show()
+        private.unit_start_price:Hide()
+        private.unit_buyout_price:Hide()
+        private.unit_start_price:ClearAllPoints()
+        private.unit_buyout_price:ClearAllPoints()
+        if UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == BUYOUT_MODE then
+            private.unit_buyout_price:SetPoint('TOPRIGHT', -65, -100)
+            private.unit_buyout_price:Show()
+        elseif UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == BID_MODE then
+            private.unit_start_price:SetPoint('TOPRIGHT', -65, -100)
             private.unit_start_price:Show()
+        elseif UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == FULL_MODE then
+            private.unit_start_price:SetPoint('TOPRIGHT', -65, -89)
+            private.unit_start_price:Show()
+            private.unit_buyout_price:SetPoint('TOPRIGHT', private.unit_start_price, 'BOTTOMRIGHT', 0, -15)
+            private.unit_buyout_price:Show()
         end
+
         private.stack_size_slider:Show()
         private.post_all_checkbox:Show()
         if private.post_all_checkbox:GetChecked() then
@@ -733,9 +770,11 @@ function private.set_item(item)
     UIDropDownMenu_Initialize(private.duration_dropdown, private.initialize_duration_dropdown) -- TODO, wtf, why is this needed
     UIDropDownMenu_SetSelectedValue(private.duration_dropdown, settings.duration)
 
+    UIDropDownMenu_Initialize(private.mode_dropdown, private.initialize_mode_dropdown)
+    UIDropDownMenu_SetSelectedValue(private.mode_dropdown, settings.mode)
+
     private.hide_checkbox:SetChecked(settings.hidden)
     private.post_all_checkbox:SetChecked(settings.post_all)
-    private.no_bidding_checkbox:SetChecked(settings.no_bidding)
 
     private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 5 or selected_item.max_stack)
     private.stack_size_slider:SetValue(settings.stack_size)
@@ -933,6 +972,33 @@ function private.initialize_duration_dropdown()
     UIDropDownMenu_AddButton{
         text = '24 Hours',
         value = DURATION_24,
+        func = on_click,
+    }
+end
+
+function private.initialize_mode_dropdown()
+    local function on_click()
+        UIDropDownMenu_SetSelectedValue(private.mode_dropdown, this.value)
+        local settings = private.load_settings()
+        settings.mode = this.value
+        private.update_recommendation()
+    end
+
+    UIDropDownMenu_AddButton{
+        text = 'Buyout',
+        value = BUYOUT_MODE,
+        func = on_click,
+    }
+
+    UIDropDownMenu_AddButton{
+        text = 'Bid',
+        value = BID_MODE,
+        func = on_click,
+    }
+
+    UIDropDownMenu_AddButton{
+        text = 'Full',
+        value = FULL_MODE,
         func = on_click,
     }
 end

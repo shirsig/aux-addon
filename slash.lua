@@ -3,6 +3,9 @@ function SlashCmdList.AUX(parameter)
     if parameter == 'clear history' then
         Aux.persistence.load_dataset().history = {}
         Aux.log('History cleared.')
+    elseif parameter == 'clear post' then
+        Aux.persistence.load_dataset().post = {}
+        Aux.log('Post settings cleared.')
     elseif parameter == 'clear' then
         aux_database = {}
         Aux.log('Database cleared.')
