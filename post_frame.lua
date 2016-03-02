@@ -989,6 +989,7 @@ function private.initialize_mode_dropdown()
         local settings = private.load_settings()
         settings.mode = this.value
         private.update_recommendation()
+        refresh = true
     end
 
     UIDropDownMenu_AddButton{
