@@ -23,7 +23,7 @@ function public.render(item_listing)
 				row.highlight:Hide()
 			end
 			getglobal(row.item:GetName()..'IconTexture'):SetTexture(item_record.texture)
-			getglobal(row.item:GetName()..'Name'):SetText(item_record.name)
+			getglobal(row.item:GetName()..'Name'):SetText('['..item_record.name..']')
 			local color = ITEM_QUALITY_COLORS[item_record.quality]
 			getglobal(row.item:GetName()..'Name'):SetTextColor(color.r, color.g, color.b)
 			if item_record.aux_quantity > 1 then

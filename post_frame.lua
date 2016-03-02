@@ -667,7 +667,7 @@ function private.update_recommendation()
         private.hide_checkbox:Show()
 
         AuxSellParametersItemIconTexture:SetTexture(selected_item.texture)
-        AuxSellParametersItemName:SetText(selected_item.name)
+        AuxSellParametersItemName:SetText('['..selected_item.name..']')
         local color = ITEM_QUALITY_COLORS[selected_item.quality]
         AuxSellParametersItemName:SetTextColor(color.r, color.g, color.b)
 		if selected_item.aux_quantity > 1 then
