@@ -189,7 +189,7 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Erroneous Max Percent Modifier'
             end
-        elseif i == 1 then
+        elseif i == 2 then
             filter.name = str
         else
             return false, 'Unknown Modifier'
