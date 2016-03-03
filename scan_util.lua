@@ -1,6 +1,164 @@
 local m = {}
 Aux.scan_util = m
 
+m.filters = {
+
+    ['LEFT'] = {
+        arity = 1,
+        test = function(duration)
+            local max_index = ({
+                ['30M'] = 1,
+                ['2H'] = 2,
+                ['8H'] = 3,
+                ['24H'] = 4
+            })[strlower(duration or '')]
+            if max_index then
+                return function(auction_record)
+                    return auction_record.duration <= max_index
+                end
+            else
+                return false, 'Erroneous Time Left Modifier'
+            end
+        end
+    },
+
+    ['MIN-LVL'] = {
+        arity = 1,
+        test = function(level)
+            level = tonumber(level or '')
+            if level then
+                return function(auction_record)
+                    return auction_record.level >= level
+                end
+            else
+                return false, 'Erroneous Min Level Modifier'
+            end
+        end
+    },
+
+    ['MAX-LVL'] = {
+        arity = 1,
+        test = function(level)
+            level = tonumber(level or '')
+            if level then
+                return function(auction_record)
+                    return auction_record.level <= level
+                end
+            else
+                return false, 'Erroneous Max Level Modifier'
+            end
+        end
+    },
+
+    ['MAX-BID'] = {
+        arity = 1,
+        test = function(amount)
+            amount = Aux.money.from_string(amount or '')
+            if amount > 0 then
+                return function(auction_record)
+                    return auction_record.bid_price <= amount
+                end
+            else
+                return false, 'Erroneous Max Bid Modifier'
+            end
+        end
+    },
+
+    ['MAX-BUYOUT'] = {
+        arity = 1,
+        test = function(amount)
+            amount = Aux.money.from_string(amount or '')
+            if amount > 0 then
+                return function(auction_record)
+                    return auction_record.buyout_price > 0 and auction_record.buyout_price <= amount
+                end
+            else
+                return false, 'Erroneous Max Buyout Modifier'
+            end
+        end
+    },
+
+    ['BID-PCT'] = {
+        arity = 1,
+        test = function(pct)
+            pct = tonumber(pct)
+            if pct then
+                return function(auction_record)
+                    return auction_record.unit_buyout_price > 0
+                            and Aux.history.value(auction_record.item_key)
+                            and auction_record.unit_buyout_price / Aux.history.value(auction_record.item_key) * 100 <= pct
+                end
+            else
+                return false, 'Erroneous Bid Percentage Modifier'
+            end
+        end
+    },
+
+    ['BUYOUT-PCT'] = {
+        arity = 1,
+        test = function(pct)
+            pct = tonumber(pct)
+            if pct then
+                return function(auction_record)
+                    return auction_record.unit_buyout_price > 0
+                            and Aux.history.value(auction_record.item_key)
+                            and auction_record.unit_buyout_price / Aux.history.value(auction_record.item_key) * 100 <= pct
+                end
+            else
+                return false, 'Erroneous Buyout Percentage Modifier'
+            end
+        end
+    },
+
+    ['BID-PROFIT'] = {
+        arity = 1,
+        test = function(amount)
+            amount = Aux.money.from_string(amount or '')
+            if amount > 0 then
+                return function(auction_record)
+                    return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
+                end
+            else
+                return false, 'Erroneous Bid Profit Modifier'
+            end
+        end
+    },
+
+    ['BUYOUT-PROFIT'] = {
+        arity = 1,
+        test = function(amount)
+            amount = Aux.money.from_string(amount or '')
+            if amount > 0 then
+                return function(auction_record)
+                    return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
+                end
+            else
+                return false, 'Erroneous Buyout Profit Modifier'
+            end
+        end
+    },
+
+    ['DISCARD'] = {
+        arity = 0,
+        test = function()
+            return false
+        end
+    },
+}
+
+function m.default_filter(str)
+    return {
+        arity = 0,
+        test = function()
+            return function(auction_record)
+                return Aux.util.any(auction_record.tooltip, function(entry)
+                    return strfind(strupper(entry.left_text or ''), strupper(str or ''), 1, true) or strfind(strupper(entry.right_text or ''), strupper(str or ''), 1, true)
+                end)
+            end
+        end,
+    }
+end
+
 function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
     local function test(index)
@@ -92,110 +250,40 @@ function m.parse_filter_string(filter_string)
     return filters
 end
 
-function m.predicate(parts, i)
-
-    if strlower(parts[i]) == 'left' then
-        local max_index = ({
-            ['30m'] = 1,
-            ['2h'] = 2,
-            ['8h'] = 3,
-            ['24h'] = 4
-        })[strlower(parts[i + 1] or '')]
-        if max_index then
-            return function(auction_record)
-                return auction_record.duration <= max_index
-            end, 2
-        else
-            return false, 'Erroneous Time Left Modifier'
-        end
-    elseif strlower(parts[i]) == 'min-lvl' then
-        local level = tonumber(parts[i + 1] or '')
-        if level then
-            return function(auction_record)
-                return auction_record.level >= level
-            end, 2
-        else
-            return false, 'Erroneous Bid Profit Modifier'
-        end
-    elseif strlower(parts[i]) == 'max-lvl' then
-        local level = tonumber(parts[i + 1] or '')
-        if level then
-            return function(auction_record)
-                return auction_record.level <= level
-            end, 2
-        else
-            return false, 'Erroneous Bid Profit Modifier'
-        end
-    elseif Aux.money.from_string(parts[i]) > 0 then
-        return function(auction_record)
-            return auction_record.buyout_price > 0 and auction_record.buyout_price <= Aux.money.from_string(parts[i])
-        end, 1
---            return false, 'Erroneous Max Price Modifier'
-    elseif strfind(parts[i], '^%d+%%$') then
-        return function(auction_record)
-            return auction_record.unit_buyout_price > 0
-                    and Aux.history.value(auction_record.item_key)
-                    and auction_record.unit_buyout_price / Aux.history.value(auction_record.item_key) * 100 <= tonumber(({strfind(parts[i], '(%d+)%%')})[3])
-        end, 1
---            return false, 'Erroneous Max Percent Modifier'
-    elseif strlower(parts[i]) == 'bid-profit' then
-        local amount = Aux.money.from_string(parts[i + 1] or '')
-        if amount > 0 then
-            return function(auction_record)
-                return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
-            end, 2
-        else
-            return false, 'Erroneous Bid Profit Modifier'
-        end
-    elseif strlower(parts[i]) == 'buyout-profit' then
-        local amount = Aux.money.from_string(parts[i + 1] or '')
-        if amount > 0 then
-            return function(auction_record)
-                return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
-            end, 2
-        else
-            return false, 'Erroneous Buyout Profit Modifier'
-        end
-    elseif strlower(parts[i]) == 'discard' then
-        return function()
-            return false
-        end, 1
-    else
-        return function(auction_record)
-            return Aux.util.any(auction_record.tooltip, function(entry)
-                return strfind(strupper(entry.left_text or ''), strupper(parts[i] or ''), 1, true) or strfind(strupper(entry.right_text or ''), strupper(parts[i] or ''), 1, true)
-            end)
-        end, 1
-    end
-end
-
 function m.filter_from_string(filter_term)
-    local parts = Aux.util.split(filter_term, '/')
+    local parts = Aux.util.map(Aux.util.split(filter_term, '/'), function(part) return strupper(Aux.util.trim(part)) end)
 
     local blizzard_query = {}
     local validator = {}
     local tooltip_counter = 0
     local i = 1
     while i <= getn(parts) do
-        local str = Aux.util.trim(parts[i])
+        local str = parts[i]
         i = i + 1
 
-        if tooltip_counter > 0 or strupper(str) == 'AND' or strupper(str) == 'OR' or strupper(str) == 'NOT' or strupper(str) == 'TT' then
+        if tooltip_counter > 0 or str == 'AND' or str == 'OR' or str == 'NOT' or str == 'TT' then
             tooltip_counter = tooltip_counter == 0 and tooltip_counter + 1 or tooltip_counter
-            if strupper(str) == 'AND' or strupper(str) == 'OR' then
+            if str == 'AND' or str == 'OR' then
                 tooltip_counter = tooltip_counter + 1
                 tinsert(validator, str)
-            elseif strupper(str) == 'NOT' or strupper(str) == 'TT' then
+            elseif str == 'NOT' or str == 'TT' then
                 tinsert(validator, str)
             elseif str ~= '' then
                 tooltip_counter = tooltip_counter - 1
 
-                local pred, consumed = m.predicate(parts, i - 1)
-                if not pred then
-                    return false, consumed
+                local filter = m.filters[str] or m.default_filter(str)
+
+                local args = {}
+                for j=1, filter.arity do
+                    tinsert(args, parts[i - 1 + j])
+                end
+                i = i + filter.arity
+
+                local test, error = filter.test(unpack(args))
+                if test then
+                    tinsert(validator, test)
                 else
-                    tinsert(validator, pred)
-                    i = i + consumed - 1
+                    return false, error
                 end
             end
         elseif tonumber(str) then
@@ -206,7 +294,7 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Erroneous Level Range Modifier'
             end
-        elseif Aux.item_class_index(str) and not (blizzard_query.class and not blizzard_query.subclass and strlower(str) == 'miscellaneous')then
+        elseif Aux.item_class_index(str) and not (blizzard_query.class and not blizzard_query.subclass and str == 'MISCELLANEOUS')then
             if not blizzard_query.class then
                 blizzard_query.class = Aux.item_class_index(str)
             else
@@ -230,30 +318,37 @@ function m.filter_from_string(filter_term)
             else
                 return false, 'Erroneous Rarity Modifier'
             end
-        elseif strlower(str) == 'usable' then
+        elseif str == 'USABLE' then
             if not blizzard_query.usable then
                 blizzard_query.usable = true
             else
                 return false, 'Erroneous Usable Only Modifier'
             end
-        elseif strlower(str) == 'exact' then
+        elseif str == 'EXACT' then
             if not blizzard_query.exact then
                 blizzard_query.exact = true
             else
                 return false, 'Erroneous Exact Only Modifier'
             end
-        elseif i == 2 then
+        elseif i == 2 and not m.filters[str] then
             blizzard_query.name = str
         elseif str ~= '' then
-            local pred, consumed = m.predicate(parts, i - 1)
-            if not pred then
-                return false, consumed
+            local filter = m.filters[str] or m.default_filter(str)
+
+            local args = {}
+            for j=1, filter.arity do
+                tinsert(args, parts[i - 1 + j])
+            end
+            i = i + filter.arity
+
+            local test, error = filter.test(unpack(args))
+            if test then
+                tinsert(validator, test)
             else
-                tinsert(validator, pred)
-                i = i + consumed - 1
+                return false, error
             end
         else
-            return false, 'Unknown Modifier'
+            return false, 'Empty Modifier'
         end
     end
 

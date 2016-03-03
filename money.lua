@@ -62,6 +62,7 @@ function m.to_string(money, pad, trim, decimal_points, color, no_color)
 end
 
 function m.from_string(value)
+	value = strlower(value)
 
 	-- remove any colors
 	value = gsub(gsub(value, '\124c([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])', ''), '\124r', '')
