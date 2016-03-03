@@ -6,15 +6,15 @@ m.filters = {
     ['LEFT'] = {
         arity = 1,
         test = function(duration)
-            local max_index = ({
+            local code = ({
                 ['30M'] = 1,
                 ['2H'] = 2,
                 ['8H'] = 3,
                 ['24H'] = 4
-            })[strlower(duration or '')]
-            if max_index then
+            })[duration or '']
+            if code then
                 return function(auction_record)
-                    return auction_record.duration <= max_index
+                    return auction_record.duration == code
                 end
             else
                 return false, 'Erroneous Time Left Modifier'
