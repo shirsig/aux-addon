@@ -164,13 +164,15 @@ function private.prettify_search(search)
         return NORMAL_FONT_COLOR_CODE..'No filter'..FONT_COLOR_CODE_CLOSE
     end
 
+    local default_color = Aux.gui.inline_color({216, 225, 211, 1})
+
     local item_pattern = '([^/;]+)([^;]*)/exact'
     while true do
         local _, _, name, in_between = strfind(search, item_pattern)
         if name then
-            search = gsub(search, item_pattern, private.display_name(Aux.static.item_id(strupper(name)))..in_between, 1)
+            search = gsub(search, item_pattern, private.display_name(Aux.static.item_id(strupper(name)))..default_color..in_between, 1)
         else
-            return Aux.gui.inline_color({216, 225, 211, 1})..search..'|r'
+            return default_color..search..'|r'
         end
     end
 end

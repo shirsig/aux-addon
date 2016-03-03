@@ -24,22 +24,22 @@ function m:complete()
 
 	local completed_filter_string = ({strfind(filter_string, '([^;]*)/[^/;]*$')})[3]
 	local current_filter = completed_filter_string and Aux.scan_util.filter_from_string(completed_filter_string)
+	local current_query = current_filter and current_filter.blizzard_query
 
 	local options = {}
 
-	if current_filter or not completed_filter_string then
-		current_filter = current_filter or {}
+	if current_query or not completed_filter_string then
+		current_query = current_query or {}
 
-		if current_filter.name
-				and Aux.static.item_id(strupper(current_filter.name))
-				and not current_filter.min_level
-				and not current_filter.max_level
-				and not current_filter.class
-				and not current_filter.subclass
-				and not current_filter.slot
-				and not current_filter.quality
-				and not current_filter.usable
-				and not current_filter.exact
+		if current_query.name
+				and Aux.static.item_id(strupper(current_query.name))
+				and not current_query.min_level
+				and not current_query.max_level
+				and not current_query.class
+				and not current_query.subclass
+				and not current_query.slot
+				and not current_query.quality
+				and not current_query.usable
 		then
 			tinsert(options, 'exact')
 		end
@@ -49,42 +49,41 @@ function m:complete()
 		tinsert(options, 'not')
 		tinsert(options, 'tt')
 
+		for filter, _ in pairs(Aux.scan_util.filters) do
+			tinsert(options, strlower(filter))
+		end
+
 		-- classes
-		if not current_filter.class and not current_filter.exact then
+		if not current_query.class then
 			for _, class in ipairs({ GetAuctionItemClasses() }) do
 				tinsert(options, class)
 			end
 		end
 
 		-- subclasses
-		if current_filter.class and not current_filter.subclass then
-			for _, subclass in ipairs({ GetAuctionItemSubClasses(current_filter.class) }) do
+		if current_query.class and not current_query.subclass then
+			for _, subclass in ipairs({ GetAuctionItemSubClasses(current_query.class) }) do
 				tinsert(options, subclass)
 			end
 		end
 
 		-- slots
-		if current_filter.class and current_filter.subclass and not current_filter.slot then
-			for _, invtype in ipairs({ GetAuctionInvTypes(current_filter.class, current_filter.subclass) }) do
+		if current_query.class and current_query.subclass and not current_query.slot then
+			for _, invtype in ipairs({ GetAuctionInvTypes(current_query.class, current_query.subclass) }) do
 				tinsert(options, getglobal(invtype))
 			end
 		end
 
 		-- usable
-		if not current_filter.usable and not current_filter.exact then
+		if not current_query.usable then
 			tinsert(options, 'usable')
 		end
 
 		-- rarities
-		if not current_filter.quality and not current_filter.exact then
+		if not current_query.quality then
 			for i=0,4 do
 				tinsert(options, getglobal('ITEM_QUALITY'..i..'_DESC'))
 			end
-		end
-
-		-- discard
-		if not current_filter.discard then
-			tinsert(options, 'discard')
 		end
 
 		-- item names
