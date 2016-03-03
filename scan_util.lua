@@ -64,8 +64,8 @@ function m.create_item_query(item_id)
         local filter = m.filter_from_string(item_info.name..'/exact')
         return {
             start_page = 0,
-            validator = m.validator(filter),
-            blizzard_query = m.blizzard_query(filter),
+            validator = filter.validator,
+            blizzard_query = filter.blizzard_query,
         }
     end
 end
@@ -92,10 +92,88 @@ function m.parse_filter_string(filter_string)
     return filters
 end
 
+function m.predicate(parts, i)
+
+    if strlower(parts[i]) == 'left' then
+        local max_index = ({
+            ['30m'] = 1,
+            ['2h'] = 2,
+            ['8h'] = 3,
+            ['24h'] = 4
+        })[strlower(parts[i + 1] or '')]
+        if max_index then
+            return function(auction_record)
+                return auction_record.duration <= max_index
+            end, 2
+        else
+            return false, 'Erroneous Time Left Modifier'
+        end
+    elseif strlower(parts[i]) == 'min-lvl' then
+        local level = tonumber(parts[i + 1] or '')
+        if level then
+            return function(auction_record)
+                return auction_record.level >= level
+            end, 2
+        else
+            return false, 'Erroneous Bid Profit Modifier'
+        end
+    elseif strlower(parts[i]) == 'max-lvl' then
+        local level = tonumber(parts[i + 1] or '')
+        if level then
+            return function(auction_record)
+                return auction_record.level <= level
+            end, 2
+        else
+            return false, 'Erroneous Bid Profit Modifier'
+        end
+    elseif Aux.money.from_string(parts[i]) > 0 then
+        return function(auction_record)
+            return auction_record.buyout_price > 0 and auction_record.buyout_price <= Aux.money.from_string(parts[i])
+        end, 1
+--            return false, 'Erroneous Max Price Modifier'
+    elseif strfind(parts[i], '^%d+%%$') then
+        return function(auction_record)
+            return auction_record.unit_buyout_price > 0
+                    and Aux.history.value(auction_record.item_key)
+                    and auction_record.unit_buyout_price / Aux.history.value(auction_record.item_key) * 100 <= tonumber(({strfind(parts[i], '(%d+)%%')})[3])
+        end, 1
+--            return false, 'Erroneous Max Percent Modifier'
+    elseif strlower(parts[i]) == 'bid-profit' then
+        local amount = Aux.money.from_string(parts[i + 1] or '')
+        if amount > 0 then
+            return function(auction_record)
+                return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
+            end, 2
+        else
+            return false, 'Erroneous Bid Profit Modifier'
+        end
+    elseif strlower(parts[i]) == 'buyout-profit' then
+        local amount = Aux.money.from_string(parts[i + 1] or '')
+        if amount > 0 then
+            return function(auction_record)
+                return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
+            end, 2
+        else
+            return false, 'Erroneous Buyout Profit Modifier'
+        end
+    elseif strlower(parts[i]) == 'discard' then
+        return function()
+            return false
+        end, 1
+    else
+        return function(auction_record)
+            return Aux.util.any(auction_record.tooltip, function(entry)
+                return strfind(strupper(entry.left_text or ''), strupper(parts[i] or ''), 1, true) or strfind(strupper(entry.right_text or ''), strupper(parts[i] or ''), 1, true)
+            end)
+        end, 1
+    end
+end
+
 function m.filter_from_string(filter_term)
     local parts = Aux.util.split(filter_term, '/')
 
-    local filter = {}
+    local blizzard_query = {}
+    local validator = {}
     local tooltip_counter = 0
     local i = 1
     while i <= getn(parts) do
@@ -103,119 +181,102 @@ function m.filter_from_string(filter_term)
         i = i + 1
 
         if tooltip_counter > 0 or strupper(str) == 'AND' or strupper(str) == 'OR' or strupper(str) == 'NOT' or strupper(str) == 'TT' then
-            filter.tooltip = filter.tooltip or {}
-            tinsert(filter.tooltip, str)
             tooltip_counter = tooltip_counter == 0 and tooltip_counter + 1 or tooltip_counter
             if strupper(str) == 'AND' or strupper(str) == 'OR' then
                 tooltip_counter = tooltip_counter + 1
-            elseif not (strupper(str) == 'NOT' or strupper(str) == 'TT' or str == '') then
+                tinsert(validator, str)
+            elseif strupper(str) == 'NOT' or strupper(str) == 'TT' then
+                tinsert(validator, str)
+            elseif str ~= '' then
                 tooltip_counter = tooltip_counter - 1
+
+                local pred, consumed = m.predicate(parts, i - 1)
+                if not pred then
+                    return false, consumed
+                else
+                    tinsert(validator, pred)
+                    i = i + consumed - 1
+                end
             end
         elseif tonumber(str) then
-            if not filter.min_level then
-                filter.min_level = tonumber(str)
-            elseif not filter.max_level and tonumber(str) >= filter.min_level then
-                filter.max_level = tonumber(str)
+            if not blizzard_query.min_level then
+                blizzard_query.min_level = tonumber(str)
+            elseif not blizzard_query.max_level and tonumber(str) >= blizzard_query.min_level then
+                blizzard_query.max_level = tonumber(str)
             else
                 return false, 'Erroneous Level Range Modifier'
             end
-        elseif Aux.item_class_index(str) and not (filter.class and not filter.subclass and strlower(str) == 'miscellaneous')then
-            if not filter.class then
-                filter.class = Aux.item_class_index(str)
+        elseif Aux.item_class_index(str) and not (blizzard_query.class and not blizzard_query.subclass and strlower(str) == 'miscellaneous')then
+            if not blizzard_query.class then
+                blizzard_query.class = Aux.item_class_index(str)
             else
                 return false, 'Erroneous Item Class Modifier'
             end
-        elseif filter.class and Aux.item_subclass_index(filter.class, str) then
-            if not filter.subclass then
-                filter.subclass = Aux.item_subclass_index(filter.class, str)
+        elseif blizzard_query.class and Aux.item_subclass_index(blizzard_query.class, str) then
+            if not blizzard_query.subclass then
+                blizzard_query.subclass = Aux.item_subclass_index(blizzard_query.class, str)
             else
                 return false, 'Erroneous Item Subclass Modifier'
             end
-        elseif filter.subclass and Aux.item_slot_index(filter.class, filter.subclass, str) then
-            if not filter.slot then
-                filter.slot = Aux.item_slot_index(filter.class, filter.subclass, str)
+        elseif blizzard_query.subclass and Aux.item_slot_index(blizzard_query.class, blizzard_query.subclass, str) then
+            if not blizzard_query.slot then
+                blizzard_query.slot = Aux.item_slot_index(blizzard_query.class, blizzard_query.subclass, str)
             else
                 return false, 'Erroneous Item Slot Modifier'
             end
         elseif Aux.item_quality_index(str) then
-            if not filter.quality then
-                filter.quality = Aux.item_quality_index(str)
+            if not blizzard_query.quality then
+                blizzard_query.quality = Aux.item_quality_index(str)
             else
                 return false, 'Erroneous Rarity Modifier'
             end
-        elseif strlower(str) == 'bid-profit' then
-            local amount = Aux.money.from_string(parts[i] or '')
-            if not filter.bid_profit and amount > 0 then
-                filter.bid_profit = amount
-            else
-                return false, 'Erroneous Bid Profit Modifier'
-            end
-            i = i + 1
-        elseif strlower(str) == 'buyout-profit' then
-            local amount = Aux.money.from_string(parts[i] or '')
-            if not filter.buyout_profit and amount > 0 then
-                filter.buyout_profit = amount
-            else
-                return false, 'Erroneous Buyout Profit Modifier'
-            end
-            i = i + 1
         elseif strlower(str) == 'usable' then
-            if not filter.usable then
-                filter.usable = true
+            if not blizzard_query.usable then
+                blizzard_query.usable = true
             else
                 return false, 'Erroneous Usable Only Modifier'
             end
         elseif strlower(str) == 'exact' then
-            if not filter.exact then
-                filter.exact = true
+            if not blizzard_query.exact then
+                blizzard_query.exact = true
             else
                 return false, 'Erroneous Exact Only Modifier'
             end
-        elseif strlower(str) == 'discard' then
-            if not filter.discard then
-                filter.discard = true
-            else
-                return false, 'Erroneous Discard Modifier'
-            end
-        elseif Aux.money.from_string(str) > 0 then
-            if not filter.max_price then
-                filter.max_price = Aux.money.from_string(str)
-            else
-                return false, 'Erroneous Max Price Modifier'
-            end
-        elseif strfind(str, '^%d+%%$') then
-            if not filter.max_percent then
-                filter.max_percent = tonumber(({strfind(str, '(%d+)%%')})[3])
-            else
-                return false, 'Erroneous Max Percent Modifier'
-            end
         elseif i == 2 then
-            filter.name = str
+            blizzard_query.name = str
+        elseif str ~= '' then
+            local pred, consumed = m.predicate(parts, i - 1)
+            if not pred then
+                return false, consumed
+            else
+                tinsert(validator, pred)
+                i = i + consumed - 1
+            end
         else
             return false, 'Unknown Modifier'
         end
     end
 
-    if tooltip_counter > 0 then
+    if tooltip_counter ~= 0 then
         return false, 'Erroneous Tooltip Modifier'
     end
 
-    if filter.exact then
-        if filter.min_level
-                or filter.max_level
-                or filter.class
-                or filter.subclass
-                or filter.slot
-                or filter.quality
-                or filter.usable
-                or not filter.name
-                or not Aux.static.item_id(strupper(filter.name))
+    if blizzard_query.exact then
+        if blizzard_query.min_level
+                or blizzard_query.max_level
+                or blizzard_query.class
+                or blizzard_query.subclass
+                or blizzard_query.slot
+                or blizzard_query.quality
+                or blizzard_query.usable
+                or not blizzard_query.name
+                or not Aux.static.item_id(strupper(blizzard_query.name))
         then
             return false, 'Erroneous Exact Only Modifier'
         end
     end
 
-    return filter
+    return { blizzard_query = m.blizzard_query(blizzard_query), validator = m.validator(blizzard_query, validator) }
 end
 
 function m.filter_to_string(filter)
@@ -299,40 +360,23 @@ function m.blizzard_query(filter)
     }
 end
 
-function m.validator(filter)
+function m.validator(blizzard_filter, validator)
 
     return function(record)
-        if filter.discard then
+        if blizzard_filter.exact and strupper(Aux.static.item_info(record.item_id).name) ~= strupper(blizzard_filter.name) then
             return
         end
-        if filter.exact and strupper(Aux.static.item_info(record.item_id).name) ~= strupper(filter.name) then
+        if blizzard_filter.min_level and record.level < blizzard_filter.min_level then
             return
         end
-        if filter.min_level and record.level < filter.min_level then
+        if blizzard_filter.max_level and record.level > blizzard_filter.max_level then
             return
         end
-        if filter.max_level and record.level > filter.max_level then
-            return
-        end
-        if filter.bid_profit and (not Aux.history.value(record.item_key) or Aux.history.value(record.item_key) * record.aux_quantity - record.bid_price < filter.bid_profit) then
-            return
-        end
-        if filter.buyout_profit and (not Aux.history.value(record.item_key) or Aux.history.value(record.item_key) * record.aux_quantity - record.buyout_price < filter.buyout_profit) then
-            return
-        end
-        if filter.max_price and record.buyout_price > filter.max_price then
-            return
-        end
-        if filter.max_percent and (record.unit_buyout_price == 0
-            or not Aux.history.value(record.item_key)
-            or record.unit_buyout_price / Aux.history.value(record.item_key) * 100 > filter.max_percent)
-        then
-            return
-        end
-        if filter.tooltip then
+        if getn(validator) > 0 then
             local stack = {}
-            for i=getn(filter.tooltip),1,-1 do
-                local op = strupper(filter.tooltip[i])
+            for i=getn(validator),1,-1 do
+                local op = validator[i]
+                local op = type(op) == 'string' and strupper(op) or op
                 if op == 'AND' then
                     local a, b = tremove(stack), tremove(stack)
                     tinsert(stack, a and b)
@@ -342,9 +386,7 @@ function m.validator(filter)
                 elseif op == 'NOT' then
                     tinsert(stack, not tremove(stack))
                 elseif op ~= 'TT' then
-                    tinsert(stack, Aux.util.any(record.tooltip, function(entry)
-                        return strfind(strupper(entry.left_text or ''), strupper(op), 1, true) or strfind(strupper(entry.right_text or ''), strupper(op), 1, true)
-                    end) and true or false)
+                    tinsert(stack, op(record) and true or false)
                 end
             end
             return Aux.util.all(stack, Aux.util.id)

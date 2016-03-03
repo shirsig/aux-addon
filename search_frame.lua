@@ -789,8 +789,8 @@ function public.start_search(filter_string)
         queries = Aux.util.map(filters, function(filter)
             return {
                 start_page = 0,
-                blizzard_query = Aux.scan_util.blizzard_query(filter),
-                validator = Aux.scan_util.validator(filter),
+                blizzard_query = filter.blizzard_query,
+                validator = filter.validator,
             }
         end)
     else
