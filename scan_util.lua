@@ -22,7 +22,7 @@ m.filters = {
             if str then
                 return m.default_filter(str).test()
             else
-                return false, 'Erroneous Tooltip Modifier'
+                return false, {}, 'Erroneous Tooltip Modifier'
             end
         end,
     },
@@ -30,13 +30,13 @@ m.filters = {
     ['item'] = {
         arity = 1,
         test = function(name)
-            local item_id = Aux.static.item_id(strupper(name))
+            local item_id = Aux.static.item_id(strupper(name or ''))
             if item_id then
                 return function(auction_record)
                     return auction_record.item_id == item_id
                 end
             else
-                return false, 'Erroneous Item Modifier'
+                return false, Aux.completion.sorted_item_names(), 'Erroneous Item Modifier'
             end
         end
     },
@@ -55,7 +55,7 @@ m.filters = {
                     return auction_record.duration == code
                 end
             else
-                return false, 'Erroneous Time Left Modifier'
+                return false, {'30m', '2h', '8h', '24h'}, 'Erroneous Time Left Modifier'
             end
         end
     },
@@ -75,7 +75,7 @@ m.filters = {
                     return auction_record.quality == code
                 end
             else
-                return false, 'Erroneous Time Left Modifier'
+                return false, {}, {'poor', 'common', 'uncommon', 'rare', 'epic'}, 'Erroneous Time Left Modifier'
             end
         end
     },
@@ -89,7 +89,7 @@ m.filters = {
                     return auction_record.level >= level
                 end
             else
-                return false, 'Erroneous Min Level Modifier'
+                return false, {}, 'Erroneous Min Level Modifier'
             end
         end
     },
@@ -103,7 +103,7 @@ m.filters = {
                     return auction_record.level <= level
                 end
             else
-                return false, 'Erroneous Max Level Modifier'
+                return false, {}, 'Erroneous Max Level Modifier'
             end
         end
     },
@@ -117,7 +117,7 @@ m.filters = {
                     return auction_record.bid_price <= amount
                 end
             else
-                return false, 'Erroneous Max Bid Modifier'
+                return false, {}, 'Erroneous Max Bid Modifier'
             end
         end
     },
@@ -131,7 +131,7 @@ m.filters = {
                     return auction_record.buyout_price > 0 and auction_record.buyout_price <= amount
                 end
             else
-                return false, 'Erroneous Max Buyout Modifier'
+                return false, {}, 'Erroneous Max Buyout Modifier'
             end
         end
     },
@@ -147,7 +147,7 @@ m.filters = {
                             and auction_record.unit_buyout_price / Aux.history.value(auction_record.item_key) * 100 <= pct
                 end
             else
-                return false, 'Erroneous Bid Percentage Modifier'
+                return false, {}, 'Erroneous Bid Percentage Modifier'
             end
         end
     },
@@ -163,7 +163,7 @@ m.filters = {
                             and auction_record.unit_buyout_price / Aux.history.value(auction_record.item_key) * 100 <= pct
                 end
             else
-                return false, 'Erroneous Buyout Percentage Modifier'
+                return false, {}, 'Erroneous Buyout Percentage Modifier'
             end
         end
     },
@@ -177,7 +177,7 @@ m.filters = {
                     return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
                 end
             else
-                return false, 'Erroneous Bid Profit Modifier'
+                return false, {}, 'Erroneous Bid Profit Modifier'
             end
         end
     },
@@ -191,7 +191,7 @@ m.filters = {
                     return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
                 end
             else
-                return false, 'Erroneous Buyout Profit Modifier'
+                return false, {}, 'Erroneous Buyout Profit Modifier'
             end
         end
     },
@@ -302,7 +302,7 @@ function m.parse_filter_string(filter_string)
     for _, str in ipairs(parts) do
         str = Aux.util.trim(str)
 
-        local filter, error = m.filter_from_string(str)
+        local filter, _, error = m.filter_from_string(str)
 
         if not filter then
             Aux.log('Invalid filter: '..error)
@@ -320,27 +320,27 @@ end
 function m.filter_from_string(filter_term)
     local parts = Aux.util.map(Aux.util.split(filter_term, '/'), function(part) return strlower(Aux.util.trim(part)) end)
 
-    local blizzard_query = {}
+    local blizzard_filter = {}
     local validator = {}
     local prettified = m.filter_builder()
-    local tooltip_counter = 0
+    local polish_notation_counter = 0
     local i = 1
 
     while i <= getn(parts) do
         local str = parts[i]
         i = i + 1
 
-        if tooltip_counter > 0 or str == 'and' or str == 'or' or str == 'not' then
-            tooltip_counter = tooltip_counter == 0 and tooltip_counter + 1 or tooltip_counter
+        if polish_notation_counter > 0 or str == 'and' or str == 'or' or str == 'not' then
+            polish_notation_counter = polish_notation_counter == 0 and polish_notation_counter + 1 or polish_notation_counter
             if str == 'and' or str == 'or' then
-                tooltip_counter = tooltip_counter + 1
+                polish_notation_counter = polish_notation_counter + 1
                 tinsert(validator, str)
                 prettified:append('|cffffff00'..str..'|r')
             elseif str == 'not' then
                 tinsert(validator, str)
                 prettified:append('|cffffff00'..str..'|r')
             elseif str ~= '' then
-                tooltip_counter = tooltip_counter - 1
+                polish_notation_counter = polish_notation_counter - 1
 
                 local filter = m.filters[str]
                 if filter then
@@ -360,66 +360,66 @@ function m.filter_from_string(filter_term)
                 end
                 i = i + filter.arity
 
-                local test, error = filter.test(unpack(args))
+                local test, suggestions, error = filter.test(unpack(args))
                 if test then
                     tinsert(validator, test)
                 else
-                    return false, error
+                    return false, i > getn(parts) and suggestions or {}, error
                 end
             end
         elseif tonumber(str) then
-            if not blizzard_query.min_level then
-                blizzard_query.min_level = tonumber(str)
+            if not blizzard_filter.min_level then
+                blizzard_filter.min_level = tonumber(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
-            elseif not blizzard_query.max_level and tonumber(str) >= blizzard_query.min_level then
-                blizzard_query.max_level = tonumber(str)
+            elseif not blizzard_filter.max_level and tonumber(str) >= blizzard_filter.min_level then
+                blizzard_filter.max_level = tonumber(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, 'Erroneous Level Range Modifier'
+                return false, {}, 'Erroneous Level Range Modifier'
             end
-        elseif Aux.item_class_index(str) and not (blizzard_query.class and not blizzard_query.subclass and str == 'MISCELLANEOUS')then
-            if not blizzard_query.class then
-                blizzard_query.class = Aux.item_class_index(str)
+        elseif Aux.item_class_index(str) and not (blizzard_filter.class and not blizzard_filter.subclass and str == 'MISCELLANEOUS')then
+            if not blizzard_filter.class then
+                blizzard_filter.class = Aux.item_class_index(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, 'Erroneous Item Class Modifier'
+                return false, {}, 'Erroneous Item Class Modifier'
             end
-        elseif blizzard_query.class and Aux.item_subclass_index(blizzard_query.class, str) then
-            if not blizzard_query.subclass then
-                blizzard_query.subclass = Aux.item_subclass_index(blizzard_query.class, str)
+        elseif blizzard_filter.class and Aux.item_subclass_index(blizzard_filter.class, str) then
+            if not blizzard_filter.subclass then
+                blizzard_filter.subclass = Aux.item_subclass_index(blizzard_filter.class, str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, 'Erroneous Item Subclass Modifier'
+                return false, {}, 'Erroneous Item Subclass Modifier'
             end
-        elseif blizzard_query.subclass and Aux.item_slot_index(blizzard_query.class, blizzard_query.subclass, str) then
-            if not blizzard_query.slot then
-                blizzard_query.slot = Aux.item_slot_index(blizzard_query.class, blizzard_query.subclass, str)
+        elseif blizzard_filter.subclass and Aux.item_slot_index(blizzard_filter.class, blizzard_filter.subclass, str) then
+            if not blizzard_filter.slot then
+                blizzard_filter.slot = Aux.item_slot_index(blizzard_filter.class, blizzard_filter.subclass, str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, 'Erroneous Item Slot Modifier'
+                return false, {}, 'Erroneous Item Slot Modifier'
             end
         elseif Aux.item_quality_index(str) then
-            if not blizzard_query.quality then
-                blizzard_query.quality = Aux.item_quality_index(str)
+            if not blizzard_filter.quality then
+                blizzard_filter.quality = Aux.item_quality_index(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, 'Erroneous Rarity Modifier'
+                return false, {}, 'Erroneous Rarity Modifier'
             end
         elseif str == 'usable' then
-            if not blizzard_query.usable then
-                blizzard_query.usable = true
+            if not blizzard_filter.usable then
+                blizzard_filter.usable = true
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, 'Erroneous Usable Only Modifier'
+                return false, {}, 'Erroneous Usable Only Modifier'
             end
         elseif str == 'exact' then
-            if not blizzard_query.exact then
-                blizzard_query.exact = true
+            if not blizzard_filter.exact then
+                blizzard_filter.exact = true
             else
-                return false, 'Erroneous Exact Only Modifier'
+                return false, {}, 'Erroneous Exact Only Modifier'
             end
         elseif i == 2 and not m.filters[str] then
-            blizzard_query.name = str
+            blizzard_filter.name = str
         elseif str ~= '' then
             local filter = m.filters[str]
             if filter then
@@ -439,49 +439,120 @@ function m.filter_from_string(filter_term)
             end
             i = i + filter.arity
 
-            local test, error = filter.test(unpack(args))
+            local test, suggestions, error = filter.test(unpack(args))
             if test then
                 tinsert(validator, test)
             else
-                return false, error
+                return false, i > getn(parts) and suggestions or {}, error
             end
         else
-            return false, 'Empty Modifier'
+            return false, {}, 'Empty Modifier'
         end
     end
 
-    if tooltip_counter ~= 0 then
-        return false, 'Erroneous Tooltip Modifier'
+    if polish_notation_counter ~= 0 then
+        local suggestions = {}
+        for filter, _ in pairs(m.filters) do
+            tinsert(suggestions, strlower(filter))
+        end
+        return false, i > getn(parts) and suggestions, 'Malformed Expression'
     end
 
-    if blizzard_query.exact then
-        if blizzard_query.min_level
-                or blizzard_query.max_level
-                or blizzard_query.class
-                or blizzard_query.subclass
-                or blizzard_query.slot
-                or blizzard_query.quality
-                or blizzard_query.usable
-                or not blizzard_query.name
-                or not Aux.static.item_id(strupper(blizzard_query.name))
+    if blizzard_filter.exact then
+        if blizzard_filter.min_level
+                or blizzard_filter.max_level
+                or blizzard_filter.class
+                or blizzard_filter.subclass
+                or blizzard_filter.slot
+                or blizzard_filter.quality
+                or blizzard_filter.usable
+                or not blizzard_filter.name
+                or not Aux.static.item_id(strupper(blizzard_filter.name))
         then
-            return false, 'Erroneous Exact Only Modifier'
+            return false, {}, 'Erroneous Exact Only Modifier'
         else
-            prettified:prepend(m.display_name(Aux.static.item_id(strupper(blizzard_query.name))))
+            prettified:prepend(m.display_name(Aux.static.item_id(strupper(blizzard_filter.name))))
         end
-    elseif blizzard_query.name then
-        if blizzard_query.name == '' then
+    elseif blizzard_filter.name then
+        if blizzard_filter.name == '' then
             prettified:prepend('|cffff0000'..'No Filter'..'|r')
         else
-            prettified:prepend('|cff2992ff'..blizzard_query.name..'|r')
+            prettified:prepend('|cff2992ff'.. blizzard_filter.name..'|r')
         end
     end
 
     return {
-        blizzard_query = m.blizzard_query(blizzard_query),
-        validator = m.validator(blizzard_query, validator),
+        blizzard_query = m.blizzard_query(blizzard_filter),
+        validator = m.validator(blizzard_filter, validator),
         prettified = prettified:get(),
-    }
+    }, m.suggestions(blizzard_filter, getn(parts))
+end
+
+function m.suggestions(blizzard_filter, num_parts)
+
+    local suggestions = {}
+
+    if blizzard_filter.name
+            and Aux.static.item_id(strupper(blizzard_filter.name))
+            and not blizzard_filter.min_level
+            and not blizzard_filter.max_level
+            and not blizzard_filter.class
+            and not blizzard_filter.subclass
+            and not blizzard_filter.slot
+            and not blizzard_filter.quality
+            and not blizzard_filter.usable
+    then
+        tinsert(suggestions, 'exact')
+    elseif num_parts == 1 then
+    -- item names
+        for _, name in ipairs(Aux.completion.sorted_item_names()) do
+            tinsert(suggestions, name..'/exact')
+        end
+    end
+
+    tinsert(suggestions, 'and')
+    tinsert(suggestions, 'or')
+    tinsert(suggestions, 'not')
+    tinsert(suggestions, 'tt')
+
+    for filter, _ in pairs(m.filters) do
+        tinsert(suggestions, strlower(filter))
+    end
+
+    -- classes
+    if not blizzard_filter.class then
+        for _, class in ipairs({ GetAuctionItemClasses() }) do
+            tinsert(suggestions, class)
+        end
+    end
+
+    -- subclasses
+    if blizzard_filter.class and not blizzard_filter.subclass then
+        for _, subclass in ipairs({ GetAuctionItemSubClasses(blizzard_filter.class) }) do
+            tinsert(suggestions, subclass)
+        end
+    end
+
+    -- slots
+    if blizzard_filter.class and blizzard_filter.subclass and not blizzard_filter.slot then
+        for _, invtype in ipairs({ GetAuctionInvTypes(blizzard_filter.class, blizzard_filter.subclass) }) do
+            tinsert(suggestions, getglobal(invtype))
+        end
+    end
+
+    -- usable
+    if not blizzard_filter.usable then
+        tinsert(suggestions, 'usable')
+    end
+
+    -- rarities
+    if not blizzard_filter.quality then
+        for i=0,4 do
+            tinsert(suggestions, getglobal('ITEM_QUALITY'..i..'_DESC'))
+        end
+    end
+
+    return suggestions
 end
 
 function m.filter_to_string(filter)

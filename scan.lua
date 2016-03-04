@@ -216,15 +216,15 @@ function private.submit_query(k)
                 GetOwnerAuctionItems(private.current_thread().page)
             else
                 QueryAuctionItems(
-                    Aux.util.safe_index{private.current_query(), 'blizzard_query', 'name'},
-                    Aux.util.safe_index{private.current_query(), 'blizzard_query', 'min_level'},
-                    Aux.util.safe_index{private.current_query(), 'blizzard_query', 'max_level'},
-                    Aux.util.safe_index{private.current_query(), 'blizzard_query', 'slot'},
-                    Aux.util.safe_index{private.current_query(), 'blizzard_query', 'class'},
-                    Aux.util.safe_index{private.current_query(), 'blizzard_query', 'subclass'},
+                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'name'),
+                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'min_level'),
+                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'max_level'),
+                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'slot'),
+                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'class'),
+                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'subclass'),
                     private.current_thread().page,
-                    Aux.util.safe_index{private.current_query(), 'blizzard_query', 'usable'},
-                    Aux.util.safe_index{private.current_query(), 'blizzard_query', 'quality'}
+                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'usable'),
+                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'quality')
                 )
             end
             private.wait_for_results(function()

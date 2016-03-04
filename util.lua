@@ -51,17 +51,17 @@ function Aux.util.inventory_iterator()
     end
 end
 
-function Aux.util.safe_index(chain)
-    local target = chain[1]
+function public.safe_index(...)
+	local target = arg[1]
 
-    for i=2,getn(chain) do
-        if not target then
-            return
-        end
-        target = target[chain[i]]
-    end
+	for i=2,arg.n do
+		if not target then
+			return
+		end
+		target = target[arg[i]]
+	end
 
-    return target
+	return target
 end
 
 function Aux_PluralizeIf(word, count)
@@ -69,7 +69,7 @@ function Aux_PluralizeIf(word, count)
     if count and count == 1 then
         return word
     else
-        return word.."s"
+        return word..'s'
     end
 end
 
