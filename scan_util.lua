@@ -1,7 +1,31 @@
 local m = {}
 Aux.scan_util = m
 
+function m.default_filter(str)
+    return {
+        arity = 0,
+        test = function()
+            return function(auction_record)
+                return Aux.util.any(auction_record.tooltip, function(entry)
+                    return strfind(strupper(entry.left_text or ''), strupper(str or ''), 1, true) or strfind(strupper(entry.right_text or ''), strupper(str or ''), 1, true)
+                end)
+            end
+        end,
+    }
+end
+
 m.filters = {
+
+    ['tt'] = {
+        arity = 1,
+        test = function(str)
+            if str then
+                return m.default_filter(str).test()
+            else
+                return false, 'Erroneous Tooltip Modifier'
+            end
+        end,
+    },
 
     ['item'] = {
         arity = 1,
@@ -180,19 +204,6 @@ m.filters = {
     },
 }
 
-function m.default_filter(str)
-    return {
-        arity = 0,
-        test = function()
-            return function(auction_record)
-                return Aux.util.any(auction_record.tooltip, function(entry)
-                    return strfind(strupper(entry.left_text or ''), strupper(str or ''), 1, true) or strfind(strupper(entry.right_text or ''), strupper(str or ''), 1, true)
-                end)
-            end
-        end,
-    }
-end
-
 function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
     local function test(index)
@@ -319,13 +330,13 @@ function m.filter_from_string(filter_term)
         local str = parts[i]
         i = i + 1
 
-        if tooltip_counter > 0 or str == 'and' or str == 'or' or str == 'not' or str == 'tt' then
+        if tooltip_counter > 0 or str == 'and' or str == 'or' or str == 'not' then
             tooltip_counter = tooltip_counter == 0 and tooltip_counter + 1 or tooltip_counter
             if str == 'and' or str == 'or' then
                 tooltip_counter = tooltip_counter + 1
                 tinsert(validator, str)
                 prettified:append('|cffffff00'..str..'|r')
-            elseif str == 'not' or str == 'tt' then
+            elseif str == 'not' then
                 tinsert(validator, str)
                 prettified:append('|cffffff00'..str..'|r')
             elseif str ~= '' then
@@ -578,7 +589,7 @@ function m.validator(blizzard_filter, validator)
                     tinsert(stack, a or b)
                 elseif op == 'not' then
                     tinsert(stack, not tremove(stack))
-                elseif op ~= 'tt' then
+                else
                     tinsert(stack, op(record) and true or false)
                 end
             end
