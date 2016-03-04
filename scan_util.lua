@@ -3,14 +3,28 @@ Aux.scan_util = m
 
 m.filters = {
 
-    ['LEFT'] = {
+    ['item'] = {
+        arity = 1,
+        test = function(name)
+            local item_id = Aux.static.item_id(strupper(name))
+            if item_id then
+                return function(auction_record)
+                    return auction_record.item_id == item_id
+                end
+            else
+                return false, 'Erroneous Item Modifier'
+            end
+        end
+    },
+
+    ['left'] = {
         arity = 1,
         test = function(duration)
             local code = ({
-                ['30M'] = 1,
-                ['2H'] = 2,
-                ['8H'] = 3,
-                ['24H'] = 4
+                ['30m'] = 1,
+                ['2h'] = 2,
+                ['8h'] = 3,
+                ['24h'] = 4,
             })[duration or '']
             if code then
                 return function(auction_record)
@@ -22,7 +36,27 @@ m.filters = {
         end
     },
 
-    ['MIN-LVL'] = {
+    ['rarity'] = {
+        arity = 1,
+        test = function(duration)
+            local code = ({
+                ['poor'] = 1,
+                ['common'] = 2,
+                ['uncommon'] = 3,
+                ['rare'] = 4,
+                ['epic'] = 5,
+            })[duration or '']
+            if code then
+                return function(auction_record)
+                    return auction_record.quality == code
+                end
+            else
+                return false, 'Erroneous Time Left Modifier'
+            end
+        end
+    },
+
+    ['min-lvl'] = {
         arity = 1,
         test = function(level)
             level = tonumber(level or '')
@@ -36,7 +70,7 @@ m.filters = {
         end
     },
 
-    ['MAX-LVL'] = {
+    ['max-lvl'] = {
         arity = 1,
         test = function(level)
             level = tonumber(level or '')
@@ -50,7 +84,7 @@ m.filters = {
         end
     },
 
-    ['MAX-BID'] = {
+    ['max-bid'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '')
@@ -64,7 +98,7 @@ m.filters = {
         end
     },
 
-    ['MAX-BUYOUT'] = {
+    ['max-buyout'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '')
@@ -78,7 +112,7 @@ m.filters = {
         end
     },
 
-    ['BID-PCT'] = {
+    ['bid-pct'] = {
         arity = 1,
         test = function(pct)
             pct = tonumber(pct)
@@ -94,7 +128,7 @@ m.filters = {
         end
     },
 
-    ['BUYOUT-PCT'] = {
+    ['buyout-pct'] = {
         arity = 1,
         test = function(pct)
             pct = tonumber(pct)
@@ -110,7 +144,7 @@ m.filters = {
         end
     },
 
-    ['BID-PROFIT'] = {
+    ['bid-profit'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '')
@@ -124,7 +158,7 @@ m.filters = {
         end
     },
 
-    ['BUYOUT-PROFIT'] = {
+    ['buyout-profit'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '')
@@ -138,7 +172,7 @@ m.filters = {
         end
     },
 
-    ['DISCARD'] = {
+    ['discard'] = {
         arity = 0,
         test = function()
             return false
@@ -214,6 +248,28 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
     }
 end
 
+function m.display_name(item_id)
+    local item_info = Aux.static.item_info(item_id)
+    return '|c'..Aux.quality_color(item_info.quality)..'['..item_info.name..']'..'|r'
+end
+
+function m.filter_builder()
+    local filter = ''
+    return {
+        append = function(self, modifier)
+            modifier = strlower(modifier)
+            filter = filter == '' and modifier or filter..'/'..modifier
+        end,
+        prepend = function(self, modifier)
+            modifier = strlower(modifier)
+            filter = filter == '' and modifier or modifier..'/'..filter
+        end,
+        get = function(self)
+            return filter
+        end
+    }
+end
+
 function m.create_item_query(item_id)
 
     local item_info = Aux.static.item_info(item_id)
@@ -251,31 +307,45 @@ function m.parse_filter_string(filter_string)
 end
 
 function m.filter_from_string(filter_term)
-    local parts = Aux.util.map(Aux.util.split(filter_term, '/'), function(part) return strupper(Aux.util.trim(part)) end)
+    local parts = Aux.util.map(Aux.util.split(filter_term, '/'), function(part) return strlower(Aux.util.trim(part)) end)
 
     local blizzard_query = {}
     local validator = {}
+    local prettified = m.filter_builder()
     local tooltip_counter = 0
     local i = 1
+
     while i <= getn(parts) do
         local str = parts[i]
         i = i + 1
 
-        if tooltip_counter > 0 or str == 'AND' or str == 'OR' or str == 'NOT' or str == 'TT' then
+        if tooltip_counter > 0 or str == 'and' or str == 'or' or str == 'not' or str == 'tt' then
             tooltip_counter = tooltip_counter == 0 and tooltip_counter + 1 or tooltip_counter
-            if str == 'AND' or str == 'OR' then
+            if str == 'and' or str == 'or' then
                 tooltip_counter = tooltip_counter + 1
                 tinsert(validator, str)
-            elseif str == 'NOT' or str == 'TT' then
+                prettified:append('|cffffff00'..str..'|r')
+            elseif str == 'not' or str == 'tt' then
                 tinsert(validator, str)
+                prettified:append('|cffffff00'..str..'|r')
             elseif str ~= '' then
                 tooltip_counter = tooltip_counter - 1
 
-                local filter = m.filters[str] or m.default_filter(str)
+                local filter = m.filters[str]
+                if filter then
+                    prettified:append('|cffffff00'..str..'|r')
+                else
+                    filter = filter or m.default_filter(str)
+                    prettified:append(str)
+                end
 
                 local args = {}
                 for j=1, filter.arity do
-                    tinsert(args, parts[i - 1 + j])
+                    local arg = parts[i - 1 + j]
+                    if arg then
+                        tinsert(args, arg)
+                        prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..arg..'|r')
+                    end
                 end
                 i = i + filter.arity
 
@@ -289,42 +359,49 @@ function m.filter_from_string(filter_term)
         elseif tonumber(str) then
             if not blizzard_query.min_level then
                 blizzard_query.min_level = tonumber(str)
+                prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             elseif not blizzard_query.max_level and tonumber(str) >= blizzard_query.min_level then
                 blizzard_query.max_level = tonumber(str)
+                prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, 'Erroneous Level Range Modifier'
             end
         elseif Aux.item_class_index(str) and not (blizzard_query.class and not blizzard_query.subclass and str == 'MISCELLANEOUS')then
             if not blizzard_query.class then
                 blizzard_query.class = Aux.item_class_index(str)
+                prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, 'Erroneous Item Class Modifier'
             end
         elseif blizzard_query.class and Aux.item_subclass_index(blizzard_query.class, str) then
             if not blizzard_query.subclass then
                 blizzard_query.subclass = Aux.item_subclass_index(blizzard_query.class, str)
+                prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, 'Erroneous Item Subclass Modifier'
             end
         elseif blizzard_query.subclass and Aux.item_slot_index(blizzard_query.class, blizzard_query.subclass, str) then
             if not blizzard_query.slot then
                 blizzard_query.slot = Aux.item_slot_index(blizzard_query.class, blizzard_query.subclass, str)
+                prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, 'Erroneous Item Slot Modifier'
             end
         elseif Aux.item_quality_index(str) then
             if not blizzard_query.quality then
                 blizzard_query.quality = Aux.item_quality_index(str)
+                prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, 'Erroneous Rarity Modifier'
             end
-        elseif str == 'USABLE' then
+        elseif str == 'usable' then
             if not blizzard_query.usable then
                 blizzard_query.usable = true
+                prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, 'Erroneous Usable Only Modifier'
             end
-        elseif str == 'EXACT' then
+        elseif str == 'exact' then
             if not blizzard_query.exact then
                 blizzard_query.exact = true
             else
@@ -333,11 +410,21 @@ function m.filter_from_string(filter_term)
         elseif i == 2 and not m.filters[str] then
             blizzard_query.name = str
         elseif str ~= '' then
-            local filter = m.filters[str] or m.default_filter(str)
+            local filter = m.filters[str]
+            if filter then
+                prettified:append('|cffffff00'..str..'|r')
+            else
+                filter = filter or m.default_filter(str)
+                prettified:append(str)
+            end
 
             local args = {}
             for j=1, filter.arity do
-                tinsert(args, parts[i - 1 + j])
+                local arg = parts[i - 1 + j]
+                if arg then
+                    tinsert(args, arg)
+                    prettified:append(arg)
+                end
             end
             i = i + filter.arity
 
@@ -368,10 +455,22 @@ function m.filter_from_string(filter_term)
                 or not Aux.static.item_id(strupper(blizzard_query.name))
         then
             return false, 'Erroneous Exact Only Modifier'
+        else
+            prettified:prepend(m.display_name(Aux.static.item_id(strupper(blizzard_query.name))))
+        end
+    elseif blizzard_query.name then
+        if blizzard_query.name == '' then
+            prettified:prepend('|cffff0000'..'No Filter'..'|r')
+        else
+            prettified:prepend('|cff2992ff'..blizzard_query.name..'|r')
         end
     end
 
-    return { blizzard_query = m.blizzard_query(blizzard_query), validator = m.validator(blizzard_query, validator) }
+    return {
+        blizzard_query = m.blizzard_query(blizzard_query),
+        validator = m.validator(blizzard_query, validator),
+        prettified = prettified:get(),
+    }
 end
 
 function m.filter_to_string(filter)
@@ -458,7 +557,7 @@ end
 function m.validator(blizzard_filter, validator)
 
     return function(record)
-        if blizzard_filter.exact and strupper(Aux.static.item_info(record.item_id).name) ~= strupper(blizzard_filter.name) then
+        if blizzard_filter.exact and strlower(Aux.static.item_info(record.item_id).name) ~= blizzard_filter.name then
             return
         end
         if blizzard_filter.min_level and record.level < blizzard_filter.min_level then
@@ -471,16 +570,15 @@ function m.validator(blizzard_filter, validator)
             local stack = {}
             for i=getn(validator),1,-1 do
                 local op = validator[i]
-                local op = type(op) == 'string' and strupper(op) or op
-                if op == 'AND' then
+                if op == 'and' then
                     local a, b = tremove(stack), tremove(stack)
                     tinsert(stack, a and b)
-                elseif op == 'OR' then
+                elseif op == 'or' then
                     local a, b = tremove(stack), tremove(stack)
                     tinsert(stack, a or b)
-                elseif op == 'NOT' then
+                elseif op == 'not' then
                     tinsert(stack, not tremove(stack))
-                elseif op ~= 'TT' then
+                elseif op ~= 'tt' then
                     tinsert(stack, op(record) and true or false)
                 end
             end

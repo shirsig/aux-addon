@@ -159,29 +159,6 @@ function private.get_form_filter()
     }
 end
 
-function private.prettify_search(search)
-    if search == '' then
-        return NORMAL_FONT_COLOR_CODE..'No filter'..FONT_COLOR_CODE_CLOSE
-    end
-
-    local default_color = Aux.gui.inline_color({216, 225, 211, 1})
-
-    local item_pattern = '([^/;]+)([^;]*)/exact'
-    while true do
-        local _, _, name, in_between = strfind(search, item_pattern)
-        if name then
-            search = gsub(search, item_pattern, private.display_name(Aux.static.item_id(strupper(name)))..default_color..in_between, 1)
-        else
-            return default_color..search..'|r'
-        end
-    end
-end
-
-function private.display_name(item_id)
-    local item_info = Aux.static.item_info(item_id)
-    return '|c'..Aux.quality_color(item_info.quality)..'['..item_info.name..']'..'|r'
-end
-
 function public.on_open()
     private.update_search_listings()
 end
@@ -787,19 +764,22 @@ function public.start_search(filter_string)
     local queries
 
     local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
-    if filters then
-        queries = Aux.util.map(filters, function(filter)
-            return {
-                start_page = 0,
-                blizzard_query = filter.blizzard_query,
-                validator = filter.validator,
-            }
-        end)
-    else
+    if not filters then
         return
     end
 
-    tinsert(aux_recent_searches, 1, { filter_string = private.search_box:GetText(), prettified = private.prettify_search(private.search_box:GetText()) })
+    local queries = Aux.util.map(filters, function(filter)
+        return {
+            start_page = 0,
+            blizzard_query = filter.blizzard_query,
+            validator = filter.validator,
+        }
+    end)
+
+    tinsert(aux_recent_searches, 1, {
+        filter_string = private.search_box:GetText(),
+        prettified = Aux.util.join(Aux.util.map(filters, function(filter) return filter.prettified end), ';'),
+    })
     while getn(aux_recent_searches) > 50 do
         tremove(aux_recent_searches)
     end
