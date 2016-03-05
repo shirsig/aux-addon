@@ -354,6 +354,33 @@ function m.filter_from_string(filter_term)
     local polish_notation_counter = 0
     local i = 1
 
+    local function non_blizzard_modifier(str)
+        local filter = m.filters[str]
+        if filter then
+            prettified:append('|cffffff00'..str..'|r')
+        else
+            filter = filter or m.default_filter(str)
+            prettified:append(str)
+        end
+
+        local args = {}
+        for j=1, filter.arity do
+            local arg = parts[i - 1 + j]
+            if arg then
+                tinsert(args, arg)
+                prettified:append(arg)
+            end
+        end
+        i = i + filter.arity
+
+        local test, suggestions, error = filter.test(unpack(args))
+        if test then
+            tinsert(validator, test)
+        else
+            return error, i > getn(parts) and suggestions or {}
+        end
+    end
+
     while i <= getn(parts) do
         local str = parts[i]
         i = i + 1
@@ -369,30 +396,9 @@ function m.filter_from_string(filter_term)
                 prettified:append('|cffffff00'..str..'|r')
             elseif str ~= '' then
                 polish_notation_counter = polish_notation_counter - 1
-
-                local filter = m.filters[str]
-                if filter then
-                    prettified:append('|cffffff00'..str..'|r')
-                else
-                    filter = filter or m.default_filter(str)
-                    prettified:append(str)
-                end
-
-                local args = {}
-                for j=1, filter.arity do
-                    local arg = parts[i - 1 + j]
-                    if arg then
-                        tinsert(args, arg)
-                        prettified:append(arg)
-                    end
-                end
-                i = i + filter.arity
-
-                local test, suggestions, error = filter.test(unpack(args))
-                if test then
-                    tinsert(validator, test)
-                else
-                    return false, i > getn(parts) and suggestions or {}, error
+                local error, suggestions = non_blizzard_modifier(str)
+                if error then
+                    return false, suggestions, error
                 end
             end
         elseif tonumber(str) then
@@ -449,29 +455,9 @@ function m.filter_from_string(filter_term)
         elseif i == 2 and not m.filters[str] then
             blizzard_filter.name = str
         elseif str ~= '' then
-            local filter = m.filters[str]
-            if filter then
-                prettified:append('|cffffff00'..str..'|r')
-            else
-                filter = filter or m.default_filter(str)
-                prettified:append(str)
-            end
-
-            local args = {}
-            for j=1, filter.arity do
-                local arg = parts[i - 1 + j]
-                if arg then
-                    tinsert(args, arg)
-                    prettified:append(arg)
-                end
-            end
-            i = i + filter.arity
-
-            local test, suggestions, error = filter.test(unpack(args))
-            if test then
-                tinsert(validator, test)
-            else
-                return false, i > getn(parts) and suggestions or {}, error
+            local error, suggestions = non_blizzard_modifier(str)
+            if error then
+                return false, suggestions, error
             end
         else
             return false, {}, 'Empty Modifier'
