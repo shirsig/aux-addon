@@ -307,8 +307,8 @@ function private.item_charges(tooltip)
     end
 
 	for _, line in ipairs(tooltip) do
-        local pattern1 = '^'..gsub(ITEM_SPELL_CHARGES, '%%d', '(%%d)')..'$'
-        local pattern2 = '^'..gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d)')..'$'
+        local pattern1 = '^'..gsub(ITEM_SPELL_CHARGES, '%%d', '(%%d+)')..'$'
+        local pattern2 = '^'..gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)')..'$'
 
         local _, _, left_charges_string1 = strfind(line.left_text or '', pattern1)
         local _, _, left_charges_string2 = strfind(line.left_text or '', pattern2)
@@ -325,7 +325,7 @@ end
 
 function public.durability(tooltip)
     for _, line in ipairs(tooltip) do
-        local pattern = '^Durability (%d+) / (%d+)$'
+        local pattern = '^'..gsub(DURABILITY_TEMPLATE, '%%d', '(%%d+)')..'$'
         local _, _, left_durability_string, left_max_durability_string = strfind(line.left_text or '', pattern)
         local _, _, right_durability_string, right_max_durability_string = strfind(line.right_text or '', pattern)
         local durability = tonumber(left_durability_string) or tonumber(right_durability_string)
