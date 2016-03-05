@@ -89,16 +89,21 @@ function public.set_filter(filter_string)
     private.search_box:SetText(filter_string)
 end
 
-function private.add_filter(filter_string)
+function private.add_filter(filter_string, replace)
     filter_string = filter_string or Aux.scan_util.filter_to_string(private.get_form_filter())
-    local old_filter_string = private.search_box:GetText()
-    old_filter_string = Aux.util.trim(old_filter_string)
 
-    if strlen(old_filter_string) > 0 then
-        old_filter_string = old_filter_string..';'
+
+    local old_filter_string
+    if not replace then
+        old_filter_string = private.search_box:GetText()
+        old_filter_string = Aux.util.trim(old_filter_string)
+
+        if strlen(old_filter_string) > 0 then
+            old_filter_string = old_filter_string..';'
+        end
     end
 
-    private.search_box:SetText(old_filter_string..filter_string)
+    private.search_box:SetText((old_filter_string or '')..filter_string)
 end
 
 function private.clear_filter()
@@ -124,23 +129,6 @@ end
 
 function private.get_form_filter()
     local exact = AuxSearchFrameFilterExactCheckButton:GetChecked()
-    local max_price = Aux.money.from_string(private.max_buyout_price:GetText())
-    local tooltip = Aux.util.filter({
-        private.tooltip1:GetText(),
-        private.tooltip2:GetText(),
-        private.tooltip3:GetText(),
-        private.tooltip4:GetText(),
-        private.tooltip5:GetText(),
-        private.tooltip6:GetText(),
-    }, function(entry) return entry ~= '' end)
-
-    if getn(tooltip) == 1 then
-        tinsert(tooltip, 1, 'tt')
-    else
-        for i=1,getn(tooltip)-1 do
-            tinsert(tooltip, 1, 'and')
-        end
-    end
 
     return {
         name = AuxSearchFrameFilterNameInputBox:GetText(),
@@ -152,10 +140,6 @@ function private.get_form_filter()
         slot = not exact and UIDropDownMenu_GetSelectedValue(private.slot_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.slot_dropdown),
         quality = not exact and UIDropDownMenu_GetSelectedValue(private.quality_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.quality_dropdown),
         usable = not exact and AuxSearchFrameFilterUsableCheckButton:GetChecked(),
-        discard = AuxSearchFrameFilterDiscardCheckButton:GetChecked(),
-        max_price = max_price > 0 and max_price,
-        max_percent = tonumber(private.max_percent:GetText()),
-        tooltip = getn(tooltip) > 0 and tooltip,
     }
 end
 
@@ -305,9 +289,9 @@ function public.on_load()
         btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
         btn3:SetWidth(80)
         btn3:SetHeight(24)
-        btn3:SetText('Clear')
+        btn3:SetText('Replace')
         btn3:SetScript('OnClick', function()
-            private.clear_filter()
+            private.add_filter(nil, true)
         end)
     end
     do
@@ -341,60 +325,60 @@ function public.on_load()
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
         label:SetText('Name')
     end
-do
-    local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentMinLevel')
-    editbox:SetPoint('TOPLEFT', AuxSearchFrameFilterNameInputBox, 'BOTTOMLEFT', 0, -22)
-    editbox:SetWidth(145)
-    editbox:SetNumeric(true)
-    editbox:SetMaxLetters(2)
-    editbox:SetScript('OnTabPressed', function()
-        if IsShiftKeyDown() then
-            getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
-        else
-            getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
-        end
-    end)
-    editbox:SetScript('OnEnterPressed', function()
-        this:ClearFocus()
-        public.start_search()
-    end)
-    editbox:SetScript('OnEscapePressed', function()
-        this:ClearFocus()
-    end)
-    editbox:SetScript('OnEditFocusGained', function()
-        this:HighlightText()
-    end)
-    local label = Aux.gui.label(editbox, 13)
-    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-    label:SetText('Level Range')
-end
-do
-    local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentMaxLevel')
-    editbox:SetPoint('TOPLEFT', AuxSearchFrameFilterMinLevel, 'TOPRIGHT', 10, 0)
-    editbox:SetWidth(145)
-    editbox:SetNumeric(true)
-    editbox:SetMaxLetters(2)
-    editbox:SetScript('OnTabPressed', function()
-        if IsShiftKeyDown() then
-            getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
-        else
-            private.max_buyout_price:SetFocus()
-        end
-    end)
-    editbox:SetScript('OnEnterPressed', function()
-        this:ClearFocus()
-        public.start_search()
-    end)
-    editbox:SetScript('OnEscapePressed', function()
-        this:ClearFocus()
-    end)
-    editbox:SetScript('OnEditFocusGained', function()
-        this:HighlightText()
-    end)
-    local label = Aux.gui.label(editbox, 13)
-    label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
-    label:SetText('-')
-end
+    do
+        local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentMinLevel')
+        editbox:SetPoint('TOPLEFT', AuxSearchFrameFilterNameInputBox, 'BOTTOMLEFT', 0, -22)
+        editbox:SetWidth(145)
+        editbox:SetNumeric(true)
+        editbox:SetMaxLetters(2)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+            else
+                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
+        end)
+        local label = Aux.gui.label(editbox, 13)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+        label:SetText('Level Range')
+    end
+    do
+        local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentMaxLevel')
+        editbox:SetPoint('TOPLEFT', AuxSearchFrameFilterMinLevel, 'TOPRIGHT', 10, 0)
+        editbox:SetWidth(145)
+        editbox:SetNumeric(true)
+        editbox:SetMaxLetters(2)
+        editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
+            else
+                private.max_buyout_price:SetFocus()
+            end
+        end)
+        editbox:SetScript('OnEnterPressed', function()
+            this:ClearFocus()
+            public.start_search()
+        end)
+        editbox:SetScript('OnEscapePressed', function()
+            this:ClearFocus()
+        end)
+        editbox:SetScript('OnEditFocusGained', function()
+            this:HighlightText()
+        end)
+        local label = Aux.gui.label(editbox, 13)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
+        label:SetText('-')
+    end
     do
         local dropdown = Aux.gui.dropdown(AuxSearchFrameFilter)
         dropdown:SetPoint('TOPLEFT', AuxSearchFrameFilterMinLevel, 'BOTTOMLEFT', 0, -22)
@@ -468,201 +452,225 @@ end
         label:SetText('Usable')
     end
     Aux.gui.vertical_line(AuxSearchFrameFilter, 425)
-    do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-        editbox:SetPoint('TOPRIGHT', -14, -20)
-        editbox:SetWidth(300)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
-            else
-                private.max_percent:SetFocus()
+    local function add_modifier(...)
+        local current_filter_string = private.search_box:GetText()
+        for i=1,arg.n do
+            if string.sub(current_filter_string, strlen(current_filter_string), strlen(current_filter_string)) ~= '/' then
+                current_filter_string = current_filter_string..'/'
             end
+            current_filter_string = current_filter_string..arg[i]
+        end
+        private.search_box:SetText(current_filter_string)
+    end
+    private.modifier_buttons = {}
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPRIGHT', -250, -10)
+        btn:SetWidth(50)
+        btn:SetHeight(24)
+        btn:SetText('and')
+        btn:SetScript('OnClick', function()
+            add_modifier('and')
         end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-        end)
-        editbox:SetScript('OnEditFocusLost', function()
-            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText())))
-        end)
-        local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Max Buyout Price')
-        private.max_buyout_price = editbox
+        private.modifier_buttons['and'] = btn
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-        editbox:SetNumeric(true)
-        editbox:SetPoint('TOPLEFT', private.max_buyout_price , 'BOTTOMLEFT', 0, -22)
-        editbox:SetWidth(300)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                private.max_buyout_price:SetFocus()
-            else
-                private.tooltip1:SetFocus()
-            end
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('LEFT', private.modifier_buttons['and'], 'RIGHT', 10, 0)
+        btn:SetWidth(50)
+        btn:SetHeight(24)
+        btn:SetText('or')
+        btn:SetScript('OnClick', function()
+            add_modifier('or')
         end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-            public.start_search()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-        end)
-        local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Max % Market Value')
-        private.max_percent = editbox
+        private.modifier_buttons['or'] = btn
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-        editbox:SetPoint('TOPLEFT', private.max_percent , 'BOTTOMLEFT', 0, -35)
-        editbox:SetWidth(300)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                private.max_percent:SetFocus()
-            else
-                private.tooltip2:SetFocus()
-            end
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('LEFT', private.modifier_buttons['or'], 'RIGHT', 10, 0)
+        btn:SetWidth(50)
+        btn:SetHeight(24)
+        btn:SetText('not')
+        btn:SetScript('OnClick', function()
+            add_modifier('not')
         end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-            public.start_search()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-        end)
-        local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Tooltip')
-        private.tooltip1 = editbox
+        private.modifier_buttons['not'] = btn
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-        editbox:SetPoint('TOPLEFT', private.tooltip1 , 'BOTTOMLEFT', 0, -3)
-        editbox:SetWidth(300)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                private.tooltip1:SetFocus()
-            else
-                private.tooltip3:SetFocus()
-            end
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['and'], 'BOTTOMLEFT', 100, -25)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('item')
+        btn:SetScript('OnClick', function()
+            add_modifier('item')
         end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-            public.start_search()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-        end)
-        private.tooltip2 = editbox
+        private.modifier_buttons['item'] = btn
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-        editbox:SetPoint('TOPLEFT', private.tooltip2 , 'BOTTOMLEFT', 0, -3)
-        editbox:SetWidth(300)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                private.tooltip2:SetFocus()
-            else
-                private.tooltip4:SetFocus()
-            end
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['item'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('tt')
+        btn:SetScript('OnClick', function()
+            add_modifier('tt')
         end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-            public.start_search()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-        end)
-        private.tooltip3 = editbox
+        private.modifier_buttons['tt'] = btn
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-        editbox:SetPoint('TOPLEFT', private.tooltip3 , 'BOTTOMLEFT', 0, -3)
-        editbox:SetWidth(300)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                private.tooltip3:SetFocus()
-            else
-                private.tooltip5:SetFocus()
-            end
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['tt'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('min-lvl')
+        btn:SetScript('OnClick', function()
+            add_modifier('min-lvl')
         end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-            public.start_search()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-        end)
-        private.tooltip4 = editbox
+        private.modifier_buttons['min-lvl'] = btn
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-        editbox:SetPoint('TOPLEFT', private.tooltip4 , 'BOTTOMLEFT', 0, -3)
-        editbox:SetWidth(300)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                private.tooltip4:SetFocus()
-            else
-                private.tooltip6:SetFocus()
-            end
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['min-lvl'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('max-lvl')
+        btn:SetScript('OnClick', function()
+            add_modifier('max-lvl')
         end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-            public.start_search()
-        end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-        end)
-        private.tooltip5 = editbox
+        private.modifier_buttons['max-lvl'] = btn
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-        editbox:SetPoint('TOPLEFT', private.tooltip5 , 'BOTTOMLEFT', 0, -3)
-        editbox:SetWidth(300)
-        editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                private.tooltip5:SetFocus()
-            else
-                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
-            end
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['max-lvl'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('rarity')
+        btn:SetScript('OnClick', function()
+            add_modifier('rarity')
         end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-            public.start_search()
+        private.modifier_buttons['rarity'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['rarity'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('left')
+        btn:SetScript('OnClick', function()
+            add_modifier('left')
         end)
-        editbox:SetScript('OnEscapePressed', function()
-            this:ClearFocus()
+        private.modifier_buttons['left'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['left'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('utilizable')
+        btn:SetScript('OnClick', function()
+            add_modifier('utilizable')
         end)
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
+        private.modifier_buttons['utilizable'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['utilizable'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('discard')
+        btn:SetScript('OnClick', function()
+            add_modifier('discard')
         end)
-        private.tooltip6 = editbox
+        private.modifier_buttons['discard'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['and'], 'BOTTOMLEFT', 0, -25)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('min-bid')
+        btn:SetScript('OnClick', function()
+            add_modifier('min-bid')
+        end)
+        private.modifier_buttons['min-bid'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['min-bid'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('max-bid')
+        btn:SetScript('OnClick', function()
+            add_modifier('max-bid')
+        end)
+        private.modifier_buttons['max-bid'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['max-bid'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('bid-profit')
+        btn:SetScript('OnClick', function()
+            add_modifier('bid-profit')
+        end)
+        private.modifier_buttons['bid-profit'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['bid-profit'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('bid-pct')
+        btn:SetScript('OnClick', function()
+            add_modifier('bid-pct')
+        end)
+        private.modifier_buttons['bid-pct'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['bid-pct'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('min-buyout')
+        btn:SetScript('OnClick', function()
+            add_modifier('min-buyout')
+        end)
+        private.modifier_buttons['min-buyout'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['min-buyout'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('max-buyout')
+        btn:SetScript('OnClick', function()
+            add_modifier('max-buyout')
+        end)
+        private.modifier_buttons['max-buyout'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['max-buyout'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('buyout-profit')
+        btn:SetScript('OnClick', function()
+            add_modifier('buyout-profit')
+        end)
+        private.modifier_buttons['buyout-profit'] = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        btn:SetPoint('TOPLEFT', private.modifier_buttons['buyout-profit'], 'BOTTOMLEFT', 0, -10)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('buyout-pct')
+        btn:SetScript('OnClick', function()
+            add_modifier('buyout-pct')
+        end)
+        private.modifier_buttons['buyout-pct'] = btn
     end
 
     private.results_listing = Aux.auction_listing.CreateAuctionResultsTable(AuxSearchFrameResults)
