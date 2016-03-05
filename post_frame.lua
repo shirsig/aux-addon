@@ -14,7 +14,7 @@ function private.load_settings(item_record)
     local dataset = Aux.persistence.load_dataset()
     dataset.post = dataset.post or {}
     dataset.post[item_record.key] = dataset.post[item_record.key] or {
-        duration = DURATION_24,
+        duration = DURATION_8,
         stack_size = 1,
         start_price = 0,
         buyout_price = 0,

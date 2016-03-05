@@ -108,6 +108,34 @@ m.filters = {
         end
     },
 
+    ['min-bid'] = {
+        arity = 1,
+        test = function(amount)
+            amount = Aux.money.from_string(amount or '')
+            if amount > 0 then
+                return function(auction_record)
+                    return auction_record.bid_price >= amount
+                end
+            else
+                return false, {}, 'Erroneous Min Bid Modifier'
+            end
+        end
+    },
+
+    ['min-buyout'] = {
+        arity = 1,
+        test = function(amount)
+            amount = Aux.money.from_string(amount or '')
+            if amount > 0 then
+                return function(auction_record)
+                    return auction_record.buyout_price >= amount
+                end
+            else
+                return false, {}, 'Erroneous Min Buyout Modifier'
+            end
+        end
+    },
+
     ['max-bid'] = {
         arity = 1,
         test = function(amount)
@@ -355,7 +383,7 @@ function m.filter_from_string(filter_term)
                     local arg = parts[i - 1 + j]
                     if arg then
                         tinsert(args, arg)
-                        prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..arg..'|r')
+                        prettified:append(arg)
                     end
                 end
                 i = i + filter.arity
@@ -454,6 +482,9 @@ function m.filter_from_string(filter_term)
         local suggestions = {}
         for filter, _ in pairs(m.filters) do
             tinsert(suggestions, strlower(filter))
+            tinsert(suggestions, 'and')
+            tinsert(suggestions, 'or')
+            tinsert(suggestions, 'not')
         end
         return false, i > getn(parts) and suggestions, 'Malformed Expression'
     end
@@ -503,11 +534,6 @@ function m.suggestions(blizzard_filter, num_parts)
             and not blizzard_filter.usable
     then
         tinsert(suggestions, 'exact')
-    elseif num_parts == 1 then
-    -- item names
-        for _, name in ipairs(Aux.completion.sorted_item_names()) do
-            tinsert(suggestions, name..'/exact')
-        end
     end
 
     tinsert(suggestions, 'and')
@@ -549,6 +575,13 @@ function m.suggestions(blizzard_filter, num_parts)
     if not blizzard_filter.quality then
         for i=0,4 do
             tinsert(suggestions, getglobal('ITEM_QUALITY'..i..'_DESC'))
+        end
+    end
+
+    -- item names
+    if num_parts == 1 and blizzard_filter.name == '' then
+        for _, name in ipairs(Aux.completion.sorted_item_names()) do
+            tinsert(suggestions, name..'/exact')
         end
     end
 
