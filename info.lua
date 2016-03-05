@@ -293,16 +293,30 @@ function public.tooltip(setter)
 end
 
 function private.item_charges(tooltip)
-	for _, line in ipairs(tooltip) do
-        -- recipes also contain the charges tooltip for the item they teach so we have to ignore them
-        local ignore_pattern = '^Use: Teaches you how to create'
-        if strfind(line.left_text or '', ignore_pattern) or strfind(line.right_text or '', ignore_pattern) then
-            return
+    local use_entry_count = 0
+    for _, line in ipairs(tooltip) do
+        if strfind(line.left_text or '', ITEM_SPELL_TRIGGER_ONUSE) then
+            use_entry_count = use_entry_count + 1
         end
-        local pattern = '^(%d+) Charges$'
-		local _, _, left_charges_string = strfind(line.left_text or '', pattern)
-		local _, _, right_charges_string = strfind(line.right_text or '', pattern)
-		local charges = tonumber(left_charges_string) or tonumber(right_charges_string)
+        if strfind(line.right_text or '', ITEM_SPELL_TRIGGER_ONUSE) then
+            use_entry_count = use_entry_count + 1
+        end
+    end
+    if use_entry_count > 1 then -- it's presumably a recipe
+        return
+    end
+
+	for _, line in ipairs(tooltip) do
+        local pattern1 = '^'..gsub(ITEM_SPELL_CHARGES, '%%d', '(%%d)')..'$'
+        local pattern2 = '^'..gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d)')..'$'
+
+        local _, _, left_charges_string1 = strfind(line.left_text or '', pattern1)
+        local _, _, left_charges_string2 = strfind(line.left_text or '', pattern2)
+
+        local _, _, right_charges_string1 = strfind(line.right_text or '', pattern1)
+        local _, _, right_charges_string2 = strfind(line.right_text or '', pattern2)
+
+        local charges = tonumber(left_charges_string1) or tonumber(left_charges_string2) or tonumber(right_charges_string1) or tonumber(right_charges_string2)
 		if charges then
 			return charges
 		end

@@ -455,7 +455,7 @@ function public.on_load()
     local function add_modifier(...)
         local current_filter_string = private.search_box:GetText()
         for i=1,arg.n do
-            if string.sub(current_filter_string, strlen(current_filter_string), strlen(current_filter_string)) ~= '/' then
+            if current_filter_string ~= '' and string.sub(current_filter_string, strlen(current_filter_string), strlen(current_filter_string)) ~= '/' then
                 current_filter_string = current_filter_string..'/'
             end
             current_filter_string = current_filter_string..arg[i]

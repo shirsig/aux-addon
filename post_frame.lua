@@ -724,8 +724,8 @@ end
 function private.auctionable(item_info)
     local durability, max_durability = Aux.info.durability(item_info.tooltip)
     return Aux.static.item_info(item_info.item_id)
-            and not Aux.info.tooltip_match('soulbound', item_info.tooltip)
-            and not Aux.info.tooltip_match('conjured item', item_info.tooltip)
+            and not Aux.info.tooltip_match(ITEM_SOULBOUND, item_info.tooltip)
+            and not Aux.info.tooltip_match(ITEM_CONJURED, item_info.tooltip)
             and not item_info.lootable
             and not (durability and durability < max_durability)
 end
