@@ -491,7 +491,7 @@ function public.on_load()
     private.modifier_buttons = {}
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPRIGHT', -250, -10)
+        btn:SetPoint('TOPRIGHT', -270, -10)
         btn:SetWidth(50)
         btn:SetHeight(24)
         btn:SetText('and')
