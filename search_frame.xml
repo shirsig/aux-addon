@@ -23,10 +23,6 @@
                         <Size><AbsDimension x="22" y="22"/></Size>
                         <Anchors><Anchor point="TOPLEFT" relativeTo="$parentExactCheckButton" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="-20" /></Offset></Anchor></Anchors>
                     </CheckButton>
-                    <CheckButton name="$parentDiscardCheckButton" inherits="UICheckButtonTemplate">
-                        <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT" relativeTo="$parentUsableCheckButton" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="-20" /></Offset></Anchor></Anchors>
-                    </CheckButton>
                 </Frames>
             </Frame>
             <Frame name="$parentResults" inherits="AuxFrameBoxTemplate">

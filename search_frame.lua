@@ -90,7 +90,7 @@ function public.set_filter(filter_string)
 end
 
 function private.add_filter(filter_string, replace)
-    filter_string = filter_string or Aux.scan_util.filter_to_string(private.get_form_filter())
+    filter_string = filter_string or private.get_form_filter()
 
 
     local old_filter_string
@@ -116,7 +116,6 @@ function private.clear_filter()
     UIDropDownMenu_ClearAll(private.slot_dropdown)
     UIDropDownMenu_ClearAll(private.quality_dropdown)
     AuxSearchFrameFilterUsableCheckButton:SetChecked(nil)
-    AuxSearchFrameFilterDiscardCheckButton:SetChecked(nil)
     private.max_buyout_price:SetText('')
     private.max_percent:SetText('')
     private.tooltip1:SetText('')
@@ -128,19 +127,51 @@ function private.clear_filter()
 end
 
 function private.get_form_filter()
-    local exact = AuxSearchFrameFilterExactCheckButton:GetChecked()
+    local filter_term = ''
 
-    return {
-        name = AuxSearchFrameFilterNameInputBox:GetText(),
-        exact = AuxSearchFrameFilterExactCheckButton:GetChecked(),
-        min_level = not exact and tonumber(AuxSearchFrameFilterMinLevel:GetText()),
-        max_level = not exact and tonumber(AuxSearchFrameFilterMaxLevel:GetText()),
-        class = not exact and UIDropDownMenu_GetSelectedValue(private.class_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.class_dropdown),
-        subclass = not exact and UIDropDownMenu_GetSelectedValue(private.subclass_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.subclass_dropdown),
-        slot = not exact and UIDropDownMenu_GetSelectedValue(private.slot_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.slot_dropdown),
-        quality = not exact and UIDropDownMenu_GetSelectedValue(private.quality_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.quality_dropdown),
-        usable = not exact and AuxSearchFrameFilterUsableCheckButton:GetChecked(),
-    }
+    local function add(part)
+        filter_term = filter_term == '' and part or filter_term..'/'..part
+    end
+
+    add(AuxSearchFrameFilterNameInputBox:GetText())
+
+    if AuxSearchFrameFilterExactCheckButton:GetChecked() then
+        add('exact')
+    end
+
+    if tonumber(AuxSearchFrameFilterMinLevel:GetText()) then
+        add(tonumber(AuxSearchFrameFilterMinLevel:GetText()))
+    end
+
+    if tonumber(AuxSearchFrameFilterMaxLevel:GetText()) then
+        add(tonumber(AuxSearchFrameFilterMaxLevel:GetText()))
+    end
+
+    if AuxSearchFrameFilterUsableCheckButton:GetChecked() then
+        add('usable')
+    end
+
+    local class = UIDropDownMenu_GetSelectedValue(private.class_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.class_dropdown)
+    if class then
+        local classes = { GetAuctionItemClasses() }
+        add(strlower(classes[class]))
+        local subclass = UIDropDownMenu_GetSelectedValue(private.subclass_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.subclass_dropdown)
+        if subclass then
+            local subclasses = {GetAuctionItemSubClasses(class)}
+            add(strlower(subclasses[subclass]))
+            local slot = UIDropDownMenu_GetSelectedValue(private.slot_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.slot_dropdown)
+            if slot then
+                add(strlower(getglobal(slot)))
+            end
+        end
+    end
+
+    local quality = UIDropDownMenu_GetSelectedValue(private.quality_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.quality_dropdown)
+    if quality then
+        add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
+    end
+
+    return filter_term
 end
 
 function public.on_open()
@@ -306,7 +337,7 @@ function public.on_load()
         end)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                private.tooltip6:SetFocus()
+                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
             else
                 getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
             end
@@ -362,7 +393,7 @@ function public.on_load()
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
             else
-                private.max_buyout_price:SetFocus()
+                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -440,11 +471,6 @@ function public.on_load()
         local label = Aux.gui.label(AuxSearchFrameFilterExactCheckButton, 13)
         label:SetPoint('BOTTOMLEFT', AuxSearchFrameFilterExactCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('Exact')
-    end
-    do
-        local label = Aux.gui.label(AuxSearchFrameFilterDiscardCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', AuxSearchFrameFilterDiscardCheckButton, 'TOPLEFT', 1, -3)
-        label:SetText('Discard')
     end
     do
         local label = Aux.gui.label(AuxSearchFrameFilterUsableCheckButton, 13)

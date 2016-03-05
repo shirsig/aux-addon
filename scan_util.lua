@@ -596,67 +596,6 @@ function m.suggestions(blizzard_filter, num_parts)
     return suggestions
 end
 
-function m.filter_to_string(filter)
-
-    local filter_term = filter.name or ''
-
-    local function add(part)
-        filter_term = filter_term == '' and part or filter_term..'/'..part
-    end
-
-    if filter.exact then
-        add('exact')
-    end
-
-    if filter.min_level then
-        add(filter.min_level)
-    end
-
-    if filter.max_level then
-        add(filter.max_level)
-    end
-
-    if filter.usable then
-        add('usable')
-    end
-
-    if filter.class then
-        local classes = { GetAuctionItemClasses() }
-        add(strlower(classes[filter.class]))
-        if filter.subclass then
-            local subclasses = {GetAuctionItemSubClasses(filter.class)}
-            add(strlower(subclasses[filter.subclass]))
-            if filter.slot then
-                add(strlower(getglobal(filter.slot)))
-            end
-        end
-    end
-
-    if filter.quality then
-        add(strlower(getglobal('ITEM_QUALITY'..filter.quality..'_DESC')))
-    end
-
-    if filter.max_price then
-        add(Aux.money.to_string(filter.max_price, nil, true, nil, nil, true))
-    end
-
-    if filter.max_percent then
-        add(filter.max_percent..'%')
-    end
-
-    if filter.discard then
-        add('discard')
-    end
-
-    if filter.tooltip then
-        for _, part in ipairs(filter.tooltip) do
-            add(part)
-        end
-    end
-
-    return filter_term
-end
-
 function m.blizzard_query(filter)
 
     local item_info
