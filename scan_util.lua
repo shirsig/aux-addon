@@ -30,13 +30,17 @@ m.filters = {
     ['item'] = {
         arity = 1,
         test = function(name)
-            local item_id = Aux.static.item_id(strupper(name or ''))
-            if item_id then
-                return function(auction_record)
-                    return auction_record.item_id == item_id
-                end
-            else
+            if not name then
                 return false, Aux.completion.sorted_item_names(), 'Erroneous Item Modifier'
+            end
+
+            local item_id = Aux.static.item_id(strupper(name or ''))
+            if not item_id then
+                return false, {}, 'Erroneous Item Modifier'
+            end
+
+            return function(auction_record)
+                return auction_record.item_id == item_id
             end
         end
     },
@@ -44,38 +48,47 @@ m.filters = {
     ['left'] = {
         arity = 1,
         test = function(duration)
+            if not duration then
+                return false, {'30m', '2h', '8h', '24h'}, 'Erroneous Time Left Modifier'
+            end
+
             local code = ({
                 ['30m'] = 1,
                 ['2h'] = 2,
                 ['8h'] = 3,
                 ['24h'] = 4,
             })[duration or '']
-            if code then
-                return function(auction_record)
-                    return auction_record.duration == code
-                end
-            else
-                return false, {'30m', '2h', '8h', '24h'}, 'Erroneous Time Left Modifier'
+
+            if not code then
+                return false, {}, 'Erroneous Time Left Modifier'
+            end
+
+            return function(auction_record)
+                return auction_record.duration == code
             end
         end
     },
 
     ['rarity'] = {
         arity = 1,
-        test = function(duration)
+        test = function(rarity)
+            if not rarity then
+                return false, {'poor', 'common', 'uncommon', 'rare', 'epic'}, 'Erroneous Time Left Modifier'
+            end
+
             local code = ({
                 ['poor'] = 1,
                 ['common'] = 2,
                 ['uncommon'] = 3,
                 ['rare'] = 4,
                 ['epic'] = 5,
-            })[duration or '']
-            if code then
-                return function(auction_record)
-                    return auction_record.quality == code
-                end
-            else
-                return false, {}, {'poor', 'common', 'uncommon', 'rare', 'epic'}, 'Erroneous Time Left Modifier'
+            })[rarity or '']
+            if not code then
+                return false, {}, 'Erroneous Time Left Modifier'
+            end
+
+            return function(auction_record)
+                return auction_record.quality == code
             end
         end
     },
