@@ -16,6 +16,15 @@ end
 
 m.filters = {
 
+    ['utilizable'] = {
+        arity = 0,
+        test = function()
+            return function(auction_record)
+                return auction_record.usable
+            end
+        end,
+    },
+
     ['tt'] = {
         arity = 1,
         test = function(str)
@@ -362,7 +371,7 @@ function m.filter_from_string(filter_term)
     local parts = Aux.util.map(Aux.util.split(filter_term, '/'), function(part) return strlower(Aux.util.trim(part)) end)
 
     local blizzard_filter = {}
-    local validator = {}
+    local post_filter = {}
     local prettified = m.filter_builder()
     local polish_notation_counter = 0
     local i = 1
@@ -388,7 +397,7 @@ function m.filter_from_string(filter_term)
 
         local test, suggestions, error = filter.test(unpack(args))
         if test then
-            tinsert(validator, test)
+            tinsert(post_filter, test)
         else
             return error, i > getn(parts) and suggestions or {}
         end
@@ -402,10 +411,10 @@ function m.filter_from_string(filter_term)
             polish_notation_counter = polish_notation_counter == 0 and polish_notation_counter + 1 or polish_notation_counter
             if str == 'and' or str == 'or' then
                 polish_notation_counter = polish_notation_counter + 1
-                tinsert(validator, str)
+                tinsert(post_filter, str)
                 prettified:append('|cffffff00'..str..'|r')
             elseif str == 'not' then
-                tinsert(validator, str)
+                tinsert(post_filter, str)
                 prettified:append('|cffffff00'..str..'|r')
             elseif str ~= '' then
                 polish_notation_counter = polish_notation_counter - 1
@@ -513,7 +522,7 @@ function m.filter_from_string(filter_term)
 
     return {
         blizzard_query = m.blizzard_query(blizzard_filter),
-        validator = m.validator(blizzard_filter, validator),
+        validator = m.validator(blizzard_filter, post_filter),
         prettified = prettified:get(),
     }, m.suggestions(blizzard_filter, getn(parts))
 end
@@ -668,7 +677,7 @@ function m.blizzard_query(filter)
     }
 end
 
-function m.validator(blizzard_filter, validator)
+function m.validator(blizzard_filter, post_filter)
 
     return function(record)
         if blizzard_filter.exact and strlower(Aux.static.item_info(record.item_id).name) ~= blizzard_filter.name then
@@ -680,10 +689,10 @@ function m.validator(blizzard_filter, validator)
         if blizzard_filter.max_level and record.level > blizzard_filter.max_level then
             return
         end
-        if getn(validator) > 0 then
+        if getn(post_filter) > 0 then
             local stack = {}
-            for i=getn(validator),1,-1 do
-                local op = validator[i]
+            for i=getn(post_filter),1,-1 do
+                local op = post_filter[i]
                 if op == 'and' then
                     local a, b = tremove(stack), tremove(stack)
                     tinsert(stack, a and b)
