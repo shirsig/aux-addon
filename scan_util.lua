@@ -382,7 +382,7 @@ function m.filter_from_string(filter_term)
             prettified:append('|cffffff00'..str..'|r')
         else
             filter = filter or m.default_filter(str)
-            prettified:append(str)
+            prettified:append('|cffff9218'..str..'|r')
         end
 
         local args = {}
@@ -390,7 +390,7 @@ function m.filter_from_string(filter_term)
             local arg = parts[i - 1 + j]
             if arg then
                 tinsert(args, arg)
-                prettified:append(arg)
+                prettified:append('|cffff9218'..arg..'|r')
             end
         end
         i = i + filter.arity
@@ -516,7 +516,7 @@ function m.filter_from_string(filter_term)
         if blizzard_filter.name == '' then
             prettified:prepend('|cffff0000'..'No Filter'..'|r')
         else
-            prettified:prepend('|cff2992ff'.. blizzard_filter.name..'|r')
+            prettified:prepend(Aux.gui.inline_color({216, 225, 211, 1})..blizzard_filter.name..'|r')
         end
     end
 
