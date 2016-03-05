@@ -37,18 +37,20 @@ function m:complete()
 	end
 end
 
-function m:complete_item()
-	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
-	return
-	end
-
-	local text = this:GetText()
-
-	for _, item_name in ipairs(m.sorted_item_names()) do
-		if string.sub(strupper(item_name), 1, strlen(text)) == strupper(text) then
-			this:SetText(strlower(item_name))
-			this:HighlightText(strlen(text), -1)
+function m.completor(options)
+	return function(self)
+		if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
 			return
+		end
+
+		local text = self:GetText()
+
+		for _, item_name in ipairs(options) do
+			if string.sub(strupper(item_name), 1, strlen(text)) == strupper(text) then
+				self:SetText(strlower(item_name))
+				self:HighlightText(strlen(text), -1)
+				return
+			end
 		end
 	end
 end

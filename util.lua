@@ -25,6 +25,12 @@ function public.copy_table(table)
 	return copy
 end
 
+function public.cons(element, list)
+	local new_list = public.copy_table(list)
+	tinsert(new_list, 1, element)
+	return new_list
+end
+
 function public.trim(string)
 	string = gsub(string, '^%s*', '')
 	string = gsub(string, '%s*$', '')

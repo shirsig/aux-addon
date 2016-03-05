@@ -14,16 +14,6 @@
                     <Anchor point="TOPLEFT" relativeTo="AuxFrameContent"></Anchor>
                     <Anchor point="BOTTOMRIGHT" relativeTo="AuxFrameContent"></Anchor>
                 </Anchors>
-                <Frames>
-                    <CheckButton name="$parentExactCheckButton" inherits="UICheckButtonTemplate">
-                        <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="362" y="-20" /></Offset></Anchor></Anchors>
-                    </CheckButton>
-                    <CheckButton name="$parentUsableCheckButton" inherits="UICheckButtonTemplate">
-                        <Size><AbsDimension x="22" y="22"/></Size>
-                        <Anchors><Anchor point="TOPLEFT" relativeTo="$parentExactCheckButton" relativePoint="BOTTOMLEFT"><Offset><AbsDimension x="0" y="-20" /></Offset></Anchor></Anchors>
-                    </CheckButton>
-                </Frames>
             </Frame>
             <Frame name="$parentResults" inherits="AuxFrameBoxTemplate">
                 <Anchors>

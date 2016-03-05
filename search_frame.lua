@@ -324,9 +324,9 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentNameInputBox')
-        editbox.complete_item = Aux.completion.complete_item
+        editbox.complete_item = Aux.completion.completor(Aux.completion.sorted_item_names())
         editbox:SetPoint('TOPLEFT', 14, -20)
-        editbox:SetWidth(300)
+        editbox:SetWidth(260)
         editbox:SetScript('OnChar', function()
             if AuxSearchFrameFilterExactCheckButton:GetChecked() then
                 this:complete_item()
@@ -354,9 +354,19 @@ function public.on_load()
         label:SetText('Name')
     end
     do
+        local checkbox = CreateFrame('CheckButton', '$parentExactCheckButton', AuxSearchFrameFilter, 'UICheckButtonTemplate')
+        checkbox:SetWidth(22)
+        checkbox:SetHeight(22)
+        checkbox:SetPoint('TOPLEFT', AuxSearchFrameFilterNameInputBox, 'TOPRIGHT', 10, 0)
+        local label = Aux.gui.label(AuxSearchFrameFilterExactCheckButton, 13)
+        label:SetPoint('BOTTOMLEFT', AuxSearchFrameFilterExactCheckButton, 'TOPLEFT', 1, -3)
+        label:SetText('Exact')
+        private.show_hidden_checkbox = checkbox
+    end
+    do
         local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentMinLevel')
         editbox:SetPoint('TOPLEFT', AuxSearchFrameFilterNameInputBox, 'BOTTOMLEFT', 0, -22)
-        editbox:SetWidth(145)
+        editbox:SetWidth(125)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
         editbox:SetScript('OnTabPressed', function()
@@ -383,7 +393,7 @@ function public.on_load()
     do
         local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentMaxLevel')
         editbox:SetPoint('TOPLEFT', AuxSearchFrameFilterMinLevel, 'TOPRIGHT', 10, 0)
-        editbox:SetWidth(145)
+        editbox:SetWidth(125)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
         editbox:SetScript('OnTabPressed', function()
@@ -404,8 +414,18 @@ function public.on_load()
             this:HighlightText()
         end)
         local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
         label:SetText('-')
+    end
+    do
+        local checkbox = CreateFrame('CheckButton', '$parentUsableCheckButton', AuxSearchFrameFilter, 'UICheckButtonTemplate')
+        checkbox:SetWidth(22)
+        checkbox:SetHeight(22)
+        checkbox:SetPoint('TOPLEFT', AuxSearchFrameFilterMaxLevel, 'TOPRIGHT', 10, 0)
+        local label = Aux.gui.label(AuxSearchFrameFilterUsableCheckButton, 13)
+        label:SetPoint('BOTTOMLEFT', AuxSearchFrameFilterUsableCheckButton, 'TOPLEFT', 1, -3)
+        label:SetText('Usable')
+        private.show_hidden_checkbox = checkbox
     end
     do
         local dropdown = Aux.gui.dropdown(AuxSearchFrameFilter)
@@ -465,16 +485,10 @@ function public.on_load()
     end
     Aux.gui.vertical_line(AuxSearchFrameFilter, 332)
     do
-        local label = Aux.gui.label(AuxSearchFrameFilterExactCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', AuxSearchFrameFilterExactCheckButton, 'TOPLEFT', 1, -3)
-        label:SetText('Exact')
-    end
-    do
         local label = Aux.gui.label(AuxSearchFrameFilterUsableCheckButton, 13)
         label:SetPoint('BOTTOMLEFT', AuxSearchFrameFilterUsableCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('Usable')
     end
-    Aux.gui.vertical_line(AuxSearchFrameFilter, 425)
     local function add_modifier(...)
         local current_filter_string = private.search_box:GetText()
         for i=1,arg.n do
@@ -485,215 +499,162 @@ function public.on_load()
         end
         private.search_box:SetText(current_filter_string)
     end
-    private.modifier_buttons = {}
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPRIGHT', -270, -10)
+        btn:SetPoint('TOPRIGHT', -362, -14)
         btn:SetWidth(50)
         btn:SetHeight(24)
         btn:SetText('and')
         btn:SetScript('OnClick', function()
             add_modifier('and')
         end)
-        private.modifier_buttons['and'] = btn
+        private.and_operator_button = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('LEFT', private.modifier_buttons['and'], 'RIGHT', 10, 0)
+        btn:SetPoint('LEFT', private.and_operator_button, 'RIGHT', 10, 0)
         btn:SetWidth(50)
         btn:SetHeight(24)
         btn:SetText('or')
         btn:SetScript('OnClick', function()
             add_modifier('or')
         end)
-        private.modifier_buttons['or'] = btn
+        private.or_operator_button = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('LEFT', private.modifier_buttons['or'], 'RIGHT', 10, 0)
+        btn:SetPoint('LEFT', private.or_operator_button, 'RIGHT', 10, 0)
         btn:SetWidth(50)
         btn:SetHeight(24)
         btn:SetText('not')
         btn:SetScript('OnClick', function()
             add_modifier('not')
         end)
-        private.modifier_buttons['not'] = btn
+        private.not_operator_button = btn
     end
+    private.modifier_buttons = {}
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['and'], 'BOTTOMLEFT', 100, -25)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('item')
-        btn:SetScript('OnClick', function()
-            add_modifier('item')
-        end)
+        btn:SetPoint('TOPLEFT', private.and_operator_button, 'BOTTOMLEFT', 205, -16)
         private.modifier_buttons['item'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['item'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('tt')
-        btn:SetScript('OnClick', function()
-            add_modifier('tt')
-        end)
         private.modifier_buttons['tt'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['tt'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('min-lvl')
-        btn:SetScript('OnClick', function()
-            add_modifier('min-lvl')
-        end)
         private.modifier_buttons['min-lvl'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['min-lvl'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('max-lvl')
-        btn:SetScript('OnClick', function()
-            add_modifier('max-lvl')
-        end)
         private.modifier_buttons['max-lvl'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['max-lvl'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('rarity')
-        btn:SetScript('OnClick', function()
-            add_modifier('rarity')
-        end)
         private.modifier_buttons['rarity'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['rarity'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('left')
-        btn:SetScript('OnClick', function()
-            add_modifier('left')
-        end)
         private.modifier_buttons['left'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['left'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('utilizable')
-        btn:SetScript('OnClick', function()
-            add_modifier('utilizable')
-        end)
         private.modifier_buttons['utilizable'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['utilizable'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('discard')
-        btn:SetScript('OnClick', function()
-            add_modifier('discard')
-        end)
         private.modifier_buttons['discard'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['and'], 'BOTTOMLEFT', 0, -25)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('min-bid')
-        btn:SetScript('OnClick', function()
-            add_modifier('min-bid')
-        end)
+        btn:SetPoint('TOPLEFT', private.and_operator_button, 'BOTTOMLEFT', 0, -16)
         private.modifier_buttons['min-bid'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['min-bid'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('max-bid')
-        btn:SetScript('OnClick', function()
-            add_modifier('max-bid')
-        end)
         private.modifier_buttons['max-bid'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['max-bid'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('bid-profit')
-        btn:SetScript('OnClick', function()
-            add_modifier('bid-profit')
-        end)
         private.modifier_buttons['bid-profit'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['bid-profit'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('bid-pct')
-        btn:SetScript('OnClick', function()
-            add_modifier('bid-pct')
-        end)
         private.modifier_buttons['bid-pct'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['bid-pct'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('min-buyout')
-        btn:SetScript('OnClick', function()
-            add_modifier('min-buyout')
-        end)
         private.modifier_buttons['min-buyout'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['min-buyout'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('max-buyout')
-        btn:SetScript('OnClick', function()
-            add_modifier('max-buyout')
-        end)
         private.modifier_buttons['max-buyout'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['max-buyout'], 'BOTTOMLEFT', 0, -10)
-        btn:SetWidth(80)
-        btn:SetHeight(24)
-        btn:SetText('buyout-profit')
-        btn:SetScript('OnClick', function()
-            add_modifier('buyout-profit')
-        end)
         private.modifier_buttons['buyout-profit'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn:SetPoint('TOPLEFT', private.modifier_buttons['buyout-profit'], 'BOTTOMLEFT', 0, -10)
+        private.modifier_buttons['buyout-pct'] = btn
+    end
+    for modifier_name, btn in private.modifier_buttons do
+        local modifier_name = modifier_name
+        local btn = btn
+
+        local filter = Aux.scan_util.filters[modifier_name]
+
         btn:SetWidth(80)
         btn:SetHeight(24)
-        btn:SetText('buyout-pct')
+        btn:SetText(modifier_name)
         btn:SetScript('OnClick', function()
-            add_modifier('buyout-pct')
+            local args = Aux.util.map(btn.inputs, function(input) return input:GetText() end)
+            if filter.test(unpack(args)) then
+                add_modifier(unpack(Aux.util.cons(modifier_name, args)))
+                for _, input in btn.inputs do
+                    input:SetText('')
+                    input:ClearFocus()
+                end
+            end
         end)
-        private.modifier_buttons['buyout-pct'] = btn
+        btn.inputs = {}
+        if filter.arity > 0 then
+            local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
+            editbox.complete = Aux.completion.completor(({filter.test()})[2])
+            editbox:SetPoint('LEFT', btn, 'RIGHT', 10, 0)
+            editbox:SetWidth(100)
+--            editbox:SetNumeric(true)
+--            editbox:SetMaxLetters(2)
+            editbox:SetScript('OnChar', function()
+                this:complete()
+            end)
+            local on_click = btn:GetScript('OnClick')
+            editbox:SetScript('OnEnterPressed', function()
+                on_click()
+            end)
+            editbox:SetScript('OnEscapePressed', function()
+                this:ClearFocus()
+            end)
+            editbox:SetScript('OnEditFocusGained', function()
+                this:HighlightText()
+            end)
+            tinsert(btn.inputs, editbox)
+        end
     end
 
     private.results_listing = Aux.auction_listing.CreateAuctionResultsTable(AuxSearchFrameResults)
