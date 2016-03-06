@@ -20,7 +20,7 @@ m.filters = {
         arity = 0,
         test = function()
             return function(auction_record)
-                return auction_record.usable
+                return auction_record.usable and not Aux.info.tooltip_match(ITEM_SPELL_KNOWN, auction_record.tooltip)
             end
         end,
     },
