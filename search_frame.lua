@@ -3,6 +3,7 @@ Aux.search_frame = public
 
 aux_favorite_searches = {}
 aux_recent_searches = {}
+local scanned_records = {}
 
 private.popup_info = {
     rename = {}
@@ -288,6 +289,17 @@ function public.on_load()
         btn:SetText('Buyout')
         btn:Disable()
         private.buyout_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrameResults, 16)
+        btn:SetPoint('TOPLEFT', private.buyout_button, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('Clear')
+        btn:SetScript('OnClick', function()
+            while tremove(scanned_records) do end
+            private.results_listing:SetDatabase()
+        end)
     end
     do
         local btn1 = Aux.gui.button(AuxSearchFrameFilter, 16)
@@ -786,7 +798,7 @@ function public.start_search(filter_string)
     private.status_bar:set_text('Scanning auctions...')
 
     private.results_listing:Clear()
-    local scanned_records = {}
+    scanned_records = {}
     private.results_listing:SetDatabase(scanned_records)
 
     local current_query
