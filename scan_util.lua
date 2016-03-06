@@ -318,11 +318,11 @@ function m.filter_builder()
     local filter = ''
     return {
         append = function(self, modifier)
-            modifier = strlower(modifier)
+            modifier = modifier
             filter = filter == '' and modifier or filter..'/'..modifier
         end,
         prepend = function(self, modifier)
-            modifier = strlower(modifier)
+            modifier = modifier
             filter = filter == '' and modifier or modifier..'/'..filter
         end,
         get = function(self)
