@@ -94,7 +94,9 @@ do
 end
 
 function public.kill_thread(thread_id)
-	private.threads[thread_id].killed = true
+	if thread_id and private.threads[thread_id] then
+		private.threads[thread_id].killed = true
+	end
 end
 
 function public.wait(...)
