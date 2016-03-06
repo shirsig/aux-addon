@@ -842,7 +842,7 @@ function public.start_search(filter_string)
             private.stop_button:Hide()
             private.search_button:Show()
 
-            if getn(scanned_records) == 0 then
+            if getn(scanned_records) == 0 and AuxSearchFrameResults:IsVisible() then
                 private.update_tab(SAVED)
             end
 --            public.start_search(filter_string)
