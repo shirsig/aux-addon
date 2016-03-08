@@ -1,7 +1,7 @@
 SLASH_AUX1 = '/aux'
 function SlashCmdList.AUX(parameter)
     if parameter == 'clear history' then
-        Aux.persistence.load_dataset().history = {}
+        Aux.persistence.load_dataset().history = nil
         Aux.log('History cleared.')
     elseif parameter == 'clear post' then
         Aux.persistence.load_dataset().post = {}
