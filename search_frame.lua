@@ -860,7 +860,7 @@ function public.start_search(filter_string, resume)
             for i=1,(current_query or 1)-1 do
                 tremove(queries, 1)
             end
-            queries[current_query].start_page = (current_page or 0)
+            queries[1].start_page = (current_page or 0)
             aborted_search = queries
             private.search_button:SetText('Cont.')
         end,
