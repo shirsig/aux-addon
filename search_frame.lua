@@ -4,6 +4,7 @@ Aux.search_frame = public
 aux_favorite_searches = {}
 aux_recent_searches = {}
 local scanned_records = {}
+local aborted_search
 
 private.popup_info = {
     rename = {}
@@ -181,9 +182,11 @@ function public.on_load()
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Search')
+        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
         btn:SetScript('OnClick', function()
             private.search_box:ClearFocus()
-            public.start_search()
+            local resume = this:GetText() == 'Cont.' and arg1 ~= 'RightButton'
+            public.start_search(nil, resume)
         end)
         private.search_button = btn
     end
@@ -757,7 +760,14 @@ function public.stop_search()
 	Aux.scan.abort('list')
 end
 
-function public.start_search(filter_string)
+function public.start_search(filter_string, resume)
+    if resume and not aborted_search then
+        return
+    end
+
+    local queries = aborted_search
+    aborted_search = nil
+    private.search_button:SetText('Search')
 
     Aux.scan.abort('list')
 
@@ -765,29 +775,29 @@ function public.start_search(filter_string)
         private.search_box:SetText(filter_string)
     end
 
-    local queries
+    if not resume then
+        local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
+        if not filters then
+            return
+        end
 
-    local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
-    if not filters then
-        return
+        queries = Aux.util.map(filters, function(filter)
+            return {
+                start_page = 0,
+                blizzard_query = filter.blizzard_query,
+                validator = filter.validator,
+            }
+        end)
+
+        tinsert(aux_recent_searches, 1, {
+            filter_string = private.search_box:GetText(),
+            prettified = Aux.util.join(Aux.util.map(filters, function(filter) return filter.prettified end), ';'),
+        })
+        while getn(aux_recent_searches) > 50 do
+            tremove(aux_recent_searches)
+        end
+        private.update_search_listings()
     end
-
-    local queries = Aux.util.map(filters, function(filter)
-        return {
-            start_page = 0,
-            blizzard_query = filter.blizzard_query,
-            validator = filter.validator,
-        }
-    end)
-
-    tinsert(aux_recent_searches, 1, {
-        filter_string = private.search_box:GetText(),
-        prettified = Aux.util.join(Aux.util.map(filters, function(filter) return filter.prettified end), ';'),
-    })
-    while getn(aux_recent_searches) > 50 do
-        tremove(aux_recent_searches)
-    end
-    private.update_search_listings()
 
     private.search_button:Hide()
     private.stop_button:Show()
@@ -797,19 +807,23 @@ function public.start_search(filter_string)
     private.status_bar:update_status(0,0)
     private.status_bar:set_text('Scanning auctions...')
 
-    private.results_listing:Clear()
-    scanned_records = {}
-    private.results_listing:SetDatabase(scanned_records)
+    if resume then
+        private.results_listing:SetSelectedRecord(nil)
+    else
+        private.results_listing:Clear()
+        scanned_records = {}
+        private.results_listing:SetDatabase(scanned_records)
+    end
 
-    local current_query
+    local current_query, current_page
     Aux.scan.start{
         type = 'list',
         queries = queries,
         on_page_loaded = function(page, total_pages)
-            local current_page = page + 1
+            current_page = page
             local current_total_pages = total_pages
-            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / current_total_pages) -- TODO
-            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page, current_total_pages))
+            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page) / current_total_pages) -- TODO
+            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page + 1, current_total_pages))
         end,
         on_page_scanned = function()
             private.results_listing:SetDatabase()
@@ -820,16 +834,6 @@ function public.start_search(filter_string)
             private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
         end,
         on_read_auction = function(auction_info, ctrl)
---            if getn(scanned_records) == 0 then
---                SetCVar('MasterSoundEffects', 0)
---                SetCVar('MasterSoundEffects', 1)
---                PlaySoundFile([[Interface\AddOns\Aux-AddOn\Event_wardrum_ogre.ogg]], 'Master')
---                PlaySoundFile([[Interface\AddOns\Aux-AddOn\scourge_horn.ogg]], 'Master')
---                tinsert(scanned_records, auction_info)
---                private.results_listing:SetDatabase()
---                ctrl.suspend()
---                Aux.scan.abort('list')
---            end
             if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
                 tinsert(scanned_records, auction_info)
             end
@@ -845,7 +849,6 @@ function public.start_search(filter_string)
             if getn(scanned_records) == 0 and AuxSearchFrameResults:IsVisible() then
                 private.update_tab(SAVED)
             end
---            public.start_search(filter_string)
         end,
         on_abort = function()
             private.results_listing:SetDatabase()
@@ -853,6 +856,13 @@ function public.start_search(filter_string)
             private.status_bar:set_text('Done Scanning')
             private.stop_button:Hide()
             private.search_button:Show()
+
+            for i=1,current_query-1 do
+                tremove(queries, 1)
+            end
+            queries[current_query].start_page = current_page
+            aborted_search = queries
+            private.search_button:SetText('Cont.')
         end,
     }
 end
