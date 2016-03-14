@@ -857,14 +857,12 @@ function public.start_search(filter_string, resume)
             private.stop_button:Hide()
             private.search_button:Show()
 
-            for i=1,current_query or 1 do
+            for i=1,(current_query or 1)-1 do
                 tremove(queries, 1)
             end
-            if getn(queries) > 0 then
-                queries[1].start_page = (current_page and current_page + 1 or 0)
-                aborted_search = queries
-                private.search_button:SetText('Cont.')
-            end
+            queries[1].start_page = (current_page and current_page + 1 or 0)
+            aborted_search = queries
+            private.search_button:SetText('Cont.')
         end,
     }
 end
