@@ -136,7 +136,7 @@ m.filters = {
             amount = Aux.money.from_string(amount or '')
             if amount > 0 then
                 return function(auction_record)
-                    return auction_record.bid_price >= amount
+                    return auction_record.unit_bid_price >= amount
                 end
             else
                 return false, {}, 'Erroneous Min Bid Modifier'
@@ -150,7 +150,7 @@ m.filters = {
             amount = Aux.money.from_string(amount or '')
             if amount > 0 then
                 return function(auction_record)
-                    return auction_record.buyout_price >= amount
+                    return auction_record.unit_buyout_price >= amount
                 end
             else
                 return false, {}, 'Erroneous Min Buyout Modifier'
@@ -164,7 +164,7 @@ m.filters = {
             amount = Aux.money.from_string(amount or '')
             if amount > 0 then
                 return function(auction_record)
-                    return auction_record.bid_price <= amount
+                    return auction_record.unit_bid_price <= amount
                 end
             else
                 return false, {}, 'Erroneous Max Bid Modifier'
@@ -178,7 +178,7 @@ m.filters = {
             amount = Aux.money.from_string(amount or '')
             if amount > 0 then
                 return function(auction_record)
-                    return auction_record.buyout_price > 0 and auction_record.buyout_price <= amount
+                    return auction_record.buyout_price > 0 and auction_record.unit_buyout_price <= amount
                 end
             else
                 return false, {}, 'Erroneous Max Buyout Modifier'
