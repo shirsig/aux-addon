@@ -433,7 +433,7 @@ function m.filter_from_string(filter_term)
             else
                 return false, {}, 'Erroneous Level Range Modifier'
             end
-        elseif Aux.item_class_index(str) and not (blizzard_filter.class and not blizzard_filter.subclass and str == 'MISCELLANEOUS')then
+        elseif Aux.item_class_index(str) and not (blizzard_filter.class and not blizzard_filter.subclass and str == strlower(({ GetAuctionItemClasses() })[10])) then
             if not blizzard_filter.class then
                 blizzard_filter.class = Aux.item_class_index(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
