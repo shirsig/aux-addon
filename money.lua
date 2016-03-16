@@ -4,16 +4,28 @@ Aux.money = m
 local GOLD_TEXT = '|cffffd70ag|r'
 local SILVER_TEXT = '|cffc7c7cfs|r'
 local COPPER_TEXT = '|cffeda55fc|r'
-local COPPER_PER_SILVER = 100
-local COPPER_PER_GOLD = 10000
+
+do
+	local COPPER_PER_SILVER = 100
+	local COPPER_PER_GOLD = 10000
+
+	function m.to_GSC(money)
+		local gold = floor(money / COPPER_PER_GOLD)
+		local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
+		local copper = mod(money, COPPER_PER_SILVER)
+		return gold, silver, copper
+	end
+
+	function m.from_GSC(gold, silver, copper)
+		return gold * COPPER_PER_GOLD + silver * COPPER_PER_SILVER + copper
+	end
+end
 
 function m.to_string(money, pad, trim, decimal_points, color, no_color)
 
 	local is_negative = money < 0
 	money = abs(money)
-	local gold = floor(money / COPPER_PER_GOLD)
-	local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
-	local copper = mod(money, COPPER_PER_SILVER)
+	local gold, silver, copper = m.to_GSC(money)
 
 	-- rounding
 	if decimal_points then
@@ -79,7 +91,7 @@ function m.from_string(value)
 	value = gsub(value, '%d*%.?%d+c', '', 1)
 	if strfind(value, '%S') then return 0 end
 	
-	return ((gold or 0) * COPPER_PER_GOLD) + ((silver or 0) * COPPER_PER_SILVER) + (copper or 0)
+	return m.from_GSC(gold or 0, silver or 0, copper or 0)
 end
 
 function m.format_number(num, pad, decimal_padding, color)

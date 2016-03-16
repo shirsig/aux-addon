@@ -1,5 +1,5 @@
 Aux = {
-    version = '2.6.17',
+    version = '2.6.18',
     blizzard_ui_shown = false,
 	orig = {},
 }
@@ -7,44 +7,6 @@ Aux = {
 function Aux.on_load()
 	Aux.log('Aux v'..Aux.version..' loaded.')
     tinsert(UISpecialFrames, 'AuxFrame')
-    LoadAddOn('EnhTooltip')
-    if IsAddOnLoaded('EnhTooltip') then
-        Stubby.RegisterFunctionHook('EnhTooltip.AddTooltip', 100, function(_ ,_ ,_ ,_ , link, _, count)
-            if EnhTooltip.LinkType(link) ~= 'item' then return end
-
-            local item_id, suffix_id = EnhTooltip.BreakLink(link)
-
-            if not Aux.static.item_info(item_id) then
-                return
-            end
-
-            local item_key = (item_id or 0)..':'..(suffix_id or 0)
-
-            local value = Aux.history.value(item_key)
-
-            local value_line = 'Value: '
-
-            value_line = value_line..(value and EnhTooltip.GetTextGSC(value) or '---')
-
-            local _, _, _, market_values = Aux.history.price_data(item_key)
-            if value and getn(market_values) < 5 then
-                value_line = value_line..' (?)'
-            end
-
-            EnhTooltip.AddLine(value_line, nil, true)
-            EnhTooltip.LineColor(0.1, 0.8, 0.5)
-
-            if aux_tooltip_daily then
-                local market_value = Aux.history.market_value(item_key)
-
-                local market_value_line = 'Today: '
-                market_value_line = market_value_line..(market_value and EnhTooltip.GetTextGSC(market_value)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or '---')
-
-                EnhTooltip.AddLine(market_value_line, nil, true)
-                EnhTooltip.LineColor(0.1, 0.8, 0.5)
-            end
-        end)
-    end
 
     do
         local tab_group = Aux.gui.tab_group(AuxFrame, 'BOTTOM')
@@ -86,6 +48,7 @@ function Aux.on_load()
     end
 
     Aux.persistence.on_load()
+    Aux.tooltip.on_load()
     Aux.search_frame.on_load()
     Aux.post_frame.on_load()
     Aux.auctions_frame.on_load()

@@ -8,6 +8,7 @@ core.xml
 gui.lua
 control.xml
 persistence.lua
+tooltip.lua
 util.lua
 sort.lua
 money.lua
