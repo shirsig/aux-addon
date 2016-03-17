@@ -197,7 +197,7 @@ local methods = {
     GetRecordPercent = function(self, record)
         if not record then return end
 --      cache the market value on the record
-        record.historical_value = record.market_value or Aux.history.value(record.item_key) or 0
+        record.historical_value = record.historical_value or Aux.history.value(record.item_key) or 0
         if record.historical_value > 0 then
             if record.unit_buyout_price > 0 then
                 return Aux.round(100 * record.unit_buyout_price / record.historical_value, 1)

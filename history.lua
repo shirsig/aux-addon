@@ -4,7 +4,7 @@ Aux.history = public
 function private.next_push()
 	local date = date('*t')
 	date.hour, date.min, date.sec = 24, 0, 0
-	return time()
+	return time(date)
 end
 
 function private.new_record()
@@ -15,6 +15,25 @@ function private.load_data()
 	local dataset = Aux.persistence.load_dataset()
 	dataset.history = dataset.history or {}
 	return dataset.history
+end
+
+function public.test()
+	local data = private.load_data()
+	for key, _ in data do
+		local record = private.read_record(key)
+		record.next_push = 0
+		private.write_record(key, record)
+	end
+end
+
+function public.test2()
+	local data = private.load_data()
+	for key, _ in data do
+		data[key] = data[key]..'5000@5000'
+		for i=1,100 do
+			data[key] = data[key]..';9999@9995'
+		end
+	end
 end
 
 function private.read_record(item_key)
@@ -57,7 +76,6 @@ function private.write_record(item_key, record)
 end
 
 function public.process_auction(auction_record)
-
 	local item_record = private.read_record(auction_record.item_key)
 
 	local unit_bid_price = ceil(auction_record.bid_price / auction_record.aux_quantity)

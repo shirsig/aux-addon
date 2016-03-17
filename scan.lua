@@ -196,7 +196,7 @@ function private.scan_auctions_helper(i, n, k)
         Aux.history.process_auction(auction_info)
 
         if not private.current_query().validator or private.current_query().validator(auction_info) then
-            return private.wait_for_callback{private.current_thread().params.on_read_auction or Aux.util.pass, auction_info, recurse }
+            return private.wait_for_callback{private.current_thread().params.on_read_auction or Aux.util.pass, auction_info, recurse}
         end
     end
 
