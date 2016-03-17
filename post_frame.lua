@@ -9,6 +9,8 @@ local selected_item
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local BUYOUT_MODE, BID_MODE, FULL_MODE = 1, 2, 3
 
+aux_post_mode = FULL_MODE
+
 function private.load_settings(item_record)
     local item_record = item_record or selected_item
     local dataset = Aux.persistence.load_dataset()
@@ -20,7 +22,6 @@ function private.load_settings(item_record)
         buyout_price = 0,
         post_all = true,
         hidden = false,
-        mode = FULL_MODE,
     }
     return dataset.post[item_record.key]
 end
@@ -778,7 +779,7 @@ function private.set_item(item)
     UIDropDownMenu_SetSelectedValue(private.duration_dropdown, settings.duration)
 
     UIDropDownMenu_Initialize(private.mode_dropdown, private.initialize_mode_dropdown)
-    UIDropDownMenu_SetSelectedValue(private.mode_dropdown, settings.mode)
+    UIDropDownMenu_SetSelectedValue(private.mode_dropdown, aux_post_mode)
 
     private.hide_checkbox:SetChecked(settings.hidden)
     private.post_all_checkbox:SetChecked(settings.post_all)
@@ -986,8 +987,7 @@ end
 function private.initialize_mode_dropdown()
     local function on_click()
         UIDropDownMenu_SetSelectedValue(private.mode_dropdown, this.value)
-        local settings = private.load_settings()
-        settings.mode = this.value
+        aux_post_mode = this.value
         private.update_recommendation()
         refresh = true
     end
