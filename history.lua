@@ -98,7 +98,7 @@ function public.value(item_key)
 
 			value = private.weighted_median(weighted_values)
 			-- not seen in the last week or not ignoring at least two high and low outliers
-			unreliable = item_record.data_points[1].time < time() - 60 * 60 * 24 * 7 or weighted_values[1].weight + (weighted_values[2] and weighted_values[2].weight or 0) >= 0.5
+			unreliable = item_record.data_points[1].time < time() - 60 * 60 * 24 * 7 or not weighted_values[2] or weighted_values[1].weight + weighted_values[2].weight >= 0.5
 		else
 			value = private.market_value(item_record)
 			unreliable = true
