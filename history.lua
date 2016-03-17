@@ -4,16 +4,16 @@ Aux.history = public
 function private.next_push()
 	local date = date('*t')
 	date.hour, date.min, date.sec = 24, 0, 0
-	return time(date)
+	return time()
 end
 
 function private.new_record()
-	return { next_push = private.next_push(), market_values = {} }
+	return { next_push = private.next_push(), data_points = {} }
 end
 
 function private.load_data()
 	local dataset = Aux.persistence.load_dataset()
-	dataset.history = dataset.history or { item_records = {} }
+	dataset.history = dataset.history or {}
 	return dataset.history
 end
 
@@ -21,15 +21,15 @@ function private.read_record(item_key)
 	local data = private.load_data()
 
 	local record
-	if data.item_records[item_key] then
-		local fields = Aux.persistence.deserialize(data.item_records[item_key], '#')
+	if data[item_key] then
+		local fields = Aux.util.split(data[item_key], '#')
 		record = {
 			next_push = tonumber(fields[1]),
-			daily_max_bid = tonumber(fields[2]),
-			daily_min_buyout = tonumber(fields[3]),
-			daily_max_price = tonumber(fields[4]),
-			market_values = Aux.util.map(Aux.persistence.deserialize(fields[5], ';'), function(value)
-				return tonumber(value)
+			daily_min_buyout = tonumber(fields[2]),
+			daily_max_price = tonumber(fields[3]),
+			data_points = Aux.util.map(Aux.persistence.deserialize(fields[4], ';'), function(data_point)
+				local market_value, time = unpack(Aux.util.split(data_point, '@'))
+				return { market_value = tonumber(market_value), time = tonumber(time) }
 			end),
 		}
 	else
@@ -46,46 +46,49 @@ end
 
 function private.write_record(item_key, record)
 	local data = private.load_data()
-	data.item_records[item_key] = Aux.persistence.serialize({
+	data[item_key] = Aux.util.join({
 		record.next_push or '',
-		record.daily_max_bid or '',
 		record.daily_min_buyout or '',
 		record.daily_max_price or '',
-		Aux.persistence.serialize(record.market_values, ';'),
+		Aux.persistence.serialize(Aux.util.map(record.data_points, function(data_point)
+			return Aux.util.join({data_point.market_value, data_point.time}, '@')
+		end), ';'),
 	},'#')
 end
 
-function public.process_auction(auction_info)
+function public.process_auction(auction_record)
 
-	local item_record = private.read_record(auction_info.item_key)
+	local item_record = private.read_record(auction_record.item_key)
 
-	local unit_high_bid = ceil(auction_info.high_bid / auction_info.aux_quantity)
-	local unit_bid_price = ceil(auction_info.bid_price / auction_info.aux_quantity)
-	local unit_buyout_price = ceil(auction_info.buyout_price / auction_info.aux_quantity)
+	local unit_bid_price = ceil(auction_record.bid_price / auction_record.aux_quantity)
+	local unit_buyout_price = ceil(auction_record.buyout_price / auction_record.aux_quantity)
 
-	if auction_info.high_bid > 0 then
-		item_record.daily_max_bid = item_record.daily_max_bid and max(item_record.daily_max_bid, unit_high_bid) or unit_high_bid
-	end
-
-	if auction_info.buyout_price > 0 then
+	if auction_record.buyout_price > 0 then
 		item_record.daily_min_buyout = item_record.daily_min_buyout and min(item_record.daily_min_buyout, unit_buyout_price) or unit_buyout_price
 	end
 
 	item_record.daily_max_price = max(item_record.daily_max_price or 0, unit_buyout_price, unit_bid_price)
 
-	private.write_record(auction_info.item_key, item_record)
+	private.write_record(auction_record.item_key, item_record)
 end
 
 function public.price_data(item_key)
 	local item_record = private.read_record(item_key)
-	return item_record.daily_max_bid, item_record.daily_min_buyout, item_record.daily_max_price, item_record.market_values
+	return item_record.daily_min_buyout, item_record.daily_max_price, item_record.data_points
 end
 
 function public.value(item_key)
 	local item_record = private.read_record(item_key)
 
-	if getn(item_record.market_values) > 0 then
-		return private.median(item_record.market_values)
+	local i = 1
+	local median_list = {}
+	while getn(median_list) <= 11 and i <= getn(item_record.data_points) do
+		tinsert(median_list, item_record.data_points[i].market_value)
+		i = i + 1
+	end
+
+	if getn(median_list) > 0 then
+		return private.median(median_list)
 	else
 		return private.market_value(item_record)
 	end
@@ -97,19 +100,7 @@ function public.market_value(item_key)
 end
 
 function private.market_value(item_record)
-	local estimate
-
-	if item_record.daily_min_buyout and item_record.daily_max_bid then
-		estimate = max(item_record.daily_min_buyout, item_record.daily_max_bid)
-	elseif item_record.daily_min_buyout then
-		estimate = item_record.daily_min_buyout
-	else
-		estimate = item_record.daily_max_bid
-	end
-
-	estimate = estimate and min(ceil(estimate * 1.15), item_record.daily_max_price)
-
-	return estimate
+	return item_record.daily_min_buyout and min(ceil(item_record.daily_min_buyout * 1.15), item_record.daily_max_price)
 end
 
 function private.median(list)
@@ -131,13 +122,12 @@ function private.push_record(item_record)
 
 	local market_value = private.market_value(item_record)
 	if market_value then
-		tinsert(item_record.market_values, market_value)
-		while getn(item_record.market_values) > 11 do
-			tremove(item_record.market_values, 1)
+		tinsert(item_record.data_points, 1, { market_value = market_value, time = time() })
+		while getn(item_record.data_points) > 100 do
+			tremove(item_record.data_points)
 		end
 	end
 
-	item_record.daily_max_bid = nil
 	item_record.daily_min_buyout = nil
 	item_record.daily_max_price = nil
 	item_record.next_push = private.next_push()

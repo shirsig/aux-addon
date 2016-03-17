@@ -77,8 +77,9 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
     value_line = value_line..(value and private.format_money(value) or '---')
 
-    local _, _, _, market_values = Aux.history.price_data(item_key)
-    if value and getn(market_values) < 5 then
+    local _, _, data_points = Aux.history.price_data(item_key)
+    -- mark as unreliable if less than 5 data points in the last month
+    if value and (not data_points[5] or data_points[5].time < time() - 60 * 60 * 24 * 30) then
         value_line = value_line..' (?)'
     end
 
