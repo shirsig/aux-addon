@@ -83,15 +83,19 @@ function public.value(item_key)
 	if not private.value_cache[item_key] then
 		local item_record = private.read_record(item_key)
 
-		local i = 1
-		local median_list = {}
-		while getn(median_list) <= 11 and i <= getn(item_record.data_points) do
-			tinsert(median_list, item_record.data_points[i].market_value)
-			i = i + 1
-		end
+		if getn(item_record.data_points) > 0 then
+			local weighted_values = {}
+			local total_weight = 0
+			for _, data_point in item_record.data_points do
+				local weight = 0.95^Aux.round((data_point.time - item_record.data_points[1].time)/(60*60*24))
+				total_weight = total_weight + weight
+				tinsert(weighted_values, {value = data_point.market_value, weight = weight})
+			end
+			for _, weighted_value in weighted_values do
+				weighted_value.weight = weighted_value.weight / total_weight
+			end
 
-		if getn(median_list) > 0 then
-			private.value_cache[item_key] = private.median(median_list)
+			private.value_cache[item_key] = private.weighted_median(weighted_values)
 		else
 			private.value_cache[item_key] = private.market_value(item_record)
 		end
@@ -109,19 +113,20 @@ function private.market_value(item_record)
 	return item_record.daily_min_buyout and min(ceil(item_record.daily_min_buyout * 1.15), item_record.daily_max_price)
 end
 
-function private.median(list)
-	if getn(list) == 0 then
-		return
-	end
-
+function private.weighted_median(list)
 	local sorted_list = {}
-	for _, v in ipairs(list) do
-		tinsert(sorted_list, v)
+	for _, e in list do
+		tinsert(sorted_list, e)
 	end
-	sort(sorted_list)
+	sort(sorted_list, function(a,b) return a.value < b.value end)
 
-	local middle = (getn(sorted_list) + 1) / 2
-	return (sorted_list[floor(middle)] + sorted_list[ceil(middle)]) / 2
+	local weight = 0
+	for _, element in sorted_list do
+		weight = weight + element.weight
+		if weight >= 0.5 then
+			return element.value
+		end
+	end
 end
 
 function private.push_record(item_record)
@@ -129,7 +134,7 @@ function private.push_record(item_record)
 	local market_value = private.market_value(item_record)
 	if market_value then
 		tinsert(item_record.data_points, 1, { market_value = market_value, time = item_record.next_push })
-		while getn(item_record.data_points) > 31 do
+		while getn(item_record.data_points) > 11 do
 			tremove(item_record.data_points)
 		end
 	end
