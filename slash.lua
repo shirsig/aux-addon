@@ -7,7 +7,7 @@ function SlashCmdList.AUX(parameter)
         Aux.persistence.load_dataset().post = nil
         Aux.log('Post settings cleared.')
     elseif parameter == 'clear' then
-        aux_database = {}
+        aux_datasets = {}
         Aux.log('Database cleared.')
     elseif parameter == 'generate item cache' then
         Aux.static.generate_cache()

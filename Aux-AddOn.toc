@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: Aux
 ## SavedVariablesPerCharacter: aux_recent_searches, aux_favorite_searches
-## SavedVariables: aux_database, aux_auctionable_items, aux_auctionable_item_ids, aux_post_mode, aux_price_per_unit, aux_tooltip_daily
+## SavedVariables: aux_datasets, aux_auctionable_items, aux_auctionable_item_ids, aux_post_mode, aux_price_per_unit, aux_tooltip_daily
 
 slash.lua
 core.xml

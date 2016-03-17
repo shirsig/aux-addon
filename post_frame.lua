@@ -11,19 +11,53 @@ local BUYOUT_MODE, BID_MODE, FULL_MODE = 1, 2, 3
 
 aux_post_mode = FULL_MODE
 
-function private.load_settings(item_record)
-    local item_record = item_record or selected_item
-    local dataset = Aux.persistence.load_dataset()
-    dataset.post = dataset.post or {}
-    dataset.post[item_record.key] = dataset.post[item_record.key] or {
+function private.default_settings()
+    return {
         duration = DURATION_8,
         stack_size = 1,
         start_price = 0,
         buyout_price = 0,
-        post_all = true,
-        hidden = false,
+        post_all = 1,
+        hidden = nil,
     }
-    return dataset.post[item_record.key]
+end
+
+function private.read_settings(item_key)
+    item_key = item_key or selected_item.key
+    local dataset = Aux.persistence.load_dataset()
+    dataset.post = dataset.post or {}
+
+    local settings
+    if dataset.post[item_key] then
+        local fields = Aux.util.split(dataset.post[item_key], '#')
+        settings = {
+            stack_size = tonumber(fields[1]),
+            duration = tonumber(fields[2]),
+            start_price = tonumber(fields[3]),
+            buyout_price = tonumber(fields[4]),
+            post_all = tonumber(fields[5]),
+            hidden = tonumber(fields[6]),
+        }
+    else
+        settings = private.default_settings()
+    end
+    return settings
+end
+
+function private.write_settings(settings, item_key)
+    item_key = item_key or selected_item.key
+
+    local dataset = Aux.persistence.load_dataset()
+    dataset.post = dataset.post or {}
+
+    dataset.post[item_key] = Aux.util.join({
+        settings.stack_size,
+        settings.duration,
+        settings.start_price,
+        settings.buyout_price,
+        tostring(settings.post_all),
+        tostring(settings.hidden),
+    }, '#')
 end
 
 function private.get_unit_start_price()
@@ -60,7 +94,7 @@ function private.update_inventory_listing()
     end
 
     Aux.item_listing.populate(private.item_listing, Aux.util.filter(inventory_records, function(record)
-        local settings = private.load_settings(record)
+        local settings = private.read_settings(record.key)
         return record.aux_quantity > 0 and (not settings.hidden or private.show_hidden_checkbox:GetChecked())
     end))
 end
@@ -246,8 +280,9 @@ function public.on_load()
             slider:SetValue(this:GetNumber())
             private.quantity_update()
             if selected_item then
-                local settings = private.load_settings()
+                local settings = private.read_settings()
                 settings.stack_size = this:GetNumber()
+                private.write_settings(settings)
             end
         end)
         slider.editbox:SetScript('OnEscapePressed', function()
@@ -281,8 +316,9 @@ function public.on_load()
         checkbox:SetHeight(22)
         checkbox:SetPoint('TOPLEFT', private.stack_size_slider, 'BOTTOMLEFT', -3, -7)
         checkbox:SetScript('OnClick', function()
-            local settings = private.load_settings()
+            local settings = private.read_settings()
             settings.post_all = this:GetChecked()
+            private.write_settings(settings)
             private.update_recommendation()
             refresh = true
         end)
@@ -348,8 +384,9 @@ function public.on_load()
         checkbox:SetHeight(22)
         checkbox:SetPoint('TOPRIGHT', -85, -6)
         checkbox:SetScript('OnClick', function()
-            local settings = private.load_settings()
+            local settings = private.read_settings()
             settings.hidden = this:GetChecked()
+            private.write_settings(settings)
             refresh = true
         end)
         local label = Aux.gui.label(checkbox, 13)
@@ -387,10 +424,11 @@ function public.on_load()
         editbox:SetWidth(150)
         editbox:SetScript('OnTextChanged', function()
             if selected_item then
-                local settings = private.load_settings()
+                local settings = private.read_settings()
                 settings.start_price = Aux.money.from_string(this:GetText())
                 local historical_value = Aux.history.value(selected_item.key)
                 private.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(settings.start_price / historical_value * 100)) or '---')
+                private.write_settings(settings)
             end
             refresh = true
         end)
@@ -435,10 +473,11 @@ function public.on_load()
         editbox:SetWidth(150)
         editbox:SetScript('OnTextChanged', function()
             if selected_item then
-                local settings = private.load_settings()
+                local settings = private.read_settings()
                 settings.buyout_price = Aux.money.from_string(this:GetText())
                 local historical_value = Aux.history.value(selected_item.key)
                 private.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(settings.buyout_price / historical_value * 100)) or '---')
+                private.write_settings(settings)
             end
             refresh = true
         end)
@@ -761,7 +800,7 @@ function private.unit_vendor_price(item_key)
 end
 
 function private.set_item(item)
-    local settings = private.load_settings(item)
+    local settings = private.read_settings(item.key)
 
     item.unit_vendor_price = private.unit_vendor_price(item.key)
     if not item.unit_vendor_price then
@@ -800,6 +839,7 @@ function private.set_item(item)
         private.refresh_entries()
     end
 
+    private.write_settings(settings, item.key)
     private.update_recommendation()
     refresh = true
 end
@@ -960,8 +1000,9 @@ function private.initialize_duration_dropdown()
 
     local function on_click()
         UIDropDownMenu_SetSelectedValue(private.duration_dropdown, this.value)
-        local settings = private.load_settings()
+        local settings = private.read_settings()
         settings.duration = this.value
+        private.write_settings(settings)
         private.update_recommendation()
     end
 

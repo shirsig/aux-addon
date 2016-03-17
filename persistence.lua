@@ -1,7 +1,7 @@
 local private, public = {}, {}
 Aux.persistence = public
 
-aux_database = {}
+aux_datasets = {}
 
 function public.on_load()
     Aux.control.as_soon_as(function() private.faction = UnitFactionGroup('player') return private.faction end, Aux.util.pass)
@@ -14,8 +14,8 @@ end
 
 function public.load_dataset()
     local dataset_key = private.get_dataset_key()
-    aux_database[dataset_key] = aux_database[dataset_key] or {}
-    return aux_database[dataset_key]
+    aux_datasets[dataset_key] = aux_datasets[dataset_key] or {}
+    return aux_datasets[dataset_key]
 end
 
 function public.serialize(data, separator, compactor)

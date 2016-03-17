@@ -1,6 +1,8 @@
 local private, public = {}, {}
 Aux.history = public
 
+private.value_cache = {}
+
 function private.next_push()
 	local date = date('*t')
 	date.hour, date.min, date.sec = 24, 0, 0
@@ -15,25 +17,6 @@ function private.load_data()
 	local dataset = Aux.persistence.load_dataset()
 	dataset.history = dataset.history or {}
 	return dataset.history
-end
-
-function public.test()
-	local data = private.load_data()
-	for key, _ in data do
-		local record = private.read_record(key)
-		record.next_push = 0
-		private.write_record(key, record)
-	end
-end
-
-function public.test2()
-	local data = private.load_data()
-	for key, _ in data do
-		data[key] = data[key]..'5000@5000'
-		for i=1,100 do
-			data[key] = data[key]..';9999@9995'
-		end
-	end
 end
 
 function private.read_record(item_key)
@@ -64,6 +47,7 @@ function private.read_record(item_key)
 end
 
 function private.write_record(item_key, record)
+	private.value_cache[item_key] = nil
 	local data = private.load_data()
 	data[item_key] = Aux.util.join({
 		record.next_push or '',
@@ -96,20 +80,24 @@ function public.price_data(item_key)
 end
 
 function public.value(item_key)
-	local item_record = private.read_record(item_key)
+	if not private.value_cache[item_key] then
+		local item_record = private.read_record(item_key)
 
-	local i = 1
-	local median_list = {}
-	while getn(median_list) <= 11 and i <= getn(item_record.data_points) do
-		tinsert(median_list, item_record.data_points[i].market_value)
-		i = i + 1
+		local i = 1
+		local median_list = {}
+		while getn(median_list) <= 11 and i <= getn(item_record.data_points) do
+			tinsert(median_list, item_record.data_points[i].market_value)
+			i = i + 1
+		end
+
+		if getn(median_list) > 0 then
+			private.value_cache[item_key] = private.median(median_list)
+		else
+			private.value_cache[item_key] = private.market_value(item_record)
+		end
 	end
 
-	if getn(median_list) > 0 then
-		return private.median(median_list)
-	else
-		return private.market_value(item_record)
-	end
+	return private.value_cache[item_key]
 end
 
 function public.market_value(item_key)
@@ -140,8 +128,8 @@ function private.push_record(item_record)
 
 	local market_value = private.market_value(item_record)
 	if market_value then
-		tinsert(item_record.data_points, 1, { market_value = market_value, time = time() })
-		while getn(item_record.data_points) > 100 do
+		tinsert(item_record.data_points, 1, { market_value = market_value, time = item_record.next_push })
+		while getn(item_record.data_points) > 31 do
 			tremove(item_record.data_points)
 		end
 	end
