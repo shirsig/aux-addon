@@ -38,7 +38,7 @@ function private.read_record(item_key)
 		record = private.new_record()
 	end
 
-	if record.next_push < time() then
+	if record.next_push <= time() then
 		private.push_record(record)
 		private.write_record(item_key, record)
 	end
@@ -80,9 +80,10 @@ function public.price_data(item_key)
 end
 
 function public.value(item_key)
-	if not private.value_cache[item_key] then
+	if not private.value_cache[item_key] or private.value_cache[item_key].next_push <= time() then
 		local item_record = private.read_record(item_key)
 
+		local value, unreliable
 		if getn(item_record.data_points) > 0 then
 			local weighted_values = {}
 			local total_weight = 0
@@ -95,13 +96,18 @@ function public.value(item_key)
 				weighted_value.weight = weighted_value.weight / total_weight
 			end
 
-			private.value_cache[item_key] = private.weighted_median(weighted_values)
+			value = private.weighted_median(weighted_values)
+			-- not seen in the last week or not ignoring at least two high and low outliers
+			unreliable = item_record.data_points[1].time < time() - 60 * 60 * 24 * 7 or weighted_values[1].weight + (weighted_values[2] and weighted_values[2].weight or 0) >= 0.5
 		else
-			private.value_cache[item_key] = private.market_value(item_record)
+			value = private.market_value(item_record)
+			unreliable = true
 		end
+
+		private.value_cache[item_key] = {value=value, unreliable=unreliable, next_push=item_record.next_push}
 	end
 
-	return private.value_cache[item_key]
+	return private.value_cache[item_key].value, private.value_cache[item_key].unreliable
 end
 
 function public.market_value(item_key)
