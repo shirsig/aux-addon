@@ -939,13 +939,11 @@ function private.refresh_entries()
 			end,
 			on_abort = function()
 				existing_auctions[item_key] = nil
-                private.update_historical_value_button()
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
 			end,
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or {}
-                private.update_historical_value_button()
 				private.update_recommendation()
                 refresh = true
                 private.status_bar:update_status(100, 100)
