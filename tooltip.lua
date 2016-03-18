@@ -5,17 +5,20 @@ local game_tooltip_hooks = {}
 
 function public.on_load()
     for func, hook in game_tooltip_hooks do
-        local old = GameTooltip[func]
-        local hook = hook
-        GameTooltip[func] = function(self, ...)
-            local result = old(unpack(Aux.util.cons(self, arg)))
-            hook(unpack(arg))
-            return result
-        end
+        local func, hook = func, hook
+        Aux.hook(
+            func,
+            function(...)
+                local results = {Aux.orig[GameTooltip][func](unpack(arg))}
+                hook(unpack(arg))
+                return unpack(results)
+            end,
+            GameTooltip
+        )
     end
-    local old = SetItemRef
+    local orig = SetItemRef
     SetItemRef = function(...)
-        local result = old(unpack(arg))
+        local result = orig(unpack(arg))
         local name, _, quality = GetItemInfo(arg[1])
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
             local _, _, _, hex = GetItemQualityColor(quality)
@@ -91,7 +94,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
     tooltip:Show()
 end
 
-function game_tooltip_hooks.SetHyperlink(itemstring)
+function game_tooltip_hooks:SetHyperlink(itemstring)
     local name, _, quality = GetItemInfo(itemstring)
     if name then
         local _, _, _, hex = GetItemQualityColor(quality)
@@ -100,7 +103,7 @@ function game_tooltip_hooks.SetHyperlink(itemstring)
     end
 end
 
-function game_tooltip_hooks.SetAuctionItem(type, index)
+function game_tooltip_hooks:SetAuctionItem(type, index)
     local link = GetAuctionItemLink(type, index)
     if link then
         local _, _, quantity = GetAuctionItemInfo(type, index)
@@ -108,7 +111,7 @@ function game_tooltip_hooks.SetAuctionItem(type, index)
     end
 end
 
-function game_tooltip_hooks.SetLootItem(slot)
+function game_tooltip_hooks:SetLootItem(slot)
     local link = GetLootSlotLink(slot)
     if link then
         local _, _, quantity = GetLootSlotInfo(slot)
@@ -116,7 +119,7 @@ function game_tooltip_hooks.SetLootItem(slot)
     end
 end
 
-function game_tooltip_hooks.SetQuestItem(qtype, slot)
+function game_tooltip_hooks:SetQuestItem(qtype, slot)
     local link = GetQuestItemLink(qtype, slot)
     if link then
         local _, _, quantity = GetQuestItemInfo(qtype, slot)
@@ -124,7 +127,7 @@ function game_tooltip_hooks.SetQuestItem(qtype, slot)
     end
 end
 
-function game_tooltip_hooks.SetQuestLogItem(qtype, slot)
+function game_tooltip_hooks:SetQuestLogItem(qtype, slot)
     local link = GetQuestLogItemLink(qtype, slot)
     if link then
         local _, _, quantity = GetQuestLogRewardInfo(slot)
@@ -132,7 +135,7 @@ function game_tooltip_hooks.SetQuestLogItem(qtype, slot)
     end
 end
 
-function game_tooltip_hooks.SetBagItem(bag, slot)
+function game_tooltip_hooks:SetBagItem(bag, slot)
     local link = GetContainerItemLink(bag, slot)
     if link then
         local _, quantity = GetContainerItemInfo(bag, slot)
@@ -140,7 +143,7 @@ function game_tooltip_hooks.SetBagItem(bag, slot)
     end
 end
 
---function game_tooltip_hooks.SetInboxItem(index)
+--function game_tooltip_hooks:SetInboxItem(index)
 --    local name, _, quantity = GetInboxItem(index)
 --
 --    for itemID = 1, 30000 do
@@ -154,14 +157,14 @@ end
 --    end
 --end
 
-function game_tooltip_hooks.SetInventoryItem(unit, slot)
+function game_tooltip_hooks:SetInventoryItem(unit, slot)
     local link = GetInventoryItemLink(unit, slot)
     if link then
         private.extend_tooltip(GameTooltip, link, 1)
     end
 end
 
-function game_tooltip_hooks.SetMerchantItem(slot)
+function game_tooltip_hooks:SetMerchantItem(slot)
     local link = GetMerchantItemLink(slot)
     if link then
         local _, _, _, quantity = GetMerchantItemInfo(slot)
@@ -169,7 +172,7 @@ function game_tooltip_hooks.SetMerchantItem(slot)
     end
 end
 
-function game_tooltip_hooks.SetCraftItem(skill, slot)
+function game_tooltip_hooks:SetCraftItem(skill, slot)
     local link, quantity
     if slot then
         link = GetCraftReagentItemLink(skill, slot)
@@ -183,14 +186,14 @@ function game_tooltip_hooks.SetCraftItem(skill, slot)
     end
 end
 
-function game_tooltip_hooks.SetCraftSpell(slot)
+function game_tooltip_hooks:SetCraftSpell(slot)
     local link = GetCraftItemLink(slot)
     if link then
         private.extend_tooltip(GameTooltip, link, 1)
     end
 end
 
-function game_tooltip_hooks.SetTradeSkillItem(skill, slot)
+function game_tooltip_hooks:SetTradeSkillItem(skill, slot)
     local link, quantity
     if slot then
         link = GetTradeSkillReagentItemLink(skill, slot)
@@ -204,7 +207,7 @@ function game_tooltip_hooks.SetTradeSkillItem(skill, slot)
     end
 end
 
-function game_tooltip_hooks.SetAuctionSellItem()
+function game_tooltip_hooks:SetAuctionSellItem()
     local name, _, quantity, _, _, _ = GetAuctionSellItemInfo()
     if name then
         for bag = 0, 4 do

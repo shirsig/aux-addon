@@ -984,7 +984,7 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
         end
 
         entry.count = entry.count + 1
-        entry.yours = entry.yours + (owner == UnitName('player') and 1 or 0)
+        entry.yours = entry.yours + (Aux.is_player(owner) and 1 or 0)
 
         return entry
 	end

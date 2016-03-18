@@ -118,41 +118,32 @@ function Aux.setup_hooks()
     end
     AuctionFrame:SetScript('OnHide', blizzard_ui_on_hide)
 
-    Aux.orig.AuctionFrame_OnShow = AuctionFrame_OnShow
-    AuctionFrame_OnShow = function()
+    Aux.hook('AuctionFrame_OnShow', function(...)
         if not Aux.blizzard_ui_shown then
             Aux.control.as_soon_as(function() return AuctionFrame:GetScript('OnHide') == blizzard_ui_on_hide end, function()
                 HideUIPanel(AuctionFrame)
             end)
         end
-        return Aux.orig.AuctionFrame_OnShow()
-    end
+        return Aux.orig.AuctionFrame_OnShow(unpack(arg))
+    end)
 
-    Aux.orig.GetOwnerAuctionItems = GetOwnerAuctionItems
-    GetOwnerAuctionItems = Aux.GetOwnerAuctionItems
-
-    Aux.orig.PickupContainerItem = PickupContainerItem
-	PickupContainerItem = Aux.PickupContainerItem
-
-    Aux.orig.SetItemRef = SetItemRef
-    SetItemRef = Aux.SetItemRef
-
-	Aux.orig.UseContainerItem = UseContainerItem
-    UseContainerItem = Aux.UseContainerItem
-
-    Aux.orig.AuctionFrameAuctions_OnEvent = AuctionFrameAuctions_OnEvent
-    AuctionFrameAuctions_OnEvent = Aux.AuctionFrameAuctions_OnEvent
+    Aux.hook('GetOwnerAuctionItems', Aux.GetOwnerAuctionItems)
+    Aux.hook('PickupContainerItem', Aux.PickupContainerItem)
+    Aux.hook('SetItemRef', Aux.SetItemRef)
+    Aux.hook('UseContainerItem', Aux.UseContainerItem)
+    Aux.hook('AuctionFrameAuctions_OnEvent', Aux.AuctionFrameAuctions_OnEvent)
 
 end
 
-function Aux.GetOwnerAuctionItems(page)
+function Aux.GetOwnerAuctionItems(...)
+    local page = arg1
     Aux.last_owner_page_requested = page
-    return Aux.orig.GetOwnerAuctionItems(page)
+    return Aux.orig.GetOwnerAuctionItems(unpack(arg))
 end
 
-function Aux.AuctionFrameAuctions_OnEvent()
+function Aux.AuctionFrameAuctions_OnEvent(...)
     if AuctionFrameAuctions:IsVisible() then
-        Aux.orig.AuctionFrameAuctions_OnEvent()
+        return Aux.orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end
 end
 
@@ -225,9 +216,10 @@ end
 
 do -- TODO make it work for other ways to pick up things
     local last_picked_up
-    function Aux.PickupContainerItem(bag, slot)
+    function Aux.PickupContainerItem(...)
+        local bag, slot = unpack(arg)
         last_picked_up = { bag, slot }
-        return Aux.orig.PickupContainerItem(bag, slot)
+        return Aux.orig.PickupContainerItem(unpack(arg))
     end
     function Aux.cursor_item()
         if last_picked_up and CursorHasItem() then
@@ -236,7 +228,8 @@ do -- TODO make it work for other ways to pick up things
     end
 end
 
-function Aux.SetItemRef(itemstring, text, button)
+function Aux.SetItemRef(...)
+    local itemstring, text, button = unpack(arg)
     if IsAltKeyDown() and AuxSearchFrame:IsVisible() then
         local item_info = Aux.static.item_info(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
@@ -245,12 +238,13 @@ function Aux.SetItemRef(itemstring, text, button)
             return
         end
     end
-    return Aux.orig.SetItemRef(itemstring, text, button)
+    return Aux.orig.SetItemRef(unpack(arg))
 end
 
-function Aux.UseContainerItem(bag, slot)
+function Aux.UseContainerItem(...)
+    local bag, slot = unpack(arg)
     if IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() then
-        return Aux.orig.UseContainerItem(bag, slot)
+        return Aux.orig.UseContainerItem(unpack(arg))
     end
 
     if AuxSearchFrame:IsVisible() then
@@ -270,7 +264,7 @@ function Aux.UseContainerItem(bag, slot)
         return
     end
 
-	return Aux.orig.UseContainerItem(bag, slot)
+	return Aux.orig.UseContainerItem(unpack(arg))
 end
 
 function Aux.quality_color(code)
@@ -338,6 +332,25 @@ end
 
 function Aux.is_player(name)
     return UnitName('player') == name -- TODO support multiple chars
+end
+
+Aux.orig = {}
+function Aux.hook(name, handler, object)
+    local orig
+    if object then
+        Aux.orig[object] = Aux.orig[object] or {}
+        orig = Aux.orig[object]
+    else
+        object = object or getfenv(0)
+        orig = Aux.orig
+    end
+
+    if orig[name] then
+        error('Already got a hook for '..name)
+    end
+
+    orig[name] = object[name]
+    object[name] = handler
 end
 
 Aux.huge = 2^100000
