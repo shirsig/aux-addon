@@ -701,8 +701,20 @@ function public.on_load()
                 StaticPopup_Show('AUX_SEARCH_SAVED_RENAME')
             elseif button == 'RightButton' and IsAltKeyDown() then
                 -- unused
-            elseif button == 'LeftButton' and IsControlKeyDown() and st == private.favorite_searches_listing then
-            elseif button == 'RightButton' and IsControlKeyDown() and st == private.favorite_searches_listing then
+            elseif button == 'LeftButton' and IsControlKeyDown() then
+                if st == private.favorite_searches_listing and data.index > 1 then
+                    local temp = aux_favorite_searches[data.index - 1]
+                    aux_favorite_searches[data.index - 1] = data.search
+                    aux_favorite_searches[data.index] = temp
+                    private.update_search_listings()
+                end
+            elseif button == 'RightButton' and IsControlKeyDown() then
+                if st == private.favorite_searches_listing and data.index < getn(aux_favorite_searches) then
+                    local temp = aux_favorite_searches[data.index + 1]
+                    aux_favorite_searches[data.index + 1] = data.search
+                    aux_favorite_searches[data.index] = temp
+                    private.update_search_listings()
+                end
             elseif button == 'LeftButton' then
                 private.search_box:SetText(data.search.filter_string)
                 public.start_search()
