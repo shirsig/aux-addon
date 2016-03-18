@@ -185,8 +185,12 @@ function public.on_load()
         btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
         btn:SetScript('OnClick', function()
             private.search_box:ClearFocus()
-            local resume = this:GetText() == 'Cont.' and arg1 ~= 'RightButton'
-            public.start_search(nil, resume)
+            if arg1 == 'RightButton' and this:GetText() == 'Cont.' then
+                aborted_search = nil
+                this:SetText('Search')
+            else
+                public.start_search(nil, this:GetText() == 'Cont.')
+            end
         end)
         private.search_button = btn
     end
