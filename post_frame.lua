@@ -430,6 +430,7 @@ function public.on_load()
                 private.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(settings.start_price / historical_value * 100)) or '---')
                 private.write_settings(settings)
             end
+            private.update_historical_value_button()
             refresh = true
         end)
         editbox:SetScript('OnTabPressed', function()
@@ -479,6 +480,7 @@ function public.on_load()
                 private.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(settings.buyout_price / historical_value * 100)) or '---')
                 private.write_settings(settings)
             end
+            private.update_historical_value_button()
             refresh = true
         end)
         editbox:SetScript('OnTabPressed', function()
@@ -939,11 +941,13 @@ function private.refresh_entries()
 			end,
 			on_abort = function()
 				existing_auctions[item_key] = nil
+                private.update_historical_value_button()
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
 			end,
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or {}
+                private.update_historical_value_button()
 				private.update_recommendation()
                 refresh = true
                 private.status_bar:update_status(100, 100)
