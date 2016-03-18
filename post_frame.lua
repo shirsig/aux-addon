@@ -61,7 +61,7 @@ function private.write_settings(settings, item_key)
 end
 
 function private.get_unit_start_price()
-    if UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == BUYOUT_MODE then
+    if aux_post_mode == BUYOUT_MODE then
         return Aux.money.from_string(private.unit_buyout_price:GetText()) or 0
     else
         return Aux.money.from_string(private.unit_start_price:GetText()) or 0
@@ -69,13 +69,13 @@ function private.get_unit_start_price()
 end
 
 function private.set_unit_start_price(amount)
-    if UIDropDownMenu_GetSelectedValue(private.mode_dropdown) ~= BUYOUT_MODE then
+    if aux_post_mode ~= BUYOUT_MODE then
         private.unit_start_price:SetText(Aux.money.to_string(amount, true, nil, 3))
     end
 end
 
 function private.get_unit_buyout_price()
-    if UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == BUYOUT_MODE or UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == FULL_MODE then
+    if aux_post_mode == BUYOUT_MODE or aux_post_mode == FULL_MODE then
         return Aux.money.from_string(private.unit_buyout_price:GetText()) or 0
     else
         return 0
@@ -83,7 +83,7 @@ function private.get_unit_buyout_price()
 end
 
 function private.set_unit_buyout_price(amount)
-    if UIDropDownMenu_GetSelectedValue(private.mode_dropdown) ~= BID_MODE then
+    if aux_post_mode ~= BID_MODE then
         private.unit_buyout_price:SetText(Aux.money.to_string(amount, true, nil, 3))
     end
 end
@@ -412,14 +412,6 @@ function public.on_load()
         editbox:SetJustifyH('RIGHT')
         editbox:SetWidth(150)
         editbox:SetScript('OnTextChanged', function()
-            if selected_item then
-                local settings = private.read_settings()
-                local input = Aux.money.from_string(this:GetText()) or 0
-                settings.start_price = input
-                local historical_value = Aux.history.value(selected_item.key)
-                private.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(input / historical_value * 100)) or '---')
-                private.write_settings(settings)
-            end
             refresh = true
         end)
         editbox:SetScript('OnTabPressed', function()
@@ -462,14 +454,6 @@ function public.on_load()
         editbox:SetJustifyH('RIGHT')
         editbox:SetWidth(150)
         editbox:SetScript('OnTextChanged', function()
-            if selected_item then
-                local settings = private.read_settings()
-                local input = Aux.money.from_string(this:GetText()) or 0
-                settings.buyout_price = input
-                local historical_value = Aux.history.value(selected_item.key)
-                private.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(input / historical_value * 100)) or '---')
-                private.write_settings(settings)
-            end
             refresh = true
         end)
         editbox:SetScript('OnTabPressed', function()
@@ -521,6 +505,28 @@ function public.on_load()
         label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
         label:SetText('Historical Value')
         private.historical_value_button = btn
+    end
+end
+
+function private.price_update()
+    if selected_item then
+        local settings = private.read_settings()
+
+        if aux_post_mode == BID_MODE or aux_post_mode == FULL_MODE then
+            local start_price_input = private.get_unit_start_price()
+            settings.start_price = start_price_input
+            local historical_value = Aux.history.value(selected_item.key)
+            private.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(start_price_input / historical_value * 100)) or '---')
+        end
+
+        if aux_post_mode == BUYOUT_MODE or aux_post_mode == FULL_MODE then
+            local buyout_price_input = private.get_unit_buyout_price()
+            settings.buyout_price = buyout_price_input
+            local historical_value = Aux.history.value(selected_item.key)
+            private.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(buyout_price_input / historical_value * 100)) or '---')
+        end
+
+        private.write_settings(settings)
     end
 end
 
@@ -643,15 +649,15 @@ function private.update_recommendation()
         private.mode_dropdown:Show()
         private.unit_start_price:ClearAllPoints()
         private.unit_buyout_price:ClearAllPoints()
-        if UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == BUYOUT_MODE then
+        if aux_post_mode == BUYOUT_MODE then
             private.unit_start_price:Hide()
             private.unit_buyout_price:SetPoint('TOPRIGHT', -65, -100)
             private.unit_buyout_price:Show()
-        elseif UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == BID_MODE then
+        elseif aux_post_mode == BID_MODE then
             private.unit_buyout_price:Hide()
             private.unit_start_price:SetPoint('TOPRIGHT', -65, -100)
             private.unit_start_price:Show()
-        elseif UIDropDownMenu_GetSelectedValue(private.mode_dropdown) == FULL_MODE then
+        elseif aux_post_mode == FULL_MODE then
             private.unit_start_price:SetPoint('TOPRIGHT', -65, -89)
             private.unit_start_price:Show()
             private.unit_buyout_price:SetPoint('TOPRIGHT', private.unit_start_price, 'BOTTOMRIGHT', 0, -15)
@@ -954,6 +960,7 @@ end
 function public.on_update()
     if refresh then
         refresh = false
+        private.price_update()
         private.update_historical_value_button()
         private.update_recommendation()
         private.update_inventory_listing()
