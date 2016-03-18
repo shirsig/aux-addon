@@ -714,7 +714,7 @@ function public.on_load()
         OnEnter = function(st, data, self)
             if not data then return end
                         GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-                        GameTooltip:AddLine(gsub(data.search.prettified, ';', '\n'), 255/255, 254/255, 250/255)
+                        GameTooltip:AddLine(gsub(data.search.prettified, ';', '\n\n'), 255/255, 254/255, 250/255, true)
                         GameTooltip:Show()
 --            GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
 --            GameTooltip:AddLine(data.search, 1, 1, 1, true)
