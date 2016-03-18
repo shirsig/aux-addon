@@ -699,6 +699,10 @@ function public.on_load()
             elseif button == 'LeftButton' and IsAltKeyDown() then
                 private.popup_info.rename = data.search
                 StaticPopup_Show('AUX_SEARCH_SAVED_RENAME')
+            elseif button == 'RightButton' and IsAltKeyDown() then
+                -- unused
+            elseif button == 'LeftButton' and IsControlKeyDown() and st == private.favorite_searches_listing then
+            elseif button == 'RightButton' and IsControlKeyDown() and st == private.favorite_searches_listing then
             elseif button == 'LeftButton' then
                 private.search_box:SetText(data.search.filter_string)
                 public.start_search()
@@ -713,25 +717,9 @@ function public.on_load()
         end,
         OnEnter = function(st, data, self)
             if not data then return end
-                        GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-                        GameTooltip:AddLine(gsub(data.search.prettified, ';', '\n\n'), 255/255, 254/255, 250/255, true)
-                        GameTooltip:Show()
---            GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
---            GameTooltip:AddLine(data.search, 1, 1, 1, true)
---            GameTooltip:AddLine("")
---            local color = TSMAPI.Design:GetInlineColor("link")
---            if st == private.frame.saved.recentST then
---                GameTooltip:AddLine(color..'Left-Click to run this search.', 1, 1, 1, true)
---                GameTooltip:AddLine(color..'Shift-Left-Click to export this search.', 1, 1, 1, true)
---                GameTooltip:AddLine(color..'Ctrl-Left-Click to rename this search.', 1, 1, 1, true)
---                GameTooltip:AddLine(color..'Right-Click to favorite this recent search.', 1, 1, 1, true)
---                GameTooltip:AddLine(color..'Shift-Right-Click to remove this recent search.', 1, 1, 1, true)
---            elseif st == private.frame.saved.favoriteST then
---                GameTooltip:AddLine(color..'Left-Click to run this search.', 1, 1, 1, true)
---                GameTooltip:AddLine(color..'Shift-Left-Click to export this search.', 1, 1, 1, true)
---                GameTooltip:AddLine(color..'Ctrl-Left-Click to rename this search.', 1, 1, 1, true)
---                GameTooltip:AddLine(color..'Right-Click to remove from favorite searches.', 1, 1, 1, true)
---            end
+            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+            GameTooltip:AddLine(gsub(data.search.prettified, ';', '\n\n'), 255/255, 254/255, 250/255, true)
+            GameTooltip:Show()
             GameTooltip:Show()
         end,
         OnLeave = function()

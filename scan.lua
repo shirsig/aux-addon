@@ -107,18 +107,18 @@ function private.owner_data_complete()
     return true
 end
 
-function private.wait_for_callback(args) -- the arguments must not be nil!
+function private.wait_for_callback(...)
 	local ok = true
 
-    local f = tremove(args, 1)
-    local k = tremove(args)
+    local f = tremove(arg, 1)
+    local k = tremove(arg)
 
 	if f then
-		tinsert(args, {
+		tinsert(arg, {
 			suspend = function() ok = false end,
 			resume = function() ok = true end,
 		})
-		f(unpack(args))
+		f(unpack(arg))
 	end
 
 	if ok then
@@ -128,17 +128,16 @@ function private.wait_for_callback(args) -- the arguments must not be nil!
 	end
 end
 
-
 function private.scan()
     local start_query_index = private.current_thread().params.start_query_index or 1
     local next_query_index = private.current_thread().params.next_query_index or function(query_index) return query_index + 1 end
 
     private.current_thread().query_index = private.current_thread().query_index and next_query_index(private.current_thread().query_index) or start_query_index
     if private.current_query() then
-        private.wait_for_callback{private.current_thread().params.on_start_query or Aux.util.pass, private.current_thread().query_index, function()
+        private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, function()
             private.current_thread().page = private.current_query().start_page
             return private.process_query()
-        end}
+        end)
     else
         local on_complete = private.current_thread().params.on_complete
         threads[private.current_thread().params.type] = nil
@@ -156,7 +155,7 @@ function private.process_query()
 
         private.scan_auctions(count, function()
 
-            private.wait_for_callback{private.current_thread().params.on_page_scanned or Aux.util.pass, function()
+            private.wait_for_callback(private.current_thread().params.on_page_scanned, function()
                 if private.current_query().next_page then
                     private.current_thread().page = private.current_query().next_page(private.current_thread().page, private.current_thread().total_pages)
                 else
@@ -168,7 +167,7 @@ function private.process_query()
                 else
                     return private.scan()
                 end
-            end}
+            end)
         end)
     end)
 end
@@ -196,7 +195,7 @@ function private.scan_auctions_helper(i, n, k)
         Aux.history.process_auction(auction_info)
 
         if not private.current_query().validator or private.current_query().validator(auction_info) then
-            return private.wait_for_callback{private.current_thread().params.on_read_auction or Aux.util.pass, auction_info, recurse}
+            return private.wait_for_callback(private.current_thread().params.on_read_auction, auction_info, recurse)
         end
     end
 
@@ -231,9 +230,9 @@ function private.submit_query(k)
                 local _, total_count = GetNumAuctionItems(private.current_thread().params.type)
                 private.current_thread().total_pages = math.ceil(total_count / PAGE_SIZE)
                 if private.current_thread().total_pages >= private.current_thread().page + 1 then
-                    private.wait_for_callback{private.current_thread().params.on_page_loaded or Aux.util.pass, private.current_thread().page, private.current_thread().total_pages, function()
+                    private.wait_for_callback(private.current_thread().params.on_page_loaded, private.current_thread().page, private.current_thread().total_pages, function()
                         return k()
-                    end}
+                    end)
                 else
                     return k()
                 end
