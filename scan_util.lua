@@ -133,7 +133,7 @@ m.filters = {
     ['min-bid'] = {
         arity = 1,
         test = function(amount)
-            amount = Aux.money.from_string(amount or '')
+            amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
                     return auction_record.unit_bid_price >= amount
@@ -147,7 +147,7 @@ m.filters = {
     ['min-buyout'] = {
         arity = 1,
         test = function(amount)
-            amount = Aux.money.from_string(amount or '')
+            amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
                     return auction_record.unit_buyout_price >= amount
@@ -161,7 +161,7 @@ m.filters = {
     ['max-bid'] = {
         arity = 1,
         test = function(amount)
-            amount = Aux.money.from_string(amount or '')
+            amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
                     return auction_record.unit_bid_price <= amount
@@ -175,7 +175,7 @@ m.filters = {
     ['max-buyout'] = {
         arity = 1,
         test = function(amount)
-            amount = Aux.money.from_string(amount or '')
+            amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
                     return auction_record.buyout_price > 0 and auction_record.unit_buyout_price <= amount
@@ -221,7 +221,7 @@ m.filters = {
     ['bid-profit'] = {
         arity = 1,
         test = function(amount)
-            amount = Aux.money.from_string(amount or '')
+            amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
                     return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
@@ -235,7 +235,7 @@ m.filters = {
     ['buyout-profit'] = {
         arity = 1,
         test = function(amount)
-            amount = Aux.money.from_string(amount or '')
+            amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
                     return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount

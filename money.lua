@@ -83,13 +83,13 @@ function m.from_string(value)
 	local gold = tonumber(({strfind(value, '(%d*%.?%d+)g')})[3])
 	local silver = tonumber(({strfind(value, '(%d*%.?%d+)s')})[3])
 	local copper = tonumber(({strfind(value, '(%d*%.?%d+)c')})[3])
---	if not gold and not silver and not copper then return end
+	if not gold and not silver and not copper then return end
 
 	-- test that there are no extra characters (other than spaces)
 	value = gsub(value, '%d*%.?%d+g', '', 1)
 	value = gsub(value, '%d*%.?%d+s', '', 1)
 	value = gsub(value, '%d*%.?%d+c', '', 1)
-	if strfind(value, '%S') then return 0 end
+	if strfind(value, '%S') then return end
 	
 	return m.from_GSC(gold or 0, silver or 0, copper or 0)
 end
