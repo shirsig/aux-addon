@@ -414,13 +414,8 @@ function public.on_load()
         editbox:SetScript('OnTextChanged', function()
             if selected_item then
                 local settings = private.read_settings()
-
-                local input = Aux.money.from_string(this:GetText())
-                if input then
-                    settings.start_price = input
-                end
-                input = input or 0
-
+                local input = Aux.money.from_string(this:GetText()) or 0
+                settings.start_price = input
                 local historical_value = Aux.history.value(selected_item.key)
                 private.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(input / historical_value * 100)) or '---')
                 private.write_settings(settings)
@@ -469,13 +464,8 @@ function public.on_load()
         editbox:SetScript('OnTextChanged', function()
             if selected_item then
                 local settings = private.read_settings()
-
-                local input = Aux.money.from_string(this:GetText())
-                if input then
-                    settings.buyout_price = input
-                end
-                input = input or 0
-
+                local input = Aux.money.from_string(this:GetText()) or 0
+                settings.buyout_price = input
                 local historical_value = Aux.history.value(selected_item.key)
                 private.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(input / historical_value * 100)) or '---')
                 private.write_settings(settings)
