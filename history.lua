@@ -88,7 +88,7 @@ function public.value(item_key)
 			local weighted_values = {}
 			local total_weight = 0
 			for _, data_point in item_record.data_points do
-				local weight = 0.95^Aux.round((data_point.time - item_record.data_points[1].time)/(60*60*24))
+				local weight = 0.95^Aux.round((data_point.time - item_record.data_points[1].time) / (60*60*24))
 				total_weight = total_weight + weight
 				tinsert(weighted_values, {value = data_point.market_value, weight = weight})
 			end
@@ -97,8 +97,8 @@ function public.value(item_key)
 			end
 
 			value = private.weighted_median(weighted_values)
-			-- not seen in the last week or not ignoring at least two high and low outliers
-			unreliable = item_record.data_points[1].time < time() - 60 * 60 * 24 * 7 or not weighted_values[2] or weighted_values[1].weight + weighted_values[2].weight >= 0.5
+			-- not seen at least 3 times in the last two weeks or not ignoring at least two high and low outliers
+			unreliable = not weighted_values[3] or item_record.data_points[3].time < time() - 60*60*24*7*2 or weighted_values[1].weight + weighted_values[2].weight >= 0.5
 		else
 			value = private.market_value(item_record)
 			unreliable = true

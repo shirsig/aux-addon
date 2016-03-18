@@ -799,6 +799,12 @@ function private.unit_vendor_price(item_key)
     end
 end
 
+function private.update_historical_value_button()
+    local historical_value = Aux.history.value(selected_item.key)
+    private.historical_value_button.amount = historical_value
+    private.historical_value_button:SetText(Aux.money.to_string(historical_value or 0, true, nil, 3))
+end
+
 function private.set_item(item)
     local settings = private.read_settings(item.key)
 
@@ -831,9 +837,7 @@ function private.set_item(item)
     private.set_unit_start_price(settings.start_price)
     private.set_unit_buyout_price(settings.buyout_price)
 
-    local historical_value = Aux.history.value(selected_item.key)
-    private.historical_value_button.amount = historical_value
-    private.historical_value_button:SetText(Aux.money.to_string(historical_value or 0, true, nil, 3))
+    private.update_historical_value_button()
 
     if not existing_auctions[selected_item.key] then
         private.refresh_entries()
@@ -935,11 +939,13 @@ function private.refresh_entries()
 			end,
 			on_abort = function()
 				existing_auctions[item_key] = nil
+                private.update_historical_value_button()
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
 			end,
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or {}
+                private.update_historical_value_button()
 				private.update_recommendation()
                 refresh = true
                 private.status_bar:update_status(100, 100)
