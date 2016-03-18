@@ -71,17 +71,11 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
     local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
-    local value, unreliable = Aux.history.value(item_key)
+    local value = Aux.history.value(item_key)
 
     local value_line = 'Value: '
 
     value_line = value_line..(value and private.format_money(value) or '---')
-
-    local _, _, data_points = Aux.history.price_data(item_key)
-    -- mark as unreliable if less than 5 data points in the last month
-    if value and unreliable then
-        value_line = value_line..' (?)'
-    end
 
     tooltip:AddLine(value_line, 0.1, 0.8, 0.5)
 
