@@ -143,7 +143,7 @@ function private.update_auction_listing()
             tinsert(auction_rows, {
                 cols = {
                     { value=auction_record.count },
-                    { value=auction_record.yours },
+                    { value=auction_record.yours > 0 and GREEN_FONT_COLOR_CODE..auction_record.yours..FONT_COLOR_CODE_CLOSE or auction_record.yours },
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=auction_record.stack_size == stack_size and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size },
                     { value=Aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
