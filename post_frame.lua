@@ -761,9 +761,11 @@ function private.unit_vendor_price(item_key)
 end
 
 function private.update_historical_value_button()
-    local historical_value = Aux.history.value(selected_item.key)
-    private.historical_value_button.amount = historical_value
-    private.historical_value_button:SetText(Aux.money.to_string(historical_value or 0, true, nil, 3))
+    if selected_item then
+        local historical_value = Aux.history.value(selected_item.key)
+        private.historical_value_button.amount = historical_value
+        private.historical_value_button:SetText(Aux.money.to_string(historical_value or 0, true, nil, 3))
+    end
 end
 
 function private.set_item(item)
