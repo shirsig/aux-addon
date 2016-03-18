@@ -136,7 +136,7 @@ function Aux.setup_hooks()
 end
 
 function Aux.GetOwnerAuctionItems(...)
-    local page = arg1
+    local page = arg[1]
     Aux.last_owner_page_requested = page
     return Aux.orig.GetOwnerAuctionItems(unpack(arg))
 end
