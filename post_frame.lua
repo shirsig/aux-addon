@@ -319,7 +319,6 @@ function public.on_load()
             local settings = private.read_settings()
             settings.post_all = this:GetChecked()
             private.write_settings(settings)
-            private.update_recommendation()
             refresh = true
         end)
         local label = Aux.gui.label(checkbox, 13)
@@ -394,16 +393,6 @@ function public.on_load()
         label:SetText('Hide this item')
         private.hide_checkbox = checkbox
     end
---    do
---        local checkbox = CreateFrame('CheckButton', nil, AuxSellParameters, 'UICheckButtonTemplate')
---        checkbox:SetWidth(22)
---        checkbox:SetHeight(22)
---        checkbox:SetPoint('TOPRIGHT', -110, -25)
---        local label = Aux.gui.label(checkbox, 13)
---        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 2)
---        label:SetText('Enable batch posting')
---        private.batch_posting_checkbox = checkbox
---    end
     do
         local dropdown = Aux.gui.dropdown(AuxSellParameters)
         dropdown:SetPoint('TOPRIGHT', -15, -42)
@@ -430,7 +419,6 @@ function public.on_load()
                 private.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(settings.start_price / historical_value * 100)) or '---')
                 private.write_settings(settings)
             end
-            private.update_historical_value_button()
             refresh = true
         end)
         editbox:SetScript('OnTabPressed', function()
@@ -480,7 +468,6 @@ function public.on_load()
                 private.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(settings.buyout_price / historical_value * 100)) or '---')
                 private.write_settings(settings)
             end
-            private.update_historical_value_button()
             refresh = true
         end)
         editbox:SetScript('OnTabPressed', function()
@@ -543,11 +530,7 @@ function public.on_open()
 
     private.update_inventory_records()
 
---    if selected_item then
---        public.select_item(selected_item.key)
---    end
-
-    private.update_recommendation()
+    refresh = true
 end
 
 function public.on_close()
@@ -602,34 +585,11 @@ function private.post_auctions()
                     end
                 end
 
-                private.update_recommendation()
                 refresh = true
 			end
 		)
 	end
 end
-
---function private.select_auction()
---	if not existing_auctions[selected_item.key].selected and getn(existing_auctions[selected_item.key]) > 0 then
---		local cheapest_for_size = {}
---		local cheapest
---
---		for _, auction_entry in ipairs(existing_auctions[selected_item.key]) do
---			if not cheapest_for_size[auction_entry.stack_size] or cheapest_for_size[auction_entry.stack_size].unit_buyout_price >= auction_entry.unit_buyout_price then
---				cheapest_for_size[auction_entry.stack_size] = auction_entry
---			end
---
---			if not cheapest or cheapest.unit_buyout_price > auction_entry.unit_buyout_price then
---				cheapest = auction_entry
---			end
---		end
---
---        local auction = cheapest_for_size[private.stack_size_slider:GetValue()] or cheapest
---
---        existing_auctions[selected_item.key].selected = auction
---        refresh = true
---	end
---end
 
 function private.validate_parameters()
 
@@ -759,7 +719,6 @@ function private.quantity_update()
     if selected_item then
         private.stack_count_slider:SetMinMaxValues(1, selected_item.charges and selected_item.availability[private.stack_size_slider:GetValue()] or floor(selected_item.availability[0] / private.stack_size_slider:GetValue()))
     end
-	private.update_recommendation()
     refresh = true
 end
 
@@ -820,7 +779,6 @@ function private.set_item(item)
     Aux.scan.abort('list')
 
     selected_item = item
-    refresh = true
 
     UIDropDownMenu_Initialize(private.duration_dropdown, private.initialize_duration_dropdown) -- TODO, wtf, why is this needed
     UIDropDownMenu_SetSelectedValue(private.duration_dropdown, settings.duration)
@@ -839,14 +797,11 @@ function private.set_item(item)
     private.set_unit_start_price(settings.start_price)
     private.set_unit_buyout_price(settings.buyout_price)
 
-    private.update_historical_value_button()
-
     if not existing_auctions[selected_item.key] then
         private.refresh_entries()
     end
 
     private.write_settings(settings, item.key)
-    private.update_recommendation()
     refresh = true
 end
 
@@ -948,7 +903,6 @@ function private.refresh_entries()
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or {}
                 private.update_historical_value_button()
-				private.update_recommendation()
                 refresh = true
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
@@ -960,7 +914,6 @@ end
 function private.refresh()
 	Aux.scan.abort('list')
     private.refresh_entries()
-    private.update_recommendation()
     refresh = true
 end
 
@@ -997,6 +950,8 @@ end
 function public.on_update()
     if refresh then
         refresh = false
+        private.update_historical_value_button()
+        private.update_recommendation()
         private.update_inventory_listing()
         private.update_auction_listing()
     end
@@ -1011,7 +966,7 @@ function private.initialize_duration_dropdown()
         local settings = private.read_settings()
         settings.duration = this.value
         private.write_settings(settings)
-        private.update_recommendation()
+        refresh = true
     end
 
     UIDropDownMenu_AddButton{
@@ -1037,7 +992,6 @@ function private.initialize_mode_dropdown()
     local function on_click()
         UIDropDownMenu_SetSelectedValue(private.mode_dropdown, this.value)
         aux_post_mode = this.value
-        private.update_recommendation()
         refresh = true
     end
 
