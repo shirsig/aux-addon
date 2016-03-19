@@ -770,10 +770,9 @@ function public.start_search(filter_string, resume)
     end
 
     local queries = aborted_search
+    Aux.scan.abort('list')
     aborted_search = nil
     private.search_button:SetText('Search')
-
-    Aux.scan.abort('list')
 
     if filter_string then
         private.search_box:SetText(filter_string)
