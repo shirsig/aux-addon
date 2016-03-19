@@ -63,7 +63,7 @@ function private.update_search_listings()
 
     local recent_search_rows = {}
     for i, recent_search in ipairs(aux_recent_searches) do
-        local name = recent_search.name or recent_search.prettified
+        local name = recent_search.name and LIGHTYELLOW_FONT_COLOR_CODE..recent_search.name..FONT_COLOR_CODE_CLOSE or recent_search.prettified
         tinsert(recent_search_rows, {
             cols = {{value=name}},
             search = recent_search,

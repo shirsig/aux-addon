@@ -321,3 +321,41 @@ function public.split(str, separator)
 		end
 	end
 end
+
+function public.format_money(money, exact, color)
+	color = color or '|r'
+
+	local TEXT_NONE = '0'
+
+	local GSC_GOLD = 'ffd100'
+	local GSC_SILVER = 'e6e6e6'
+	local GSC_COPPER = 'c8602c'
+	local GSC_START = '|cff%s%d|r'
+	local GSC_PART = color..'.|cff%s%02d|r'
+	local GSC_NONE = '|cffa0a0a0'..TEXT_NONE..'|r'
+
+	if not exact and money >= 10000 then
+		-- Round to nearest silver
+		money = math.floor(money / 100 + 0.5) * 100
+	end
+	local g, s, c = Aux.money.to_GSC(money)
+
+	local gsc = ''
+
+	local fmt = GSC_START
+	if g > 0 then
+		gsc = gsc..string.format(fmt, GSC_GOLD, g)
+		fmt = GSC_PART
+	end
+	if s > 0 or c > 0 then
+		gsc = gsc..string.format(fmt, GSC_SILVER, s)
+		fmt = GSC_PART
+	end
+	if c > 0 then
+		gsc = gsc..string.format(fmt, GSC_COPPER, c)
+	end
+	if gsc == '' then
+		gsc = GSC_NONE
+	end
+	return gsc
+end

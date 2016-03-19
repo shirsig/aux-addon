@@ -29,42 +29,6 @@ function public.on_load()
     end
 end
 
-function private.format_money(money, exact)
-    local TEXT_NONE = '0'
-
-    local GSC_GOLD = 'ffd100'
-    local GSC_SILVER = 'e6e6e6'
-    local GSC_COPPER = 'c8602c'
-    local GSC_START = '|cff%s%d|r'
-    local GSC_PART = '.|cff%s%02d|r'
-    local GSC_NONE = '|cffa0a0a0'..TEXT_NONE..'|r'
-
-    if not exact and money >= 10000 then
-        -- Round to nearest silver
-        money = math.floor(money / 100 + 0.5) * 100
-    end
-    local g, s, c = Aux.money.to_GSC(money)
-
-    local gsc = ''
-
-    local fmt = GSC_START
-    if g > 0 then
-        gsc = gsc..string.format(fmt, GSC_GOLD, g)
-        fmt = GSC_PART
-    end
-    if s > 0 or c > 0 then
-        gsc = gsc..string.format(fmt, GSC_SILVER, s)
-        fmt = GSC_PART
-    end
-    if c > 0 then
-        gsc = gsc..string.format(fmt, GSC_COPPER, c)
-    end
-    if gsc == '' then
-        gsc = GSC_NONE
-    end
-    return gsc
-end
-
 function private.extend_tooltip(tooltip, hyperlink, quantity)
     local item_id, suffix_id = Aux.info.parse_hyperlink(hyperlink)
 
@@ -78,17 +42,19 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
     local value_line = 'Value: '
 
-    value_line = value_line..(value and private.format_money(value) or '---')
+    value_line = value_line..(value and Aux.util.format_money(value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
 
-    tooltip:AddLine(value_line, 0.1, 0.8, 0.5)
+    local color = {r=1.0, g=1.0, b=0.6}
+
+    tooltip:AddLine(value_line, color.r, color.g, color.b)
 
     if aux_tooltip_daily then
         local market_value = Aux.history.market_value(item_key)
 
         local market_value_line = 'Today: '
-        market_value_line = market_value_line..(market_value and private.format_money(market_value)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or '---')
+        market_value_line = market_value_line..(market_value and Aux.util.format_money(market_value)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
 
-        tooltip:AddLine(market_value_line, 0.1, 0.8, 0.5)
+        tooltip:AddLine(market_value_line, color.r, color.g, color.b)
     end
 
     tooltip:Show()

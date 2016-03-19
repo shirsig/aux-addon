@@ -74,8 +74,69 @@ function Aux.on_event()
 end
 
 function Aux.on_addon_loaded()
-    if string.lower(arg1) == 'blizzard_auctionui' then
+    if arg1 == 'Blizzard_AuctionUI' then
         Aux.setup_hooks()
+    end
+
+    do
+        local function cost_label(cost)
+            local label = LIGHTYELLOW_FONT_COLOR_CODE..'(Total cost: '..FONT_COLOR_CODE_CLOSE
+            label = label..(cost and Aux.util.format_money(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
+            label = label..LIGHTYELLOW_FONT_COLOR_CODE..')'..FONT_COLOR_CODE_CLOSE
+            return label
+        end
+
+        if arg1 == 'Blizzard_CraftUI' then
+            Aux.hook('CraftFrame_SetSelection', function(...)
+                local results = {Aux.orig.CraftFrame_SetSelection(unpack(arg)) }
+
+                local id = GetCraftSelectionIndex()
+                local reagent_count = GetCraftNumReagents(id)
+
+                local total_cost = 0
+                for i=1,reagent_count do
+                    local item_id, suffix_id = Aux.info.parse_hyperlink(GetCraftReagentItemLink(id, i))
+                    local count = ({GetCraftReagentInfo(id, i)})[3]
+                    local value = Aux.history.value(item_id..':'..suffix_id)
+                    if not value then
+                        total_cost = nil
+                        break
+                    else
+                        total_cost = total_cost + value * count
+                    end
+                end
+
+                CraftReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
+
+                return unpack(results)
+            end)
+        end
+
+        if arg1 == 'Blizzard_TradeSkillUI' then
+            Aux.hook('TradeSkillFrame_SetSelection', function(...)
+                local results = {Aux.orig.TradeSkillFrame_SetSelection(unpack(arg)) }
+
+                local id = GetTradeSkillSelectionIndex()
+                local reagent_count = GetTradeSkillNumReagents(id)
+
+                local total_cost = 0
+                for i=1,reagent_count do
+                    local item_id, suffix_id = Aux.info.parse_hyperlink(GetTradeSkillReagentItemLink(id, i))
+                    local count = ({GetTradeSkillReagentInfo(id, i)})[3]
+                    local value = Aux.history.value(item_id..':'..suffix_id)
+                    if not value then
+                        total_cost = nil
+                        break
+                    else
+                        total_cost = total_cost + value * count
+                    end
+                end
+
+                TradeSkillReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
+
+                return unpack(results)
+            end)
+        end
     end
 end
 
