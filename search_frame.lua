@@ -10,27 +10,35 @@ private.popup_info = {
     rename = {}
 }
 
-StaticPopupDialogs['AUX_SEARCH_SAVED_RENAME'] = {
-    text = 'Enter a new name for this search.',
-    button1 = 'Accept',
-    button2 = 'Cancel',
-    hasEditBox = 1,
-    OnShow = function()
-        local rename_info = private.popup_info.rename
-        local edit_box = getglobal(this:GetName()..'EditBox')
-        edit_box:SetText(rename_info.name or '')
-        edit_box:HighlightText()
-        edit_box:SetFocus()
-        edit_box:SetScript('OnEscapePressed', function() StaticPopup_Hide('AUX_SEARCH_SAVED_RENAME') end)
-        edit_box:SetScript('OnEnterPressed', function() getglobal(this:GetParent():GetName()..'Button1'):Click() end)
-    end,
-    OnAccept = function()
+do
+    local function action()
         private.popup_info.rename.name = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
         private.update_search_listings()
-    end,
-    timeout = 0,
-    hideOnEscape = 1,
-}
+    end
+
+    StaticPopupDialogs['AUX_SEARCH_SAVED_RENAME'] = {
+        text = 'Enter a new name for this search.',
+        button1 = 'Accept',
+        button2 = 'Cancel',
+        hasEditBox = 1,
+        OnShow = function()
+            local rename_info = private.popup_info.rename
+            local edit_box = getglobal(this:GetName()..'EditBox')
+            edit_box:SetText(rename_info.name or '')
+            edit_box:HighlightText()
+        end,
+        OnAccept = action,
+        EditBoxOnEnterPressed = function()
+            action()
+            this:GetParent():Hide()
+        end,
+        EditBoxOnEscapePressed = function()
+            this:GetParent():Hide()
+        end,
+        timeout = 0,
+        hideOnEscape = 1,
+    }
+end
 
 local RESULTS, SAVED, FILTER = {}, {}, {}
 
