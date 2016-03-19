@@ -498,8 +498,10 @@ function public.on_load()
         btn:GetFontString():SetJustifyH('RIGHT')
         btn:GetFontString():SetPoint('RIGHT', 0, 0)
         btn:SetScript('OnClick', function()
-            private.set_unit_start_price(this.amount or 0)
-            private.set_unit_buyout_price(this.amount or 0)
+            if this.amount then
+                private.set_unit_start_price(this.amount)
+                private.set_unit_buyout_price(this.amount)
+            end
         end)
         local label = Aux.gui.label(btn, 13)
         label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
@@ -772,7 +774,7 @@ function private.update_historical_value_button()
     if selected_item then
         local historical_value = Aux.history.value(selected_item.key)
         private.historical_value_button.amount = historical_value
-        private.historical_value_button:SetText(Aux.money.to_string(historical_value or 0, true, nil, 3))
+        private.historical_value_button:SetText(historical_value and Aux.money.to_string(historical_value, true, nil, 3) or '---')
     end
 end
 
@@ -804,8 +806,8 @@ function private.set_item(item)
     private.quantity_update()
     private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
 
-    private.set_unit_start_price(settings.start_price)
-    private.set_unit_buyout_price(settings.buyout_price)
+    private.unit_start_price:SetText(Aux.money.to_string(settings.start_price, true, nil, 3))
+    private.unit_buyout_price:SetText(Aux.money.to_string(settings.buyout_price, true, nil, 3))
 
     if not existing_auctions[selected_item.key] then
         private.refresh_entries()
