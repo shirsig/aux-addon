@@ -252,7 +252,8 @@ m.filters = {
             amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
-                    return Aux.disenchant.value(auction_record.item_id) and Aux.disenchant.value(auction_record.item_id) - auction_record.bid_price >= amount
+                    local disenchant_value = Aux.disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
+                    return disenchant_value and disenchant_value - auction_record.bid_price >= amount
                 end
             else
                 return false, {}, 'Erroneous Bid Disenchant Profit Modifier'
@@ -266,7 +267,8 @@ m.filters = {
             amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
-                    return Aux.disenchant.value(auction_record.item_id) and Aux.disenchant.value(auction_record.item_id) - auction_record.buyout_price >= amount
+                    local disenchant_value = Aux.disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
+                    return disenchant_value and disenchant_value - auction_record.buyout_price >= amount
                 end
             else
                 return false, {}, 'Erroneous Buyout Disenchant Profit Modifier'
