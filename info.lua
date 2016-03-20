@@ -255,10 +255,17 @@ function public.load_tooltip(frame, tooltip)
     end
 end
 
-function public.display_name(item_id)
+function public.display_name(item_id, plain, uncolored)
     local item_info = Aux.info.item(item_id)
     if item_info then
-        return ({GetItemQualityColor(item_info.quality)})[4]..'['..item_info.name..']'..'|r'
+        local name = item_info.name
+        if not plain then
+            name = '['..name..']'
+        end
+        if not uncolored then
+            name = ({GetItemQualityColor(item_info.quality)})[4]..name..FONT_COLOR_CODE_CLOSE
+        end
+        return name
     end
 end
 
