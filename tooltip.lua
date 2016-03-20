@@ -73,7 +73,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
                 tooltip:AddLine('Disenchants into:', color.r, color.g, color.b)
                 sort(distribution, function(a,b) return a.probability > b.probability end)
                 for _, event in distribution do
-                    tooltip:AddLine(format('  %s%% %s x%s', event.probability * 100, Aux.info.display_name(event.item_id, true) or event.item_id, event.quantity), color.r, color.g, color.b)
+                    tooltip:AddLine(format('  %s%% %s x%s', event.probability * 100, Aux.info.display_name(event.item_id, true) or 'item:'..event.item_id, event.quantity), color.r, color.g, color.b)
                 end
             end
 
