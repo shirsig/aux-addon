@@ -606,7 +606,7 @@ function m.suggestions(blizzard_filter, num_parts)
 
     -- item names
     if num_parts == 1 and blizzard_filter.name == '' then
-        for _, name in ipairs(Aux.item_cache.sorted_auctionable_items()) do
+        for _, name in aux_auctionable_items do
             tinsert(suggestions, name..'/exact')
         end
     end
