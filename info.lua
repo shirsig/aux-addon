@@ -216,12 +216,26 @@ function public.set_shopping_tooltip(slot)
     end
 end
 
-function public.tooltip_match(pattern, tooltip)
+function public.tooltip_match(entry, tooltip)
     return Aux.util.any(tooltip, function(line)
-        local left_match = line.left_text and strupper(line.left_text) == strupper(pattern)
-        local right_match = line.right_text and strupper(line.right_text) == strupper(pattern)
+        local left_match = line.left_text and strupper(line.left_text) == strupper(entry)
+        local right_match = line.right_text and strupper(line.right_text) == strupper(entry)
         return left_match or right_match
     end)
+end
+
+function public.tooltip_find(pattern, tooltip)
+    local count = 0
+    for _, line in ipairs(tooltip) do
+        if line.left_text and strfind(line.left_text, pattern) then
+            count = count + 1
+        end
+        if line.right_text and strfind(line.right_text, pattern) then
+            count = count + 1
+        end
+    end
+
+    return count
 end
 
 function public.load_tooltip(frame, tooltip)
@@ -253,13 +267,13 @@ function public.display_name(item_id, plain, uncolored)
 end
 
 function public.auctionable(tooltip, quality, lootable)
-    local durability, max_durability = Aux.info.durability(tooltip)
+    local durability, max_durability = public.durability(tooltip)
     return not lootable
             and (not quality or quality < 6)
-            and not Aux.info.tooltip_match(ITEM_BIND_ON_PICKUP, tooltip)
-            and not Aux.info.tooltip_match(ITEM_BIND_QUEST, tooltip)
-            and not Aux.info.tooltip_match(ITEM_SOULBOUND, tooltip)
-            and not Aux.info.tooltip_match(ITEM_CONJURED, tooltip)
+            and not public.tooltip_match(ITEM_BIND_ON_PICKUP, tooltip)
+            and not public.tooltip_match(ITEM_BIND_QUEST, tooltip)
+            and not public.tooltip_match(ITEM_SOULBOUND, tooltip)
+            and (not public.tooltip_match(ITEM_CONJURED, tooltip) or public.tooltip_find(ITEM_MIN_LEVEL, tooltip) > 1)
             and not (durability and durability < max_durability)
 end
 
@@ -302,16 +316,7 @@ function public.tooltip(setter)
 end
 
 function private.item_charges(tooltip)
-    local use_entry_count = 0
-    for _, line in ipairs(tooltip) do
-        if strfind(line.left_text or '', ITEM_SPELL_TRIGGER_ONUSE) then
-            use_entry_count = use_entry_count + 1
-        end
-        if strfind(line.right_text or '', ITEM_SPELL_TRIGGER_ONUSE) then
-            use_entry_count = use_entry_count + 1
-        end
-    end
-    if use_entry_count > 1 then -- it's presumably a recipe
+    if public.tooltip_find(ITEM_SPELL_TRIGGER_ONUSE, tooltip) > 1 then -- it's presumably a recipe
         return
     end
 
