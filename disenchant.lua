@@ -80,11 +80,11 @@ function public.value(slot, quality, level)
 end
 
 function public.distribution(slot, quality, level)
-    if not (armor[slot] or weapon[slot]) then
+    if not (armor[slot] or weapon[slot]) or level == 0 then
         return {}
     end
 
-    local function p(probability_weapon, probability_armor)
+    local function p(probability_armor, probability_weapon)
         if armor[slot] then
             return probability_armor
         elseif weapon[slot] then
