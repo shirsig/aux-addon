@@ -271,6 +271,36 @@ m.filters = {
         end
     },
 
+    ['bid-vendor-profit'] = {
+        arity = 1,
+        test = function(amount)
+            amount = Aux.money.from_string(amount or '') or 0
+            if amount > 0 then
+                return function(auction_record)
+                    local vendor_price = Aux.merchant.info(auction_record.item_id)
+                    return vendor_price and vendor_price * auction_record.aux_quantity - auction_record.bid_price >= amount
+                end
+            else
+                return false, {}, 'Erroneous Bid Vendor Profit Modifier'
+            end
+        end
+    },
+
+    ['buyout-vendor-profit'] = {
+        arity = 1,
+        test = function(amount)
+            amount = Aux.money.from_string(amount or '') or 0
+            if amount > 0 then
+                return function(auction_record)
+                    local vendor_price = Aux.merchant.info(auction_record.item_id)
+                    return vendor_price and vendor_price * auction_record.aux_quantity - auction_record.buyout_price >= amount
+                end
+            else
+                return false, {}, 'Erroneous Buyout Vendor Profit Modifier'
+            end
+        end
+    },
+
     ['discard'] = {
         arity = 0,
         test = function()

@@ -62,7 +62,6 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
     end
 
     local item_info = Aux.info.item(item_id)
-
     if item_info then
         local distribution = Aux.disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
 
@@ -84,6 +83,23 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
                 local disenchant_value = Aux.disenchant.value(item_info.slot, item_info.quality, item_info.level)
                 tooltip:AddLine('Disenchant Value: '..(disenchant_value and Aux.util.format_money(disenchant_value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
             end
+        end
+    end
+
+    if aux_tooltip_vendor_buy then
+        local color = {r=0.8, g=0.5, b=0.1}
+
+        local _, price, limited = Aux.merchant.info(item_id)
+        if price then
+            tooltip:AddLine('Vendor Buy '..(limited and '(limited): ' or ': ')..Aux.util.format_money(price), color.r, color.g, color.b)
+        end
+    end
+    if aux_tooltip_vendor_sell then
+        local color = {r=0.8, g=0.5, b=0.1}
+
+        local price = Aux.merchant.info(item_id)
+        if price then
+            tooltip:AddLine('Vendor Sell: '..Aux.util.format_money(price), color.r, color.g, color.b)
         end
     end
 

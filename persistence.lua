@@ -12,8 +12,8 @@ function private.get_dataset_key()
 	return private.realm..'|'..private.faction
 end
 
-function public.blizzard_boolean(bool)
-    return bool and 1 or nil
+function public.blizzard_boolean(boolean)
+    return boolean and 1 or nil
 end
 
 function public.load_dataset()

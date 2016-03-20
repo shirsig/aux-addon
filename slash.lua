@@ -24,6 +24,12 @@ function SlashCmdList.AUX(parameter)
     elseif parameter == 'tooltip daily' then
         aux_tooltip_daily = not aux_tooltip_daily
         Aux.log('Market value in tooltip '..(aux_tooltip_daily and 'enabled' or 'disabled')..'.')
+    elseif parameter == 'tooltip vendor buy' then
+        aux_tooltip_vendor_buy = not aux_tooltip_vendor_buy
+        Aux.log('Vendor buy price in tooltip '..(aux_tooltip_vendor_buy and 'enabled' or 'disabled')..'.')
+    elseif parameter == 'tooltip vendor sell' then
+        aux_tooltip_vendor_sell = not aux_tooltip_vendor_sell
+        Aux.log('Vendor sell price in tooltip '..(aux_tooltip_vendor_sell and 'enabled' or 'disabled')..'.')
     elseif parameter == 'tooltip disenchant value' then
         aux_tooltip_disenchant_value = not aux_tooltip_disenchant_value
         Aux.log('Disenchant value in tooltip '..(aux_tooltip_disenchant_value and 'enabled' or 'disabled')..'.')
