@@ -562,7 +562,6 @@ function m.suggestions(blizzard_filter, num_parts)
     local suggestions = {}
 
     if blizzard_filter.name
-            and Aux.static.item_id(strupper(blizzard_filter.name))
             and not blizzard_filter.min_level
             and not blizzard_filter.max_level
             and not blizzard_filter.class

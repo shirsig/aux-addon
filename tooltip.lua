@@ -2,6 +2,8 @@ local private, public = {}, {}
 Aux.tooltip = public
 
 local game_tooltip_hooks = {}
+local hooked_setter
+local game_tooltip_money
 
 function public.on_load()
     for func, hook in game_tooltip_hooks do
@@ -9,7 +11,10 @@ function public.on_load()
         Aux.hook(
             func,
             function(...)
-                local results = {Aux.orig[GameTooltip][func](unpack(arg))}
+                hooked_setter = true
+                game_tooltip_money = 0
+                local results = {Aux.orig[GameTooltip][func](unpack(arg)) }
+                hooked_setter = false
                 hook(unpack(arg))
                 return unpack(results)
             end,
@@ -27,6 +32,14 @@ function public.on_load()
         end
         return result
     end
+    local orig = GameTooltip:GetScript('OnTooltipAddMoney')
+    GameTooltip:SetScript('OnTooltipAddMoney', function(...)
+        if hooked_setter then
+            game_tooltip_money = arg1
+        else
+            return orig(unpack(arg))
+        end
+    end)
 end
 
 function private.extend_tooltip(tooltip, hyperlink, quantity)
@@ -98,6 +111,9 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
         end
     end
 
+    if tooltip == GameTooltip and game_tooltip_money > 0 then
+        SetTooltipMoney(tooltip, game_tooltip_money)
+    end
     tooltip:Show()
 end
 

@@ -262,10 +262,11 @@ function public.tooltip(setter)
 	end
 	
 	AuxInfoTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+    AuxInfoTooltip.money = 0
 	setter(AuxInfoTooltip)
 	AuxInfoTooltip:Show()
 	
-	local tooltip = {}
+	local tooltip = { money=AuxInfoTooltip.money }
 	for i = 1, TOOLTIP_LENGTH do
 
 		local left_text = getglobal('AuxInfoTooltipTextLeft'..i):GetText()

@@ -8,6 +8,9 @@
             <OnUpdate>
                 Aux.info.reanchor_tooltip()
             </OnUpdate>
+            <OnTooltipAddMoney>
+                this.money = arg1
+            </OnTooltipAddMoney>
         </Scripts>
     </GameTooltip>
 </Ui>

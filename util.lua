@@ -57,6 +57,16 @@ function Aux.util.inventory_iterator()
     end
 end
 
+function public.loop_inventory(f)
+	for bag = 0, 4 do
+		if GetBagName(bag) then
+			for slot = 1, GetContainerNumSlots(bag) do
+				f(bag, slot)
+			end
+		end
+	end
+end
+
 function public.safe_index(...)
 	local target = arg[1]
 
