@@ -1,5 +1,5 @@
 Aux = {
-    version = '2.8.5',
+    version = '2.8.6',
     blizzard_ui_shown = false,
 	orig = {},
 }
@@ -295,7 +295,7 @@ end
 
 function Aux.SetItemRef(...)
     local itemstring, text, button = unpack(arg)
-    if IsAltKeyDown() and AuxSearchFrame:IsVisible() then
+    if AuxSearchFrame:IsVisible() and button == 'RightButton' then
         local item_info = Aux.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
             Aux.search_frame.set_filter(item_info.name..'/exact')
