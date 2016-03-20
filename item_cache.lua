@@ -59,8 +59,7 @@ function public.populate_wdb()
 			AuxTooltip:SetHyperlink('item:'..item_id)
 		end
 
-		local t0 = GetTime()
-		Aux.control.as_soon_as(function() return GetItemInfo('item:'..item_id) or GetTime() - t0 > 0.1 end, function()
+		Aux.control.on_next_update(function()
 			return helper(item_id + 1)
 		end)
 	end
