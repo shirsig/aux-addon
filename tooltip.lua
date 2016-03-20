@@ -98,7 +98,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
         local color = {r=0.8, g=0.5, b=0.1}
 
         local price = Aux.merchant.info(item_id)
-        if price then
+        if price ~= 0 then
             tooltip:AddLine('Vendor Sell: '..Aux.util.format_money(price), color.r, color.g, color.b)
         end
     end
@@ -107,22 +107,14 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
     local auctionable = not item_info or Aux.info.auctionable(Aux.info.tooltip(function(tt) tt:SetHyperlink(item_info.itemstring) end), item_info.quality)
     local item_key = (item_id or 0)..':'..(suffix_id or 0)
-    local value
-    if auctionable then
-        value = Aux.history.value(item_key)
-    else
-        value = 0
-    end
-    tooltip:AddLine('Value: '..(value and Aux.util.format_money(value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
 
-    if aux_tooltip_daily and value ~= 0 then
-        local market_value
-        if auctionable then
-            market_value = Aux.history.market_value(item_key)
-        else
-            market_value = 0
+    local value = Aux.history.value(item_key)
+    if auctionable then
+        tooltip:AddLine('Value: '..(value and Aux.util.format_money(value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+        if aux_tooltip_daily  then
+            local market_value = Aux.history.market_value(item_key)
+            tooltip:AddLine('Today: '..(market_value and Aux.util.format_money(market_value)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
-        tooltip:AddLine('Today: '..(market_value and Aux.util.format_money(market_value)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
     end
 
     if tooltip == GameTooltip and game_tooltip_money > 0 then
