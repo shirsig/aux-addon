@@ -6,9 +6,15 @@ function SlashCmdList.AUX(parameter)
     elseif parameter == 'clear post' then
         Aux.persistence.load_dataset().post = nil
         Aux.log('Post settings cleared.')
-    elseif parameter == 'clear' then
+    elseif parameter == 'clear datasets' then
         aux_datasets = {}
-        Aux.log('Database cleared.')
+        Aux.log('Datasets cleared.')
+    elseif parameter == 'clear merchant buy' then
+        aux_merchant_buy = {}
+        Aux.log('Merchant buy prices cleared.')
+    elseif parameter == 'clear merchant sell' then
+        aux_merchant_sell = {}
+        Aux.log('Merchant sell prices cleared.')
     elseif parameter == 'clear item cache' then
         aux_items = {}
         aux_auctionable_items = {}
