@@ -233,7 +233,7 @@ m.filters = {
             amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
-                    return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
+                    return auction_record.buyout_price > 0 and Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
                 end
             else
                 return false, {}, 'Erroneous Buyout Profit Modifier'
@@ -263,7 +263,7 @@ m.filters = {
             if amount > 0 then
                 return function(auction_record)
                     local disenchant_value = Aux.disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
-                    return disenchant_value and disenchant_value - auction_record.buyout_price >= amount
+                    return auction_record.buyout_price > 0 and disenchant_value and disenchant_value - auction_record.buyout_price >= amount
                 end
             else
                 return false, {}, 'Erroneous Buyout Disenchant Profit Modifier'
@@ -293,7 +293,7 @@ m.filters = {
             if amount > 0 then
                 return function(auction_record)
                     local vendor_price = Aux.merchant.info(auction_record.item_id)
-                    return vendor_price and vendor_price * auction_record.aux_quantity - auction_record.buyout_price >= amount
+                    return auction_record.buyout_price > 0 and vendor_price and vendor_price * auction_record.aux_quantity - auction_record.buyout_price >= amount
                 end
             else
                 return false, {}, 'Erroneous Buyout Vendor Profit Modifier'
