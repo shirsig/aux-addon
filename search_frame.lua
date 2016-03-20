@@ -351,7 +351,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentNameInputBox')
-        editbox.complete_item = Aux.completion.completor(Aux.static.sorted_item_names)
+        editbox.complete_item = Aux.completion.completor(function() return aux_auctionable_items end)
         editbox:SetPoint('TOPLEFT', 14, -20)
         editbox:SetWidth(260)
         editbox:SetScript('OnChar', function()

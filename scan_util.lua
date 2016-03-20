@@ -40,7 +40,7 @@ m.filters = {
         arity = 1,
         test = function(name)
             if not name then
-                return false, Aux.static.sorted_item_names(), 'Erroneous Item Modifier'
+                return false, aux_auctionable_items, 'Erroneous Item Modifier'
             end
 
             return function(auction_record)
@@ -529,7 +529,7 @@ function m.filter_from_string(filter_term)
         then
             return false, {}, 'Erroneous Exact Only Modifier'
         else
-            prettified:prepend(Aux.info.display_name(Aux.static.item_id(blizzard_filter.name)) or '['..blizzard_filter.name..']')
+            prettified:prepend(Aux.info.display_name(Aux.item_cache.item_id(blizzard_filter.name)) or Aux.gui.inline_color({216, 225, 211, 1})..'['..blizzard_filter.name..']|r')
         end
     elseif blizzard_filter.name then
         if blizzard_filter.name == '' then
@@ -606,7 +606,7 @@ function m.suggestions(blizzard_filter, num_parts)
 
     -- item names
     if num_parts == 1 and blizzard_filter.name == '' then
-        for _, name in ipairs(Aux.static.sorted_item_names()) do
+        for _, name in ipairs(Aux.item_cache.sorted_auctionable_items()) do
             tinsert(suggestions, name..'/exact')
         end
     end
@@ -618,7 +618,7 @@ function m.blizzard_query(filter)
 
     local item_info, class_index, subclass_index, slot_index
     if filter.exact then
-        local item_id = Aux.static.item_id(filter.name)
+        local item_id = Aux.item_cache.item_id(filter.name)
         item_info = Aux.info.item(item_id)
         class_index = item_info and Aux.item_class_index(item_info.class)
         subclass_index = class_index and item_info.subclass and Aux.item_subclass_index(class_index, item_info.subclass)

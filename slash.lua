@@ -9,12 +9,12 @@ function SlashCmdList.AUX(parameter)
     elseif parameter == 'clear' then
         aux_datasets = {}
         Aux.log('Database cleared.')
-    elseif parameter == 'generate item cache' then
-        Aux.static.generate_cache()
-    elseif parameter == 'delete item cache' then
-        aux_auctionable_items = nil
-        aux_auctionable_item_ids = nil
-        Aux.log('Item cache deleted; falling back to the default.')
+    elseif parameter == 'clear item cache' then
+        aux_items = {}
+        aux_auctionable_items = {}
+        Aux.log('Item cache cleared.')
+    elseif parameter == 'populate wdb' then
+        Aux.item_cache.populate_wdb()
     elseif parameter == 'tooltip daily' then
         aux_tooltip_daily = not aux_tooltip_daily
         Aux.log('Market value in tooltip '..(aux_tooltip_daily and 'enabled' or 'disabled')..'.')

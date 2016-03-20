@@ -275,23 +275,23 @@ end
 
 function public.tooltip(setter)
 	for i = 1, TOOLTIP_LENGTH do
-		getglobal('AuxInfoTooltipTextLeft'..i):SetText()
-		getglobal('AuxInfoTooltipTextRight'..i):SetText()
+		getglobal('AuxTooltipTextLeft'..i):SetText()
+		getglobal('AuxTooltipTextRight'..i):SetText()
 	end
 	
-	AuxInfoTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-    AuxInfoTooltip.money = 0
-	setter(AuxInfoTooltip)
-	AuxInfoTooltip:Show()
-	
-	local tooltip = { money=AuxInfoTooltip.money }
+	AuxTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+    AuxTooltip.money = 0
+	setter(AuxTooltip)
+	AuxTooltip:Show()
+
+	local tooltip = { money=AuxTooltip.money }
 	for i = 1, TOOLTIP_LENGTH do
 
-		local left_text = getglobal('AuxInfoTooltipTextLeft'..i):GetText()
-		local left_color = { getglobal('AuxInfoTooltipTextLeft'..i):GetTextColor() }
+		local left_text = getglobal('AuxTooltipTextLeft'..i):GetText()
+		local left_color = { getglobal('AuxTooltipTextLeft'..i):GetTextColor() }
 		
-		local right_text = getglobal('AuxInfoTooltipTextRight'..i):GetText()
-		local right_color = { getglobal('AuxInfoTooltipTextRight'..i):GetTextColor() }
+		local right_text = getglobal('AuxTooltipTextRight'..i):GetText()
+		local right_color = { getglobal('AuxTooltipTextRight'..i):GetTextColor() }
 
         if left_text or right_text then
 		    tinsert(tooltip, {
@@ -304,8 +304,8 @@ function public.tooltip(setter)
 	end
 	
 	for i = 1, TOOLTIP_LENGTH do
-		getglobal('AuxInfoTooltipTextLeft'..i):SetText()
-		getglobal('AuxInfoTooltipTextRight'..i):SetText()
+		getglobal('AuxTooltipTextLeft'..i):SetText()
+		getglobal('AuxTooltipTextRight'..i):SetText()
 	end
 	
 	return tooltip

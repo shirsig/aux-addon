@@ -18,6 +18,14 @@
 		</Scripts>
 	</Frame>
 
+    <GameTooltip name="AuxTooltip" inherits="GameTooltipTemplate">
+        <Scripts>
+            <OnTooltipAddMoney>
+                this.money = arg1
+            </OnTooltipAddMoney>
+        </Scripts>
+    </GameTooltip>
+
     <CheckButton name="AuxRadioButtonTemplate" virtual="true">
         <Size><AbsDimension x="16" y="16"/></Size>
         <Layers>

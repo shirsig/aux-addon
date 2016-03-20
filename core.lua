@@ -47,7 +47,7 @@ function Aux.on_load()
         end)
     end
 
-    Aux.static.on_load()
+    Aux.item_cache.on_load()
     Aux.persistence.on_load()
     Aux.tooltip.on_load()
     Aux.search_frame.on_load()

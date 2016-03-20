@@ -1,18 +1,21 @@
 ## Interface: 11200
 ## Title: Aux
 ## SavedVariablesPerCharacter: aux_recent_searches, aux_favorite_searches
-## SavedVariables: aux_datasets, aux_post_mode, aux_price_per_unit, aux_tooltip_daily, aux_tooltip_disenchant_value, aux_tooltip_disenchant_distribution, aux_tooltip_disenchant_source
+## SavedVariables: aux_datasets, aux_items, aux_auctionable_items, aux_post_mode, aux_price_per_unit, aux_tooltip_daily, aux_tooltip_disenchant_value, aux_tooltip_disenchant_distribution, aux_tooltip_disenchant_source
 
 slash.lua
 core.xml
 gui.lua
 control.xml
 persistence.lua
+item_cache.lua
+merchant.lua
 disenchant.lua
 tooltip.lua
 util.lua
 sort.lua
 money.lua
+info.lua
 
 scan.lua
 scan_util.lua
@@ -22,15 +25,12 @@ listing.lua
 auction_listing.lua
 item_listing.lua
 history.lua
-info.xml
 completion.xml
 
 search_frame.xml
 post_frame.xml
 auctions_frame.xml
 bids_frame.xml
-
-static.xml
 
 test.lua
 
