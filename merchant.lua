@@ -17,6 +17,8 @@ function public.info(item_id)
     return aux_merchant_sell[item_id], unit_price, limited
 end
 
+-- TODO hook GetAuctionSellItemInfo()
+
 function private.scan_merchant()
     Aux.util.loop_inventory(function(bag, slot)
         local item_info = Aux.info.container_item(bag, slot)
@@ -25,7 +27,7 @@ function private.scan_merchant()
         end
     end)
 
---    local merchant_name = UnitName('npc')
+-- TODO maybe more detail? zone or  local merchant_name = UnitName('npc')
     local merchant_item_count = GetMerchantNumItems()
     for i=1,merchant_item_count do
         local item_id = Aux.info.parse_hyperlink(GetMerchantItemLink(i))
