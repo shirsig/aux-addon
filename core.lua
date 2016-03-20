@@ -1,5 +1,5 @@
 Aux = {
-    version = '2.7.8',
+    version = '2.8.0',
     blizzard_ui_shown = false,
 	orig = {},
 }
@@ -326,24 +326,6 @@ function Aux.UseContainerItem(...)
     end
 
 	return Aux.orig.UseContainerItem(unpack(arg))
-end
-
-function Aux.quality_color(code)
-	if code == 0 then
-		return 'ff9d9d9d' -- poor, gray
-	elseif code == 1 then
-		return 'ffffffff' -- common, white
-	elseif code == 2 then
-		return 'ff1eff00' -- uncommon, green
-	elseif code == 3 then -- rare, blue
-		return 'ff0070dd'
-	elseif code == 4 then
-		return 'ffa335ee' -- epic, purple
-	elseif code == 5 then
-		return 'ffff8000' -- legendary, orange
-    elseif code == 6 then
-        return 'ffe6cc80' -- artifact, pale gold
-    end
 end
 
 function Aux.item_class_index(item_class)

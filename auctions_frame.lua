@@ -64,7 +64,7 @@ function private.update_listing()
         local historical_value = Aux.history.value(auction_record.item_key)
         tinsert(auction_rows, {
             cols = {
-                { value='|c'..Aux.quality_color(auction_record.quality)..'['..auction_record.name..']'..'|r' },
+                { value=({GetItemQualityColor(auction_record.quality)})[4]..'['..auction_record.name..']'..'|r' },
                 { value=auction_record.aux_quantity },
                 { value=Aux.auction_listing.time_left(auction_record.duration) },
                 { value=auction_record.high_bid > 0 and Aux.money.to_string(auction_record.high_bid, true, false) or RED_FONT_COLOR_CODE..'No Bids'..FONT_COLOR_CODE_CLOSE },

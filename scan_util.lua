@@ -246,6 +246,34 @@ m.filters = {
         end
     },
 
+    ['bid-disenchant-profit'] = {
+        arity = 1,
+        test = function(amount)
+            amount = Aux.money.from_string(amount or '') or 0
+            if amount > 0 then
+                return function(auction_record)
+                    return Aux.disenchant.value(auction_record.item_key) and Aux.disenchant.value(auction_record.item_key) - auction_record.bid_price >= amount
+                end
+            else
+                return false, {}, 'Erroneous Bid Disenchant Profit Modifier'
+            end
+        end
+    },
+
+    ['buyout-disenchant-profit'] = {
+        arity = 1,
+        test = function(amount)
+            amount = Aux.money.from_string(amount or '') or 0
+            if amount > 0 then
+                return function(auction_record)
+                    return Aux.disenchant.value(auction_record.item_key) and Aux.disenchant.value(auction_record.item_key) - auction_record.buyout_price >= amount
+                end
+            else
+                return false, {}, 'Erroneous Buyout Disenchant Profit Modifier'
+            end
+        end
+    },
+
     ['discard'] = {
         arity = 0,
         test = function()
@@ -311,7 +339,7 @@ end
 
 function m.display_name(item_id)
     local item_info = Aux.static.item_info(item_id)
-    return '|c'..Aux.quality_color(item_info.quality)..'['..item_info.name..']'..'|r'
+    return ({GetItemQualityColor(item_info.quality)})[4]..'['..item_info.name..']'..'|r'
 end
 
 function m.filter_builder()
