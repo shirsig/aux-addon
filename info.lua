@@ -170,24 +170,7 @@ function public.auction(index, type)
     }
 end
 
-function public.reanchor_tooltip()
-    if private.anchor_cursor then
-        this:ClearAllPoints()
-        local x, y = GetCursorPosition()
-        x, y = x / UIParent:GetEffectiveScale() + private.x_offset, y / UIParent:GetEffectiveScale() + private.y_offset
-        this:SetPoint('TOP', UIParent, 'BOTTOMLEFT', x, y)
-    end
-end
-
-function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor, x_offset, y_offset)
-    if anchor == 'ANCHOR_CURSOR' and (x_offset or y_offset) then
-        private.anchor_cursor = true
-        private.x_offset = x_offset
-        private.y_offset = y_offset
-        anchor = 'TOP'
-    else
-        private.anchor_cursor = false
-    end
+function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor)
 
     GameTooltip:SetOwner(owner, anchor)
     GameTooltip:SetHyperlink(itemstring)

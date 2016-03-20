@@ -214,7 +214,7 @@ function public.on_load()
     )
 
 --    private.inventory_listing:SetHandler('OnEnter', function(table, row_data, column)
---        Aux.info.set_tooltip(row_data.itemstring, nil, column.row, 'ANCHOR_LEFT', 0, 0)
+--        Aux.info.set_tooltip(row_data.itemstring, nil, column.row, 'ANCHOR_LEFT')
 --    end)
 --    private.inventory_listing:SetHandler('OnLeave', function()
 --        GameTooltip:Hide()
