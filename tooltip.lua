@@ -99,7 +99,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
         local price = Aux.merchant.info(item_id)
         if price ~= 0 then
-            tooltip:AddLine('Vendor Sell: '..Aux.util.format_money(price), color.r, color.g, color.b)
+            tooltip:AddLine('Vendor Sell: '..(price and Aux.util.format_money(price) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
     end
 
