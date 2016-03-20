@@ -69,18 +69,17 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
         if getn(distribution) > 0 then
 
             if aux_tooltip_disenchant_distribution then
-                local color = {r=0.8, g=0.8, b=0.2 }
+                local color = {r=0.8, g=0.8, b=0.2}
 
                 tooltip:AddLine('Disenchants into:', color.r, color.g, color.b)
                 sort(distribution, function(a,b) return a.probability > b.probability end)
                 for _, event in distribution do
-                    local reagent_info = Aux.static.item_info(event.item_id)
-                    tooltip:AddLine(format('  %s%% %s x%s', event.probability * 100, ({GetItemQualityColor(reagent_info.quality)})[4]..reagent_info.name..'|r', event.quantity), color.r, color.g, color.b)
+                    tooltip:AddLine(format('  %s%% %s x%s', event.probability * 100, Aux.info.display_name(event.item_id) or event.item_id, event.quantity), color.r, color.g, color.b)
                 end
             end
 
             if aux_tooltip_disenchant_value then
-                local color = {r=0.1, g=0.6, b=0.6 }
+                local color = {r=0.1, g=0.6, b=0.6}
 
                 local disenchant_value = Aux.disenchant.value(item_info.slot, item_info.quality, item_info.level)
                 tooltip:AddLine('Disenchant Value: '..(disenchant_value and Aux.util.format_money(disenchant_value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
@@ -88,27 +87,25 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
         end
     end
 
-    if Aux.static.item_info(item_id) then
-        local item_key = (item_id or 0)..':'..(suffix_id or 0)
+    local item_key = (item_id or 0)..':'..(suffix_id or 0)
 
-        local value = Aux.history.value(item_key)
+    local value = Aux.history.value(item_key)
 
-        local value_line = 'Value: '
+    local value_line = 'Value: '
 
-        value_line = value_line..(value and Aux.util.format_money(value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
+    value_line = value_line..(value and Aux.util.format_money(value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
 
-        local color = {r=1, g=1, b=0.6}
+    local color = {r=1, g=1, b=0.6}
 
-        tooltip:AddLine(value_line, color.r, color.g, color.b)
+    tooltip:AddLine(value_line, color.r, color.g, color.b)
 
-        if aux_tooltip_daily then
-            local market_value = Aux.history.market_value(item_key)
+    if aux_tooltip_daily then
+        local market_value = Aux.history.market_value(item_key)
 
-            local market_value_line = 'Today: '
-            market_value_line = market_value_line..(market_value and Aux.util.format_money(market_value)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
+        local market_value_line = 'Today: '
+        market_value_line = market_value_line..(market_value and Aux.util.format_money(market_value)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
 
-            tooltip:AddLine(market_value_line, color.r, color.g, color.b)
-        end
+        tooltip:AddLine(market_value_line, color.r, color.g, color.b)
     end
 
     if tooltip == GameTooltip and game_tooltip_money > 0 then

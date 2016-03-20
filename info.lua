@@ -255,6 +255,24 @@ function public.load_tooltip(frame, tooltip)
     end
 end
 
+function public.display_name(item_id)
+    local item_info = Aux.info.item(item_id)
+    if item_info then
+        return ({GetItemQualityColor(item_info.quality)})[4]..'['..item_info.name..']'..'|r'
+    end
+end
+
+function public.auctionable(tooltip, quality, lootable)
+    local durability, max_durability = Aux.info.durability(tooltip)
+    return not lootable
+            and (not quality or quality < 6)
+            and not Aux.info.tooltip_match(ITEM_BIND_ON_PICKUP, tooltip)
+            and not Aux.info.tooltip_match(ITEM_BIND_QUEST, tooltip)
+            and not Aux.info.tooltip_match(ITEM_SOULBOUND, tooltip)
+            and not Aux.info.tooltip_match(ITEM_CONJURED, tooltip)
+            and not (durability and durability < max_durability)
+end
+
 function public.tooltip(setter)
 	for i = 1, TOOLTIP_LENGTH do
 		getglobal('AuxInfoTooltipTextLeft'..i):SetText()

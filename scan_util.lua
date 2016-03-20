@@ -40,16 +40,11 @@ m.filters = {
         arity = 1,
         test = function(name)
             if not name then
-                return false, Aux.completion.sorted_item_names(), 'Erroneous Item Modifier'
-            end
-
-            local item_id = Aux.static.item_id(strupper(name or ''))
-            if not item_id then
-                return false, {}, 'Erroneous Item Modifier'
+                return false, Aux.static.sorted_item_names(), 'Erroneous Item Modifier'
             end
 
             return function(auction_record)
-                return auction_record.item_id == item_id
+                return strlower(Aux.info.item(auction_record.item_id)) == name
             end
         end
     },
@@ -339,11 +334,6 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
     }
 end
 
-function m.display_name(item_id)
-    local item_info = Aux.static.item_info(item_id)
-    return ({GetItemQualityColor(item_info.quality)})[4]..'['..item_info.name..']'..'|r'
-end
-
 function m.filter_builder()
     local filter = ''
     return {
@@ -363,7 +353,7 @@ end
 
 function m.create_item_query(item_id)
 
-    local item_info = Aux.static.item_info(item_id)
+    local item_info = Aux.info.item(item_id)
 
     if item_info then
         local filter = m.filter_from_string(item_info.name..'/exact')
@@ -536,11 +526,10 @@ function m.filter_from_string(filter_term)
                 or blizzard_filter.quality
                 or blizzard_filter.usable
                 or not blizzard_filter.name
-                or not Aux.static.item_id(strupper(blizzard_filter.name))
         then
             return false, {}, 'Erroneous Exact Only Modifier'
         else
-            prettified:prepend(m.display_name(Aux.static.item_id(strupper(blizzard_filter.name))))
+            prettified:prepend(Aux.info.display_name(Aux.static.item_id(blizzard_filter.name)) or '['..blizzard_filter.name..']')
         end
     elseif blizzard_filter.name then
         if blizzard_filter.name == '' then
@@ -617,7 +606,7 @@ function m.suggestions(blizzard_filter, num_parts)
 
     -- item names
     if num_parts == 1 and blizzard_filter.name == '' then
-        for _, name in ipairs(Aux.completion.sorted_item_names()) do
+        for _, name in ipairs(Aux.static.sorted_item_names()) do
             tinsert(suggestions, name..'/exact')
         end
     end
@@ -627,28 +616,31 @@ end
 
 function m.blizzard_query(filter)
 
-    local item_info
+    local item_info, class_index, subclass_index, slot_index
     if filter.exact then
-        local item_id = Aux.static.item_id(strupper(filter.name))
-        item_info = Aux.static.item_info(item_id)
+        local item_id = Aux.static.item_id(filter.name)
+        item_info = Aux.info.item(item_id)
+        class_index = item_info and Aux.item_class_index(item_info.class)
+        subclass_index = class_index and item_info.subclass and Aux.item_subclass_index(class_index, item_info.subclass)
+        slot_index = subclass_index and item_info.slot and Aux.item_slot_index(class_index, subclass_index, item_info.slot)
     end
 
     return {
         name = filter.name,
-        min_level = filter.exact and item_info.level or filter.min_level,
-        max_level = filter.exact and item_info.level or filter.max_level,
-        class = filter.exact and item_info.class or filter.class,
-        subclass = filter.exact and item_info.subclass or filter.subclass,
-        slot = filter.exact and (item_info.class and item_info.subclass and Aux.item_slot_index(item_info.class, item_info.subclass, item_info.slot)) or filter.slot,
-        usable = filter.exact and item_info.usable or filter.usable and 1 or 0,
-        quality = filter.exact and item_info.quality or filter.quality,
+        min_level = item_info and item_info.level or filter.min_level,
+        max_level = item_info and item_info.level or filter.max_level,
+        class = item_info and class_index or filter.class,
+        subclass = item_info and subclass_index or filter.subclass,
+        slot = item_info and item_info.class and slot_index or filter.slot,
+        usable = item_info and item_info.usable or filter.usable and 1 or 0,
+        quality = item_info and item_info.quality or filter.quality,
     }
 end
 
 function m.validator(blizzard_filter, post_filter)
 
     return function(record)
-        if blizzard_filter.exact and strlower(Aux.static.item_info(record.item_id).name) ~= blizzard_filter.name then
+        if blizzard_filter.exact and strlower(Aux.info.item(record.item_id).name) ~= blizzard_filter.name then
             return
         end
         if blizzard_filter.min_level and record.level < blizzard_filter.min_level then

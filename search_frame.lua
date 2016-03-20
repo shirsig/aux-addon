@@ -240,7 +240,7 @@ function public.on_load()
             this:HighlightText()
         end)
         editbox:SetScript('OnReceiveDrag', function()
-            local item_info = Aux.cursor_item() and Aux.static.item_info(Aux.cursor_item().item_id)
+            local item_info = Aux.cursor_item() and Aux.info.item(Aux.cursor_item().item_id)
             if item_info then
                 public.start_search(strlower(item_info.name)..'/exact')
             end
@@ -351,7 +351,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentNameInputBox')
-        editbox.complete_item = Aux.completion.completor(Aux.completion.sorted_item_names())
+        editbox.complete_item = Aux.completion.completor(Aux.static.sorted_item_names)
         editbox:SetPoint('TOPLEFT', 14, -20)
         editbox:SetWidth(260)
         editbox:SetScript('OnChar', function()
@@ -662,7 +662,7 @@ function public.on_load()
         btn.inputs = {}
         if filter.arity > 0 then
             local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-            editbox.complete = Aux.completion.completor(({filter.test()})[2])
+            editbox.complete = Aux.completion.completor(function() return ({filter.test()})[2] end)
             editbox:SetPoint('LEFT', btn, 'RIGHT', 10, 0)
             editbox:SetWidth(100)
 --            editbox:SetNumeric(true)

@@ -1,20 +1,6 @@
 local m = {}
 Aux.completion = m
 
-do
-	local sorted_item_names
-	function m.sorted_item_names()
-		if not sorted_item_names then
-			sorted_item_names = {}
-			for _, item_info in ipairs(Aux.static.items()) do
-				tinsert(sorted_item_names, item_info.name)
-			end
-			sort(sorted_item_names, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
-		end
-		return sorted_item_names
-	end
-end
-
 function m:complete()
 	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
 		return
@@ -45,7 +31,7 @@ function m.completor(options)
 
 		local text = self:GetText()
 
-		for _, item_name in ipairs(options) do
+		for _, item_name in ipairs(options()) do
 			if string.sub(strupper(item_name), 1, strlen(text)) == strupper(text) then
 				self:SetText(strlower(item_name))
 				self:HighlightText(strlen(text), -1)

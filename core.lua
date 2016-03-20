@@ -47,6 +47,7 @@ function Aux.on_load()
         end)
     end
 
+    Aux.static.on_load()
     Aux.persistence.on_load()
     Aux.tooltip.on_load()
     Aux.search_frame.on_load()
@@ -292,7 +293,7 @@ end
 function Aux.SetItemRef(...)
     local itemstring, text, button = unpack(arg)
     if IsAltKeyDown() and AuxSearchFrame:IsVisible() then
-        local item_info = Aux.static.item_info(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
+        local item_info = Aux.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
             Aux.search_frame.set_filter(item_info.name..'/exact')
             Aux.search_frame.start_search()
@@ -310,7 +311,7 @@ function Aux.UseContainerItem(...)
 
     if AuxSearchFrame:IsVisible() then
         local item_info = Aux.info.container_item(bag, slot)
-        item_info = item_info and Aux.static.item_info(item_info.item_id)
+        item_info = item_info and Aux.info.item(item_info.item_id)
         if item_info then
             Aux.search_frame.start_search(strlower(item_info.name)..'/exact')
         end
