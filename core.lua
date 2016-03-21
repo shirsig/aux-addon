@@ -96,7 +96,12 @@ function Aux.on_addon_loaded()
 
                 local total_cost = 0
                 for i=1,reagent_count do
-                    local item_id, suffix_id = Aux.info.parse_hyperlink(GetCraftReagentItemLink(id, i))
+                    local link = GetCraftReagentItemLink(id, i)
+                    if not link then
+                        total_cost = nil
+                        break
+                    end
+                    local item_id, suffix_id = Aux.info.parse_hyperlink(link)
                     local count = ({GetCraftReagentInfo(id, i)})[3]
                     local _, price, limited = Aux.cache.merchant_info(item_id)
                     local value = price and not limited and price or Aux.history.value(item_id..':'..suffix_id)
@@ -123,7 +128,12 @@ function Aux.on_addon_loaded()
 
                 local total_cost = 0
                 for i=1,reagent_count do
-                    local item_id, suffix_id = Aux.info.parse_hyperlink(GetTradeSkillReagentItemLink(id, i))
+                    local link = GetTradeSkillReagentItemLink(id, i)
+                    if not link then
+                        total_cost = nil
+                        break
+                    end
+                    local item_id, suffix_id = Aux.info.parse_hyperlink(link)
                     local count = ({GetTradeSkillReagentInfo(id, i)})[3]
                     local _, price, limited = Aux.cache.merchant_info(item_id)
                     local value = price and not limited and price or Aux.history.value(item_id..':'..suffix_id)
