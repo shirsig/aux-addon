@@ -90,7 +90,7 @@ function private.scan_merchant()
 					unit_price = min(old_unit_price, new_unit_price)
 				end
 
-				aux_merchant_buy[item_id] = Aux.persistence.write(merchant_buy_schema, unit_price, old_limited or new_limited)
+				aux_merchant_buy[item_id] = Aux.persistence.write(merchant_buy_schema, unit_price, old_limited and new_limited)
 			else
 				aux_merchant_buy[item_id] = Aux.persistence.write(merchant_buy_schema, new_unit_price, new_limited)
 			end
