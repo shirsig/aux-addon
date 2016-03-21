@@ -14,10 +14,10 @@ local merchant_buy_schema = {'record', '#', {'number', 'boolean'}}
 function public.on_load()
 	private.scan_wdb()
 	Aux.control.event_listener('MERCHANT_SHOW', private.scan_merchant).start()
-end
-
-function private.read_item_info(data_string)
-
+	Aux.control.event_listener('MERCHANT_UPDATE', private.scan_merchant).start()
+--	Aux.control.event_listener('NEW_AUCTION_UPDATE', function()
+	-- -- TODO GetAuctionSellItemInfo()
+	-- -- end).start()
 end
 
 function public.merchant_info(item_id)
@@ -28,8 +28,6 @@ function public.merchant_info(item_id)
 
 	return aux_merchant_sell[item_id], unit_price, limited
 end
-
--- TODO hook GetAuctionSellItemInfo()
 
 function public.item_info(item_id)
 	local data_string = aux_items[item_id]
