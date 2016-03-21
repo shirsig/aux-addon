@@ -102,9 +102,8 @@ function private.scan_wdb()
 		while processed <= 100 and item_id <= MAX_ITEM_ID do
 			local itemstring = 'item:'..item_id
 			local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
-			name = name and strlower(name)
-			if name and not aux_item_ids[name] then
-				aux_item_ids[name] = item_id
+			if name and not aux_item_ids[strlower(name)] then
+				aux_item_ids[strlower(name)] = item_id
 				aux_items[item_id] = Aux.util.join({
 					name,
 					quality or '',
@@ -117,7 +116,7 @@ function private.scan_wdb()
 				}, '#')
 				local tooltip = Aux.info.tooltip(function(tt) tt:SetHyperlink(itemstring) end)
 				if Aux.info.auctionable(tooltip, quality) then
-					tinsert(aux_auctionable_items, name)
+					tinsert(aux_auctionable_items, strlower(name))
 				end
 				processed = processed + 1
 			end
