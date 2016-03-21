@@ -65,7 +65,7 @@ function private.scan_merchant()
 	local merchant_item_count = GetMerchantNumItems()
 	for i=1,merchant_item_count do
 		local link = GetMerchantItemLink(i)
-		if link then
+		if link then -- TODO somehow try again when the item is in the wdb?
 			local item_id = Aux.info.parse_hyperlink(link)
 			local _, _, price, count, stock = GetMerchantItemInfo(i)
 			local new_unit_price, new_limited = price / count, stock >= 0
