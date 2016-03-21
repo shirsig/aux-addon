@@ -44,7 +44,7 @@ m.filters = {
             end
 
             return function(auction_record)
-                return strlower(Aux.info.item(auction_record.item_id)) == name
+                return strlower(Aux.info.item(auction_record.item_id).name) == name
             end
         end
     },
