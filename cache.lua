@@ -9,7 +9,8 @@ aux_auctionable_items = {}
 aux_merchant_buy = {}
 aux_merchant_sell = {}
 
-local merchant_buy_schema = {'record', '#', {'number', 'boolean'}}
+local items_schema = {'record', '#', {'string', 'number', 'number', 'string', 'string', 'string', 'number', 'string'}}
+local merchant_buy_schema = {'record', '#', {'number', 'boolean'} }
 
 function public.on_load()
 	private.scan_wdb()
@@ -42,17 +43,17 @@ end
 function public.item_info(item_id)
 	local data_string = aux_items[item_id]
 	if data_string then
-		local fields = Aux.util.split(data_string, '#')
+		local name, quality, level, class, subclass, slot, max_stack, texture = Aux.persistence.read(items_schema, data_string)
 		return {
-			name = fields[1],
+			name = name,
 			itemstring = 'item:'..item_id..':0:0:0',
-			quality = tonumber(fields[2]),
-			level = tonumber(fields[3]),
-			class = fields[4],
-			subclass = fields[5],
-			slot = fields[6],
-			max_stack = fields[7],
-			texture = fields[8],
+			quality = quality,
+			level = level,
+			class = class,
+			subclass = subclass,
+			slot = slot,
+			max_stack = max_stack,
+			texture = texture,
 		}
 	end
 end
@@ -106,16 +107,16 @@ function private.scan_wdb()
 			local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 			if name and not aux_item_ids[strlower(name)] then
 				aux_item_ids[strlower(name)] = item_id
-				aux_items[item_id] = Aux.util.join({
+				aux_items[item_id] = Aux.persistence.write(items_schema,
 					name,
-					quality or '',
-					level or '',
-					class or '',
-					subclass or '',
-					slot or '',
-					max_stack or '',
-					texture or ''
-				}, '#')
+					quality,
+					level,
+					class,
+					subclass,
+					slot,
+					max_stack,
+					texture
+				)
 				local tooltip = Aux.info.tooltip(function(tt) tt:SetHyperlink(itemstring) end)
 				if Aux.info.auctionable(tooltip, quality) then
 					tinsert(aux_auctionable_items, strlower(name))
