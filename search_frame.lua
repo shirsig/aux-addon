@@ -25,6 +25,7 @@ do
             local rename_info = private.popup_info.rename
             local edit_box = getglobal(this:GetName()..'EditBox')
             edit_box:SetText(rename_info.name or '')
+            edit_box:SetFocus()
             edit_box:HighlightText()
         end,
         OnAccept = action,
