@@ -23,7 +23,7 @@ end
 function public.merchant_info(item_id)
 	local unit_price, limited
 	if aux_merchant_buy[item_id] then
-		local unit_price, limited = Aux.persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
+		unit_price, limited = Aux.persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
 	end
 
 	return aux_merchant_sell[item_id], unit_price, limited
