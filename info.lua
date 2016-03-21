@@ -364,18 +364,18 @@ function public.itemstring(item_id, suffix_id, unique_id, enchant_id)
     return 'item:'..(item_id or 0)..':'..(enchant_id or 0)..':'..(suffix_id or 0)..':'..(unique_id or 0)
 end
 
-function public.item(item_id, suffix_id, unique_id, enchant_id)
-    local itemstring = 'item:'..(item_id or 0)..':'..(enchant_id or 0)..':'..(suffix_id or 0)..':'..(unique_id or 0)
+function public.item(item_id, suffix_id)
+    local itemstring = 'item:'..(item_id or 0)..':0:'..(suffix_id or 0)..':0'
     local name, itemstring, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
     return name and {
-        itemstring = itemstring,
         name = name,
-        texture = texture,
+        itemstring = itemstring,
         quality = quality,
         level = level,
-        slot = slot,
         class = class,
         subclass = subclass,
+        slot = slot,
         max_stack = max_stack,
-    }
+        texture = texture,
+    } or Aux.cache.item_info(item_id)
 end

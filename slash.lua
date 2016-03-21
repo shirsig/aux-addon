@@ -17,10 +17,11 @@ function SlashCmdList.AUX(parameter)
         Aux.log('Merchant sell prices cleared.')
     elseif parameter == 'clear item cache' then
         aux_items = {}
+        aux_item_ids = {}
         aux_auctionable_items = {}
         Aux.log('Item cache cleared.')
     elseif parameter == 'populate wdb' then
-        Aux.item_cache.populate_wdb()
+        Aux.cache.populate_wdb()
     elseif parameter == 'tooltip daily' then
         aux_tooltip_daily = not aux_tooltip_daily
         Aux.log('Market value in tooltip '..(aux_tooltip_daily and 'enabled' or 'disabled')..'.')

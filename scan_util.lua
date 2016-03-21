@@ -277,7 +277,7 @@ m.filters = {
             amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
-                    local vendor_price = Aux.merchant.info(auction_record.item_id)
+                    local vendor_price = Aux.cache.merchant_info(auction_record.item_id)
                     return vendor_price and vendor_price * auction_record.aux_quantity - auction_record.bid_price >= amount
                 end
             else
@@ -292,7 +292,7 @@ m.filters = {
             amount = Aux.money.from_string(amount or '') or 0
             if amount > 0 then
                 return function(auction_record)
-                    local vendor_price = Aux.merchant.info(auction_record.item_id)
+                    local vendor_price = Aux.cache.merchant_info(auction_record.item_id)
                     return auction_record.buyout_price > 0 and vendor_price and vendor_price * auction_record.aux_quantity - auction_record.buyout_price >= amount
                 end
             else
@@ -559,7 +559,7 @@ function m.filter_from_string(filter_term)
         then
             return false, {}, 'Erroneous Exact Only Modifier'
         else
-            prettified:prepend(Aux.info.display_name(Aux.item_cache.item_id(blizzard_filter.name)) or Aux.gui.inline_color({216, 225, 211, 1})..'['..blizzard_filter.name..']|r')
+            prettified:prepend(Aux.info.display_name(Aux.cache.item_id(blizzard_filter.name)) or Aux.gui.inline_color({216, 225, 211, 1})..'['..blizzard_filter.name..']|r')
         end
     elseif blizzard_filter.name then
         if blizzard_filter.name == '' then
@@ -648,7 +648,7 @@ function m.blizzard_query(filter)
 
     local item_info, class_index, subclass_index, slot_index
     if filter.exact then
-        local item_id = Aux.item_cache.item_id(filter.name)
+        local item_id = Aux.cache.item_id(filter.name)
         item_info = Aux.info.item(item_id)
         class_index = item_info and Aux.item_class_index(item_info.class)
         subclass_index = class_index and item_info.subclass and Aux.item_subclass_index(class_index, item_info.subclass)

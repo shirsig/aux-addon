@@ -89,7 +89,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
     if aux_tooltip_vendor_buy then
         local color = {r=0.8, g=0.5, b=0.1}
 
-        local _, price, limited = Aux.merchant.info(item_id)
+        local _, price, limited = Aux.cache.merchant_info(item_id)
         if price then
             tooltip:AddLine('Vendor Buy '..(limited and '(limited): ' or ': ')..Aux.util.format_money(price), color.r, color.g, color.b)
         end
@@ -97,7 +97,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
     if aux_tooltip_vendor_sell then
         local color = {r=0.8, g=0.5, b=0.1}
 
-        local price = Aux.merchant.info(item_id)
+        local price = Aux.cache.merchant_info(item_id)
         if price ~= 0 then
             tooltip:AddLine('Vendor Sell: '..(price and Aux.util.format_money(price) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
