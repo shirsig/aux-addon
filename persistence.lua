@@ -18,15 +18,40 @@ function public.load_dataset()
     return aux_datasets[dataset_key]
 end
 
-function public.schema(...)
-    return function(datastring)
-        for i=1,arg.n do
+function private.read(type, str)
+    if type == 'string' then
+        return str
+    elseif type == 'boolean' then
+        return str == '1'
+    elseif type == 'number' then
+        return tonumber(str)
+    end
+end
 
-        end
-    end, function(record)
-        for i=1,arg.n do
+function private.write(type, obj)
+    if type == 'string' then
+        return obj
+    elseif type == 'boolean' then
+        return obj and '1' or '0'
+    elseif type == 'number' then
+        return tostring(obj)
+    end
+end
 
+function public.schema(separator, ...)
+    return function(record)
+        local fields
+        local parts = Aux.util.split(record, separator)
+        for i=1,arg.n do
+            tinsert(fields, private.read(arg[i], parts[i]))
         end
+        return fields
+    end, function(fields)
+        local parts = {}
+        for i=1,arg.n do
+            tinsert(parts, private.write(arg[i], fields[i]))
+        end
+        return Aux.util.join(parts, '#')
     end
 end
 
