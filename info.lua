@@ -80,23 +80,27 @@ function public.container_item(bag, slot)
 end
 
 function public.auction_sell_item()
-	local name, texture, stack_size, quality, usable, vendor_price = GetAuctionSellItemInfo()
+	local name, texture, count, quality, usable, vendor_price = GetAuctionSellItemInfo()
 
 	if name then
 
-        local unit_vendor_price = vendor_price / stack_size
+        local unit_vendor_price = vendor_price / count
         local tooltip = public.tooltip(function(tt) tt:SetAuctionSellItem() end)
 
-		return {
+        local charges = private.item_charges(tooltip)
+        local aux_quantity = charges or count
+
+        return {
 			name = name,
 			texture = texture,
             quality = quality,
-
-			stack_size = stack_size,
+            aux_quantity = aux_quantity,
+			stack_size = count,
 			usable = usable,
+            vendor_price = vendor_price,
             unit_vendor_price = unit_vendor_price,
             tooltip = tooltip,
-            charges = private.item_charges(tooltip),
+            charges = charges,
 		}
 	end
 end

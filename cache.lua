@@ -15,9 +15,19 @@ function public.on_load()
 	private.scan_wdb()
 	Aux.control.event_listener('MERCHANT_SHOW', private.scan_merchant).start()
 	Aux.control.event_listener('MERCHANT_UPDATE', private.scan_merchant).start()
---	Aux.control.event_listener('NEW_AUCTION_UPDATE', function()
-	-- -- TODO GetAuctionSellItemInfo()
-	-- -- end).start()
+	Aux.control.event_listener('BAG_UPDATE', function()
+		if MerchantFrame:IsVisible() then
+			private.scan_merchant()
+		end
+	end).start()
+	Aux.control.event_listener('NEW_AUCTION_UPDATE', function()
+		local info = Aux.info.auction_sell_item()
+		if info then
+			if Aux.cache.item_id(info.name) then
+				aux_merchant_sell[Aux.cache.item_id(info.name)] = info.vendor_price / info.aux_quantity
+			end
+		end
+	end).start()
 end
 
 function public.merchant_info(item_id)
@@ -63,7 +73,7 @@ function private.scan_merchant()
 	local merchant_item_count = GetMerchantNumItems()
 	for i=1,merchant_item_count do
 		local link = GetMerchantItemLink(i)
-		if link then -- TODO somehow try again when the item is in the wdb?
+		if link then
 			local item_id = Aux.info.parse_hyperlink(link)
 			local _, _, price, count, stock = GetMerchantItemInfo(i)
 			local new_unit_price, new_limited = price / count, stock >= 0
