@@ -9,6 +9,8 @@ aux_auctionable_items = {}
 aux_merchant_buy = {}
 aux_merchant_sell = {}
 
+local merchant_buy_schema = {'record', '#', {'number', 'boolean'}}
+
 function public.on_load()
 	private.scan_wdb()
 	Aux.control.event_listener('MERCHANT_SHOW', private.scan_merchant).start()
@@ -21,8 +23,7 @@ end
 function public.merchant_info(item_id)
 	local unit_price, limited
 	if aux_merchant_buy[item_id] then
-		local buy_fields = Aux.util.split(aux_merchant_buy[item_id], '#')
-		unit_price, limited = tonumber(buy_fields[1]), not not tonumber(buy_fields[2])
+		local unit_price, limited = Aux.persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
 	end
 
 	return aux_merchant_sell[item_id], unit_price, limited
@@ -67,10 +68,9 @@ function private.scan_merchant()
 		if link then
 			local item_id = Aux.info.parse_hyperlink(link)
 			local _, _, price, count, stock = GetMerchantItemInfo(i)
-			local new_unit_price, new_limited = price / count, Aux.persistence.blizzard_boolean(stock >= 0)
+			local new_unit_price, new_limited = price / count, stock >= 0
 			if aux_merchant_buy[item_id] then
-				local fields = Aux.util.split(aux_merchant_buy[item_id], '#')
-				local old_unit_price, old_limited = tonumber(fields[1]), tonumber(fields[2])
+				local old_unit_price, old_limited = Aux.persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
 
 				local unit_price
 				if old_limited and not new_limited then
@@ -81,15 +81,9 @@ function private.scan_merchant()
 					unit_price = min(old_unit_price, new_unit_price)
 				end
 
-				aux_merchant_buy[item_id] = Aux.util.join({
-					unit_price,
-					tostring(old_limited or new_limited),
-				}, '#')
+				aux_merchant_buy[item_id] = Aux.persistence.write(merchant_buy_schema, unit_price, old_limited or new_limited)
 			else
-				aux_merchant_buy[item_id] = Aux.util.join({
-					new_unit_price,
-					tostring(new_limited),
-				}, '#')
+				aux_merchant_buy[item_id] = Aux.persistence.write(merchant_buy_schema, new_unit_price, new_limited)
 			end
 		end
 	end

@@ -18,45 +18,98 @@ function public.load_dataset()
     return aux_datasets[dataset_key]
 end
 
-function private.read(type, str)
-    if type == 'string' then
+function public.read(schema, str)
+    if type(schema) == 'table' and schema[1] == 'record' then
+        return unpack(private.read(schema, str))
+    else
+        return private.read(schema, str)
+    end
+end
+
+function public.write(schema, ...)
+    if type(schema) == 'table' and schema[1] == 'record' then
+        return private.write(schema, arg)
+    else
+        return private.write(schema, arg[1])
+    end
+end
+
+function private.read(schema, str)
+    if schema == 'string' then
         return str
-    elseif type == 'boolean' then
+    elseif schema == 'boolean' then
         return str == '1'
-    elseif type == 'number' then
+    elseif schema == 'number' then
         return tonumber(str)
+    elseif type(schema) == 'table' and schema[1] == 'list' then
+        return private.read_list(schema, str)
+    elseif type(schema) == 'table' and schema[1] == 'record' then
+        return private.read_record(schema, str)
+    else
+        error('Unknown schema.')
     end
 end
 
-function private.write(type, obj)
-    if type == 'string' then
-        return obj
-    elseif type == 'boolean' then
+function private.write(schema, obj)
+    if schema == 'string' then
+        return obj or ''
+    elseif schema == 'boolean' then
         return obj and '1' or '0'
-    elseif type == 'number' then
-        return tostring(obj)
+    elseif schema == 'number' then
+        return obj and tostring(obj) or ''
+    elseif type(schema) == 'table' and schema[1] == 'list' then
+        return private.write_list(schema, obj)
+    elseif type(schema) == 'table' and schema[1] == 'record' then
+        return private.write_record(schema, obj)
+    else
+        error('Unknown schema.')
     end
 end
 
-function public.schema(separator, ...)
-    return function(record)
-        local fields
-        local parts = Aux.util.split(record, separator)
-        for i=1,arg.n do
-            tinsert(fields, private.read(arg[i], parts[i]))
-        end
-        return fields
-    end, function(fields)
-        local parts = {}
-        for i=1,arg.n do
-            tinsert(parts, private.write(arg[i], fields[i]))
-        end
-        return Aux.util.join(parts, '#')
+function private.read_list(schema, str)
+    if str == '' then
+        return {}
     end
+
+    local separator = schema[2]
+    local element_type = schema[3]
+    local parts = Aux.util.split(str, separator)
+    return Aux.util.map(parts, function(part)
+        return private.read(element_type, part)
+    end)
 end
 
-function public.blizzard_boolean(boolean)
-    return boolean and 1 or nil
+function private.write_list(schema, list)
+    local separator = schema[2]
+    local element_type = schema[3]
+    local parts = Aux.util.map(list, function(element)
+        return private.write(element_type, element)
+    end)
+    return Aux.util.join(parts, separator)
+end
+
+function private.read_record(schema, str)
+    local separator = schema[2]
+    local record = {}
+    local parts = Aux.util.split(str, separator)
+    for i, type in ipairs(schema[3]) do
+        local field = private.read(type, parts[i])
+        if field ~= nil then
+            tinsert(record, field)
+        else
+            tinsert(record, nil)
+        end
+    end
+    return record
+end
+
+function private.write_record(schema, record)
+    local separator = schema[2]
+    local parts = {}
+    for i, type in ipairs(schema[3]) do
+        tinsert(parts, private.write(type, record[i]))
+    end
+    return Aux.util.join(parts, separator)
 end
 
 function public.serialize(data, separator, compactor)
