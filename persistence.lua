@@ -12,14 +12,26 @@ function private.get_dataset_key()
 	return private.realm..'|'..private.faction
 end
 
-function public.blizzard_boolean(boolean)
-    return boolean and 1 or nil
-end
-
 function public.load_dataset()
     local dataset_key = private.get_dataset_key()
     aux_datasets[dataset_key] = aux_datasets[dataset_key] or {}
     return aux_datasets[dataset_key]
+end
+
+function public.schema(...)
+    return function(datastring)
+        for i=1,arg.n do
+
+        end
+    end, function(record)
+        for i=1,arg.n do
+
+        end
+    end
+end
+
+function public.blizzard_boolean(boolean)
+    return boolean and 1 or nil
 end
 
 function public.serialize(data, separator, compactor)

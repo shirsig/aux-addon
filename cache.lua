@@ -35,15 +35,15 @@ function public.item_info(item_id)
 	if data_string then
 		local fields = Aux.util.split(data_string, '#')
 		return {
-			name = fields[2],
+			name = fields[1],
 			itemstring = 'item:'..item_id..':0:0:0',
-			quality = tonumber(fields[3]),
-			level = tonumber(fields[4]),
-			class = fields[5],
-			subclass = fields[6],
-			slot = fields[7],
-			max_stack = fields[8],
-			texture = fields[9],
+			quality = tonumber(fields[2]),
+			level = tonumber(fields[3]),
+			class = fields[4],
+			subclass = fields[5],
+			slot = fields[6],
+			max_stack = fields[7],
+			texture = fields[8],
 		}
 	end
 end
