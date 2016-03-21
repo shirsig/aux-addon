@@ -50,12 +50,12 @@ function private.scan_merchant()
 
                 aux_merchant_buy[item_id] = Aux.util.join({
                     unit_price,
-                    old_limited or new_limited,
+                    tostring(old_limited or new_limited),
                 }, '#')
             else
                 aux_merchant_buy[item_id] = Aux.util.join({
                     new_unit_price,
-                    new_limited,
+                    tostring(new_limited),
                 }, '#')
             end
         end
