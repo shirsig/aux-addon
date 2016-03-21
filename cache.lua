@@ -14,6 +14,10 @@ function public.on_load()
 	Aux.control.event_listener('MERCHANT_SHOW', private.scan_merchant).start()
 end
 
+function private.read_item_info(data_string)
+
+end
+
 function public.merchant_info(item_id)
 	local unit_price, limited
 	if aux_merchant_buy[item_id] then
@@ -25,6 +29,28 @@ function public.merchant_info(item_id)
 end
 
 -- TODO hook GetAuctionSellItemInfo()
+
+function public.item_info(item_id)
+	local data_string = aux_items[item_id]
+	if data_string then
+		local fields = Aux.util.split(data_string, '#')
+		return {
+			name = fields[2],
+			itemstring = 'item:'..item_id..':0:0:0',
+			quality = tonumber(fields[3]),
+			level = tonumber(fields[4]),
+			class = fields[5],
+			subclass = fields[6],
+			slot = fields[7],
+			max_stack = fields[8],
+			texture = fields[9],
+		}
+	end
+end
+
+function public.item_id(item_name)
+	return aux_item_ids[strlower(item_name)]
+end
 
 function private.scan_merchant()
 	Aux.util.loop_inventory(function(bag, slot)
@@ -67,28 +93,6 @@ function private.scan_merchant()
 			end
 		end
 	end
-end
-
-function private.read_item_info(data_string)
-	local fields = Aux.util.split(data_string, '#')
-	return {
-		name = fields[2],
-		quality = tonumber(fields[3]),
-		level = tonumber(fields[4]),
-		class = fields[5],
-		subclass = fields[6],
-		slot = fields[7],
-		max_stack = fields[8],
-		texture = fields[9],
-	}
-end
-
-function public.item_info(item_id)
-	return aux_items[item_id] and private.read_item_info(aux_items[item_id])
-end
-
-function public.item_id(item_name)
-	return aux_item_ids[strlower(item_name)]
 end
 
 function private.scan_wdb()
