@@ -98,11 +98,7 @@ function public.scan_auctions()
     private.update_listing()
     Aux.scan.start{
         type = 'owner',
-        queries = {
-            {
-                start_page = 0,
-            }
-        },
+        queries = {{ blizzard_query = {} }},
         on_page_loaded = function(page, total_pages)
             private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages)
             private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))

@@ -18,7 +18,7 @@ function private.current_query()
 end
 
 function private.current_thread()
-    for _, thread in pairs(threads) do
+    for _, thread in threads do
         if thread.id == Aux.control.thread_id then
             return thread
         end
@@ -26,7 +26,7 @@ function private.current_thread()
 end
 
 function public.start(params)
-    public.abort(params.type)
+    public.abort(Aux.util.safe_index(threads[params.type], 'id'))
 
     local thread_id = Aux.control.new_thread(private.scan)
     threads[params.type] = {
@@ -131,13 +131,10 @@ end
 
 function private.scan()
     private.wait_for_callback(private.current_thread().params.on_start_scan, function()
-        local start_query_index = private.current_thread().params.start_query_index or 1
-        local next_query_index = private.current_thread().params.next_query_index or function(query_index) return query_index + 1 end
-
-        private.current_thread().query_index = private.current_thread().query_index and next_query_index(private.current_thread().query_index) or start_query_index
+        private.current_thread().query_index = private.current_thread().query_index and private.current_thread().query_index + 1 or 1
         if private.current_query() then
             private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, function()
-                private.current_thread().page = private.current_query().start_page
+                private.current_thread().page = private.current_query().start_page or 0
                 return private.process_query()
             end)
         else
@@ -206,7 +203,7 @@ function private.scan_auctions_helper(i, n, k)
 end
 
 function private.submit_query(k)
-	if private.current_thread().blizzard_query then
+	if private.current_query().blizzard_query then
         Aux.control.wait_until(function() return private.current_thread().params.type ~= 'list' or CanSendAuctionQuery() end, function()
 
             if private.current_thread().params.on_submit_query then
@@ -218,15 +215,15 @@ function private.submit_query(k)
                 GetOwnerAuctionItems(private.current_thread().page)
             else
                 QueryAuctionItems(
-                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'name'),
-                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'min_level'),
-                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'max_level'),
-                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'slot'),
-                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'class'),
-                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'subclass'),
+                    Aux.util.safe_index(private.current_query().blizzard_query, 'name'),
+                    Aux.util.safe_index(private.current_query().blizzard_query, 'min_level'),
+                    Aux.util.safe_index(private.current_query().blizzard_query, 'max_level'),
+                    Aux.util.safe_index(private.current_query().blizzard_query, 'slot'),
+                    Aux.util.safe_index(private.current_query().blizzard_query, 'class'),
+                    Aux.util.safe_index(private.current_query().blizzard_query, 'subclass'),
                     private.current_thread().page,
-                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'usable'),
-                    Aux.util.safe_index(private.current_query(), 'blizzard_query', 'quality')
+                    Aux.util.safe_index(private.current_query().blizzard_query, 'usable'),
+                    Aux.util.safe_index(private.current_query().blizzard_query, 'quality')
                 )
             end
             private.wait_for_results(function()
@@ -242,7 +239,7 @@ function private.submit_query(k)
             end)
 		end)
     else
-        private.current_thread().total_pages = 0
+        private.current_thread().total_pages = 1
         return k()
 	end
 end

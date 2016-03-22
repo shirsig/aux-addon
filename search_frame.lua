@@ -795,7 +795,6 @@ function public.start_search(filter_string, resume)
 
         queries = Aux.util.map(filters, function(filter)
             return {
-                start_page = 0,
                 blizzard_query = filter.blizzard_query,
                 validator = filter.validator,
             }
@@ -979,16 +978,6 @@ do
         end
     end
 end
-
-
---    if auction_info.current_bid == 0 then
---        status = 'No Bid'
---    elseif auction_info.high_bidder then
---        status = GREEN_FONT_COLOR_CODE..'Your Bid'..FONT_COLOR_CODE_CLOSE
---    else
---        status = 'Other Bidder'
---    end
-
 
 function private.initialize_class_dropdown()
     local function on_click()

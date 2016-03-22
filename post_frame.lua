@@ -144,8 +144,7 @@ function private.update_auction_listing()
 
             tinsert(auction_rows, {
                 cols = {
-                    { value=auction_record.count },
-                    { value=auction_record.yours > 0 and GREEN_FONT_COLOR_CODE..auction_record.yours..FONT_COLOR_CODE_CLOSE or auction_record.yours },
+                    { value=auction_record.own and GREEN_FONT_COLOR_CODE..auction_record.count..FONT_COLOR_CODE_CLOSE or auction_record.count },
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=auction_record.stack_size == stack_size and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size },
                     { value=Aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
@@ -159,8 +158,7 @@ function private.update_auction_listing()
             a.record.unit_buyout_price, b.record.unit_buyout_price,
             a.record.unit_blizzard_bid, b.record.unit_blizzard_bid,
             a.record.stack_size, b.record.stack_size,
-            a.record.count - a.record.yours, b.record.count - b.record.yours,
-            b.record.yours, a.record.yours,
+            b.record.own and 1 or 0, a.record.own and 1 or 0,
             a.record.duration, b.record.duration
         ) end)
     end
@@ -224,23 +222,22 @@ function public.on_load()
 
     private.auction_listing = Aux.listing.CreateScrollingTable(AuxSellAuctions)
     private.auction_listing:SetColInfo({
-        { name='Auctions', width=.12, align='CENTER' },
-        { name='Yours', width=.12, align='CENTER' },
-        { name='Left', width=.1, align='CENTER' },
-        { name='Qty', width=.08, align='CENTER' },
-        { name='Bid/ea', width=.23, align='RIGHT' },
-        { name='Buy/ea', width=.23, align='RIGHT' },
-        { name='Pct', width=.12, align='CENTER' }
+        { name='Auctions', width=.14, align='CENTER' },
+        { name='Left', width=.12, align='CENTER' },
+        { name='Qty', width=.1, align='CENTER' },
+        { name='Bid/ea', width=.25, align='RIGHT' },
+        { name='Buy/ea', width=.25, align='RIGHT' },
+        { name='Pct', width=.14, align='CENTER' }
     })
     private.auction_listing:DisableSelection(true)
     private.auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
         local column_index = Aux.util.index_of(column, column.row.cols)
         local unit_start_price, unit_buyout_price = private.undercut(row_data.record, private.stack_size_slider:GetValue(), button == 'RightButton')
-        if column_index == 4 then
+        if column_index == 3 then
             private.stack_size_slider:SetValue(row_data.record.stack_size)
-        elseif column_index == 5 then
+        elseif column_index == 4 then
             private.set_unit_start_price(unit_start_price)
-        elseif column_index == 6 then
+        elseif column_index == 5 then
             private.set_unit_buyout_price(unit_buyout_price)
         end
     end)
@@ -721,7 +718,7 @@ function private.undercut(record, stack_size, stack)
     local start_price = Aux.round(record.unit_blizzard_bid * (stack and record.stack_size or stack_size))
     local buyout_price = Aux.round(record.unit_buyout_price * (stack and record.stack_size or stack_size))
 
-    if record.yours < record.count then
+    if not record.own then
         start_price = max(0, start_price - 1)
         buyout_price = max(0, buyout_price - 1)
     end
@@ -929,7 +926,7 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
 		existing_auctions[key] = existing_auctions[key] or {}
 		local entry
 		for _, existing_entry in ipairs(existing_auctions[key]) do
-			if unit_blizzard_bid == existing_entry.unit_blizzard_bid and unit_buyout_price == existing_entry.unit_buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration then
+			if unit_blizzard_bid == existing_entry.unit_blizzard_bid and unit_buyout_price == existing_entry.unit_buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration and Aux.is_player(owner) == existing_entry.own then
 				entry = existing_entry
 			end
         end
@@ -941,14 +938,13 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
                 unit_blizzard_bid = unit_blizzard_bid,
                 unit_buyout_price = unit_buyout_price,
                 duration = duration,
+                own = Aux.is_player(owner),
                 count = 0,
-                yours = 0,
             }
             tinsert(existing_auctions[key], entry)
         end
 
         entry.count = entry.count + 1
-        entry.yours = entry.yours + (Aux.is_player(owner) and 1 or 0)
 
         return entry
 	end

@@ -316,13 +316,13 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
         return auction_info and auction_info.search_signature == auction_record.search_signature
     end
 
-    local pages = auction_record.page > 0 and { auction_record.page, auction_record.page - 1 } or { auction_record.page }
-
     local queries = {}
     tinsert(queries, {})
     if auction_record.blizzard_query then
-        tinsert(queries,         {
+        local pages = auction_record.page > 0 and { auction_record.page - 1 } or {}
+        tinsert(queries, {
             blizzard_query = auction_record.blizzard_query,
+            start_page = auction_record.page,
             next_page = function()
                 if getn(pages) == 1 then
                     status_bar:update_status(50, 50)
@@ -394,7 +394,7 @@ function m.item_query(item_id, page, single_page)
     if item_info then
         local filter = m.filter_from_string(item_info.name..'/exact')
         return {
-            start_page = page or 0,
+            start_page = page,
             next_page = single_page and Aux.util.pass,
             validator = filter.validator,
             blizzard_query = filter.blizzard_query,
