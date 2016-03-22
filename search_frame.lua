@@ -42,6 +42,12 @@ do
         hideOnEscape = 1,
     }
 end
+StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
+    text = 'Table full!\nFurther results from this search will be discarded.',
+    button1 = 'Ok',
+    timeout = 0,
+    hideOnEscape = 1,
+}
 
 local RESULTS, SAVED, FILTER = {}, {}, {}
 
@@ -835,7 +841,7 @@ function public.start_search(filter_string, resume)
         on_page_loaded = function(page, total_pages)
             current_page = page
             local current_total_pages = total_pages
-            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page) / current_total_pages) -- TODO
+            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page) / current_total_pages)
             private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page + 1, current_total_pages))
         end,
         on_page_scanned = function()
@@ -843,12 +849,15 @@ function public.start_search(filter_string, resume)
         end,
         on_start_query = function(query_index)
             current_query = query_index
-            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 0) -- TODO
+            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 0)
             private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
         end,
         on_auction = function(auction_record)
-            if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
+            if getn(scanned_records) < 1000 then
                 tinsert(scanned_records, auction_record)
+                if getn(scanned_records) == 1000 then
+                    StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
+                end
             end
         end,
         on_complete = function()
