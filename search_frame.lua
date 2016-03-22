@@ -5,7 +5,8 @@ aux_favorite_searches = {}
 aux_recent_searches = {}
 local scanned_records = {}
 local aborted_search
-local search_id
+local search_scan_id
+local find_scan_id
 
 private.popup_info = {
     rename = {}
@@ -771,7 +772,7 @@ function public.on_load()
 end
 
 function private.stop_search()
-	Aux.scan.abort(search_id)
+	Aux.scan.abort(search_scan_id)
 end
 
 function public.start_search(filter_string, resume)
@@ -824,7 +825,7 @@ function public.start_search(filter_string, resume)
     end
 
     local current_query, current_page
-    search_id = Aux.scan.start{
+    search_scan_id = Aux.scan.start{
         type = 'list',
         queries = queries,
         on_scan_start = function()
@@ -912,8 +913,9 @@ do
             return
         end
 
+        Aux.scan.abort(find_scan_id)
         state = SEARCHING
-        Aux.scan_util.find(
+        find_scan_id = Aux.scan_util.find(
             record,
             private.status_bar,
             function()
