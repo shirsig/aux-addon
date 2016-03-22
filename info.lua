@@ -164,24 +164,12 @@ function public.auction(index, type)
         tooltip = tooltip,
         charges = charges,
         aux_quantity = aux_quantity,
-
-        EnhTooltip_info = {
-            name = name,
-            hyperlink = hyperlink,
-            quality = quality,
-            count = aux_quantity,
-        },
     }
 end
 
-function public.set_tooltip(itemstring, EnhTooltip_info, owner, anchor)
-
+function public.set_tooltip(itemstring, owner, anchor)
     GameTooltip:SetOwner(owner, anchor)
     GameTooltip:SetHyperlink(itemstring)
-
-	if EnhTooltip and EnhTooltip_info then
-		EnhTooltip.TooltipCall(GameTooltip, EnhTooltip_info.name, EnhTooltip_info.hyperlink, EnhTooltip_info.quality, EnhTooltip_info.count)
-	end
 end
 
 function public.set_shopping_tooltip(slot)

@@ -86,7 +86,7 @@ local methods = {
         local rt = this:GetParent().row.rt
         local rowData = this:GetParent().row.data
         if rowData and rowData.record then
-            Aux.info.set_tooltip(rowData.record.itemstring, rowData.record.EnhTooltip_info, this, 'ANCHOR_RIGHT')
+            Aux.info.set_tooltip(rowData.record.itemstring, this, 'ANCHOR_RIGHT')
             Aux.info.set_shopping_tooltip(rowData.record.slot)
             rt.isShowingItemTooltip = true
         end
