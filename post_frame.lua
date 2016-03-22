@@ -150,7 +150,7 @@ function private.update_auction_listing()
                     { value=Aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
                     { value=historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---' },
                     { value=auction_record.unit_buyout_price > 0 and Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---' },
-                    { value=auction_record.unit_buyout_price and historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_buyout_price / historical_value * 100)) or '---' },
+                    { value=auction_record.unit_buyout_price > 0 and historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_buyout_price / historical_value * 100)) or '---' },
                 },
                 record = auction_record,
             })
