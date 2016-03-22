@@ -5,6 +5,7 @@ local refresh
 local existing_auctions = {}
 local inventory_records
 local selected_item
+local scan_id
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local BUYOUT_MODE, BID_MODE, FULL_MODE = 1, 2, 3
@@ -782,7 +783,7 @@ function private.set_item(item)
         return
     end
 
-    Aux.scan.abort('list')
+    Aux.scan.abort(scan_id)
 
     selected_item = item
 
@@ -880,7 +881,7 @@ function private.refresh_entries()
         private.status_bar:update_status(0,0)
         private.status_bar:set_text('Scanning auctions...')
 
-		Aux.scan.start{
+		scan_id = Aux.scan.start{
             type = 'list',
             no_wait_owner = true,
 			queries = { query },
@@ -918,7 +919,7 @@ function private.refresh_entries()
 end
 
 function private.refresh()
-	Aux.scan.abort('list')
+	Aux.scan.abort(scan_id)
     private.refresh_entries()
     refresh = true
 end

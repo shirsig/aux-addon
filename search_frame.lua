@@ -5,6 +5,7 @@ aux_favorite_searches = {}
 aux_recent_searches = {}
 local scanned_records = {}
 local aborted_search
+local search_id
 
 private.popup_info = {
     rename = {}
@@ -209,7 +210,7 @@ function public.on_load()
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Stop')
-        btn:SetScript('OnClick', Aux.search_frame.stop_search)
+        btn:SetScript('OnClick', private.stop_search)
         btn:Hide()
         private.stop_button = btn
     end
@@ -769,8 +770,8 @@ function public.on_load()
     private.update_tab(SAVED)
 end
 
-function public.stop_search()
-	Aux.scan.abort('list')
+function private.stop_search()
+	Aux.scan.abort(search_id)
 end
 
 function public.start_search(filter_string, resume)
@@ -779,7 +780,6 @@ function public.start_search(filter_string, resume)
     end
 
     local queries = aborted_search
-    Aux.scan.abort('list')
     aborted_search = nil
     private.search_button:SetText('Search')
 
@@ -816,9 +816,6 @@ function public.start_search(filter_string, resume)
 
     private.update_tab(RESULTS)
 
-    private.status_bar:update_status(0,0)
-    private.status_bar:set_text('Scanning auctions...')
-
     if resume then
         private.results_listing:SetSelectedRecord(nil)
     else
@@ -828,9 +825,13 @@ function public.start_search(filter_string, resume)
     end
 
     local current_query, current_page
-    Aux.scan.start{
+    search_id = Aux.scan.start{
         type = 'list',
         queries = queries,
+        on_start_scan = function()
+            private.status_bar:update_status(0,0)
+            private.status_bar:set_text('Scanning auctions...')
+        end,
         on_page_loaded = function(page, total_pages)
             current_page = page
             local current_total_pages = total_pages

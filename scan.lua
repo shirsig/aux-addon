@@ -33,12 +33,13 @@ function public.start(params)
         id = thread_id,
         params = params,
     }
+    return thread_id
 end
 
-function public.abort(type)
+function public.abort(scan_id)
     local aborted_threads = {}
     for t, thread in pairs(threads) do
-        if not type or type == t then
+        if thread.id == scan_id then
             Aux.control.kill_thread(thread.id)
             threads[t] = nil
             tinsert(aborted_threads, thread)
@@ -129,22 +130,24 @@ function private.wait_for_callback(...)
 end
 
 function private.scan()
-    local start_query_index = private.current_thread().params.start_query_index or 1
-    local next_query_index = private.current_thread().params.next_query_index or function(query_index) return query_index + 1 end
+    private.wait_for_callback(private.current_thread().params.on_start_scan, function()
+        local start_query_index = private.current_thread().params.start_query_index or 1
+        local next_query_index = private.current_thread().params.next_query_index or function(query_index) return query_index + 1 end
 
-    private.current_thread().query_index = private.current_thread().query_index and next_query_index(private.current_thread().query_index) or start_query_index
-    if private.current_query() then
-        private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, function()
-            private.current_thread().page = private.current_query().start_page
-            return private.process_query()
-        end)
-    else
-        local on_complete = private.current_thread().params.on_complete
-        threads[private.current_thread().params.type] = nil
-        if on_complete then
-            return on_complete()
+        private.current_thread().query_index = private.current_thread().query_index and next_query_index(private.current_thread().query_index) or start_query_index
+        if private.current_query() then
+            private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, function()
+                private.current_thread().page = private.current_query().start_page
+                return private.process_query()
+            end)
+        else
+            local on_complete = private.current_thread().params.on_complete
+            threads[private.current_thread().params.type] = nil
+            if on_complete then
+                return on_complete()
+            end
         end
-    end
+    end)
 end
 
 function private.process_query()

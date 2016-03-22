@@ -316,11 +316,6 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
         return auction_info and auction_info.search_signature == auction_record.search_signature
     end
 
-    Aux.scan.abort(auction_record.query_type)
-
-    status_bar:update_status(0, 0)
-    status_bar:set_text('Searching auction...')
-
     local pages = auction_record.page > 0 and { auction_record.page, auction_record.page - 1 } or { auction_record.page }
 
     local query = {
@@ -340,6 +335,10 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
     Aux.scan.start{
         type = auction_record.query_type,
         queries = { query },
+        on_scan_start = function()
+            status_bar:update_status(0, 0)
+            status_bar:set_text('Searching auction...')
+        end,
         on_read_auction = function(auction_info, ctrl)
             if test(auction_info.index) then
                 found = true
