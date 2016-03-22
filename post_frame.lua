@@ -120,7 +120,7 @@ function private.update_auction_listing()
             stack_blizzard_bid_undercut = Aux.money.from_string(Aux.money.to_string(stack_blizzard_bid_undercut, true, nil, 3))
 
             local stack_size = private.stack_size_slider:GetValue()
-            local historical_value = Aux.history.value(auction_record.item_key)
+            local historical_value = Aux.history.value(selected_item.key)
 
             local blizzard_above = stack_blizzard_bid_undercut < unit_start_price
 
@@ -148,14 +148,15 @@ function private.update_auction_listing()
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=auction_record.stack_size == stack_size and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size },
                     { value=Aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
-                    { value=Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) },
-                    { value=historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_buyout_price / historical_value * 100)) or '---' },
+                    { value=historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---' },
+                    { value=auction_record.unit_buyout_price > 0 and Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---' },
+                    { value=auction_record.unit_buyout_price and historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_buyout_price / historical_value * 100)) or '---' },
                 },
                 record = auction_record,
             })
         end
         sort(auction_rows, function(a, b) return Aux.sort.multi_lt(
-            a.record.unit_buyout_price, b.record.unit_buyout_price,
+            a.record.unit_buyout_price == 0 and Aux.huge or a.record.unit_buyout_price, b.record.unit_buyout_price == 0 and Aux.huge or b.record.unit_buyout_price,
             a.record.unit_blizzard_bid, b.record.unit_blizzard_bid,
             a.record.stack_size, b.record.stack_size,
             b.record.own and 1 or 0, a.record.own and 1 or 0,
@@ -222,12 +223,13 @@ function public.on_load()
 
     private.auction_listing = Aux.listing.CreateScrollingTable(AuxSellAuctions)
     private.auction_listing:SetColInfo({
-        { name='Auctions', width=.14, align='CENTER' },
-        { name='Left', width=.12, align='CENTER' },
-        { name='Qty', width=.1, align='CENTER' },
-        { name='Bid/ea', width=.25, align='RIGHT' },
-        { name='Buy/ea', width=.25, align='RIGHT' },
-        { name='Pct', width=.14, align='CENTER' }
+        { name='Auctions', width=.12, align='CENTER' },
+        { name='Left', width=.1, align='CENTER' },
+        { name='Qty', width=.08, align='CENTER' },
+        { name='Bid/ea', width=.23, align='RIGHT' },
+        { name='Bid Pct', width=.12, align='CENTER' },
+        { name='Buy/ea', width=.23, align='RIGHT' },
+        { name='Buy Pct', width=.12, align='CENTER' }
     })
     private.auction_listing:DisableSelection(true)
     private.auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
@@ -922,32 +924,29 @@ function private.refresh()
 end
 
 function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
-	if unit_buyout_price > 0 then
-		existing_auctions[key] = existing_auctions[key] or {}
-		local entry
-		for _, existing_entry in ipairs(existing_auctions[key]) do
-			if unit_blizzard_bid == existing_entry.unit_blizzard_bid and unit_buyout_price == existing_entry.unit_buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration and Aux.is_player(owner) == existing_entry.own then
-				entry = existing_entry
-			end
+    existing_auctions[key] = existing_auctions[key] or {}
+    local entry
+    for _, existing_entry in ipairs(existing_auctions[key]) do
+        if unit_blizzard_bid == existing_entry.unit_blizzard_bid and unit_buyout_price == existing_entry.unit_buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration and Aux.is_player(owner) == existing_entry.own then
+            entry = existing_entry
         end
+    end
 
-        if not entry then
-            entry = {
-                item_key = key,
-                stack_size = aux_quantity,
-                unit_blizzard_bid = unit_blizzard_bid,
-                unit_buyout_price = unit_buyout_price,
-                duration = duration,
-                own = Aux.is_player(owner),
-                count = 0,
-            }
-            tinsert(existing_auctions[key], entry)
-        end
+    if not entry then
+        entry = {
+            stack_size = aux_quantity,
+            unit_blizzard_bid = unit_blizzard_bid,
+            unit_buyout_price = unit_buyout_price,
+            duration = duration,
+            own = Aux.is_player(owner),
+            count = 0,
+        }
+        tinsert(existing_auctions[key], entry)
+    end
 
-        entry.count = entry.count + 1
+    entry.count = entry.count + 1
 
-        return entry
-	end
+    return entry
 end
 
 function public.on_update()
