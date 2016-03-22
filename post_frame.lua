@@ -115,28 +115,29 @@ function private.update_auction_listing()
             blizzard_bid_undercut = Aux.money.from_string(Aux.money.to_string(blizzard_bid_undercut, true, nil, 3))
             buyout_price_undercut = Aux.money.from_string(Aux.money.to_string(buyout_price_undercut, true, nil, 3))
 
-            local stack_blizzard_bid_undercut, stack_buyout_price_undercut = private.undercut(auction_record, private.stack_size_slider:GetValue(), true)
+            local stack_blizzard_bid_undercut = private.undercut(auction_record, private.stack_size_slider:GetValue(), true)
             stack_blizzard_bid_undercut = Aux.money.from_string(Aux.money.to_string(stack_blizzard_bid_undercut, true, nil, 3))
-            stack_buyout_price_undercut = Aux.money.from_string(Aux.money.to_string(stack_buyout_price_undercut, true, nil, 3))
 
             local stack_size = private.stack_size_slider:GetValue()
             local historical_value = Aux.history.value(auction_record.item_key)
 
+            local blizzard_above = stack_blizzard_bid_undercut < unit_start_price
+
             local bid_color
-            if blizzard_bid_undercut < unit_start_price and stack_blizzard_bid_undercut < unit_start_price then
+            if blizzard_bid_undercut < unit_start_price and blizzard_above then
                 bid_color = '|cffff0000'
             elseif blizzard_bid_undercut < unit_start_price then
                 bid_color = '|cffff9218'
-            elseif stack_blizzard_bid_undercut < unit_start_price then
+            elseif blizzard_above then
                 bid_color = '|cffffff00'
             end
 
             local buyout_color
-            if buyout_price_undercut < unit_buyout_price and stack_buyout_price_undercut < unit_buyout_price then
+            if buyout_price_undercut < unit_buyout_price and blizzard_above then
                 buyout_color = '|cffff0000'
             elseif buyout_price_undercut < unit_buyout_price then
                 buyout_color = '|cffff9218'
-            elseif stack_buyout_price_undercut < unit_buyout_price then
+            elseif blizzard_above then
                 buyout_color = '|cffffff00'
             end
 
@@ -234,7 +235,9 @@ function public.on_load()
     private.auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
         local column_index = Aux.util.index_of(column, column.row.cols)
         local unit_start_price, unit_buyout_price = private.undercut(row_data.record, private.stack_size_slider:GetValue(), button == 'RightButton')
-        if column_index == 5 then
+        if column_index == 4 then
+            private.stack_size_slider:SetValue(row_data.record.stack_size)
+        elseif column_index == 5 then
             private.set_unit_start_price(unit_start_price)
         elseif column_index == 6 then
             private.set_unit_buyout_price(unit_buyout_price)
