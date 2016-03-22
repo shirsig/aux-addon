@@ -876,7 +876,7 @@ function private.refresh_entries()
 
         existing_auctions[item_key] = nil
 
-        local query = Aux.scan_util.create_item_query(item_id)
+        local query = Aux.scan_util.item_query(item_id)
 
         private.status_bar:update_status(0,0)
         private.status_bar:set_text('Scanning auctions...')

@@ -31,7 +31,7 @@ m.filters = {
             if str then
                 return m.default_filter(str).test()
             else
-                return false, {}, 'Erroneous Tooltip Modifier'
+                return false, {}, 'Erroneous tooltip modifier'
             end
         end,
     },
@@ -40,7 +40,7 @@ m.filters = {
         arity = 1,
         test = function(name)
             if not name then
-                return false, aux_auctionable_items, 'Erroneous Item Modifier'
+                return false, aux_auctionable_items, 'Erroneous item modifier'
             end
 
             return function(auction_record)
@@ -53,7 +53,7 @@ m.filters = {
         arity = 1,
         test = function(duration)
             if not duration then
-                return false, {'30m', '2h', '8h', '24h'}, 'Erroneous Time Left Modifier'
+                return false, {'30m', '2h', '8h', '24h'}, 'Erroneous time left modifier'
             end
 
             local code = ({
@@ -64,7 +64,7 @@ m.filters = {
             })[duration or '']
 
             if not code then
-                return false, {}, 'Erroneous Time Left Modifier'
+                return false, {}, 'Erroneous time left modifier'
             end
 
             return function(auction_record)
@@ -77,7 +77,7 @@ m.filters = {
         arity = 1,
         test = function(rarity)
             if not rarity then
-                return false, {'poor', 'common', 'uncommon', 'rare', 'epic'}, 'Erroneous Time Left Modifier'
+                return false, {'poor', 'common', 'uncommon', 'rare', 'epic'}, 'Erroneous rarity modifier'
             end
 
             local code = ({
@@ -88,7 +88,7 @@ m.filters = {
                 ['epic'] = 5,
             })[rarity or '']
             if not code then
-                return false, {}, 'Erroneous Time Left Modifier'
+                return false, {}, 'Erroneous rarity modifier'
             end
 
             return function(auction_record)
@@ -106,7 +106,7 @@ m.filters = {
                     return auction_record.level >= level
                 end
             else
-                return false, {}, 'Erroneous Min Level Modifier'
+                return false, {}, 'Erroneous min level modifier'
             end
         end
     },
@@ -120,7 +120,7 @@ m.filters = {
                     return auction_record.level <= level
                 end
             else
-                return false, {}, 'Erroneous Max Level Modifier'
+                return false, {}, 'Erroneous max level modifier'
             end
         end
     },
@@ -134,7 +134,7 @@ m.filters = {
                     return auction_record.unit_bid_price >= amount
                 end
             else
-                return false, {}, 'Erroneous Min Bid Modifier'
+                return false, {}, 'Erroneous min bid modifier'
             end
         end
     },
@@ -148,7 +148,7 @@ m.filters = {
                     return auction_record.unit_buyout_price >= amount
                 end
             else
-                return false, {}, 'Erroneous Min Buyout Modifier'
+                return false, {}, 'Erroneous min buyout modifier'
             end
         end
     },
@@ -162,7 +162,7 @@ m.filters = {
                     return auction_record.unit_bid_price <= amount
                 end
             else
-                return false, {}, 'Erroneous Max Bid Modifier'
+                return false, {}, 'Erroneous max bid modifier'
             end
         end
     },
@@ -176,7 +176,7 @@ m.filters = {
                     return auction_record.buyout_price > 0 and auction_record.unit_buyout_price <= amount
                 end
             else
-                return false, {}, 'Erroneous Max Buyout Modifier'
+                return false, {}, 'Erroneous max buyout modifier'
             end
         end
     },
@@ -192,7 +192,7 @@ m.filters = {
                             and auction_record.unit_buyout_price / Aux.history.value(auction_record.item_key) * 100 <= pct
                 end
             else
-                return false, {}, 'Erroneous Bid Percentage Modifier'
+                return false, {}, 'Erroneous bid percentage modifier'
             end
         end
     },
@@ -208,7 +208,7 @@ m.filters = {
                             and auction_record.unit_buyout_price / Aux.history.value(auction_record.item_key) * 100 <= pct
                 end
             else
-                return false, {}, 'Erroneous Buyout Percentage Modifier'
+                return false, {}, 'Erroneous buyout percentage modifier'
             end
         end
     },
@@ -222,7 +222,7 @@ m.filters = {
                     return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
                 end
             else
-                return false, {}, 'Erroneous Bid Profit Modifier'
+                return false, {}, 'Erroneous bid profit modifier'
             end
         end
     },
@@ -236,7 +236,7 @@ m.filters = {
                     return auction_record.buyout_price > 0 and Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
                 end
             else
-                return false, {}, 'Erroneous Buyout Profit Modifier'
+                return false, {}, 'Erroneous buyout profit modifier'
             end
         end
     },
@@ -251,7 +251,7 @@ m.filters = {
                     return disenchant_value and disenchant_value - auction_record.bid_price >= amount
                 end
             else
-                return false, {}, 'Erroneous Bid Disenchant Profit Modifier'
+                return false, {}, 'Erroneous bid disenchant profit modifier'
             end
         end
     },
@@ -266,7 +266,7 @@ m.filters = {
                     return auction_record.buyout_price > 0 and disenchant_value and disenchant_value - auction_record.buyout_price >= amount
                 end
             else
-                return false, {}, 'Erroneous Buyout Disenchant Profit Modifier'
+                return false, {}, 'Erroneous buyout disenchant profit modifier'
             end
         end
     },
@@ -281,7 +281,7 @@ m.filters = {
                     return vendor_price and vendor_price * auction_record.aux_quantity - auction_record.bid_price >= amount
                 end
             else
-                return false, {}, 'Erroneous Bid Vendor Profit Modifier'
+                return false, {}, 'Erroneous bid vendor profit Modifier'
             end
         end
     },
@@ -296,7 +296,7 @@ m.filters = {
                     return auction_record.buyout_price > 0 and vendor_price and vendor_price * auction_record.aux_quantity - auction_record.buyout_price >= amount
                 end
             else
-                return false, {}, 'Erroneous Buyout Vendor Profit Modifier'
+                return false, {}, 'Erroneous buyout vendor profit Modifier'
             end
         end
     },
@@ -318,23 +318,30 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
     local pages = auction_record.page > 0 and { auction_record.page, auction_record.page - 1 } or { auction_record.page }
 
-    local query = {
-        validator = function(auction_info) return test(auction_info.index) end,
-        blizzard_query = auction_record.query.blizzard_query,
-        next_page = function()
-            if getn(pages) == 1 then
-                status_bar:update_status(50, 50)
-            end
-            local page = pages[1]
-            tremove(pages, 1)
-            return page
-        end,
-    }
+    local queries = {}
+    tinsert(queries, {})
+    if auction_record.blizzard_query then
+        tinsert(queries,         {
+            blizzard_query = auction_record.blizzard_query,
+            next_page = function()
+                if getn(pages) == 1 then
+                    status_bar:update_status(50, 50)
+                end
+                local page = pages[1]
+                tremove(pages, 1)
+                return page
+            end,
+        })
+        local item_query = m.item_query(auction_record.item_id, 0, true)
+        if not Aux.util.table_eq(auction_record.blizzard_query, item_query.blizzard_query) then
+            tinsert(queries, item_query)
+        end
+    end
 
     local found
     Aux.scan.start{
         type = auction_record.query_type,
-        queries = { query },
+        queries = queries,
         on_scan_start = function()
             status_bar:update_status(0, 0)
             status_bar:set_text('Searching auction...')
@@ -380,14 +387,15 @@ function m.filter_builder()
     }
 end
 
-function m.create_item_query(item_id)
+function m.item_query(item_id, page, single_page)
 
     local item_info = Aux.info.item(item_id)
 
     if item_info then
         local filter = m.filter_from_string(item_info.name..'/exact')
         return {
-            start_page = 0,
+            start_page = page or 0,
+            next_page = single_page and Aux.util.pass,
             validator = filter.validator,
             blizzard_query = filter.blizzard_query,
         }
@@ -480,48 +488,48 @@ function m.filter_from_string(filter_term)
                 blizzard_filter.max_level = tonumber(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, {}, 'Erroneous Level Range Modifier'
+                return false, {}, 'Erroneous level range modifier'
             end
         elseif Aux.item_class_index(str) and not (blizzard_filter.class and not blizzard_filter.subclass and str == strlower(({ GetAuctionItemClasses() })[10])) then
             if not blizzard_filter.class then
                 blizzard_filter.class = Aux.item_class_index(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, {}, 'Erroneous Item Class Modifier'
+                return false, {}, 'Erroneous item class modifier'
             end
         elseif blizzard_filter.class and Aux.item_subclass_index(blizzard_filter.class, str) then
             if not blizzard_filter.subclass then
                 blizzard_filter.subclass = Aux.item_subclass_index(blizzard_filter.class, str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, {}, 'Erroneous Item Subclass Modifier'
+                return false, {}, 'Erroneous item subclass modifier'
             end
         elseif blizzard_filter.subclass and Aux.item_slot_index(blizzard_filter.class, blizzard_filter.subclass, str) then
             if not blizzard_filter.slot then
                 blizzard_filter.slot = Aux.item_slot_index(blizzard_filter.class, blizzard_filter.subclass, str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, {}, 'Erroneous Item Slot Modifier'
+                return false, {}, 'Erroneous item slot modifier'
             end
         elseif Aux.item_quality_index(str) then
             if not blizzard_filter.quality then
                 blizzard_filter.quality = Aux.item_quality_index(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, {}, 'Erroneous Rarity Modifier'
+                return false, {}, 'Erroneous rarity modifier'
             end
         elseif str == 'usable' then
             if not blizzard_filter.usable then
                 blizzard_filter.usable = true
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, {}, 'Erroneous Usable Only Modifier'
+                return false, {}, 'Erroneous usable only modifier'
             end
         elseif str == 'exact' then
             if not blizzard_filter.exact then
                 blizzard_filter.exact = true
             else
-                return false, {}, 'Erroneous Exact Only Modifier'
+                return false, {}, 'Erroneous exact only modifier'
             end
         elseif i == 2 and not m.filters[str] then
             blizzard_filter.name = str
@@ -531,7 +539,7 @@ function m.filter_from_string(filter_term)
                 return false, suggestions, error
             end
         else
-            return false, {}, 'Empty Modifier'
+            return false, {}, 'Empty modifier'
         end
     end
 
@@ -543,7 +551,7 @@ function m.filter_from_string(filter_term)
             tinsert(suggestions, 'or')
             tinsert(suggestions, 'not')
         end
-        return false, i > getn(parts) and suggestions, 'Malformed Expression'
+        return false, i > getn(parts) and suggestions, 'Malformed expression'
     end
 
     if blizzard_filter.exact then
@@ -556,7 +564,7 @@ function m.filter_from_string(filter_term)
                 or blizzard_filter.usable
                 or not blizzard_filter.name
         then
-            return false, {}, 'Erroneous Exact Only Modifier'
+            return false, {}, 'Erroneous exact only modifier'
         else
             prettified:prepend(Aux.info.display_name(Aux.cache.item_id(blizzard_filter.name)) or Aux.gui.inline_color({216, 225, 211, 1})..'['..blizzard_filter.name..']|r')
         end

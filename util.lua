@@ -8,6 +8,15 @@ function public.id(object)
 	return object
 end
 
+function public.table_eq(t1, t2)
+	for key, value in t1 do
+		if t2[key] ~= value then
+			return false
+		end
+	end
+	return true
+end
+
 function public.wipe(table)
 	while getn(table) > 0 do
 		tremove(table)

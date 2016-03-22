@@ -192,7 +192,7 @@ function private.scan_auctions_helper(i, n, k)
     if auction_info then
         auction_info.index = i
         auction_info.page = private.current_thread().page
-        auction_info.query = private.current_query()
+        auction_info.blizzard_query = private.current_query().blizzard_query
         auction_info.query_type = private.current_thread().params.type
 
         Aux.history.process_auction(auction_info)
@@ -206,7 +206,7 @@ function private.scan_auctions_helper(i, n, k)
 end
 
 function private.submit_query(k)
-	if private.current_thread().page then
+	if private.current_thread().blizzard_query then
         Aux.control.wait_until(function() return private.current_thread().params.type ~= 'list' or CanSendAuctionQuery() end, function()
 
             if private.current_thread().params.on_submit_query then
@@ -241,7 +241,8 @@ function private.submit_query(k)
                 end
             end)
 		end)
-	else
-		return k()
+    else
+        private.current_thread().total_pages = 0
+        return k()
 	end
 end
