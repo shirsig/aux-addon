@@ -43,7 +43,7 @@ end
 function public.abort(scan_id)
     local aborted_threads = {}
     for t, thread in pairs(threads) do
-        if thread.id == scan_id then
+        if not scan_id or thread.id == scan_id then
             Aux.control.kill_thread(thread.id)
             threads[t] = nil
             tinsert(aborted_threads, thread)
