@@ -239,7 +239,7 @@ function public.on_load()
             private.stack_size_slider:SetValue(row_data.record.stack_size)
         elseif column_index == 4 then
             private.set_unit_start_price(unit_start_price)
-        elseif column_index == 5 then
+        elseif column_index == 6 then
             private.set_unit_buyout_price(unit_buyout_price)
         end
     end)
