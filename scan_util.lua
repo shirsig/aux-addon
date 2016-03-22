@@ -346,13 +346,13 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
             status_bar:update_status(0, 0)
             status_bar:set_text('Searching auction...')
         end,
-        on_read_auction = function(auction_info, ctrl)
-            if test(auction_info.index) then
+        on_auction = function(auction_record, ctrl)
+            if test(auction_record.index) then
                 found = true
                 ctrl.suspend()
                 status_bar:update_status(100, 100)
                 status_bar:set_text('Auction found')
-                return on_success(auction_info.index)
+                return on_success(auction_record.index)
             end
         end,
         on_abort = function()

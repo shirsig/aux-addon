@@ -886,15 +886,15 @@ function private.refresh_entries()
                 private.status_bar:update_status(100 * (page + 1) / total_pages, 0) -- TODO
                 private.status_bar:set_text(format('Scanning Page %d / %d', page + 1, total_pages))
 			end,
-			on_read_auction = function(auction_info)
-				if auction_info.item_key == item_key then
+			on_auction = function(auction_record)
+				if auction_record.item_key == item_key then
                     private.record_auction(
-                        auction_info.item_key,
-                        auction_info.aux_quantity,
-                        auction_info.unit_blizzard_bid,
-                        auction_info.unit_buyout_price,
-                        auction_info.duration,
-                        auction_info.owner
+                        auction_record.item_key,
+                        auction_record.aux_quantity,
+                        auction_record.unit_blizzard_bid,
+                        auction_record.unit_buyout_price,
+                        auction_record.duration,
+                        auction_record.owner
                     )
 				end
 			end,

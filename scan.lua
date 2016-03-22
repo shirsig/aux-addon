@@ -26,9 +26,13 @@ function private.current_thread()
 end
 
 function public.start(params)
-    public.abort(Aux.util.safe_index(threads[params.type], 'id'))
+    if threads[params.type] then
+        public.abort(threads[params.type].id)
+    end
 
-    local thread_id = Aux.control.new_thread(private.scan)
+    local thread_id = Aux.control.new_thread(function()
+        return private.wait_for_callback(private.current_thread().params.on_scan_start, private.scan)
+    end)
     threads[params.type] = {
         id = thread_id,
         params = params,
@@ -130,21 +134,19 @@ function private.wait_for_callback(...)
 end
 
 function private.scan()
-    private.wait_for_callback(private.current_thread().params.on_start_scan, function()
-        private.current_thread().query_index = private.current_thread().query_index and private.current_thread().query_index + 1 or 1
-        if private.current_query() then
-            private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, function()
-                private.current_thread().page = private.current_query().start_page or 0
-                return private.process_query()
-            end)
-        else
-            local on_complete = private.current_thread().params.on_complete
-            threads[private.current_thread().params.type] = nil
-            if on_complete then
-                return on_complete()
-            end
+    private.current_thread().query_index = private.current_thread().query_index and private.current_thread().query_index + 1 or 1
+    if private.current_query() then
+        private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, function()
+            private.current_thread().page = private.current_query().start_page or 0
+            return private.process_query()
+        end)
+    else
+        local on_complete = private.current_thread().params.on_complete
+        threads[private.current_thread().params.type] = nil
+        if on_complete then
+            return on_complete()
         end
-    end)
+    end
 end
 
 function private.process_query()
@@ -195,7 +197,7 @@ function private.scan_auctions_helper(i, n, k)
         Aux.history.process_auction(auction_info)
 
         if not private.current_query().validator or private.current_query().validator(auction_info) then
-            return private.wait_for_callback(private.current_thread().params.on_read_auction, auction_info, recurse)
+            return private.wait_for_callback(private.current_thread().params.on_auction, auction_info, recurse)
         end
     end
 

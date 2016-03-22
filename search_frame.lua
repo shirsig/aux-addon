@@ -827,7 +827,7 @@ function public.start_search(filter_string, resume)
     search_id = Aux.scan.start{
         type = 'list',
         queries = queries,
-        on_start_scan = function()
+        on_scan_start = function()
             private.status_bar:update_status(0,0)
             private.status_bar:set_text('Scanning auctions...')
         end,
@@ -845,13 +845,12 @@ function public.start_search(filter_string, resume)
             private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 0) -- TODO
             private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
         end,
-        on_read_auction = function(auction_info, ctrl)
+        on_auction = function(auction_record)
             if getn(scanned_records) < 1000 then -- TODO static popup, remove discard
-                tinsert(scanned_records, auction_info)
+                tinsert(scanned_records, auction_record)
             end
         end,
         on_complete = function()
-            private.results_listing:SetDatabase()
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Scanning')
 
@@ -863,7 +862,6 @@ function public.start_search(filter_string, resume)
             end
         end,
         on_abort = function()
-            private.results_listing:SetDatabase()
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Scanning')
             private.stop_button:Hide()
@@ -966,7 +964,7 @@ do
 
         local selection = private.results_listing:GetSelection()
         if not selection then
-           state = IDLE
+            state = IDLE
         elseif selection and state == IDLE then
             private.find_auction(selection.record)
         elseif state == FOUND and not private.test(selection.record)(found_index) then

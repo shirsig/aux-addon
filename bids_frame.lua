@@ -123,7 +123,7 @@ function public.scan_bids()
             private.status_bar:update_status(100 * (page + 1) / total_pages, 100 * (page + 1) / total_pages)
             private.status_bar:set_text(format('Scanning (Page %d / %d)', page + 1, total_pages))
         end,
-        on_read_auction = function(auction_record)
+        on_auction = function(auction_record)
             tinsert(auction_records, auction_record)
         end,
         on_complete = function()
