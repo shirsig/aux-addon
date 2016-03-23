@@ -697,10 +697,8 @@ function public.on_load()
     private.results_listing:Show()
     private.results_listing:SetSort(9)
     private.results_listing:Clear()
-    private.results_listing:SetHandler('OnSelectionChanged', function(rt, datum)
-        if not datum then return end
-
-        if IsAltKeyDown() and private.results_listing:GetSelection() == datum then
+    private.results_listing:SetHandler('OnCellClick', function(cell, button)
+        if IsAltKeyDown() and private.results_listing:GetSelection().record == cell.row.data.record then
             if arg1 == 'LeftButton' and private.buyout_button:IsEnabled() then
                 private.buyout_button:Click()
                 return
@@ -709,7 +707,9 @@ function public.on_load()
                 return
             end
         end
-
+    end)
+    private.results_listing:SetHandler('OnSelectionChanged', function(rt, datum)
+        if not datum then return end
         private.find_auction(datum.record)
     end)
 
