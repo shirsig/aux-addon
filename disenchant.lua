@@ -180,8 +180,17 @@ function public.distribution(slot, quality, level)
             return {{item_id=14344, quantity=1, probability=0.995}, {item_id=20725, quantity=1, probability=0.005}}
         end
     elseif quality == EPIC then
-        return {{item_id=20725, quantity=1, probability=1}}
+        if level <= 40 then
+            return {{item_id=11177, quantity=3, probability=1}}
+        elseif level <= 45 then
+            return {{item_id=11178, quantity=3, probability=1}}
+        elseif level <= 50 then
+            return {{item_id=14343, quantity=3, probability=1}}
+        elseif level <= 55 then
+            return {{item_id=20725, quantity=1, probability=1}}
+        elseif level <= 60 then
+            return {{item_id=20725, quantity=1.5, probability=1}}
+        end
     end
-
     return {}
 end
