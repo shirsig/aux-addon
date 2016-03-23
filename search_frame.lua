@@ -787,6 +787,7 @@ function public.start_search(filter_string, resume)
     end
 
     local queries = aborted_search
+    Aux.scan.abort(search_scan_id)
     aborted_search = nil
     private.search_button:SetText('Search')
 
@@ -836,7 +837,11 @@ function public.start_search(filter_string, resume)
         queries = queries,
         on_scan_start = function()
             private.status_bar:update_status(0,0)
-            private.status_bar:set_text('Scanning auctions...')
+            if resume then
+                private.status_bar:set_text('Resuming scan...')
+            else
+                private.status_bar:set_text('Scanning auctions...')
+            end
         end,
         on_page_loaded = function(page, total_pages)
             current_page = page
@@ -849,8 +854,6 @@ function public.start_search(filter_string, resume)
         end,
         on_start_query = function(query_index)
             current_query = query_index
-            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 0)
-            private.status_bar:set_text(format('Scanning %d / %d', current_query, getn(queries)))
         end,
         on_auction = function(auction_record)
             if getn(scanned_records) < 1000 then
