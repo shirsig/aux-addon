@@ -116,29 +116,28 @@ function private.update_auction_listing()
             blizzard_bid_undercut = Aux.money.from_string(Aux.money.to_string(blizzard_bid_undercut, true, nil, 3))
             buyout_price_undercut = Aux.money.from_string(Aux.money.to_string(buyout_price_undercut, true, nil, 3))
 
-            local stack_blizzard_bid_undercut = private.undercut(auction_record, private.stack_size_slider:GetValue(), true)
+            local stack_blizzard_bid_undercut, stack_buyout_price_undercut = private.undercut(auction_record, private.stack_size_slider:GetValue(), true)
             stack_blizzard_bid_undercut = Aux.money.from_string(Aux.money.to_string(stack_blizzard_bid_undercut, true, nil, 3))
+            stack_buyout_price_undercut = Aux.money.from_string(Aux.money.to_string(stack_buyout_price_undercut, true, nil, 3))
 
             local stack_size = private.stack_size_slider:GetValue()
             local historical_value = Aux.history.value(selected_item.key)
 
-            local blizzard_above = stack_blizzard_bid_undercut < unit_start_price
-
             local bid_color
-            if blizzard_bid_undercut < unit_start_price and blizzard_above then
+            if blizzard_bid_undercut < unit_start_price and stack_blizzard_bid_undercut < unit_start_price then
                 bid_color = '|cffff0000'
             elseif blizzard_bid_undercut < unit_start_price then
                 bid_color = '|cffff9218'
-            elseif blizzard_above then
+            elseif stack_blizzard_bid_undercut < unit_start_price then
                 bid_color = '|cffffff00'
             end
 
             local buyout_color
-            if buyout_price_undercut < unit_buyout_price and blizzard_above then
+            if buyout_price_undercut < unit_buyout_price and stack_buyout_price_undercut < unit_buyout_price then
                 buyout_color = '|cffff0000'
             elseif buyout_price_undercut < unit_buyout_price then
                 buyout_color = '|cffff9218'
-            elseif blizzard_above then
+            elseif stack_buyout_price_undercut < unit_buyout_price then
                 buyout_color = '|cffffff00'
             end
 
