@@ -14,8 +14,13 @@ function public.on_load()
         { name='Start Price', width=.15, align='RIGHT' },
         { name='Buy', width=.15, align='RIGHT' },
     })
-    private.listing:SetHandler('OnClick', function(table, row_data, column)
-        private.on_row_click(row_data.record)
+    private.listing:SetHandler('OnClick', function(table, row_data, column, button)
+        if button == 'LeftButton' then
+            private.on_row_click(row_data.record)
+        elseif button == 'RightButton' then
+            Aux.tab_group:set_tab(1)
+            Aux.search_frame.start_search(strlower(Aux.info.item(this.row.data.record.item_id).name)..'/exact')
+        end
     end)
     private.listing:SetHandler('OnEnter', function(table, row_data, column)
         Aux.info.set_tooltip(row_data.record.itemstring, column.row, 'ANCHOR_RIGHT')

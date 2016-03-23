@@ -38,7 +38,7 @@ function public.render(item_listing)
 	end
 end
 
-function public.create(parent, on_click, selected)
+function public.create(parent, on_click, on_enter, on_leave, selected)
 	local name = (parent:GetName() or '')..'aux_item_list'
 
 	local id = 1
@@ -80,17 +80,19 @@ function public.create(parent, on_click, selected)
 			row:SetScript('OnClick', on_click)
 			row:SetScript('OnEnter', function()
 				row.highlight:Show()
+				on_enter()
 			end)
 			row:SetScript('OnLeave', function()
 				if not selected(row.item_record) then
 					row.highlight:Hide()
 				end
+				on_leave()
 			end)
 
 			local item = CreateFrame('Frame', name..'_item'..row_index, row, 'AuxItemTemplate')
 			row.item = item
 			item:SetPoint('CENTER', 4, 0)
---			row:RegisterForClicks('LeftButtonDown', 'RightButtonDown')
+			row:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 			
 			local highlight = row:CreateTexture()
 			highlight:SetAllPoints(item)

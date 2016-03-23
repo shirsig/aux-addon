@@ -187,6 +187,14 @@ function public.on_load()
         end
         ClearCursor()
     end)
+--    AuxSellParametersItemIconTexture:SetScript('OnEnter', function()
+--        if selected_item then
+--            Aux.info.set_tooltip(selected_item.itemstring, this, 'ANCHOR_RIGHT')
+--        end
+--    end)
+--    AuxSellParametersItemIconTexture:SetScript('OnLeave', function()
+--        GameTooltip:Hide()
+--    end)
 
     do
         local checkbox = CreateFrame('CheckButton', nil, AuxSellInventory, 'UICheckButtonTemplate')
@@ -207,19 +215,23 @@ function public.on_load()
     private.item_listing = Aux.item_listing.create(
         AuxSellInventory,
         function()
-            private.set_item(this.item_record)
+            if arg1 == 'LeftButton' then
+                private.set_item(this.item_record)
+            elseif arg1 == 'RightButton' then
+                Aux.tab_group:set_tab(1)
+                Aux.search_frame.start_search(strlower(Aux.info.item(this.item_record.item_id).name)..'/exact')
+            end
+        end,
+        function()
+            Aux.info.set_tooltip(this.item_record.itemstring, this, 'ANCHOR_RIGHT')
+        end,
+        function()
+            GameTooltip:Hide()
         end,
         function(item_record)
             return item_record == selected_item
         end
     )
-
---    private.inventory_listing:SetHandler('OnEnter', function(table, row_data, column)
---        Aux.info.set_tooltip(row_data.itemstring, nil, column.row, 'ANCHOR_LEFT')
---    end)
---    private.inventory_listing:SetHandler('OnLeave', function()
---        GameTooltip:Hide()
---    end)
 
     private.auction_listing = Aux.listing.CreateScrollingTable(AuxSellAuctions)
     private.auction_listing:SetColInfo({
@@ -839,13 +851,11 @@ function private.update_inventory_records()
                         suffix_id = item_info.suffix_id,
 
                         key = item_info.item_key,
-                        hyperlink = item_info.hyperlink,
+                        itemstring = item_info.itemstring,
 
                         name = item_info.name,
                         texture = item_info.texture,
                         quality = item_info.quality,
-                        class = item_info.type,
-                        subclass = item_info.subtype,
                         charges = item_info.charges,
                         aux_quantity = item_info.charges or item_info.count,
                         max_stack = item_info.max_stack,
