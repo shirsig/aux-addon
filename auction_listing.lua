@@ -144,14 +144,13 @@ local methods = {
             DressUpItemLink(this.row.data.record.hyperlink)
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(this.row.data.record.hyperlink)
-        elseif IsAltKeyDown() then
-            if this.rt.handlers.OnCellAltClick then
-                this.rt.handlers.OnCellAltClick(this, button)
-            end
         elseif button == 'RightButton' then
             Aux.search_frame.start_search(strlower(Aux.info.item(this.row.data.record.item_id).name)..'/exact')
         else
             this.rt:SetSelectedRecord(this.row.data.record)
+            if this.rt.handlers.OnCellAltClick then
+                this.rt.handlers.OnCellAltClick(this, button)
+            end
         end
     end,
 

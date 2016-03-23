@@ -697,12 +697,19 @@ function public.on_load()
     private.results_listing:Show()
     private.results_listing:SetSort(9)
     private.results_listing:Clear()
-    private.results_listing:SetHandler('OnCellAltClick', function(cell, button)
-        private.results_listing:SetSelectedRecord(nil)
-        private.find_auction_and_bid(cell.row.data.record, button == 'LeftButton')
-    end)
     private.results_listing:SetHandler('OnSelectionChanged', function(rt, datum)
         if not datum then return end
+
+        if IsAltKeyDown() and private.results_listing:GetSelection() == datum then
+            if arg1 == 'LeftButton' and private.buyout_button:IsEnabled() then
+                private.buyout_button:Click()
+                return
+            elseif arg1 == 'RightButton' and private.bid_button:IsEnabled() then
+                private.bid_button:Click()
+                return
+            end
+        end
+
         private.find_auction(datum.record)
     end)
 
