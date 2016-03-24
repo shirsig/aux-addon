@@ -18,6 +18,148 @@ local TIME_LEFT_STRINGS = {
     '|cff2992ff24h|r', -- Very Long
 }
 
+local search_layout = {
+    {
+        title = 'Item',
+        width = 0.35,
+        init = function(cell, record)
+            local spacer = CreateFrame('Frame', nil, cell)
+            spacer:SetPoint('TOPLEFT', 0, 0)
+            spacer:SetHeight(rt.ROW_HEIGHT)
+            spacer:SetWidth(1)
+            cell.spacer = spacer
+
+            local iconBtn = CreateFrame('Button', nil, cell)
+            iconBtn:SetBackdrop({edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5})
+            iconBtn:SetBackdropBorderColor(0, 1, 0, 0)
+            iconBtn:SetPoint('TOPLEFT', spacer, 'TOPRIGHT')
+            iconBtn:SetHeight(rt.ROW_HEIGHT)
+            iconBtn:SetWidth(rt.ROW_HEIGHT)
+            iconBtn:SetScript('OnEnter', rt.OnIconEnter)
+            iconBtn:SetScript('OnLeave', rt.OnIconLeave)
+            iconBtn:SetScript('OnClick', rt.OnIconClick)
+            iconBtn:SetScript('OnDoubleClick', rt.OnIconDoubleClick)
+            local icon = iconBtn:CreateTexture(nil, 'ARTWORK')
+            icon:SetPoint('TOPLEFT', 2, -2)
+            icon:SetPoint('BOTTOMRIGHT', -2, 2)
+            cell.iconBtn = iconBtn
+            cell.icon = icon
+
+            text:ClearAllPoints()
+            text:SetPoint('TOPLEFT', iconBtn, 'TOPRIGHT', 2, 0)
+            text:SetPoint('BOTTOMRIGHT', 0, 0)
+        end,
+        set = function(cell, record)
+            cell.icon:SetTexture(record.texture)
+            if indented then
+                cell.spacer:SetWidth(10)
+                cell.icon:SetAlpha(0.5)
+                cell:GetFontString():SetAlpha(0.7)
+            else
+                cell.spacer:SetWidth(1)
+                cell.icon:SetAlpha(1)
+                cell:GetFontString():SetAlpha(1)
+            end
+            cell:SetText(gsub(record.hyperlink, '[%[%]]', ''))
+        end
+    },
+    {
+        title = 'Lvl',
+        width = 0.035,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(record.level)
+        end
+    },
+    {
+        title = 'Auctions',
+        width = 0.06,
+        align = 'CENTER',
+        set = function(cell, record)
+            local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color2)..displayNumAuctions..'|r') or displayNumAuctions
+            if numPlayerAuctions > 0 then
+                numAuctionsText = numAuctionsText..(' |cffffff00('..numPlayerAuctions..')|r')
+            end
+            row.cells[3]:SetText(numAuctionsText)
+        end
+    },
+    {
+        title = 'Stack Size',
+        width = 0.055,
+        align = 'CENTER',
+        set = function(cell, record)
+            row.cells[4]:SetText(record.aux_quantity)
+        end
+    },
+    {
+        title = 'Time Left',
+        width = 0.04,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
+        end
+    },
+    {
+        title = 'Seller',
+        width = 0.04,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
+        end
+    },
+    {
+        title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
+        width = 0.125,
+        align = 'RIGHT',
+        set = function(cell, record)
+            local bid, buyout, colorBid, colorBuyout = self.GetRowPrices(record, aux_price_per_unit)
+            cell:SetText(Aux.money.to_string(bid, true, false, nil, colorBid))
+        end
+    },
+    {
+        title ={'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
+        width = 0.125,
+        align = 'RIGHT',
+        set = function(cell, record)
+            local bid, buyout, colorBid, colorBuyout = self.GetRowPrices(record, aux_price_per_unit)
+            cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
+        end
+    },
+    {
+        title = '% Hist. Value',
+        width = 0.08,
+        align = 'CENTER',
+        set = function(cell, record)
+            local pct, bidPct = self:GetRecordPercent(record)
+            cell:SetText((pct or bidPct) and public.percentage_historical(pct or bidPct, not pct) or '---')
+        end
+    },
+}
+
+local auctions_layout = {
+    {
+
+    },
+}
+
+local bids_layout = {
+    {
+
+    },
+}
+
+--if rowIndex <= 0 or rowIndex > getn(self.rows) then return end
+--local row = self.rows[rowIndex]
+---- show this row
+--row:Show()
+--if self.selected and record.search_signature == self.selected.search_signature then
+--    row.highlight:Show()
+--else
+--    row.highlight:Hide()
+--end
+--row.data = {record=record, expandable=expandable, indented=indented, numAuctions=numAuctions, expandKey=expandKey}
+--
+
 function public.percentage_historical(pct, based_on_bid)
     local pctColor = '|cffffffff'
 
@@ -419,29 +561,20 @@ local methods = {
         end
         row.cells[1]:SetText(gsub(record.hyperlink, '[%[%]]', ''))
         row.cells[2]:SetText(record.level)
-        if record.isFake then
-            row.cells[3]:SetText(0)
-            row.cells[4]:SetText("---")
-            row.cells[5]:SetText("---")
-            row.cells[6]:SetText("<No Auctions>")
-            row.cells[7]:SetText("---")
-            row.cells[8]:SetText("---")
-            row.cells[9]:SetText("---")
-        else
-            local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color2)..displayNumAuctions..'|r') or displayNumAuctions
-            if numPlayerAuctions > 0 then
-                numAuctionsText = numAuctionsText..(' |cffffff00('..numPlayerAuctions..')|r')
-            end
-            row.cells[3]:SetText(numAuctionsText)
-            row.cells[4]:SetText(record.aux_quantity)
-            row.cells[5]:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
-            row.cells[6]:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
-            local bid, buyout, colorBid, colorBuyout = self.GetRowPrices(record, aux_price_per_unit)
-            row.cells[7]:SetText(bid > 0 and Aux.money.to_string(bid, true, false, nil, colorBid) or '---')
-            row.cells[8]:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
-            local pct, bidPct = self:GetRecordPercent(record)
-            row.cells[9]:SetText((pct or bidPct) and public.percentage_historical(pct or bidPct, not pct) or '---')
+
+        local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color2)..displayNumAuctions..'|r') or displayNumAuctions
+        if numPlayerAuctions > 0 then
+            numAuctionsText = numAuctionsText..(' |cffffff00('..numPlayerAuctions..')|r')
         end
+        row.cells[3]:SetText(numAuctionsText)
+        row.cells[4]:SetText(record.aux_quantity)
+        row.cells[5]:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
+        row.cells[6]:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
+        local bid, buyout, colorBid, colorBuyout = self.GetRowPrices(record, aux_price_per_unit)
+        row.cells[7]:SetText(bid > 0 and Aux.money.to_string(bid, true, false, nil, colorBid) or '---')
+        row.cells[8]:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
+        local pct, bidPct = self:GetRecordPercent(record)
+        row.cells[9]:SetText((pct or bidPct) and public.percentage_historical(pct or bidPct, not pct) or '---')
     end,
 
     SetSelectedRecord = function(self, record, silent)
