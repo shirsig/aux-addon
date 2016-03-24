@@ -239,15 +239,11 @@ end
 function game_tooltip_hooks:SetAuctionSellItem()
     local name, _, quantity, _, _, _ = GetAuctionSellItemInfo()
     if name then
-        for bag = 0, 4 do
-            if GetBagName(bag) then
-                for slot = 1, GetContainerNumSlots(bag) do
-                    local link = GetContainerItemLink(bag, slot)
-                    if link and ({Aux.info.parse_hyperlink(link)})[5] == name then
-                        private.extend_tooltip(GameTooltip, link, quantity)
-                        return
-                    end
-                end
+        for slot in Aux.util.inventory() do
+            local link = GetContainerItemLink(unpack(slot))
+            if link and ({Aux.info.parse_hyperlink(link)})[5] == name then
+                private.extend_tooltip(GameTooltip, link, quantity)
+                return
             end
         end
     end

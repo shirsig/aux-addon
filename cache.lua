@@ -63,12 +63,12 @@ function public.item_id(item_name)
 end
 
 function private.scan_merchant()
-	Aux.util.loop_inventory(function(bag, slot)
-		local item_info = Aux.info.container_item(bag, slot)
+	for slot in Aux.util.inventory() do
+		local item_info = Aux.info.container_item(unpack(slot))
 		if item_info then
 			aux_merchant_sell[item_info.item_id] = item_info.tooltip.money / item_info.aux_quantity
 		end
-	end)
+	end
 
 	-- TODO maybe more detail? zone or  local merchant_name = UnitName('npc')
 	local merchant_item_count = GetMerchantNumItems()

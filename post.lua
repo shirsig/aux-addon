@@ -9,50 +9,52 @@ function private.process()
 			state.allow_partial = false
 		end
 
-		local stacking_complete
-		local stack_slot
-		
+		local stacking_complete, target_slot
+
 		Aux.stack.start(
 			state.item_key,
 			state.stack_size,
 			function(slot)
 				stacking_complete = true
-				stack_slot = slot
+				target_slot = slot
 			end
 		)
 
-		Aux.control.wait_until(function() return stacking_complete end, function()
-
-			if stack_slot and Aux.info.container_item(stack_slot.bag, stack_slot.bag_slot).aux_quantity <= state.stack_size then
-				private.post_auction(stack_slot, function(stack_size)
-					if state.posted == state.count then
-						state.partial_stack = stack_size
-					end
-					state.posted = state.posted + 1
-					return private.process()
-				end)
+		return Aux.control.wait_until(function() return stacking_complete end, function()
+			if target_slot then
+				return private.post_auction(target_slot, state.posted == state.count, private.process)
 			else
 				return public.stop()
 			end
-
 		end)
+	end
+
+	return public.stop()
+end
+
+function private.post_auction(slot, partial, k)
+	local item_info = Aux.info.container_item(unpack(slot))
+	if item_info.item_key == state.item_key and Aux.info.auctionable(item_info.tooltip) and (item_info.aux_quantity == state.stack_size or partial and item_info.aux_quantity < state.stack_size) then
+
+		ClearCursor()
+		ClickAuctionSellItemButton()
+		ClearCursor()
+		PickupContainerItem(unpack(slot))
+		ClickAuctionSellItemButton()
+		ClearCursor()
+
+		StartAuction(max(1, Aux.round(state.unit_start_price * item_info.aux_quantity)), Aux.round(state.unit_buyout_price * item_info.aux_quantity), state.duration)
+		Aux.control.wait_until(function() return not GetContainerItemInfo(unpack(slot)) end, function()
+			if state.posted == state.count then
+				state.partial_stack = item_info.aux_quantity
+			end
+			state.posted = state.posted + 1
+			return k()
+		end)
+
 	else
 		return public.stop()
 	end
-end
-
-function private.post_auction(slot, k)
-	ClearCursor()
-	ClickAuctionSellItemButton()
-	ClearCursor()
-	PickupContainerItem(slot.bag, slot.bag_slot)
-	ClickAuctionSellItemButton()
-	ClearCursor()
-	local stack_size = Aux.info.container_item(slot.bag, slot.bag_slot).aux_quantity
-	StartAuction(max(1, Aux.round(state.unit_start_price * stack_size)), Aux.round(state.unit_buyout_price * stack_size), state.duration)
-	Aux.control.wait_until(function() return not GetContainerItemInfo(slot.bag, slot.bag_slot) end, function()
-		return k(stack_size)
-	end)
 end
 
 function public.stop()

@@ -747,20 +747,15 @@ function private.quantity_update()
 end
 
 function private.unit_vendor_price(item_key)
-    local inventory_iterator = Aux.util.inventory_iterator()
 
-    while true do
-        local slot = inventory_iterator()
-        if not slot then
-            break
-        end
+    for slot in Aux.util.inventory() do
 
-        local item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
+        local item_info = Aux.info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
 
             if Aux.info.auctionable(item_info.tooltip, nil, item_info.lootable) then
                 ClearCursor()
-                PickupContainerItem(slot.bag, slot.bag_slot)
+                PickupContainerItem(unpack(slot))
                 ClickAuctionSellItemButton()
                 local auction_sell_item = Aux.info.auction_sell_item()
                 ClearCursor()
@@ -828,14 +823,9 @@ function private.update_inventory_records()
 
     local auction_candidate_map = {}
 
-    local inventory_iterator = Aux.util.inventory_iterator()
-    while true do
-        local slot = inventory_iterator()
-        if not slot then
-            break
-        end
+    for slot in Aux.util.inventory() do
 
-        local item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
+        local item_info = Aux.info.container_item(unpack(slot))
         if item_info then
             local charge_class = item_info.charges or 0
 

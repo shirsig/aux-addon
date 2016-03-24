@@ -9,11 +9,16 @@ function public.id(object)
 end
 
 function public.table_eq(t1, t2)
+	if not t1 or not t2 then
+		return false
+	end
+
 	for key, value in t1 do
 		if t2[key] ~= value then
 			return false
 		end
 	end
+
 	return true
 end
 
@@ -46,32 +51,21 @@ function public.trim(string)
 	return string
 end
 
-function Aux.util.inventory_iterator()
-    local inventory = {}
-    for bag = 0, 4 do
-        if GetBagName(bag) then
-            for bag_slot = 1, GetContainerNumSlots(bag) do
-                tinsert(inventory, { bag = bag, bag_slot = bag_slot })
-            end
-        end
-    end
+function public.inventory()
+	local bag, slot = 0, 0
 
-    local i = 0
-    local n = getn(inventory)
-    return function()
-        i = i + 1
-        if i <= n then
-            return inventory[i]
-        end
-    end
-end
+	return function()
+		if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then
+			repeat
+				bag = bag + 1
+			until GetBagName(bag) or bag > 4
+			slot = 1
+		else
+			slot = slot + 1
+		end
 
-function public.loop_inventory(f)
-	for bag = 0, 4 do
-		if GetBagName(bag) then
-			for slot = 1, GetContainerNumSlots(bag) do
-				f(bag, slot)
-			end
+		if bag <= 4 then
+			return { bag, slot }
 		end
 	end
 end

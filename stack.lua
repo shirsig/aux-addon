@@ -3,95 +3,103 @@ Aux.stack = public
 
 local state
 
-function private.item_slots(item_key)
-	local slots = Aux.util.inventory_iterator()
-	return function()
-        local slot
-		repeat
-			slot = slots()
-		until slot == nil or private.item_key(slot) == item_key
-		return slot
-	end
+function private.stack_size(slot)
+    local container_item_info = Aux.info.container_item(unpack(slot))
+    return container_item_info and container_item_info.count or 0
 end
 
-function private.find_empty_slot()
-	for slot in Aux.util.inventory_iterator() do
-		if not GetContainerItemInfo(slot.bag, slot.bag_slot) then
+function private.charges(slot)
+    local container_item_info = Aux.info.container_item(unpack(slot))
+	return container_item_info and container_item_info.charges
+end
+
+function private.max_stack(slot)
+	local container_item_info = Aux.info.container_item(unpack(slot))
+	return container_item_info and container_item_info.max_stack
+end
+
+function private.locked(slot)
+	local container_item_info = Aux.info.container_item(unpack(slot))
+	return container_item_info and container_item_info.locked
+end
+
+function private.find_item_slot(partial)
+	for slot in Aux.util.inventory() do
+		if private.matching_item(slot, partial) and not Aux.util.table_eq(slot, state.target_slot) then
 			return slot
 		end
 	end
 end
 
-function private.find_charges_item_slot(item_key, charges)
-	for slot in private.item_slots(item_key) do
-		if private.item_charges(slot) == charges then
+function private.matching_item(slot, partial)
+	local item_info = Aux.info.container_item(unpack(slot))
+	return item_info and item_info.item_key == state.item_key and Aux.info.auctionable(item_info.tooltip) and (not partial or item_info.count < item_info.max_stack)
+end
+
+function private.find_empty_slot()
+	for slot in Aux.util.inventory() do
+		if not GetContainerItemInfo(unpack(slot)) then
+			return slot
+		end
+	end
+end
+
+function private.find_charge_item_slot()
+	for slot in private.item_slots(state.item_key) do
+		if private.charges(slot) == state.target_size then
 			return slot
 		end
 	end
 end
 
 function private.move_item(from_slot, to_slot, amount, k)
-	local size_before = private.stack_size(to_slot)
-		
+
+	if private.locked(from_slot) or private.locked(to_slot) then
+		return Aux.control.wait(k)
+	end
+
 	amount = min(private.max_stack(from_slot) - private.stack_size(to_slot), private.stack_size(from_slot), amount)
+	local expected_size = private.stack_size(to_slot) + amount
 
 	ClearCursor()
-	SplitContainerItem(from_slot.bag, from_slot.bag_slot, amount)
-	PickupContainerItem(to_slot.bag, to_slot.bag_slot)
-	
-	return Aux.control.wait_until(function() return private.stack_size(to_slot) == size_before + amount end, k)
-end
+	SplitContainerItem(from_slot[1], from_slot[2], amount)
+	PickupContainerItem(unpack(to_slot))
 
-function private.item_key(slot)
-	local container_item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
-	return container_item_info and container_item_info.item_key
-end
-
-function private.stack_size(slot)
-    local container_item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
-    return container_item_info and container_item_info.count or 0
-end
-
-function private.item_charges(slot)
-    local container_item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
-	return container_item_info and container_item_info.charges
+	return Aux.control.wait_until(function() return private.stack_size(to_slot) == expected_size end, k)
 end
 
 function private.process()
 
+	if not state.target_slot or not private.matching_item(state.target_slot) then
+		state.target_slot = private.find_item_slot()
+		if not state.target_slot then
+			return public.stop()
+		end
+	end
+
+	if private.charges(state.target_slot) then
+		state.target_slot = private.find_charge_item_slot()
+		return public.stop()
+	end
+
 	if private.stack_size(state.target_slot) > state.target_size then
-		local empty_slot = private.find_empty_slot()
-		
-		if empty_slot then
+		local slot = private.find_item_slot(true) or private.find_empty_slot()
+		if slot then
 			return private.move_item(
 				state.target_slot,
-				empty_slot,
+				slot,
 				private.stack_size(state.target_slot) - state.target_size,
-				function()
-					return private.process()
-			end)
-		else
-			local next_slot = state.other_slots()
-			if next_slot then
-				return private.move_item(
-					state.target_slot,
-					next_slot,
-					private.stack_size(state.target_slot) - state.target_size,
-					function()
-						return private.process()
-				end)
-			end
+				private.process
+			)
 		end
 	elseif private.stack_size(state.target_slot) < state.target_size then
-		local next_slot = state.other_slots()
-		if next_slot then
+		local slot = private.find_item_slot()
+		if slot then
 			return private.move_item(
-				next_slot,
+				slot,
 				state.target_slot,
 				state.target_size - private.stack_size(state.target_slot),
-				function()
-					return private.process()
-				end
+				private.process
 			)
 		end
 	end
@@ -99,16 +107,14 @@ function private.process()
 	return public.stop()
 end
 
-function private.max_stack(slot)
-    local container_item_info = Aux.info.container_item(slot.bag, slot.bag_slot)
-    return container_item_info and container_item_info.max_stack
-end
-
 function public.stop()
 	if state then
 		Aux.control.kill_thread(state.thread_id)
 
 		local callback, slot = state.callback, state.target_slot
+		if not private.matching_item(slot) then
+			slot = nil
+		end
 		
 		state = nil
 		
@@ -121,23 +127,12 @@ end
 function public.start(item_key, size, callback)
 	public.stop()
 
-	local slots = private.item_slots(item_key)
-	local target_slot = slots()
-
 	local thread_id = Aux.control.new_thread(private.process)
 
 	state = {
 		thread_id = thread_id,
+		item_key = item_key,
 		target_size = size,
-		target_slot = target_slot,
-		other_slots = slots,
 		callback = callback,
 	}
-
-	if not target_slot then
-		public.stop()
-	elseif private.item_charges(target_slot) then
-		state.target_slot = private.find_charges_item_slot(item_key, size)
-		public.stop()
-	end
 end
