@@ -45,8 +45,8 @@ function private.find_empty_slot()
 end
 
 function private.find_charge_item_slot()
-	for slot in private.item_slots(state.item_key) do
-		if private.charges(slot) == state.target_size then
+	for slot in Aux.util.inventory() do
+		if private.matching_item(slot) and private.charges(slot) == state.target_size then
 			return slot
 		end
 	end
