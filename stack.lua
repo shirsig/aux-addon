@@ -37,8 +37,8 @@ function private.matching_item(slot, partial)
 end
 
 function private.find_empty_slot()
-	for slot in Aux.util.inventory() do
-		if not GetContainerItemInfo(unpack(slot)) then
+	for slot, type in Aux.util.inventory() do
+		if type == 1 and not GetContainerItemInfo(unpack(slot)) then
 			return slot
 		end
 	end
