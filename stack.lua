@@ -112,7 +112,7 @@ function public.stop()
 		Aux.control.kill_thread(state.thread_id)
 
 		local callback, slot = state.callback, state.target_slot
-		if not private.matching_item(slot) then
+		if slot and not private.matching_item(slot) then
 			slot = nil
 		end
 		
