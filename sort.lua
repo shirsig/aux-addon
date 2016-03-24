@@ -54,18 +54,11 @@ function public.invert_order(ordering)
     end
 end
 
-function public.compare(a, b, nil_ordering)
-    nil_ordering = nil_ordering or public.EQ
-    if not a and b then
-        return nil_ordering
-    elseif a and not b then
-        return public.invert_order(nil_ordering)
-    elseif not a and not b then
-        return public.EQ
-    elseif a < b then
-        return public.LT
+function public.compare(a, b, desc)
+    if a < b then
+        return desc and public.GT or public.LT
     elseif a > b then
-        return public.GT
+        return desc and public.LT or public.GT
     else
         return public.EQ
     end

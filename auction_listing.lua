@@ -62,15 +62,21 @@ local search_config = {
                 cell:GetFontString():SetAlpha(1)
             end
             cell:SetText(gsub(record.hyperlink, '[%[%]]', ''))
-        end
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.name, record_b.name, desc)
+        end,
     },
     {
         title = 'Lvl',
         width = 0.035,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(record.level)
-        end
+            cell:SetText(max(record.level, 1))
+        end,
+        cmp = function(record_a, record_b, desc)
+            Aux.sort.compare(record_a.level, record_b.level, desc)
+        end,
     },
     {
         title = 'Auctions',
@@ -82,7 +88,19 @@ local search_config = {
                 numAuctionsText = numAuctionsText..(' |cffffff00('..own..')|r')
             end
             cell:SetText(numAuctionsText)
-        end
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.EQ
+--            if sortKey == 'numAuctions' then
+--                if a.children then
+--                    aVal = a.totalAuctions
+--                    bVal = b.totalAuctions
+--                else
+--                    aVal = a.numAuctions
+--                    bVal = b.numAuctions
+--                end
+--            end
+        end,
     },
     {
         title = 'Stack Size',
@@ -90,7 +108,10 @@ local search_config = {
         align = 'CENTER',
         set = function(cell, record)
             cell:SetText(record.aux_quantity)
-        end
+        end,
+        cmp = function(record_a, record_b, desc)
+            Aux.sort.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+        end,
     },
     {
         title = 'Time Left',
@@ -98,7 +119,10 @@ local search_config = {
         align = 'CENTER',
         set = function(cell, record)
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
-        end
+        end,
+        cmp = function(record_a, record_b, desc)
+            Aux.sort.compare(record_a.duration, record_b.duration, desc)
+        end,
     },
     {
         title = 'Seller',
@@ -106,7 +130,10 @@ local search_config = {
         align = 'CENTER',
         set = function(cell, record)
             cell:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
-        end
+        end,
+        cmp = function(record_a, record_b, desc)
+            Aux.sort.compare(record_a.owner, record_b.owner, desc)
+        end,
     },
     {
         title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
@@ -116,7 +143,12 @@ local search_config = {
         set = function(cell, record)
             local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
             cell:SetText(Aux.money.to_string(bid, true, false, nil, colorBid))
-        end
+        end,
+        cmp = function(record_a, record_b, desc)
+            local price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
+            local price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
+            return Aux.sort.compare(price_a, price_b, desc)
+        end,
     },
     {
         title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
@@ -126,7 +158,15 @@ local search_config = {
         set = function(cell, record)
             local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
             cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
-        end
+        end,
+        cmp = function(record_a, record_b, desc)
+            local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
+            local price_b = aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
+            price_a = price_a > 0 and price_a or (desc and -Aux.huge or Aux.huge)
+            price_b = price_b > 0 and price_b or (desc and -Aux.huge or Aux.huge)
+
+            return Aux.sort.compare(price_a, price_b, desc)
+        end,
     },
     {
         title = '% Hist. Value',
@@ -135,7 +175,12 @@ local search_config = {
         set = function(cell, record)
             local pct, bidPct = private.record_percentage(record)
             cell:SetText((pct or bidPct) and public.percentage_historical(pct or bidPct, not pct) or '---')
-        end
+        end,
+        cmp = function(record_a, record_b, desc)
+            local pct_a = private.record_percentage(record_a) or desc and -Aux.huge or Aux.huge
+            local pct_b = private.record_percentage(record_b) or desc and -Aux.huge or Aux.huge
+            Aux.sort.compare(pct_a, pct_b, desc)
+        end,
     },
 }
 
@@ -166,7 +211,7 @@ function private.record_prices(record, per_unit)
     end
 end
 
-function private.record_percentage(self, record)
+function private.record_percentage(record)
     if not record then return end
 
     local historical_value = Aux.history.value(record.item_key) or 0
@@ -420,7 +465,7 @@ local methods = {
         end
 
         if not self.sortInfo.isSorted then
-            local function SortHelperFunc(a, b, sortKey)
+            local function sort_helper(a, b, sortKey)
                 local hadSortKey = sortKey and true or false
                 sortKey = sortKey or self.sortInfo.sortKey
 
@@ -433,90 +478,84 @@ local methods = {
                     record_b = b.record
                 end
 
-                if record_a.isFake then
-                    return true
-                elseif record_b.isFake then
-                    return false
-                end
+                local ordering = search_config[self.sortInfo.columnIndex].cmp and search_config[self.sortInfo.columnIndex].cmp(record_a, record_b, self.sortInfo.descending) or Aux.sort.EQ
 
-                local aVal, bVal
-                if sortKey == 'percent' then
-                    aVal = private.record_percentage(record_a)
-                    bVal = private.record_percentage(record_b)
-                elseif sortKey == 'numAuctions' then
-                    if a.children then
-                        aVal = a.totalAuctions
-                        bVal = b.totalAuctions
-                    else
-                        aVal = a.numAuctions
-                        bVal = b.numAuctions
-                    end
-                elseif sortKey == 'unit_bid_price' or sortKey == 'bid_price' then
-                    aVal = private.record_prices(record_a, sortKey == 'unit_bid_price')
-                    bVal = private.record_prices(record_b, sortKey == 'unit_bid_price')
-                elseif sortKey == 'unit_buyout_price' or sortKey == 'buyout_price' then
-                    aVal = ({ private.record_prices(record_a, sortKey == 'unit_buyout_price') })[2]
-                    bVal = ({ private.record_prices(record_b, sortKey == 'unit_buyout_price') })[2]
-                else
-                    aVal = record_a[sortKey]
-                    bVal = record_b[sortKey]
-                end
-                if sortKey == 'buyout_price' or sortKey == 'unit_buyout_price' then
-                    -- for buyout, put bid-only auctions at the bottom
-                    if not aVal or aVal == 0 then
-                        aVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
-                    end
-                    if not bVal or bVal == 0 then
-                        bVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
-                    end
-                elseif sortKey == 'percent' then
-                    -- for percent, put bid-only auctions at the bottom
-                    aVal = aVal or ((self.sortInfo.descending and -1 or 1) * Aux.huge)
-                    bVal = bVal or ((self.sortInfo.descending and -1 or 1) * Aux.huge)
-                end
-                if type(aVal) == 'string' or type(bVal) == 'string' then
-                    aVal = aVal or ''
-                    bVal = bVal or ''
-                else
-                    aVal = tonumber(aVal) or 0
-                    bVal = tonumber(bVal) or 0
-                end
-                if aVal == bVal then
-                    if sortKey == 'percent' then
-                        -- sort by buyout
-                        sortKey = aux_price_per_unit and 'unit_buyout_price' or 'buyout_price'
-                        local result = SortHelperFunc(a, b, sortKey)
-                        if result ~= nil then
-                            return result
-                        end
-                    elseif sortKey == 'buyout_price' or sortKey == 'unit_buyout_price' then
-                        -- sort by bid
-                        sortKey = aux_price_per_unit and 'unit_bid_price' or 'bid_price'
-                        local result = SortHelperFunc(a, b, sortKey)
-                        if result ~= nil then
-                            return result
-                        end
-                    elseif hadSortKey then
-                        -- this was called recursively, so just return nil
-                        return
-                    else
-                        -- sort by percent
-                        return SortHelperFunc(a, b, 'percent')
-                    end
+                if ordering == Aux.sort.EQ then
+--                    if sortKey == 'percent' then
+--                        -- sort by buyout
+--                        sortKey = aux_price_per_unit and 'unit_buyout_price' or 'buyout_price'
+--                        local result = SortHelperFunc(a, b, sortKey)
+--                        if result ~= nil then
+--                            return result
+--                        end
+--                    elseif sortKey == 'buyout_price' or sortKey == 'unit_buyout_price' then
+--                        -- sort by bid
+--                        sortKey = aux_price_per_unit and 'unit_bid_price' or 'bid_price'
+--                        local result = SortHelperFunc(a, b, sortKey)
+--                        if result ~= nil then
+--                            return result
+--                        end
+--                    elseif hadSortKey then
+--                        -- this was called recursively, so just return nil
+--                        return
+--                    else
+--                        -- sort by percent
+--                        return SortHelperFunc(a, b, 'percent')
+--                    end
                     -- as a last resort compare search signatures to ensure a total order
                     return record_a.search_signature < record_b.search_signature
-                end
-                if self.sortInfo.descending then
-                    return aVal > bVal
                 else
-                    return aVal < bVal
+                    return ordering == Aux.sort.LT
                 end
+
+--                local aVal, bVal
+--                if sortKey == 'percent' then
+--                    aVal = private.record_percentage(record_a)
+--                    bVal = private.record_percentage(record_b)
+--                elseif sortKey == 'numAuctions' then
+--                    if a.children then
+--                        aVal = a.totalAuctions
+--                        bVal = b.totalAuctions
+--                    else
+--                        aVal = a.numAuctions
+--                        bVal = b.numAuctions
+--                    end
+--                elseif sortKey == 'unit_bid_price' or sortKey == 'bid_price' then
+--                    aVal = private.record_prices(record_a, sortKey == 'unit_bid_price')
+--                    bVal = private.record_prices(record_b, sortKey == 'unit_bid_price')
+--                elseif sortKey == 'unit_buyout_price' or sortKey == 'buyout_price' then
+--                    aVal = ({ private.record_prices(record_a, sortKey == 'unit_buyout_price') })[2]
+--                    bVal = ({ private.record_prices(record_b, sortKey == 'unit_buyout_price') })[2]
+--                else
+--                    aVal = record_a[sortKey]
+--                    bVal = record_b[sortKey]
+--                end
+--                if sortKey == 'buyout_price' or sortKey == 'unit_buyout_price' then
+--                    -- for buyout, put bid-only auctions at the bottom
+--                    if not aVal or aVal == 0 then
+--                        aVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
+--                    end
+--                    if not bVal or bVal == 0 then
+--                        bVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
+--                    end
+--                elseif sortKey == 'percent' then
+--                    -- for percent, put bid-only auctions at the bottom
+--                    aVal = aVal or ((self.sortInfo.descending and -1 or 1) * Aux.huge)
+--                    bVal = bVal or ((self.sortInfo.descending and -1 or 1) * Aux.huge)
+--                end
+--                if type(aVal) == 'string' or type(bVal) == 'string' then
+--                    aVal = aVal or ''
+--                    bVal = bVal or ''
+--                else
+--                    aVal = tonumber(aVal) or 0
+--                    bVal = tonumber(bVal) or 0
+--                end
             end
             -- sort the row info
             for i, info in ipairs(self.rowInfo) do
-                sort(info.children, SortHelperFunc)
+                sort(info.children, sort_helper)
             end
-            sort(self.rowInfo, SortHelperFunc)
+            sort(self.rowInfo, sort_helper)
             self.sortInfo.isSorted = true
         end
 
