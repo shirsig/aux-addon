@@ -693,16 +693,16 @@ function public.on_load()
         end
     end
 
-    private.results_listing = Aux.auction_listing.CreateAuctionResultsTable(AuxSearchFrameResults)
+    private.results_listing = Aux.auction_listing.CreateAuctionResultsTable(AuxSearchFrameResults, Aux.auction_listing.search_config)
     private.results_listing:Show()
     private.results_listing:SetSort(9)
     private.results_listing:Clear()
     private.results_listing:SetHandler('OnCellClick', function(cell, button)
         if IsAltKeyDown() and private.results_listing:GetSelection().record == cell.row.data.record then
-            if arg1 == 'LeftButton' and private.buyout_button:IsEnabled() then
+            if button == 'LeftButton' and private.buyout_button:IsEnabled() then
                 private.buyout_button:Click()
                 return
-            elseif arg1 == 'RightButton' and private.bid_button:IsEnabled() then
+            elseif button == 'RightButton' and private.bid_button:IsEnabled() then
                 private.bid_button:Click()
                 return
             end

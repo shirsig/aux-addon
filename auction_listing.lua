@@ -18,7 +18,8 @@ local TIME_LEFT_STRINGS = {
     '|cff2992ff24h|r', -- Very Long
 }
 
-local search_config = {
+public.search_config = {
+    rows = 16,
     {
         title = 'Item',
         width = 0.35,
@@ -75,7 +76,7 @@ local search_config = {
             cell:SetText(max(record.level, 1))
         end,
         cmp = function(record_a, record_b, desc)
-            Aux.sort.compare(record_a.level, record_b.level, desc)
+            return Aux.sort.compare(record_a.level, record_b.level, desc)
         end,
     },
     {
@@ -110,7 +111,7 @@ local search_config = {
             cell:SetText(record.aux_quantity)
         end,
         cmp = function(record_a, record_b, desc)
-            Aux.sort.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            return Aux.sort.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
         end,
     },
     {
@@ -121,7 +122,7 @@ local search_config = {
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            Aux.sort.compare(record_a.duration, record_b.duration, desc)
+            return Aux.sort.compare(record_a.duration, record_b.duration, desc)
         end,
     },
     {
@@ -132,7 +133,7 @@ local search_config = {
             cell:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
-            Aux.sort.compare(record_a.owner, record_b.owner, desc)
+            return Aux.sort.compare(record_a.owner, record_b.owner, desc)
         end,
     },
     {
@@ -177,22 +178,346 @@ local search_config = {
             cell:SetText((pct or bidPct) and public.percentage_historical(pct or bidPct, not pct) or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            local pct_a = private.record_percentage(record_a) or desc and -Aux.huge or Aux.huge
-            local pct_b = private.record_percentage(record_b) or desc and -Aux.huge or Aux.huge
-            Aux.sort.compare(pct_a, pct_b, desc)
+            local pct_a = private.record_percentage(record_a) or (desc and -Aux.huge or Aux.huge)
+            local pct_b = private.record_percentage(record_b) or (desc and -Aux.huge or Aux.huge)
+            return Aux.sort.compare(pct_a, pct_b, desc)
         end,
     },
 }
 
-local auctions_layout = {
+public.auctions_config = {
+    rows = 16,
     {
+        title = 'Item',
+        width = 0.35,
+        init = function(rt, cell)
+            local spacer = CreateFrame('Frame', nil, cell)
+            spacer:SetPoint('TOPLEFT', 0, 0)
+            spacer:SetHeight(rt.ROW_HEIGHT)
+            spacer:SetWidth(1)
+            cell.spacer = spacer
 
+            local iconBtn = CreateFrame('Button', nil, cell)
+            iconBtn:SetBackdrop({edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5})
+            iconBtn:SetBackdropBorderColor(0, 1, 0, 0)
+            iconBtn:SetPoint('TOPLEFT', spacer, 'TOPRIGHT')
+            iconBtn:SetHeight(rt.ROW_HEIGHT)
+            iconBtn:SetWidth(rt.ROW_HEIGHT)
+            iconBtn:SetScript('OnEnter', rt.OnIconEnter)
+            iconBtn:SetScript('OnLeave', rt.OnIconLeave)
+            iconBtn:SetScript('OnClick', rt.OnIconClick)
+            iconBtn:SetScript('OnDoubleClick', rt.OnIconDoubleClick)
+            local icon = iconBtn:CreateTexture(nil, 'ARTWORK')
+            icon:SetPoint('TOPLEFT', 2, -2)
+            icon:SetPoint('BOTTOMRIGHT', -2, 2)
+            cell.iconBtn = iconBtn
+            cell.icon = icon
+
+            local text = cell:GetFontString()
+            text:ClearAllPoints()
+            text:SetPoint('TOPLEFT', iconBtn, 'TOPRIGHT', 2, 0)
+            text:SetPoint('BOTTOMRIGHT', 0, 0)
+        end,
+        set = function(cell, record, _, _, _, indented)
+            cell.icon:SetTexture(record.texture)
+            if indented then
+                cell.spacer:SetWidth(10)
+                cell.icon:SetAlpha(0.5)
+                cell:GetFontString():SetAlpha(0.7)
+            else
+                cell.spacer:SetWidth(1)
+                cell.icon:SetAlpha(1)
+                cell:GetFontString():SetAlpha(1)
+            end
+            cell:SetText(gsub(record.hyperlink, '[%[%]]', ''))
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.name, record_b.name, desc)
+        end,
+    },
+    {
+        title = 'Lvl',
+        width = 0.035,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(max(record.level, 1))
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.level, record_b.level, desc)
+        end,
+    },
+    {
+        title = 'Auctions',
+        width = 0.06,
+        align = 'CENTER',
+        set = function(cell, record, count, own, expandable)
+            local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color2)..count..'|r') or count
+            cell:SetText(numAuctionsText)
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.EQ
+            --            if sortKey == 'numAuctions' then
+            --                if a.children then
+            --                    aVal = a.totalAuctions
+            --                    bVal = b.totalAuctions
+            --                else
+            --                    aVal = a.numAuctions
+            --                    bVal = b.numAuctions
+            --                end
+            --            end
+        end,
+    },
+    {
+        title = 'Stack Size',
+        width = 0.055,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(record.aux_quantity)
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+        end,
+    },
+    {
+        title = 'Time Left',
+        width = 0.04,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.duration, record_b.duration, desc)
+        end,
+    },
+    {
+        title = {'Auction Start\n(per item)', 'Auction Start\n(per stack)'},
+        width = 0.125,
+        align = 'RIGHT',
+        isPrice = true,
+        set = function(cell, record)
+            cell:SetText(record.high_bidder and Aux.money.to_string(aux_price_per_unit and ceil(record.unit_start_price) or record.start_price, true, false) or '---')
+        end,
+        cmp = function(record_a, record_b, desc)
+            local price_a = aux_price_per_unit and record_a.unit_start_price or record_a.start_price
+            local price_b = aux_price_per_unit and record_b.unit_start_price or record_b.start_price
+            return Aux.sort.compare(price_a, price_b, desc)
+        end,
+    },
+    {
+        title = {'Auction High Bid\n(per item)', 'Auction High Bid\n(per stack)'},
+        width = 0.125,
+        align = 'RIGHT',
+        isPrice = true,
+        set = function(cell, record)
+            cell:SetText(record.high_bid > 0 and Aux.money.to_string(aux_price_per_unit and ceil(record.unit_high_bid) or record.high_bid, true, false) or RED_FONT_COLOR_CODE..'No Bids'..FONT_COLOR_CODE_CLOSE)
+        end,
+        cmp = function(record_a, record_b, desc)
+            local price_a = aux_price_per_unit and record_a.unit_high_bid or record_a.high_bid
+            local price_b = aux_price_per_unit and record_b.unit_high_bid or record_b.high_bid
+            price_a = price_a > 0 and price_a or (desc and -Aux.huge or Aux.huge)
+            price_b = price_b > 0 and price_b or (desc and -Aux.huge or Aux.huge)
+            return Aux.sort.compare(price_a, price_b, desc)
+        end,
+    },
+    {
+        title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
+        width = 0.125,
+        align = 'RIGHT',
+        isPrice = true,
+        set = function(cell, record)
+            local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
+            cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
+        end,
+        cmp = function(record_a, record_b, desc)
+            local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
+            local price_b = aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
+            price_a = price_a > 0 and price_a or (desc and -Aux.huge or Aux.huge)
+            price_b = price_b > 0 and price_b or (desc and -Aux.huge or Aux.huge)
+
+            return Aux.sort.compare(price_a, price_b, desc)
+        end,
     },
 }
 
-local bids_layout = {
+public.bids_config = {
+    rows = 16,
     {
+        title = 'Item',
+        width = 0.35,
+        init = function(rt, cell)
+            local spacer = CreateFrame('Frame', nil, cell)
+            spacer:SetPoint('TOPLEFT', 0, 0)
+            spacer:SetHeight(rt.ROW_HEIGHT)
+            spacer:SetWidth(1)
+            cell.spacer = spacer
 
+            local iconBtn = CreateFrame('Button', nil, cell)
+            iconBtn:SetBackdrop({edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5})
+            iconBtn:SetBackdropBorderColor(0, 1, 0, 0)
+            iconBtn:SetPoint('TOPLEFT', spacer, 'TOPRIGHT')
+            iconBtn:SetHeight(rt.ROW_HEIGHT)
+            iconBtn:SetWidth(rt.ROW_HEIGHT)
+            iconBtn:SetScript('OnEnter', rt.OnIconEnter)
+            iconBtn:SetScript('OnLeave', rt.OnIconLeave)
+            iconBtn:SetScript('OnClick', rt.OnIconClick)
+            iconBtn:SetScript('OnDoubleClick', rt.OnIconDoubleClick)
+            local icon = iconBtn:CreateTexture(nil, 'ARTWORK')
+            icon:SetPoint('TOPLEFT', 2, -2)
+            icon:SetPoint('BOTTOMRIGHT', -2, 2)
+            cell.iconBtn = iconBtn
+            cell.icon = icon
+
+            local text = cell:GetFontString()
+            text:ClearAllPoints()
+            text:SetPoint('TOPLEFT', iconBtn, 'TOPRIGHT', 2, 0)
+            text:SetPoint('BOTTOMRIGHT', 0, 0)
+        end,
+        set = function(cell, record, _, _, _, indented)
+            cell.icon:SetTexture(record.texture)
+            if indented then
+                cell.spacer:SetWidth(10)
+                cell.icon:SetAlpha(0.5)
+                cell:GetFontString():SetAlpha(0.7)
+            else
+                cell.spacer:SetWidth(1)
+                cell.icon:SetAlpha(1)
+                cell:GetFontString():SetAlpha(1)
+            end
+            cell:SetText(gsub(record.hyperlink, '[%[%]]', ''))
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.name, record_b.name, desc)
+        end,
+    },
+    {
+        title = 'Lvl',
+        width = 0.035,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(max(record.level, 1))
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.level, record_b.level, desc)
+        end,
+    },
+    {
+        title = 'Auctions',
+        width = 0.06,
+        align = 'CENTER',
+        set = function(cell, record, count, own, expandable)
+            local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color2)..count..'|r') or count
+            cell:SetText(numAuctionsText)
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.EQ
+            --            if sortKey == 'numAuctions' then
+            --                if a.children then
+            --                    aVal = a.totalAuctions
+            --                    bVal = b.totalAuctions
+            --                else
+            --                    aVal = a.numAuctions
+            --                    bVal = b.numAuctions
+            --                end
+            --            end
+        end,
+    },
+    {
+        title = 'Stack Size',
+        width = 0.055,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(record.aux_quantity)
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+        end,
+    },
+    {
+        title = 'Time Left',
+        width = 0.04,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.duration, record_b.duration, desc)
+        end,
+    },
+    {
+        title = 'Seller',
+        width = 0.13,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.owner, record_b.owner, desc)
+        end,
+    },
+    {
+        title = {'Your Bid\n(per item)', 'Your Bid\n(per stack)'},
+        width = 0.125,
+        align = 'RIGHT',
+        isPrice = true,
+        set = function(cell, record)
+            cell:SetText(record.high_bidder and Aux.money.to_string(aux_price_per_unit and ceil(record.unit_high_bid) or record.high_bid, true, false) or '---')
+        end,
+        cmp = function(record_a, record_b, desc)
+            local price_a = aux_price_per_unit and record_a.unit_high_bid or record_a.high_bid
+            local price_b = aux_price_per_unit and record_b.unit_high_bid or record_b.high_bid
+            price_a = price_a > 0 and price_a or (desc and -Aux.huge or Aux.huge)
+            price_b = price_b > 0 and price_b or (desc and -Aux.huge or Aux.huge)
+        end,
+    },
+    {
+        title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
+        width = 0.125,
+        align = 'RIGHT',
+        isPrice = true,
+        set = function(cell, record)
+            local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
+            cell:SetText(Aux.money.to_string(bid, true, false, nil, colorBid))
+        end,
+        cmp = function(record_a, record_b, desc)
+            local price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
+            local price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
+            return Aux.sort.compare(price_a, price_b, desc)
+        end,
+    },
+    {
+        title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
+        width = 0.125,
+        align = 'RIGHT',
+        isPrice = true,
+        set = function(cell, record)
+            local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
+            cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
+        end,
+        cmp = function(record_a, record_b, desc)
+            local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
+            local price_b = aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
+            price_a = price_a > 0 and price_a or (desc and -Aux.huge or Aux.huge)
+            price_b = price_b > 0 and price_b or (desc and -Aux.huge or Aux.huge)
+
+            return Aux.sort.compare(price_a, price_b, desc)
+        end,
+    },
+    {
+        title = 'Status',
+        width = 0.04,
+        align = 'CENTER',
+        set = function(cell, record)
+            local status
+            if record.high_bidder then
+                status = GREEN_FONT_COLOR_CODE..'High Bidder'..FONT_COLOR_CODE_CLOSE
+            else
+                status = RED_FONT_COLOR_CODE..'Outbid'..FONT_COLOR_CODE_CLOSE
+            end
+            cell:SetText(status)
+        end,
+        cmp = function(record_a, record_b, desc)
+            return Aux.sort.compare(record_a.high_bidder and 1 or 0, record_b.high_bidder and 1 or 0, desc)
+        end,
     },
 }
 
@@ -222,18 +547,6 @@ function private.record_percentage(record)
         return nil, Aux.round(100 * record.unit_bid_price / historical_value, 1)
     end
 end
-
---if rowIndex <= 0 or rowIndex > getn(self.rows) then return end
---local row = self.rows[rowIndex]
----- show this row
---row:Show()
---if self.selected and record.search_signature == self.selected.search_signature then
---    row.highlight:Show()
---else
---    row.highlight:Hide()
---end
---row.data = {record=record, expandable=expandable, indented=indented, numAuctions=numAuctions, expandKey=expandKey}
---
 
 function public.percentage_historical(pct, based_on_bid)
     local pctColor = '|cffffffff'
@@ -455,7 +768,6 @@ local methods = {
             self.headCells[self.sortInfo.columnIndex]:GetNormalTexture():SetTexture(0.6, 0.8, 1, 0.8)
         end
 
-        -- update the scroll frame
         FauxScrollFrame_Update(self.scrollFrame, self.rowInfo.numDisplayRows, getn(self.rows), self.ROW_HEIGHT)
 
         -- make sure the offset is not too high
@@ -465,9 +777,7 @@ local methods = {
         end
 
         if not self.sortInfo.isSorted then
-            local function sort_helper(a, b, sortKey)
-                local hadSortKey = sortKey and true or false
-                sortKey = sortKey or self.sortInfo.sortKey
+            local function sort_helper(a, b)
 
                 local record_a, record_b
                 if a.children then
@@ -478,7 +788,7 @@ local methods = {
                     record_b = b.record
                 end
 
-                local ordering = search_config[self.sortInfo.columnIndex].cmp and search_config[self.sortInfo.columnIndex].cmp(record_a, record_b, self.sortInfo.descending) or Aux.sort.EQ
+                local ordering = self.config[self.sortInfo.columnIndex].cmp and self.config[self.sortInfo.columnIndex].cmp(record_a, record_b, self.sortInfo.descending) or Aux.sort.EQ
 
                 if ordering == Aux.sort.EQ then
 --                    if sortKey == 'percent' then
@@ -507,51 +817,8 @@ local methods = {
                 else
                     return ordering == Aux.sort.LT
                 end
-
---                local aVal, bVal
---                if sortKey == 'percent' then
---                    aVal = private.record_percentage(record_a)
---                    bVal = private.record_percentage(record_b)
---                elseif sortKey == 'numAuctions' then
---                    if a.children then
---                        aVal = a.totalAuctions
---                        bVal = b.totalAuctions
---                    else
---                        aVal = a.numAuctions
---                        bVal = b.numAuctions
---                    end
---                elseif sortKey == 'unit_bid_price' or sortKey == 'bid_price' then
---                    aVal = private.record_prices(record_a, sortKey == 'unit_bid_price')
---                    bVal = private.record_prices(record_b, sortKey == 'unit_bid_price')
---                elseif sortKey == 'unit_buyout_price' or sortKey == 'buyout_price' then
---                    aVal = ({ private.record_prices(record_a, sortKey == 'unit_buyout_price') })[2]
---                    bVal = ({ private.record_prices(record_b, sortKey == 'unit_buyout_price') })[2]
---                else
---                    aVal = record_a[sortKey]
---                    bVal = record_b[sortKey]
---                end
---                if sortKey == 'buyout_price' or sortKey == 'unit_buyout_price' then
---                    -- for buyout, put bid-only auctions at the bottom
---                    if not aVal or aVal == 0 then
---                        aVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
---                    end
---                    if not bVal or bVal == 0 then
---                        bVal = (self.sortInfo.descending and -1 or 1) * Aux.huge
---                    end
---                elseif sortKey == 'percent' then
---                    -- for percent, put bid-only auctions at the bottom
---                    aVal = aVal or ((self.sortInfo.descending and -1 or 1) * Aux.huge)
---                    bVal = bVal or ((self.sortInfo.descending and -1 or 1) * Aux.huge)
---                end
---                if type(aVal) == 'string' or type(bVal) == 'string' then
---                    aVal = aVal or ''
---                    bVal = bVal or ''
---                else
---                    aVal = tonumber(aVal) or 0
---                    bVal = tonumber(bVal) or 0
---                end
             end
-            -- sort the row info
+
             for i, info in ipairs(self.rowInfo) do
                 sort(info.children, sort_helper)
             end
@@ -588,7 +855,7 @@ local methods = {
         end
         row.data = {record=record, expandable=expandable, indented=indented, numAuctions=numAuctions, expandKey=expandKey}
 
-        for i, column_config in ipairs(search_config) do
+        for i, column_config in ipairs(self.config) do
             column_config.set(row.cells[i], record, displayNumAuctions, numPlayerAuctions, expandable, indented)
         end
     end,
@@ -655,14 +922,12 @@ local methods = {
             -- try to select the same row
             local row = rt.rows[prevSelectedIndex]
             if row and row:IsVisible() and row.data and row.data.record then
---                TSM:LOG_INFO("Selecting row from point 1")
                 rt:SetSelectedRecord(row.data.record)
             end
             if not rt.selected then
                 -- select the first row
                 row = rt.rows[1]
                 if row and row:IsVisible() and row.data and row.data.record then
---                    TSM:LOG_INFO("Selecting row from point 1")
                     rt:SetSelectedRecord(row.data.record)
                 end
             end
@@ -703,19 +968,11 @@ local methods = {
     end,
 
     SetSort = function(self, sortIndex)
-        local sortIndexLookup
-        if aux_price_per_unit then
-            sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'unit_bid_price', 'unit_buyout_price', 'percent'}
-        else
-            sortIndexLookup = {'name', 'level', 'numAuctions', 'aux_quantity', 'duration', 'owner', 'bid_price', 'buyout_price', 'percent'}
-        end
         if sortIndex then
             if sortIndex == self.sortInfo.index then return end
             self.sortInfo.descending = sortIndex < 0
             self.sortInfo.columnIndex = abs(sortIndex)
         end
---        TSMAPI:Assert(self.sortInfo.columnIndex > 0 and self.sortInfo.columnIndex <= getn(self.headCells))
-        self.sortInfo.sortKey = sortIndexLookup[self.sortInfo.columnIndex]
         self.sortInfo.isSorted = nil
         self.sortInfo.index = sortIndex
         self:UpdateRows()
@@ -768,13 +1025,14 @@ local methods = {
     end,
 }
 
-function public.CreateAuctionResultsTable(parent)
+function public.CreateAuctionResultsTable(parent, config)
 
     local rtName = 'AuxAuctionResultsTable'..RT_COUNT
     RT_COUNT = RT_COUNT + 1
     local rt = CreateFrame('Frame', rtName, parent)
+    rt.config = config
 --    local numRows = TSM.db.profile.auctionResultRows
-    local numRows = 16
+    local numRows = config.rows
     rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT-HEAD_SPACE) / numRows
     rt.scrollDisabled = nil
     rt.expanded = {}
@@ -828,7 +1086,7 @@ function public.CreateAuctionResultsTable(parent)
 
     -- create the header cells
     rt.headCells = {}
-    for i, column_config in ipairs(search_config) do
+    for i, column_config in ipairs(rt.config) do
         local cell = CreateFrame('Button', rtName..'HeadCol'..i, rt.contentFrame)
         cell:SetHeight(HEAD_HEIGHT)
         if i == 1 then
@@ -889,11 +1147,11 @@ function public.CreateAuctionResultsTable(parent)
         row.rt = rt
 
         row.cells = {}
-        for j=1, getn(search_config) do
+        for j=1, getn(rt.config) do
             local cell = CreateFrame('Button', nil, row)
             local text = cell:CreateFontString()
             text:SetFont(Aux.gui.config.content_font, min(14, rt.ROW_HEIGHT))
-            text:SetJustifyH(search_config[j].align or 'LEFT')
+            text:SetJustifyH(rt.config[j].align or 'LEFT')
             text:SetJustifyV('CENTER')
             text:SetPoint('TOPLEFT', 1, -1)
             text:SetPoint('BOTTOMRIGHT', -1, 1)
@@ -921,8 +1179,8 @@ function public.CreateAuctionResultsTable(parent)
                 cell:SetNormalTexture(tex)
             end
 
-            if search_config[j].init then
-                search_config[j].init(rt, cell)
+            if rt.config[j].init then
+                rt.config[j].init(rt, cell)
             end
 
             tinsert(row.cells, cell)

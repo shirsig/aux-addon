@@ -6,30 +6,32 @@ local auction_records
 local selected_auction
 
 function public.on_load()
-    private.listing = Aux.listing.CreateScrollingTable(AuxBidsFrameListing)
-    private.listing:SetColInfo({
-        { name='Item', width=.275 },
-        { name='Qty', width=.05, align='CENTER' },
-        { name='Status', width=.125, align='CENTER' },
-        { name='Left', width=.05, align='CENTER' },
-        { name='Seller', width=.125, align='CENTER' },
-        { name='Your Bid', width=.125, align='RIGHT' },
-        { name='Bid', width=.125, align='RIGHT' },
-        { name='Buy', width=.125, align='RIGHT' },
-    })
-    private.listing:SetHandler('OnClick', function(table, row_data, column, button)
-        if button == 'LeftButton' then
-            private.on_row_click(row_data.record)
-        elseif button == 'RightButton' then
-            Aux.tab_group:set_tab(1)
-            Aux.search_frame.start_search(strlower(Aux.info.item(this.row.data.record.item_id).name)..'/exact')
-        end
+--    private.listing:SetHandler('OnClick', function(table, row_data, column, button)
+--        if button == 'LeftButton' then
+--            private.on_row_click(row_data.record)
+--        elseif button == 'RightButton' then
+--            Aux.tab_group:set_tab(1)
+--            Aux.search_frame.start_search(strlower(Aux.info.item(this.row.data.record.item_id).name)..'/exact')
+--        end
+--    end)
+    private.listing = Aux.auction_listing.CreateAuctionResultsTable(AuxBidsFrameListing, Aux.auction_listing.bids_config)
+    private.listing:Show()
+    private.listing:SetSort(9)
+    private.listing:Clear()
+    private.listing:SetHandler('OnCellClick', function(cell, button)
+--        if IsAltKeyDown() and private.listing:GetSelection().record == cell.row.data.record then
+--            if button == 'LeftButton' and private.buyout_button:IsEnabled() then
+--                private.buyout_button:Click()
+--                return
+--            elseif button == 'RightButton' and private.bid_button:IsEnabled() then
+--                private.bid_button:Click()
+--                return
+--            end
+--        end
     end)
-    private.listing:SetHandler('OnEnter', function(table, row_data, column)
-        Aux.info.set_tooltip(row_data.record.itemstring, column.row, 'ANCHOR_RIGHT')
-    end)
-    private.listing:SetHandler('OnLeave', function(table, row_data, column)
-        GameTooltip:Hide()
+    private.listing:SetHandler('OnSelectionChanged', function(rt, datum)
+--        if not datum then return end
+--        private.find_auction(datum.record)
     end)
 
     do
@@ -76,34 +78,7 @@ function private.update_listing()
         return
     end
 
-    local auction_rows = {}
-    for i, auction_record in auction_records or {} do
-        local status
-        if auction_record.high_bidder then
-            status = GREEN_FONT_COLOR_CODE..'High Bidder'..FONT_COLOR_CODE_CLOSE
-        else
-            status = RED_FONT_COLOR_CODE..'Outbid'..FONT_COLOR_CODE_CLOSE
-        end
-        local historical_value = Aux.history.value(auction_record.item_key)
-        tinsert(auction_rows, {
-            cols = {
-                { value=({GetItemQualityColor(auction_record.quality)})[4]..'['..auction_record.name..']'..'|r' },
-                { value=auction_record.aux_quantity },
-                { value=status },
-                { value=Aux.auction_listing.time_left(auction_record.duration) },
-                { value=auction_record.owner },
-                { value=auction_record.high_bidder and Aux.money.to_string(auction_record.high_bid, true, false) or '---' },
-                { value=Aux.money.to_string(auction_record.bid_price, true, false) },
-                { value=auction_record.buyout_price > 0 and Aux.money.to_string(auction_record.buyout_price, true, false) or '---' },
-                --                { value=Aux.auction_listing.percentage_historical(market_value and Aux.round(auction_record.unit_buyout_price/market_value * 100) or '---') },
-            },
-            record = auction_record,
-        })
-    end
-    sort(auction_rows, function(a, b) return Aux.sort.multi_lt(a.record.name, b.record.name, a.record.search_signature, b.record.search_signature, tostring(a.record), tostring(b.record)) end)
-
-    private.listing:SetData(auction_rows)
-    private.listing:SetSelection(function(row) return row.record == selected_auction end)
+    private.listing:SetDatabase(auction_records)
 end
 
 function public.on_open()
