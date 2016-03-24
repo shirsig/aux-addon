@@ -231,8 +231,8 @@ function private.submit_query(k)
             private.wait_for_results(function()
                 local _, total_count = GetNumAuctionItems(private.current_thread().params.type)
                 private.current_thread().total_pages = math.ceil(total_count / PAGE_SIZE)
-                if private.current_thread().total_pages >= private.current_thread().page + 1 then
-                    private.wait_for_callback(private.current_thread().params.on_page_loaded, private.current_thread().page, private.current_thread().total_pages, function()
+                if max(1, private.current_thread().total_pages) >= private.current_thread().page + 1 then
+                    private.wait_for_callback(private.current_thread().params.on_page_loaded, private.current_thread().page, max(1, private.current_thread().total_pages), function()
                         return k()
                     end)
                 else
