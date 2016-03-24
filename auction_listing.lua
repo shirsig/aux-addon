@@ -290,12 +290,12 @@ public.auctions_config = {
         end,
     },
     {
-        title = {'Auction Start\n(per item)', 'Auction Start\n(per stack)'},
+        title = {'Auction Start Bid\n(per item)', 'Auction Start Bid\n(per stack)'},
         width = 0.125,
         align = 'RIGHT',
         isPrice = true,
         set = function(cell, record)
-            cell:SetText(record.high_bidder and Aux.money.to_string(aux_price_per_unit and ceil(record.unit_start_price) or record.start_price, true, false) or '---')
+            cell:SetText(Aux.money.to_string(aux_price_per_unit and ceil(record.unit_start_price) or record.start_price, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = aux_price_per_unit and record_a.unit_start_price or record_a.start_price
@@ -326,7 +326,7 @@ public.auctions_config = {
         isPrice = true,
         set = function(cell, record)
             local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
-            cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
+            cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
@@ -476,7 +476,7 @@ public.bids_config = {
         isPrice = true,
         set = function(cell, record)
             local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
-            cell:SetText(Aux.money.to_string(bid, true, false, nil, colorBid))
+            cell:SetText(Aux.money.to_string(bid, true, false))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
@@ -491,7 +491,7 @@ public.bids_config = {
         isPrice = true,
         set = function(cell, record)
             local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
-            cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
+            cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
