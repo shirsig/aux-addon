@@ -44,6 +44,7 @@ end
 
 function private.extend_tooltip(tooltip, hyperlink, quantity)
     local item_id, suffix_id = Aux.info.parse_hyperlink(hyperlink)
+    quantity = IsShiftKeyDown() and quantity or 1
 
     if aux_tooltip_disenchant_source then
         local color = {r=0.7, g=0.7, b=0.7 }
@@ -91,7 +92,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
         local _, price, limited = Aux.cache.merchant_info(item_id)
         if price then
-            tooltip:AddLine('Vendor Buy '..(limited and '(limited): ' or ': ')..Aux.util.format_money(price), color.r, color.g, color.b)
+            tooltip:AddLine('Vendor Buy '..(limited and '(limited): ' or ': ')..Aux.util.format_money(price * quantity), color.r, color.g, color.b)
         end
     end
     if aux_tooltip_vendor_sell then
@@ -99,7 +100,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
         local price = Aux.cache.merchant_info(item_id)
         if price ~= 0 then
-            tooltip:AddLine('Vendor Sell: '..(price and Aux.util.format_money(price) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Vendor Sell: '..(price and Aux.util.format_money(price * quantity) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
     end
 
@@ -110,10 +111,10 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
     local value = Aux.history.value(item_key)
     if auctionable then
-        tooltip:AddLine('Value: '..(value and Aux.util.format_money(value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+        tooltip:AddLine('Value: '..(value and Aux.util.format_money(value * quantity) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         if aux_tooltip_daily  then
             local market_value = Aux.history.market_value(item_key)
-            tooltip:AddLine('Today: '..(market_value and Aux.util.format_money(market_value)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Today: '..(market_value and Aux.util.format_money(market_value * quantity)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
     end
 
@@ -172,19 +173,17 @@ function game_tooltip_hooks:SetBagItem(bag, slot)
     end
 end
 
---function game_tooltip_hooks:SetInboxItem(index)
---    local name, _, quantity = GetInboxItem(index)
---
---    for itemID = 1, 30000 do
---        local itemName, itemstring, itemQuality = GetItemInfo(itemID)
---        if (itemName and itemName == inboxItemName) then
---            local _, _, _, hex = GetItemQualityColor(tonumber(itemQuality))
---            local itemLink = hex.. '|H'..itemstring..'|h['..itemName..']|h|r'
---            tooltipCall(GameTooltip, inboxItemName, itemLink, inboxItemQuality, inboxItemCount)
---            break
---        end
---    end
---end
+function game_tooltip_hooks:SetInboxItem(index)
+    local name, _, quantity = GetInboxItem(index)
+
+    local id = Aux.cache.item_id(name)
+    if id then
+        local _, itemstring, quality = GetItemInfo(id)
+        local _, _, _, hex = GetItemQualityColor(tonumber(quality))
+        local link = hex.. '|H'..itemstring..'|h['..name..']|h|r'
+        private.extend_tooltip(GameTooltip, link, quantity)
+    end
+end
 
 function game_tooltip_hooks:SetInventoryItem(unit, slot)
     local link = GetInventoryItemLink(unit, slot)
