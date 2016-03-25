@@ -18,39 +18,41 @@ local TIME_LEFT_STRINGS = {
     '|cff2992ff24h|r', -- Very Long
 }
 
+function private.item_column_init(rt, cell)
+    local spacer = CreateFrame('Frame', nil, cell)
+    spacer:SetPoint('TOPLEFT', 0, 0)
+    spacer:SetHeight(rt.ROW_HEIGHT)
+    spacer:SetWidth(1)
+    cell.spacer = spacer
+
+    local iconBtn = CreateFrame('Button', nil, cell)
+    iconBtn:SetBackdrop({edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5})
+    iconBtn:SetBackdropBorderColor(0, 1, 0, 0)
+    iconBtn:SetPoint('TOPLEFT', spacer, 'TOPRIGHT')
+    iconBtn:SetHeight(rt.ROW_HEIGHT)
+    iconBtn:SetWidth(rt.ROW_HEIGHT)
+    iconBtn:SetScript('OnEnter', rt.OnIconEnter)
+    iconBtn:SetScript('OnLeave', rt.OnIconLeave)
+    iconBtn:SetScript('OnClick', rt.OnIconClick)
+    iconBtn:SetScript('OnDoubleClick', rt.OnIconDoubleClick)
+    local icon = iconBtn:CreateTexture(nil, 'ARTWORK')
+    icon:SetPoint('TOPLEFT', 2, -2)
+    icon:SetPoint('BOTTOMRIGHT', -2, 2)
+    cell.iconBtn = iconBtn
+    cell.icon = icon
+
+    local text = cell:GetFontString()
+    text:ClearAllPoints()
+    text:SetPoint('TOPLEFT', iconBtn, 'TOPRIGHT', 2, 0)
+    text:SetPoint('BOTTOMRIGHT', 0, 0)
+end
+
 public.search_config = {
     rows = 16,
     {
         title = 'Item',
         width = 0.35,
-        init = function(rt, cell)
-            local spacer = CreateFrame('Frame', nil, cell)
-            spacer:SetPoint('TOPLEFT', 0, 0)
-            spacer:SetHeight(rt.ROW_HEIGHT)
-            spacer:SetWidth(1)
-            cell.spacer = spacer
-
-            local iconBtn = CreateFrame('Button', nil, cell)
-            iconBtn:SetBackdrop({edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5})
-            iconBtn:SetBackdropBorderColor(0, 1, 0, 0)
-            iconBtn:SetPoint('TOPLEFT', spacer, 'TOPRIGHT')
-            iconBtn:SetHeight(rt.ROW_HEIGHT)
-            iconBtn:SetWidth(rt.ROW_HEIGHT)
-            iconBtn:SetScript('OnEnter', rt.OnIconEnter)
-            iconBtn:SetScript('OnLeave', rt.OnIconLeave)
-            iconBtn:SetScript('OnClick', rt.OnIconClick)
-            iconBtn:SetScript('OnDoubleClick', rt.OnIconDoubleClick)
-            local icon = iconBtn:CreateTexture(nil, 'ARTWORK')
-            icon:SetPoint('TOPLEFT', 2, -2)
-            icon:SetPoint('BOTTOMRIGHT', -2, 2)
-            cell.iconBtn = iconBtn
-            cell.icon = icon
-
-            local text = cell:GetFontString()
-            text:ClearAllPoints()
-            text:SetPoint('TOPLEFT', iconBtn, 'TOPRIGHT', 2, 0)
-            text:SetPoint('BOTTOMRIGHT', 0, 0)
-        end,
+        init = private.item_column_init,
         set = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
@@ -142,12 +144,33 @@ public.search_config = {
         align = 'RIGHT',
         isPrice = true,
         set = function(cell, record)
-            local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
-            cell:SetText(Aux.money.to_string(bid, true, false, nil, colorBid))
+            local color
+            if record.high_bidder then
+                color = '|cff16ff16'
+            elseif record.high_bid ~= 0 then
+                color = '|cffff9218'
+            end
+            local price
+            if record.high_bidder then
+                price = aux_price_per_unit and ceil(record.unit_high_bid) or record.high_bid
+            else
+                price = aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
+            end
+            cell:SetText(Aux.money.to_string(price, true, false, nil, color))
         end,
         cmp = function(record_a, record_b, desc)
-            local price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
-            local price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
+            local price_a
+            if record_a.high_bidder then
+                price_a = aux_price_per_unit and record_a.unit_high_bid or record_a.high_bid
+            else
+                price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
+            end
+            local price_b
+            if record_b.high_bidder then
+                price_b = aux_price_per_unit and record_b.unit_high_bid or record_b.high_bid
+            else
+                price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
+            end
             return Aux.sort.compare(price_a, price_b, desc)
         end,
     },
@@ -157,8 +180,8 @@ public.search_config = {
         align = 'RIGHT',
         isPrice = true,
         set = function(cell, record)
-            local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
-            cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false, nil, colorBuyout) or '---')
+            local price = aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
+            cell:SetText(price > 0 and Aux.money.to_string(price, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
@@ -190,34 +213,7 @@ public.auctions_config = {
     {
         title = 'Item',
         width = 0.35,
-        init = function(rt, cell)
-            local spacer = CreateFrame('Frame', nil, cell)
-            spacer:SetPoint('TOPLEFT', 0, 0)
-            spacer:SetHeight(rt.ROW_HEIGHT)
-            spacer:SetWidth(1)
-            cell.spacer = spacer
-
-            local iconBtn = CreateFrame('Button', nil, cell)
-            iconBtn:SetBackdrop({edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5})
-            iconBtn:SetBackdropBorderColor(0, 1, 0, 0)
-            iconBtn:SetPoint('TOPLEFT', spacer, 'TOPRIGHT')
-            iconBtn:SetHeight(rt.ROW_HEIGHT)
-            iconBtn:SetWidth(rt.ROW_HEIGHT)
-            iconBtn:SetScript('OnEnter', rt.OnIconEnter)
-            iconBtn:SetScript('OnLeave', rt.OnIconLeave)
-            iconBtn:SetScript('OnClick', rt.OnIconClick)
-            iconBtn:SetScript('OnDoubleClick', rt.OnIconDoubleClick)
-            local icon = iconBtn:CreateTexture(nil, 'ARTWORK')
-            icon:SetPoint('TOPLEFT', 2, -2)
-            icon:SetPoint('BOTTOMRIGHT', -2, 2)
-            cell.iconBtn = iconBtn
-            cell.icon = icon
-
-            local text = cell:GetFontString()
-            text:ClearAllPoints()
-            text:SetPoint('TOPLEFT', iconBtn, 'TOPRIGHT', 2, 0)
-            text:SetPoint('BOTTOMRIGHT', 0, 0)
-        end,
+        init = private.item_column_init,
         set = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
@@ -290,32 +286,32 @@ public.auctions_config = {
         end,
     },
     {
-        title = {'Auction Start Bid\n(per item)', 'Auction Start Bid\n(per stack)'},
+        title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
         width = 0.125,
         align = 'RIGHT',
         isPrice = true,
         set = function(cell, record)
-            cell:SetText(Aux.money.to_string(aux_price_per_unit and ceil(record.unit_start_price) or record.start_price, true, false) or '---')
+            local price
+            if record.high_bidder then
+                price = aux_price_per_unit and ceil(record.unit_high_bid) or record.high_bid
+            else
+                price = aux_price_per_unit and ceil(record.unit_start_price) or record.start_price
+            end
+            cell:SetText(Aux.money.to_string(price, true, false))
         end,
         cmp = function(record_a, record_b, desc)
-            local price_a = aux_price_per_unit and record_a.unit_start_price or record_a.start_price
-            local price_b = aux_price_per_unit and record_b.unit_start_price or record_b.start_price
-            return Aux.sort.compare(price_a, price_b, desc)
-        end,
-    },
-    {
-        title = {'Auction High Bid\n(per item)', 'Auction High Bid\n(per stack)'},
-        width = 0.125,
-        align = 'RIGHT',
-        isPrice = true,
-        set = function(cell, record)
-            cell:SetText(record.high_bid > 0 and Aux.money.to_string(aux_price_per_unit and ceil(record.unit_high_bid) or record.high_bid, true, false) or RED_FONT_COLOR_CODE..'No Bids'..FONT_COLOR_CODE_CLOSE)
-        end,
-        cmp = function(record_a, record_b, desc)
-            local price_a = aux_price_per_unit and record_a.unit_high_bid or record_a.high_bid
-            local price_b = aux_price_per_unit and record_b.unit_high_bid or record_b.high_bid
-            price_a = price_a > 0 and price_a or (desc and -Aux.huge or Aux.huge)
-            price_b = price_b > 0 and price_b or (desc and -Aux.huge or Aux.huge)
+            local price_a
+            if record_a.high_bidder then
+                price_a = aux_price_per_unit and record_a.unit_high_bid or record_a.high_bid
+            else
+                price_a = aux_price_per_unit and record_a.unit_start_price or record_a.start_price
+            end
+            local price_b
+            if record_b.high_bidder then
+                price_b = aux_price_per_unit and record_b.unit_high_bid or record_b.high_bid
+            else
+                price_b = aux_price_per_unit and record_b.unit_start_price or record_b.start_price
+            end
             return Aux.sort.compare(price_a, price_b, desc)
         end,
     },
@@ -325,8 +321,8 @@ public.auctions_config = {
         align = 'RIGHT',
         isPrice = true,
         set = function(cell, record)
-            local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
-            cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false) or '---')
+            local price = aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
+            cell:SetText(price > 0 and Aux.money.to_string(price, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
@@ -337,6 +333,25 @@ public.auctions_config = {
             return Aux.sort.compare(price_a, price_b, desc)
         end,
     },
+    {
+        title = 'High Bidder',
+        width = 0.21,
+        align = 'CENTER',
+        set = function(cell, record)
+            cell:SetText(record.high_bidder or RED_FONT_COLOR_CODE..'No Bids'..FONT_COLOR_CODE_CLOSE)
+        end,
+        cmp = function(record_a, record_b, desc)
+            if not record_a.high_bidder and not record_b.high_bidder then
+                return Aux.sort.EQ
+            elseif record_a.high_bidder then
+                return Aux.sort.LT
+            elseif record_b.high_bidder then
+                return Aux.sort.GT
+            else
+                return Aux.sort.compare(record_a.high_bidder, record_b.high_bidder, desc)
+            end
+        end,
+    },
 }
 
 public.bids_config = {
@@ -344,34 +359,7 @@ public.bids_config = {
     {
         title = 'Item',
         width = 0.35,
-        init = function(rt, cell)
-            local spacer = CreateFrame('Frame', nil, cell)
-            spacer:SetPoint('TOPLEFT', 0, 0)
-            spacer:SetHeight(rt.ROW_HEIGHT)
-            spacer:SetWidth(1)
-            cell.spacer = spacer
-
-            local iconBtn = CreateFrame('Button', nil, cell)
-            iconBtn:SetBackdrop({edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5})
-            iconBtn:SetBackdropBorderColor(0, 1, 0, 0)
-            iconBtn:SetPoint('TOPLEFT', spacer, 'TOPRIGHT')
-            iconBtn:SetHeight(rt.ROW_HEIGHT)
-            iconBtn:SetWidth(rt.ROW_HEIGHT)
-            iconBtn:SetScript('OnEnter', rt.OnIconEnter)
-            iconBtn:SetScript('OnLeave', rt.OnIconLeave)
-            iconBtn:SetScript('OnClick', rt.OnIconClick)
-            iconBtn:SetScript('OnDoubleClick', rt.OnIconDoubleClick)
-            local icon = iconBtn:CreateTexture(nil, 'ARTWORK')
-            icon:SetPoint('TOPLEFT', 2, -2)
-            icon:SetPoint('BOTTOMRIGHT', -2, 2)
-            cell.iconBtn = iconBtn
-            cell.icon = icon
-
-            local text = cell:GetFontString()
-            text:ClearAllPoints()
-            text:SetPoint('TOPLEFT', iconBtn, 'TOPRIGHT', 2, 0)
-            text:SetPoint('BOTTOMRIGHT', 0, 0)
-        end,
+        init = private.item_column_init,
         set = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
@@ -387,17 +375,6 @@ public.bids_config = {
         end,
         cmp = function(record_a, record_b, desc)
             return Aux.sort.compare(record_a.name, record_b.name, desc)
-        end,
-    },
-    {
-        title = 'Lvl',
-        width = 0.035,
-        align = 'CENTER',
-        set = function(cell, record)
-            cell:SetText(max(record.level, 1))
-        end,
-        cmp = function(record_a, record_b, desc)
-            return Aux.sort.compare(record_a.level, record_b.level, desc)
         end,
     },
     {
@@ -451,22 +428,15 @@ public.bids_config = {
             cell:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
-            return Aux.sort.compare(record_a.owner, record_b.owner, desc)
-        end,
-    },
-    {
-        title = {'Your Bid\n(per item)', 'Your Bid\n(per stack)'},
-        width = 0.125,
-        align = 'RIGHT',
-        isPrice = true,
-        set = function(cell, record)
-            cell:SetText(record.high_bidder and Aux.money.to_string(aux_price_per_unit and ceil(record.unit_high_bid) or record.high_bid, true, false) or '---')
-        end,
-        cmp = function(record_a, record_b, desc)
-            local price_a = aux_price_per_unit and record_a.unit_high_bid or record_a.high_bid
-            local price_b = aux_price_per_unit and record_b.unit_high_bid or record_b.high_bid
-            price_a = price_a > 0 and price_a or (desc and -Aux.huge or Aux.huge)
-            price_b = price_b > 0 and price_b or (desc and -Aux.huge or Aux.huge)
+            if not record_a.owner and not record_b.owner then
+                return Aux.sort.EQ
+            elseif record_a.owner then
+                return Aux.sort.LT
+            elseif record_b.owner then
+                return Aux.sort.GT
+            else
+                return Aux.sort.compare(record_a.owner, record_b.owner, desc)
+            end
         end,
     },
     {
@@ -475,12 +445,27 @@ public.bids_config = {
         align = 'RIGHT',
         isPrice = true,
         set = function(cell, record)
-            local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
-            cell:SetText(Aux.money.to_string(bid, true, false))
+            local price
+            if record.high_bidder then
+                price = aux_price_per_unit and ceil(record.unit_high_bid) or record.high_bid
+            else
+                price = aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
+            end
+            cell:SetText(Aux.money.to_string(price))
         end,
         cmp = function(record_a, record_b, desc)
-            local price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
-            local price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
+            local price_a
+            if record_a.high_bidder then
+                price_a = aux_price_per_unit and record_a.unit_high_bid or record_a.high_bid
+            else
+                price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
+            end
+            local price_b
+            if record_b.high_bidder then
+                price_b = aux_price_per_unit and record_b.unit_high_bid or record_b.high_bid
+            else
+                price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
+            end
             return Aux.sort.compare(price_a, price_b, desc)
         end,
     },
@@ -490,8 +475,8 @@ public.bids_config = {
         align = 'RIGHT',
         isPrice = true,
         set = function(cell, record)
-            local bid, buyout, colorBid, colorBuyout = private.record_prices(record, aux_price_per_unit)
-            cell:SetText(buyout > 0 and Aux.money.to_string(buyout, true, false) or '---')
+            local price = aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
+            cell:SetText(price > 0 and Aux.money.to_string(price, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
@@ -504,7 +489,7 @@ public.bids_config = {
     },
     {
         title = 'Status',
-        width = 0.04,
+        width = 0.115,
         align = 'CENTER',
         set = function(cell, record)
             local status
@@ -520,21 +505,6 @@ public.bids_config = {
         end,
     },
 }
-
-function private.record_prices(record, per_unit)
-    local bid_color
-    if record.high_bidder then
-        bid_color = '|cff16ff16'
-    elseif record.high_bid ~= 0 then
-        bid_color = '|cffff9218'
-    end
-
-    if per_unit then
-        return ceil(record.unit_bid_price), ceil(record.unit_buyout_price), bid_color
-    else
-        return record.bid_price, record.buyout_price, bid_color
-    end
-end
 
 function private.record_percentage(record)
     if not record then return end
