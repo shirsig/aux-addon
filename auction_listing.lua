@@ -650,6 +650,7 @@ local methods = {
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(this.row.data.record.hyperlink)
         elseif Aux.unmodified() and button == 'RightButton' then -- TODO not when alt (how?)
+            Aux.tab_group:set_tab(1)
             Aux.search_frame.start_search(strlower(Aux.info.item(this.row.data.record.item_id).name)..'/exact')
         else
             local selection = this.rt:GetSelection()
