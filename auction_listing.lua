@@ -48,7 +48,6 @@ function private.item_column_init(rt, cell)
 end
 
 public.search_config = {
-    rows = 16,
     {
         title = 'Item',
         width = 0.35,
@@ -135,7 +134,15 @@ public.search_config = {
             cell:SetText(Aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
-            return Aux.sort.compare(record_a.owner, record_b.owner, desc)
+            if not record_a.owner and not record_b.owner then
+                return Aux.sort.EQ
+            elseif not record_a.owner then
+                return Aux.sort.GT
+            elseif not record_b.owner then
+                return Aux.sort.LT
+            else
+                return Aux.sort.compare(record_a.owner, record_b.owner, desc)
+            end
         end,
     },
     {
@@ -209,7 +216,6 @@ public.search_config = {
 }
 
 public.auctions_config = {
-    rows = 16,
     {
         title = 'Item',
         width = 0.35,
@@ -343,10 +349,10 @@ public.auctions_config = {
         cmp = function(record_a, record_b, desc)
             if not record_a.high_bidder and not record_b.high_bidder then
                 return Aux.sort.EQ
-            elseif record_a.high_bidder then
-                return Aux.sort.LT
-            elseif record_b.high_bidder then
+            elseif not record_a.high_bidder then
                 return Aux.sort.GT
+            elseif not record_b.high_bidder then
+                return Aux.sort.LT
             else
                 return Aux.sort.compare(record_a.high_bidder, record_b.high_bidder, desc)
             end
@@ -355,7 +361,6 @@ public.auctions_config = {
 }
 
 public.bids_config = {
-    rows = 16,
     {
         title = 'Item',
         width = 0.35,
@@ -430,10 +435,10 @@ public.bids_config = {
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
                 return Aux.sort.EQ
-            elseif record_a.owner then
-                return Aux.sort.LT
-            elseif record_b.owner then
+            elseif not record_a.owner then
                 return Aux.sort.GT
+            elseif not record_b.owner then
+                return Aux.sort.LT
             else
                 return Aux.sort.compare(record_a.owner, record_b.owner, desc)
             end
@@ -644,7 +649,7 @@ local methods = {
             DressUpItemLink(this.row.data.record.hyperlink)
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(this.row.data.record.hyperlink)
-        elseif button == 'RightButton' then -- TODO not when alt (how?)
+        elseif Aux.unmodified() and button == 'RightButton' then -- TODO not when alt (how?)
             Aux.search_frame.start_search(strlower(Aux.info.item(this.row.data.record.item_id).name)..'/exact')
         else
             local selection = this.rt:GetSelection()
@@ -1002,7 +1007,7 @@ function public.CreateAuctionResultsTable(parent, config)
     local rt = CreateFrame('Frame', rtName, parent)
     rt.config = config
 --    local numRows = TSM.db.profile.auctionResultRows
-    local numRows = config.rows
+    local numRows = 16
     rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT-HEAD_SPACE) / numRows
     rt.scrollDisabled = nil
     rt.expanded = {}

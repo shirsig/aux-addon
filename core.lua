@@ -390,6 +390,10 @@ function Aux.is_player(name)
     return UnitName('player') == name -- TODO support multiple chars
 end
 
+function Aux.unmodified()
+    return not IsShiftKeyDown() and not IsControlKeyDown() and not IsAltKeyDown()
+end
+
 Aux.orig = {}
 function Aux.hook(name, handler, object)
     local orig
