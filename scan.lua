@@ -99,7 +99,7 @@ function private.wait_for_list_results(k)
 end
 
 function private.owner_data_complete()
-    if private.current_thread().params.no_wait_owner then
+    if private.current_thread().params.no_wait_owner or aux_ignore_owner then
         return true
     end
     local count, _ = GetNumAuctionItems(private.current_thread().params.type)
