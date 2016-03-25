@@ -159,7 +159,7 @@ public.search_config = {
             end
             local price
             if record.high_bidder then
-                price = aux_price_per_unit and ceil(record.unit_high_bid) or record.high_bid
+                price = aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
             else
                 price = aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
             end
@@ -168,13 +168,13 @@ public.search_config = {
         cmp = function(record_a, record_b, desc)
             local price_a
             if record_a.high_bidder then
-                price_a = aux_price_per_unit and record_a.unit_high_bid or record_a.high_bid
+                price_a = aux_price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
             else
                 price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
             end
             local price_b
             if record_b.high_bidder then
-                price_b = aux_price_per_unit and record_b.unit_high_bid or record_b.high_bid
+                price_b = aux_price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
             else
                 price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end
@@ -299,24 +299,24 @@ public.auctions_config = {
         set = function(cell, record)
             local price
             if record.high_bidder then
-                price = aux_price_per_unit and ceil(record.unit_high_bid) or record.high_bid
+                price = aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
             else
-                price = aux_price_per_unit and ceil(record.unit_start_price) or record.start_price
+                price = aux_price_per_unit and ceil(record.start_price / record.aux_quantity) or record.start_price
             end
             cell:SetText(Aux.money.to_string(price, true, false))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a
             if record_a.high_bidder then
-                price_a = aux_price_per_unit and record_a.unit_high_bid or record_a.high_bid
+                price_a = aux_price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
             else
-                price_a = aux_price_per_unit and record_a.unit_start_price or record_a.start_price
+                price_a = aux_price_per_unit and record_a.start_price / record_b.aux_quantity or record_a.start_price
             end
             local price_b
             if record_b.high_bidder then
-                price_b = aux_price_per_unit and record_b.unit_high_bid or record_b.high_bid
+                price_b = aux_price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
             else
-                price_b = aux_price_per_unit and record_b.unit_start_price or record_b.start_price
+                price_b = aux_price_per_unit and record_b.start_price / record_b.aux_quantity or record_b.start_price
             end
             return Aux.sort.compare(price_a, price_b, desc)
         end,
@@ -452,7 +452,7 @@ public.bids_config = {
         set = function(cell, record)
             local price
             if record.high_bidder then
-                price = aux_price_per_unit and ceil(record.unit_high_bid) or record.high_bid
+                price = aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
             else
                 price = aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
             end
@@ -461,13 +461,13 @@ public.bids_config = {
         cmp = function(record_a, record_b, desc)
             local price_a
             if record_a.high_bidder then
-                price_a = aux_price_per_unit and record_a.unit_high_bid or record_a.high_bid
+                price_a = aux_price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
             else
                 price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
             end
             local price_b
             if record_b.high_bidder then
-                price_b = aux_price_per_unit and record_b.unit_high_bid or record_b.high_bid
+                price_b = aux_price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
             else
                 price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end
