@@ -6,7 +6,6 @@ aux_recent_searches = {}
 local scanned_records = {}
 local aborted_search
 local search_scan_id
-local find_scan_id
 
 private.popup_info = {
     rename = {}
@@ -701,10 +700,8 @@ function public.on_load()
         if IsAltKeyDown() and private.results_listing:GetSelection().record == cell.row.data.record then
             if button == 'LeftButton' and private.buyout_button:IsEnabled() then
                 private.buyout_button:Click()
-                return
             elseif button == 'RightButton' and private.bid_button:IsEnabled() then
                 private.bid_button:Click()
-                return
             end
         end
     end)
@@ -910,19 +907,8 @@ function private.record_remover(record)
     end
 end
 
-function private.find_auction_and_bid(record, buyout_mode)
-    if not private.results_listing:ContainsRecord(record) or (buyout_mode and not record.buyout_price) or (not buyout_mode and record.high_bidder) or Aux.is_player(record.owner) then
-        return
-    end
-
-    Aux.scan_util.find(record, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
-        if private.results_listing:ContainsRecord(record) then
-            Aux.place_bid('list', index, buyout_mode and record.buyout_price or record.bid_price, private.record_remover(record))
-        end
-    end)
-end
-
 do
+    local scan_id
     local IDLE, SEARCHING, FOUND = {}, {}, {}
     local state = IDLE
     local found_index
@@ -932,9 +918,9 @@ do
             return
         end
 
-        Aux.scan.abort(find_scan_id)
+        Aux.scan.abort(scan_id)
         state = SEARCHING
-        find_scan_id = Aux.scan_util.find(
+        scan_id = Aux.scan_util.find(
             record,
             private.status_bar,
             function()
@@ -970,10 +956,6 @@ do
     end
 
     function public.on_update()
-        if not AuxSearchFrame:IsVisible() then
-            return
-        end
-
         if state == IDLE or state == SEARCHING then
             private.buyout_button:Disable()
             private.bid_button:Disable()

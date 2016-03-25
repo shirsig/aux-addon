@@ -2,35 +2,20 @@ local private, public = {}, {}
 Aux.auctions_frame = public
 
 local auction_records
-local selected_auction
 
 function public.on_load()
---    private.listing:SetHandler('OnClick', function(table, row_data, column, button)
---        if button == 'LeftButton' then
---            private.on_row_click(row_data.record)
---        elseif button == 'RightButton' then
---            Aux.tab_group:set_tab(1)
---            Aux.search_frame.start_search(strlower(Aux.info.item(this.row.data.record.item_id).name)..'/exact')
---        end
---    end)
     private.listing = Aux.auction_listing.CreateAuctionResultsTable(AuxAuctionsFrameListing, Aux.auction_listing.auctions_config)
     private.listing:Show()
     private.listing:SetSort(7)
     private.listing:Clear()
     private.listing:SetHandler('OnCellClick', function(cell, button)
-        --        if IsAltKeyDown() and private.listing:GetSelection().record == cell.row.data.record then
-        --            if button == 'LeftButton' and private.buyout_button:IsEnabled() then
-        --                private.buyout_button:Click()
-        --                return
-        --            elseif button == 'RightButton' and private.bid_button:IsEnabled() then
-        --                private.bid_button:Click()
-        --                return
-        --            end
-        --        end
+        if IsAltKeyDown() and private.listing:GetSelection().record == cell.row.data.record and private.cancel_button:IsEnabled() then
+            private.cancel_button:Click()
+        end
     end)
     private.listing:SetHandler('OnSelectionChanged', function(rt, datum)
-        --        if not datum then return end
-        --        private.find_auction(datum.record)
+        if not datum then return end
+        private.find_auction(datum.record)
     end)
 
     do
@@ -84,7 +69,6 @@ function public.scan_auctions()
     private.status_bar:set_text('Scanning auctions...')
 
     auction_records = {}
-    selected_auction = nil
     private.update_listing()
     Aux.scan.start{
         type = 'owner',
@@ -117,25 +101,8 @@ end
 
 function private.record_remover(record)
     return function()
-        local index = Aux.util.index_of(record, auction_records)
-        if index then
-            tremove(auction_records, index)
-        end
-        private.update_listing()
+        private.listing:RemoveAuctionRecord(record)
     end
-end
-
-function private.find_auction_and_cancel(record)
-    if not Aux.util.index_of(record, auction_records) then
-        return
-    end
-
-    Aux.scan_util.find(record, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
-        if Aux.util.index_of(record, auction_records) then
-            CancelAuction(index)
-            private.record_remover(record)()
-        end
-    end)
 end
 
 do
@@ -162,47 +129,65 @@ do
 
         end)
     end
+end
+
+do
+    local scan_id
+    local IDLE, SEARCHING, FOUND = {}, {}, {}
+    local state = IDLE
+    local found_index
+
+    function private.find_auction(record)
+        if not private.listing:ContainsRecord(record) then
+            return
+        end
+
+        Aux.scan.abort(scan_id)
+        state = SEARCHING
+        scan_id = Aux.scan_util.find(
+            record,
+            private.status_bar,
+            function()
+                state = IDLE
+            end,
+            function()
+                state = IDLE
+                private.record_remover(record)()
+            end,
+            function(index)
+                state = FOUND
+                found_index = index
+
+                private.cancel_button:SetScript('OnClick', function()
+                    if private.test(record)(index) and private.listing:ContainsRecord(record) then
+                        CancelAuction(index)
+                        private.record_remover(record)()
+                    end
+                end)
+                private.cancel_button:Enable()
+            end
+        )
+    end
 
     function public.on_update()
-        if not private.cancel_button:IsEnabled() then
+        if state == IDLE or state == SEARCHING then
+            private.cancel_button:Disable()
+        end
+
+        if state == SEARCHING then
             return
         end
 
-        if not found_index then
+        local selection = private.listing:GetSelection()
+        if not selection then
+            state = IDLE
+        elseif selection and state == IDLE then
+            private.find_auction(selection.record)
+        elseif state == FOUND and not private.test(selection.record)(found_index) then
             private.cancel_button:Disable()
-            return
-        end
-
-        if not selected_auction then
-            private.cancel_button:Disable()
-            return
-        end
-
-        if found_index and not private.test(selected_auction)(found_index) then
-            private.cancel_button:Disable()
-            private.find_auction(selected_auction)
+--            if not Aux.bid_in_progress() then
+                state = IDLE
+--            end
         end
     end
 end
-
-function private.on_row_click(auction_record)
-
---    if IsControlKeyDown() then
---        DressUpItemLink(datum.hyperlink)
---    elseif IsShiftKeyDown() then
---        if ChatFrameEditBox:IsVisible() then
---            ChatFrameEditBox:Insert(datum.hyperlink)
---        end
---    else
-    local express_mode = IsAltKeyDown()
-    if express_mode then
-        selected_auction = nil
-        private.find_auction_and_cancel(auction_record)
-    else
-        selected_auction = auction_record
-        private.find_auction(auction_record)
-    end
---    end
-end
-
-
