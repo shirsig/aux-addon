@@ -881,7 +881,7 @@ function private.refresh_entries()
 
 		scan_id = Aux.scan.start{
             type = 'list',
-            no_wait_owner = true,
+            ignore_owner = true,
 			queries = { query },
 			on_page_loaded = function(page, total_pages)
                 private.status_bar:update_status(100 * (page + 1) / total_pages, 0) -- TODO

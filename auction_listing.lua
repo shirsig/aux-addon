@@ -813,7 +813,7 @@ local methods = {
 --                        return SortHelperFunc(a, b, 'percent')
 --                    end
                     -- as a last resort compare search signatures to ensure a total order
-                    return record_a.search_signature < record_b.search_signature
+                    return tostring(record_a) < tostring(record_b)
                 else
                     return ordering == Aux.sort.LT
                 end

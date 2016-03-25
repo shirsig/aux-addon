@@ -99,7 +99,7 @@ function private.wait_for_list_results(k)
 end
 
 function private.owner_data_complete()
-    if private.current_thread().params.no_wait_owner or aux_ignore_owner then
+    if private.current_thread().params.ignore_owner or aux_ignore_owner then
         return true
     end
     local count, _ = GetNumAuctionItems(private.current_thread().params.type)
@@ -188,7 +188,7 @@ function private.scan_auctions_helper(i, n, k)
     end
 
     local auction_info = Aux.info.auction(i, private.current_thread().params.type)
-    if auction_info then
+    if auction_info and (auction_info.owner or private.current_thread().params.ignore_owner or aux_ignore_owner) then
         auction_info.index = i
         auction_info.page = private.current_thread().page
         auction_info.blizzard_query = private.current_query().blizzard_query
