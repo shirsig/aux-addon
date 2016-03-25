@@ -176,7 +176,7 @@ end
 function game_tooltip_hooks:SetInboxItem(index)
     local name, _, quantity = GetInboxItem(index)
 
-    local id = Aux.cache.item_id(name)
+    local id = name and Aux.cache.item_id(name)
     if id then
         local _, itemstring, quality = GetItemInfo(id)
         local _, _, _, hex = GetItemQualityColor(tonumber(quality))

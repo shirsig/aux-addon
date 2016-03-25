@@ -44,6 +44,7 @@ end
 StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
     text = 'Table full!\nFurther results from this search will be discarded.',
     button1 = 'Ok',
+    showAlert = 1,
     timeout = 0,
     hideOnEscape = 1,
 }
