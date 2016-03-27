@@ -60,7 +60,7 @@ private.elements = {
 function private.update_search_listings()
     local favorite_search_rows = {}
     for i, favorite_search in ipairs(aux_favorite_searches) do
-        local name = favorite_search.name or favorite_search.prettified
+        local name = favorite_search.name and LIGHTYELLOW_FONT_COLOR_CODE..favorite_search.name..FONT_COLOR_CODE_CLOSE or strsub(favorite_search.prettified, 0, 250)
         tinsert(favorite_search_rows, {
             cols = {{value=name}},
             search = favorite_search,
@@ -72,7 +72,7 @@ function private.update_search_listings()
 
     local recent_search_rows = {}
     for i, recent_search in ipairs(aux_recent_searches) do
-        local name = recent_search.name and LIGHTYELLOW_FONT_COLOR_CODE..recent_search.name..FONT_COLOR_CODE_CLOSE or recent_search.prettified
+        local name = recent_search.name and LIGHTYELLOW_FONT_COLOR_CODE..recent_search.name..FONT_COLOR_CODE_CLOSE or strsub(recent_search.prettified, 0, 250)
         tinsert(recent_search_rows, {
             cols = {{value=name}},
             search = recent_search,
