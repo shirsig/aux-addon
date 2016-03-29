@@ -105,10 +105,10 @@ function public.auction_sell_item()
 	end
 end
 
-function public.auction(index, type)
-    type = type or 'list'
+function public.auction(index, query_type)
+    query_type = query_type or 'list'
 
-	local hyperlink = GetAuctionItemLink(type, index)
+	local hyperlink = GetAuctionItemLink(query_type, index)
 	
 	if not hyperlink then
 		return
@@ -117,10 +117,10 @@ function public.auction(index, type)
     local item_id, suffix_id, unique_id, enchant_id = public.parse_hyperlink(hyperlink)
     local item_info = public.item(item_id, suffix_id, unique_id, enchant_id)
 
-    local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(type, index)
+    local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(query_type, index)
 
-	local duration = GetAuctionItemTimeLeft(type, index)
-    local tooltip = public.tooltip(function(tt) tt:SetAuctionItem(type, index) end)
+	local duration = GetAuctionItemTimeLeft(query_type, index)
+    local tooltip = public.tooltip(function(tt) tt:SetAuctionItem(query_type, index) end)
     local charges = private.item_charges(tooltip)
     local aux_quantity = charges or count
     local blizzard_bid = high_bid > 0 and high_bid or start_price
@@ -135,7 +135,7 @@ function public.auction(index, type)
         hyperlink = hyperlink,
         itemstring = item_info.itemstring,
         item_key = item_id..':'..suffix_id,
-        search_signature = Aux.util.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, high_bidder and 1 or 0, aux_ignore_owner and (Aux.is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+        search_signature = Aux.util.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, type(high_bidder) == 'string' and high_bidder or (high_bidder and 1 or 0), aux_ignore_owner and (Aux.is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
 
         name = name,
         texture = texture,
