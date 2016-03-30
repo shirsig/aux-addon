@@ -783,7 +783,8 @@ function private.set_item(item)
 
     item.unit_vendor_price = private.unit_vendor_price(item.key)
     if not item.unit_vendor_price then
-        settings.hidden = true
+        settings.hidden = 1
+        private.write_settings(settings, item.key)
         refresh = true
         return
     end
