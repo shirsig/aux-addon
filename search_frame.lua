@@ -190,6 +190,7 @@ function public.on_open()
 end
 
 function public.on_close()
+    private.results_listing:SetSelectedRecord(nil)
 end
 
 function public.on_load()
