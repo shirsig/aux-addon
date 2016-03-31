@@ -627,7 +627,7 @@ function private.validate_parameters()
     private.post_button:Enable()
 end
 
-function private.update_recommendation()
+function private.update_item_configuration()
 
 	if not selected_item then
 		private.refresh_button:Disable()
@@ -941,7 +941,7 @@ function public.on_update()
         refresh = false
         private.price_update()
         private.update_historical_value_button()
-        private.update_recommendation()
+        private.update_item_configuration()
         private.update_inventory_listing()
         private.update_auction_listing()
     end
