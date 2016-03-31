@@ -19,22 +19,6 @@ function public.load_dataset()
 end
 
 function public.read(schema, str)
-    if type(schema) == 'table' and schema[1] == 'record' then
-        return unpack(private.read(schema, str))
-    else
-        return private.read(schema, str)
-    end
-end
-
-function public.write(schema, ...)
-    if type(schema) == 'table' and schema[1] == 'record' then
-        return private.write(schema, arg)
-    else
-        return private.write(schema, arg[1])
-    end
-end
-
-function private.read(schema, str)
     if schema == 'string' then
         return str
     elseif schema == 'boolean' then
@@ -42,15 +26,15 @@ function private.read(schema, str)
     elseif schema == 'number' then
         return tonumber(str)
     elseif type(schema) == 'table' and schema[1] == 'list' then
-        return private.read_list(schema, str)
+        return public.read_list(schema, str)
     elseif type(schema) == 'table' and schema[1] == 'record' then
-        return private.read_record(schema, str)
+        return public.read_record(schema, str)
     else
         error('Unknown schema.')
     end
 end
 
-function private.write(schema, obj)
+function public.write(schema, obj)
     if schema == 'string' then
         return obj or ''
     elseif schema == 'boolean' then
@@ -58,15 +42,15 @@ function private.write(schema, obj)
     elseif schema == 'number' then
         return obj and tostring(obj) or ''
     elseif type(schema) == 'table' and schema[1] == 'list' then
-        return private.write_list(schema, obj)
+        return public.write_list(schema, obj)
     elseif type(schema) == 'table' and schema[1] == 'record' then
-        return private.write_record(schema, obj)
+        return public.write_record(schema, obj)
     else
         error('Unknown schema.')
     end
 end
 
-function private.read_list(schema, str)
+function public.read_list(schema, str)
     if str == '' then
         return {}
     end
@@ -75,39 +59,36 @@ function private.read_list(schema, str)
     local element_type = schema[3]
     local parts = Aux.util.split(str, separator)
     return Aux.util.map(parts, function(part)
-        return private.read(element_type, part)
+        return public.read(element_type, part)
     end)
 end
 
-function private.write_list(schema, list)
+function public.write_list(schema, list)
     local separator = schema[2]
     local element_type = schema[3]
     local parts = Aux.util.map(list, function(element)
-        return private.write(element_type, element)
+        return public.write(element_type, element)
     end)
     return Aux.util.join(parts, separator)
 end
 
-function private.read_record(schema, str)
+function public.read_record(schema, str)
     local separator = schema[2]
     local record = {}
     local parts = Aux.util.split(str, separator)
-    for i, type in ipairs(schema[3]) do
-        local field = private.read(type, parts[i])
-        if field ~= nil then
-            tinsert(record, field)
-        else
-            tinsert(record, nil)
-        end
+    for i=3,getn(schema) do
+        local key, type = next(schema[i])
+        record[key] = public.read(type, parts[i - 2])
     end
     return record
 end
 
-function private.write_record(schema, record)
+function public.write_record(schema, record)
     local separator = schema[2]
     local parts = {}
-    for i, type in ipairs(schema[3]) do
-        tinsert(parts, private.write(type, record[i]))
+    for i=3,getn(schema) do
+        local key, type = next(schema[i])
+        tinsert(parts, public.write(type, record[key]))
     end
     return Aux.util.join(parts, separator)
 end

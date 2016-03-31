@@ -7,6 +7,8 @@ local inventory_records
 local selected_item
 local scan_id
 
+local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {post_all='boolean'}, {hidden='boolean'}}
+
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local BUYOUT_MODE, BID_MODE, FULL_MODE = 1, 2, 3
 
@@ -30,15 +32,7 @@ function private.read_settings(item_key)
 
     local settings
     if dataset.post[item_key] then
-        local fields = Aux.util.split(dataset.post[item_key], '#')
-        settings = {
-            stack_size = tonumber(fields[1]),
-            duration = tonumber(fields[2]),
-            start_price = tonumber(fields[3]),
-            buyout_price = tonumber(fields[4]),
-            post_all = tonumber(fields[5]),
-            hidden = tonumber(fields[6]),
-        }
+        settings = Aux.persistence.read(settings_schema, dataset.post[item_key])
     else
         settings = private.default_settings()
     end
@@ -51,14 +45,7 @@ function private.write_settings(settings, item_key)
     local dataset = Aux.persistence.load_dataset()
     dataset.post = dataset.post or {}
 
-    dataset.post[item_key] = Aux.util.join({
-        settings.stack_size,
-        settings.duration,
-        settings.start_price,
-        settings.buyout_price,
-        tostring(settings.post_all),
-        tostring(settings.hidden),
-    }, '#')
+    dataset.post[item_key] = Aux.persistence.write(settings_schema, settings)
 end
 
 function private.get_unit_start_price()

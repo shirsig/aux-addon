@@ -9,8 +9,8 @@ aux_auctionable_items = {}
 aux_merchant_buy = {}
 aux_merchant_sell = {}
 
-local items_schema = {'record', '#', {'string', 'number', 'number', 'string', 'string', 'string', 'number', 'string'}}
-local merchant_buy_schema = {'record', '#', {'number', 'boolean'} }
+local items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
+local merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'}}
 
 function public.on_load()
 	private.scan_wdb()
@@ -32,28 +32,28 @@ function public.on_load()
 end
 
 function public.merchant_info(item_id)
-	local unit_price, limited
+	local buy_info
 	if aux_merchant_buy[item_id] then
-		unit_price, limited = Aux.persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
+		buy_info = Aux.persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
 	end
 
-	return aux_merchant_sell[item_id], unit_price, limited
+	return aux_merchant_sell[item_id], buy_info and buy_info.unit_price, buy_info and buy_info.limited
 end
 
 function public.item_info(item_id)
 	local data_string = aux_items[item_id]
 	if data_string then
-		local name, quality, level, class, subclass, slot, max_stack, texture = Aux.persistence.read(items_schema, data_string)
+		local cached_data = Aux.persistence.read(items_schema, data_string)
 		return {
-			name = name,
+			name = cached_data.name,
 			itemstring = 'item:'..item_id..':0:0:0',
-			quality = quality,
-			level = level,
-			class = class,
-			subclass = subclass,
-			slot = slot,
-			max_stack = max_stack,
-			texture = texture,
+			quality = cached_data.quality,
+			level = cached_data.level,
+			class = cached_data.class,
+			subclass = cached_data.subclass,
+			slot = cached_data.slot,
+			max_stack = cached_data.max_stack,
+			texture = cached_data.texture,
 		}
 	end
 end
@@ -79,20 +79,26 @@ function private.scan_merchant()
 			local _, _, price, count, stock = GetMerchantItemInfo(i)
 			local new_unit_price, new_limited = price / count, stock >= 0
 			if aux_merchant_buy[item_id] then
-				local old_unit_price, old_limited = Aux.persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
+				local buy_info = Aux.persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
 
 				local unit_price
-				if old_limited and not new_limited then
+				if buy_info.limited and not new_limited then
 					unit_price = new_unit_price
-				elseif new_limited and not old_limited then
-					unit_price = old_unit_price
+				elseif new_limited and not buy_info.limited then
+					unit_price = buy_info.unit_price
 				else
-					unit_price = min(old_unit_price, new_unit_price)
+					unit_price = min(buy_info.unit_price, new_unit_price)
 				end
 
-				aux_merchant_buy[item_id] = Aux.persistence.write(merchant_buy_schema, unit_price, old_limited and new_limited)
+				aux_merchant_buy[item_id] = Aux.persistence.write(merchant_buy_schema, {
+					unit_price = unit_price,
+					limited = buy_info.limited and new_limited,
+				})
 			else
-				aux_merchant_buy[item_id] = Aux.persistence.write(merchant_buy_schema, new_unit_price, new_limited)
+				aux_merchant_buy[item_id] = Aux.persistence.write(merchant_buy_schema, {
+					unit_price = new_unit_price,
+					limited = new_limited,
+				})
 			end
 		end
 	end
@@ -107,16 +113,16 @@ function private.scan_wdb()
 			local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 			if name and not aux_item_ids[strlower(name)] then
 				aux_item_ids[strlower(name)] = item_id
-				aux_items[item_id] = Aux.persistence.write(items_schema,
-					name,
-					quality,
-					level,
-					class,
-					subclass,
-					slot,
-					max_stack,
-					texture
-				)
+				aux_items[item_id] = Aux.persistence.write(items_schema, {
+					name = name,
+					quality = quality,
+					level = level,
+					class = class,
+					subclass = subclass,
+					slot = slot,
+					max_stack = max_stack,
+					texture = texture,
+				})
 				local tooltip = Aux.info.tooltip(function(tt) tt:SetHyperlink(itemstring) end)
 				if Aux.info.auctionable(tooltip, quality) then
 					tinsert(aux_auctionable_items, strlower(name))

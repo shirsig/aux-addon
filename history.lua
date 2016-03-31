@@ -1,6 +1,7 @@
 local private, public = {}, {}
 Aux.history = public
 
+local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}}}
 private.value_cache = {}
 
 function private.next_push()
@@ -24,16 +25,7 @@ function private.read_record(item_key)
 
 	local record
 	if data[item_key] then
-		local fields = Aux.util.split(data[item_key], '#')
-		record = {
-			next_push = tonumber(fields[1]),
-			daily_min_buyout = tonumber(fields[2]),
-			daily_max_price = tonumber(fields[3]),
-			data_points = Aux.util.map(Aux.persistence.deserialize(fields[4], ';'), function(data_point)
-				local market_value, time = unpack(Aux.util.split(data_point, '@'))
-				return { market_value = tonumber(market_value), time = tonumber(time) }
-			end),
-		}
+		record = Aux.persistence.read(history_schema, data[item_key])
 	else
 		record = private.new_record()
 	end
@@ -49,14 +41,7 @@ end
 function private.write_record(item_key, record)
 	private.value_cache[item_key] = nil
 	local data = private.load_data()
-	data[item_key] = Aux.util.join({
-		record.next_push or '',
-		record.daily_min_buyout or '',
-		record.daily_max_price or '',
-		Aux.persistence.serialize(Aux.util.map(record.data_points, function(data_point)
-			return Aux.util.join({data_point.market_value, data_point.time}, '@')
-		end), ';'),
-	},'#')
+	data[item_key] = Aux.persistence.write(history_schema, record)
 end
 
 function public.process_auction(auction_record)
