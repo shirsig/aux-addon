@@ -200,16 +200,7 @@ function public.on_load()
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Search')
-        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-        btn:SetScript('OnClick', function()
-            private.search_box:ClearFocus()
-            if arg1 == 'RightButton' and this:GetText() == 'Cont.' then
-                aborted_search = nil
-                this:SetText('Search')
-            else
-                public.start_search(nil, this:GetText() == 'Cont.')
-            end
-        end)
+        btn:SetScript('OnClick', public.start_search)
         private.search_button = btn
     end
     do
@@ -217,8 +208,32 @@ function public.on_load()
         btn:SetPoint('TOPRIGHT', -5, -8)
         btn:SetWidth(60)
         btn:SetHeight(25)
+        btn:SetText('Cont.')
+        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
+        btn:SetScript('OnClick', function()
+            private.search_box:ClearFocus()
+            if arg1 == 'RightButton' then
+                private.discard_aborted_scan()
+            else
+                public.start_search(nil, true)
+            end
+        end)
+        btn:Hide()
+        private.resume_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrame, 22)
+        btn:SetPoint('TOPRIGHT', -5, -8)
+        btn:SetWidth(60)
+        btn:SetHeight(25)
         btn:SetText('Stop')
-        btn:SetScript('OnClick', private.stop_search)
+        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
+        btn:SetScript('OnClick', function()
+            private.stop_search()
+            if arg1 == 'RightButton' then
+                private.discard_aborted_scan()
+            end
+        end)
         btn:Hide()
         private.stop_button = btn
     end
@@ -787,6 +802,12 @@ function private.stop_search()
 	Aux.scan.abort(search_scan_id)
 end
 
+function private.discard_aborted_scan()
+    aborted_search = nil
+    private.resume_button:Hide()
+    private.search_button:Show()
+end
+
 function public.start_search(filter_string, resume)
     if resume and not aborted_search then
         return
@@ -794,8 +815,7 @@ function public.start_search(filter_string, resume)
 
     local queries = aborted_search
     Aux.scan.abort(search_scan_id)
-    aborted_search = nil
-    private.search_button:SetText('Search')
+    private.discard_aborted_scan()
 
     if filter_string then
         private.search_box:SetText(filter_string)
@@ -824,10 +844,10 @@ function public.start_search(filter_string, resume)
         private.update_search_listings()
     end
 
-    private.search_button:Hide()
-    private.stop_button:Show()
-
     private.update_tab(RESULTS)
+    private.stop_button:Show()
+    private.resume_button:Hide()
+    private.search_button:Hide()
 
     if resume then
         private.results_listing:SetSelectedRecord(nil)
@@ -883,15 +903,18 @@ function public.start_search(filter_string, resume)
         on_abort = function()
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Scanning')
+
             private.stop_button:Hide()
-            private.search_button:Show()
+            if not resume then
+                private.search_button:Hide()
+            end
+            private.resume_button:Show()
 
             for i=1,(current_query or 1)-1 do
                 tremove(queries, 1)
             end
             queries[1].start_page = (current_page and current_page + 1 or queries[1].start_page)
             aborted_search = queries
-            private.search_button:SetText('Cont.')
         end,
     }
 end
