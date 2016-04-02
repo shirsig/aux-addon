@@ -789,7 +789,7 @@ function private.set_item(item)
     private.hide_checkbox:SetChecked(settings.hidden)
     private.post_all_checkbox:SetChecked(settings.post_all)
 
-    private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 5 or selected_item.max_stack)
+    private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 10 or selected_item.max_stack)
     private.stack_size_slider:SetValue(settings.stack_size)
     private.quantity_update()
     private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
@@ -820,7 +820,10 @@ function private.update_inventory_records()
             if Aux.info.auctionable(item_info.tooltip, nil, item_info.lootable) then
                 if not auction_candidate_map[item_info.item_key] then
 
-                    local availability = { [0]=0, [1]=0, [2]=0, [3]=0, [4]=0, [5]=0 }
+                    local availability = {}
+                    for i=0,10 do
+                        availability[i] = 0
+                    end
                     availability[charge_class] = item_info.count
 
                     auction_candidate_map[item_info.item_key] = {
