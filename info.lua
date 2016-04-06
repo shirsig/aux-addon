@@ -313,16 +313,12 @@ end
 
 function private.item_charges(tooltip)
 	for _, line in ipairs(tooltip) do
-        local pattern1 = '^'..gsub(ITEM_SPELL_CHARGES, '%%d', '(%%d+)')..'$'
-        local pattern2 = '^'..gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)')..'$'
+        local pattern = '^'..gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)')..'$'
 
-        local _, _, left_charges_string1 = strfind(line.left_text or '', pattern1)
-        local _, _, left_charges_string2 = strfind(line.left_text or '', pattern2)
+        local _, _, left_charges_string = strfind(line.left_text or '', pattern)
+        local _, _, right_charges_string = strfind(line.right_text or '', pattern)
 
-        local _, _, right_charges_string1 = strfind(line.right_text or '', pattern1)
-        local _, _, right_charges_string2 = strfind(line.right_text or '', pattern2)
-
-        local charges = tonumber(left_charges_string1) or tonumber(left_charges_string2) or tonumber(right_charges_string1) or tonumber(right_charges_string2)
+        local charges = tonumber(left_charges_string) or tonumber(right_charges_string)
 		if charges then
 			return charges
 		end
