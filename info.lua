@@ -46,7 +46,8 @@ function public.container_item(bag, slot)
 
     local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
     local tooltip = public.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
-    local charges = private.item_charges(tooltip)
+    local max_charges = private.max_item_charges(item_id)
+    local charges = max_charges and private.item_charges(tooltip)
     local aux_quantity = charges or count
 
     return {
@@ -67,7 +68,6 @@ function public.container_item(bag, slot)
         slot = item_info.slot,
         quality = item_info.quality,
         max_stack = item_info.max_stack,
-        aux_quantity = aux_quantity,
 
         count = count,
         locked = locked,
@@ -75,7 +75,9 @@ function public.container_item(bag, slot)
         lootable = lootable,
 
         tooltip = tooltip,
+        max_charges = max_charges,
         charges = charges,
+        aux_quantity = aux_quantity,
     }
 end
 
@@ -86,21 +88,20 @@ function public.auction_sell_item()
 
         local unit_vendor_price = vendor_price / count
         local tooltip = public.tooltip(function(tt) tt:SetAuctionSellItem() end)
-
         local charges = private.item_charges(tooltip)
-        local aux_quantity = charges or count
+        local aux_quantity = charges > 1 and charges or count
 
         return {
 			name = name,
 			texture = texture,
             quality = quality,
-            aux_quantity = aux_quantity,
 			stack_size = count,
 			usable = usable,
             vendor_price = vendor_price,
             unit_vendor_price = unit_vendor_price,
+
             tooltip = tooltip,
-            charges = charges,
+            aux_quantity = aux_quantity,
 		}
 	end
 end
@@ -121,7 +122,8 @@ function public.auction(index, query_type)
 
 	local duration = GetAuctionItemTimeLeft(query_type, index)
     local tooltip = public.tooltip(function(tt) tt:SetAuctionItem(query_type, index) end)
-    local charges = private.item_charges(tooltip)
+    local max_charges = private.max_item_charges(item_id)
+    local charges = max_charges and private.item_charges(tooltip)
     local aux_quantity = charges or count
     local blizzard_bid = high_bid > 0 and high_bid or start_price
     local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
@@ -161,7 +163,9 @@ function public.auction(index, query_type)
         sale_status = sale_status,
         duration = duration,
         usable = usable,
+
         tooltip = tooltip,
+        max_charges = max_charges,
         charges = charges,
         aux_quantity = aux_quantity,
     }
@@ -308,10 +312,6 @@ function public.tooltip(setter)
 end
 
 function private.item_charges(tooltip)
-    if public.tooltip_find(ITEM_SPELL_TRIGGER_ONUSE, tooltip) > 1 then -- it's presumably a recipe
-        return
-    end
-
 	for _, line in ipairs(tooltip) do
         local pattern1 = '^'..gsub(ITEM_SPELL_CHARGES, '%%d', '(%%d+)')..'$'
         local pattern2 = '^'..gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)')..'$'
@@ -326,7 +326,33 @@ function private.item_charges(tooltip)
 		if charges then
 			return charges
 		end
-	end
+    end
+    return 1
+end
+
+function private.max_item_charges(item_id)
+    return ({
+        -- wizard oil
+        [20744] = 5,
+        [20746] = 5,
+        [20750] = 5,
+        [20749] = 5,
+
+        -- mana oil
+        [20745] = 5,
+        [20747] = 5,
+        [20748] = 5,
+
+        -- discombobulator
+        [4388] = 5,
+
+        -- recombobulator
+        [4381] = 10,
+        [18637] = 10,
+
+        -- ... TODO
+
+    })[item_id]
 end
 
 function public.durability(tooltip)

@@ -20,8 +20,8 @@ function private.default_settings()
         stack_size = 1,
         start_price = 0,
         buyout_price = 0,
-        post_all = 1,
-        hidden = nil,
+        post_all = true,
+        hidden = false,
     }
 end
 
@@ -554,7 +554,7 @@ function private.post_auctions()
         local unit_buyout_price = private.get_unit_buyout_price()
         local stack_size = private.stack_size_slider:GetValue()
         local stack_count
-        if private.post_all_checkbox:GetChecked() and not selected_item.charges then
+        if private.post_all_checkbox:GetChecked() and not selected_item.max_charges then
             stack_count = floor(selected_item.aux_quantity / stack_size)
         else
             stack_count = private.stack_count_slider:GetValue()
@@ -578,7 +578,7 @@ function private.post_auctions()
             unit_start_price,
             unit_buyout_price,
 			stack_count,
-            private.post_all_checkbox:GetChecked() and not selected_item.charges,
+            private.post_all_checkbox:GetChecked() and not selected_item.max_charges,
 			function(posted, partial)
                 local new_auction_record
 				for i = 1, posted do
@@ -619,7 +619,7 @@ function private.validate_parameters()
         return
     end
 
-    if private.stack_count_slider:GetValue() == 0 and (selected_item.charges or not private.post_all_checkbox:GetChecked()) then
+    if private.stack_count_slider:GetValue() == 0 and (selected_item.max_charges or not private.post_all_checkbox:GetChecked()) then
         private.post_button:Disable()
         return
     end
@@ -696,13 +696,13 @@ function private.update_item_configuration()
             local deposit_factor = Aux.neutral and 0.25 or 0.05
             local stack_size = private.stack_size_slider:GetValue()
             local stack_count
-            if private.post_all_checkbox:GetChecked() and not selected_item.charges then
+            if private.post_all_checkbox:GetChecked() and not selected_item.max_charges then
                 stack_count = floor(selected_item.aux_quantity / stack_size)
             else
                 stack_count = private.stack_count_slider:GetValue()
             end
-            local deposit = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
-            if private.post_all_checkbox:GetChecked() and not selected_item.charges then
+            local deposit = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
+            if private.post_all_checkbox:GetChecked() and not selected_item.max_charges then
                 local partial_stack = mod(selected_item.aux_quantity, stack_size)
                 deposit = deposit + floor(selected_item.unit_vendor_price * deposit_factor * partial_stack) * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
             end
@@ -728,7 +728,7 @@ end
 
 function private.quantity_update()
     if selected_item then
-        private.stack_count_slider:SetMinMaxValues(1, selected_item.charges and selected_item.availability[private.stack_size_slider:GetValue()] or floor(selected_item.availability[0] / private.stack_size_slider:GetValue()))
+        private.stack_count_slider:SetMinMaxValues(1, selected_item.max_charges and selected_item.availability[private.stack_size_slider:GetValue()] or floor(selected_item.availability[0] / private.stack_size_slider:GetValue()))
     end
     refresh = true
 end
@@ -789,7 +789,7 @@ function private.set_item(item)
     private.hide_checkbox:SetChecked(settings.hidden)
     private.post_all_checkbox:SetChecked(settings.post_all)
 
-    private.stack_size_slider:SetMinMaxValues(1, selected_item.charges and 10 or selected_item.max_stack)
+    private.stack_size_slider:SetMinMaxValues(1, selected_item.max_charges or selected_item.max_stack)
     private.stack_size_slider:SetValue(settings.stack_size)
     private.quantity_update()
     private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
@@ -836,9 +836,9 @@ function private.update_inventory_records()
                         name = item_info.name,
                         texture = item_info.texture,
                         quality = item_info.quality,
-                        charges = item_info.charges,
                         aux_quantity = item_info.charges or item_info.count,
                         max_stack = item_info.max_stack,
+                        max_charges = item_info.max_charges,
                         availability = availability,
                     }
                 else
