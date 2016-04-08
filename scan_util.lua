@@ -320,9 +320,10 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
     tinsert(queries, {})
     if auction_record.blizzard_query then
         local pages = auction_record.page > 0 and { auction_record.page - 1 } or {}
+        local blizzard_query = Aux.util.copy_table(auction_record.blizzard_query)
+        blizzard_query.start_page = auction_record.page
         tinsert(queries, {
-            blizzard_query = auction_record.blizzard_query,
-            start_page = auction_record.page,
+            blizzard_query = blizzard_query,
             next_page = function()
                 if getn(pages) == 1 then
                     status_bar:update_status(50, 50)
@@ -392,9 +393,8 @@ function m.item_query(item_id, page, single_page)
     local item_info = Aux.info.item(item_id)
 
     if item_info then
-        local filter = m.filter_from_string(item_info.name..'/exact')
+        local filter = m.filter_from_string(item_info.name..'/exact/@'..(page or 0))
         return {
-            start_page = page,
             next_page = single_page and Aux.util.pass,
             validator = filter.validator,
             blizzard_query = filter.blizzard_query,
@@ -479,6 +479,13 @@ function m.filter_from_string(filter_term)
                 if error then
                     return false, suggestions, error
                 end
+            end
+        elseif strfind(str, '@%d+') then
+            if not blizzard_filter.start_page then
+                blizzard_filter.start_page = tonumber(({strfind(str, '@(%d+)')})[3])
+                prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
+            else
+                return false, {}, 'Erroneous start page modifier'
             end
         elseif tonumber(str) then
             if not blizzard_filter.min_level then
@@ -663,6 +670,7 @@ function m.blizzard_query(filter)
     end
 
     return {
+        start_page = filter.start_page or 0,
         name = filter.name,
         min_level = item_info and item_info.level or filter.min_level,
         max_level = item_info and item_info.level or filter.max_level,

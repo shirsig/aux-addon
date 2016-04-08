@@ -137,7 +137,7 @@ function private.scan()
     private.current_thread().query_index = private.current_thread().query_index and private.current_thread().query_index + 1 or 1
     if private.current_query() then
         private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, function()
-            private.current_thread().page = private.current_query().start_page or 0
+            private.current_thread().page = private.current_query().blizzard_query and private.current_query().blizzard_query.start_page or 0
             return private.process_query()
         end)
     else
