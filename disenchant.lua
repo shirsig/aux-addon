@@ -73,7 +73,7 @@ function public.value(slot, quality, level)
         if not value then
             return
         else
-            expectation = (expectation or 0) + event.probability * event.quantity * value
+            expectation = (expectation or 0) + event.probability * (event.min_quantity + event.max_quantity) / 2 * value
         end
     end
     return expectation
@@ -95,101 +95,101 @@ function public.distribution(slot, quality, level)
     if quality == UNCOMMON then
         if level <= 10 then
             return {
-                {item_id=10940, quantity=1.5, probability=0.8},
-                {item_id=10938, quantity=1.5, probability=0.2},
+                {item_id=10940, min_quantity=1, max_quantity=2, probability=0.8},
+                {item_id=10938, min_quantity=1, max_quantity=2, probability=0.2},
             }
         elseif level <= 15 then
             return {
-                {item_id=10940, quantity=2.5, probability=p(0.75, 0.2)},
-                {item_id=10939, quantity=1.5, probability=p(0.2, 0.75)},
-                {item_id=10978, quantity=1, probability=0.05},
+                {item_id=10940, min_quantity=2, max_quantity=3, probability=p(0.75, 0.2)},
+                {item_id=10939, min_quantity=1, max_quantity=2, probability=p(0.2, 0.75)},
+                {item_id=10978, min_quantity=1, max_quantity=1, probability=0.05},
             }
         elseif level <= 20 then
             return {
-                {item_id=10940, quantity=5, probability=p(0.75, 0.15)},
-                {item_id=10998, quantity=1.5, probability=p(0.15, 0.75)},
-                {item_id=10978, quantity=1, probability=0.10},
+                {item_id=10940, min_quantity=4, max_quantity=6, probability=p(0.75, 0.15)},
+                {item_id=10998, min_quantity=1, max_quantity=2, probability=p(0.15, 0.75)},
+                {item_id=10978, min_quantity=1, max_quantity=1, probability=0.10},
             }
         elseif level <= 25 then
             return {
-                {item_id=11083, quantity=1.5, probability=p(0.75, 0.2)},
-                {item_id=11082, quantity=1.5, probability=p(0.2, 0.75)},
-                {item_id=11084, quantity=1, probability=0.05},
+                {item_id=11083, min_quantity=1, max_quantity=2, probability=p(0.75, 0.2)},
+                {item_id=11082, min_quantity=1, max_quantity=2, probability=p(0.2, 0.75)},
+                {item_id=11084, min_quantity=1, max_quantity=1, probability=0.05},
             }
         elseif level <= 30 then
             return {
-                {item_id=11083, quantity=3.5, probability=p(0.75, 0.2)},
-                {item_id=11134, quantity=1.5, probability=p(0.2, 0.75)},
-                {item_id=11138, quantity=1, probability=0.05},
+                {item_id=11083, min_quantity=2, max_quantity=5, probability=p(0.75, 0.2)},
+                {item_id=11134, min_quantity=1, max_quantity=2, probability=p(0.2, 0.75)},
+                {item_id=11138, min_quantity=1, max_quantity=1, probability=0.05},
             }
         elseif level <= 35 then
             return {
-                {item_id=11137, quantity=1.5, probability=p(0.75, 0.2)},
-                {item_id=11135, quantity=1.5, probability=p(0.2, 0.75)},
-                {item_id=11139, quantity=1, probability=0.05},
+                {item_id=11137, min_quantity=1, max_quantity=2, probability=p(0.75, 0.2)},
+                {item_id=11135, min_quantity=1, max_quantity=2, probability=p(0.2, 0.75)},
+                {item_id=11139, min_quantity=1, max_quantity=1, probability=0.05},
             }
         elseif level <= 40 then
             return {
-                {item_id=11137, quantity=3.5, probability=p(0.75, 0.2)},
-                {item_id=11174, quantity=1.5, probability=p(0.2, 0.75)},
-                {item_id=11177, quantity=1, probability=0.05},
+                {item_id=11137, min_quantity=2, max_quantity=5, probability=p(0.75, 0.2)},
+                {item_id=11174, min_quantity=1, max_quantity=2, probability=p(0.2, 0.75)},
+                {item_id=11177, min_quantity=1, max_quantity=1, probability=0.05},
             }
         elseif level <= 45 then
             return {
-                {item_id=11176, quantity=1.5, probability=p(0.75, 0.2)},
-                {item_id=11175, quantity=1.5, probability=p(0.2, 0.75)},
-                {item_id=11178, quantity=1, probability=0.05},
+                {item_id=11176, min_quantity=1, max_quantity=2, probability=p(0.75, 0.2)},
+                {item_id=11175, min_quantity=1, max_quantity=2, probability=p(0.2, 0.75)},
+                {item_id=11178, min_quantity=1, max_quantity=1, probability=0.05},
             }
         elseif level <= 50 then
             return {
-                {item_id=11176, quantity=3.5, probability=p(0.75, 0.22)},
-                {item_id=16202, quantity=1.5, probability=p(0.2, 0.75)},
-                {item_id=14343, quantity=1, probability=p(0.05, 0.03)},
+                {item_id=11176, min_quantity=2, max_quantity=5, probability=p(0.75, 0.22)},
+                {item_id=16202, min_quantity=1, max_quantity=2, probability=p(0.2, 0.75)},
+                {item_id=14343, min_quantity=1, max_quantity=1, probability=p(0.05, 0.03)},
             }
         elseif level <= 55 then
             return {
                 {item_id=16204, quantity=1.5, probability=p(0.75, 0.22)},
-                {item_id=16203, quantity=1.5, probability=p(0.2, 0.75)},
-                {item_id=14344, quantity=1, probability=p(0.05, 0.03)},
+                {item_id=16203, min_quantity=1, max_quantity=2, probability=p(0.2, 0.75)},
+                {item_id=14344, min_quantity=1, max_quantity=1, probability=p(0.05, 0.03)},
             }
         elseif level <= 60 then
             return {
                 {item_id=16204, quantity=3.5, probability=p(0.75, 0.22)},
-                {item_id=16203, quantity=2.5, probability=p(0.2, 0.75)},
-                {item_id=14344, quantity=1, probability=p(0.05, 0.03)},
+                {item_id=16203, min_quantity=2, max_quantity=3, probability=p(0.2, 0.75)},
+                {item_id=14344, min_quantity=1, max_quantity=1, probability=p(0.05, 0.03)},
             }
         end
     elseif quality == RARE then
         if level <= 20 then
-            return {{item_id=10978, quantity=1, probability=1}}
+            return {{item_id=10978, min_quantity=1, max_quantity=1, probability=1}}
         elseif level <= 25 then
-            return {{item_id=11084, quantity=1, probability=1}}
+            return {{item_id=11084, min_quantity=1, max_quantity=1, probability=1}}
         elseif level <= 30 then
-            return {{item_id=11138, quantity=1, probability=1}}
+            return {{item_id=11138, min_quantity=1, max_quantity=1, probability=1}}
         elseif level <= 35 then
-            return {{item_id=11139, quantity=1, probability=1}}
+            return {{item_id=11139, min_quantity=1, max_quantity=1, probability=1}}
         elseif level <= 40 then
-            return {{item_id=11177, quantity=1, probability=1}}
+            return {{item_id=11177, min_quantity=1, max_quantity=1, probability=1}}
         elseif level <= 45 then
-            return {{item_id=11178, quantity=1, probability=1}}
+            return {{item_id=11178, min_quantity=1, max_quantity=1, probability=1}}
         elseif level <= 50 then
-            return {{item_id=14343, quantity=1, probability=1}}
+            return {{item_id=14343, min_quantity=1, max_quantity=1, probability=1}}
         elseif level <= 55 then
-            return {{item_id=14344, quantity=1, probability=0.995}, {item_id=20725, quantity=1, probability=0.005}}
+            return {{item_id=14344, min_quantity=1, max_quantity=1, probability=0.995}, {item_id=20725, min_quantity=1, max_quantity=1, probability=0.005}}
         elseif level <= 60 then
-            return {{item_id=14344, quantity=1, probability=0.995}, {item_id=20725, quantity=1, probability=0.005}}
+            return {{item_id=14344, min_quantity=1, max_quantity=1, probability=0.995}, {item_id=20725, min_quantity=1, max_quantity=1, probability=0.005}}
         end
     elseif quality == EPIC then
         if level <= 40 then
-            return {{item_id=11177, quantity=3, probability=1}}
+            return {{item_id=11177, min_quantity=2, max_quantity=4, probability=1}}
         elseif level <= 45 then
-            return {{item_id=11178, quantity=3, probability=1}}
+            return {{item_id=11178, min_quantity=2, max_quantity=4, probability=1}}
         elseif level <= 50 then
-            return {{item_id=14343, quantity=3, probability=1}}
+            return {{item_id=14343, min_quantity=2, max_quantity=4, probability=1}}
         elseif level <= 55 then
-            return {{item_id=20725, quantity=1, probability=1}}
+            return {{item_id=20725, min_quantity=1, max_quantity=1, probability=1}}
         elseif level <= 60 then
-            return {{item_id=20725, quantity=1.5, probability=1}}
+            return {{item_id=20725, min_quantity=1, max_quantity=2, probability=1}}
         end
     end
     return {}
