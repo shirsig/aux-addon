@@ -1,5 +1,5 @@
 Aux = {
-    version = '2.11.0',
+    version = '2.11.1',
     blizzard_ui_shown = false,
 	orig = {},
 }

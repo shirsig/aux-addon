@@ -148,13 +148,13 @@ function public.distribution(slot, quality, level)
             }
         elseif level <= 55 then
             return {
-                {item_id=16204, quantity=1.5, probability=p(0.75, 0.22)},
+                {item_id=16204, min_quantity=1, max_quantity=2, probability=p(0.75, 0.22)},
                 {item_id=16203, min_quantity=1, max_quantity=2, probability=p(0.2, 0.75)},
                 {item_id=14344, min_quantity=1, max_quantity=1, probability=p(0.05, 0.03)},
             }
         elseif level <= 60 then
             return {
-                {item_id=16204, quantity=3.5, probability=p(0.75, 0.22)},
+                {item_id=16204, min_quantity=2, max_quantity=5, probability=p(0.75, 0.22)},
                 {item_id=16203, min_quantity=2, max_quantity=3, probability=p(0.2, 0.75)},
                 {item_id=14344, min_quantity=1, max_quantity=1, probability=p(0.05, 0.03)},
             }
