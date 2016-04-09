@@ -711,7 +711,7 @@ function public.on_load()
 
     private.results_listing = Aux.auction_listing.CreateAuctionResultsTable(AuxSearchFrameResults, Aux.auction_listing.search_config)
     private.results_listing:Show()
-    private.results_listing:SetSort(9)
+    private.results_listing:SetSort(1,2,3,4,5,6,7,8,9)
     private.results_listing:Clear()
     private.results_listing:SetHandler('OnCellClick', function(cell, button)
         if IsAltKeyDown() and private.results_listing:GetSelection().record == cell.row.data.record then
@@ -913,7 +913,9 @@ function public.start_search(filter_string, resume)
             for i=1,(current_query or 1)-1 do
                 tremove(queries, 1)
             end
-            queries[1].start_page = (current_page and current_page + 1 or queries[1].start_page)
+            if queries[1].blizzard_query then
+                queries[1].blizzard_query.start_page = (current_page and current_page + 1 or queries[1].start_page)
+            end
             aborted_search = queries
         end,
     }

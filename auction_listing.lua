@@ -581,8 +581,8 @@ local methods = {
         end
 
         local descending = false
-        if rt.sortInfo.columnIndex == this.columnIndex then
-            descending = not rt.sortInfo.descending
+        if getn(rt.sorts) > 0 and rt.sorts[1].index == this.columnIndex then
+            descending = not rt.sorts[1].descending
         end
         rt:SetSort((descending and -1 or 1) * this.columnIndex)
     end,
@@ -685,7 +685,7 @@ local methods = {
     UpdateRowInfo = function(self)
         Aux.util.wipe(self.rowInfo)
         self.rowInfo.numDisplayRows = 0
-        self.sortInfo.isSorted = nil
+        self.isSorted = nil
         self:SetSelectedRecord(nil, true)
 
         sort(self.records, function(a, b) return Aux.sort.multi_lt(a.search_signature, b.search_signature, tostring(a), tostring(b)) end)
@@ -738,10 +738,14 @@ local methods = {
             tex:SetTexCoord(0.017, 1, 0.083, 0.909)
             tex:SetAlpha(0.5)
         end
-        if self.sortInfo.descending then
-            self.headCells[self.sortInfo.columnIndex]:GetNormalTexture():SetTexture(0.8, 0.6, 1, 0.8)
-        else
-            self.headCells[self.sortInfo.columnIndex]:GetNormalTexture():SetTexture(0.6, 0.8, 1, 0.8)
+
+        if getn(self.sorts) > 0 then
+            local last_sort = self.sorts[1]
+            if last_sort.descending then
+                self.headCells[last_sort.index]:GetNormalTexture():SetTexture(0.8, 0.6, 1, 0.8)
+            else
+                self.headCells[last_sort.index]:GetNormalTexture():SetTexture(0.6, 0.8, 1, 0.8)
+            end
         end
 
         FauxScrollFrame_Update(self.scrollFrame, self.rowInfo.numDisplayRows, getn(self.rows), self.ROW_HEIGHT)
@@ -752,7 +756,7 @@ local methods = {
             FauxScrollFrame_SetOffset(self.scrollFrame, maxOffset)
         end
 
-        if not self.sortInfo.isSorted then
+        if not self.isSorted then
             local function sort_helper(a, b)
 
                 local record_a, record_b
@@ -764,42 +768,24 @@ local methods = {
                     record_b = b.record
                 end
 
-                local ordering = self.config[self.sortInfo.columnIndex].cmp and self.config[self.sortInfo.columnIndex].cmp(record_a, record_b, self.sortInfo.descending) or Aux.sort.EQ
+                for _, sort in self.sorts do
+                    local ordering = self.config[sort.index].cmp and self.config[sort.index].cmp(record_a, record_b, sort.descending) or Aux.sort.EQ
 
-                if ordering == Aux.sort.EQ then
---                    if sortKey == 'percent' then
---                        -- sort by buyout
---                        sortKey = aux_price_per_unit and 'unit_buyout_price' or 'buyout_price'
---                        local result = SortHelperFunc(a, b, sortKey)
---                        if result ~= nil then
---                            return result
---                        end
---                    elseif sortKey == 'buyout_price' or sortKey == 'unit_buyout_price' then
---                        -- sort by bid
---                        sortKey = aux_price_per_unit and 'unit_bid_price' or 'bid_price'
---                        local result = SortHelperFunc(a, b, sortKey)
---                        if result ~= nil then
---                            return result
---                        end
---                    elseif hadSortKey then
---                        -- this was called recursively, so just return nil
---                        return
---                    else
---                        -- sort by percent
---                        return SortHelperFunc(a, b, 'percent')
---                    end
-                    -- as a last resort compare search signatures to ensure a total order
-                    return tostring(record_a) < tostring(record_b)
-                else
-                    return ordering == Aux.sort.LT
+                    if ordering == Aux.sort.LT then
+                        return true
+                    elseif ordering == Aux.sort.GT then
+                        return false
+                    end
                 end
+
+                return tostring(a) < tostring(b)
             end
 
             for i, info in ipairs(self.rowInfo) do
                 sort(info.children, sort_helper)
             end
             sort(self.rowInfo, sort_helper)
-            self.sortInfo.isSorted = true
+            self.isSorted = true
         end
 
         -- update all the rows
@@ -943,14 +929,18 @@ local methods = {
         end
     end,
 
-    SetSort = function(self, sortIndex)
-        if sortIndex then
-            if sortIndex == self.sortInfo.index then return end
-            self.sortInfo.descending = sortIndex < 0
-            self.sortInfo.columnIndex = abs(sortIndex)
+    SetSort = function(self, ...)
+        for k=1,arg.n do
+            for i, sort in self.sorts do
+                if sort.index == abs(arg[k]) then
+                    tremove(self.sorts, i)
+                    break
+                end
+            end
+            tinsert(self.sorts, 1, { index = abs(arg[k]), descending = arg[k] < 0 })
         end
-        self.sortInfo.isSorted = nil
-        self.sortInfo.index = sortIndex
+
+        self.isSorted = nil
         self:UpdateRows()
     end,
 
@@ -1013,7 +1003,7 @@ function public.CreateAuctionResultsTable(parent, config)
     rt.scrollDisabled = nil
     rt.expanded = {}
     rt.handlers = {}
-    rt.sortInfo = {}
+    rt.sorts = {}
     rt.records = {}
     rt.rowInfo = { numDisplayRows=0 }
 

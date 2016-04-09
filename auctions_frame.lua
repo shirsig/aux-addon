@@ -6,7 +6,7 @@ local auction_records
 function public.on_load()
     private.listing = Aux.auction_listing.CreateAuctionResultsTable(AuxAuctionsFrameListing, Aux.auction_listing.auctions_config)
     private.listing:Show()
-    private.listing:SetSort(8)
+    private.listing:SetSort(1,2,3,4,5,6,7,8)
     private.listing:Clear()
     private.listing:SetHandler('OnCellClick', function(cell, button)
         if IsAltKeyDown() and private.listing:GetSelection().record == cell.row.data.record and private.cancel_button:IsEnabled() then
