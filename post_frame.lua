@@ -642,7 +642,9 @@ end
 
 function private.quantity_update()
     if selected_item then
-        private.stack_count_slider:SetMinMaxValues(1, selected_item.max_charges and selected_item.availability[private.stack_size_slider:GetValue()] or floor(selected_item.availability[0] / private.stack_size_slider:GetValue()))
+        local max_stack_count = selected_item.max_charges and selected_item.availability[private.stack_size_slider:GetValue()] or floor(selected_item.availability[0] / private.stack_size_slider:GetValue())
+        private.stack_count_slider:SetMinMaxValues(1, max_stack_count)
+        private.stack_count_slider:SetValue(max_stack_count)
     end
     refresh = true
 end
