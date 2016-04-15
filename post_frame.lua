@@ -7,12 +7,9 @@ local inventory_records
 local selected_item
 local scan_id
 
-local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {post_all='boolean'}, {hidden='boolean'}}
+local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
-local BUYOUT_MODE, BID_MODE, FULL_MODE = 1, 2, 3
-
-aux_post_mode = FULL_MODE
 
 function private.default_settings()
     return {
@@ -20,7 +17,6 @@ function private.default_settings()
         stack_size = 1,
         start_price = 0,
         buyout_price = 0,
-        post_all = true,
         hidden = false,
     }
 end
@@ -49,31 +45,21 @@ function private.write_settings(settings, item_key)
 end
 
 function private.get_unit_start_price()
-    if aux_post_mode == BUYOUT_MODE then
-        return Aux.money.from_string(private.unit_buyout_price:GetText()) or 0
-    else
-        return Aux.money.from_string(private.unit_start_price:GetText()) or 0
-    end
+    local money_text = private.unit_start_price:GetText()
+    return Aux.money.from_string(money_text) or (tonumber(money_text) and tonumber(money_text) * 10000) or 0
 end
 
 function private.set_unit_start_price(amount)
-    if aux_post_mode ~= BUYOUT_MODE then
-        private.unit_start_price:SetText(Aux.money.to_string(amount, true, nil, 3))
-    end
+    private.unit_start_price:SetText(Aux.money.to_string(amount, true, nil, 3))
 end
 
 function private.get_unit_buyout_price()
-    if aux_post_mode == BUYOUT_MODE or aux_post_mode == FULL_MODE then
-        return Aux.money.from_string(private.unit_buyout_price:GetText()) or 0
-    else
-        return 0
-    end
+    local money_text = private.unit_buyout_price:GetText()
+    return Aux.money.from_string(money_text) or (tonumber(money_text) and tonumber(money_text) * 10000) or 0
 end
 
 function private.set_unit_buyout_price(amount)
-    if aux_post_mode ~= BID_MODE then
-        private.unit_buyout_price:SetText(Aux.money.to_string(amount, true, nil, 3))
-    end
+    private.unit_buyout_price:SetText(Aux.money.to_string(amount, true, nil, 3))
 end
 
 function private.update_inventory_listing()
@@ -252,7 +238,7 @@ function public.on_load()
         private.status_bar = status_bar
     end
     do
-        local btn = Aux.gui.button(AuxSellParameters, 16, '$parentPostButton')
+        local btn = Aux.gui.button(AuxSellParameters, 16)
         btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -261,7 +247,7 @@ function public.on_load()
         private.post_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSellParameters, 16, '$parentRefreshButton')
+        local btn = Aux.gui.button(AuxSellParameters, 16)
         btn:SetPoint('TOPLEFT', private.post_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -272,7 +258,7 @@ function public.on_load()
     do
         local slider = Aux.gui.slider(AuxSellParameters)
         slider:SetValueStep(1)
-        slider:SetPoint('TOPLEFT', 16, -74)
+        slider:SetPoint('TOPLEFT', 16, -75)
         slider:SetWidth(190)
         slider:SetScript('OnValueChanged', function()
             private.quantity_update()
@@ -312,25 +298,9 @@ function public.on_load()
         private.stack_size_slider = slider
     end
     do
-        local checkbox = CreateFrame('CheckButton', nil, AuxSellInventory, 'UICheckButtonTemplate')
-        checkbox:SetWidth(22)
-        checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPLEFT', private.stack_size_slider, 'BOTTOMLEFT', -3, -7)
-        checkbox:SetScript('OnClick', function()
-            local settings = private.read_settings()
-            settings.post_all = this:GetChecked()
-            private.write_settings(settings)
-            refresh = true
-        end)
-        local label = Aux.gui.label(checkbox, 13)
-        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
-        label:SetText('Post all')
-        private.post_all_checkbox = checkbox
-    end
-    do
         local slider = Aux.gui.slider(AuxSellParameters)
         slider:SetValueStep(1)
-        slider:SetPoint('TOPLEFT', private.stack_size_slider, 'BOTTOMLEFT', 0, -51)
+        slider:SetPoint('TOPLEFT', private.stack_size_slider, 'BOTTOMLEFT', 0, -30)
         slider:SetWidth(190)
         slider:SetScript('OnValueChanged', function()
             private.quantity_update()
@@ -395,21 +365,8 @@ function public.on_load()
         private.hide_checkbox = checkbox
     end
     do
-        local dropdown = Aux.gui.dropdown(AuxSellParameters)
-        dropdown:SetPoint('TOPRIGHT', -15, -42)
-        dropdown:SetWidth(120)
-        dropdown:SetHeight(10)
-        local label = Aux.gui.label(dropdown, 13)
-        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
-        label:SetText('Mode')
-        UIDropDownMenu_Initialize(dropdown, private.initialize_mode_dropdown)
-        dropdown:SetScript('OnShow', function()
-            UIDropDownMenu_Initialize(this, private.initialize_mode_dropdown)
-        end)
-        private.mode_dropdown = dropdown
-    end
-    do
         local editbox = Aux.gui.editbox(AuxSellParameters)
+        editbox:SetPoint('TOPRIGHT', -65, -66)
         editbox:SetJustifyH('RIGHT')
         editbox:SetWidth(150)
         editbox:SetScript('OnTextChanged', function()
@@ -434,7 +391,7 @@ function public.on_load()
             this:HighlightText()
         end)
         editbox:SetScript('OnEditFocusLost', function()
-            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText()) or 0, true, nil, 3))
+            this:SetText(Aux.money.to_string(private.get_unit_start_price(), true, nil, 3))
         end)
         do
             local label = Aux.gui.label(editbox, 13)
@@ -452,6 +409,7 @@ function public.on_load()
     end
     do
         local editbox = Aux.gui.editbox(AuxSellParameters)
+        editbox:SetPoint('TOPRIGHT', private.unit_start_price, 'BOTTOMRIGHT', 0, -18)
         editbox:SetJustifyH('RIGHT')
         editbox:SetWidth(150)
         editbox:SetScript('OnTextChanged', function()
@@ -474,7 +432,7 @@ function public.on_load()
             this:HighlightText()
         end)
         editbox:SetScript('OnEditFocusLost', function()
-            this:SetText(Aux.money.to_string(Aux.money.from_string(this:GetText()) or 0, true, nil, 3))
+            this:SetText(Aux.money.to_string(private.get_unit_buyout_price(), true, nil, 3))
         end)
         do
             local label = Aux.gui.label(editbox, 13)
@@ -491,8 +449,8 @@ function public.on_load()
         private.unit_buyout_price = editbox
     end
     do
-        local btn = Aux.gui.button(AuxSellParameters, 16, '$parentPostButton')
-        btn:SetPoint('TOPRIGHT', -15, -163)
+        local btn = Aux.gui.button(AuxSellParameters, 16)
+        btn:SetPoint('TOPRIGHT', -15, -143)
         btn:SetWidth(150)
         btn:SetHeight(20)
         btn:GetFontString():SetTextHeight(15)
@@ -515,19 +473,15 @@ function private.price_update()
     if selected_item then
         local settings = private.read_settings()
 
-        if aux_post_mode == BID_MODE or aux_post_mode == FULL_MODE then
-            local start_price_input = private.get_unit_start_price()
-            settings.start_price = start_price_input
-            local historical_value = Aux.history.value(selected_item.key)
-            private.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(start_price_input / historical_value * 100)) or '---')
-        end
+        local start_price_input = private.get_unit_start_price()
+        settings.start_price = start_price_input
+        local historical_value = Aux.history.value(selected_item.key)
+        private.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(start_price_input / historical_value * 100)) or '---')
 
-        if aux_post_mode == BUYOUT_MODE or aux_post_mode == FULL_MODE then
-            local buyout_price_input = private.get_unit_buyout_price()
-            settings.buyout_price = buyout_price_input
-            local historical_value = Aux.history.value(selected_item.key)
-            private.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(buyout_price_input / historical_value * 100)) or '---')
-        end
+        local buyout_price_input = private.get_unit_buyout_price()
+        settings.buyout_price = buyout_price_input
+        local historical_value = Aux.history.value(selected_item.key)
+        private.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(buyout_price_input / historical_value * 100)) or '---')
 
         private.write_settings(settings)
     end
@@ -554,11 +508,7 @@ function private.post_auctions()
         local unit_buyout_price = private.get_unit_buyout_price()
         local stack_size = private.stack_size_slider:GetValue()
         local stack_count
-        if private.post_all_checkbox:GetChecked() and not selected_item.max_charges then
-            stack_count = floor(selected_item.aux_quantity / stack_size)
-        else
-            stack_count = private.stack_count_slider:GetValue()
-        end
+        stack_count = private.stack_count_slider:GetValue()
         local duration = UIDropDownMenu_GetSelectedValue(private.duration_dropdown)
 		local key = selected_item.key
 
@@ -578,14 +528,10 @@ function private.post_auctions()
             unit_start_price,
             unit_buyout_price,
 			stack_count,
-            private.post_all_checkbox:GetChecked() and not selected_item.max_charges,
-			function(posted, partial)
+			function(posted)
                 local new_auction_record
 				for i = 1, posted do
                     new_auction_record = private.record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
-                end
-                if partial then
-                    new_auction_record = private.record_auction(key, partial, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
                 end
 
                 private.update_inventory_records()
@@ -619,7 +565,7 @@ function private.validate_parameters()
         return
     end
 
-    if private.stack_count_slider:GetValue() == 0 and (selected_item.max_charges or not private.post_all_checkbox:GetChecked()) then
+    if private.stack_count_slider:GetValue() == 0 then
         private.post_button:Disable()
         return
     end
@@ -637,43 +583,19 @@ function private.update_item_configuration()
         AuxSellParametersItemName:SetTextColor(unpack(Aux.gui.config.label_color.enabled))
         AuxSellParametersItemName:SetText('No item selected')
 
-        private.mode_dropdown:Hide()
         private.unit_start_price:Hide()
         private.unit_buyout_price:Hide()
-
         private.stack_size_slider:Hide()
-        private.post_all_checkbox:Hide()
         private.stack_count_slider:Hide()
         private.deposit:Hide()
         private.duration_dropdown:Hide()
         private.historical_value_button:Hide()
         private.hide_checkbox:Hide()
     else
-        private.mode_dropdown:Show()
-        private.unit_start_price:ClearAllPoints()
-        private.unit_buyout_price:ClearAllPoints()
-        if aux_post_mode == BUYOUT_MODE then
-            private.unit_start_price:Hide()
-            private.unit_buyout_price:SetPoint('TOPRIGHT', -65, -100)
-            private.unit_buyout_price:Show()
-        elseif aux_post_mode == BID_MODE then
-            private.unit_buyout_price:Hide()
-            private.unit_start_price:SetPoint('TOPRIGHT', -65, -100)
-            private.unit_start_price:Show()
-        elseif aux_post_mode == FULL_MODE then
-            private.unit_start_price:SetPoint('TOPRIGHT', -65, -89)
-            private.unit_start_price:Show()
-            private.unit_buyout_price:SetPoint('TOPRIGHT', private.unit_start_price, 'BOTTOMRIGHT', 0, -15)
-            private.unit_buyout_price:Show()
-        end
-
+        private.unit_start_price:Show()
+        private.unit_buyout_price:Show()
         private.stack_size_slider:Show()
-        private.post_all_checkbox:Show()
-        if private.post_all_checkbox:GetChecked() then
-            private.stack_count_slider:Hide()
-        else
-            private.stack_count_slider:Show()
-        end
+        private.stack_count_slider:Show()
         private.deposit:Show()
         private.duration_dropdown:Show()
         private.historical_value_button:Show()
@@ -696,16 +618,8 @@ function private.update_item_configuration()
             local deposit_factor = Aux.neutral and 0.25 or 0.05
             local stack_size = private.stack_size_slider:GetValue()
             local stack_count
-            if private.post_all_checkbox:GetChecked() and not selected_item.max_charges then
-                stack_count = floor(selected_item.aux_quantity / stack_size)
-            else
-                stack_count = private.stack_count_slider:GetValue()
-            end
+            stack_count = private.stack_count_slider:GetValue()
             local deposit = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
-            if private.post_all_checkbox:GetChecked() and not selected_item.max_charges then
-                local partial_stack = mod(selected_item.aux_quantity, stack_size)
-                deposit = deposit + floor(selected_item.unit_vendor_price * deposit_factor * partial_stack) * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
-            end
 
             private.deposit:SetText('Deposit: '..Aux.money.to_string(deposit, nil, nil, nil, Aux.gui.inline_color({255, 254, 250, 1})))
         end
@@ -783,11 +697,7 @@ function private.set_item(item)
     UIDropDownMenu_Initialize(private.duration_dropdown, private.initialize_duration_dropdown) -- TODO, wtf, why is this needed
     UIDropDownMenu_SetSelectedValue(private.duration_dropdown, settings.duration)
 
-    UIDropDownMenu_Initialize(private.mode_dropdown, private.initialize_mode_dropdown)
-    UIDropDownMenu_SetSelectedValue(private.mode_dropdown, aux_post_mode)
-
     private.hide_checkbox:SetChecked(settings.hidden)
-    private.post_all_checkbox:SetChecked(settings.post_all)
 
     private.stack_size_slider:SetMinMaxValues(1, selected_item.max_charges or selected_item.max_stack)
     private.stack_size_slider:SetValue(settings.stack_size)
@@ -898,7 +808,6 @@ function private.refresh_entries()
 			end,
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or {}
-                private.update_historical_value_button()
                 refresh = true
                 private.status_bar:update_status(100, 100)
                 private.status_bar:set_text('Done Scanning')
@@ -977,32 +886,6 @@ function private.initialize_duration_dropdown()
     UIDropDownMenu_AddButton{
         text = '24 Hours',
         value = DURATION_24,
-        func = on_click,
-    }
-end
-
-function private.initialize_mode_dropdown()
-    local function on_click()
-        UIDropDownMenu_SetSelectedValue(private.mode_dropdown, this.value)
-        aux_post_mode = this.value
-        refresh = true
-    end
-
-    UIDropDownMenu_AddButton{
-        text = 'Buyout',
-        value = BUYOUT_MODE,
-        func = on_click,
-    }
-
-    UIDropDownMenu_AddButton{
-        text = 'Bid',
-        value = BID_MODE,
-        func = on_click,
-    }
-
-    UIDropDownMenu_AddButton{
-        text = 'Full',
-        value = FULL_MODE,
         func = on_click,
     }
 end

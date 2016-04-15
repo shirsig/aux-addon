@@ -1,6 +1,6 @@
 ## Interface: 11200
 ## Title: Aux
-## SavedVariablesPerCharacter: aux_ignore_owner, aux_recent_searches, aux_favorite_searches, aux_post_mode, aux_price_per_unit, aux_tooltip_daily, aux_tooltip_vendor_buy, aux_tooltip_vendor_sell, aux_tooltip_disenchant_value, aux_tooltip_disenchant_distribution, aux_tooltip_disenchant_source
+## SavedVariablesPerCharacter: aux_ignore_owner, aux_recent_searches, aux_favorite_searches, aux_price_per_unit, aux_tooltip_daily, aux_tooltip_vendor_buy, aux_tooltip_vendor_sell, aux_tooltip_disenchant_value, aux_tooltip_disenchant_distribution, aux_tooltip_disenchant_source
 ## SavedVariables: aux_datasets, aux_items, aux_item_ids, aux_auctionable_items, aux_merchant_buy, aux_merchant_sell
 
 slash.lua

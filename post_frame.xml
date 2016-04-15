@@ -28,7 +28,7 @@
                         </Anchors>
                     </Frame>
                     <frame name="AuxSellParameters" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension y="197"/></Size>
+                        <Size><AbsDimension y="177"/></Size>
                         <Anchors>
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor>
                             <Anchor point="TOPRIGHT"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor>
@@ -40,7 +40,7 @@
                         </frames>
                     </frame>
                     <Frame name="AuxSellAuctions" inherits="AuxFrameBoxTemplate">
-                        <Size><AbsDimension y="197"/></Size>
+                        <Size><AbsDimension y="217"/></Size>
                         <Anchors>
                             <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="AuxSellInventory"><Offset><AbsDimension x="8" y="0"/></Offset></Anchor>
                             <Anchor point="BOTTOMRIGHT"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor>
