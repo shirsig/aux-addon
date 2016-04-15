@@ -304,7 +304,9 @@ m.filters = {
     ['discard'] = {
         arity = 0,
         test = function()
-            return false
+            return function()
+                return false
+            end
         end
     },
 }

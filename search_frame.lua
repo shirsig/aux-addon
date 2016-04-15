@@ -677,7 +677,7 @@ function public.on_load()
         btn:SetScript('OnClick', function()
             local args = Aux.util.map(btn.inputs, function(input) return input:GetText() end)
             if filter.test(unpack(args)) then
-                add_modifier(unpack(Aux.util.cons(modifier_name, args)))
+                add_modifier(modifier_name, unpack(args))
                 for _, input in btn.inputs do
                     input:SetText('')
                     input:ClearFocus()
