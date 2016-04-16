@@ -261,11 +261,11 @@ function public.on_load()
         slider:SetPoint('TOPLEFT', 16, -75)
         slider:SetWidth(190)
         slider:SetScript('OnValueChanged', function()
-            private.quantity_update()
+            private.quantity_update(true)
         end)
         slider.editbox:SetScript('OnTextChanged', function()
             slider:SetValue(this:GetNumber())
-            private.quantity_update()
+            private.quantity_update(true)
             if selected_item then
                 local settings = private.read_settings()
                 settings.stack_size = this:GetNumber()
@@ -640,11 +640,13 @@ function private.undercut(record, stack_size, stack)
     return start_price / stack_size, buyout_price / stack_size
 end
 
-function private.quantity_update()
+function private.quantity_update(max_count)
     if selected_item then
         local max_stack_count = selected_item.max_charges and selected_item.availability[private.stack_size_slider:GetValue()] or floor(selected_item.availability[0] / private.stack_size_slider:GetValue())
         private.stack_count_slider:SetMinMaxValues(1, max_stack_count)
-        private.stack_count_slider:SetValue(max_stack_count)
+        if max_count then
+            private.stack_count_slider:SetValue(max_stack_count)
+        end
     end
     refresh = true
 end
@@ -703,8 +705,7 @@ function private.set_item(item)
 
     private.stack_size_slider:SetMinMaxValues(1, selected_item.max_charges or selected_item.max_stack)
     private.stack_size_slider:SetValue(settings.stack_size)
-    private.quantity_update()
-    private.stack_count_slider:SetValue(selected_item.aux_quantity) -- reduced to max possible
+    private.quantity_update(true)
 
     private.unit_start_price:SetText(Aux.money.to_string(settings.start_price, true, nil, 3))
     private.unit_buyout_price:SetText(Aux.money.to_string(settings.buyout_price, true, nil, 3))
