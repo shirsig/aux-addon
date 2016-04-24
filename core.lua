@@ -174,9 +174,9 @@ do
             local listener = Aux.control.event_listener('CHAT_MSG_SYSTEM')
             listener:set_action(function()
                 if arg1 == ERR_AUCTION_BID_PLACED then
+                    listener:stop()
                     on_success()
                     locked = false
-                    listener:stop()
                 end
             end)
             listener:start()
@@ -203,9 +203,9 @@ do
         local listener = Aux.control.event_listener('CHAT_MSG_SYSTEM')
         listener:set_action(function()
             if arg1 == ERR_AUCTION_REMOVED then
+                listener:stop()
                 on_success()
                 locked = false
-                listener:stop()
             end
         end)
         listener:start()

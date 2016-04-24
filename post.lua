@@ -41,7 +41,17 @@ function private.post_auction(slot, k)
 		ClearCursor()
 
 		StartAuction(max(1, Aux.round(state.unit_start_price * item_info.aux_quantity)), Aux.round(state.unit_buyout_price * item_info.aux_quantity), state.duration)
-		Aux.control.wait_until(function() return not GetContainerItemInfo(unpack(slot)) end, function()
+
+		local posted
+		local listener = Aux.control.event_listener('CHAT_MSG_SYSTEM')
+		listener:set_action(function()
+			if arg1 == ERR_AUCTION_STARTED then
+				posted = true
+				listener:stop()
+			end
+		end)
+		listener:start()
+		Aux.control.wait_until(function() return posted end, function()
 			state.posted = state.posted + 1
 			return k()
 		end)
