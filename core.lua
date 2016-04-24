@@ -1,5 +1,5 @@
 Aux = {
-    version = '2.11.2',
+    version = '2.11.3',
     blizzard_ui_shown = false,
 	orig = {},
 }
@@ -167,17 +167,48 @@ do
         end
 
         local money = GetMoney()
+        PlaceAuctionBid(type, index, amount)
         if money >= amount then
             locked = true
-            local t0 = GetTime()
-            Aux.control.as_soon_as(function() return GetMoney() < money or GetTime() - t0 > 10 end, function()
-                if GetMoney() < money then
+
+            local listener = Aux.control.event_listener('CHAT_MSG_SYSTEM')
+            listener:set_action(function()
+                if arg1 == ERR_AUCTION_BID_PLACED then
                     on_success()
+                    locked = false
+                    listener:stop()
                 end
-                locked = false
             end)
+            listener:start()
         end
-        PlaceAuctionBid(type, index, amount)
+    end
+end
+
+do
+    local locked
+
+    function Aux.cancel_in_progress()
+        return locked
+    end
+
+    function Aux.cancel_auction(index, on_success)
+
+        if locked then
+            return
+        end
+
+        locked = true
+
+        CancelAuction(index)
+        local listener = Aux.control.event_listener('CHAT_MSG_SYSTEM')
+        listener:set_action(function()
+            if arg1 == ERR_AUCTION_REMOVED then
+                on_success()
+                locked = false
+                listener:stop()
+            end
+        end)
+        listener:start()
     end
 end
 

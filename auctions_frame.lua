@@ -106,32 +106,6 @@ function private.record_remover(record)
 end
 
 do
-    local found_index
-
-    function private.find_auction(record)
-        if not Aux.util.index_of(record, auction_records) then
-            return
-        end
-
-        found_index = nil
-
-        Aux.scan_util.find(record, private.status_bar, Aux.util.pass, private.record_remover(record), function(index)
-
-            found_index = index
-
-            private.cancel_button:SetScript('OnClick', function()
-                if private.test(record)(index) and Aux.util.index_of(record, auction_records) then
-                    CancelAuction(index)
-                    private.record_remover(record)()
-                end
-            end)
-            private.cancel_button:Enable()
-
-        end)
-    end
-end
-
-do
     local scan_id
     local IDLE, SEARCHING, FOUND = {}, {}, {}
     local state = IDLE
@@ -160,8 +134,7 @@ do
 
                 private.cancel_button:SetScript('OnClick', function()
                     if private.test(record)(index) and private.listing:ContainsRecord(record) then
-                        CancelAuction(index)
-                        private.record_remover(record)()
+                        Aux.cancel_auction(index, private.record_remover(record))
                     end
                 end)
                 private.cancel_button:Enable()
