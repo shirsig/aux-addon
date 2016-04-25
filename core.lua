@@ -253,11 +253,12 @@ function Aux.AuctionFrameAuctions_OnEvent(...)
 end
 
 function Aux.on_auction_house_show()
-    if not UnitFactionGroup('npc') then
-        Aux.neutral = true
-    end
     AuxFrame:Show()
     Aux.tab_group:set_tab(1)
+end
+
+function Aux.neutral_faction()
+    return not UnitFactionGroup('npc')
 end
 
 function Aux.on_auction_house_closed()

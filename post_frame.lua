@@ -615,7 +615,7 @@ function private.update_item_configuration()
         private.stack_count_slider.editbox:SetNumber(private.stack_count_slider:GetValue())
 
         do
-            local deposit_factor = Aux.neutral and 0.25 or 0.05
+            local deposit_factor = Aux.neutral_faction() and 0.25 or 0.05
             local stack_size = private.stack_size_slider:GetValue()
             local stack_count
             stack_count = private.stack_count_slider:GetValue()
