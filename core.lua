@@ -253,7 +253,7 @@ function Aux.AuctionFrameAuctions_OnEvent(...)
 end
 
 function Aux.on_auction_house_show()
-    if not UnitFactionGroup('target') then
+    if not UnitFactionGroup('npc') then
         Aux.neutral = true
     end
     AuxFrame:Show()
