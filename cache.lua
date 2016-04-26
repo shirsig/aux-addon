@@ -14,14 +14,14 @@ local merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boo
 
 function public.on_load()
 	private.scan_wdb()
-	Aux.control.event_listener('MERCHANT_SHOW', private.on_merchant_show).start()
-	Aux.control.event_listener('MERCHANT_CLOSED', private.on_merchant_closed).start()
-	Aux.control.event_listener('MERCHANT_UPDATE', private.on_merchant_update).start()
-	Aux.control.event_listener('BAG_UPDATE', function()
-		if MerchantFrame:IsVisible() then
-			private.scan_merchant_sell_prices()
-		end
-	end).start()
+
+	Aux.control.event_listener('MERCHANT_SHOW', private.on_merchant_show):start()
+	Aux.control.event_listener('MERCHANT_CLOSED', private.on_merchant_closed):start()
+	Aux.control.event_listener('MERCHANT_UPDATE', private.on_merchant_update):start()
+	Aux.control.event_listener('BAG_UPDATE', private.on_bag_update):start()
+
+	CreateFrame('Frame', nil, MerchantFrame):SetScript('OnUpdate', private.merchant_on_update)
+
 	Aux.control.event_listener('NEW_AUCTION_UPDATE', function()
 		local info = Aux.info.auction_sell_item()
 		if info then
@@ -29,24 +29,40 @@ function public.on_load()
 				aux_merchant_sell[Aux.cache.item_id(info.name)] = info.vendor_price / info.aux_quantity
 			end
 		end
-	end).start()
+	end):start()
 end
 
 do
-	local incomplete_data
+	local sell_scan_countdown, incomplete_buy_data
 
 	function private.on_merchant_show()
-		private.scan_merchant_sell_prices()
-		incomplete_data = not private.scan_merchant_buy_prices()
+		private.merchant_sell_scan()
+		incomplete_buy_data = not private.merchant_buy_scan()
 	end
 
 	function private.on_merchant_closed()
-		incomplete_data = false
+		sell_scan_countdown = nil
+		incomplete_buy_data = false
 	end
 
 	function private.on_merchant_update()
-		if incomplete_data then
-			incomplete_data = not private.scan_merchant_buy_prices()
+		if incomplete_buy_data then
+			incomplete_buy_data = not private.merchant_buy_scan()
+		end
+	end
+
+	function private.on_bag_update()
+		if MerchantFrame:IsVisible() then
+			sell_scan_countdown = 10
+		end
+	end
+
+	function private.merchant_on_update()
+		if sell_scan_countdown == 0 then
+			sell_scan_countdown = nil
+			private.merchant_sell_scan()
+		elseif sell_scan_countdown then
+			sell_scan_countdown = sell_scan_countdown - 1
 		end
 	end
 end
@@ -91,7 +107,7 @@ function public.item_id(item_name)
 	return aux_item_ids[strlower(item_name)]
 end
 
-function private.scan_merchant_buy_prices()
+function private.merchant_buy_scan()
 
 	local incomplete_data
 	for i=1,GetMerchantNumItems() do
@@ -130,7 +146,7 @@ function private.scan_merchant_buy_prices()
 	return not incomplete_data
 end
 
-function private.scan_merchant_sell_prices()
+function private.merchant_sell_scan()
 	for slot in Aux.util.inventory() do
 		local item_info = Aux.info.container_item(unpack(slot))
 		if item_info then
