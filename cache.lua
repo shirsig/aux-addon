@@ -14,11 +14,12 @@ local merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boo
 
 function public.on_load()
 	private.scan_wdb()
-	Aux.control.event_listener('MERCHANT_SHOW', private.scan_merchant).start()
-	Aux.control.event_listener('MERCHANT_UPDATE', private.scan_merchant).start()
+	Aux.control.event_listener('MERCHANT_SHOW', private.on_merchant_show).start()
+	Aux.control.event_listener('MERCHANT_CLOSED', private.on_merchant_closed).start()
+	Aux.control.event_listener('MERCHANT_UPDATE', private.on_merchant_update).start()
 	Aux.control.event_listener('BAG_UPDATE', function()
 		if MerchantFrame:IsVisible() then
-			private.scan_merchant()
+			private.scan_merchant_sell_prices()
 		end
 	end).start()
 	Aux.control.event_listener('NEW_AUCTION_UPDATE', function()
@@ -29,6 +30,34 @@ function public.on_load()
 			end
 		end
 	end).start()
+end
+
+do
+	local incomplete_data
+
+	function private.on_merchant_show()
+		private.scan_merchant_sell_prices()
+		incomplete_data = not private.scan_merchant_buy_prices()
+	end
+
+	function private.on_merchant_closed()
+		incomplete_data = false
+	end
+
+	function private.on_merchant_update()
+		if incomplete_data then
+			incomplete_data = not private.scan_merchant_buy_prices()
+		end
+	end
+end
+
+function private.merchant_loaded()
+	for i=1,GetMerchantNumItems() do
+		if not GetMerchantItemLink(i) then
+			return false
+		end
+	end
+	return true
 end
 
 function public.merchant_info(item_id)
@@ -62,21 +91,14 @@ function public.item_id(item_name)
 	return aux_item_ids[strlower(item_name)]
 end
 
-function private.scan_merchant()
-	for slot in Aux.util.inventory() do
-		local item_info = Aux.info.container_item(unpack(slot))
-		if item_info then
-			aux_merchant_sell[item_info.item_id] = item_info.tooltip.money / item_info.aux_quantity
-		end
-	end
+function private.scan_merchant_buy_prices()
 
-	-- TODO maybe more detail? zone or  local merchant_name = UnitName('npc')
-	local merchant_item_count = GetMerchantNumItems()
-	for i=1,merchant_item_count do
+	local incomplete_data
+	for i=1,GetMerchantNumItems() do
+		local _, _, price, count, stock = GetMerchantItemInfo(i)
 		local link = GetMerchantItemLink(i)
 		if link then
 			local item_id = Aux.info.parse_hyperlink(link)
-			local _, _, price, count, stock = GetMerchantItemInfo(i)
 			local new_unit_price, new_limited = price / count, stock >= 0
 			if aux_merchant_buy[item_id] then
 				local buy_info = Aux.persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
@@ -100,6 +122,19 @@ function private.scan_merchant()
 					limited = new_limited,
 				})
 			end
+		else
+			incomplete_data = true
+		end
+	end
+
+	return not incomplete_data
+end
+
+function private.scan_merchant_sell_prices()
+	for slot in Aux.util.inventory() do
+		local item_info = Aux.info.container_item(unpack(slot))
+		if item_info then
+			aux_merchant_sell[item_info.item_id] = item_info.tooltip.money / item_info.aux_quantity
 		end
 	end
 end
