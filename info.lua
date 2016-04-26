@@ -370,7 +370,7 @@ function public.item_key(hyperlink)
 end
 
 function public.parse_hyperlink(hyperlink)
-    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(hyperlink, '|Hitem:(%d+):(%d+):(%d+):(%d+)|h%[([^]]+)%]|h')
+    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(hyperlink, '|c%x%x%x%x%x%x%x%x|Hitem:(%d*):(%d*):(%d*):(%d*)[:0-9]*|h%[([^]]+)%]|h|r')
     return tonumber(item_id) or 0, tonumber(suffix_id) or 0, tonumber(unique_id) or 0, tonumber(enchant_id) or 0, name
 end
 
