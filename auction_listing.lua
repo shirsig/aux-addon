@@ -74,7 +74,9 @@ public.search_config = {
         width = 0.035,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(max(record.level, 1))
+            local display_level = max(record.level, 1)
+            display_level = UnitLevel('player') < record.level and RED_FONT_COLOR_CODE..display_level..FONT_COLOR_CODE_CLOSE or display_level
+            cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
             return Aux.sort.compare(record_a.level, record_b.level, desc)
@@ -242,7 +244,9 @@ public.auctions_config = {
         width = 0.035,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(max(record.level, 1))
+            local display_level = max(record.level, 1)
+            display_level = UnitLevel('player') < record.level and RED_FONT_COLOR_CODE..display_level..FONT_COLOR_CODE_CLOSE or display_level
+            cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
             return Aux.sort.compare(record_a.level, record_b.level, desc)
