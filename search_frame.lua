@@ -342,6 +342,23 @@ function public.on_load()
         end)
     end
     do
+        local btn = Aux.gui.button(AuxSearchFrameSaved, 16)
+        btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
+        btn:SetWidth(80)
+        btn:SetHeight(24)
+        btn:SetText('Favorite')
+        btn:SetScript('OnClick', function()
+            local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
+            if filters then
+                tinsert(aux_favorite_searches, 1, {
+                    filter_string = private.search_box:GetText(),
+                    prettified = Aux.util.join(Aux.util.map(filters, function(filter) return filter.prettified end), ';'),
+                })
+            end
+            private.update_search_listings()
+        end)
+    end
+    do
         local btn1 = Aux.gui.button(AuxSearchFrameFilter, 16)
         btn1:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
         btn1:SetWidth(80)
@@ -758,7 +775,7 @@ function public.on_load()
                 public.start_search()
             elseif button == 'RightButton' then
                 if st == private.recent_searches_listing then
-                    tinsert(aux_favorite_searches, data.search)
+                    tinsert(aux_favorite_searches, 1, data.search)
                 elseif st == private.favorite_searches_listing then
                     tremove(aux_favorite_searches, data.index)
                 end
