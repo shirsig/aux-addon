@@ -31,6 +31,4 @@ post_frame.xml
 auctions_frame.xml
 bids_frame.xml
 
-test.lua
-
 
