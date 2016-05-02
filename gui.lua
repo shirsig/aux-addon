@@ -284,8 +284,11 @@ function m.editbox(parent, name)
     editbox:SetBackdropColor(unpack(m.config.content_color))
     editbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
 
-    editbox:SetScript('OnEscapePressed', function()
+    editbox:SetScript('OnEditFocusLost', function()
         this:HighlightText(0, 0)
+    end)
+
+    editbox:SetScript('OnEscapePressed', function()
         this:ClearFocus()
     end)
 
