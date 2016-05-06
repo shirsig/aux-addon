@@ -292,17 +292,24 @@ function m.editbox(parent, name)
         this:ClearFocus()
     end)
 
-    local last_time, last_x, last_y
-    editbox:SetScript('OnMouseUp', function()
-        local x, y = GetCursorPosition()
-        if last_time and last_time > GetTime() - .5 and abs(x - last_x) < 10 and abs(y - last_y) < 10 then
+    do
+        local last_time, last_x, last_y
+
+        editbox:SetScript('OnEditFocusGained', function()
             this:HighlightText()
-            last_time = nil
-        else
-            last_time = GetTime()
-            last_x, last_y = GetCursorPosition()
-        end
-    end)
+        end)
+
+        editbox:SetScript('OnMouseUp', function()
+            local x, y = GetCursorPosition()
+            if last_time and last_time > GetTime() - .5 and abs(x - last_x) < 10 and abs(y - last_y) < 10 then
+                this:HighlightText()
+                last_time = nil
+            else
+                last_time = GetTime()
+                last_x, last_y = GetCursorPosition()
+            end
+        end)
+    end
 
 --        local label = frame:CreateFontString(nil, 'OVERLAY')
 --        label:SetPoint('TOPLEFT', 0, -2)
