@@ -15,8 +15,8 @@ function m:complete()
 	current_modifier = current_modifier or ''
 
 	for _, suggestion in ipairs(suggestions) do
-		if string.sub(strupper(suggestion), 1, strlen(current_modifier)) == strupper(current_modifier) then
-			this:SetText(strlower(string.sub(filter_string, 1, start_index - 1).. suggestion))
+		if strsub(strupper(suggestion), 1, strlen(current_modifier)) == strupper(current_modifier) then
+			this:SetText(strlower(strsub(filter_string, 1, start_index - 1).. suggestion))
 			this:HighlightText(strlen(filter_string), -1)
 			return
 		end
@@ -32,7 +32,7 @@ function m.completor(options)
 		local text = self:GetText()
 
 		for _, item_name in ipairs(options()) do
-			if string.sub(strupper(item_name), 1, strlen(text)) == strupper(text) then
+			if strsub(strupper(item_name), 1, strlen(text)) == strupper(text) then
 				self:SetText(strlower(item_name))
 				self:HighlightText(strlen(text), -1)
 				return

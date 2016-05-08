@@ -341,11 +341,11 @@ function public.split(str, separator)
 		local start_index, _ = strfind(str, separator, 1, true)
 
 		if start_index then
-			local part = string.sub(str, 1, start_index - 1)
+			local part = strsub(str, 1, start_index - 1)
 			tinsert(array, part)
-			str = string.sub(str, start_index + 1, strlen(str))
+			str = strsub(str, start_index + 1)
 		else
-			local part = string.sub(str, 1, strlen(str))
+			local part = strsub(str, 1)
 			tinsert(array, part)
 			return array
 		end

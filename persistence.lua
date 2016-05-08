@@ -122,16 +122,16 @@ function public.deserialize(data_string, separator, compactor)
 
         local part
         if start_index then
-            part = string.sub(data_string, 1, start_index - 1)
-            data_string = string.sub(data_string, start_index + 1, strlen(data_string))
+            part = strsub(data_string, 1, start_index - 1)
+            data_string = strsub(data_string, start_index + 1)
         else
-            part = string.sub(data_string, 1, strlen(data_string))
+            part = strsub(data_string, 1)
         end
 
         if compactor and strfind(part, compactor, 1, true) then
             local compactor_index, _ = strfind(part, compactor, 1, true)
-            for i=1, tonumber(string.sub(part, compactor_index + 1, strlen(part))) do
-               tinsert(data, string.sub(part, 1, compactor_index - 1))
+            for i=1, tonumber(strsub(part, compactor_index + 1)) do
+               tinsert(data, strsub(part, 1, compactor_index - 1))
             end
         else
             tinsert(data, part)
