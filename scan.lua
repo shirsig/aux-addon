@@ -6,11 +6,11 @@ local PAGE_SIZE = 50
 local state
 local threads = {}
 
-function private.default_next_page(page, total_pages)
+function private.last_page(total_count)
+    local total_pages = math.ceil(total_count / PAGE_SIZE)
     local last_page = max(total_pages - 1, 0)
-    if page < last_page then
-        return page + 1
-    end
+    local last_page_limit = Aux.util.safe_index(private.current_query().blizzard_query, 'last_page')
+    return last_page_limit and min(last_page_limit, last_page) or last_page
 end
 
 function private.current_query()
@@ -137,7 +137,7 @@ function private.scan()
     private.current_thread().query_index = private.current_thread().query_index and private.current_thread().query_index + 1 or 1
     if private.current_query() then
         private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, function()
-            private.current_thread().page = private.current_query().blizzard_query and private.current_query().blizzard_query.start_page or 0
+            private.current_thread().page = Aux.util.safe_index(private.current_query().blizzard_query, 'first_page') or 0
             return private.process_query()
         end)
     else
@@ -153,22 +153,19 @@ function private.process_query()
 
     private.submit_query(function()
 
-        local count, _ = GetNumAuctionItems(private.current_thread().params.type)
+        local count, total_count = GetNumAuctionItems(private.current_thread().params.type)
 
         private.scan_auctions(count, function()
 
             private.wait_for_callback(private.current_thread().params.on_page_scanned, function()
-                if private.current_query().next_page then
-                    private.current_thread().page = private.current_query().next_page(private.current_thread().page, private.current_thread().total_pages)
-                else
-                    private.current_thread().page = private.default_next_page(private.current_thread().page, private.current_thread().total_pages)
-                end
 
-                if private.current_thread().page then
+                if private.current_query().blizzard_query and private.current_thread().page < private.last_page(total_count) then
+                    private.current_thread().page = private.current_thread().page + 1
                     return private.process_query()
                 else
                     return private.scan()
                 end
+
             end)
         end)
     end)
@@ -230,18 +227,15 @@ function private.submit_query(k)
             end
             private.wait_for_results(function()
                 local _, total_count = GetNumAuctionItems(private.current_thread().params.type)
-                private.current_thread().total_pages = math.ceil(total_count / PAGE_SIZE)
-                if max(1, private.current_thread().total_pages) >= private.current_thread().page + 1 then
-                    private.wait_for_callback(private.current_thread().params.on_page_loaded, private.current_thread().page, max(1, private.current_thread().total_pages), function()
-                        return k()
-                    end)
-                else
-                    return k()
-                end
+                private.wait_for_callback(
+                    private.current_thread().params.on_page_loaded,
+                    private.current_thread().page - (private.current_query().blizzard_query.first_page or 0) + 1,
+                    private.last_page(total_count) - (private.current_query().blizzard_query.first_page or 0) + 1,
+                    k
+                )
             end)
 		end)
     else
-        private.current_thread().total_pages = 1
         return k()
 	end
 end

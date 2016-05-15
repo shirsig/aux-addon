@@ -776,8 +776,8 @@ function private.refresh_entries()
             ignore_owner = true,
 			queries = { query },
 			on_page_loaded = function(page, total_pages)
-                private.status_bar:update_status(100 * (page + 1) / total_pages, 0) -- TODO
-                private.status_bar:set_text(format('Scanning Page %d / %d', page + 1, total_pages))
+                private.status_bar:update_status(100 * (page - 1) / total_pages, 0) -- TODO
+                private.status_bar:set_text(format('Scanning Page %d / %d', page, total_pages))
 			end,
 			on_auction = function(auction_record)
 				if auction_record.item_key == item_key then

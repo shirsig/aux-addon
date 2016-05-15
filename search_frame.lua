@@ -857,9 +857,8 @@ function public.start_search(filter_string, resume)
         end,
         on_page_loaded = function(page, total_pages)
             current_page = page
-            local current_total_pages = total_pages
-            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page) / current_total_pages)
-            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), current_page + 1, current_total_pages))
+            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (page - 1) / total_pages)
+            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), page, total_pages))
         end,
         on_page_scanned = function()
             private.results_listing:SetDatabase()
@@ -900,7 +899,7 @@ function public.start_search(filter_string, resume)
                 tremove(queries, 1)
             end
             if queries[1].blizzard_query then
-                queries[1].blizzard_query.start_page = (current_page and current_page + 1 or queries[1].start_page)
+                queries[1].blizzard_query.first_page = (current_page and (queries[1].blizzard_query.first_page or 0) + current_page or queries[1].blizzard_query.first_page)
             end
             aborted_search = queries
         end,

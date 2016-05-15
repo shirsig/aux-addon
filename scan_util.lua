@@ -320,26 +320,31 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
     local queries = {}
     tinsert(queries, {})
+
     if auction_record.blizzard_query then
-        local pages = auction_record.page > 0 and { auction_record.page - 1 } or {}
-        local blizzard_query = Aux.util.copy_table(auction_record.blizzard_query)
-        blizzard_query.start_page = auction_record.page
+
+        local blizzard_query1 = Aux.util.copy_table(auction_record.blizzard_query)
+        blizzard_query1.first_page = auction_record.page
+        blizzard_query1.last_page = auction_record.page
         tinsert(queries, {
-            blizzard_query = blizzard_query,
-            next_page = function()
-                if getn(pages) == 1 then
-                    status_bar:update_status(50, 50)
-                end
-                local page = pages[1]
-                tremove(pages, 1)
-                return page
-            end,
+            blizzard_query = blizzard_query1,
         })
-        local item_query = m.item_query(auction_record.item_id, 0, true)
+
+        if auction_record.page > 0 then
+            local blizzard_query2 = Aux.util.copy_table(auction_record.blizzard_query)
+            blizzard_query2.first_page = auction_record.page - 1
+            blizzard_query2.last_page = auction_record.page - 1
+            tinsert(queries, {
+                blizzard_query = blizzard_query1,
+            })
+        end
+
+        local item_query = m.item_query(auction_record.item_id, 0, 0)
         if not Aux.util.table_eq(auction_record.blizzard_query, item_query.blizzard_query) then
             tinsert(queries, item_query)
         end
     end
+
 
     local found
     return Aux.scan.start{
@@ -348,6 +353,9 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
         on_scan_start = function()
             status_bar:update_status(0, 0)
             status_bar:set_text('Searching auction...')
+        end,
+        on_start_query = function(query_index)
+            status_bar:update_status((query_index - 1) / getn(queries) * 100, 0)
         end,
         on_auction = function(auction_record, ctrl)
             if test(auction_record.index) then
@@ -390,14 +398,13 @@ function m.filter_builder()
     }
 end
 
-function m.item_query(item_id, page, single_page)
+function m.item_query(item_id, first_page, last_page)
 
     local item_info = Aux.info.item(item_id)
 
     if item_info then
-        local filter = m.filter_from_string(item_info.name..'/exact/@'..(page or 0))
+        local filter = m.filter_from_string(item_info.name..'/exact/'..(first_page or '')..':'..(last_page or ''))
         return {
-            next_page = single_page and Aux.util.pass,
             validator = filter.validator,
             blizzard_query = filter.blizzard_query,
         }
@@ -482,12 +489,14 @@ function m.filter_from_string(filter_term)
                     return false, suggestions, error
                 end
             end
-        elseif strfind(str, '@%d+') then
-            if not blizzard_filter.start_page then
-                blizzard_filter.start_page = tonumber(({strfind(str, '@(%d+)')})[3])
+        elseif strfind(str, '^%d*:%d*$') then
+            if not blizzard_filter.first_page and not blizzard_filter.last_page then
+                local _, _, first_page, last_page = strfind(str, '^(%d*):(%d*)$')
+                blizzard_filter.first_page = tonumber(first_page)
+                blizzard_filter.last_page = tonumber(last_page)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
-                return false, {}, 'Erroneous start page modifier'
+                return false, {}, 'Erroneous page range modifier'
             end
         elseif tonumber(str) then
             if not blizzard_filter.min_level then
@@ -672,7 +681,8 @@ function m.blizzard_query(filter)
     end
 
     return {
-        start_page = filter.start_page or 0,
+        first_page = filter.first_page and filter.first_page - 1,
+        last_page = filter.last_page and filter.last_page - 1,
         name = filter.name,
         min_level = item_info and item_info.level or filter.min_level,
         max_level = item_info and item_info.level or filter.max_level,
