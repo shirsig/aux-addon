@@ -102,7 +102,7 @@ function private.owner_data_complete()
     if private.current_thread().params.ignore_owner or aux_ignore_owner then
         return true
     end
-    local count, _ = GetNumAuctionItems(private.current_thread().params.type)
+    local count = GetNumAuctionItems(private.current_thread().params.type)
     for i=1,count do
         local auction_info = Aux.info.auction(i, private.current_thread().params.type)
         if auction_info and not auction_info.owner then
@@ -136,10 +136,7 @@ end
 function private.scan()
     private.current_thread().query_index = private.current_thread().query_index and private.current_thread().query_index + 1 or 1
     if private.current_query() then
-        private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, function()
-            private.current_thread().page = Aux.util.safe_index(private.current_query().blizzard_query, 'first_page') or 0
-            return private.process_query()
-        end)
+        private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, private.process_query)
     else
         local on_complete = private.current_thread().params.on_complete
         threads[private.current_thread().params.type] = nil
@@ -150,37 +147,40 @@ function private.scan()
 end
 
 function private.process_query()
+    if private.current_query().blizzard_query then
+        private.current_thread().page = private.current_thread().page or private.current_query().blizzard_query.first_page or 0
+        return private.submit_query(private.scan_page)
+    else
+        return private.scan_page()
+    end
+end
 
-    private.submit_query(function()
+function private.scan_page()
+    private.scan_auctions(function()
 
-        local count, total_count = GetNumAuctionItems(private.current_thread().params.type)
+        private.wait_for_callback(private.current_thread().params.on_page_scanned, function()
 
-        private.scan_auctions(count, function()
+            if private.current_query().blizzard_query and private.current_thread().page < private.last_page(private.current_thread().total_auctions) then
+                private.current_thread().page = private.current_thread().page + 1
+                return private.process_query()
+            else
+                return private.scan()
+            end
 
-            private.wait_for_callback(private.current_thread().params.on_page_scanned, function()
-
-                if private.current_query().blizzard_query and private.current_thread().page < private.last_page(total_count) then
-                    private.current_thread().page = private.current_thread().page + 1
-                    return private.process_query()
-                else
-                    return private.scan()
-                end
-
-            end)
         end)
     end)
 end
 
-function private.scan_auctions(count, k)
-	return private.scan_auctions_helper(1, count, k)
+function private.scan_auctions(k)
+	return private.scan_auctions_helper(1, k)
 end
 
-function private.scan_auctions_helper(i, n, k)
+function private.scan_auctions_helper(i, k)
     local recurse = function()
-        if i >= n then
+        if i >= (private.current_thread().page_auctions or GetNumAuctionItems(private.current_thread().params.type)) then
             return k()
         else
-            return private.scan_auctions_helper(i + 1, n, k)
+            return private.scan_auctions_helper(i + 1, k)
         end
     end
 
@@ -202,40 +202,36 @@ function private.scan_auctions_helper(i, n, k)
 end
 
 function private.submit_query(k)
-	if private.current_query().blizzard_query then
-        Aux.control.wait_until(function() return private.current_thread().params.type ~= 'list' or CanSendAuctionQuery() end, function()
+    Aux.control.wait_until(function() return private.current_thread().params.type ~= 'list' or CanSendAuctionQuery() end, function()
 
-            if private.current_thread().params.on_submit_query then
-                private.current_thread().params.on_submit_query()
-            end
-            if private.current_thread().params.type == 'bidder' then
-                GetBidderAuctionItems(private.current_thread().page)
-            elseif private.current_thread().params.type == 'owner' then
-                GetOwnerAuctionItems(private.current_thread().page)
-            else
-                QueryAuctionItems(
-                    Aux.util.safe_index(private.current_query().blizzard_query, 'name'),
-                    Aux.util.safe_index(private.current_query().blizzard_query, 'min_level'),
-                    Aux.util.safe_index(private.current_query().blizzard_query, 'max_level'),
-                    Aux.util.safe_index(private.current_query().blizzard_query, 'slot'),
-                    Aux.util.safe_index(private.current_query().blizzard_query, 'class'),
-                    Aux.util.safe_index(private.current_query().blizzard_query, 'subclass'),
-                    private.current_thread().page,
-                    Aux.util.safe_index(private.current_query().blizzard_query, 'usable'),
-                    Aux.util.safe_index(private.current_query().blizzard_query, 'quality')
-                )
-            end
-            private.wait_for_results(function()
-                local _, total_count = GetNumAuctionItems(private.current_thread().params.type)
-                private.wait_for_callback(
-                    private.current_thread().params.on_page_loaded,
-                    private.current_thread().page - (private.current_query().blizzard_query.first_page or 0) + 1,
-                    private.last_page(total_count) - (private.current_query().blizzard_query.first_page or 0) + 1,
-                    k
-                )
-            end)
-		end)
-    else
-        return k()
-	end
+        if private.current_thread().params.on_submit_query then
+            private.current_thread().params.on_submit_query()
+        end
+        if private.current_thread().params.type == 'bidder' then
+            GetBidderAuctionItems(private.current_thread().page)
+        elseif private.current_thread().params.type == 'owner' then
+            GetOwnerAuctionItems(private.current_thread().page)
+        else
+            QueryAuctionItems(
+                Aux.util.safe_index(private.current_query().blizzard_query, 'name'),
+                Aux.util.safe_index(private.current_query().blizzard_query, 'min_level'),
+                Aux.util.safe_index(private.current_query().blizzard_query, 'max_level'),
+                Aux.util.safe_index(private.current_query().blizzard_query, 'slot'),
+                Aux.util.safe_index(private.current_query().blizzard_query, 'class'),
+                Aux.util.safe_index(private.current_query().blizzard_query, 'subclass'),
+                private.current_thread().page,
+                Aux.util.safe_index(private.current_query().blizzard_query, 'usable'),
+                Aux.util.safe_index(private.current_query().blizzard_query, 'quality')
+            )
+        end
+        private.wait_for_results(function()
+            private.current_thread().page_auctions,  private.current_thread().total_auctions = GetNumAuctionItems(private.current_thread().params.type)
+            private.wait_for_callback(
+                private.current_thread().params.on_page_loaded,
+                private.current_thread().page - (private.current_query().blizzard_query.first_page or 0) + 1,
+                private.last_page(private.current_thread().total_auctions) - (private.current_query().blizzard_query.first_page or 0) + 1,
+                k
+            )
+        end)
+    end)
 end
