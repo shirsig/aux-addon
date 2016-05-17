@@ -81,11 +81,11 @@ m.filters = {
             end
 
             local code = ({
-                ['poor'] = 1,
-                ['common'] = 2,
-                ['uncommon'] = 3,
-                ['rare'] = 4,
-                ['epic'] = 5,
+                ['poor'] = 0,
+                ['common'] = 1,
+                ['uncommon'] = 2,
+                ['rare'] = 3,
+                ['epic'] = 4,
             })[rarity or '']
             if not code then
                 return false, {}, 'Erroneous rarity modifier'
