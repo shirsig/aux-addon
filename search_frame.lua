@@ -919,6 +919,19 @@ function private.record_remover(record)
     end
 end
 
+function private.record_bid_updater(record)
+    return function()
+        record.high_bid = record.bid_price
+        record.blizzard_bid = record.bid_price
+        record.min_increment = Aux.min_bid_increment(record.bid_price)
+        record.bid_price = record.bid_price + record.min_increment
+        record.unit_blizzard_bid = record.blizzard_bid / record.aux_quantity
+        record.unit_bid_price = record.bid_price / record.aux_quantity
+        record.high_bidder = 1
+        private.results_listing:SetDatabase()
+    end
+end
+
 do
     local scan_id
     local IDLE, SEARCHING, FOUND = {}, {}, {}
@@ -949,7 +962,7 @@ do
                 if not record.high_bidder then
                     private.bid_button:SetScript('OnClick', function()
                         if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
-                            Aux.place_bid('list', index, record.bid_price, private.record_remover(record))
+                            Aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and private.record_bid_updater(record) or private.record_remover(record))
                         end
                     end)
                     private.bid_button:Enable()

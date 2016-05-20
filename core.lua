@@ -306,6 +306,10 @@ function Aux.round(v)
 	return floor(v + 0.5)
 end
 
+function Aux.min_bid_increment(current_bid)
+    return ceil(current_bid * 0.05)
+end
+
 function Aux.price_level_color(pct)
     if pct > 135 then
         return 1.0,0.0,0.0 -- red
