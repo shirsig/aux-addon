@@ -95,8 +95,8 @@ function public.distribution(slot, quality, level)
     if quality == UNCOMMON then
         if level <= 10 then
             return {
-                {item_id=10940, min_quantity=1, max_quantity=2, probability=0.8},
-                {item_id=10938, min_quantity=1, max_quantity=2, probability=0.2},
+                {item_id=10940, min_quantity=1, max_quantity=2, probability=p(0.8, 0.2)},
+                {item_id=10938, min_quantity=1, max_quantity=2, probability=p(0.2, 0.8)},
             }
         elseif level <= 15 then
             return {
