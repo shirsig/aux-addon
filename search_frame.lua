@@ -928,6 +928,7 @@ function private.record_bid_updater(record)
         record.unit_blizzard_bid = record.blizzard_bid / record.aux_quantity
         record.unit_bid_price = record.bid_price / record.aux_quantity
         record.high_bidder = 1
+        record.search_signature = Aux.util.join({record.item_id, record.suffix_id, record.enchant_id, record.start_price, record.buyout_price, record.bid_price, record.aux_quantity, record.duration, 1, aux_ignore_owner and (Aux.is_player(record.owner) and 0 or 1) or (record.owner or '?')}, ':')
         private.results_listing:SetDatabase()
     end
 end

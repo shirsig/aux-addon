@@ -307,7 +307,7 @@ function Aux.round(v)
 end
 
 function Aux.min_bid_increment(current_bid)
-    return ceil(current_bid * 0.05)
+    return max(1, floor(current_bid / 100) * 5)
 end
 
 function Aux.price_level_color(pct)
