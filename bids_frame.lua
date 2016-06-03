@@ -148,7 +148,10 @@ do
                 if not record.high_bidder then
                     private.bid_button:SetScript('OnClick', function()
                         if private.test(record)(index) and private.listing:ContainsRecord(record) then
-                            Aux.place_bid('bidder', index, record.bid_price, private.record_remover(record))
+                            Aux.place_bid('bidder', index, record.bid_price, record.bid_price < record.buyout_price and function()
+                                Aux.info.bid_update(record)
+                                private.listing:SetDatabase()
+                            end or private.record_remover(record))
                         end
                     end)
                     private.bid_button:Enable()

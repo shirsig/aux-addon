@@ -920,17 +920,7 @@ function private.record_remover(record)
 end
 
 function private.record_bid_updater(record)
-    return function()
-        record.high_bid = record.bid_price
-        record.blizzard_bid = record.bid_price
-        record.min_increment = Aux.min_bid_increment(record.bid_price)
-        record.bid_price = record.bid_price + record.min_increment
-        record.unit_blizzard_bid = record.blizzard_bid / record.aux_quantity
-        record.unit_bid_price = record.bid_price / record.aux_quantity
-        record.high_bidder = 1
-        record.search_signature = Aux.util.join({record.item_id, record.suffix_id, record.enchant_id, record.start_price, record.buyout_price, record.bid_price, record.aux_quantity, record.duration, 1, aux_ignore_owner and (Aux.is_player(record.owner) and 0 or 1) or (record.owner or '?')}, ':')
-        private.results_listing:SetDatabase()
-    end
+    return
 end
 
 do
@@ -963,7 +953,10 @@ do
                 if not record.high_bidder then
                     private.bid_button:SetScript('OnClick', function()
                         if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
-                            Aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and private.record_bid_updater(record) or private.record_remover(record))
+                            Aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
+                                Aux.info.bid_update(record)
+                                private.results_listing:SetDatabase()
+                            end or private.record_remover(record))
                         end
                     end)
                     private.bid_button:Enable()
