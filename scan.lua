@@ -136,6 +136,11 @@ end
 function private.scan()
     private.current_thread().query_index = private.current_thread().query_index and private.current_thread().query_index + 1 or 1
     if private.current_query() then
+        if private.current_query().blizzard_query then
+            private.current_thread().page = private.current_query().blizzard_query.first_page or 0
+        else
+            private.current_thread().page = nil
+        end
         private.wait_for_callback(private.current_thread().params.on_start_query, private.current_thread().query_index, private.process_query)
     else
         local on_complete = private.current_thread().params.on_complete
@@ -148,7 +153,6 @@ end
 
 function private.process_query()
     if private.current_query().blizzard_query then
-        private.current_thread().page = private.current_thread().page or private.current_query().blizzard_query.first_page or 0
         return private.submit_query(private.scan_page)
     else
         return private.scan_page()
@@ -229,7 +233,7 @@ function private.submit_query(k)
             private.wait_for_callback(
                 private.current_thread().params.on_page_loaded,
                 private.current_thread().page - (private.current_query().blizzard_query.first_page or 0) + 1,
-                private.last_page(private.current_thread().total_auctions) - (private.current_query().blizzard_query.first_page or 0) + 1,
+                max(1, private.last_page(private.current_thread().total_auctions) - (private.current_query().blizzard_query.first_page or 0) + 1),
                 k
             )
         end)
