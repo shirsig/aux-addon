@@ -548,7 +548,7 @@ function private.validate_parameters()
         return
     end
 
-    if private.get_unit_start_price() < 1 then
+    if private.get_unit_start_price() == 0 then
         private.post_button:Disable()
         return
     end
