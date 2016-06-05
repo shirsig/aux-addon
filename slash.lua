@@ -1,26 +1,7 @@
-local function strsplit(delimiter, text)
-	local list = {}
-	local pos = 1
-	if strfind("", delimiter, 1) then -- this would result in endless loops
-		error("delimiter matches empty string!")
-	end
-	while 1 do
-		local first, last = strfind(text, delimiter, pos)
-		if first then -- found?
-			tinsert(list, strsub(text, pos, first-1))
-			pos = last+1
-		else
-			tinsert(list, strsub(text, pos))
-			break
-		end
-	end
-	return list
-end
-
 SLASH_AUX1 = '/aux'
 function SlashCmdList.AUX(command)
 	if not command then return end
-	local arguments = strsplit(" ", command)
+	local arguments = Aux.util.split(command, " ")
     if command == 'clear history' then
         Aux.persistence.load_dataset().history = nil
         Aux.log('History cleared.')
@@ -65,21 +46,34 @@ function SlashCmdList.AUX(command)
         aux_ignore_owner = not aux_ignore_owner
         Aux.log('Ignoring of owner '..(aux_ignore_owner and 'enabled' or 'disabled')..'.')
     elseif arguments[1] == 'addchar' and arguments[2] then
-		arguments[2] = strupper(strsub(arguments[2], 1, 1))..strsub(arguments[2], 2) -- make sure we get name starting from upper case
-		for i,v in ipairs(aux_characters) do
-			if (aux_characters[i] == arguments[2]) then
-				return
+		local exists = false
+		for i=2, table.getn(arguments) do
+			exists = false
+			if arguments[i] ~= "" then
+				arguments[i] = strupper(strsub(arguments[i], 1, 1))..strsub(arguments[i], 2) -- force uppercase
+				for i_aux,v in ipairs(aux_characters) do
+					if (aux_characters[i_aux] == arguments[i]) then
+						exists = true
+						break
+					end
+				end
+				if not exists then
+					table.insert(aux_characters, arguments[i])
+					Aux.log('Character "'..arguments[i]..'" added.')
+				end
 			end
 		end
-		table.insert(aux_characters, arguments[2])
-		Aux.log('Character "'..arguments[2]..'" added.')
 	elseif arguments[1] == 'delchar' and arguments[2] then
-		arguments[2] = strupper(strsub(arguments[2], 1, 1))..strsub(arguments[2], 2) -- make sure we get name starting from upper case
-		for i,v in ipairs(aux_characters) do
-			if (aux_characters[i] == arguments[2]) then
-				table.remove(aux_characters, i)
-				Aux.log('Character "'..arguments[2]..'" removed.')
-				break
+		for i=2, table.getn(arguments) do
+			if arguments[i] ~= "" then
+				arguments[i] = strupper(strsub(arguments[i], 1, 1))..strsub(arguments[i], 2)
+				for i_aux,v in ipairs(aux_characters) do
+					if (aux_characters[i_aux] == arguments[i]) then
+						table.remove(aux_characters, i_aux)
+						Aux.log('Character "'..arguments[i]..'" removed.')
+						break
+					end
+				end
 			end
 		end
 	elseif command == 'chars' then
