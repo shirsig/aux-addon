@@ -423,7 +423,12 @@ function Aux.show_elements(elements)
 end
 
 function Aux.is_player(name)
-    return UnitName('player') == name -- TODO support multiple chars
+	for i,v in ipairs(aux_characters) do
+		if aux_characters[i] == name then
+			return true
+		end
+	end
+    return UnitName('player') == name
 end
 
 function Aux.unmodified()
