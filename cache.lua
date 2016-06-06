@@ -8,6 +8,7 @@ aux_item_ids = {}
 aux_auctionable_items = {}
 aux_merchant_buy = {}
 aux_merchant_sell = {}
+aux_characters = {}
 
 local items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
 local merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'}}
