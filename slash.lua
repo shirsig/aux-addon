@@ -1,7 +1,7 @@
 SLASH_AUX1 = '/aux'
 function SlashCmdList.AUX(command)
 	if not command then return end
-	local arguments = Aux.util.split(command, " ")
+	local arguments = Aux.util.tokenize(command)
     if command == 'clear history' then
         Aux.persistence.load_dataset().history = nil
         Aux.log('History cleared.')
@@ -47,11 +47,11 @@ function SlashCmdList.AUX(command)
         Aux.log('Ignoring of owner '..(aux_ignore_owner and 'enabled' or 'disabled')..'.')
     elseif arguments[1] == 'addchar' and arguments[2] then
 		local exists = false
-		for i=2, table.getn(arguments) do
+		for i=2, getn(arguments) do
 			exists = false
-			if arguments[i] ~= "" then
-				arguments[i] = strupper(strsub(arguments[i], 1, 1))..strsub(arguments[i], 2) -- force uppercase
-				for i_aux,v in ipairs(aux_characters) do
+			if arguments[i] ~= '' then
+				arguments[i] = string.gsub(arguments[i], '^%l', strupper) -- force uppercase
+				for i_aux,_ in ipairs(aux_characters) do
 					if (aux_characters[i_aux] == arguments[i]) then
 						exists = true
 						break
@@ -68,7 +68,7 @@ function SlashCmdList.AUX(command)
 			if arguments[i] ~= "" then
 				arguments[i] = strupper(strsub(arguments[i], 1, 1))..strsub(arguments[i], 2)
 				for i_aux,v in ipairs(aux_characters) do
-					if (aux_characters[i_aux] == arguments[i]) then
+					if aux_characters[i_aux] == arguments[i] then
 						table.remove(aux_characters, i_aux)
 						Aux.log('Character "'..arguments[i]..'" removed.')
 						break
@@ -77,20 +77,20 @@ function SlashCmdList.AUX(command)
 			end
 		end
 	elseif command == 'chars' then
-		local chars = nil
-		local num = table.getn(aux_characters);
+		local chars
+		local num = table.getn(aux_characters)
 		for i,v in ipairs(aux_characters) do
-			if( i ~= num) then
-				if chars ~= nil then
-					chars = chars .. v .. ", ";
+			if  i ~= num then
+				if chars then
+					chars = chars .. v .. ", "
 				else
-					chars =   v .. ", ";
+					chars =   v .. ", "
 				end
 			else
-				if chars ~= nil then
-					chars = chars .. v;
+				if chars then
+					chars = chars .. v
 				else
-					chars = v;
+					chars = v
 				end
 			end
 		end

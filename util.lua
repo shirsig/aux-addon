@@ -334,6 +334,14 @@ function public.join(array, separator)
 	return str
 end
 
+function public.tokenize(str)
+	local tokens = {}
+	for token in string.gfind(str, '%S+') do
+		tinsert(tokens, token)
+	end
+	return tokens
+end
+
 function public.split(str, separator)
 
 	local array = {}
