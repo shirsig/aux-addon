@@ -1,5 +1,5 @@
 Aux = {
-    version = '2.13.4',
+    version = '2.13.5',
     blizzard_ui_shown = false,
 	orig = {},
 }
@@ -423,11 +423,10 @@ function Aux.show_elements(elements)
 end
 
 function Aux.is_player(name)
-	for i,v in ipairs(aux_characters) do
-		if aux_characters[i] == name then
-			return true
-		end
-	end
+    local realm = GetCVar('realmName')
+    if aux_characters[realm][name] then
+        return true
+    end
     return UnitName('player') == name
 end
 
