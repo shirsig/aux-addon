@@ -57,7 +57,9 @@ function SlashCmdList.AUX(command)
 		end
 	elseif arguments[1] == 'delchar' then
 		local realm = GetCVar('realmName')
-		aux_characters[realm] = aux_characters[realm] or {}
+		if not aux_characters[realm] then
+			return
+		end
 		for i=2,getn(arguments) do
 			local name = string.gsub(strlower(arguments[i]), '^%l', strupper)
 			if aux_characters[realm][name] then
