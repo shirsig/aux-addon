@@ -424,10 +424,7 @@ end
 
 function Aux.is_player(name)
     local realm = GetCVar('realmName')
-    if aux_characters[realm] and aux_characters[realm][name] then
-        return true
-    end
-    return UnitName('player') == name
+    return Aux.util.safe_index(aux_characters, realm, name) or UnitName('player') == name
 end
 
 function Aux.unmodified()
