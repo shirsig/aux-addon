@@ -424,7 +424,7 @@ end
 
 function Aux.is_player(name)
     local realm = GetCVar('realmName')
-    if aux_characters[realm][name] then
+    if aux_characters[realm] and aux_characters[realm][name] then
         return true
     end
     return UnitName('player') == name
