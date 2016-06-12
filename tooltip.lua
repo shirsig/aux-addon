@@ -1,6 +1,8 @@
 local private, public = {}, {}
 Aux.tooltip = public
 
+aux_tooltip_value = true
+
 local game_tooltip_hooks = {}
 local hooked_setter
 local game_tooltip_money
@@ -111,7 +113,9 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
     local value = Aux.history.value(item_key)
     if auctionable then
-        tooltip:AddLine('Value: '..(value and Aux.util.format_money(value * quantity) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+        if aux_tooltip_value then
+            tooltip:AddLine('Value: '..(value and Aux.util.format_money(value * quantity) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+        end
         if aux_tooltip_daily  then
             local market_value = Aux.history.market_value(item_key)
             tooltip:AddLine('Today: '..(market_value and Aux.util.format_money(market_value * quantity)..' ('..Aux.auction_listing.percentage_historical(Aux.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)

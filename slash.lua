@@ -24,6 +24,9 @@ function SlashCmdList.AUX(command)
         Aux.log('Item cache cleared.')
     elseif arguments[1] == 'populate' and arguments[2] == 'wdb' then
         Aux.cache.populate_wdb()
+    elseif arguments[1] == 'tooltip' and arguments[2] == 'value' then
+        aux_tooltip_value = not aux_tooltip_value
+        Aux.log('Historical value in tooltip '..(aux_tooltip_value and 'enabled' or 'disabled')..'.')
     elseif arguments[1] == 'tooltip' and arguments[2] == 'daily' then
         aux_tooltip_daily = not aux_tooltip_daily
         Aux.log('Market value in tooltip '..(aux_tooltip_daily and 'enabled' or 'disabled')..'.')
