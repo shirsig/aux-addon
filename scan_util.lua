@@ -25,7 +25,7 @@ m.filters = {
         end,
     },
 
-    ['tt'] = {
+    ['tooltip'] = {
         arity = 1,
         test = function(str)
             if str then
@@ -125,7 +125,7 @@ m.filters = {
         end
     },
 
-    ['min-bid'] = {
+    ['min-unit-bid'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '') or 0
@@ -139,7 +139,7 @@ m.filters = {
         end
     },
 
-    ['min-buyout'] = {
+    ['min-unit-buy'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '') or 0
@@ -153,7 +153,7 @@ m.filters = {
         end
     },
 
-    ['max-bid'] = {
+    ['max-unit-bid'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '') or 0
@@ -167,7 +167,7 @@ m.filters = {
         end
     },
 
-    ['max-buyout'] = {
+    ['max-unit-buy'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '') or 0
@@ -197,7 +197,7 @@ m.filters = {
         end
     },
 
-    ['buyout-pct'] = {
+    ['buy-pct'] = {
         arity = 1,
         test = function(pct)
             pct = tonumber(pct)
@@ -227,7 +227,7 @@ m.filters = {
         end
     },
 
-    ['buyout-profit'] = {
+    ['buy-profit'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '') or 0
@@ -241,7 +241,7 @@ m.filters = {
         end
     },
 
-    ['bid-disenchant-profit'] = {
+    ['bid-dis-profit'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '') or 0
@@ -256,7 +256,7 @@ m.filters = {
         end
     },
 
-    ['buyout-disenchant-profit'] = {
+    ['buy-dis-profit'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '') or 0
@@ -271,7 +271,7 @@ m.filters = {
         end
     },
 
-    ['bid-vendor-profit'] = {
+    ['bid-vend-profit'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '') or 0
@@ -286,7 +286,7 @@ m.filters = {
         end
     },
 
-    ['buyout-vendor-profit'] = {
+    ['buy-vend-profit'] = {
         arity = 1,
         test = function(amount)
             amount = Aux.money.from_string(amount or '') or 0
