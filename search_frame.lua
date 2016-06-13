@@ -188,10 +188,6 @@ function private.get_form_filter()
         add((tonumber(private.first_page_editbox:GetText()) or '') .. ':' .. (tonumber(private.last_page_editbox:GetText()) or ''))
     end
 
-    if tonumber(AuxSearchFrameFilterMaxLevel:GetText()) then
-        add(tonumber(AuxSearchFrameFilterMaxLevel:GetText()))
-    end
-
     return filter_term
 end
 
@@ -737,7 +733,7 @@ function public.on_load()
 
         local filter = Aux.scan_util.filters[modifier_name]
 
-        btn:SetWidth(90)
+        btn:SetWidth(100)
         btn:SetHeight(19)
         btn:SetText(modifier_name)
         btn:SetScript('OnClick', function()
@@ -755,7 +751,7 @@ function public.on_load()
             local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
             editbox.complete = Aux.completion.completor(function() return ({filter.test()})[2] end)
             editbox:SetPoint('LEFT', btn, 'RIGHT', 10, 0)
-            editbox:SetWidth(90)
+            editbox:SetWidth(80)
 --            editbox:SetNumeric(true)
 --            editbox:SetMaxLetters(2)
             editbox:SetScript('OnChar', function()
