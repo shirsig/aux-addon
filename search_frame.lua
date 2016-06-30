@@ -153,11 +153,11 @@ function private.get_form_filter()
     end
 
     if tonumber(AuxSearchFrameFilterMinLevel:GetText()) then
-        add(tonumber(AuxSearchFrameFilterMinLevel:GetText()))
+        add(max(1, min(60, tonumber(AuxSearchFrameFilterMinLevel:GetText()))))
     end
 
     if tonumber(AuxSearchFrameFilterMaxLevel:GetText()) then
-        add(tonumber(AuxSearchFrameFilterMaxLevel:GetText()))
+        add(max(1, min(60, tonumber(AuxSearchFrameFilterMaxLevel:GetText()))))
     end
 
     if AuxSearchFrameFilterUsableCheckButton:GetChecked() then
@@ -184,8 +184,11 @@ function private.get_form_filter()
         add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
     end
 
-    if tonumber(private.first_page_editbox:GetText()) or tonumber(private.last_page_editbox:GetText()) then
-        add((tonumber(private.first_page_editbox:GetText()) or '') .. ':' .. (tonumber(private.last_page_editbox:GetText()) or ''))
+    local first_page, last_page = tonumber(private.first_page_editbox:GetText()), tonumber(private.last_page_editbox:GetText())
+    first_page = first_page and max(1, first_page)
+    last_page = last_page and max(1, last_page)
+    if first_page or last_page then
+        add((first_page or '') .. ':' .. (last_page or ''))
     end
 
     return filter_term

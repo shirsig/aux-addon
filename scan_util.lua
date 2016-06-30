@@ -492,6 +492,9 @@ function m.filter_from_string(filter_term)
         elseif strfind(str, '^%d*:%d*$') then
             if not blizzard_filter.first_page and not blizzard_filter.last_page then
                 local _, _, first_page, last_page = strfind(str, '^(%d*):(%d*)$')
+                if tonumber(first_page) and tonumber(first_page) < 1 or tonumber(last_page) and tonumber(last_page) < 1 then
+                    return false, {}, 'Erroneous page range modifier'
+                end
                 blizzard_filter.first_page = tonumber(first_page)
                 blizzard_filter.last_page = tonumber(last_page)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
@@ -499,6 +502,9 @@ function m.filter_from_string(filter_term)
                 return false, {}, 'Erroneous page range modifier'
             end
         elseif tonumber(str) then
+            if tonumber(str) < 1 or tonumber(str) > 60 then
+                return false, {}, 'Erroneous level range modifier'
+            end
             if not blizzard_filter.min_level then
                 blizzard_filter.min_level = tonumber(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
