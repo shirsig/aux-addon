@@ -499,12 +499,6 @@ function private.refresh_entries()
 	end
 end
 
-function private.private.refresh()
-	Aux.scan.abort(scan_id)
-    private.refresh_entries()
-    private.refresh = true
-end
-
 function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
     existing_auctions[key] = existing_auctions[key] or {}
     local entry
