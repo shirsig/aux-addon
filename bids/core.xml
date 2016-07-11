@@ -1,8 +1,4 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
-
-	<Script file="bids/core.lua"/>
-	<Script file="bids/frames.lua"/>
-
     <Frame name="AuxBidsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Scripts>
 			<OnUpdate>

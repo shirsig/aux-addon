@@ -26,9 +26,21 @@ item_listing.lua
 history.lua
 completion.xml
 
-search/core.xml
-post/core.xml
-auctions/core.xml
-bids/core.xml
+
+search\core.xml
+search\core.lua
+search\frames.lua
+
+post\core.xml
+post\core.lua
+post\frames.lua
+
+auctions\core.xml
+auctions\core.lua
+auctions\frames.lua
+
+bids\core.xml
+bids\core.lua
+bids\frames.lua
 
 

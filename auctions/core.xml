@@ -1,8 +1,4 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
-
-	<Script file="auctions/core.lua"/>
-	<Script file="auctions/frames.lua"/>
-
     <Frame name="AuxAuctionsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Scripts>
 			<OnUpdate>
