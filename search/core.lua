@@ -433,7 +433,6 @@ do
 
     function private.update_search()
         private.search_box:SetText(searches[search_index].filter_string)
-        private.results_listing:Clear()
         private.results_listing:SetDatabase(searches[search_index].records)
         if search_index == 1 or search_index == 0 then
             private.previous_button:Disable()
@@ -465,11 +464,13 @@ do
     function private.previous_search()
         search_index = search_index - 1
         private.update_search()
+        private.update_tab(private.RESULTS)
     end
 
     function private.next_search()
         search_index = search_index + 1
         private.update_search()
+        private.update_tab(private.RESULTS)
     end
 end
 
