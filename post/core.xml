@@ -1,6 +1,7 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="post_frame.lua"/>
+	<Script file="post/core.lua"/>
+    <Script file="post/frames.lua"/>
 
 	<Frame name="AuxPostFrame" parent="AuxFrame" hidden="true">
         <Anchors>

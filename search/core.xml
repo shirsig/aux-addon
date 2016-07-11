@@ -1,6 +1,7 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
 
-	<Script file="search_frame.lua"/>
+	<Script file="search/core.lua"/>
+    <Script file="search/frames.lua"/>
 
     <Frame name="AuxSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
         <Scripts>

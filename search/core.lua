@@ -3,8 +3,7 @@ Aux.search_frame = public
 
 aux_favorite_searches = {}
 aux_recent_searches = {}
-local scanned_records = {}
-local aborted_search
+
 local search_scan_id
 
 private.popup_info = {
@@ -205,7 +204,7 @@ end
 function public.on_load()
     do
         local btn = Aux.gui.button(AuxSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -5, -8)
+        btn:SetPoint('TOPRIGHT', -75, -8)
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Search')
@@ -214,7 +213,7 @@ function public.on_load()
     end
     do
         local btn = Aux.gui.button(AuxSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -5, -8)
+        btn:SetPoint('TOPRIGHT', -75, -8)
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Cont.')
@@ -222,7 +221,7 @@ function public.on_load()
         btn:SetScript('OnClick', function()
             private.search_box:ClearFocus()
             if arg1 == 'RightButton' then
-                private.discard_aborted_scan()
+                private.discard_search_continuation()
             else
                 public.start_search(nil, true)
             end
@@ -232,7 +231,7 @@ function public.on_load()
     end
     do
         local btn = Aux.gui.button(AuxSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -5, -8)
+        btn:SetPoint('TOPRIGHT', -75, -8)
         btn:SetWidth(60)
         btn:SetHeight(25)
         btn:SetText('Stop')
@@ -240,11 +239,29 @@ function public.on_load()
         btn:SetScript('OnClick', function()
             private.stop_search()
             if arg1 == 'RightButton' then
-                private.discard_aborted_scan()
+                private.discard_search_continuation()
             end
         end)
         btn:Hide()
         private.stop_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrame, 26)
+        btn:SetPoint('TOPRIGHT', -40, -8)
+        btn:SetWidth(30)
+        btn:SetHeight(25)
+        btn:SetText('<')
+        btn:SetScript('OnClick', private.previous_search)
+        private.previous_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrame, 26)
+        btn:SetPoint('TOPRIGHT', -5, -8)
+        btn:SetWidth(30)
+        btn:SetHeight(25)
+        btn:SetText('>')
+        btn:SetScript('OnClick', private.next_search)
+        private.next_button = btn
     end
     do
         local editbox = Aux.gui.editbox(AuxSearchFrame)
@@ -339,7 +356,7 @@ function public.on_load()
         btn:SetHeight(24)
         btn:SetText('Clear')
         btn:SetScript('OnClick', function()
-            while tremove(scanned_records) do end
+            while tremove(private:current_search().records) do end
             private.results_listing:SetDatabase()
         end)
     end
@@ -853,7 +870,8 @@ function public.on_load()
     private.favorite_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
     private.favorite_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
 
-
+    private.update_search()
+    
     private.update_tab(SAVED)
 end
 
@@ -861,20 +879,20 @@ function private.stop_search()
 	Aux.scan.abort(search_scan_id)
 end
 
-function private.discard_aborted_scan()
-    aborted_search = nil
+function private.discard_search_continuation()
+    private:current_search().continuation = nil
     private.resume_button:Hide()
     private.search_button:Show()
 end
 
 function public.start_search(filter_string, resume)
-    if resume and not aborted_search then
+    if resume and not private:current_search().continuation then
         return
     end
 
-    local queries = aborted_search
+    local queries = private:current_search().continuation
     Aux.scan.abort(search_scan_id)
-    private.discard_aborted_scan()
+    private.discard_search_continuation()
 
     if filter_string then
         private.search_box:SetText(filter_string)
@@ -911,9 +929,7 @@ function public.start_search(filter_string, resume)
     if resume then
         private.results_listing:SetSelectedRecord(nil)
     else
-        private.results_listing:Clear()
-        scanned_records = {}
-        private.results_listing:SetDatabase(scanned_records)
+        private.new_search()
     end
 
     local current_query, current_page
@@ -940,9 +956,9 @@ function public.start_search(filter_string, resume)
             current_query = query_index
         end,
         on_auction = function(auction_record)
-            if getn(scanned_records) < 1000 then
-                tinsert(scanned_records, auction_record)
-                if getn(scanned_records) == 1000 then
+            if getn(private:current_search().records) < 1000 then
+                tinsert(private:current_search().records, auction_record)
+                if getn(private:current_search().records) == 1000 then
                     StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
                 end
             end
@@ -954,7 +970,7 @@ function public.start_search(filter_string, resume)
             private.stop_button:Hide()
             private.search_button:Show()
 
-            if getn(scanned_records) == 0 and AuxSearchFrameResults:IsVisible() then
+            if getn(private:current_search().records) == 0 and AuxSearchFrameResults:IsVisible() then
                 private.update_tab(SAVED)
             end
         end,
@@ -974,7 +990,7 @@ function public.start_search(filter_string, resume)
             if queries[1].blizzard_query then
                 queries[1].blizzard_query.first_page = (current_page and (queries[1].blizzard_query.first_page or 0) + current_page or queries[1].blizzard_query.first_page)
             end
-            aborted_search = queries
+            private:current_search().continuation = queries
         end,
     }
 end
@@ -1069,6 +1085,59 @@ do
                 state = IDLE
             end
         end
+    end
+end
+
+do
+    local searches = { [0] = {
+        filter_string = '',
+        records = {},
+    }}
+    local search_index = 0
+
+    function private.current_search()
+        return searches[search_index]
+    end
+
+    function private.update_search()
+        private.search_box:SetText(searches[search_index].filter_string)
+        private.results_listing:Clear()
+        private.results_listing:SetDatabase(searches[search_index].records)
+        if search_index == 1 or search_index == 0 then
+            private.previous_button:Disable()
+        else
+            private.previous_button:Enable()
+        end
+        if search_index == getn(searches) or search_index == 0 then
+            private.next_button:Disable()
+        else
+            private.next_button:Enable()
+        end
+    end
+
+    function private.new_search()
+        tinsert(searches, search_index + 1, {
+            filter_string = private.search_box:GetText(),
+            records = {},
+        })
+        while getn(searches) > search_index + 1 do
+            tremove(searches)
+        end
+        if getn(searches) > 5 then
+            tremove(searches, 1)
+        end
+        search_index = getn(searches)
+        private.update_search()
+    end
+
+    function private.previous_search()
+        search_index = search_index - 1
+        private.update_search()
+    end
+
+    function private.next_search()
+        search_index = search_index + 1
+        private.update_search()
     end
 end
 
