@@ -212,15 +212,14 @@ function public.execute(mode, filter_string)
         private.search_box:SetText(filter_string)
     end
 
-    local queries
+    local queries, filters
+    if mode == 'refresh' then
+        private.search_box:SetText(private.current_search().filter_string)
+        private.current_search().records = {}
+        private.results_listing:SetDatabase(private.current_search().records)
+    end
     if mode == 'search' or mode == 'refresh' then
-        if mode == 'refresh' then
-            private.search_box:SetText(private.current_search().filter_string)
-            private.current_search().records = {}
-            private.results_listing:SetDatabase(private.current_search().records)
-        end
-
-        local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
+        filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
         if not filters then
             return
         end
@@ -231,23 +230,25 @@ function public.execute(mode, filter_string)
                 validator = filter.validator,
             }
         end)
-
-        if mode == 'search' then
-            tinsert(aux_recent_searches, 1, {
-                filter_string = private.search_box:GetText(),
-                prettified = Aux.util.join(Aux.util.map(filters, function(filter) return filter.prettified end), ';'),
-            })
-            while getn(aux_recent_searches) > 50 do
-                tremove(aux_recent_searches)
-            end
-            private.update_search_listings()
-            private.new_search()
+    end
+    if mode == 'search' then
+        tinsert(aux_recent_searches, 1, {
+            filter_string = private.search_box:GetText(),
+            prettified = Aux.util.join(Aux.util.map(filters, function(filter) return filter.prettified end), ';'),
+        })
+        while getn(aux_recent_searches) > 50 do
+            tremove(aux_recent_searches)
         end
-    elseif mode == 'resume' then
+        private.update_search_listings()
+        private.new_search()
+    end
+    if mode == 'resume' then
         queries = private.current_search().continuation
-        private.current_search().continuation = nil
-       private.disable_resume()
         private.results_listing:SetSelectedRecord()
+    end
+    if mode == 'resume' or mode == 'refresh' then
+        private.current_search().continuation = nil
+        private.disable_resume()
     end
 
     private.update_tab(private.RESULTS)
