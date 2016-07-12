@@ -246,7 +246,7 @@ function public.execute(mode, filter_string)
     elseif mode == 'resume' then
         queries = private.current_search().continuation
         private.current_search().continuation = nil
-        private.resume_button:Disable()
+       private.disable_resume()
         private.results_listing:SetSelectedRecord()
     end
 
@@ -306,7 +306,7 @@ function public.execute(mode, filter_string)
             end
             search.continuation = queries
             if private.current_search() == search then
-                private.resume_button:Enable()
+                private.enable_resume()
             end
         end,
     }
@@ -405,6 +405,18 @@ do
     end
 end
 
+function private.enable_resume()
+    private.resume_button:Show()
+    private.refresh_button:ClearAllPoints()
+    private.refresh_button:SetPoint('RIGHT', private.resume_button, 'LEFT', -4, 0)
+end
+
+function private.disable_resume()
+    private.resume_button:Hide()
+    private.refresh_button:ClearAllPoints()
+    private.refresh_button:SetPoint('TOPRIGHT', -5, -8)
+end
+
 do
     local searches = { [0] = {
         filter_string = '',
@@ -437,9 +449,9 @@ do
             private.refresh_button:Enable()
         end
         if searches[search_index].continuation then
-            private.resume_button:Enable()
+            private.enable_resume()
         else
-            private.resume_button:Disable()
+            private.disable_resume()
         end
     end
 
