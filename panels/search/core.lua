@@ -198,7 +198,7 @@ function public.on_open()
 end
 
 function public.on_close()
-    private.results_listing:SetSelectedRecord(nil)
+    private.results_listing:SetSelectedRecord()
 end
 
 function public.on_load()
@@ -216,6 +216,7 @@ function public.execute(mode, filter_string)
     if mode == 'search' or mode == 'refresh' then
         if mode == 'refresh' then
             private.search_box:SetText(private.current_search().filter_string)
+            private.results_listing:Reset()
         end
 
         local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
