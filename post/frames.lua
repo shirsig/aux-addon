@@ -41,7 +41,7 @@ function Aux.post_frame.create_frames(private, public)
                 private.set_item(this.item_record)
             elseif arg1 == 'RightButton' then
                 Aux.tab_group:set_tab(1)
-                Aux.search_frame.start_search(strlower(Aux.info.item(this.item_record.item_id).name)..'/exact')
+                Aux.search_frame.execute('search', strlower(Aux.info.item(this.item_record.item_id).name)..'/exact')
             end
         end,
         function()

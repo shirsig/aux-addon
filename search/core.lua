@@ -207,30 +207,17 @@ function public.on_load()
     private.update_tab(private.SAVED)
 end
 
-function private.stop_search()
-	Aux.scan.abort(search_scan_id)
-end
-
-function private.discard_search_continuation()
-    private:current_search().continuation = nil
-    private.resume_button:Hide()
-    private.search_button:Show()
-end
-
-function public.start_search(filter_string, resume)
-    if resume and not private:current_search().continuation then
-        return
-    end
-
-    local queries = private:current_search().continuation
-    Aux.scan.abort(search_scan_id)
-    private.discard_search_continuation()
-
+function public.execute(mode, filter_string)
     if filter_string then
         private.search_box:SetText(filter_string)
     end
 
-    if not resume then
+    local queries
+    if mode == 'search' or mode == 'refresh' then
+        if mode == 'refresh' then
+            private.search_box:SetText(private.current_search().filter_string)
+        end
+
         local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
         if not filters then
             return
@@ -243,37 +230,40 @@ function public.start_search(filter_string, resume)
             }
         end)
 
-        tinsert(aux_recent_searches, 1, {
-            filter_string = private.search_box:GetText(),
-            prettified = Aux.util.join(Aux.util.map(filters, function(filter) return filter.prettified end), ';'),
-        })
-        while getn(aux_recent_searches) > 50 do
-            tremove(aux_recent_searches)
+        if mode == 'search' then
+            tinsert(aux_recent_searches, 1, {
+                filter_string = private.search_box:GetText(),
+                prettified = Aux.util.join(Aux.util.map(filters, function(filter) return filter.prettified end), ';'),
+            })
+            while getn(aux_recent_searches) > 50 do
+                tremove(aux_recent_searches)
+            end
+            private.update_search_listings()
+            private.new_search()
         end
-        private.update_search_listings()
+    elseif mode == 'resume' then
+        queries = private.current_search().continuation
+        Aux.scan.abort(search_scan_id)
+        private.current_search().continuation = nil
+        private.resume_button:Disable()
+        private.results_listing:SetSelectedRecord()
     end
 
     private.update_tab(private.RESULTS)
-    private.stop_button:Show()
-    private.resume_button:Hide()
-    private.search_button:Hide()
 
-    if resume then
-        private.results_listing:SetSelectedRecord(nil)
-    else
-        private.new_search()
-    end
-
+    local search = private.current_search()
     local current_query, current_page
     search_scan_id = Aux.scan.start{
         type = 'list',
         queries = queries,
         on_scan_start = function()
             private.status_bar:update_status(0,0)
-            if resume then
-                private.status_bar:set_text('Resuming scan...')
-            else
+            if mode == 'search' then
                 private.status_bar:set_text('Scanning auctions...')
+            elseif mode == 'refresh' then
+                private.status_bar:set_text('Rescanning auctions...')
+            elseif mode == 'resume' then
+                private.status_bar:set_text('Resuming scan...')
             end
         end,
         on_page_loaded = function(page, total_pages)
@@ -288,9 +278,9 @@ function public.start_search(filter_string, resume)
             current_query = query_index
         end,
         on_auction = function(auction_record)
-            if getn(private:current_search().records) < 1000 then
-                tinsert(private:current_search().records, auction_record)
-                if getn(private:current_search().records) == 1000 then
+            if getn(search.records) < 1000 then
+                tinsert(search.records, auction_record)
+                if getn(search.records) == 1000 then
                     StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
                 end
             end
@@ -299,10 +289,7 @@ function public.start_search(filter_string, resume)
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Scanning')
 
-            private.stop_button:Hide()
-            private.search_button:Show()
-
-            if getn(private:current_search().records) == 0 and AuxSearchFrameResults:IsVisible() then
+            if private.current_search() == search and AuxSearchFrameResults:IsVisible() and getn(search.records) == 0 then
                 private.update_tab(private.SAVED)
             end
         end,
@@ -310,19 +297,16 @@ function public.start_search(filter_string, resume)
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Scanning')
 
-            private.stop_button:Hide()
-            if not resume then
-                private.search_button:Hide()
-            end
-            private.resume_button:Show()
-
             for i=1,(current_query or 1)-1 do
                 tremove(queries, 1)
             end
             if queries[1].blizzard_query then
                 queries[1].blizzard_query.first_page = (current_page and (queries[1].blizzard_query.first_page or 0) + current_page or queries[1].blizzard_query.first_page)
             end
-            private:current_search().continuation = queries
+            search.continuation = queries
+            if private.current_search() == search then
+                private.resume_button:Enable()
+            end
         end,
     }
 end
@@ -432,7 +416,9 @@ do
     end
 
     function private.update_search()
+        Aux.scan.abort(search_scan_id)
         private.search_box:SetText(searches[search_index].filter_string)
+        private.results_listing:Reset()
         private.results_listing:SetDatabase(searches[search_index].records)
         if search_index == 1 or search_index == 0 then
             private.previous_button:Disable()
@@ -440,9 +426,19 @@ do
             private.previous_button:Enable()
         end
         if search_index == getn(searches) or search_index == 0 then
-            private.next_button:Disable()
+            private.next_button:Hide()
+            private.search_box:SetPoint('LEFT', private.previous_button, 'RIGHT', 4, 0)
         else
-            private.next_button:Enable()
+            private.next_button:Show()
+            private.search_box:SetPoint('LEFT', private.next_button, 'RIGHT', 4, 0)
+        end
+        if search_index > 0 then
+            private.refresh_button:Enable()
+        end
+        if searches[search_index].continuation then
+            private.resume_button:Enable()
+        else
+            private.resume_button:Disable()
         end
     end
 

@@ -344,7 +344,7 @@ function Aux.SetItemRef(...)
         local item_info = Aux.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
             Aux.search_frame.set_filter(item_info.name..'/exact')
-            Aux.search_frame.start_search()
+            Aux.search_frame.execute('search')
             return
         end
     end
@@ -361,7 +361,7 @@ function Aux.UseContainerItem(...)
         local item_info = Aux.info.container_item(bag, slot)
         item_info = item_info and Aux.info.item(item_info.item_id)
         if item_info then
-            Aux.search_frame.start_search(strlower(item_info.name)..'/exact')
+            Aux.search_frame.execute('search', strlower(item_info.name)..'/exact')
         end
         return
     end

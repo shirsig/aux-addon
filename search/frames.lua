@@ -1,50 +1,7 @@
 function Aux.search_frame.create_frames(private, public)
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -75, -8)
-        btn:SetWidth(60)
-        btn:SetHeight(25)
-        btn:SetText('Search')
-        btn:SetScript('OnClick', public.start_search)
-        private.search_button = btn
-    end
-    do
-        local btn = Aux.gui.button(AuxSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -75, -8)
-        btn:SetWidth(60)
-        btn:SetHeight(25)
-        btn:SetText('Cont.')
-        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-        btn:SetScript('OnClick', function()
-            private.search_box:ClearFocus()
-            if arg1 == 'RightButton' then
-                private.discard_search_continuation()
-            else
-                public.start_search(nil, true)
-            end
-        end)
-        btn:Hide()
-        private.resume_button = btn
-    end
-    do
-        local btn = Aux.gui.button(AuxSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -75, -8)
-        btn:SetWidth(60)
-        btn:SetHeight(25)
-        btn:SetText('Stop')
-        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-        btn:SetScript('OnClick', function()
-            private.stop_search()
-            if arg1 == 'RightButton' then
-                private.discard_search_continuation()
-            end
-        end)
-        btn:Hide()
-        private.stop_button = btn
-    end
-    do
         local btn = Aux.gui.button(AuxSearchFrame, 26)
-        btn:SetPoint('TOPRIGHT', -40, -8)
+        btn:SetPoint('TOPLEFT', 5, -8)
         btn:SetWidth(30)
         btn:SetHeight(25)
         btn:SetText('<')
@@ -53,7 +10,7 @@ function Aux.search_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxSearchFrame, 26)
-        btn:SetPoint('TOPRIGHT', -5, -8)
+        btn:SetPoint('LEFT', private.previous_button, 'RIGHT', 4, 0)
         btn:SetWidth(30)
         btn:SetHeight(25)
         btn:SetText('>')
@@ -61,13 +18,35 @@ function Aux.search_frame.create_frames(private, public)
         private.next_button = btn
     end
     do
+        local btn = Aux.gui.button(AuxSearchFrame, 22)
+        btn:SetPoint('TOPRIGHT', -5, -8)
+        btn:SetWidth(69)
+        btn:SetHeight(25)
+        btn:SetText('Resume')
+        btn:SetScript('OnClick', function()
+            private.search_box:ClearFocus()
+            public.execute('resume')
+        end)
+        private.resume_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrame, 22)
+        btn:SetPoint('RIGHT', private.resume_button, 'LEFT', -4, 0)
+        btn:SetWidth(72)
+        btn:SetHeight(25)
+        btn:SetText('Refresh')
+        btn:SetScript('OnClick', function()
+            public.execute('refresh')
+        end)
+        btn:Disable()
+        private.refresh_button = btn
+    end
+    do
         local editbox = Aux.gui.editbox(AuxSearchFrame)
         editbox:SetMaxLetters(nil)
         editbox:EnableMouse(1)
         editbox.complete = Aux.completion.complete
-        editbox:SetPoint('TOPLEFT', 5, -8)
-        editbox:SetPoint('RIGHT', private.search_button, 'LEFT', -4, 0)
-        editbox:SetWidth(400)
+        editbox:SetPoint('RIGHT', private.refresh_button, 'LEFT', -4, 0)
         editbox:SetHeight(25)
         editbox:SetScript('OnChar', function()
             this:complete()
@@ -78,12 +57,12 @@ function Aux.search_frame.create_frames(private, public)
         editbox:SetScript('OnEnterPressed', function()
             this:HighlightText(0, 0)
             this:ClearFocus()
-            public.start_search()
+            public.execute('search')
         end)
         editbox:SetScript('OnReceiveDrag', function()
             local item_info = Aux.cursor_item() and Aux.info.item(Aux.cursor_item().item_id)
             if item_info then
-                public.start_search(strlower(item_info.name)..'/exact')
+                public.execute('search', strlower(item_info.name)..'/exact')
             end
             ClearCursor()
         end)
@@ -184,7 +163,7 @@ function Aux.search_frame.create_frames(private, public)
             private.search_box:SetText('')
             private.add_filter()
             private.clear_form()
-            public.start_search()
+            public.execute('search')
         end)
 
         local btn2 = Aux.gui.button(AuxSearchFrameFilter, 16)
@@ -226,7 +205,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.start_search()
+            public.execute('search')
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -257,7 +236,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.start_search()
+            public.execute('search')
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -278,7 +257,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.start_search()
+            public.execute('search')
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
@@ -365,7 +344,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.start_search()
+            public.execute('search')
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -387,7 +366,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.start_search()
+            public.execute('search')
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
@@ -583,9 +562,8 @@ function Aux.search_frame.create_frames(private, public)
     end
 
     private.results_listing = Aux.auction_listing.CreateAuctionResultsTable(AuxSearchFrameResults, Aux.auction_listing.search_config)
-    private.results_listing:Show()
     private.results_listing:SetSort(1,2,3,4,5,6,7,8,9)
-    private.results_listing:Clear()
+    private.results_listing:Reset()
     private.results_listing:SetHandler('OnCellClick', function(cell, button)
         if IsAltKeyDown() and private.results_listing:GetSelection().record == cell.row.data.record then
             if button == 'LeftButton' and private.buyout_button:IsEnabled() then
@@ -628,7 +606,7 @@ function Aux.search_frame.create_frames(private, public)
                 end
             elseif button == 'LeftButton' then
                 private.search_box:SetText(data.search.filter_string)
-                public.start_search()
+                public.execute('search')
             elseif button == 'RightButton' then
                 if st == private.recent_searches_listing then
                     tinsert(aux_favorite_searches, 1, data.search)
