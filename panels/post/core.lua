@@ -3,7 +3,7 @@ Aux.post_frame = public
 
 local existing_auctions = {}
 local inventory_records
-local scan_id
+local scan_id = 0
 
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 

@@ -4,7 +4,7 @@ Aux.search_frame = public
 aux_favorite_searches = {}
 aux_recent_searches = {}
 
-local search_scan_id
+local search_scan_id = 0
 
 private.popup_info = {
     rename = {}
@@ -216,7 +216,8 @@ function public.execute(mode, filter_string)
     if mode == 'search' or mode == 'refresh' then
         if mode == 'refresh' then
             private.search_box:SetText(private.current_search().filter_string)
-            private.results_listing:SetSelectedRecord()
+            private.current_search().records = {}
+            private.results_listing:SetDatabase(private.current_search().records)
         end
 
         local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
@@ -244,7 +245,6 @@ function public.execute(mode, filter_string)
         end
     elseif mode == 'resume' then
         queries = private.current_search().continuation
-        Aux.scan.abort(search_scan_id)
         private.current_search().continuation = nil
         private.resume_button:Disable()
         private.results_listing:SetSelectedRecord()
@@ -330,7 +330,7 @@ function private.record_bid_updater(record)
 end
 
 do
-    local scan_id
+    local scan_id = 0
     local IDLE, SEARCHING, FOUND = {}, {}, {}
     local state = IDLE
     local found_index

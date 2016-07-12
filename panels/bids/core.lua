@@ -65,7 +65,7 @@ function private.record_remover(record)
 end
 
 do
-    local scan_id
+    local scan_id = 0
     local IDLE, SEARCHING, FOUND = {}, {}, {}
     local state = IDLE
     local found_index

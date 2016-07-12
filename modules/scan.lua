@@ -42,7 +42,7 @@ end
 
 function public.abort(scan_id)
     local aborted_threads = {}
-    for t, thread in pairs(threads) do
+    for t, thread in threads do
         if not scan_id or thread.id == scan_id then
             Aux.control.kill_thread(thread.id)
             threads[t] = nil
