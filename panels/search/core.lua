@@ -287,9 +287,11 @@ function public.execute(mode, filter_string)
         end,
         on_page_loaded = function(_, total_pages)
             current_page = current_page + 1
-            total_pages = max(current_page, total_pages)
-            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / (total_pages + start_page - 1))
-            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, (total_pages + start_page - 1)))
+            total_pages = total_pages + (start_page - 1)
+            total_pages = max(total_pages, 1)
+            current_page = min(current_page, total_pages)
+            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / total_pages)
+            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_pages))
         end,
         on_page_scanned = function()
             private.results_listing:SetDatabase()
@@ -321,7 +323,7 @@ function public.execute(mode, filter_string)
             if current_query then
                 search.next = {current_query, current_page + 1}
             else
-                search.next = {start_page, start_query}
+                search.next = {start_query, start_page}
             end
 
             if private.current_search() == search then
