@@ -31,9 +31,9 @@
                             <Anchor point="TOPRIGHT"><Offset><AbsDimension x="-4" y="0"/></Offset></Anchor>
                         </Anchors>
                         <frames>
-                            <Frame name="$parentItem" inherits="AuxItemTemplate">
+                            <Button name="$parentItem" inherits="AuxItemTemplate">
                                 <Anchors><Anchor point="TOPLEFT"><Offset><AbsDimension x="10" y="-10"/></Offset></Anchor></Anchors>
-                            </Frame>
+                            </Button>
                         </frames>
                     </frame>
                     <Frame name="AuxPostAuctions" inherits="AuxFrameBoxTemplate">

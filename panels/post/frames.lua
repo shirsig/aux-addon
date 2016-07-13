@@ -9,14 +9,21 @@ function Aux.post_frame.create_frames(private, public)
         end
         ClearCursor()
     end)
-    --    AuxPostParametersItemIconTexture:SetScript('OnEnter', function()
-    --        if private.selected_item then
-    --            Aux.info.set_tooltip(private.selected_item.itemstring, this, 'ANCHOR_RIGHT')
-    --        end
-    --    end)
-    --    AuxPostParametersItemIconTexture:SetScript('OnLeave', function()
-    --        GameTooltip:Hide()
-    --    end)
+    AuxPostParametersItem:SetScript('OnClick', function()
+        local item_info = Aux.cursor_item()
+        if item_info then
+            public.select_item(item_info.item_key)
+        end
+        ClearCursor()
+    end)
+    AuxPostParametersItem:SetScript('OnEnter', function()
+        if private.selected_item then
+            Aux.info.set_tooltip(private.selected_item.itemstring, this, 'ANCHOR_RIGHT')
+        end
+    end)
+    AuxPostParametersItem:SetScript('OnLeave', function()
+        GameTooltip:Hide()
+    end)
 
     do
         local checkbox = CreateFrame('CheckButton', nil, AuxPostInventory, 'UICheckButtonTemplate')
