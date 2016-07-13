@@ -114,23 +114,10 @@ do
         local frame = CreateFrame('Frame', nil, parent)
         frame:SetHeight(100)
         frame:SetWidth(100)
---        frame:SetFrameStrata('FULLSCREEN_DIALOG')
-
---        local border = CreateFrame('Frame', nil, frame)
---        border:SetPoint('TOPLEFT', 1, -30)
---        border:SetPoint('BOTTOMRIGHT', -1, 3)
---        border:SetBackdrop({ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size })
---        border:SetBackdropColor(unpack(m.config.frame_color))
---        border:SetBackdropBorderColor(unpack(m.config.frame_border_color))
-
---        local content = CreateFrame('Frame', nil, border)
---        content:SetPoint('TOPLEFT', 8, -8)
---        content:SetPoint('BOTTOMRIGHT', -8, 8)
 
         local self = {
             id = id,
             frame = parent,
---            border = border,
             tabs = {},
             on_select = function() end,
         }
@@ -213,11 +200,6 @@ do
 
         function self.update_tabs()
             for _, tab in ipairs(self.tabs) do
-                --    if tab.disabled then
-                --        TSMAPI.Design:SetWidgetLabelColor(tab.text, true)
-                --        tab:Disable()
-                --        tab.text = tab:GetText()
-                --        tab.dock:Hide()
                 if tab.group.selected == tab.id then
 --                    TSMAPI.Design:SetWidgetLabelColor(tab.text)
                     tab.text:SetTextColor(216/255, 225/255, 211/255) -- TODO
@@ -235,34 +217,6 @@ do
                 end
             end
         end
-
-
---            ["OnWidthSet"] = function(self, width)
---                local content = self.content
---                local contentwidth = width - 60
---                if contentwidth < 0 then
---                    contentwidth = 0
---                end
---                content:SetWidth(contentwidth)
---                content.width = contentwidth
---                self:BuildTabs(self)
---                self.frame:SetScript("OnUpdate", BuildTabsOnUpdate)
---            end,
---
---            ["OnHeightSet"] = function(self, height)
---                local content = self.content
---                local contentheight = height - 30
---                if contentheight < 0 then
---                    contentheight = 0
---                end
---                content:SetHeight(contentheight)
---                content.height = contentheight
---            end,
---
---            ["LayoutFinished"] = function(self, width, height)
---                if self.noAutoHeight then return end
---                self:SetHeight((height or 0) + 30)
---            end
 
         return self
     end
@@ -346,12 +300,6 @@ function m.status_bar(parent)
                 this:SetAlpha(1)
             end
         end)
---        local ag = status_bar:CreateAnimationGroup()
---        local alpha = ag:CreateAnimation('Alpha')
---        alpha:SetDuration(1)
---        alpha:SetChange(-.5)
---        ag:SetLooping('Bounce')
---        status_bar.ag = ag
         self.minor_status_bar = status_bar
     end
 
@@ -371,12 +319,6 @@ function m.status_bar(parent)
                 this:SetAlpha(1)
             end
         end)
---        local ag = status_bar:CreateAnimationGroup()
---        local alpha = ag:CreateAnimation('Alpha')
---        alpha:SetDuration(1)
---        alpha:SetChange(-.5)
---        ag:SetLooping('Bounce')
---        status_bar.ag = ag
         self.major_status_bar = status_bar
     end
 
@@ -393,19 +335,9 @@ function m.status_bar(parent)
     function self:update_status(major_status, minor_status)
         if major_status then
             self.major_status_bar:SetValue(major_status)
---            if major_status == 100 then
---                self.major_status_bar.ag:Stop()
---            elseif not self.major_status_bar.ag:IsPlaying() then
---                self.major_status_bar.ag:Play()
---            end
         end
         if minor_status then
             self.minor_status_bar:SetValue(minor_status)
---            if minor_status == 100 then
---                self.minor_status_bar.ag:Stop()
---            elseif not self.minor_status_bar.ag:IsPlaying() then
---                self.minor_status_bar.ag:Play()
---            end
         end
     end
 
@@ -454,7 +386,6 @@ do
     function m.dropdown(parent)
         id = id + 1
 
-        --    local frame = CreateFrame("Frame", nil, UIParent)
         local dropdown = CreateFrame('Frame', 'aux_dropdown'..id, parent, 'UIDropDownMenuTemplate')
 
         dropdown:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size, insets={top=5,bottom=5}})
@@ -475,7 +406,6 @@ do
         text:SetFont(Aux.gui.config.content_font, 13)
         text:SetShadowColor(0, 0, 0, 0)
 
-    --    frame:SetScript("OnHide", Dropdown_OnHide)
     --
     --    dropdown:ClearAllPoints()
     --    dropdown:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -7, 0)
@@ -547,20 +477,11 @@ do
 end
 
 function m.slider(frame, name)
---    local frame = CreateFrame('Frame', nil, UIParent)
---
---    frame:EnableMouse(true)
---    frame:SetScript("OnMouseDown", Frame_OnMouseDown)
---    frame:SetScript("OnEnter", Control_OnEnter)
---    frame:SetScript("OnLeave", Control_OnLeave)
---
 
     local slider = CreateFrame('Slider', name, frame)
     slider:SetOrientation('HORIZONTAL')
     slider:SetHeight(6)
     slider:SetHitRectInsets(0, 0, -8, -8)
---    slider:SetPoint('TOPLEFT', label, 'BOTTOMLEFT', 3, -4)
---    slider:SetPoint('TOPRIGHT', label, 'BOTTOMRIGHT', -6, -4)
     slider:SetValue(0)
     slider:SetBackdrop({ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size })
     slider:SetBackdropColor(unpack(m.config.frame_color))
@@ -580,15 +501,6 @@ function m.slider(frame, name)
     label:SetFont(m.config.content_font, m.config.normal_font_size)
     label:SetTextColor(unpack(m.config.label_color.enabled))
 
-
---    local lowtext = slider:CreateFontString(nil, 'ARTWORK')
---    lowtext:SetFont(TSMAPI.Design:GetContentFont('small'))
---    lowtext:SetPoint('TOPLEFT', slider, 'BOTTOMLEFT', 2, -4)
---
---    local hightext = slider:CreateFontString(nil, 'ARTWORK')
---    hightext:SetFont(TSMAPI.Design:GetContentFont('small'))
---    hightext:SetPoint('TOPRIGHT', slider, 'BOTTOMRIGHT', -2, -4)
---
     local editbox = CreateFrame('EditBox', nil, slider)
     editbox:SetAutoFocus(false)
     editbox:SetPoint('LEFT', slider, 'RIGHT', 5, 0)
@@ -599,11 +511,6 @@ function m.slider(frame, name)
     editbox:SetBackdrop({ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size })
     editbox:SetBackdropColor(unpack(m.config.content_color))
     editbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
---    editbox:SetScript('OnEnterPressed', EditBox_OnEnterPressed)
---    editbox:SetScript('OnEscapePressed', EditBox_OnEscapePressed)
---    editbox:SetScript('OnTextChanged', EditBox_OnTextChanged)
---    editbox:SetScript('OnEnter', Control_OnEnter)
---    editbox:SetScript('OnLeave', Control_OnLeave)
 --    editbox:SetFont(m.config.content_font, m.config.normal_font_size)
     editbox:SetFont(m.config.content_font, m.config.normal_button_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
@@ -616,23 +523,6 @@ function m.slider(frame, name)
 --    button:SetScript('OnClick', Button_OnClick)
 --    button:Hide()
 --
---    local widget = {
---        label       = label,
---        slider      = slider,
---        lowtext     = lowtext,
---        hightext    = hightext,
---        editbox     = editbox,
---        button		= button,
---        alignoffset = 25,
---        frame       = frame,
---        type        = Type
---    }
---    for method, func in pairs(methods) do
---        widget[method] = func
---    end
---    slider.obj, editbox.obj, button.obj, frame.obj = widget, widget, widget, widget
-
-
     slider.label = label
     slider.editbox = editbox
     return slider
