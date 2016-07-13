@@ -212,9 +212,16 @@ function public.execute(mode, filter_string)
         private.search_box:SetText(filter_string)
     end
 
+    if mode == 'search' and private.search_box:GetText() == private.current_search().filter_string then
+        mode = 'refresh'
+    end
+
     local queries, filters
-    if mode == 'refresh' then
+    if mode == 'refresh' or mode == 'resume' then
+        private.search_box:ClearFocus()
         private.search_box:SetText(private.current_search().filter_string)
+    end
+    if mode == 'refresh' then
         private.current_search().records = {}
         private.results_listing:SetDatabase(private.current_search().records)
     end
@@ -431,6 +438,7 @@ do
 
     function private.update_search()
         Aux.scan.abort(search_scan_id)
+        private.search_box:ClearFocus()
         private.search_box:SetText(searches[search_index].filter_string)
         private.results_listing:Reset()
         private.results_listing:SetDatabase(searches[search_index].records)

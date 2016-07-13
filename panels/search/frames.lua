@@ -24,7 +24,6 @@ function Aux.search_frame.create_frames(private, public)
         btn:SetHeight(25)
         btn:SetText(GREEN_FONT_COLOR_CODE..'Resume'..FONT_COLOR_CODE_CLOSE)
         btn:SetScript('OnClick', function()
-            private.search_box:ClearFocus()
             public.execute('resume')
         end)
         private.resume_button = btn
