@@ -208,6 +208,7 @@ function public.on_load()
 end
 
 function public.execute(mode, filter_string)
+
     if filter_string then
         private.search_box:SetText(filter_string)
     end
@@ -216,7 +217,8 @@ function public.execute(mode, filter_string)
         mode = 'refresh'
     end
 
-    local queries, filters
+    local queries, filters, current_query, current_page, total_queries, start_page, start_query
+
     if mode == 'refresh' or mode == 'resume' then
         private.search_box:ClearFocus()
         private.search_box:SetText(private.current_search().filter_string)
@@ -225,19 +227,30 @@ function public.execute(mode, filter_string)
         private.current_search().records = {}
         private.results_listing:SetDatabase(private.current_search().records)
     end
-    if mode == 'search' or mode == 'refresh' then
-        filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
-        if not filters then
-            return
-        end
 
-        queries = Aux.util.map(filters, function(filter)
-            return {
-                blizzard_query = filter.blizzard_query,
-                validator = filter.validator,
-            }
-        end)
+    filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
+    if not filters then
+        return
     end
+    queries = Aux.util.map(filters, function(filter)
+        return {
+            blizzard_query = filter.blizzard_query,
+            validator = filter.validator,
+        }
+    end)
+    total_queries = getn(queries)
+
+    if mode == 'resume' then
+        start_query, start_page = unpack(private.current_search().next)
+        for i=1,start_query-1 do
+            tremove(queries, 1)
+        end
+        queries[1].blizzard_query.first_page = (queries[1].blizzard_query.first_page or 0) + start_page - 1
+        private.results_listing:SetSelectedRecord()
+    else
+        start_query, start_page = 1, 1
+    end
+
     if mode == 'search' then
         tinsert(aux_recent_searches, 1, {
             filter_string = private.search_box:GetText(),
@@ -249,19 +262,16 @@ function public.execute(mode, filter_string)
         private.update_search_listings()
         private.new_search()
     end
-    if mode == 'resume' then
-        queries = private.current_search().continuation
-        private.results_listing:SetSelectedRecord()
-    end
+
     if mode == 'resume' or mode == 'refresh' then
-        private.current_search().continuation = nil
+        Aux.scan.abort(search_scan_id)
+        private.current_search().next = nil
         private.disable_resume()
     end
 
     private.update_tab(private.RESULTS)
 
     local search = private.current_search()
-    local current_query, current_page
     search_scan_id = Aux.scan.start{
         type = 'list',
         queries = queries,
@@ -275,16 +285,18 @@ function public.execute(mode, filter_string)
                 private.status_bar:set_text('Resuming scan...')
             end
         end,
-        on_page_loaded = function(page, total_pages)
-            current_page = page
-            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (page - 1) / total_pages)
-            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, getn(queries), page, total_pages))
+        on_page_loaded = function(_, total_pages)
+            current_page = current_page + 1
+            total_pages = max(current_page, total_pages)
+            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / (total_pages + start_page - 1))
+            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, (total_pages + start_page - 1)))
         end,
         on_page_scanned = function()
             private.results_listing:SetDatabase()
         end,
-        on_start_query = function(query_index)
-            current_query = query_index
+        on_start_query = function(query)
+            current_query = current_query and current_query + 1 or start_query
+            current_page = current_page and 0 or start_page - 1
         end,
         on_auction = function(auction_record)
             if getn(search.records) < 1000 then
@@ -306,13 +318,12 @@ function public.execute(mode, filter_string)
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Scanning')
 
-            for i=1,(current_query or 1)-1 do
-                tremove(queries, 1)
+            if current_query then
+                search.next = {current_query, current_page + 1}
+            else
+                search.next = {start_page, start_query}
             end
-            if queries[1].blizzard_query then
-                queries[1].blizzard_query.first_page = (current_page and (queries[1].blizzard_query.first_page or 0) + current_page or queries[1].blizzard_query.first_page)
-            end
-            search.continuation = queries
+
             if private.current_search() == search then
                 private.enable_resume()
             end
@@ -457,7 +468,7 @@ do
         if search_index > 0 then
             private.refresh_button:Enable()
         end
-        if searches[search_index].continuation then
+        if searches[search_index].next then
             private.enable_resume()
         else
             private.disable_resume()

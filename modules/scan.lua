@@ -233,7 +233,7 @@ function private.submit_query(k)
             private.wait_for_callback(
                 private.current_thread().params.on_page_loaded,
                 private.current_thread().page - (private.current_query().blizzard_query.first_page or 0) + 1,
-                max(1, private.last_page(private.current_thread().total_auctions) - (private.current_query().blizzard_query.first_page or 0) + 1),
+                private.last_page(private.current_thread().total_auctions) - (private.current_query().blizzard_query.first_page or 0) + 1,
                 k
             )
         end)
