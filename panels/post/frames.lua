@@ -21,8 +21,8 @@ function Aux.post_frame.create_frames(private, public)
     highlight:Hide()
     highlight:SetTexture(1, .9, .9, .1)
     AuxPostParametersItem:SetScript('OnEnter', function()
+        highlight:Show()
         if private.selected_item then
-            highlight:Show()
             Aux.info.set_tooltip(private.selected_item.itemstring, this, 'ANCHOR_RIGHT')
         end
     end)
