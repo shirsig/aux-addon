@@ -209,15 +209,86 @@ end
 
 function public.execute(mode, filter_string)
 
-    if filter_string then
-        private.search_box:SetText(filter_string)
+    filter_string = filter_string or private.search_box:GetText()
+    private.search_box:SetText(filter_string)
+
+    local queries = Aux.scan_util.parse_filter_string(filter_string)
+    if not queries then
+        return
+    elseif getn(queries) > 1 then
+        Aux.log('Invalid filter: The sniping mode does not support multiple queries')
     end
+    if queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
+        Aux.log('Invalid filter: The sniping mode does not support page range filters')
+    end
+
+    private.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
+
+    private.sniping_helper(private.current_search(), queries[1])
+end
+
+function private.sniping_helper(search, query)
+
+    local ignore_page = not query.blizzard_query.first_page
+    query.blizzard_query.first_page = query.blizzard_query.first_page or 0
+    query.blizzard_query.last_page = query.blizzard_query.last_page or 0
+
+    local sniping_map = {}
+    for _, record in search.records do
+        sniping_map[record.sniping_signature] = record
+    end
+
+    private.update_tab(private.RESULTS)
+
+    search_scan_id = Aux.scan.start{
+        type = 'list',
+        queries = {query},
+        on_scan_start = function()
+            private.status_bar:update_status(99.99, 99.99)
+            private.status_bar:set_text('Sniping ...')
+        end,
+        on_page_loaded = function(_, _, last_page)
+            query.blizzard_query.first_page = last_page - 1
+            query.blizzard_query.last_page = last_page - 1
+            if last_page == 1 then
+                ignore_page = false
+            end
+        end,
+        on_auction = function(auction_record)
+            if not ignore_page then
+                sniping_map[auction_record.sniping_signature] = auction_record
+            end
+        end,
+        on_complete = function()
+            if Aux.util.set_size(sniping_map) > 1000 then
+                StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
+            else
+                search.records = {}
+                for _, record in sniping_map do
+                    tinsert(search.records, record)
+                end
+                private.results_listing:SetDatabase(search.records)
+            end
+
+            private.sniping_helper(search, query)
+        end,
+        on_abort = function()
+            private.status_bar:update_status(100, 100)
+            private.status_bar:set_text('Done Sniping')
+        end,
+    }
+end
+
+function public.snipe(mode, filter_string)
+
+    filter_string = filter_string or private.search_box:GetText()
+    private.search_box:SetText(filter_string)
 
     if mode == 'search' and private.search_box:GetText() == private.current_search().filter_string then
         mode = 'refresh'
     end
 
-    local queries, filters, current_query, current_page, total_queries, start_page, start_query
+    local queries, current_query, current_page, total_queries, start_page, start_query
 
     if mode == 'refresh' or mode == 'resume' then
         private.search_box:ClearFocus()
@@ -228,16 +299,10 @@ function public.execute(mode, filter_string)
         private.results_listing:SetDatabase(private.current_search().records)
     end
 
-    filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
-    if not filters then
+    queries = Aux.scan_util.parse_filter_string(filter_string)
+    if not queries then
         return
     end
-    queries = Aux.util.map(filters, function(filter)
-        return {
-            blizzard_query = filter.blizzard_query,
-            validator = filter.validator,
-        }
-    end)
     total_queries = getn(queries)
 
     if mode == 'resume' then
@@ -252,15 +317,7 @@ function public.execute(mode, filter_string)
     end
 
     if mode == 'search' then
-        tinsert(aux_recent_searches, 1, {
-            filter_string = private.search_box:GetText(),
-            prettified = Aux.util.join(Aux.util.map(filters, function(filter) return filter.prettified end), ';'),
-        })
-        while getn(aux_recent_searches) > 50 do
-            tremove(aux_recent_searches)
-        end
-        private.update_search_listings()
-        private.new_search()
+        private.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
     end
 
     if mode == 'resume' or mode == 'refresh' then
@@ -475,9 +532,18 @@ do
         end
     end
 
-    function private.new_search()
+    function private.new_search(filter_string, prettified)
+        tinsert(aux_recent_searches, 1, {
+            filter_string = filter_string,
+            prettified = prettified,
+        })
+        while getn(aux_recent_searches) > 50 do
+            tremove(aux_recent_searches)
+        end
+        private.update_search_listings()
+
         tinsert(searches, search_index + 1, {
-            filter_string = private.search_box:GetText(),
+            filter_string = filter_string,
             records = {},
         })
         while getn(searches) > search_index + 1 do

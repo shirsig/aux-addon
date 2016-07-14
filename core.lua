@@ -2,12 +2,18 @@ function Aux_module(self, name)
     local module, data, is_public, private, public = {}, {}, {}, {}, {}
     setmetatable(private, {
         __newindex = function(_, key, value)
+            if data[key] ~= nil then
+                error('Multiple declarations of "'..key..'" in module"'..name..'"!')
+            end
             rawset(data, key, value)
             is_public[key] = nil
         end,
     })
     setmetatable(public, {
         __newindex = function(_, key, value)
+            if data[key] ~= nil then
+                error('Multiple declarations of "'..key..'" in module"'..name..'"!')
+            end
             rawset(data, key, value)
             is_public[key] = true
         end,
@@ -15,7 +21,7 @@ function Aux_module(self, name)
     setmetatable(data, {
         __newindex = function(_, key)
             if data[key] == nil then
-                error('Assignment of undeclared module attribute "'..key..'"!')
+                error('Assignment of undeclared module attribute "'..key..'" in module"'..name..'"!')
             end
         end,
     })
@@ -32,7 +38,6 @@ end
 
 function Aux_addon()
     local addon = {
-        metadata = metadata,
         modules = {},
         module = Aux_module,
     }
@@ -472,9 +477,9 @@ function Aux.show_elements(elements)
     end
 end
 
-function Aux.is_player(name)
+function Aux.is_player(name, current)
     local realm = GetCVar('realmName')
-    return Aux.util.safe_index(aux_characters, realm, name) or UnitName('player') == name
+    return (not current and Aux.util.safe_index(aux_characters, realm, name)) or UnitName('player') == name
 end
 
 function Aux.unmodified()
@@ -493,7 +498,7 @@ function Aux.hook(name, handler, object)
     end
 
     if orig[name] then
-        error('"'..name..'"'..'is already hooked!')
+        error('"'..name..'" is already hooked!')
     end
 
     orig[name] = object[name]

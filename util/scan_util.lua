@@ -281,7 +281,7 @@ m.filters = {
                     return vendor_price and vendor_price * auction_record.aux_quantity - auction_record.bid_price >= amount
                 end
             else
-                return false, {}, 'Erroneous bid vendor profit Modifier'
+                return false, {}, 'Erroneous bid vendor profit modifier'
             end
         end
     },
@@ -296,7 +296,7 @@ m.filters = {
                     return auction_record.buyout_price > 0 and vendor_price and vendor_price * auction_record.aux_quantity - auction_record.buyout_price >= amount
                 end
             else
-                return false, {}, 'Erroneous buyout vendor profit Modifier'
+                return false, {}, 'Erroneous buyout vendor profit modifier'
             end
         end
     },
@@ -424,7 +424,8 @@ function m.parse_filter_string(filter_string)
             Aux.log('Invalid filter: '..error)
             return
         elseif filter.name and strlen(filter.name) > 63 then
-
+            Aux.log('Invalid filter: The name may not longer than 63 characters')
+            return
         else
             tinsert(filters, filter)
         end
