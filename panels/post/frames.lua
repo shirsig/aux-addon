@@ -16,12 +16,18 @@ function Aux.post_frame.create_frames(private, public)
         end
         ClearCursor()
     end)
+    local highlight = AuxPostParametersItem:CreateTexture()
+    highlight:SetAllPoints(AuxPostParametersItem)
+    highlight:Hide()
+    highlight:SetTexture(1, .9, .9, .1)
     AuxPostParametersItem:SetScript('OnEnter', function()
         if private.selected_item then
+            highlight:Show()
             Aux.info.set_tooltip(private.selected_item.itemstring, this, 'ANCHOR_RIGHT')
         end
     end)
     AuxPostParametersItem:SetScript('OnLeave', function()
+        highlight:Hide()
         GameTooltip:Hide()
     end)
 

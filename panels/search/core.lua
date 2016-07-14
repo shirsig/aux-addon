@@ -439,11 +439,11 @@ function private.disable_resume()
 end
 
 do
-    local searches = { [0] = {
+    local searches = { [1] = {
         filter_string = '',
         records = {},
     }}
-    local search_index = 0
+    local search_index = 1
 
     function private.current_search()
         return searches[search_index]
