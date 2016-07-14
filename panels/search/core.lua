@@ -428,14 +428,12 @@ end
 
 function private.enable_resume()
     private.resume_button:Show()
-    private.refresh_button:ClearAllPoints()
-    private.refresh_button:SetPoint('RIGHT', private.resume_button, 'LEFT', -4, 0)
+    private.search_box:SetPoint('RIGHT', private.resume_button, 'LEFT', -4, 0)
 end
 
 function private.disable_resume()
     private.resume_button:Hide()
-    private.refresh_button:ClearAllPoints()
-    private.refresh_button:SetPoint('TOPRIGHT', -5, -8)
+    private.search_box:SetPoint('RIGHT', private.refresh_button, 'LEFT', -4, 0)
 end
 
 do

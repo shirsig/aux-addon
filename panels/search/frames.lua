@@ -22,23 +22,23 @@ function Aux.search_frame.create_frames(private, public)
         btn:SetPoint('TOPRIGHT', -5, -8)
         btn:SetWidth(70)
         btn:SetHeight(25)
-        btn:SetText(GREEN_FONT_COLOR_CODE..'Resume'..FONT_COLOR_CODE_CLOSE)
-        btn:SetScript('OnClick', function()
-            public.execute('resume')
-        end)
-        private.resume_button = btn
-    end
-    do
-        local btn = Aux.gui.button(AuxSearchFrame, 22)
-        btn:SetPoint('TOPRIGHT', -5, -8)
-        btn:SetWidth(70)
-        btn:SetHeight(25)
         btn:SetText('Refresh')
         btn:SetScript('OnClick', function()
             public.execute('refresh')
         end)
         btn:Disable()
         private.refresh_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrame, 22)
+        btn:SetPoint('RIGHT', private.refresh_button, 'LEFT', -4, 0)
+        btn:SetWidth(70)
+        btn:SetHeight(25)
+        btn:SetText(GREEN_FONT_COLOR_CODE..'Resume'..FONT_COLOR_CODE_CLOSE)
+        btn:SetScript('OnClick', function()
+            public.execute('resume')
+        end)
+        private.resume_button = btn
     end
     do
         local editbox = Aux.gui.editbox(AuxSearchFrame)
