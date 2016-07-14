@@ -176,6 +176,13 @@ local methods = {
         st.sortInfo.col = abs(defaultCol or 1)
         st.sortInfo.ascending = not defaultCol or defaultCol > 0
         st.updateSort = true
+        for _, headCol in st.headCols do
+            if value then
+                headCol:EnableMouse(true)
+            else
+                headCol:EnableMouse(false)
+            end
+        end
         st:RefreshRows()
     end,
 

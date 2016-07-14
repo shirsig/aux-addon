@@ -78,6 +78,7 @@ function Aux.post_frame.create_frames(private, public)
         { name='Buy/ea', width=.23, align='RIGHT' },
         { name='Buy Pct', width=.12, align='CENTER' }
     })
+    private.auction_listing:EnableSorting(false)
     private.auction_listing:DisableSelection(true)
     private.auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
         local column_index = Aux.util.index_of(column, column.row.cols)

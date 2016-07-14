@@ -125,13 +125,24 @@ function private.update_auction_listing()
                 record = auction_record,
             })
         end
-        sort(auction_rows, function(a, b) return Aux.sort.multi_lt(
-            a.record.unit_buyout_price == 0 and Aux.huge or a.record.unit_buyout_price, b.record.unit_buyout_price == 0 and Aux.huge or b.record.unit_buyout_price,
-            a.record.unit_blizzard_bid, b.record.unit_blizzard_bid,
-            a.record.stack_size, b.record.stack_size,
-            b.record.own and 1 or 0, a.record.own and 1 or 0,
-            a.record.duration, b.record.duration
-        ) end)
+        sort(auction_rows, function(a, b)
+            return Aux.sort.multi_lt(
+                {
+                    a.record.unit_buyout_price == 0 and Aux.huge or a.record.unit_buyout_price,
+                    a.record.unit_blizzard_bid,
+                    a.record.stack_size,
+                    b.record.own and 1 or 0,
+                    a.record.duration,
+                },
+                {
+                    b.record.unit_buyout_price == 0 and Aux.huge or b.record.unit_buyout_price,
+                    b.record.unit_blizzard_bid,
+                    b.record.stack_size,
+                    a.record.own and 1 or 0,
+                    b.record.duration,
+                }
+            )
+        end)
     end
     private.auction_listing:SetData(auction_rows)
 end

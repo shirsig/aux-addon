@@ -692,7 +692,7 @@ local methods = {
         self.isSorted = nil
         self:SetSelectedRecord(nil, true)
 
-        sort(self.records, function(a, b) return Aux.sort.multi_lt(a.search_signature, b.search_signature, tostring(a), tostring(b)) end)
+        sort(self.records, function(a, b) return Aux.sort.multi_lt({a.search_signature, tostring(a)}, {b.search_signature, tostring(b)}) end)
 
         local records = self.records
         if getn(records) == 0 then return end

@@ -1,8 +1,52 @@
-Aux = {
-    version = '2.15.9',
-    blizzard_ui_shown = false,
-	orig = {},
-}
+function Aux_module(self, name)
+    local module, data, is_public, private, public = {}, {}, {}, {}, {}
+    setmetatable(private, {
+        __newindex = function(_, key, value)
+            rawset(data, key, value)
+            is_public[key] = nil
+        end,
+    })
+    setmetatable(public, {
+        __newindex = function(_, key, value)
+            rawset(data, key, value)
+            is_public[key] = true
+        end,
+    })
+    setmetatable(data, {
+        __newindex = function(_, key)
+            if data[key] == nil then
+                error('Assignment of undeclared module attribute "'..key..'"!')
+            end
+        end,
+    })
+    setmetatable(module, {
+        __index = function(_, key)
+            if is_public[key] then
+                return data[key]
+            end
+        end,
+    })
+    self.modules[name] = module
+    return data, private, public
+end
+
+function Aux_addon()
+    local addon = {
+        metadata = metadata,
+        modules = {},
+        module = Aux_module,
+    }
+    setmetatable(addon, {
+        __index = addon.modules,
+    })
+    return addon
+end
+
+Aux = Aux_addon()
+
+Aux.version = '2.15.10'
+Aux.blizzard_ui_shown = false
+Aux.orig = {}
 
 function Aux.on_load()
 	Aux.log('Aux v'..Aux.version..' loaded.')
@@ -45,6 +89,12 @@ function Aux.on_load()
                 ShowUIPanel(AuctionFrame)
             end
         end)
+    end
+
+    for _, module in Aux.modules do
+        if module.LOAD then
+            module:LOAD()
+        end
     end
 
     Aux.cache.on_load()
@@ -443,11 +493,19 @@ function Aux.hook(name, handler, object)
     end
 
     if orig[name] then
-        error('Already got a hook for '..name)
+        error('"'..name..'"'..'is already hooked!')
     end
 
     orig[name] = object[name]
     object[name] = handler
 end
 
+function Aux.tab(name)
+    local private, public = Aux.module(name)
+    tinsert(Aux.tabs, Aux[name])
+    return private, public
+end
+
 Aux.huge = 2^100000
+
+Aux.null = {}

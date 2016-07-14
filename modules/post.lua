@@ -92,5 +92,4 @@ function public.start(item_key, stack_size, duration, unit_start_price, unit_buy
 		posted = 0,
 		callback = callback,
 	}
-
 end

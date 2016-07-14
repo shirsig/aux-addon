@@ -1,11 +1,11 @@
-local private, public = {}, {}
-Aux.control = public
+local m, private, public = Aux:module'control'
 
 private.event_listeners = {}
 private.threads = {}
+public.thread_id = Aux.null
 
 function public.on_event()
-	for listener, _ in pairs(private.event_listeners) do
+	for listener, _ in m.event_listeners do
 		if event == listener.event and not listener.deleted then
 			listener.action()
 		end
@@ -13,22 +13,22 @@ function public.on_event()
 end
 
 function public.on_update()
-	private.event_listeners = Aux.util.set_filter(private.event_listeners, function(l) return not l.deleted end)
+	m.event_listeners = Aux.util.set_filter(m.event_listeners, function(l) return not l.deleted end)
 	local threads = {}
-	for thread_id, thread in pairs(private.threads) do
+	for thread_id, thread in m.threads do
 		if not thread.killed then
 			threads[thread_id] = thread
 		end
 	end
-	private.threads = threads
+	m.threads = threads
 
-	for thread_id, thread in pairs(private.threads) do
+	for thread_id, thread in m.threads do
 		if not thread.killed then
 			local k = thread.k
 			thread.k = nil
-			public.thread_id = thread_id
+			m.thread_id = thread_id
 			k()
-			public.thread_id = nil
+			m.thread_id = Aux.null
 			if not thread.k then
 				thread.killed = true
 			end
@@ -46,14 +46,14 @@ function public.event_listener(event, action)
 	end
 	
 	function self:start()
-		Aux.util.set_add(private.event_listeners, listener)
+		Aux.util.set_add(m.event_listeners, listener)
 		AuxControlFrame:RegisterEvent(event)
 		return self
 	end
 	
 	function self:stop()
 		listener.deleted = true
-		if not Aux.util.any(Aux.util.set_to_array(private.event_listeners), function(l) return l.event == event end) then
+		if not Aux.util.any(Aux.util.set_to_array(m.event_listeners), function(l) return l.event == event end) then
 			AuxControlFrame:UnregisterEvent(event)
 		end
 		return self
@@ -63,7 +63,7 @@ function public.event_listener(event, action)
 end
 
 function public.on_next_event(event, callback)
-	local listener = public.event_listener(event)
+	local listener = m.event_listener(event)
 	
 	listener:set_action(function()
 		listener:stop()
@@ -74,12 +74,12 @@ function public.on_next_event(event, callback)
 end
 
 function public.on_next_update(callback)
-	return public.new_thread(callback)
+	return m.new_thread(callback)
 end
 
 function public.as_soon_as(p, callback)
-	return public.new_thread(function()
-		return public.wait_until(p, callback)
+	return m.new_thread(function()
+		return m.wait_until(p, callback)
 	end)
 end
 
@@ -88,20 +88,25 @@ do
 	function public.new_thread(k)
 		local thread_id = next_thread_id
 		next_thread_id = next_thread_id + 1
-		private.threads[thread_id] = { k = k }
+		m.threads[thread_id] = { k = k }
 		return thread_id
 	end
 end
 
 function public.kill_thread(thread_id)
-	if thread_id and private.threads[thread_id] then
-		private.threads[thread_id].killed = true
+	if m.threads[thread_id] then
+		m.threads[thread_id].killed = true
 	end
 end
 
 function public.wait(...)
-	local k = tremove(arg, 1)
-	private.threads[public.thread_id].k = function() return k(unpack(arg)) end
+	if type(arg[1]) == 'number' then
+		local count = tremove(arg, 1)
+		m.wait_until(function() count = count - 1 return count <= 0 end, unpack(arg))
+	else
+		local k = tremove(arg, 1)
+		m.threads[m.thread_id].k = function() return k(unpack(arg)) end
+	end
 end
 
 function public.wait_until(p, ...)
@@ -109,6 +114,6 @@ function public.wait_until(p, ...)
 	if p() then
 		return k(unpack(arg))
 	else
-		return public.wait(public.wait_until, p, function() return k(unpack(arg)) end)
+		return m.wait(m.wait_until, p, function() return k(unpack(arg)) end)
 	end
 end

@@ -37,11 +37,17 @@ function public.compare_from_lt(lt)
     end
 end
 
-function public.multi_lt(...)
-    for i=1,arg.n-1,2 do
-        if arg[i] ~= arg[i+1] then
-            return arg[i] < arg[i+1]
+function public.multi_lt(xs, ys)
+    local i = 1
+    while true do
+        if xs[i] and ys[i] and xs[i] ~= ys[i] then
+            return xs[i] < ys[i]
+        elseif not xs[i] and ys[i] then
+            return true
+        elseif not ys[i] then
+            return false
         end
+
+        i = i + 1
     end
-    return false
 end
