@@ -49,7 +49,7 @@ end
 
 Aux = Aux_addon()
 
-Aux.version = '2.16.1'
+Aux.version = '2.16.2'
 Aux.blizzard_ui_shown = false
 Aux.orig = {}
 
