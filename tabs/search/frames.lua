@@ -1,4 +1,4 @@
-Aux.search_frame.FRAMES(function(m, public, private)
+Aux.search_tab.FRAMES(function(m, public, private)
     do
         local btn = Aux.gui.button(AuxSearchFrame, 22)
         btn:SetPoint('TOPLEFT', 5, -8)

@@ -1,4 +1,4 @@
-local m, public, private = Aux.tab(4, 'bids_frame')
+local m, public, private = Aux.tab(4, 'bids_tab')
 
 local auction_records
 

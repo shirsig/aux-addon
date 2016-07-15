@@ -2,7 +2,7 @@
     <Frame name="AuxSearchFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
         <Scripts>
             <OnUpdate>
-                Aux.search_frame.on_update()
+                Aux.search_tab.on_update()
             </OnUpdate>
         </Scripts>
 		<Frames>

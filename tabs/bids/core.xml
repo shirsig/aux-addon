@@ -2,7 +2,7 @@
     <Frame name="AuxBidsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Scripts>
 			<OnUpdate>
-				Aux.bids_frame.on_update()
+				Aux.bids_tab.on_update()
 			</OnUpdate>
 		</Scripts>
 		<Frames>

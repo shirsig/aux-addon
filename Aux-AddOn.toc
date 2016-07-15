@@ -32,20 +32,20 @@ tables\auction_listing.lua
 tables\item_listing.lua
 
 
-panels\search\core.xml
-panels\search\core.lua
-panels\search\frames.lua
+tabs\search\core.xml
+tabs\search\core.lua
+tabs\search\frames.lua
 
-panels\post\core.xml
-panels\post\core.lua
-panels\post\frames.lua
+tabs\post\core.xml
+tabs\post\core.lua
+tabs\post\frames.lua
 
-panels\auctions\core.xml
-panels\auctions\core.lua
-panels\auctions\frames.lua
+tabs\auctions\core.xml
+tabs\auctions\core.lua
+tabs\auctions\frames.lua
 
-panels\bids\core.xml
-panels\bids\core.lua
-panels\bids\frames.lua
+tabs\bids\core.xml
+tabs\bids\core.lua
+tabs\bids\frames.lua
 
 

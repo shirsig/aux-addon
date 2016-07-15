@@ -1,4 +1,4 @@
-Aux.post_frame.FRAMES(function(m, public, private)
+Aux.post_tab.FRAMES(function(m, public, private)
     Aux.gui.vertical_line(AuxPostFrameContent, 219)
 
     AuxPostParametersItem:EnableMouse()
@@ -54,9 +54,9 @@ Aux.post_frame.FRAMES(function(m, public, private)
                 m.set_item(this.item_record)
             elseif arg1 == 'RightButton' then
                 Aux.tab_group:set_tab(1)
-                Aux.search_frame.set_filter(strlower(Aux.info.item(this.item_record.item_id).name)..'/exact')
-                Aux.search_frame.disable_sniping()
-                Aux.search_frame.execute()
+                Aux.search_tab.set_filter(strlower(Aux.info.item(this.item_record.item_id).name)..'/exact')
+                Aux.search_tab.disable_sniping()
+                Aux.search_tab.execute()
             end
         end,
         function()

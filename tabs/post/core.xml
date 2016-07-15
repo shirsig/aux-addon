@@ -6,7 +6,7 @@
         </Anchors>
         <Scripts>
             <OnUpdate>
-                Aux.post_frame.on_update()
+                Aux.post_tab.on_update()
             </OnUpdate>
         </Scripts>
 		<Frames>

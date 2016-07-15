@@ -344,6 +344,7 @@ function private.setup_hooks()
 
     m.hook('GetOwnerAuctionItems', m.GetOwnerAuctionItems)
     m.hook('PickupContainerItem', m.PickupContainerItem)
+    m.hook('PickupInventoryItem', m.PickupInventoryItem)
     m.hook('SetItemRef', m.SetItemRef)
     m.hook('UseContainerItem', m.UseContainerItem)
     m.hook('AuctionFrameAuctions_OnEvent', m.AuctionFrameAuctions_OnEvent)
@@ -426,7 +427,11 @@ do -- TODO make it work for other ways to pick up things
         last_picked_up = { bag, slot }
         return m.orig.PickupContainerItem(unpack(arg))
     end
-    function private.cursor_item()
+    function private.PickupInventoryItem(...)
+        last_picked_up = nil
+        return m.orig.PickupInventoryItem(unpack(arg))
+    end
+    function public.cursor_item()
         if last_picked_up and CursorHasItem() then
             return m.info.container_item(unpack(last_picked_up))
         end
@@ -438,9 +443,9 @@ function private.SetItemRef(...)
     if AuxSearchFrame:IsVisible() and button == 'RightButton' then
         local item_info = m.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
-            m.search_frame.set_filter(strlower(item_info.name)..'/exact')
-            m.search_frame.disable_sniping()
-            m.search_frame.execute()
+            m.search_tab.set_filter(strlower(item_info.name)..'/exact')
+            m.search_tab.disable_sniping()
+            m.search_tab.execute()
             return
         end
     end
@@ -457,9 +462,9 @@ function private.UseContainerItem(...)
         local item_info = m.info.container_item(bag, slot)
         item_info = item_info and m.info.item(item_info.item_id)
         if item_info then
-            m.search_frame.set_filter(strlower(item_info.name)..'/exact')
-            m.search_frame.disable_sniping()
-            m.search_frame.execute()
+            m.search_tab.set_filter(strlower(item_info.name)..'/exact')
+            m.search_tab.disable_sniping()
+            m.search_tab.execute()
         end
         return
     end
@@ -467,7 +472,7 @@ function private.UseContainerItem(...)
     if AuxPostFrame:IsVisible() then
         local item_info = m.info.container_item(bag, slot)
         if item_info then
-            m.post_frame.select_item(item_info.item_key)
+            m.post_tab.select_item(item_info.item_key)
         end
         return
     end

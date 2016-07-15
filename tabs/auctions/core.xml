@@ -2,7 +2,7 @@
     <Frame name="AuxAuctionsFrame" hidden="true" parent="AuxFrame" setAllPoints="true">
 		<Scripts>
 			<OnUpdate>
-				Aux.auctions_frame.on_update()
+				Aux.auctions_tab.on_update()
 			</OnUpdate>
 		</Scripts>
 		<Frames>

@@ -1,4 +1,4 @@
-local m, public, private = Aux.tab(2, 'post_frame')
+local m, public, private = Aux.tab(2, 'post_tab')
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}

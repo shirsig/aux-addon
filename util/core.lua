@@ -64,7 +64,7 @@ function public.inventory()
 		end
 
 		if bag <= 4 then
-			return { bag, slot }, public.bag_type(bag)
+			return { bag, slot }, m.bag_type(bag)
 		end
 	end
 end

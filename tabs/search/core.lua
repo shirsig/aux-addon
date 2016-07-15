@@ -1,4 +1,4 @@
-local m, public, private = Aux.tab(1, 'search_frame')
+local m, public, private = Aux.tab(1, 'search_tab')
 
 aux_favorite_searches = {}
 aux_recent_searches = {}
