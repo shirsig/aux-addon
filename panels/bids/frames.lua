@@ -1,19 +1,19 @@
-function Aux.bids_frame.create_frames(private, public)
+Aux.bids_frame.FRAMES(function(m, private, public)
     private.listing = Aux.auction_listing.CreateAuctionResultsTable(AuxBidsFrameListing, Aux.auction_listing.bids_config)
-    private.listing:SetSort(1,2,3,4,5,6,7,8)
-    private.listing:Reset()
-    private.listing:SetHandler('OnCellClick', function(cell, button)
-        if IsAltKeyDown() and private.listing:GetSelection().record == cell.row.data.record then
-            if button == 'LeftButton' and private.buyout_button:IsEnabled() then
-                private.buyout_button:Click()
-            elseif button == 'RightButton' and private.bid_button:IsEnabled() then
-                private.bid_button:Click()
+    m.listing:SetSort(1,2,3,4,5,6,7,8)
+    m.listing:Reset()
+    m.listing:SetHandler('OnCellClick', function(cell, button)
+        if IsAltKeyDown() and m.listing:GetSelection().record == cell.row.data.record then
+            if button == 'LeftButton' and m.buyout_button:IsEnabled() then
+                m.buyout_button:Click()
+            elseif button == 'RightButton' and m.bid_button:IsEnabled() then
+                m.bid_button:Click()
             end
         end
     end)
-    private.listing:SetHandler('OnSelectionChanged', function(rt, datum)
+    m.listing:SetHandler('OnSelectionChanged', function(rt, datum)
         if not datum then return end
-        private.find_auction(datum.record)
+        m.find_auction(datum.record)
     end)
 
     do
@@ -27,7 +27,7 @@ function Aux.bids_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxBidsFrame, 16)
-        btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Bid')
@@ -36,7 +36,7 @@ function Aux.bids_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxBidsFrame, 16)
-        btn:SetPoint('TOPLEFT', private.bid_button, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.bid_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Buyout')
@@ -45,12 +45,12 @@ function Aux.bids_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxBidsFrame, 16)
-        btn:SetPoint('TOPLEFT', private.buyout_button, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.buyout_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Refresh')
         btn:SetScript('OnClick', function()
-            public.scan_bids()
+            m.scan_bids()
         end)
     end
-end
+end)

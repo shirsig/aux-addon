@@ -1,5 +1,4 @@
-local private, public = {}, {}
-Aux.post = public
+local m, private, public = Aux.module'post'
 
 local state
 
@@ -19,14 +18,14 @@ function private.process()
 
 		return Aux.control.wait_until(function() return stacking_complete end, function()
 			if target_slot then
-				return private.post_auction(target_slot, private.process)
+				return m.post_auction(target_slot, m.process)
 			else
-				return public.stop()
+				return m.stop()
 			end
 		end)
 	end
 
-	return public.stop()
+	return m.stop()
 end
 
 function private.post_auction(slot, k)
@@ -57,7 +56,7 @@ function private.post_auction(slot, k)
 		end)
 
 	else
-		return public.stop()
+		return m.stop()
 	end
 end
 
@@ -77,9 +76,9 @@ function public.stop()
 end
 
 function public.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, callback)
-	public.stop()
+	m.stop()
 
-	local thread_id = Aux.control.new_thread(private.process)
+	local thread_id = Aux.control.new_thread(m.process)
 
 	state = {
 		thread_id = thread_id,

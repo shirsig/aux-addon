@@ -1,15 +1,15 @@
-function Aux.auctions_frame.create_frames(private, public)
+Aux.auctions_frame.FRAMES(function(m, private, public)
     private.listing = Aux.auction_listing.CreateAuctionResultsTable(AuxAuctionsFrameListing, Aux.auction_listing.auctions_config)
-    private.listing:SetSort(1,2,3,4,5,6,7,8)
-    private.listing:Reset()
-    private.listing:SetHandler('OnCellClick', function(cell, button)
-        if IsAltKeyDown() and private.listing:GetSelection().record == cell.row.data.record and private.cancel_button:IsEnabled() then
-            private.cancel_button:Click()
+    m.listing:SetSort(1,2,3,4,5,6,7,8)
+    m.listing:Reset()
+    m.listing:SetHandler('OnCellClick', function(cell, button)
+        if IsAltKeyDown() and m.listing:GetSelection().record == cell.row.data.record and m.cancel_button:IsEnabled() then
+            m.cancel_button:Click()
         end
     end)
-    private.listing:SetHandler('OnSelectionChanged', function(rt, datum)
+    m.listing:SetHandler('OnSelectionChanged', function(rt, datum)
         if not datum then return end
-        private.find_auction(datum.record)
+        m.find_auction(datum.record)
     end)
 
     do
@@ -23,7 +23,7 @@ function Aux.auctions_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxAuctionsFrame, 16)
-        btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Cancel')
@@ -32,12 +32,12 @@ function Aux.auctions_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxAuctionsFrame, 16)
-        btn:SetPoint('TOPLEFT', private.cancel_button, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.cancel_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Refresh')
         btn:SetScript('OnClick', function()
-            public.scan_auctions()
+            m.scan_auctions()
         end)
     end
-end
+end)

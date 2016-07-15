@@ -1,6 +1,4 @@
-local private, public = {}, {}
-
-Aux.item_listing = public
+local m, private, public = Aux.module'item_listing'
 
 local ROW_HEIGHT = 38
 
@@ -53,7 +51,7 @@ function public.create(parent, on_click, on_enter, on_leave, selected)
 
 	local scroll_frame = CreateFrame('ScrollFrame', name..'ScrollFrame', parent, 'FauxScrollFrameTemplate')
 	scroll_frame:SetScript('OnVerticalScroll', function(self, offset)
-		FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() public.render(this.item_listing) end)
+		FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() m.render(this.item_listing) end)
 	end)
 	scroll_frame:SetPoint('TOPLEFT', content, 'TOPLEFT', 0, 15)
 	scroll_frame:SetPoint('BOTTOMRIGHT', content, 'BOTTOMRIGHT', -4, -15)
@@ -117,5 +115,5 @@ end
 
 function public.populate(item_listing, item_records)
 	item_listing.item_records = item_records
-	public.render(item_listing)
+	m.render(item_listing)
 end

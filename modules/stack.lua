@@ -1,5 +1,4 @@
-local private, public = {}, {}
-Aux.stack = public
+local m, private, public = Aux.module'stack'
 
 local state
 
@@ -25,7 +24,7 @@ end
 
 function private.find_item_slot(partial)
 	for slot in Aux.util.inventory() do
-		if private.matching_item(slot, partial) and not Aux.util.table_eq(slot, state.target_slot) then
+		if m.matching_item(slot, partial) and not Aux.util.table_eq(slot, state.target_slot) then
 			return slot
 		end
 	end
@@ -46,7 +45,7 @@ end
 
 function private.find_charge_item_slot()
 	for slot in Aux.util.inventory() do
-		if private.matching_item(slot) and private.charges(slot) == state.target_size then
+		if m.matching_item(slot) and m.charges(slot) == state.target_size then
 			return slot
 		end
 	end
@@ -54,57 +53,57 @@ end
 
 function private.move_item(from_slot, to_slot, amount, k)
 
-	if private.locked(from_slot) or private.locked(to_slot) then
+	if m.locked(from_slot) or m.locked(to_slot) then
 		return Aux.control.wait(k)
 	end
 
-	amount = min(private.max_stack(from_slot) - private.stack_size(to_slot), private.stack_size(from_slot), amount)
-	local expected_size = private.stack_size(to_slot) + amount
+	amount = min(m.max_stack(from_slot) - m.stack_size(to_slot), m.stack_size(from_slot), amount)
+	local expected_size = m.stack_size(to_slot) + amount
 
 	ClearCursor()
 	SplitContainerItem(from_slot[1], from_slot[2], amount)
 	PickupContainerItem(unpack(to_slot))
 
-	return Aux.control.wait_until(function() return private.stack_size(to_slot) == expected_size end, k)
+	return Aux.control.wait_until(function() return m.stack_size(to_slot) == expected_size end, k)
 end
 
 function private.process()
 
-	if not state.target_slot or not private.matching_item(state.target_slot) then
-		state.target_slot = private.find_item_slot()
+	if not state.target_slot or not m.matching_item(state.target_slot) then
+		state.target_slot = m.find_item_slot()
 		if not state.target_slot then
-			return public.stop()
+			return m.stop()
 		end
 	end
 
-	if private.charges(state.target_slot) then
-		state.target_slot = private.find_charge_item_slot()
-		return public.stop()
+	if m.charges(state.target_slot) then
+		state.target_slot = m.find_charge_item_slot()
+		return m.stop()
 	end
 
-	if private.stack_size(state.target_slot) > state.target_size then
-		local slot = private.find_item_slot(true) or private.find_empty_slot()
+	if m.stack_size(state.target_slot) > state.target_size then
+		local slot = m.find_item_slot(true) or m.find_empty_slot()
 		if slot then
-			return private.move_item(
+			return m.move_item(
 				state.target_slot,
 				slot,
-				private.stack_size(state.target_slot) - state.target_size,
-				private.process
+				m.stack_size(state.target_slot) - state.target_size,
+				m.process
 			)
 		end
-	elseif private.stack_size(state.target_slot) < state.target_size then
-		local slot = private.find_item_slot()
+	elseif m.stack_size(state.target_slot) < state.target_size then
+		local slot = m.find_item_slot()
 		if slot then
-			return private.move_item(
+			return m.move_item(
 				slot,
 				state.target_slot,
-				state.target_size - private.stack_size(state.target_slot),
-				private.process
+				state.target_size - m.stack_size(state.target_slot),
+				m.process
 			)
 		end
 	end
 		
-	return public.stop()
+	return m.stop()
 end
 
 function public.stop()
@@ -112,7 +111,7 @@ function public.stop()
 		Aux.control.kill_thread(state.thread_id)
 
 		local callback, slot = state.callback, state.target_slot
-		if slot and not private.matching_item(slot) then
+		if slot and not m.matching_item(slot) then
 			slot = nil
 		end
 		
@@ -125,9 +124,9 @@ function public.stop()
 end
 
 function public.start(item_key, size, callback)
-	public.stop()
+	m.stop()
 
-	local thread_id = Aux.control.new_thread(private.process)
+	local thread_id = Aux.control.new_thread(m.process)
 
 	state = {
 		thread_id = thread_id,

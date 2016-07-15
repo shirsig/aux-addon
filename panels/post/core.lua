@@ -1,13 +1,37 @@
-local private, public = {}, {}
-Aux.post_frame = public
+local m, private, public = Aux.tab(2, 'post_frame')
+
+local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
+local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
 local existing_auctions = {}
 local inventory_records
 local scan_id = 0
 
-local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
+private.selected_item = nil
+private.refresh = nil
 
-local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
+function public.FRAMES(f)
+    private.create_frames = f
+end
+
+function public.LOAD()
+    m.create_frames(m, private, public)
+end
+
+function public.OPEN()
+    m.deposit:SetText('Deposit: '..Aux.money.to_string(0, nil, nil, nil, Aux.gui.inline_color({255, 254, 250, 1})))
+
+    m.set_unit_start_price(0)
+    m.set_unit_buyout_price(0)
+
+    m.update_inventory_records()
+
+    m.refresh = true
+end
+
+function public.CLOSE()
+    m.selected_item = nil
+end
 
 function private.default_settings()
     return {
@@ -20,7 +44,7 @@ function private.default_settings()
 end
 
 function private.read_settings(item_key)
-    item_key = item_key or private.selected_item.key
+    item_key = item_key or m.selected_item.key
     local dataset = Aux.persistence.load_dataset()
     dataset.post = dataset.post or {}
 
@@ -28,13 +52,13 @@ function private.read_settings(item_key)
     if dataset.post[item_key] then
         settings = Aux.persistence.read(settings_schema, dataset.post[item_key])
     else
-        settings = private.default_settings()
+        settings = m.default_settings()
     end
     return settings
 end
 
 function private.write_settings(settings, item_key)
-    item_key = item_key or private.selected_item.key
+    item_key = item_key or m.selected_item.key
 
     local dataset = Aux.persistence.load_dataset()
     dataset.post = dataset.post or {}
@@ -43,21 +67,21 @@ function private.write_settings(settings, item_key)
 end
 
 function private.get_unit_start_price()
-    local money_text = private.unit_start_price:GetText()
+    local money_text = m.unit_start_price:GetText()
     return Aux.money.from_string(money_text) or (tonumber(money_text) and tonumber(money_text) * 10000) or 0
 end
 
 function private.set_unit_start_price(amount)
-    private.unit_start_price:SetText(Aux.money.to_string(amount, true, nil, 3))
+    m.unit_start_price:SetText(Aux.money.to_string(amount, true, nil, 3))
 end
 
 function private.get_unit_buyout_price()
-    local money_text = private.unit_buyout_price:GetText()
+    local money_text = m.unit_buyout_price:GetText()
     return Aux.money.from_string(money_text) or (tonumber(money_text) and tonumber(money_text) * 10000) or 0
 end
 
 function private.set_unit_buyout_price(amount)
-    private.unit_buyout_price:SetText(Aux.money.to_string(amount, true, nil, 3))
+    m.unit_buyout_price:SetText(Aux.money.to_string(amount, true, nil, 3))
 end
 
 function private.update_inventory_listing()
@@ -65,9 +89,9 @@ function private.update_inventory_listing()
         return
     end
 
-    Aux.item_listing.populate(private.item_listing, Aux.util.filter(inventory_records, function(record)
-        local settings = private.read_settings(record.key)
-        return record.aux_quantity > 0 and (not settings.hidden or private.show_hidden_checkbox:GetChecked())
+    Aux.item_listing.populate(m.item_listing, Aux.util.filter(inventory_records, function(record)
+        local settings = m.read_settings(record.key)
+        return record.aux_quantity > 0 and (not settings.hidden or m.show_hidden_checkbox:GetChecked())
     end))
 end
 
@@ -77,22 +101,22 @@ function private.update_auction_listing()
     end
 
     local auction_rows = {}
-    if private.selected_item then
-        local unit_start_price = private.get_unit_start_price()
-        local unit_buyout_price = private.get_unit_buyout_price()
+    if m.selected_item then
+        local unit_start_price = m.get_unit_start_price()
+        local unit_buyout_price = m.get_unit_buyout_price()
 
-        for i, auction_record in ipairs(existing_auctions[private.selected_item.key] or {}) do
+        for i, auction_record in ipairs(existing_auctions[m.selected_item.key] or {}) do
 
-            local blizzard_bid_undercut, buyout_price_undercut = private.undercut(auction_record, private.stack_size_slider:GetValue())
+            local blizzard_bid_undercut, buyout_price_undercut = m.undercut(auction_record, m.stack_size_slider:GetValue())
             blizzard_bid_undercut = Aux.money.from_string(Aux.money.to_string(blizzard_bid_undercut, true, nil, 3))
             buyout_price_undercut = Aux.money.from_string(Aux.money.to_string(buyout_price_undercut, true, nil, 3))
 
-            local stack_blizzard_bid_undercut, stack_buyout_price_undercut = private.undercut(auction_record, private.stack_size_slider:GetValue(), true)
+            local stack_blizzard_bid_undercut, stack_buyout_price_undercut = m.undercut(auction_record, m.stack_size_slider:GetValue(), true)
             stack_blizzard_bid_undercut = Aux.money.from_string(Aux.money.to_string(stack_blizzard_bid_undercut, true, nil, 3))
             stack_buyout_price_undercut = Aux.money.from_string(Aux.money.to_string(stack_buyout_price_undercut, true, nil, 3))
 
-            local stack_size = private.stack_size_slider:GetValue()
-            local historical_value = Aux.history.value(private.selected_item.key)
+            local stack_size = m.stack_size_slider:GetValue()
+            local historical_value = Aux.history.value(m.selected_item.key)
 
             local bid_color
             if blizzard_bid_undercut < unit_start_price and stack_blizzard_bid_undercut < unit_start_price then
@@ -144,64 +168,45 @@ function private.update_auction_listing()
             )
         end)
     end
-    private.auction_listing:SetData(auction_rows)
+    m.auction_listing:SetData(auction_rows)
 end
 
 function public.select_item(item_key)
     for _, inventory_record in ipairs(Aux.util.filter(inventory_records, function(record) return record.aux_quantity > 0 end)) do
         if inventory_record.key == item_key then
-            private.set_item(inventory_record)
+            m.set_item(inventory_record)
             break
         end
     end
 end
 
-function public.on_load()
-    public.create_frames(private, public)
-end
-
 function private.price_update()
-    if private.selected_item then
-        local settings = private.read_settings()
+    if m.selected_item then
+        local settings = m.read_settings()
 
-        local start_price_input = private.get_unit_start_price()
+        local start_price_input = m.get_unit_start_price()
         settings.start_price = start_price_input
-        local historical_value = Aux.history.value(private.selected_item.key)
-        private.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(start_price_input / historical_value * 100)) or '---')
+        local historical_value = Aux.history.value(m.selected_item.key)
+        m.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(start_price_input / historical_value * 100)) or '---')
 
-        local buyout_price_input = private.get_unit_buyout_price()
+        local buyout_price_input = m.get_unit_buyout_price()
         settings.buyout_price = buyout_price_input
-        local historical_value = Aux.history.value(private.selected_item.key)
-        private.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(buyout_price_input / historical_value * 100)) or '---')
+        local historical_value = Aux.history.value(m.selected_item.key)
+        m.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(buyout_price_input / historical_value * 100)) or '---')
 
-        private.write_settings(settings)
+        m.write_settings(settings)
     end
 end
 
-function public.on_open()
-    private.deposit:SetText('Deposit: '..Aux.money.to_string(0, nil, nil, nil, Aux.gui.inline_color({255, 254, 250, 1})))
-
-    private.set_unit_start_price(0)
-    private.set_unit_buyout_price(0)
-
-    private.update_inventory_records()
-
-    private.refresh = true
-end
-
-function public.on_close()
-    private.selected_item = nil
-end
-
 function private.post_auctions()
-	if private.selected_item then
-        local unit_start_price = private.get_unit_start_price()
-        local unit_buyout_price = private.get_unit_buyout_price()
-        local stack_size = private.stack_size_slider:GetValue()
+	if m.selected_item then
+        local unit_start_price = m.get_unit_start_price()
+        local unit_buyout_price = m.get_unit_buyout_price()
+        local stack_size = m.stack_size_slider:GetValue()
         local stack_count
-        stack_count = private.stack_count_slider:GetValue()
-        local duration = UIDropDownMenu_GetSelectedValue(private.duration_dropdown)
-		local key = private.selected_item.key
+        stack_count = m.stack_count_slider:GetValue()
+        local duration = UIDropDownMenu_GetSelectedValue(m.duration_dropdown)
+		local key = m.selected_item.key
 
         local duration_code
 		if duration == DURATION_4 then
@@ -222,18 +227,18 @@ function private.post_auctions()
 			function(posted)
                 local new_auction_record
 				for i = 1, posted do
-                    new_auction_record = private.record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
+                    new_auction_record = m.record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
                 end
 
-                private.update_inventory_records()
-                private.selected_item = nil
+                m.update_inventory_records()
+                m.selected_item = nil
                 for _, record in ipairs(inventory_records) do
                     if record.key == key then
-                        private.set_item(record)
+                        m.set_item(record)
                     end
                 end
 
-                private.refresh = true
+                m.refresh = true
 			end
 		)
 	end
@@ -241,81 +246,81 @@ end
 
 function private.validate_parameters()
 
-    if not private.selected_item then
-        private.post_button:Disable()
+    if not m.selected_item then
+        m.post_button:Disable()
         return
     end
 
-    if private.get_unit_buyout_price() > 0 and private.get_unit_start_price() > private.get_unit_buyout_price() then
-        private.post_button:Disable()
+    if m.get_unit_buyout_price() > 0 and m.get_unit_start_price() > m.get_unit_buyout_price() then
+        m.post_button:Disable()
         return
     end
 
-    if private.get_unit_start_price() == 0 then
-        private.post_button:Disable()
+    if m.get_unit_start_price() == 0 then
+        m.post_button:Disable()
         return
     end
 
-    if private.stack_count_slider:GetValue() == 0 then
-        private.post_button:Disable()
+    if m.stack_count_slider:GetValue() == 0 then
+        m.post_button:Disable()
         return
     end
 
-    private.post_button:Enable()
+    m.post_button:Enable()
 end
 
 function private.update_item_configuration()
 
-	if not private.selected_item then
-		private.refresh_button:Disable()
+	if not m.selected_item then
+        m.refresh_button:Disable()
 
 		AuxPostParametersItemIconTexture:SetTexture(nil)
         AuxPostParametersItemCount:SetText()
         AuxPostParametersItemName:SetTextColor(unpack(Aux.gui.config.label_color.enabled))
         AuxPostParametersItemName:SetText('No item selected')
 
-        private.unit_start_price:Hide()
-        private.unit_buyout_price:Hide()
-        private.stack_size_slider:Hide()
-        private.stack_count_slider:Hide()
-        private.deposit:Hide()
-        private.duration_dropdown:Hide()
-        private.historical_value_button:Hide()
-        private.hide_checkbox:Hide()
+        m.unit_start_price:Hide()
+        m.unit_buyout_price:Hide()
+        m.stack_size_slider:Hide()
+        m.stack_count_slider:Hide()
+        m.deposit:Hide()
+        m.duration_dropdown:Hide()
+        m.historical_value_button:Hide()
+        m.hide_checkbox:Hide()
     else
-        private.unit_start_price:Show()
-        private.unit_buyout_price:Show()
-        private.stack_size_slider:Show()
-        private.stack_count_slider:Show()
-        private.deposit:Show()
-        private.duration_dropdown:Show()
-        private.historical_value_button:Show()
-        private.hide_checkbox:Show()
+        m.unit_start_price:Show()
+        m.unit_buyout_price:Show()
+        m.stack_size_slider:Show()
+        m.stack_count_slider:Show()
+        m.deposit:Show()
+        m.duration_dropdown:Show()
+        m.historical_value_button:Show()
+        m.hide_checkbox:Show()
 
-        AuxPostParametersItemIconTexture:SetTexture(private.selected_item.texture)
-        AuxPostParametersItemName:SetText('['..private.selected_item.name..']')
-        local color = ITEM_QUALITY_COLORS[private.selected_item.quality]
+        AuxPostParametersItemIconTexture:SetTexture(m.selected_item.texture)
+        AuxPostParametersItemName:SetText('['..m.selected_item.name..']')
+        local color = ITEM_QUALITY_COLORS[m.selected_item.quality]
         AuxPostParametersItemName:SetTextColor(color.r, color.g, color.b)
-		if private.selected_item.aux_quantity > 1 then
-            AuxPostParametersItemCount:SetText(private.selected_item.aux_quantity)
+		if m.selected_item.aux_quantity > 1 then
+            AuxPostParametersItemCount:SetText(m.selected_item.aux_quantity)
 		else
             AuxPostParametersItemCount:SetText()
         end
 
-        private.stack_size_slider.editbox:SetNumber(private.stack_size_slider:GetValue())
-        private.stack_count_slider.editbox:SetNumber(private.stack_count_slider:GetValue())
+        m.stack_size_slider.editbox:SetNumber(m.stack_size_slider:GetValue())
+        m.stack_count_slider.editbox:SetNumber(m.stack_count_slider:GetValue())
 
         do
             local deposit_factor = Aux.neutral_faction() and 0.25 or 0.05
-            local stack_size = private.stack_size_slider:GetValue()
+            local stack_size = m.stack_size_slider:GetValue()
             local stack_count
-            stack_count = private.stack_count_slider:GetValue()
-            local deposit = floor(private.selected_item.unit_vendor_price * deposit_factor * (private.selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(private.duration_dropdown) / 120
+            stack_count = m.stack_count_slider:GetValue()
+            local deposit = floor(m.selected_item.unit_vendor_price * deposit_factor * (m.selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(m.duration_dropdown) / 120
 
-            private.deposit:SetText('Deposit: '..Aux.money.to_string(deposit, nil, nil, nil, Aux.gui.inline_color({255, 254, 250, 1})))
+            m.deposit:SetText('Deposit: '..Aux.money.to_string(deposit, nil, nil, nil, Aux.gui.inline_color({255, 254, 250, 1})))
         end
 
-        private.refresh_button:Enable()
+        m.refresh_button:Enable()
 	end
 end
 
@@ -332,14 +337,14 @@ function private.undercut(record, stack_size, stack)
 end
 
 function private.quantity_update(max_count)
-    if private.selected_item then
-        local max_stack_count = private.selected_item.max_charges and private.selected_item.availability[private.stack_size_slider:GetValue()] or floor(private.selected_item.availability[0] / private.stack_size_slider:GetValue())
-        private.stack_count_slider:SetMinMaxValues(1, max_stack_count)
+    if m.selected_item then
+        local max_stack_count = m.selected_item.max_charges and m.selected_item.availability[m.stack_size_slider:GetValue()] or floor(m.selected_item.availability[0] / m.stack_size_slider:GetValue())
+        m.stack_count_slider:SetMinMaxValues(1, max_stack_count)
         if max_count then
-            private.stack_count_slider:SetValue(max_stack_count)
+            m.stack_count_slider:SetValue(max_stack_count)
         end
     end
-    private.refresh = true
+    m.refresh = true
 end
 
 function private.unit_vendor_price(item_key)
@@ -367,51 +372,51 @@ function private.unit_vendor_price(item_key)
 end
 
 function private.update_historical_value_button()
-    if private.selected_item then
-        local historical_value = Aux.history.value(private.selected_item.key)
-        private.historical_value_button.amount = historical_value
-        private.historical_value_button:SetText(historical_value and Aux.money.to_string(historical_value, true, nil, 3) or '---')
+    if m.selected_item then
+        local historical_value = Aux.history.value(m.selected_item.key)
+        m.historical_value_button.amount = historical_value
+        m.historical_value_button:SetText(historical_value and Aux.money.to_string(historical_value, true, nil, 3) or '---')
     end
 end
 
 function private.set_item(item)
-    local settings = private.read_settings(item.key)
+    local settings = m.read_settings(item.key)
 
-    item.unit_vendor_price = private.unit_vendor_price(item.key)
+    item.unit_vendor_price = m.unit_vendor_price(item.key)
     if not item.unit_vendor_price then
         settings.hidden = 1
-        private.write_settings(settings, item.key)
-        private.refresh = true
+        m.write_settings(settings, item.key)
+        m.refresh = true
         return
     end
 
     Aux.scan.abort(scan_id)
 
-    private.selected_item = item
+    m.selected_item = item
 
-    UIDropDownMenu_Initialize(private.duration_dropdown, private.initialize_duration_dropdown) -- TODO, wtf, why is this needed
-    UIDropDownMenu_SetSelectedValue(private.duration_dropdown, settings.duration)
+    UIDropDownMenu_Initialize(m.duration_dropdown, m.initialize_duration_dropdown) -- TODO, wtf, why is this needed
+    UIDropDownMenu_SetSelectedValue(m.duration_dropdown, settings.duration)
 
-    private.hide_checkbox:SetChecked(settings.hidden)
+    m.hide_checkbox:SetChecked(settings.hidden)
 
-    private.stack_size_slider:SetMinMaxValues(1, private.selected_item.max_charges or private.selected_item.max_stack)
-    private.stack_size_slider:SetValue(settings.stack_size)
-    private.quantity_update(true)
+    m.stack_size_slider:SetMinMaxValues(1, m.selected_item.max_charges or m.selected_item.max_stack)
+    m.stack_size_slider:SetValue(settings.stack_size)
+    m.quantity_update(true)
 
-    private.unit_start_price:SetText(Aux.money.to_string(settings.start_price, true, nil, 3, nil, true))
-    private.unit_buyout_price:SetText(Aux.money.to_string(settings.buyout_price, true, nil, 3, nil, true))
+    m.unit_start_price:SetText(Aux.money.to_string(settings.start_price, true, nil, 3, nil, true))
+    m.unit_buyout_price:SetText(Aux.money.to_string(settings.buyout_price, true, nil, 3, nil, true))
 
-    if not existing_auctions[private.selected_item.key] then
-        private.refresh_entries()
+    if not existing_auctions[m.selected_item.key] then
+        m.refresh_entries()
     end
 
-    private.write_settings(settings, item.key)
-    private.refresh = true
+    m.write_settings(settings, item.key)
+    m.refresh = true
 end
 
 function private.update_inventory_records()
     inventory_records = {}
-    private.refresh = true
+    m.refresh = true
 
     local auction_candidate_map = {}
 
@@ -459,32 +464,32 @@ function private.update_inventory_records()
         tinsert(inventory_records, auction_candidate)
     end
     sort(inventory_records, function(a, b) return a.name < b.name end)
-    private.refresh = true
+    m.refresh = true
 end
 
 function private.refresh_entries()
-	if private.selected_item then
-		local item_id, suffix_id = private.selected_item.item_id, private.selected_item.suffix_id
+	if m.selected_item then
+		local item_id, suffix_id = m.selected_item.item_id, m.selected_item.suffix_id
         local item_key = item_id..':'..suffix_id
 
         existing_auctions[item_key] = nil
 
         local query = Aux.scan_util.item_query(item_id)
 
-        private.status_bar:update_status(0,0)
-        private.status_bar:set_text('Scanning auctions...')
+        m.status_bar:update_status(0,0)
+        m.status_bar:set_text('Scanning auctions...')
 
 		scan_id = Aux.scan.start{
             type = 'list',
             ignore_owner = true,
 			queries = { query },
 			on_page_loaded = function(page, total_pages)
-                private.status_bar:update_status(100 * (page - 1) / total_pages, 0) -- TODO
-                private.status_bar:set_text(format('Scanning Page %d / %d', page, total_pages))
+                m.status_bar:update_status(100 * (page - 1) / total_pages, 0) -- TODO
+                m.status_bar:set_text(format('Scanning Page %d / %d', page, total_pages))
 			end,
 			on_auction = function(auction_record)
 				if auction_record.item_key == item_key then
-                    private.record_auction(
+                    m.record_auction(
                         auction_record.item_key,
                         auction_record.aux_quantity,
                         auction_record.unit_blizzard_bid,
@@ -496,15 +501,15 @@ function private.refresh_entries()
 			end,
 			on_abort = function()
 				existing_auctions[item_key] = nil
-                private.update_historical_value_button()
-                private.status_bar:update_status(100, 100)
-                private.status_bar:set_text('Done Scanning')
+                m.update_historical_value_button()
+                m.status_bar:update_status(100, 100)
+                m.status_bar:set_text('Done Scanning')
 			end,
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or {}
-                private.refresh = true
-                private.status_bar:update_status(100, 100)
-                private.status_bar:set_text('Done Scanning')
+                m.refresh = true
+                m.status_bar:update_status(100, 100)
+                m.status_bar:set_text('Done Scanning')
             end,
 		}
 	end
@@ -537,26 +542,26 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
 end
 
 function public.on_update()
-    if private.refresh then
-        private.refresh = false
-        private.price_update()
-        private.update_historical_value_button()
-        private.update_item_configuration()
-        private.update_inventory_listing()
-        private.update_auction_listing()
+    if m.refresh then
+        m.refresh = false
+        m.price_update()
+        m.update_historical_value_button()
+        m.update_item_configuration()
+        m.update_inventory_listing()
+        m.update_auction_listing()
     end
 
-    private.validate_parameters()
+    m.validate_parameters()
 end
 
 function private.initialize_duration_dropdown()
 
     local function on_click()
-        UIDropDownMenu_SetSelectedValue(private.duration_dropdown, this.value)
-        local settings = private.read_settings()
+        UIDropDownMenu_SetSelectedValue(m.duration_dropdown, this.value)
+        local settings = m.read_settings()
         settings.duration = this.value
-        private.write_settings(settings)
-        private.refresh = true
+        m.write_settings(settings)
+        m.refresh = true
     end
 
     UIDropDownMenu_AddButton{

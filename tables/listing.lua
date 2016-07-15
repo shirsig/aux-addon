@@ -1,5 +1,4 @@
-local private, public = {}, {}
-Aux.listing = public
+local m, private, public = Aux.module'listing'
 
 local ST_COUNT = 0
 

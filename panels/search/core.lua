@@ -1,10 +1,11 @@
-local private, public = {}, {}
-Aux.search_frame = public
+local m, private, public = Aux.tab(1, 'search_frame')
 
 aux_favorite_searches = {}
 aux_recent_searches = {}
 
 private.search_scan_id = 0
+private.snipe_auto = nil
+private.snipe = nil
 
 private.popup_info = {
     rename = {}
@@ -12,8 +13,8 @@ private.popup_info = {
 
 do
     local function action()
-        private.popup_info.rename.name = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
-        private.update_search_listings()
+        m.popup_info.rename.name = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
+        m.update_search_listings()
     end
 
     StaticPopupDialogs['AUX_SEARCH_SAVED_RENAME'] = {
@@ -22,7 +23,7 @@ do
         button2 = 'Cancel',
         hasEditBox = 1,
         OnShow = function()
-            local rename_info = private.popup_info.rename
+            local rename_info = m.popup_info.rename
             local edit_box = getglobal(this:GetName()..'EditBox')
             edit_box:SetText(rename_info.name or '')
             edit_box:SetFocus()
@@ -52,9 +53,9 @@ StaticPopupDialogs['AUX_SEARCH_AUTO_SNIPING'] = {
     button1 = 'Yes',
     button2 = 'No',
     OnAccept = function()
-        private.snipe_button.auto = true
+        m.snipe_button.auto = true
         local color = RED_FONT_COLOR
-        private.snipe_button:GetFontString():SetTextColor(color.r, color.g, color.b)
+        m.snipe_button:GetFontString():SetTextColor(color.r, color.g, color.b)
     end,
     timeout = 0,
     hideOnEscape = 1,
@@ -63,10 +64,29 @@ StaticPopupDialogs['AUX_SEARCH_AUTO_SNIPING'] = {
 private.RESULTS, private.SAVED, private.FILTER = 1, 2, 3
 
 private.elements = {
-    [private.RESULTS] = {},
-    [private.SAVED] = {},
-    [private.FILTER] = {},
+    [m.RESULTS] = {},
+    [m.SAVED] = {},
+    [m.FILTER] = {},
 }
+
+function public.FRAMES(f)
+    private.create_frames = f
+end
+
+function public.LOAD()
+    m.create_frames(m, private, public)
+    m:disable_sniping()
+    m.update_search()
+    m.update_tab(m.SAVED)
+end
+
+function public.OPEN()
+    m.update_search_listings()
+end
+
+function public.CLOSE()
+    m.results_listing:SetSelectedRecord()
+end
 
 function private.update_search_listings()
     local favorite_search_rows = {}
@@ -79,7 +99,7 @@ function private.update_search_listings()
             name = name,
         })
     end
-    private.favorite_searches_listing:SetData(favorite_search_rows)
+    m.favorite_searches_listing:SetData(favorite_search_rows)
 
     local recent_search_rows = {}
     for i, recent_search in ipairs(aux_recent_searches) do
@@ -91,41 +111,41 @@ function private.update_search_listings()
             name = name,
         })
     end
-    private.recent_searches_listing:SetData(recent_search_rows)
+    m.recent_searches_listing:SetData(recent_search_rows)
 end
 
 function private.update_tab(tab)
 
-    private.search_results_button:UnlockHighlight()
-    private.saved_searches_button:UnlockHighlight()
-    private.new_filter_button:UnlockHighlight()
+    m.search_results_button:UnlockHighlight()
+    m.saved_searches_button:UnlockHighlight()
+    m.new_filter_button:UnlockHighlight()
     AuxSearchFrameResults:Hide()
     AuxSearchFrameSaved:Hide()
     AuxSearchFrameFilter:Hide()
 
-    if tab == private.RESULTS then
+    if tab == m.RESULTS then
         AuxSearchFrameResults:Show()
-        private.search_results_button:LockHighlight()
-    elseif tab == private.SAVED then
+        m.search_results_button:LockHighlight()
+    elseif tab == m.SAVED then
         AuxSearchFrameSaved:Show()
-        private.saved_searches_button:LockHighlight()
-    elseif tab == private.FILTER then
+        m.saved_searches_button:LockHighlight()
+    elseif tab == m.FILTER then
         AuxSearchFrameFilter:Show()
-        private.new_filter_button:LockHighlight()
+        m.new_filter_button:LockHighlight()
     end
 end
 
 function public.set_filter(filter_string)
-    private.search_box:SetText(filter_string)
+    m.search_box:SetText(filter_string)
 end
 
 function private.add_filter(filter_string, replace)
-    filter_string = filter_string or private.get_form_filter()
+    filter_string = filter_string or m.get_form_filter()
 
 
     local old_filter_string
     if not replace then
-        old_filter_string = private.search_box:GetText()
+        old_filter_string = m.search_box:GetText()
         old_filter_string = Aux.util.trim(old_filter_string)
 
         if strlen(old_filter_string) > 0 then
@@ -133,7 +153,7 @@ function private.add_filter(filter_string, replace)
         end
     end
 
-    private.search_box:SetText((old_filter_string or '')..filter_string)
+    m.search_box:SetText((old_filter_string or '')..filter_string)
 end
 
 function private.clear_form()
@@ -142,12 +162,12 @@ function private.clear_form()
     AuxSearchFrameFilterMinLevel:SetText('')
     AuxSearchFrameFilterMaxLevel:SetText('')
     AuxSearchFrameFilterUsableCheckButton:SetChecked(nil)
-    UIDropDownMenu_ClearAll(private.class_dropdown)
-    UIDropDownMenu_ClearAll(private.subclass_dropdown)
-    UIDropDownMenu_ClearAll(private.slot_dropdown)
-    UIDropDownMenu_ClearAll(private.quality_dropdown)
-    private.first_page_editbox:SetText('')
-    private.last_page_editbox:SetText('')
+    UIDropDownMenu_ClearAll(m.class_dropdown)
+    UIDropDownMenu_ClearAll(m.subclass_dropdown)
+    UIDropDownMenu_ClearAll(m.slot_dropdown)
+    UIDropDownMenu_ClearAll(m.quality_dropdown)
+    m.first_page_editbox:SetText('')
+    m.last_page_editbox:SetText('')
 end
 
 function private.get_form_filter()
@@ -175,27 +195,27 @@ function private.get_form_filter()
         add('usable')
     end
 
-    local class = UIDropDownMenu_GetSelectedValue(private.class_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.class_dropdown)
+    local class = UIDropDownMenu_GetSelectedValue(m.class_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.class_dropdown)
     if class then
         local classes = { GetAuctionItemClasses() }
         add(strlower(classes[class]))
-        local subclass = UIDropDownMenu_GetSelectedValue(private.subclass_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.subclass_dropdown)
+        local subclass = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
         if subclass then
             local subclasses = {GetAuctionItemSubClasses(class)}
             add(strlower(subclasses[subclass]))
-            local slot = UIDropDownMenu_GetSelectedValue(private.slot_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.slot_dropdown)
+            local slot = UIDropDownMenu_GetSelectedValue(m.slot_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.slot_dropdown)
             if slot then
                 add(strlower(getglobal(slot)))
             end
         end
     end
 
-    local quality = UIDropDownMenu_GetSelectedValue(private.quality_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(private.quality_dropdown)
+    local quality = UIDropDownMenu_GetSelectedValue(m.quality_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.quality_dropdown)
     if quality then
         add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
     end
 
-    local first_page, last_page = tonumber(private.first_page_editbox:GetText()), tonumber(private.last_page_editbox:GetText())
+    local first_page, last_page = tonumber(m.first_page_editbox:GetText()), tonumber(m.last_page_editbox:GetText())
     first_page = first_page and max(1, first_page)
     last_page = last_page and max(1, last_page)
     if first_page or last_page then
@@ -205,55 +225,40 @@ function private.get_form_filter()
     return filter_term
 end
 
-function public.on_open()
-    private.update_search_listings()
-end
-
-function public.on_close()
-    private.results_listing:SetSelectedRecord()
-end
-
-function public.on_load()
-    public.create_frames(private, public)
-    public:disable_sniping()
-    private.update_search()
-    private.update_tab(private.SAVED)
-end
-
 function private.discard_continuation()
-    Aux.scan.abort(private.search_scan_id)
-    private.current_search().continuation = nil
-    private.update_resume()
+    Aux.scan.abort(m.search_scan_id)
+    m.current_search().continuation = nil
+    m.update_resume()
 end
 
 function private:enable_stop()
-    Aux.scan.abort(private.search_scan_id)
-    private.stop_button:Show()
-    private.start_button:Hide()
+    Aux.scan.abort(m.search_scan_id)
+    m.stop_button:Show()
+    m.start_button:Hide()
 end
 
 function private:enable_start()
-    private.start_button:Show()
-    private.stop_button:Hide()
+    m.start_button:Show()
+    m.stop_button:Hide()
 end
 
 function public.enable_sniping()
-    Aux.scan.abort(private.search_scan_id)
-    private.snipe = true
-    private.snipe_button:LockHighlight()
+    Aux.scan.abort(m.search_scan_id)
+    m.snipe = true
+    m.snipe_button:LockHighlight()
 end
 
 function public.disable_sniping()
-    Aux.scan.abort(private.search_scan_id)
-    private.snipe = false
-    private.snipe_button:UnlockHighlight()
+    Aux.scan.abort(m.search_scan_id)
+    m.snipe = false
+    m.snipe_button:UnlockHighlight()
 end
 
 function private.start_sniping(query, search)
 
     local ignore_page
     if not search then
-        search = private.current_search()
+        search = m.current_search()
         query.blizzard_query.first_page = 0
         query.blizzard_query.last_page = 0
         ignore_page = true
@@ -265,12 +270,12 @@ function private.start_sniping(query, search)
     end
 
     local next_page
-    private.search_scan_id = Aux.scan.start{
+    m.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = {query},
         on_scan_start = function()
-            private.status_bar:update_status(99.99, 99.99)
-            private.status_bar:set_text('Sniping ...')
+            m.status_bar:update_status(99.99, 99.99)
+            m.status_bar:set_text('Sniping ...')
         end,
         on_page_loaded = function(_, _, last_page)
             next_page = last_page
@@ -280,7 +285,7 @@ function private.start_sniping(query, search)
         end,
         on_auction = function(auction_record)
             if not ignore_page then
-                if private.snipe_button.auto then
+                if m.snipe_button.auto then
                     PlaceAuctionBid('list', auction_record.index, auction_record.buyout_price)
                 else
                     sniping_map[auction_record.sniping_signature] = auction_record
@@ -295,23 +300,23 @@ function private.start_sniping(query, search)
                 for _, record in sniping_map do
                     tinsert(search.records, record)
                 end
-                private.results_listing:SetDatabase(search.records)
+                m.results_listing:SetDatabase(search.records)
             end
 
             query.blizzard_query.first_page = next_page
             query.blizzard_query.last_page = next_page
-            private.start_sniping(query, search)
+            m.start_sniping(query, search)
         end,
         on_abort = function()
-            private.status_bar:update_status(100, 100)
-            private.status_bar:set_text('Done Sniping')
+            m.status_bar:update_status(100, 100)
+            m.status_bar:set_text('Done Sniping')
 
             search.continuation = true
-            if private.current_search() == search then
-                private.update_resume()
+            if m.current_search() == search then
+                m.update_resume()
             end
 
-            private:enable_start()
+            m:enable_start()
         end,
     }
 end
@@ -327,21 +332,21 @@ function private.start_search(queries, continuation)
             tremove(queries, 1)
         end
         queries[1].blizzard_query.first_page = (queries[1].blizzard_query.first_page or 0) + start_page - 1
-        private.results_listing:SetSelectedRecord()
+        m.results_listing:SetSelectedRecord()
     else
         start_query, start_page = 1, 1
     end
 
-    local search = private.current_search()
-    private.search_scan_id = Aux.scan.start{
+    local search = m.current_search()
+    m.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = queries,
         on_scan_start = function()
-            private.status_bar:update_status(0,0)
+            m.status_bar:update_status(0,0)
             if resume then
-                private.status_bar:set_text('Resuming scan...')
+                m.status_bar:set_text('Resuming scan...')
             else
-                private.status_bar:set_text('Scanning auctions...')
+                m.status_bar:set_text('Scanning auctions...')
             end
         end,
         on_page_loaded = function(_, total_scan_pages)
@@ -349,11 +354,11 @@ function private.start_search(queries, continuation)
             total_scan_pages = total_scan_pages + (start_page - 1)
             total_scan_pages = max(total_scan_pages, 1)
             current_page = min(current_page, total_scan_pages)
-            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / total_scan_pages)
-            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_scan_pages))
+            m.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / total_scan_pages)
+            m.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_scan_pages))
         end,
         on_page_scanned = function()
-            private.results_listing:SetDatabase()
+            m.results_listing:SetDatabase()
         end,
         on_start_query = function(query)
             current_query = current_query and current_query + 1 or start_query
@@ -368,43 +373,43 @@ function private.start_search(queries, continuation)
             end
         end,
         on_complete = function()
-            private.status_bar:update_status(100, 100)
-            private.status_bar:set_text('Done Scanning')
+            m.status_bar:update_status(100, 100)
+            m.status_bar:set_text('Done Scanning')
 
-            if private.current_search() == search and AuxSearchFrameResults:IsVisible() and getn(search.records) == 0 then
-                private.update_tab(private.SAVED)
+            if m.current_search() == search and AuxSearchFrameResults:IsVisible() and getn(search.records) == 0 then
+                m.update_tab(m.SAVED)
             end
 
-            private:enable_start()
+            m.enable_start()
         end,
         on_abort = function()
-            private.status_bar:update_status(100, 100)
-            private.status_bar:set_text('Done Scanning')
+            m.status_bar:update_status(100, 100)
+            m.status_bar:set_text('Done Scanning')
 
             if current_query then
                 search.continuation = {current_query, current_page + 1}
             else
                 search.continuation = {start_query, start_page}
             end
-            if private.current_search() == search then
-                private.update_resume()
+            if m.current_search() == search then
+                m.update_resume()
             end
 
-            private:enable_start()
+            m.enable_start()
         end,
     }
 end
 
 function public.execute(resume)
     if resume then
-        private.search_box:SetText(private.current_search().filter_string)
+        m.search_box:SetText(m.current_search().filter_string)
     end
-    local filter_string = private.search_box:GetText()
+    local filter_string = m.search_box:GetText()
 
     local queries = Aux.scan_util.parse_filter_string(filter_string)
     if not queries then
         return
-    elseif private.snipe then
+    elseif m.snipe then
         if getn(queries) > 1 then
             Aux.log('Invalid filter: The sniping mode does not support multiple queries')
             return
@@ -414,32 +419,32 @@ function public.execute(resume)
         end
     end
 
-    if filter_string ~= private.current_search().filter_string then
-        private.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
+    if filter_string ~= m.current_search().filter_string then
+        m.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
     else
-        private.search_box:ClearFocus()
+        m.search_box:ClearFocus()
         if resume then
-            private.results_listing:SetSelectedRecord()
+            m.results_listing:SetSelectedRecord()
         else
-            if private.current_search().snipe ~= private.snipe then
-                private.results_listing:Reset()
+            if m.current_search().snipe ~= m.snipe then
+                m.results_listing:Reset()
             end
-            private.current_search().records = {}
-            private.results_listing:SetDatabase(private.current_search().records)
+            m.current_search().records = {}
+            m.results_listing:SetDatabase(m.current_search().records)
         end
     end
 
-    local continuation = private.current_search().continuation
-    private.discard_continuation()
-    private:enable_stop()
+    local continuation = m.current_search().continuation
+    m.discard_continuation()
+    m:enable_stop()
 
-    private.update_tab(private.RESULTS)
-    if private.snipe then
-        private.current_search().snipe = true
-        private.start_sniping(queries[1])
+    m.update_tab(m.RESULTS)
+    if m.snipe then
+        m.current_search().snipe = true
+        m.start_sniping(queries[1])
     else
-        private.current_search().snipe = false
-        private.start_search(queries, resume and continuation)
+        m.current_search().snipe = false
+        m.start_search(queries, resume and continuation)
     end
 end
 
@@ -452,7 +457,7 @@ end
 
 function private.record_remover(record)
     return function()
-        private.results_listing:RemoveAuctionRecord(record)
+        m.results_listing:RemoveAuctionRecord(record)
     end
 end
 
@@ -467,7 +472,7 @@ do
     local found_index
 
     function private.find_auction(record)
-        if not private.results_listing:ContainsRecord(record) or Aux.is_player(record.owner) then
+        if not m.results_listing:ContainsRecord(record) or Aux.is_player(record.owner) then
             return
         end
 
@@ -475,37 +480,37 @@ do
         state = SEARCHING
         scan_id = Aux.scan_util.find(
             record,
-            private.status_bar,
+            m.status_bar,
             function()
                 state = IDLE
             end,
             function()
                 state = IDLE
-                private.record_remover(record)()
+                m.record_remover(record)()
             end,
             function(index)
                 state = FOUND
                 found_index = index
 
                 if not record.high_bidder then
-                    private.bid_button:SetScript('OnClick', function()
-                        if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
+                    m.bid_button:SetScript('OnClick', function()
+                        if m.test(record)(index) and m.results_listing:ContainsRecord(record) then
                             Aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
                                 Aux.info.bid_update(record)
-                                private.results_listing:SetDatabase()
-                            end or private.record_remover(record))
+                                m.results_listing:SetDatabase()
+                            end or m.record_remover(record))
                         end
                     end)
-                    private.bid_button:Enable()
+                    m.bid_button:Enable()
                 end
 
                 if record.buyout_price > 0 then
-                    private.buyout_button:SetScript('OnClick', function()
-                        if private.test(record)(index) and private.results_listing:ContainsRecord(record) then
-                            Aux.place_bid('list', index, record.buyout_price, private.record_remover(record))
+                    m.buyout_button:SetScript('OnClick', function()
+                        if m.test(record)(index) and m.results_listing:ContainsRecord(record) then
+                            Aux.place_bid('list', index, record.buyout_price, m.record_remover(record))
                         end
                     end)
-                    private.buyout_button:Enable()
+                    m.buyout_button:Enable()
                 end
             end
         )
@@ -513,22 +518,22 @@ do
 
     function public.on_update()
         if state == IDLE or state == SEARCHING then
-            private.buyout_button:Disable()
-            private.bid_button:Disable()
+            m.buyout_button:Disable()
+            m.bid_button:Disable()
         end
 
         if state == SEARCHING then
             return
         end
 
-        local selection = private.results_listing:GetSelection()
+        local selection = m.results_listing:GetSelection()
         if not selection then
             state = IDLE
         elseif selection and state == IDLE then
-            private.find_auction(selection.record)
-        elseif state == FOUND and not private.test(selection.record)(found_index) then
-            private.buyout_button:Disable()
-            private.bid_button:Disable()
+            m.find_auction(selection.record)
+        elseif state == FOUND and not m.test(selection.record)(found_index) then
+            m.buyout_button:Disable()
+            m.bid_button:Disable()
             if not Aux.bid_in_progress() then
                 state = IDLE
             end
@@ -537,12 +542,12 @@ do
 end
 
 function private.update_resume()
-    if private.current_search().continuation and private.current_search().snipe == private.snipe then
-        private.resume_button:Show()
-        private.search_box:SetPoint('RIGHT', private.resume_button, 'LEFT', -4, 0)
+    if m.current_search().continuation and m.current_search().snipe == m.snipe then
+        m.resume_button:Show()
+        m.search_box:SetPoint('RIGHT', m.resume_button, 'LEFT', -4, 0)
     else
-        private.resume_button:Hide()
-        private.search_box:SetPoint('RIGHT', private.start_button, 'LEFT', -4, 0)
+        m.resume_button:Hide()
+        m.search_box:SetPoint('RIGHT', m.start_button, 'LEFT', -4, 0)
     end
 end
 
@@ -558,24 +563,24 @@ do
     end
 
     function private.update_search()
-        Aux.scan.abort(private.search_scan_id)
-        private.search_box:ClearFocus()
-        private.search_box:SetText(searches[search_index].filter_string)
-        private.results_listing:Reset()
-        private.results_listing:SetDatabase(searches[search_index].records)
+        Aux.scan.abort(m.search_scan_id)
+        m.search_box:ClearFocus()
+        m.search_box:SetText(searches[search_index].filter_string)
+        m.results_listing:Reset()
+        m.results_listing:SetDatabase(searches[search_index].records)
         if search_index == 1 or search_index == 0 then
-            private.previous_button:Disable()
+            m.previous_button:Disable()
         else
-            private.previous_button:Enable()
+            m.previous_button:Enable()
         end
         if search_index == getn(searches) or search_index == 0 then
-            private.next_button:Hide()
-            private.search_box:SetPoint('LEFT', private.previous_button, 'RIGHT', 4, 0)
+            m.next_button:Hide()
+            m.search_box:SetPoint('LEFT', m.previous_button, 'RIGHT', 4, 0)
         else
-            private.next_button:Show()
-            private.search_box:SetPoint('LEFT', private.next_button, 'RIGHT', 4, 0)
+            m.next_button:Show()
+            m.search_box:SetPoint('LEFT', m.next_button, 'RIGHT', 4, 0)
         end
-        private.update_resume()
+        m.update_resume()
     end
 
     function private.new_search(filter_string, prettified)
@@ -586,7 +591,7 @@ do
         while getn(aux_recent_searches) > 50 do
             tremove(aux_recent_searches)
         end
-        private.update_search_listings()
+        m.update_search_listings()
 
         tinsert(searches, search_index + 1, {
             filter_string = filter_string,
@@ -599,29 +604,29 @@ do
             tremove(searches, 1)
         end
         search_index = getn(searches)
-        private.update_search()
+        m.update_search()
     end
 
     function private.previous_search()
         search_index = search_index - 1
-        private.update_search()
-        private.update_tab(private.RESULTS)
+        m.update_search()
+        m.update_tab(m.RESULTS)
     end
 
     function private.next_search()
         search_index = search_index + 1
-        private.update_search()
-        private.update_tab(private.RESULTS)
+        m.update_search()
+        m.update_tab(m.RESULTS)
     end
 end
 
 function private.initialize_class_dropdown()
     local function on_click()
-        if this.value ~= UIDropDownMenu_GetSelectedValue(private.class_dropdown) then
-            UIDropDownMenu_ClearAll(private.subclass_dropdown)
-            UIDropDownMenu_ClearAll(private.slot_dropdown)
+        if this.value ~= UIDropDownMenu_GetSelectedValue(m.class_dropdown) then
+            UIDropDownMenu_ClearAll(m.subclass_dropdown)
+            UIDropDownMenu_ClearAll(m.slot_dropdown)
         end
-        UIDropDownMenu_SetSelectedValue(private.class_dropdown, this.value)
+        UIDropDownMenu_SetSelectedValue(m.class_dropdown, this.value)
     end
 
     UIDropDownMenu_AddButton{
@@ -642,13 +647,13 @@ end
 function private.initialize_subclass_dropdown()
 
     local function on_click()
-        if this.value ~= UIDropDownMenu_GetSelectedValue(private.subclass_dropdown) then
-            UIDropDownMenu_ClearAll(private.slot_dropdown)
+        if this.value ~= UIDropDownMenu_GetSelectedValue(m.subclass_dropdown) then
+            UIDropDownMenu_ClearAll(m.slot_dropdown)
         end
-        UIDropDownMenu_SetSelectedValue(private.subclass_dropdown, this.value)
+        UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, this.value)
     end
 
-    local class_index = UIDropDownMenu_GetSelectedValue(private.class_dropdown)
+    local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
 
     if class_index and GetAuctionItemSubClasses(class_index) then
         UIDropDownMenu_AddButton{
@@ -670,11 +675,11 @@ end
 function private.initialize_slot_dropdown()
 
     local function on_click()
-        UIDropDownMenu_SetSelectedValue(private.slot_dropdown, this.value)
+        UIDropDownMenu_SetSelectedValue(m.slot_dropdown, this.value)
     end
 
-    local class_index = UIDropDownMenu_GetSelectedValue(private.class_dropdown)
-    local subclass_index = UIDropDownMenu_GetSelectedValue(private.subclass_dropdown)
+    local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
+    local subclass_index = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
 
     if class_index and subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
         UIDropDownMenu_AddButton{
@@ -697,7 +702,7 @@ end
 function private.initialize_quality_dropdown()
 
     local function on_click()
-        UIDropDownMenu_SetSelectedValue(private.quality_dropdown, this.value)
+        UIDropDownMenu_SetSelectedValue(m.quality_dropdown, this.value)
     end
 
 	UIDropDownMenu_AddButton{

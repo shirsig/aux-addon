@@ -1,5 +1,4 @@
-local private, public = {}, {}
-Aux.auction_listing = public
+local m, private, public = Aux.module'auction_listing'
 
 local RT_COUNT = 1
 local HEAD_HEIGHT = 27
@@ -51,7 +50,7 @@ public.search_config = {
     {
         title = 'Item',
         width = 0.35,
-        init = private.item_column_init,
+        init = m.item_column_init,
         set = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
@@ -206,12 +205,12 @@ public.search_config = {
         width = 0.08,
         align = 'CENTER',
         set = function(cell, record)
-            local pct, bidPct = private.record_percentage(record)
-            cell:SetText((pct or bidPct) and public.percentage_historical(pct or bidPct, not pct) or '---')
+            local pct, bidPct = m.record_percentage(record)
+            cell:SetText((pct or bidPct) and m.percentage_historical(pct or bidPct, not pct) or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            local pct_a = private.record_percentage(record_a) or (desc and -Aux.huge or Aux.huge)
-            local pct_b = private.record_percentage(record_b) or (desc and -Aux.huge or Aux.huge)
+            local pct_a = m.record_percentage(record_a) or (desc and -Aux.huge or Aux.huge)
+            local pct_b = m.record_percentage(record_b) or (desc and -Aux.huge or Aux.huge)
             return Aux.sort.compare(pct_a, pct_b, desc)
         end,
     },
@@ -221,7 +220,7 @@ public.auctions_config = {
     {
         title = 'Item',
         width = 0.35,
-        init = private.item_column_init,
+        init = m.item_column_init,
         set = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
@@ -368,7 +367,7 @@ public.bids_config = {
     {
         title = 'Item',
         width = 0.35,
-        init = private.item_column_init,
+        init = m.item_column_init,
         set = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then

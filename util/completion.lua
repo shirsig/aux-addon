@@ -1,5 +1,4 @@
 local m, private, public = Aux.module'completion'
-Aux.completion = m
 
 function public:complete()
 	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution

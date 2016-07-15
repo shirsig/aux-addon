@@ -1,4 +1,4 @@
-function Aux.search_frame.create_frames(private, public)
+Aux.search_frame.FRAMES(function(m, private, public)
     do
         local btn = Aux.gui.button(AuxSearchFrame, 22)
         btn:SetPoint('TOPLEFT', 5, -8)
@@ -8,12 +8,12 @@ function Aux.search_frame.create_frames(private, public)
         btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
         btn:SetScript('OnClick', function()
             if arg1 == 'LeftButton' then
-                if private.snipe then
-                    public.disable_sniping()
+                if m.snipe then
+                    m.disable_sniping()
                 else
-                    public.enable_sniping()
+                    m.enable_sniping()
                 end
-                private.update_resume()
+                m.update_resume()
             elseif arg1 == 'RightButton' then
                 if this.auto then
                     this.auto = false
@@ -29,20 +29,20 @@ function Aux.search_frame.create_frames(private, public)
     Aux.gui.vertical_line(AuxSearchFrame, 80, nil, 408)
     do
         local btn = Aux.gui.button(AuxSearchFrame, 26)
-        btn:SetPoint('LEFT', private.snipe_button, 'RIGHT', 12, 0)
+        btn:SetPoint('LEFT', m.snipe_button, 'RIGHT', 12, 0)
         btn:SetWidth(30)
         btn:SetHeight(25)
         btn:SetText('<')
-        btn:SetScript('OnClick', private.previous_search)
+        btn:SetScript('OnClick', m.previous_search)
         private.previous_button = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrame, 26)
-        btn:SetPoint('LEFT', private.previous_button, 'RIGHT', 4, 0)
+        btn:SetPoint('LEFT', m.previous_button, 'RIGHT', 4, 0)
         btn:SetWidth(30)
         btn:SetHeight(25)
         btn:SetText('>')
-        btn:SetScript('OnClick', private.next_search)
+        btn:SetScript('OnClick', m.next_search)
         private.next_button = btn
     end
     do
@@ -54,9 +54,9 @@ function Aux.search_frame.create_frames(private, public)
         btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
         btn:SetScript('OnClick', function()
             if arg1 == 'RightButton' then
-                public.set_filter(private.current_search().filter_string)
+                m.set_filter(m.current_search().filter_string)
             end
-            public.execute()
+            m.execute()
         end)
         private.start_button = btn
     end
@@ -67,19 +67,19 @@ function Aux.search_frame.create_frames(private, public)
         btn:SetHeight(25)
         btn:SetText('Stop')
         btn:SetScript('OnClick', function()
-            Aux.scan.abort(private.search_scan_id)
+            Aux.scan.abort(m.search_scan_id)
         end)
         btn:Hide()
         private.stop_button = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrame, 22)
-        btn:SetPoint('RIGHT', private.start_button, 'LEFT', -4, 0)
+        btn:SetPoint('RIGHT', m.start_button, 'LEFT', -4, 0)
         btn:SetWidth(70)
         btn:SetHeight(25)
         btn:SetText(GREEN_FONT_COLOR_CODE..'Resume'..FONT_COLOR_CODE_CLOSE)
         btn:SetScript('OnClick', function()
-            public.execute(true)
+            m.execute(true)
         end)
         private.resume_button = btn
     end
@@ -88,7 +88,7 @@ function Aux.search_frame.create_frames(private, public)
         editbox:SetMaxLetters(nil)
         editbox:EnableMouse(1)
         editbox.complete = Aux.completion.complete
-        editbox:SetPoint('RIGHT', private.start_button, 'LEFT', -4, 0)
+        editbox:SetPoint('RIGHT', m.start_button, 'LEFT', -4, 0)
         editbox:SetHeight(25)
         editbox:SetScript('OnChar', function()
             this:complete()
@@ -99,14 +99,14 @@ function Aux.search_frame.create_frames(private, public)
         editbox:SetScript('OnEnterPressed', function()
             this:HighlightText(0, 0)
             this:ClearFocus()
-            public.execute()
+            m.execute()
         end)
         editbox:SetScript('OnReceiveDrag', function()
             local item_info = Aux.cursor_item() and Aux.info.item(Aux.cursor_item().item_id)
             if item_info then
-                public.set_filter(strlower(item_info.name)..'/exact')
-                public.disable_sniping()
-                public.execute()
+                m.set_filter(strlower(item_info.name)..'/exact')
+                m.disable_sniping()
+                m.execute()
             end
             ClearCursor()
         end)
@@ -121,25 +121,25 @@ function Aux.search_frame.create_frames(private, public)
         btn:SetWidth(243)
         btn:SetHeight(22)
         btn:SetText('Search Results')
-        btn:SetScript('OnClick', function() private.update_tab(private.RESULTS) end)
+        btn:SetScript('OnClick', function() m.update_tab(m.RESULTS) end)
         private.search_results_button = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrame, 18)
-        btn:SetPoint('TOPLEFT', private.search_results_button, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.search_results_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(243)
         btn:SetHeight(22)
         btn:SetText('Saved Searches')
-        btn:SetScript('OnClick', function() private.update_tab(private.SAVED) end)
+        btn:SetScript('OnClick', function() m.update_tab(m.SAVED) end)
         private.saved_searches_button = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrame, 18)
-        btn:SetPoint('TOPLEFT', private.saved_searches_button, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.saved_searches_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(243)
         btn:SetHeight(22)
         btn:SetText('New Filter')
-        btn:SetScript('OnClick', function() private.update_tab(private.FILTER) end)
+        btn:SetScript('OnClick', function() m.update_tab(m.FILTER) end)
         private.new_filter_button = btn
     end
     do
@@ -153,7 +153,7 @@ function Aux.search_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameResults, 16)
-        btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Bid')
@@ -162,7 +162,7 @@ function Aux.search_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameResults, 16)
-        btn:SetPoint('TOPLEFT', private.bid_button, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.bid_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Buyout')
@@ -171,43 +171,43 @@ function Aux.search_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameResults, 16)
-        btn:SetPoint('TOPLEFT', private.buyout_button, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.buyout_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Clear')
         btn:SetScript('OnClick', function()
-            while tremove(private:current_search().records) do end
-            private.results_listing:SetDatabase()
+            while tremove(m.current_search().records) do end
+            m.results_listing:SetDatabase()
         end)
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameSaved, 16)
-        btn:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Favorite')
         btn:SetScript('OnClick', function()
-            local filters = Aux.scan_util.parse_filter_string(private.search_box:GetText())
+            local filters = Aux.scan_util.parse_filter_string(m.search_box:GetText())
             if filters then
                 tinsert(aux_favorite_searches, 1, {
-                    filter_string = private.search_box:GetText(),
+                    filter_string = m.search_box:GetText(),
                     prettified = Aux.util.join(Aux.util.map(filters, function(filter) return filter.prettified end), ';'),
                 })
             end
-            private.update_search_listings()
+            m.update_search_listings()
         end)
     end
     do
         local btn1 = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn1:SetPoint('TOPLEFT', private.status_bar, 'TOPRIGHT', 5, 0)
+        btn1:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
         btn1:SetWidth(80)
         btn1:SetHeight(24)
         btn1:SetText('Search')
         btn1:SetScript('OnClick', function()
-            private.search_box:SetText('')
-            private.add_filter()
-            private.clear_form()
-            public.execute()
+            m.search_box:SetText('')
+            m.add_filter()
+            m.clear_form()
+            m.execute()
         end)
 
         local btn2 = Aux.gui.button(AuxSearchFrameFilter, 16)
@@ -216,8 +216,8 @@ function Aux.search_frame.create_frames(private, public)
         btn2:SetHeight(24)
         btn2:SetText('Add')
         btn2:SetScript('OnClick', function()
-            private.add_filter()
-            private.clear_form()
+            m.add_filter()
+            m.clear_form()
         end)
 
         local btn3 = Aux.gui.button(AuxSearchFrameFilter, 16)
@@ -226,8 +226,8 @@ function Aux.search_frame.create_frames(private, public)
         btn3:SetHeight(24)
         btn3:SetText('Replace')
         btn3:SetScript('OnClick', function()
-            private.add_filter(nil, true)
-            private.clear_form()
+            m.add_filter(nil, true)
+            m.clear_form()
         end)
     end
     do
@@ -242,14 +242,14 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                private.last_page_editbox:SetFocus()
+                m.last_page_editbox:SetFocus()
             else
                 getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.execute()
+            m.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -280,7 +280,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.execute()
+            m.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -296,12 +296,12 @@ function Aux.search_frame.create_frames(private, public)
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
             else
-                private.first_page_editbox:SetFocus()
+                m.first_page_editbox:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.execute()
+            m.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
@@ -315,7 +315,7 @@ function Aux.search_frame.create_frames(private, public)
         local label = Aux.gui.label(AuxSearchFrameFilterUsableCheckButton, 13)
         label:SetPoint('BOTTOMLEFT', AuxSearchFrameFilterUsableCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('Usable')
-        private.show_hidden_checkbox = checkbox
+        private.usable_checkbox = checkbox
     end
     do
         local dropdown = Aux.gui.dropdown(AuxSearchFrameFilter)
@@ -325,57 +325,57 @@ function Aux.search_frame.create_frames(private, public)
         local label = Aux.gui.label(dropdown, 13)
         label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
         label:SetText('Item Class')
-        UIDropDownMenu_Initialize(dropdown, private.initialize_class_dropdown)
+        UIDropDownMenu_Initialize(dropdown, m.initialize_class_dropdown)
         dropdown:SetScript('OnShow', function()
-            UIDropDownMenu_Initialize(this, private.initialize_class_dropdown)
+            UIDropDownMenu_Initialize(this, m.initialize_class_dropdown)
         end)
         private.class_dropdown = dropdown
     end
     do
         local dropdown = Aux.gui.dropdown(AuxSearchFrameFilter)
-        dropdown:SetPoint('TOPLEFT', private.class_dropdown, 'BOTTOMLEFT', 0, -18)
+        dropdown:SetPoint('TOPLEFT', m.class_dropdown, 'BOTTOMLEFT', 0, -18)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
         label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
         label:SetText('Item Subclass')
-        UIDropDownMenu_Initialize(dropdown, private.initialize_subclass_dropdown)
+        UIDropDownMenu_Initialize(dropdown, m.initialize_subclass_dropdown)
         dropdown:SetScript('OnShow', function()
-            UIDropDownMenu_Initialize(this, private.initialize_subclass_dropdown)
+            UIDropDownMenu_Initialize(this, m.initialize_subclass_dropdown)
         end)
         private.subclass_dropdown = dropdown
     end
     do
         local dropdown = Aux.gui.dropdown(AuxSearchFrameFilter)
-        dropdown:SetPoint('TOPLEFT', private.subclass_dropdown, 'BOTTOMLEFT', 0, -18)
+        dropdown:SetPoint('TOPLEFT', m.subclass_dropdown, 'BOTTOMLEFT', 0, -18)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
         label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
         label:SetText('Item Slot')
-        UIDropDownMenu_Initialize(dropdown, private.initialize_slot_dropdown)
+        UIDropDownMenu_Initialize(dropdown, m.initialize_slot_dropdown)
         dropdown:SetScript('OnShow', function()
-            UIDropDownMenu_Initialize(this, private.initialize_slot_dropdown)
+            UIDropDownMenu_Initialize(this, m.initialize_slot_dropdown)
         end)
         private.slot_dropdown = dropdown
     end
     do
         local dropdown = Aux.gui.dropdown(AuxSearchFrameFilter)
-        dropdown:SetPoint('TOPLEFT', private.slot_dropdown, 'BOTTOMLEFT', 0, -18)
+        dropdown:SetPoint('TOPLEFT', m.slot_dropdown, 'BOTTOMLEFT', 0, -18)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
         label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
         label:SetText('Min Rarity')
-        UIDropDownMenu_Initialize(dropdown, private.initialize_quality_dropdown)
+        UIDropDownMenu_Initialize(dropdown, m.initialize_quality_dropdown)
         dropdown:SetScript('OnShow', function()
-            UIDropDownMenu_Initialize(this, private.initialize_quality_dropdown)
+            UIDropDownMenu_Initialize(this, m.initialize_quality_dropdown)
         end)
         private.quality_dropdown = dropdown
     end
     do
         local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-        editbox:SetPoint('TOPLEFT', private.quality_dropdown, 'BOTTOMLEFT', 0, -18)
+        editbox:SetPoint('TOPLEFT', m.quality_dropdown, 'BOTTOMLEFT', 0, -18)
         editbox:SetWidth(145)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
@@ -383,12 +383,12 @@ function Aux.search_frame.create_frames(private, public)
             if IsShiftKeyDown() then
                 getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
             else
-                private.last_page_editbox:SetFocus()
+                m.last_page_editbox:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.execute()
+            m.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -397,20 +397,20 @@ function Aux.search_frame.create_frames(private, public)
     end
     do
         local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
-        editbox:SetPoint('TOPLEFT', private.first_page_editbox, 'TOPRIGHT', 10, 0)
+        editbox:SetPoint('TOPLEFT', m.first_page_editbox, 'TOPRIGHT', 10, 0)
         editbox:SetWidth(145)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                private.first_page_editbox:SetFocus()
+                m.first_page_editbox:SetFocus()
             else
                 getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.execute()
+            m.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
@@ -424,14 +424,14 @@ function Aux.search_frame.create_frames(private, public)
         label:SetText('Usable')
     end
     local function add_modifier(...)
-        local current_filter_string = private.search_box:GetText()
+        local current_filter_string = m.search_box:GetText()
         for i=1,arg.n do
             if current_filter_string ~= '' and strsub(current_filter_string, -1) ~= '/' then
                 current_filter_string = current_filter_string..'/'
             end
             current_filter_string = current_filter_string..arg[i]
         end
-        private.search_box:SetText(current_filter_string)
+        m.search_box:SetText(current_filter_string)
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
@@ -446,7 +446,7 @@ function Aux.search_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('LEFT', private.and_operator_button, 'RIGHT', 10, 0)
+        btn:SetPoint('LEFT', m.and_operator_button, 'RIGHT', 10, 0)
         btn:SetWidth(50)
         btn:SetHeight(19)
         btn:SetText('or')
@@ -457,7 +457,7 @@ function Aux.search_frame.create_frames(private, public)
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('LEFT', private.or_operator_button, 'RIGHT', 10, 0)
+        btn:SetPoint('LEFT', m.or_operator_button, 'RIGHT', 10, 0)
         btn:SetWidth(50)
         btn:SetHeight(19)
         btn:SetText('not')
@@ -469,105 +469,105 @@ function Aux.search_frame.create_frames(private, public)
     private.modifier_buttons = {}
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.and_operator_button, 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['min-unit-bid'] = btn
+        btn:SetPoint('TOPLEFT', m.and_operator_button, 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['min-unit-bid'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['min-unit-bid'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['min-unit-buy'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['min-unit-bid'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['min-unit-buy'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['min-unit-buy'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['max-unit-bid'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['min-unit-buy'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['max-unit-bid'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['max-unit-bid'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['max-unit-buy'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['max-unit-bid'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['max-unit-buy'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['max-unit-buy'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['bid-profit'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['max-unit-buy'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['bid-profit'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['bid-profit'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['buy-profit'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-profit'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['buy-profit'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['buy-profit'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['bid-vend-profit'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['buy-profit'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['bid-vend-profit'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['bid-vend-profit'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['buy-vend-profit'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-vend-profit'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['buy-vend-profit'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['buy-vend-profit'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['bid-dis-profit'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['buy-vend-profit'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['bid-dis-profit'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['bid-dis-profit'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['buy-dis-profit'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-dis-profit'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['buy-dis-profit'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.and_operator_button, 'BOTTOMLEFT', 205, -10)
-        private.modifier_buttons['bid-pct'] = btn
+        btn:SetPoint('TOPLEFT', m.and_operator_button, 'BOTTOMLEFT', 205, -10)
+        m.modifier_buttons['bid-pct'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['bid-pct'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['buy-pct'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-pct'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['buy-pct'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['buy-pct'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['item'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['buy-pct'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['item'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['item'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['tooltip'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['item'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['tooltip'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['tooltip'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['min-lvl'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['tooltip'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['min-lvl'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['min-lvl'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['max-lvl'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['min-lvl'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['max-lvl'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['max-lvl'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['rarity'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['max-lvl'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['rarity'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['rarity'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['left'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['rarity'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['left'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['left'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['utilizable'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['left'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['utilizable'] = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
-        btn:SetPoint('TOPLEFT', private.modifier_buttons['utilizable'], 'BOTTOMLEFT', 0, -10)
-        private.modifier_buttons['discard'] = btn
+        btn:SetPoint('TOPLEFT', m.modifier_buttons['utilizable'], 'BOTTOMLEFT', 0, -10)
+        m.modifier_buttons['discard'] = btn
     end
-    for modifier_name, btn in private.modifier_buttons do
+    for modifier_name, btn in m.modifier_buttons do
         local modifier_name = modifier_name
         local btn = btn
 
@@ -606,58 +606,58 @@ function Aux.search_frame.create_frames(private, public)
     end
 
     private.results_listing = Aux.auction_listing.CreateAuctionResultsTable(AuxSearchFrameResults, Aux.auction_listing.search_config)
-    private.results_listing:SetSort(1,2,3,4,5,6,7,8,9)
-    private.results_listing:Reset()
-    private.results_listing:SetHandler('OnCellClick', function(cell, button)
-        if IsAltKeyDown() and private.results_listing:GetSelection().record == cell.row.data.record then
-            if button == 'LeftButton' and private.buyout_button:IsEnabled() then
-                private.buyout_button:Click()
-            elseif button == 'RightButton' and private.bid_button:IsEnabled() then
-                private.bid_button:Click()
+    m.results_listing:SetSort(1,2,3,4,5,6,7,8,9)
+    m.results_listing:Reset()
+    m.results_listing:SetHandler('OnCellClick', function(cell, button)
+        if IsAltKeyDown() and m.results_listing:GetSelection().record == cell.row.data.record then
+            if button == 'LeftButton' and m.buyout_button:IsEnabled() then
+                m.buyout_button:Click()
+            elseif button == 'RightButton' and m.bid_button:IsEnabled() then
+                m.bid_button:Click()
             end
         end
     end)
-    private.results_listing:SetHandler('OnSelectionChanged', function(rt, datum)
+    m.results_listing:SetHandler('OnSelectionChanged', function(rt, datum)
         if not datum then return end
-        private.find_auction(datum.record)
+        m.find_auction(datum.record)
     end)
 
     local handlers = {
         OnClick = function(st, data, _, button)
             if not data then return end
             if button == 'LeftButton' and IsShiftKeyDown() then
-                private.search_box:SetText(data.search.filter_string)
+                m.search_box:SetText(data.search.filter_string)
             elseif button == 'RightButton' and IsShiftKeyDown() then
-                private.add_filter(data.search.filter_string)
+                m.add_filter(data.search.filter_string)
             elseif button == 'LeftButton' and IsAltKeyDown() then
-                private.popup_info.rename = data.search
+                m.popup_info.rename = data.search
                 StaticPopup_Show('AUX_SEARCH_SAVED_RENAME')
             elseif button == 'RightButton' and IsAltKeyDown() then
                 -- unused
             elseif button == 'LeftButton' and IsControlKeyDown() then
-                if st == private.favorite_searches_listing and data.index > 1 then
+                if st == m.favorite_searches_listing and data.index > 1 then
                     local temp = aux_favorite_searches[data.index - 1]
                     aux_favorite_searches[data.index - 1] = data.search
                     aux_favorite_searches[data.index] = temp
-                    private.update_search_listings()
+                    m.update_search_listings()
                 end
             elseif button == 'RightButton' and IsControlKeyDown() then
-                if st == private.favorite_searches_listing and data.index < getn(aux_favorite_searches) then
+                if st == m.favorite_searches_listing and data.index < getn(aux_favorite_searches) then
                     local temp = aux_favorite_searches[data.index + 1]
                     aux_favorite_searches[data.index + 1] = data.search
                     aux_favorite_searches[data.index] = temp
-                    private.update_search_listings()
+                    m.update_search_listings()
                 end
             elseif button == 'LeftButton' then
-                private.search_box:SetText(data.search.filter_string)
-                public.execute()
+                m.search_box:SetText(data.search.filter_string)
+                m.execute()
             elseif button == 'RightButton' then
-                if st == private.recent_searches_listing then
+                if st == m.recent_searches_listing then
                     tinsert(aux_favorite_searches, 1, data.search)
-                elseif st == private.favorite_searches_listing then
+                elseif st == m.favorite_searches_listing then
                     tremove(aux_favorite_searches, data.index)
                 end
-                private.update_search_listings()
+                m.update_search_listings()
             end
         end,
         OnEnter = function(st, data, self)
@@ -674,20 +674,20 @@ function Aux.search_frame.create_frames(private, public)
     }
 
     private.recent_searches_listing = Aux.listing.CreateScrollingTable(AuxSearchFrameSavedRecent)
-    private.recent_searches_listing:SetColInfo({{name='Recent Searches', width=1}})
-    private.recent_searches_listing:EnableSorting(false)
-    private.recent_searches_listing:DisableSelection(true)
-    private.recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
-    private.recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
-    private.recent_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
+    m.recent_searches_listing:SetColInfo({{name='Recent Searches', width=1}})
+    m.recent_searches_listing:EnableSorting(false)
+    m.recent_searches_listing:DisableSelection(true)
+    m.recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
+    m.recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
+    m.recent_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
 
     Aux.gui.vertical_line(AuxSearchFrameSaved, 379)
 
     private.favorite_searches_listing = Aux.listing.CreateScrollingTable(AuxSearchFrameSavedFavorite)
-    private.favorite_searches_listing:SetColInfo({{name='Favorite Searches', width=1}})
-    private.favorite_searches_listing:EnableSorting(false)
-    private.favorite_searches_listing:DisableSelection(true)
-    private.favorite_searches_listing:SetHandler('OnClick', handlers.OnClick)
-    private.favorite_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
-    private.favorite_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
-end
+    m.favorite_searches_listing:SetColInfo({{name='Favorite Searches', width=1}})
+    m.favorite_searches_listing:EnableSorting(false)
+    m.favorite_searches_listing:DisableSelection(true)
+    m.favorite_searches_listing:SetHandler('OnClick', handlers.OnClick)
+    m.favorite_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
+    m.favorite_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
+end)

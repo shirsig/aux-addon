@@ -21,13 +21,10 @@ end
 function Aux_module(name)
     local interface, data, private, public, is_public = {}, {}, {}, {}, {}
     setmetatable(interface, {
---        __newindex = function()
---            error('Illegal write on interface of "'..name..'"!')
---        end,
+        __newindex = function(_, key)
+            error('Illegal write of attribute "'..key..'" on interface of "'..name..'"!')
+        end,
         __index = function(_, key)
-            if rawget(interface, key) then -- TODO remove
-                return rawget(interface, key) -- TODO remove
-            end -- TODO remove
             if is_public[key] then
                 return data[key]
             end
@@ -42,7 +39,7 @@ function Aux_module(name)
         end,
         __index = function(_, key)
             if rawget(data, key) == nil then
---                error('Access of undeclared attribute "'..key..'" of module"'..name..'"!')
+                error('Access of undeclared attribute "'..key..'" of module"'..name..'"!')
             else
                 return Aux_unwrap(rawget(data, key))
             end
@@ -95,11 +92,14 @@ local addon = Aux_addon('Aux')
 Aux = tremove(addon, 1)
 local m, private, public = unpack(addon)
 
+private.tabs = {}
 function public.tab(index, name)
     local ret = { m.module(name) }
-    m.tabs[index] = m[name]
+    m.tabs[index] = m.modules[name]
     return unpack(ret)
 end
+
+private.active_tab = nil
 
 function public.on_load()
     public.version = '2.16.2'
@@ -155,13 +155,9 @@ function public.on_load()
 
     for _, module in m.modules do
         if module.LOAD then
-            module:LOAD()
+            module.LOAD()
         end
     end
-    Aux.search_frame.on_load()
-    Aux.post_frame.on_load()
-    Aux.auctions_frame.on_load()
-    Aux.bids_frame.on_load()
 end
 
 function public.on_event()
@@ -369,45 +365,39 @@ function public.neutral_faction()
     return not UnitFactionGroup('npc')
 end
 
-function private:on_auction_house_closed()
+function private.on_auction_house_closed()
 	m.post.stop()
 	m.stack.stop()
 	m.scan.abort()
 
-    --    Aux.tabs[self.active_tab].CLOSE() TODO
-    Aux.search_frame.on_close()
-    Aux.post_frame.on_close()
-    Aux.auctions_frame.on_close()
-    Aux.bids_frame.on_close()
+    m.tabs[m.active_tab].CLOSE()
 
 	AuxFrame:Hide()
 end
 
-function private:on_tab_click(index)
-    --    Aux.tabs[self.active_tab].CLOSE() TODO
-    Aux.search_frame.on_close()
-    Aux.post_frame.on_close()
-    Aux.auctions_frame.on_close()
-    Aux.bids_frame.on_close()
+function private.on_tab_click(index)
+    if m.active_tab then
+        m.tabs[m.active_tab].CLOSE()
+    end
     AuxSearchFrame:Hide()
     AuxPostFrame:Hide()
     AuxAuctionsFrame:Hide()
     AuxBidsFrame:Hide()
 
---    Aux.tabs[index].OPEN() TODO
-    if index == 1 then
-        AuxSearchFrame:Show()
-        Aux.search_frame.on_open()
-    elseif index == 2 then
-        AuxPostFrame:Show()
-        Aux.post_frame.on_open()
-    elseif index == 3 then
-        AuxAuctionsFrame:Show()
-        Aux.auctions_frame.on_open()
-    elseif index == 4 then
-        AuxBidsFrame:Show()
-        Aux.bids_frame.on_open()
-    end
+    m.tabs[index].OPEN()
+--    if index == 1 then
+--        AuxSearchFrame:Show()
+--        Aux.search_frame.on_open()
+--    elseif index == 2 then
+--        AuxPostFrame:Show()
+--        Aux.post_frame.on_open()
+--    elseif index == 3 then
+--        AuxAuctionsFrame:Show()
+--        Aux.auctions_frame.on_open()
+--    elseif index == 4 then
+--        AuxBidsFrame:Show()
+--        Aux.bids_frame.on_open()
+--    end
 
     m.active_tab = index
 end
