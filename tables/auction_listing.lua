@@ -655,7 +655,8 @@ local methods = {
             ChatFrameEditBox:Insert(this.row.data.record.hyperlink)
         elseif Aux.unmodified() and button == 'RightButton' then -- TODO not when alt (how?)
             Aux.tab_group:set_tab(1)
-            Aux.search_frame.execute('search', strlower(Aux.info.item(this.row.data.record.item_id).name)..'/exact')
+            Aux.search_frame.set_filter(strlower(Aux.info.item(this.row.data.record.item_id).name)..'/exact')
+            Aux.search_frame.execute()
         else
             local selection = this.rt:GetSelection()
             if not selection or selection.record ~= this.row.data.record then

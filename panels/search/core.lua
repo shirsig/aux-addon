@@ -207,42 +207,26 @@ function public.on_load()
     private.update_tab(private.SAVED)
 end
 
-function public.execute(mode, filter_string)
-
-    filter_string = filter_string or private.search_box:GetText()
-    private.search_box:SetText(filter_string)
-
-    local queries = Aux.scan_util.parse_filter_string(filter_string)
-    if not queries then
-        return
-    elseif getn(queries) > 1 then
-        Aux.log('Invalid filter: The sniping mode does not support multiple queries')
-    end
-    if queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-        Aux.log('Invalid filter: The sniping mode does not support page range filters')
-    end
-
-    if filter_string ~= private.current_search().filter_string then
-        private.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
-    else
-        private.results_listing:SetSelectedRecord()
-    end
-
-    private.sniping_helper(private.current_search(), queries[1])
+function private.discard_continuation()
+    Aux.scan.abort(search_scan_id)
+    private.current_search().continuation = nil
+    private.disable_resume()
 end
 
-function private.sniping_helper(search, query)
+function private.snipe(query, search)
 
-    local ignore_page = not query.blizzard_query.first_page
-    query.blizzard_query.first_page = query.blizzard_query.first_page or 0
-    query.blizzard_query.last_page = query.blizzard_query.last_page or 0
+    local ignore_page
+    if not search then
+        search = private.current_search()
+        query.blizzard_query.first_page = 0
+        query.blizzard_query.last_page = 0
+        ignore_page = true
+    end
 
     local sniping_map = {}
     for _, record in search.records do
         sniping_map[record.sniping_signature] = record
     end
-
-    private.update_tab(private.RESULTS)
 
     local next_page
     search_scan_id = Aux.scan.start{
@@ -276,43 +260,27 @@ function private.sniping_helper(search, query)
 
             query.blizzard_query.first_page = next_page
             query.blizzard_query.last_page = next_page
-            private.sniping_helper(search, query)
+            private.snipe(query, search)
         end,
         on_abort = function()
             private.status_bar:update_status(100, 100)
             private.status_bar:set_text('Done Sniping')
+
+            search.continuation = true
+            if private.current_search() == search then
+                private.enable_resume()
+            end
         end,
     }
 end
 
-function public.snipe(mode, filter_string)
+function private.search(queries, resume)
+    local current_query, current_page, total_queries, start_query, start_page
 
-    filter_string = filter_string or private.search_box:GetText()
-    private.search_box:SetText(filter_string)
-
-    if mode == 'search' and private.search_box:GetText() == private.current_search().filter_string then
-        mode = 'refresh'
-    end
-
-    local queries, current_query, current_page, total_queries, start_page, start_query
-
-    if mode == 'refresh' or mode == 'resume' then
-        private.search_box:ClearFocus()
-        private.search_box:SetText(private.current_search().filter_string)
-    end
-    if mode == 'refresh' then
-        private.current_search().records = {}
-        private.results_listing:SetDatabase(private.current_search().records)
-    end
-
-    queries = Aux.scan_util.parse_filter_string(filter_string)
-    if not queries then
-        return
-    end
     total_queries = getn(queries)
 
-    if mode == 'resume' then
-        start_query, start_page = unpack(private.current_search().next)
+    if resume then
+        start_query, start_page = unpack(private.current_search().continuation)
         for i=1,start_query-1 do
             tremove(queries, 1)
         end
@@ -321,18 +289,7 @@ function public.snipe(mode, filter_string)
     else
         start_query, start_page = 1, 1
     end
-
-    if mode == 'search' then
-        private.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
-    end
-
-    if mode == 'resume' or mode == 'refresh' then
-        Aux.scan.abort(search_scan_id)
-        private.current_search().next = nil
-        private.disable_resume()
-    end
-
-    private.update_tab(private.RESULTS)
+    private.discard_continuation()
 
     local search = private.current_search()
     search_scan_id = Aux.scan.start{
@@ -340,12 +297,10 @@ function public.snipe(mode, filter_string)
         queries = queries,
         on_scan_start = function()
             private.status_bar:update_status(0,0)
-            if mode == 'search' then
-                private.status_bar:set_text('Scanning auctions...')
-            elseif mode == 'refresh' then
-                private.status_bar:set_text('Rescanning auctions...')
-            elseif mode == 'resume' then
+            if resume then
                 private.status_bar:set_text('Resuming scan...')
+            else
+                private.status_bar:set_text('Scanning auctions...')
             end
         end,
         on_page_loaded = function(_, total_scan_pages)
@@ -384,16 +339,60 @@ function public.snipe(mode, filter_string)
             private.status_bar:set_text('Done Scanning')
 
             if current_query then
-                search.next = {current_query, current_page + 1}
+                search.continuation = {current_query, current_page + 1}
             else
-                search.next = {start_query, start_page}
+                search.continuation = {start_query, start_page}
             end
-
             if private.current_search() == search then
                 private.enable_resume()
             end
         end,
     }
+end
+
+function public.execute(snipe, resume)
+    if resume then
+        private.search_box:SetText(private.current_search().filter_string)
+    end
+    local filter_string = private.search_box:GetText()
+
+    local queries = Aux.scan_util.parse_filter_string(filter_string)
+    if not queries then
+        return
+    elseif snipe then
+        if getn(queries) > 1 then
+            Aux.log('Invalid filter: The sniping mode does not support multiple queries')
+            return
+        elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
+            Aux.log('Invalid filter: The sniping mode does not support page range filters')
+            return
+        end
+    end
+
+    if filter_string ~= private.current_search().filter_string then
+        private.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
+    else
+        private.search_box:ClearFocus()
+        if resume then
+            private.results_listing:SetSelectedRecord()
+        else
+            if private.current_search().snipe ~= snipe then
+                private.results_listing:Reset()
+            end
+            private.current_search().records = {}
+            private.results_listing:SetDatabase(private.current_search().records)
+        end
+    end
+
+    private.update_tab(private.RESULTS)
+    if snipe then
+        private.current_search().snipe = true
+        private.discard_continuation()
+        private.snipe(queries[1])
+    else
+        private.current_search().snipe = false
+        private.search(queries, resume)
+    end
 end
 
 function private.test(record)
@@ -496,7 +495,7 @@ end
 
 function private.disable_resume()
     private.resume_button:Hide()
-    private.search_box:SetPoint('RIGHT', private.refresh_button, 'LEFT', -4, 0)
+    private.search_box:SetPoint('RIGHT', private.start_button, 'LEFT', -4, 0)
 end
 
 do
@@ -528,10 +527,7 @@ do
             private.next_button:Show()
             private.search_box:SetPoint('LEFT', private.next_button, 'RIGHT', 4, 0)
         end
-        if search_index > 0 then
-            private.refresh_button:Enable()
-        end
-        if searches[search_index].next then
+        if searches[search_index].continuation and searches[search_index].snipe == private.snipe_button.enabled then
             private.enable_resume()
         else
             private.disable_resume()
@@ -551,7 +547,6 @@ do
         tinsert(searches, search_index + 1, {
             filter_string = filter_string,
             records = {},
---            sniping = private.snipe_button:GetChecked() TODO
         })
         while getn(searches) > search_index + 1 do
             tremove(searches)

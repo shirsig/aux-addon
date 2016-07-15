@@ -368,10 +368,10 @@ function m.horizontal_line(parent, y_offset, inverted_color)
     return texture
 end
 
-function m.vertical_line(parent, x_offset, inverted_color)
+function m.vertical_line(parent, x_offset, top_offset, bottom_offset, inverted_color)
     local texture = parent:CreateTexture()
-    texture:SetPoint('TOPLEFT', parent, 'TOPLEFT', x_offset, -2)
-    texture:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', x_offset, 2)
+    texture:SetPoint('TOPLEFT', parent, 'TOPLEFT', x_offset, top_offset or -2)
+    texture:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', x_offset, bottom_offset or 2)
     texture:SetWidth(2)
     if inverted_color then
         texture:SetTexture(unpack(m.config.frame_color))

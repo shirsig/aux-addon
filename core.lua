@@ -49,7 +49,7 @@ end
 
 Aux = Aux_addon()
 
-Aux.version = '2.15.10'
+Aux.version = '2.16.0'
 Aux.blizzard_ui_shown = false
 Aux.orig = {}
 
@@ -398,8 +398,8 @@ function Aux.SetItemRef(...)
     if AuxSearchFrame:IsVisible() and button == 'RightButton' then
         local item_info = Aux.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
-            Aux.search_frame.set_filter(item_info.name..'/exact')
-            Aux.search_frame.execute('search')
+            Aux.search_frame.set_filter(strlower(item_info.name)..'/exact')
+            Aux.search_frame.execute()
             return
         end
     end
@@ -416,7 +416,8 @@ function Aux.UseContainerItem(...)
         local item_info = Aux.info.container_item(bag, slot)
         item_info = item_info and Aux.info.item(item_info.item_id)
         if item_info then
-            Aux.search_frame.execute('search', strlower(item_info.name)..'/exact')
+            Aux.search_frame.set_filter(strlower(item_info.name)..'/exact')
+            Aux.search_frame.execute()
         end
         return
     end
