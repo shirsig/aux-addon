@@ -1,24 +1,22 @@
-do
+local wrap, unwrap = (function()
     local null = {}
-
-    function Aux_wrap(value)
+    return function(value)
         if value == nil then
             return null
         else
             return value
         end
-    end
-
-    function Aux_unwrap(value)
+    end,
+    function(value)
         if value == null then
             return nil
         else
             return value
         end
     end
-end
+end)()
 
-function Aux_module(name)
+local function Aux_module(name)
     local data, is_public, public_interface, private_interface, public, private = {}, {}, {}, {}, {}, {}
     setmetatable(public_interface, {
         __newindex = function(_, key)
@@ -29,7 +27,7 @@ function Aux_module(name)
                 error('Access of undeclared attribute "'..key..'" on public interface of "'..name..'"!')
             end
             if is_public[key] then
-                return Aux_unwrap(data[key])
+                return unwrap(data[key])
             end
         end,
         __call = function(_, key)
@@ -41,13 +39,13 @@ function Aux_module(name)
             if data[key] == nil then
                 error('Assignment of undeclared attribute "'..key..'" on private interface of "'..name..'"!')
             end
-            data[key] = Aux_wrap(value)
+            data[key] = wrap(value)
         end,
         __index = function(_, key)
             if data[key] == nil then
                 error('Access of undeclared attribute "'..key..'" on private interface of "'..name..'"!')
             end
-            return Aux_unwrap(data[key])
+            return unwrap(data[key])
         end,
         __call = function(_, key)
             return data[key] ~= nil
@@ -58,7 +56,7 @@ function Aux_module(name)
             if data[key] ~= nil then
                 error('Multiple declarations of "'..key..'" in "'..name..'"!')
             end
-            data[key] = Aux_wrap(value)
+            data[key] = wrap(value)
             is_public[key] = true
         end,
         __index = function(_, key)
@@ -70,7 +68,7 @@ function Aux_module(name)
             if data[key] ~= nil then
                 error('Multiple declarations of "'..key..'" in "'..name..'"!')
             end
-            data[key] = Aux_wrap(value)
+            data[key] = wrap(value)
             is_public[key] = nil
         end,
         __index = function(_, key)
@@ -80,25 +78,21 @@ function Aux_module(name)
     return { public_interface, private_interface, public, private }
 end
 
-function Aux_addon(name)
-    local public_interface, private_interface, public, private = unpack(Aux_module(name))
+-----------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------
 
-    private.modules = { public_interface }
-
-    function public.module(name)
-        local module = Aux_module(name)
-        local public_interface = tremove(module, 1)
-        tinsert(private_interface.modules, public_interface)
-        public[name] = public_interface
-        return unpack(module)
-    end
-
-    return { public_interface, private_interface, public, private }
-end
-
-local addon = Aux_addon('Aux')
+local addon = Aux_module('Aux')
 Aux = tremove(addon, 1)
 local m, public, private = unpack(addon)
+
+private.modules = { Aux }
+function public.module(name)
+    local module = Aux_module(name)
+    local public_interface = tremove(module, 1)
+    tinsert(m.modules, public_interface)
+    public[name] = public_interface
+    return unpack(module)
+end
 
 private.tabs = {}
 function public.tab(index, name)
@@ -106,7 +100,6 @@ function public.tab(index, name)
     m.tabs[index] = m[name]
     return unpack(ret)
 end
-
 private.active_tab = nil
 
 function public.on_load()
