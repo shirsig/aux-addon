@@ -1,7 +1,6 @@
-local m = {}
-Aux.scan_util = m
+local m, private, public = Aux.module'scan_util'
 
-function m.default_filter(str)
+function public.default_filter(str)
     return {
         arity = 0,
         test = function()
@@ -14,7 +13,7 @@ function m.default_filter(str)
     }
 end
 
-m.filters = {
+public.filters = {
 
     ['utilizable'] = {
         arity = 0,
@@ -311,7 +310,7 @@ m.filters = {
     },
 }
 
-function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
+function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
     local function test(index)
         local auction_info = Aux.info.auction(index, auction_record.query_type)
@@ -381,7 +380,7 @@ function m.find(auction_record, status_bar, on_abort, on_failure, on_success)
     }
 end
 
-function m.filter_builder()
+function public.filter_builder()
     local filter = ''
     return {
         append = function(self, modifier)
@@ -398,7 +397,7 @@ function m.filter_builder()
     }
 end
 
-function m.item_query(item_id, first_page, last_page)
+function public.item_query(item_id, first_page, last_page)
 
     local item_info = Aux.info.item(item_id)
 
@@ -411,7 +410,7 @@ function m.item_query(item_id, first_page, last_page)
     end
 end
 
-function m.parse_filter_string(filter_string)
+function public.parse_filter_string(filter_string)
     local parts = Aux.util.split(filter_string, ';')
 
     local filters = {}
@@ -434,7 +433,7 @@ function m.parse_filter_string(filter_string)
     return filters
 end
 
-function m.filter_from_string(filter_term)
+function public.filter_from_string(filter_term)
     local parts = Aux.util.map(Aux.util.split(filter_term, '/'), function(part) return strlower(Aux.util.trim(part)) end)
 
     local blizzard_filter = {}
@@ -608,7 +607,7 @@ function m.filter_from_string(filter_term)
     }, m.suggestions(blizzard_filter, getn(parts))
 end
 
-function m.suggestions(blizzard_filter, num_parts)
+function public.suggestions(blizzard_filter, num_parts)
 
     local suggestions = {}
 
@@ -676,7 +675,7 @@ function m.suggestions(blizzard_filter, num_parts)
     return suggestions
 end
 
-function m.blizzard_query(filter)
+function public.blizzard_query(filter)
 
     local item_info, class_index, subclass_index, slot_index
     if filter.exact then
@@ -701,7 +700,7 @@ function m.blizzard_query(filter)
     }
 end
 
-function m.validator(blizzard_filter, post_filter)
+function public.validator(blizzard_filter, post_filter)
 
     return function(record)
         if blizzard_filter.exact and strlower(Aux.info.item(record.item_id).name) ~= blizzard_filter.name then

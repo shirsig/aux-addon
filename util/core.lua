@@ -1,7 +1,6 @@
-local private, public = {}, {}
-Aux.util = public
+local m, private, public = Aux.module'util'
 
-function Aux.util.pass()
+function public.pass()
 end
 
 function public.id(object)
@@ -109,21 +108,21 @@ function Aux_PluralizeIf(word, count)
     end
 end
 
-function Aux.util.without_errors(f)
+function public.without_errors(f)
     local orig = UIErrorsFrame.AddMessage
-    UIErrorsFrame.AddMessage = Aux.util.pass
+    UIErrorsFrame.AddMessage = m.pass
     f()
     UIErrorsFrame.AddMessage = orig
 end
 
-function Aux.util.without_sound(f)
+function public.without_sound(f)
     local orig = GetCVar('MasterSoundEffects')
     SetCVar('MasterSoundEffects', 0)
     f()
     SetCVar('MasterSoundEffects', orig)
 end
 
-function Aux.util.iter(array)
+function public.iter(array)
 	local with_index = ipairs(array)
 	return function()
 		local _, value = with_index
@@ -131,19 +130,19 @@ function Aux.util.iter(array)
 	end
 end
 
-function Aux.util.set_add(set, key)
+function public.set_add(set, key)
     set[key] = true
 end
 
-function Aux.util.set_remove(set, key)
+function public.set_remove(set, key)
     set[key] = nil
 end
 
-function Aux.util.set_contains(set, key)
+function public.set_contains(set, key)
     return set[key] ~= nil
 end
 
-function Aux.util.set_size(set)
+function public.set_size(set)
     local size = 0
 	for _,_ in pairs(set) do
 		size = size + 1
@@ -151,7 +150,7 @@ function Aux.util.set_size(set)
 	return size
 end
 
-function Aux.util.set_to_array(set)
+function public.set_to_array(set)
 	local array = {}
 	for element, _ in pairs(set) do
 		tinsert(array, element)
@@ -159,34 +158,34 @@ function Aux.util.set_to_array(set)
 	return array
 end
 
-function Aux.util.any(xs, p)
-	holds = false
+function public.any(xs, p)
+	local holds = false
 	for _, x in ipairs(xs) do
 		holds = holds or p(x)
 	end
 	return holds
 end
 
-function Aux.util.all(xs, p)
-	holds = true
+function public.all(xs, p)
+	local holds = true
 	for _, x in ipairs(xs) do
 		holds = holds and p(x)
 	end
 	return holds
 end
 
-function Aux.util.set_filter(xs, p)
-	ys = {}
+function public.set_filter(xs, p)
+	local ys = {}
 	for x, _ in pairs(xs) do
 		if p(x) then
-			Aux.util.set_add(ys, x)
+			m.set_add(ys, x)
 		end
 	end
 	return ys
 end
 
-function Aux.util.filter(xs, p)
-	ys = {}
+function public.filter(xs, p)
+	local ys = {}
 	for _, x in ipairs(xs) do
 		if p(x) then
 			tinsert(ys, x)
@@ -195,16 +194,16 @@ function Aux.util.filter(xs, p)
 	return ys
 end
 
-function Aux.util.map(xs, f)
-	ys = {}
+function public.map(xs, f)
+	local ys = {}
 	for _, x in ipairs(xs) do
 		tinsert(ys, f(x))
 	end
 	return ys
 end
 
-function Aux.util.take(n, xs)
-	ys = {}
+function public.take(n, xs)
+	local ys = {}
 	for i=1,n do
 		if xs[i] then
 			tinsert(ys, xs[i])
@@ -213,7 +212,7 @@ function Aux.util.take(n, xs)
 	return ys
 end
 
-function Aux.util.index_of(value, array)
+function public.index_of(value, array)
 	for i, item in ipairs(array) do
 		if item == value then
 			return i
@@ -234,7 +233,7 @@ local GSC_3N = "|cff"..GSC_RED.."(|cff"..GSC_GOLD.."%d|cff000000.|cff"..GSC_SILV
 local GSC_2N = "|cff"..GSC_RED.."(|cff"..GSC_SILVER.."%d|cff000000.|cff"..GSC_COPPER.."%02d|cff"..GSC_RED..")|r"
 local GSC_1N = "|cff"..GSC_RED.."(|cff"..GSC_COPPER.."%d|cff"..GSC_RED..")|r"
 
-function Aux.util.money_string(money)
+function public.money_string(money)
 	money = floor(tonumber(money) or 0)
 	local negative = money < 0
 	money = abs(money)
@@ -266,7 +265,7 @@ function Aux.util.money_string(money)
 	end
 end
 
-function Aux.util.group_by(tables, equal)
+function public.group_by(tables, equal)
 	local groups = {}
 	for _, table in ipairs(tables) do
         local found_group
@@ -283,7 +282,7 @@ function Aux.util.group_by(tables, equal)
 	return groups
 end
 
-function Aux.util.set()
+function public.set()
     local self = {}
 
     local data = {}

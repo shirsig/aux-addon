@@ -1,5 +1,4 @@
-local m = {}
-Aux.money = m
+local m, private, public = Aux.module'money'
 
 local GOLD_TEXT = '|cffffd70ag|r'
 local SILVER_TEXT = '|cffc7c7cfs|r'
@@ -9,19 +8,19 @@ do
 	local COPPER_PER_SILVER = 100
 	local COPPER_PER_GOLD = 10000
 
-	function m.to_GSC(money)
+	function public.to_GSC(money)
 		local gold = floor(money / COPPER_PER_GOLD)
 		local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
 		local copper = mod(money, COPPER_PER_SILVER)
 		return gold, silver, copper
 	end
 
-	function m.from_GSC(gold, silver, copper)
+	function public.from_GSC(gold, silver, copper)
 		return gold * COPPER_PER_GOLD + silver * COPPER_PER_SILVER + copper
 	end
 end
 
-function m.to_string(money, pad, trim, decimal_points, color, no_color)
+function public.to_string(money, pad, trim, decimal_points, color, no_color)
 
 	local is_negative = money < 0
 	money = abs(money)
@@ -73,7 +72,7 @@ function m.to_string(money, pad, trim, decimal_points, color, no_color)
 	return text
 end
 
-function m.from_string(value)
+function public.from_string(value)
 	value = strlower(value)
 
 	-- remove any colors
@@ -94,7 +93,7 @@ function m.from_string(value)
 	return m.from_GSC(gold or 0, silver or 0, copper or 0)
 end
 
-function m.format_number(num, pad, decimal_padding, color)
+function public.format_number(num, pad, decimal_padding, color)
 
 	local padding = pad and 2 + (decimal_padding and decimal_padding + 1 or 0) or 0
 	num = format('%0'..padding..'.0'..(decimal_padding or 0)..'f', num)

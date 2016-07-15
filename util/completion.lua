@@ -1,7 +1,7 @@
-local m = {}
+local m, private, public = Aux.module'completion'
 Aux.completion = m
 
-function m:complete()
+function public:complete()
 	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
 		return
 	end
@@ -23,7 +23,7 @@ function m:complete()
 	end
 end
 
-function m.completor(options)
+function public.completor(options)
 	return function(self)
 		if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
 			return
