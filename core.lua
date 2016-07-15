@@ -102,7 +102,6 @@ function Aux.on_load()
         end
     end
 
-    Aux.tooltip.on_load()
     Aux.search_frame.on_load()
     Aux.post_frame.on_load()
     Aux.auctions_frame.on_load()
