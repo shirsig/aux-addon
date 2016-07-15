@@ -51,7 +51,11 @@ function Aux.search_frame.create_frames(private, public)
         btn:SetWidth(70)
         btn:SetHeight(25)
         btn:SetText('Start')
+        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
         btn:SetScript('OnClick', function()
+            if arg1 == 'RightButton' then
+                public.set_filter(private.current_search().filter_string)
+            end
             public.execute()
         end)
         private.start_button = btn
