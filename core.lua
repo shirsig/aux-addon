@@ -399,6 +399,7 @@ function Aux.SetItemRef(...)
         local item_info = Aux.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
             Aux.search_frame.set_filter(strlower(item_info.name)..'/exact')
+            Aux.search_frame.disable_sniping()
             Aux.search_frame.execute()
             return
         end
@@ -417,6 +418,7 @@ function Aux.UseContainerItem(...)
         item_info = item_info and Aux.info.item(item_info.item_id)
         if item_info then
             Aux.search_frame.set_filter(strlower(item_info.name)..'/exact')
+            Aux.search_frame.disable_sniping()
             Aux.search_frame.execute()
         end
         return

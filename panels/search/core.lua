@@ -4,7 +4,7 @@ Aux.search_frame = public
 aux_favorite_searches = {}
 aux_recent_searches = {}
 
-local search_scan_id = 0
+private.search_scan_id = 0
 
 private.popup_info = {
     rename = {}
@@ -215,17 +215,41 @@ end
 
 function public.on_load()
     public.create_frames(private, public)
+    public:disable_sniping()
     private.update_search()
     private.update_tab(private.SAVED)
 end
 
 function private.discard_continuation()
-    Aux.scan.abort(search_scan_id)
+    Aux.scan.abort(private.search_scan_id)
     private.current_search().continuation = nil
-    private.disable_resume()
+    private.update_resume()
 end
 
-function private.snipe(query, search)
+function private:enable_stop()
+    Aux.scan.abort(private.search_scan_id)
+    private.stop_button:Show()
+    private.start_button:Hide()
+end
+
+function private:enable_start()
+    private.start_button:Show()
+    private.stop_button:Hide()
+end
+
+function public.enable_sniping()
+    Aux.scan.abort(private.search_scan_id)
+    private.snipe = true
+    private.snipe_button:LockHighlight()
+end
+
+function public.disable_sniping()
+    Aux.scan.abort(private.search_scan_id)
+    private.snipe = false
+    private.snipe_button:UnlockHighlight()
+end
+
+function private.start_sniping(query, search)
 
     local ignore_page
     if not search then
@@ -241,7 +265,7 @@ function private.snipe(query, search)
     end
 
     local next_page
-    search_scan_id = Aux.scan.start{
+    private.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = {query},
         on_scan_start = function()
@@ -276,7 +300,7 @@ function private.snipe(query, search)
 
             query.blizzard_query.first_page = next_page
             query.blizzard_query.last_page = next_page
-            private.snipe(query, search)
+            private.start_sniping(query, search)
         end,
         on_abort = function()
             private.status_bar:update_status(100, 100)
@@ -286,17 +310,19 @@ function private.snipe(query, search)
             if private.current_search() == search then
                 private.update_resume()
             end
+
+            private:enable_start()
         end,
     }
 end
 
-function private.search(queries, resume)
+function private.start_search(queries, continuation)
     local current_query, current_page, total_queries, start_query, start_page
 
     total_queries = getn(queries)
 
-    if resume then
-        start_query, start_page = unpack(private.current_search().continuation)
+    if continuation then
+        start_query, start_page = unpack(continuation)
         for i=1,start_query-1 do
             tremove(queries, 1)
         end
@@ -305,10 +331,9 @@ function private.search(queries, resume)
     else
         start_query, start_page = 1, 1
     end
-    private.discard_continuation()
 
     local search = private.current_search()
-    search_scan_id = Aux.scan.start{
+    private.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = queries,
         on_scan_start = function()
@@ -349,6 +374,8 @@ function private.search(queries, resume)
             if private.current_search() == search and AuxSearchFrameResults:IsVisible() and getn(search.records) == 0 then
                 private.update_tab(private.SAVED)
             end
+
+            private:enable_start()
         end,
         on_abort = function()
             private.status_bar:update_status(100, 100)
@@ -362,11 +389,13 @@ function private.search(queries, resume)
             if private.current_search() == search then
                 private.update_resume()
             end
+
+            private:enable_start()
         end,
     }
 end
 
-function public.execute(snipe, resume)
+function public.execute(resume)
     if resume then
         private.search_box:SetText(private.current_search().filter_string)
     end
@@ -375,7 +404,7 @@ function public.execute(snipe, resume)
     local queries = Aux.scan_util.parse_filter_string(filter_string)
     if not queries then
         return
-    elseif snipe then
+    elseif private.snipe then
         if getn(queries) > 1 then
             Aux.log('Invalid filter: The sniping mode does not support multiple queries')
             return
@@ -392,7 +421,7 @@ function public.execute(snipe, resume)
         if resume then
             private.results_listing:SetSelectedRecord()
         else
-            if private.current_search().snipe ~= snipe then
+            if private.current_search().snipe ~= private.snipe then
                 private.results_listing:Reset()
             end
             private.current_search().records = {}
@@ -400,14 +429,17 @@ function public.execute(snipe, resume)
         end
     end
 
+    local continuation = private.current_search().continuation
+    private.discard_continuation()
+    private:enable_stop()
+
     private.update_tab(private.RESULTS)
-    if snipe then
+    if private.snipe then
         private.current_search().snipe = true
-        private.discard_continuation()
-        private.snipe(queries[1])
+        private.start_sniping(queries[1])
     else
         private.current_search().snipe = false
-        private.search(queries, resume)
+        private.start_search(queries, resume and continuation)
     end
 end
 
@@ -504,21 +536,13 @@ do
     end
 end
 
-function private.enable_resume()
-    private.resume_button:Show()
-    private.search_box:SetPoint('RIGHT', private.resume_button, 'LEFT', -4, 0)
-end
-
-function private.disable_resume()
-    private.resume_button:Hide()
-    private.search_box:SetPoint('RIGHT', private.start_button, 'LEFT', -4, 0)
-end
-
 function private.update_resume()
-    if private.current_search().continuation and private.current_search().snipe == private.snipe_button.enabled then
-        private.enable_resume()
+    if private.current_search().continuation and private.current_search().snipe == private.snipe then
+        private.resume_button:Show()
+        private.search_box:SetPoint('RIGHT', private.resume_button, 'LEFT', -4, 0)
     else
-        private.disable_resume()
+        private.resume_button:Hide()
+        private.search_box:SetPoint('RIGHT', private.start_button, 'LEFT', -4, 0)
     end
 end
 
@@ -534,7 +558,7 @@ do
     end
 
     function private.update_search()
-        Aux.scan.abort(search_scan_id)
+        Aux.scan.abort(private.search_scan_id)
         private.search_box:ClearFocus()
         private.search_box:SetText(searches[search_index].filter_string)
         private.results_listing:Reset()

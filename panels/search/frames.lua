@@ -8,11 +8,10 @@ function Aux.search_frame.create_frames(private, public)
         btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
         btn:SetScript('OnClick', function()
             if arg1 == 'LeftButton' then
-                this.enabled = not this.enabled
-                if this.enabled then
-                    this:LockHighlight()
+                if private.snipe then
+                    public.disable_sniping()
                 else
-                    this:UnlockHighlight()
+                    public.enable_sniping()
                 end
                 private.update_resume()
             elseif arg1 == 'RightButton' then
@@ -24,7 +23,6 @@ function Aux.search_frame.create_frames(private, public)
                 end
             end
         end)
-        btn.enabled = false
         btn.auto = false
         private.snipe_button = btn
     end
@@ -54,9 +52,21 @@ function Aux.search_frame.create_frames(private, public)
         btn:SetHeight(25)
         btn:SetText('Start')
         btn:SetScript('OnClick', function()
-            public.execute(private.snipe_button.enabled)
+            public.execute()
         end)
         private.start_button = btn
+    end
+    do
+        local btn = Aux.gui.button(AuxSearchFrame, 22)
+        btn:SetPoint('TOPRIGHT', -5, -8)
+        btn:SetWidth(70)
+        btn:SetHeight(25)
+        btn:SetText('Stop')
+        btn:SetScript('OnClick', function()
+            Aux.scan.abort(private.search_scan_id)
+        end)
+        btn:Hide()
+        private.stop_button = btn
     end
     do
         local btn = Aux.gui.button(AuxSearchFrame, 22)
@@ -65,7 +75,7 @@ function Aux.search_frame.create_frames(private, public)
         btn:SetHeight(25)
         btn:SetText(GREEN_FONT_COLOR_CODE..'Resume'..FONT_COLOR_CODE_CLOSE)
         btn:SetScript('OnClick', function()
-            public.execute(private.snipe_button.enabled, true)
+            public.execute(true)
         end)
         private.resume_button = btn
     end
@@ -85,13 +95,14 @@ function Aux.search_frame.create_frames(private, public)
         editbox:SetScript('OnEnterPressed', function()
             this:HighlightText(0, 0)
             this:ClearFocus()
-            public.execute(private.snipe_button.enabled)
+            public.execute()
         end)
         editbox:SetScript('OnReceiveDrag', function()
             local item_info = Aux.cursor_item() and Aux.info.item(Aux.cursor_item().item_id)
             if item_info then
                 public.set_filter(strlower(item_info.name)..'/exact')
-                public.execute(private.snipe_button.enabled)
+                public.disable_sniping()
+                public.execute()
             end
             ClearCursor()
         end)
@@ -192,7 +203,7 @@ function Aux.search_frame.create_frames(private, public)
             private.search_box:SetText('')
             private.add_filter()
             private.clear_form()
-            public.execute(private.snipe_button.enabled)
+            public.execute()
         end)
 
         local btn2 = Aux.gui.button(AuxSearchFrameFilter, 16)
@@ -234,7 +245,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.execute(private.snipe_button.enabled)
+            public.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -265,7 +276,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.execute(private.snipe_button.enabled)
+            public.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -286,7 +297,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.execute(private.snipe_button.enabled)
+            public.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
@@ -373,7 +384,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.execute(private.snipe_button.enabled)
+            public.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -395,7 +406,7 @@ function Aux.search_frame.create_frames(private, public)
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
-            public.execute(private.snipe_button.enabled)
+            public.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
@@ -635,7 +646,7 @@ function Aux.search_frame.create_frames(private, public)
                 end
             elseif button == 'LeftButton' then
                 private.search_box:SetText(data.search.filter_string)
-                public.execute(private.snipe_button.enabled)
+                public.execute()
             elseif button == 'RightButton' then
                 if st == private.recent_searches_listing then
                     tinsert(aux_favorite_searches, 1, data.search)
