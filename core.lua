@@ -110,7 +110,7 @@ end
 private.active_tab = nil
 
 function public.on_load()
-    public.version = '2.16.2'
+    public.version = '3.0.0'
     public.blizzard_ui_shown = false
     public.bids_loaded = false
     public.current_owner_page = nil
