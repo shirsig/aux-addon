@@ -1,4 +1,4 @@
-local m, private, public = Aux.tab(1, 'search_frame')
+local m, public, private = Aux.tab(1, 'search_frame')
 
 aux_favorite_searches = {}
 aux_recent_searches = {}
@@ -74,18 +74,20 @@ function public.FRAMES(f)
 end
 
 function public.LOAD()
-    m.create_frames(m, private, public)
+    m.create_frames(m, public, private)
     m:disable_sniping()
     m.update_search()
     m.update_tab(m.SAVED)
 end
 
 function public.OPEN()
+    AuxSearchFrame:Show()
     m.update_search_listings()
 end
 
 function public.CLOSE()
     m.results_listing:SetSelectedRecord()
+    AuxSearchFrame:Hide()
 end
 
 function private.update_search_listings()

@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'sort'
+local m, public, private = Aux.module'sort'
 
 public.LT = {}
 public.EQ = {}

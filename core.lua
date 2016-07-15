@@ -19,83 +19,91 @@ do
 end
 
 function Aux_module(name)
-    local interface, data, private, public, is_public = {}, {}, {}, {}, {}
-    setmetatable(interface, {
+    local data, is_public, public_interface, private_interface, public, private = {}, {}, {}, {}, {}, {}
+    setmetatable(public_interface, {
         __newindex = function(_, key)
-            error('Illegal write of attribute "'..key..'" on interface of "'..name..'"!')
+            error('Illegal write of attribute "'..key..'" on public interface of "'..name..'"!')
         end,
         __index = function(_, key)
+            if data[key] == nil then
+                error('Access of undeclared attribute "'..key..'" on public interface of "'..name..'"!')
+            end
             if is_public[key] then
-                return data[key]
+                return Aux_unwrap(data[key])
             end
         end,
+        __call = function(_, key)
+            return is_public[key]
+        end
     })
-    setmetatable(data, {
+    setmetatable(private_interface, {
         __newindex = function(_, key, value)
-            if rawget(data, key) == nil then
-                error('Assignment of undeclared attribute "'..key..'" of module"'..name..'"!')
+            if data[key] == nil then
+                error('Assignment of undeclared attribute "'..key..'" on private interface of "'..name..'"!')
             end
-            rawset(data, key, Aux_wrap(value))
+            data[key] = Aux_wrap(value)
         end,
         __index = function(_, key)
-            if rawget(data, key) == nil then
-                error('Access of undeclared attribute "'..key..'" of module"'..name..'"!')
-            else
-                return Aux_unwrap(rawget(data, key))
+            if data[key] == nil then
+                error('Access of undeclared attribute "'..key..'" on private interface of "'..name..'"!')
             end
+            return Aux_unwrap(data[key])
+        end,
+        __call = function(_, key)
+            return data[key] ~= nil
+        end
+    })
+    setmetatable(public, {
+        __newindex = function(_, key, value)
+            if data[key] ~= nil then
+                error('Multiple declarations of "'..key..'" in "'..name..'"!')
+            end
+            data[key] = Aux_wrap(value)
+            is_public[key] = true
+        end,
+        __index = function(_, key)
+            error('Illegal read of attribute "'..key..'" on public keyword in "'..name..'"!')
         end,
     })
     setmetatable(private, {
         __newindex = function(_, key, value)
-            if rawget(data, key) ~= nil then
-                error('Multiple declarations of "'..key..'" in module"'..name..'"!')
+            if data[key] ~= nil then
+                error('Multiple declarations of "'..key..'" in "'..name..'"!')
             end
-            rawset(data, key, Aux_wrap(value))
+            data[key] = Aux_wrap(value)
             is_public[key] = nil
         end,
-        __index = function()
-            error('Illegal read on "private" keyword in"'..name..'"!')
+        __index = function(_, key)
+            error('Illegal read of attribute "'..key..'" on private keyword in "'..name..'"!')
         end,
     })
-    setmetatable(public, {
-        __newindex = function(_, key, value)
-            if rawget(data, key) ~= nil then
-                error('Multiple declarations of "'..key..'" in module"'..name..'"!')
-            end
-            rawset(data, key, Aux_wrap(value))
-            is_public[key] = true
-        end,
-        __index = function()
-            error('Illegal read on "public" keyword in"'..name..'"!')
-        end,
-    })
-    return { interface, data, private, public }
+    return { public_interface, private_interface, public, private }
 end
 
 function Aux_addon(name)
-    local interface, data, private, public = unpack(Aux_module(name))
+    local public_interface, private_interface, public, private = unpack(Aux_module(name))
 
-    private.modules = { interface }
+    private.modules = { public_interface }
 
     function public.module(name)
         local module = Aux_module(name)
-        local interface = tremove(module, 1)
-        tinsert(data.modules, interface)
-        public[name] = interface
+        local public_interface = tremove(module, 1)
+        tinsert(private_interface.modules, public_interface)
+        public[name] = public_interface
         return unpack(module)
     end
 
-    return { interface, data, private, public }
+    return { public_interface, private_interface, public, private }
 end
 
 local addon = Aux_addon('Aux')
 Aux = tremove(addon, 1)
-local m, private, public = unpack(addon)
+local m, public, private = unpack(addon)
 
 private.tabs = {}
 function public.tab(index, name)
     local ret = { m.module(name) }
-    m.tabs[index] = m.modules[name]
+    m.tabs[index] = m[name]
     return unpack(ret)
 end
 
@@ -118,9 +126,7 @@ function public.on_load()
         tab_group:create_tab('Post')
         tab_group:create_tab('Auctions')
         tab_group:create_tab('Bids')
-        tab_group.on_select = function()
-            m.on_tab_click()
-        end
+        tab_group.on_select = m.on_tab_click
         public.tab_group = tab_group
     end
 
@@ -154,7 +160,7 @@ function public.on_load()
     end
 
     for _, module in m.modules do
-        if module.LOAD then
+        if module('LOAD') then
             module.LOAD()
         end
     end
@@ -376,28 +382,17 @@ function private.on_auction_house_closed()
 end
 
 function private.on_tab_click(index)
+    local y = m.active_tab
     if m.active_tab then
         m.tabs[m.active_tab].CLOSE()
     end
+
     AuxSearchFrame:Hide()
     AuxPostFrame:Hide()
     AuxAuctionsFrame:Hide()
     AuxBidsFrame:Hide()
 
     m.tabs[index].OPEN()
---    if index == 1 then
---        AuxSearchFrame:Show()
---        Aux.search_frame.on_open()
---    elseif index == 2 then
---        AuxPostFrame:Show()
---        Aux.post_frame.on_open()
---    elseif index == 3 then
---        AuxAuctionsFrame:Show()
---        Aux.auctions_frame.on_open()
---    elseif index == 4 then
---        AuxBidsFrame:Show()
---        Aux.bids_frame.on_open()
---    end
 
     m.active_tab = index
 end

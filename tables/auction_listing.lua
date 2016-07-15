@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'auction_listing'
+local m, public, private = Aux.module'auction_listing'
 
 local RT_COUNT = 1
 local HEAD_HEIGHT = 27

@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'gui'
+local m, public, private = Aux.module'gui'
 
 --TSM.designDefaults = {
 --    frameColors = {

@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'post'
+local m, public, private = Aux.module'post'
 
 local state
 

@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'stack'
+local m, public, private = Aux.module'stack'
 
 local state
 

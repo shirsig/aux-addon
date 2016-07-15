@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'util'
+local m, public, private = Aux.module'util'
 
 function public.pass()
 end

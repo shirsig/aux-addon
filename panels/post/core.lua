@@ -1,4 +1,4 @@
-local m, private, public = Aux.tab(2, 'post_frame')
+local m, public, private = Aux.tab(2, 'post_frame')
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
@@ -15,10 +15,12 @@ function public.FRAMES(f)
 end
 
 function public.LOAD()
-    m.create_frames(m, private, public)
+    m.create_frames(m, public, private)
 end
 
 function public.OPEN()
+    AuxPostFrame:Show()
+
     m.deposit:SetText('Deposit: '..Aux.money.to_string(0, nil, nil, nil, Aux.gui.inline_color({255, 254, 250, 1})))
 
     m.set_unit_start_price(0)
@@ -31,6 +33,7 @@ end
 
 function public.CLOSE()
     m.selected_item = nil
+    AuxPostFrame:Hide()
 end
 
 function private.default_settings()

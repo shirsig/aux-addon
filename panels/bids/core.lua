@@ -1,4 +1,4 @@
-local m, private, public = Aux.tab(4, 'bids_frame')
+local m, public, private = Aux.tab(4, 'bids_frame')
 
 local auction_records
 
@@ -7,14 +7,16 @@ function public.FRAMES(f)
 end
 
 function public.LOAD()
-    m.create_frames(m, private, public)
+    m.create_frames(m, public, private)
 end
 
 function public.OPEN()
+    AuxBidsFrame:Show()
     m.scan_bids()
 end
 
 function public.CLOSE()
+    AuxBidsFrame:Hide()
 end
 
 function private.update_listing()

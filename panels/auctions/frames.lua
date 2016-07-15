@@ -1,4 +1,4 @@
-Aux.auctions_frame.FRAMES(function(m, private, public)
+Aux.auctions_frame.FRAMES(function(m, public, private)
     private.listing = Aux.auction_listing.CreateAuctionResultsTable(AuxAuctionsFrameListing, Aux.auction_listing.auctions_config)
     m.listing:SetSort(1,2,3,4,5,6,7,8)
     m.listing:Reset()

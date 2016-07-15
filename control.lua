@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'control'
+local m, public, private = Aux.module'control'
 
 private.event_listeners = {}
 private.threads = {}

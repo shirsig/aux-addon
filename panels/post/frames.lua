@@ -1,4 +1,4 @@
-Aux.post_frame.FRAMES(function(m, private, public)
+Aux.post_frame.FRAMES(function(m, public, private)
     Aux.gui.vertical_line(AuxPostFrameContent, 219)
 
     AuxPostParametersItem:EnableMouse()

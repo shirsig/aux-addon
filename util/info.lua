@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'info'
+local m, public, private = Aux.module'info'
 
 local TOOLTIP_LENGTH = 30
 

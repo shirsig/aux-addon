@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'money'
+local m, public, private = Aux.module'money'
 
 local GOLD_TEXT = '|cffffd70ag|r'
 local SILVER_TEXT = '|cffc7c7cfs|r'

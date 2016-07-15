@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'scan_util'
+local m, public, private = Aux.module'scan_util'
 
 function public.default_filter(str)
     return {

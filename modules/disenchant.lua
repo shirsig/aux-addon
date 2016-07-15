@@ -1,4 +1,4 @@
-local m, private, public = Aux.module'disenchant'
+local m, public, private = Aux.module'disenchant'
 
 function public.source(item_id)
 
