@@ -1,4 +1,4 @@
-local m, private, public = Aux:module('scan')
+local m, private, public = Aux:module'scan'
 
 local PAGE_SIZE = 50
 
