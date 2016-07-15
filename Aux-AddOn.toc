@@ -17,14 +17,14 @@ util\info.lua
 util\scan_util.lua
 
 
-modules\cache.lua
-modules\disenchant.lua
-modules\slash.lua
-modules\scan.lua
-modules\stack.lua
-modules\post.lua
-modules\history.lua
-modules\tooltip.lua
+components\cache.lua
+components\disenchant.lua
+components\slash.lua
+components\scan.lua
+components\stack.lua
+components\post.lua
+components\history.lua
+components\tooltip.lua
 
 
 tables\listing.lua
