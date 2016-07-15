@@ -5,20 +5,31 @@ function Aux.search_frame.create_frames(private, public)
         btn:SetWidth(70)
         btn:SetHeight(25)
         btn:SetText('Snipe')
+        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
         btn:SetScript('OnClick', function()
-            this.enabled = not this.enabled
-            if this.enabled then
-                this:LockHighlight()
-            else
-                this:UnlockHighlight()
-            end
-            if private.current_search().continuation and private.current_search().snipe == private.snipe_button.enabled then
-                private.enable_resume()
-            else
-                private.disable_resume()
+            if arg1 == 'LeftButton' then
+                this.enabled = not this.enabled
+                if this.enabled then
+                    this:LockHighlight()
+                else
+                    this:UnlockHighlight()
+                end
+                if private.current_search().continuation and private.current_search().snipe == private.snipe_button.enabled then
+                    private.enable_resume()
+                else
+                    private.disable_resume()
+                end
+            elseif arg1 == 'RightButton' then
+                if this.auto then
+                    this.auto = false
+                    this:GetFontString():SetTextColor(unpack(Aux.gui.config.text_color.enabled))
+                else
+                    StaticPopup_Show('AUX_SEARCH_AUTO_SNIPING')
+                end
             end
         end)
         btn.enabled = false
+        btn.auto = false
         private.snipe_button = btn
     end
     Aux.gui.vertical_line(AuxSearchFrame, 80, nil, 408)
