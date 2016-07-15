@@ -118,7 +118,11 @@ Aux.post_tab.FRAMES(function(m, public, private)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Refresh')
---        btn:SetScript('OnClick', m.refresh) TODO
+        btn:SetScript('OnClick', function()
+            Aux.scan.abort(m.scan_id)
+            m.refresh_entries()
+            m.refresh = true
+        end)
         private.refresh_button = btn
     end
     do
