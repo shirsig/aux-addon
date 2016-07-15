@@ -256,14 +256,14 @@ function public.disable_sniping()
     m.snipe_button:UnlockHighlight()
 end
 
-function private.start_sniping(query, search)
+function private.start_sniping(query, search, continuation)
 
     local ignore_page
     if not search then
         search = m.current_search()
-        query.blizzard_query.first_page = 0
-        query.blizzard_query.last_page = 0
-        ignore_page = true
+        query.blizzard_query.first_page = tonumber(continuation) or 0
+        query.blizzard_query.last_page = tonumber(continuation) or 0
+        ignore_page = not tonumber(continuation)
     end
 
     local sniping_map = {}
@@ -313,7 +313,8 @@ function private.start_sniping(query, search)
             m.status_bar:update_status(100, 100)
             m.status_bar:set_text('Done Sniping')
 
-            search.continuation = true
+            search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
+
             if m.current_search() == search then
                 m.update_resume()
             end
@@ -345,7 +346,7 @@ function private.start_search(queries, continuation)
         queries = queries,
         on_scan_start = function()
             m.status_bar:update_status(0,0)
-            if resume then
+            if continuation then
                 m.status_bar:set_text('Resuming scan...')
             else
                 m.status_bar:set_text('Scanning auctions...')
@@ -436,17 +437,17 @@ function public.execute(resume)
         end
     end
 
-    local continuation = m.current_search().continuation
+    local continuation = resume and m.current_search().continuation
     m.discard_continuation()
     m:enable_stop()
 
     m.update_tab(m.RESULTS)
     if m.snipe then
         m.current_search().snipe = true
-        m.start_sniping(queries[1])
+        m.start_sniping(queries[1], nil, continuation)
     else
         m.current_search().snipe = false
-        m.start_search(queries, resume and continuation)
+        m.start_search(queries, continuation)
     end
 end
 
