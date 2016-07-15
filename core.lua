@@ -53,6 +53,12 @@ Aux.version = '2.16.2'
 Aux.blizzard_ui_shown = false
 Aux.orig = {}
 
+function Aux:tab(index, name)
+    local m, private, public = self:module(name)
+    self.tabs[index] = self.modules[name]
+    return m, private, public
+end
+
 function Aux.on_load()
 	Aux.log('Aux v'..Aux.version..' loaded.')
     tinsert(UISpecialFrames, 'AuxFrame')
@@ -318,6 +324,7 @@ function Aux.on_auction_house_closed()
 	Aux.stack.stop()
 	Aux.scan.abort()
 
+    --    Aux.tabs[previous].CLOSE() TODO
     Aux.search_frame.on_close()
     Aux.post_frame.on_close()
     Aux.auctions_frame.on_close()
@@ -326,17 +333,18 @@ function Aux.on_auction_house_closed()
 	AuxFrame:Hide()
 end
 
-function Aux.on_tab_click(index)
+function Aux.on_tab_click(index, previous)
+    --    Aux.tabs[previous].CLOSE() TODO
     Aux.search_frame.on_close()
     Aux.post_frame.on_close()
     Aux.auctions_frame.on_close()
     Aux.bids_frame.on_close()
-
     AuxSearchFrame:Hide()
     AuxPostFrame:Hide()
     AuxAuctionsFrame:Hide()
     AuxBidsFrame:Hide()
 
+--    Aux.tabs[index].OPEN() TODO
     if index == 1 then
         AuxSearchFrame:Show()
         Aux.search_frame.on_open()
@@ -503,12 +511,6 @@ function Aux.hook(name, handler, object)
 
     orig[name] = object[name]
     object[name] = handler
-end
-
-function Aux.tab(name)
-    local private, public = Aux.module(name)
-    tinsert(Aux.tabs, Aux[name])
-    return private, public
 end
 
 Aux.huge = 2^100000

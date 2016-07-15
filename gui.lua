@@ -191,11 +191,12 @@ do
         end
 
         function self:set_tab(id)
+            local previous = self.selected
             self.selected = id
 
             self.update_tabs()
 
-            self.on_select(id)
+            self.on_select(id, previous)
         end
 
         function self.update_tabs()
