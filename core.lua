@@ -102,8 +102,6 @@ function Aux.on_load()
         end
     end
 
-    Aux.cache.on_load()
-    Aux.persistence.on_load()
     Aux.tooltip.on_load()
     Aux.search_frame.on_load()
     Aux.post_frame.on_load()

@@ -1,19 +1,22 @@
-local private, public = {}, {}
-Aux.persistence = public
+local m, private, public = Aux:module'persistence'
 
 aux_datasets = {}
 
-function public.on_load()
-    Aux.control.as_soon_as(function() private.faction = UnitFactionGroup('player') return private.faction end, Aux.util.pass)
-    private.realm = GetCVar('realmName')
-end
+do
+    local realm, faction
 
-function private.get_dataset_key()
-	return private.realm..'|'..private.faction
+    function public.LOAD()
+        Aux.control.as_soon_as(function() faction = UnitFactionGroup('player') return faction end, Aux.util.pass)
+        realm = GetCVar('realmName')
+    end
+
+    function private.get_dataset_key()
+        return realm..'|'..faction
+    end
 end
 
 function public.load_dataset()
-    local dataset_key = private.get_dataset_key()
+    local dataset_key = m.get_dataset_key()
     aux_datasets[dataset_key] = aux_datasets[dataset_key] or {}
     return aux_datasets[dataset_key]
 end
@@ -26,9 +29,9 @@ function public.read(schema, str)
     elseif schema == 'number' then
         return tonumber(str)
     elseif type(schema) == 'table' and schema[1] == 'list' then
-        return public.read_list(schema, str)
+        return m.read_list(schema, str)
     elseif type(schema) == 'table' and schema[1] == 'record' then
-        return public.read_record(schema, str)
+        return m.read_record(schema, str)
     else
         error('Unknown schema.')
     end
@@ -42,9 +45,9 @@ function public.write(schema, obj)
     elseif schema == 'number' then
         return obj and tostring(obj) or ''
     elseif type(schema) == 'table' and schema[1] == 'list' then
-        return public.write_list(schema, obj)
+        return m.write_list(schema, obj)
     elseif type(schema) == 'table' and schema[1] == 'record' then
-        return public.write_record(schema, obj)
+        return m.write_record(schema, obj)
     else
         error('Unknown schema.')
     end
@@ -59,7 +62,7 @@ function public.read_list(schema, str)
     local element_type = schema[3]
     local parts = Aux.util.split(str, separator)
     return Aux.util.map(parts, function(part)
-        return public.read(element_type, part)
+        return m.read(element_type, part)
     end)
 end
 
@@ -67,7 +70,7 @@ function public.write_list(schema, list)
     local separator = schema[2]
     local element_type = schema[3]
     local parts = Aux.util.map(list, function(element)
-        return public.write(element_type, element)
+        return m.write(element_type, element)
     end)
     return Aux.util.join(parts, separator)
 end
@@ -78,7 +81,7 @@ function public.read_record(schema, str)
     local parts = Aux.util.split(str, separator)
     for i=3,getn(schema) do
         local key, type = next(schema[i])
-        record[key] = public.read(type, parts[i - 2])
+        record[key] = m.read(type, parts[i - 2])
     end
     return record
 end
@@ -88,7 +91,7 @@ function public.write_record(schema, record)
     local parts = {}
     for i=3,getn(schema) do
         local key, type = next(schema[i])
-        tinsert(parts, public.write(type, record[key]))
+        tinsert(parts, m.write(type, record[key]))
     end
     return Aux.util.join(parts, separator)
 end

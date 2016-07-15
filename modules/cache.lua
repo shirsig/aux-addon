@@ -1,7 +1,8 @@
-local private, public = {}, {}
-Aux.cache = public
+local m, private, public = Aux:module'cache'
 
 local MIN_ITEM_ID, MAX_ITEM_ID = 1, 30000
+local items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
+local merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'} }
 
 aux_items = {}
 aux_item_ids = {}
@@ -10,18 +11,15 @@ aux_merchant_buy = {}
 aux_merchant_sell = {}
 aux_characters = {}
 
-local items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
-local merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'}}
+function public.LOAD()
+	m.scan_wdb()
 
-function public.on_load()
-	private.scan_wdb()
+	Aux.control.event_listener('MERCHANT_SHOW', m.on_merchant_show):start()
+	Aux.control.event_listener('MERCHANT_CLOSED', m.on_merchant_closed):start()
+	Aux.control.event_listener('MERCHANT_UPDATE', m.on_merchant_update):start()
+	Aux.control.event_listener('BAG_UPDATE', m.on_bag_update):start()
 
-	Aux.control.event_listener('MERCHANT_SHOW', private.on_merchant_show):start()
-	Aux.control.event_listener('MERCHANT_CLOSED', private.on_merchant_closed):start()
-	Aux.control.event_listener('MERCHANT_UPDATE', private.on_merchant_update):start()
-	Aux.control.event_listener('BAG_UPDATE', private.on_bag_update):start()
-
-	CreateFrame('Frame', nil, MerchantFrame):SetScript('OnUpdate', private.merchant_on_update)
+	CreateFrame('Frame', nil, MerchantFrame):SetScript('OnUpdate', m.merchant_on_update)
 
 	Aux.control.event_listener('NEW_AUCTION_UPDATE', function()
 		local info = Aux.info.auction_sell_item()
@@ -37,8 +35,8 @@ do
 	local sell_scan_countdown, incomplete_buy_data
 
 	function private.on_merchant_show()
-		private.merchant_sell_scan()
-		incomplete_buy_data = not private.merchant_buy_scan()
+		m.merchant_sell_scan()
+		incomplete_buy_data = not m.merchant_buy_scan()
 	end
 
 	function private.on_merchant_closed()
@@ -48,7 +46,7 @@ do
 
 	function private.on_merchant_update()
 		if incomplete_buy_data then
-			incomplete_buy_data = not private.merchant_buy_scan()
+			incomplete_buy_data = not m.merchant_buy_scan()
 		end
 	end
 
@@ -61,7 +59,7 @@ do
 	function private.merchant_on_update()
 		if sell_scan_countdown == 0 then
 			sell_scan_countdown = nil
-			private.merchant_sell_scan()
+			m.merchant_sell_scan()
 		elseif sell_scan_countdown then
 			sell_scan_countdown = sell_scan_countdown - 1
 		end
