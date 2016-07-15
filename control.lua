@@ -2,7 +2,7 @@ local m, public, private = Aux.module'control'
 
 private.event_listeners = {}
 private.threads = {}
-public.thread_id = Aux.null
+public.thread_id = nil
 
 function public.on_event()
 	for listener, _ in m.event_listeners do
@@ -28,7 +28,7 @@ function public.on_update()
 			thread.k = nil
 			m.thread_id = thread_id
 			k()
-			m.thread_id = Aux.null
+			m.thread_id = nil
 			if not thread.k then
 				thread.killed = true
 			end

@@ -3,10 +3,9 @@ local m, public, private = Aux.tab(2, 'post_tab')
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
-local existing_auctions = {}
-local inventory_records
-local scan_id = 0
-
+private.existing_auctions = {}
+private.inventory_records = nil
+private.scan_id = 0
 private.selected_item = nil
 private.refresh = nil
 
@@ -92,7 +91,7 @@ function private.update_inventory_listing()
         return
     end
 
-    Aux.item_listing.populate(m.item_listing, Aux.util.filter(inventory_records, function(record)
+    Aux.item_listing.populate(m.item_listing, Aux.util.filter(m.inventory_records, function(record)
         local settings = m.read_settings(record.key)
         return record.aux_quantity > 0 and (not settings.hidden or m.show_hidden_checkbox:GetChecked())
     end))
@@ -108,7 +107,7 @@ function private.update_auction_listing()
         local unit_start_price = m.get_unit_start_price()
         local unit_buyout_price = m.get_unit_buyout_price()
 
-        for i, auction_record in ipairs(existing_auctions[m.selected_item.key] or {}) do
+        for i, auction_record in ipairs(m.existing_auctions[m.selected_item.key] or {}) do
 
             local blizzard_bid_undercut, buyout_price_undercut = m.undercut(auction_record, m.stack_size_slider:GetValue())
             blizzard_bid_undercut = Aux.money.from_string(Aux.money.to_string(blizzard_bid_undercut, true, nil, 3))
@@ -175,7 +174,7 @@ function private.update_auction_listing()
 end
 
 function public.select_item(item_key)
-    for _, inventory_record in ipairs(Aux.util.filter(inventory_records, function(record) return record.aux_quantity > 0 end)) do
+    for _, inventory_record in ipairs(Aux.util.filter(m.inventory_records, function(record) return record.aux_quantity > 0 end)) do
         if inventory_record.key == item_key then
             m.set_item(inventory_record)
             break
@@ -235,7 +234,7 @@ function private.post_auctions()
 
                 m.update_inventory_records()
                 m.selected_item = nil
-                for _, record in ipairs(inventory_records) do
+                for _, record in ipairs(m.inventory_records) do
                     if record.key == key then
                         m.set_item(record)
                     end
@@ -393,7 +392,7 @@ function private.set_item(item)
         return
     end
 
-    Aux.scan.abort(scan_id)
+    Aux.scan.abort(m.scan_id)
 
     m.selected_item = item
 
@@ -409,7 +408,7 @@ function private.set_item(item)
     m.unit_start_price:SetText(Aux.money.to_string(settings.start_price, true, nil, 3, nil, true))
     m.unit_buyout_price:SetText(Aux.money.to_string(settings.buyout_price, true, nil, 3, nil, true))
 
-    if not existing_auctions[m.selected_item.key] then
+    if not m.existing_auctions[m.selected_item.key] then
         m.refresh_entries()
     end
 
@@ -418,7 +417,7 @@ function private.set_item(item)
 end
 
 function private.update_inventory_records()
-    inventory_records = {}
+    m.inventory_records = {}
     m.refresh = true
 
     local auction_candidate_map = {}
@@ -462,11 +461,11 @@ function private.update_inventory_records()
         end
     end
 
-    inventory_records = {}
+    m.inventory_records = {}
     for _, auction_candidate in pairs(auction_candidate_map) do
-        tinsert(inventory_records, auction_candidate)
+        tinsert(m.inventory_records, auction_candidate)
     end
-    sort(inventory_records, function(a, b) return a.name < b.name end)
+    sort(m.inventory_records, function(a, b) return a.name < b.name end)
     m.refresh = true
 end
 
@@ -475,14 +474,14 @@ function private.refresh_entries()
 		local item_id, suffix_id = m.selected_item.item_id, m.selected_item.suffix_id
         local item_key = item_id..':'..suffix_id
 
-        existing_auctions[item_key] = nil
+        m.existing_auctions[item_key] = nil
 
         local query = Aux.scan_util.item_query(item_id)
 
         m.status_bar:update_status(0,0)
         m.status_bar:set_text('Scanning auctions...')
 
-		scan_id = Aux.scan.start{
+		m.scan_id = Aux.scan.start{
             type = 'list',
             ignore_owner = true,
 			queries = { query },
@@ -503,13 +502,13 @@ function private.refresh_entries()
 				end
 			end,
 			on_abort = function()
-				existing_auctions[item_key] = nil
+				m.existing_auctions[item_key] = nil
                 m.update_historical_value_button()
                 m.status_bar:update_status(100, 100)
                 m.status_bar:set_text('Done Scanning')
 			end,
 			on_complete = function()
-				existing_auctions[item_key] = existing_auctions[item_key] or {}
+				m.existing_auctions[item_key] = m.existing_auctions[item_key] or {}
                 m.refresh = true
                 m.status_bar:update_status(100, 100)
                 m.status_bar:set_text('Done Scanning')
@@ -519,9 +518,9 @@ function private.refresh_entries()
 end
 
 function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
-    existing_auctions[key] = existing_auctions[key] or {}
+    m.existing_auctions[key] = m.existing_auctions[key] or {}
     local entry
-    for _, existing_entry in ipairs(existing_auctions[key]) do
+    for _, existing_entry in ipairs(m.existing_auctions[key]) do
         if unit_blizzard_bid == existing_entry.unit_blizzard_bid and unit_buyout_price == existing_entry.unit_buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration and Aux.is_player(owner) == existing_entry.own then
             entry = existing_entry
         end
@@ -536,7 +535,7 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
             own = Aux.is_player(owner),
             count = 0,
         }
-        tinsert(existing_auctions[key], entry)
+        tinsert(m.existing_auctions[key], entry)
     end
 
     entry.count = entry.count + 1

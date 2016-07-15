@@ -25,14 +25,14 @@ function public.wipe(table)
 	while getn(table) > 0 do
 		tremove(table)
 	end
-	for k, _ in pairs(table) do
+	for k, _ in table do
 		table[k] = nil
 	end
 end
 
 function public.copy_table(table)
 	local copy = {}
-	for k, v in pairs(table) do
+	for k, v in table do
 		copy[k] = v
 	end
 	return copy
@@ -69,20 +69,16 @@ function public.inventory()
 	end
 end
 
-do
-	local bag_types = { GetAuctionItemSubClasses(3) }
+function public.bag_type(bag)
+	if bag == 0 then
+		return 1
+	end
 
-	function public.bag_type(bag)
-		if bag == 0 then
-			return 1
-		end
-
-		local link = GetInventoryItemLink('player', ContainerIDToInventoryID(bag))
-		if link then
-			local item_id = Aux.info.parse_hyperlink(GetInventoryItemLink('player', ContainerIDToInventoryID(bag)))
-			local item_info = Aux.info.item(item_id)
-			return Aux.item_subclass_index(3, item_info.subclass)
-		end
+	local link = GetInventoryItemLink('player', ContainerIDToInventoryID(bag))
+	if link then
+		local item_id = Aux.info.parse_hyperlink(GetInventoryItemLink('player', ContainerIDToInventoryID(bag)))
+		local item_info = Aux.info.item(item_id)
+		return Aux.item_subclass_index(3, item_info.subclass)
 	end
 end
 
@@ -144,7 +140,7 @@ end
 
 function public.set_size(set)
     local size = 0
-	for _,_ in pairs(set) do
+	for _,_ in set do
 		size = size + 1
 	end
 	return size
@@ -152,7 +148,7 @@ end
 
 function public.set_to_array(set)
 	local array = {}
-	for element, _ in pairs(set) do
+	for element, _ in set do
 		tinsert(array, element)
 	end
 	return array
@@ -176,7 +172,7 @@ end
 
 function public.set_filter(xs, p)
 	local ys = {}
-	for x, _ in pairs(xs) do
+	for x, _ in xs do
 		if p(x) then
 			m.set_add(ys, x)
 		end
@@ -196,7 +192,7 @@ end
 
 function public.map(xs, f)
 	local ys = {}
-	for _, x in ipairs(xs) do
+	for _, x in xs do
 		tinsert(ys, f(x))
 	end
 	return ys
@@ -313,7 +309,7 @@ function public.set()
 
     function self:values()
         local values = {}
-        for value, _ in pairs(data) do
+        for value, _ in data do
             tinsert(values, value)
         end
         return values

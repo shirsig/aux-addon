@@ -1,6 +1,6 @@
 local m, public, private = Aux.module'stack'
 
-local state
+private.state = nil
 
 function private.stack_size(slot)
     local container_item_info = Aux.info.container_item(unpack(slot))
@@ -24,7 +24,7 @@ end
 
 function private.find_item_slot(partial)
 	for slot in Aux.util.inventory() do
-		if m.matching_item(slot, partial) and not Aux.util.table_eq(slot, state.target_slot) then
+		if m.matching_item(slot, partial) and not Aux.util.table_eq(slot, m.state.target_slot) then
 			return slot
 		end
 	end
@@ -32,7 +32,7 @@ end
 
 function private.matching_item(slot, partial)
 	local item_info = Aux.info.container_item(unpack(slot))
-	return item_info and item_info.item_key == state.item_key and Aux.info.auctionable(item_info.tooltip) and (not partial or item_info.count < item_info.max_stack)
+	return item_info and item_info.item_key == m.state.item_key and Aux.info.auctionable(item_info.tooltip) and (not partial or item_info.count < item_info.max_stack)
 end
 
 function private.find_empty_slot()
@@ -45,7 +45,7 @@ end
 
 function private.find_charge_item_slot()
 	for slot in Aux.util.inventory() do
-		if m.matching_item(slot) and m.charges(slot) == state.target_size then
+		if m.matching_item(slot) and m.charges(slot) == m.state.target_size then
 			return slot
 		end
 	end
@@ -69,35 +69,35 @@ end
 
 function private.process()
 
-	if not state.target_slot or not m.matching_item(state.target_slot) then
-		state.target_slot = m.find_item_slot()
-		if not state.target_slot then
+	if not m.state.target_slot or not m.matching_item(m.state.target_slot) then
+		m.state.target_slot = m.find_item_slot()
+		if not m.state.target_slot then
 			return m.stop()
 		end
 	end
 
-	if m.charges(state.target_slot) then
-		state.target_slot = m.find_charge_item_slot()
+	if m.charges(m.state.target_slot) then
+		m.state.target_slot = m.find_charge_item_slot()
 		return m.stop()
 	end
 
-	if m.stack_size(state.target_slot) > state.target_size then
+	if m.stack_size(m.state.target_slot) > m.state.target_size then
 		local slot = m.find_item_slot(true) or m.find_empty_slot()
 		if slot then
 			return m.move_item(
-				state.target_slot,
+				m.state.target_slot,
 				slot,
-				m.stack_size(state.target_slot) - state.target_size,
+				m.stack_size(m.state.target_slot) - m.state.target_size,
 				m.process
 			)
 		end
-	elseif m.stack_size(state.target_slot) < state.target_size then
+	elseif m.stack_size(m.state.target_slot) < m.state.target_size then
 		local slot = m.find_item_slot()
 		if slot then
 			return m.move_item(
 				slot,
-				state.target_slot,
-				state.target_size - m.stack_size(state.target_slot),
+				m.state.target_slot,
+				m.state.target_size - m.stack_size(m.state.target_slot),
 				m.process
 			)
 		end
@@ -107,15 +107,15 @@ function private.process()
 end
 
 function public.stop()
-	if state then
-		Aux.control.kill_thread(state.thread_id)
+	if m.state then
+		Aux.control.kill_thread(m.state.thread_id)
 
-		local callback, slot = state.callback, state.target_slot
+		local callback, slot = m.state.callback, m.state.target_slot
 		if slot and not m.matching_item(slot) then
 			slot = nil
 		end
 		
-		state = nil
+		m.state = nil
 		
 		if callback then
 			callback(slot)
@@ -128,7 +128,7 @@ function public.start(item_key, size, callback)
 
 	local thread_id = Aux.control.new_thread(m.process)
 
-	state = {
+	m.state = {
 		thread_id = thread_id,
 		item_key = item_key,
 		target_size = size,

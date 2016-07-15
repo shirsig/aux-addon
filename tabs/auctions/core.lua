@@ -1,6 +1,6 @@
 local m, public, private = Aux.tab(3, 'auctions_tab')
 
-local auction_records
+private.auction_records = nil
 
 function public.FRAMES(f)
     private.create_frames = f
@@ -24,7 +24,7 @@ function private.update_listing()
         return
     end
 
-    m.listing:SetDatabase(auction_records)
+    m.listing:SetDatabase(m.auction_records)
 end
 
 function public.scan_auctions()
@@ -32,7 +32,7 @@ function public.scan_auctions()
     m.status_bar:update_status(0,0)
     m.status_bar:set_text('Scanning auctions...')
 
-    auction_records = {}
+    m.auction_records = {}
     m.update_listing()
     Aux.scan.start{
         type = 'owner',
@@ -42,7 +42,7 @@ function public.scan_auctions()
             m.status_bar:set_text(format('Scanning (Page %d / %d)', page, total_pages))
         end,
         on_auction = function(auction_record)
-            tinsert(auction_records, auction_record)
+            tinsert(m.auction_records, auction_record)
         end,
         on_complete = function()
             m.status_bar:update_status(100, 100)

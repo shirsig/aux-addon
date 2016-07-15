@@ -2,8 +2,7 @@ local m, public, private = Aux.module'scan'
 
 local PAGE_SIZE = 50
 
-local state
-local threads = {}
+private.threads = {}
 
 function private.total_pages(total_auctions)
     return math.ceil(total_auctions / PAGE_SIZE)
@@ -20,7 +19,7 @@ function private.current_query()
 end
 
 function private.current_thread()
-    for _, thread in threads do
+    for _, thread in m.threads do
         if thread.id == Aux.control.thread_id then
             return thread
         end
@@ -28,14 +27,14 @@ function private.current_thread()
 end
 
 function public.start(params)
-    if threads[params.type] then
-        m.abort(threads[params.type].id)
+    if m.threads[params.type] then
+        m.abort(m.threads[params.type].id)
     end
 
     local thread_id = Aux.control.new_thread(function()
         return m.wait_for_callback(m.current_thread().params.on_scan_start, m.scan)
     end)
-    threads[params.type] = {
+    m.threads[params.type] = {
         id = thread_id,
         params = params,
     }
@@ -44,10 +43,10 @@ end
 
 function public.abort(scan_id)
     local aborted_threads = {}
-    for t, thread in threads do
+    for t, thread in m.threads do
         if not scan_id or thread.id == scan_id then
             Aux.control.kill_thread(thread.id)
-            threads[t] = nil
+            m.threads[t] = nil
             tinsert(aborted_threads, thread)
         end
     end
@@ -146,7 +145,7 @@ function private.scan()
         m.wait_for_callback(m.current_thread().params.on_start_query, m.current_thread().query_index, m.process_query)
     else
         local on_complete = m.current_thread().params.on_complete
-        threads[m.current_thread().params.type] = nil
+        m.threads[m.current_thread().params.type] = nil
         if on_complete then
             return on_complete()
         end
