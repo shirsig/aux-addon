@@ -1,5 +1,4 @@
-local m = {}
-Aux.gui = m
+local m, private, public = Aux.module'gui'
 
 --TSM.designDefaults = {
 --    frameColors = {
@@ -33,7 +32,7 @@ Aux.gui = m
 --    },
 --}
 
-m.config = {
+public.config = {
     link_color = { 153, 255, 255, 1 },
     link_color2 = { 153, 255, 255, 1 }, -- TODO inline color needs 255, others need /255
     edge_size = 1.5,
@@ -50,12 +49,12 @@ m.config = {
 
 }
 
-function m.inline_color(color)
+function public.inline_color(color)
     local r, g, b, a = unpack(color)
     return format("|c%02X%02X%02X%02X", a, r, g, b)
 end
 
-function m.panel(parent, name)
+function public.panel(parent, name)
     local panel = CreateFrame('Frame', name, parent)
     panel:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size})
     panel:SetBackdropColor(unpack(m.config.frame_color))
@@ -63,7 +62,7 @@ function m.panel(parent, name)
     return panel
 end
 
-function m.button(parent, text_height, name)
+function public.button(parent, text_height, name)
     local button = CreateFrame('Button', name, parent)
     button:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size})
     button:SetBackdropColor(unpack(m.config.content_color))
@@ -98,17 +97,17 @@ function m.button(parent, text_height, name)
 end
 
 
-function m.resize_tab(tab, width, padding)
+function public.resize_tab(tab, width, padding)
     tab:SetWidth(width + padding + 10)
 end
 
-function m.update_tab(tab)
+function public.update_tab(tab)
 
 end
 
 do
     local id = 0
-    function m.tab_group(parent, position)
+    function public.tab_group(parent, position)
         id = id + 1
 
         local frame = CreateFrame('Frame', nil, parent)
@@ -191,12 +190,9 @@ do
         end
 
         function self:set_tab(id)
-            local previous = self.selected
             self.selected = id
-
             self.update_tabs()
-
-            self.on_select(id, previous)
+            self.on_select(id)
         end
 
         function self.update_tabs()
@@ -223,7 +219,7 @@ do
     end
 end
 
-function m.editbox(parent, name)
+function public.editbox(parent, name)
 
 --        local frame = CreateFrame('Frame', name, parent)
 --        frame:Hide()
@@ -278,7 +274,7 @@ function m.editbox(parent, name)
     return editbox
 end
 
-function m.status_bar(parent)
+function public.status_bar(parent)
     local self = CreateFrame('Frame', nil, parent)
 
     local level = parent:GetFrameLevel()
@@ -349,14 +345,14 @@ function m.status_bar(parent)
     return self
 end
 
-function m.label(parent, size)
+function public.label(parent, size)
     local label = parent:CreateFontString()
     label:SetFont(m.config.content_font, size or m.config.normal_font_size)
     label:SetTextColor(unpack(m.config.label_color.enabled))
     return label
 end
 
-function m.horizontal_line(parent, y_offset, inverted_color)
+function public.horizontal_line(parent, y_offset, inverted_color)
     local texture = parent:CreateTexture()
     texture:SetPoint('TOPLEFT', parent, 'TOPLEFT', 2, y_offset)
     texture:SetPoint('TOPRIGHT', parent, 'TOPRIGHT', -2, y_offset)
@@ -369,7 +365,7 @@ function m.horizontal_line(parent, y_offset, inverted_color)
     return texture
 end
 
-function m.vertical_line(parent, x_offset, top_offset, bottom_offset, inverted_color)
+function public.vertical_line(parent, x_offset, top_offset, bottom_offset, inverted_color)
     local texture = parent:CreateTexture()
     texture:SetPoint('TOPLEFT', parent, 'TOPLEFT', x_offset, top_offset or -2)
     texture:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', x_offset, bottom_offset or 2)
@@ -384,14 +380,14 @@ end
 
 do
     local id = 0
-    function m.dropdown(parent)
+    function public.dropdown(parent)
         id = id + 1
 
         local dropdown = CreateFrame('Frame', 'aux_dropdown'..id, parent, 'UIDropDownMenuTemplate')
 
-        dropdown:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=Aux.gui.config.edge_size, insets={top=5,bottom=5}})
-        dropdown:SetBackdropColor(unpack(Aux.gui.config.content_color))
-        dropdown:SetBackdropBorderColor(unpack(Aux.gui.config.content_border_color))
+        dropdown:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size, insets={top=5,bottom=5}})
+        dropdown:SetBackdropColor(unpack(m.config.content_color))
+        dropdown:SetBackdropBorderColor(unpack(m.config.content_border_color))
         local left = getglobal(dropdown:GetName()..'Left'):Hide()
         local middle = getglobal(dropdown:GetName()..'Middle'):Hide()
         local right = getglobal(dropdown:GetName()..'Right'):Hide()
@@ -404,7 +400,7 @@ do
         text:ClearAllPoints()
         text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
         text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
-        text:SetFont(Aux.gui.config.content_font, 13)
+        text:SetFont(m.config.content_font, 13)
         text:SetShadowColor(0, 0, 0, 0)
 
     --
@@ -477,7 +473,7 @@ do
     end
 end
 
-function m.slider(frame, name)
+function public.slider(frame, name)
 
     local slider = CreateFrame('Slider', name, frame)
     slider:SetOrientation('HORIZONTAL')

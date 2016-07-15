@@ -1,4 +1,4 @@
-local m, private, public = Aux:module'cache'
+local m, private, public = Aux.module'cache'
 
 local MIN_ITEM_ID, MAX_ITEM_ID = 1, 30000
 local items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}

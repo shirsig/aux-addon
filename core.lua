@@ -1,80 +1,131 @@
-function Aux_module(self, name)
-    local module, data, is_public, private, public = {}, {}, {}, {}, {}
-    setmetatable(private, {
-        __newindex = function(_, key, value)
-            if data[key] ~= nil then
-                error('Multiple declarations of "'..key..'" in module"'..name..'"!')
-            end
-            rawset(data, key, value)
-            is_public[key] = nil
-        end,
-    })
-    setmetatable(public, {
-        __newindex = function(_, key, value)
-            if data[key] ~= nil then
-                error('Multiple declarations of "'..key..'" in module"'..name..'"!')
-            end
-            rawset(data, key, value)
-            is_public[key] = true
-        end,
-    })
-    setmetatable(data, {
-        __newindex = function(_, key)
-            if data[key] == nil then
-                error('Assignment of undeclared module attribute "'..key..'" in module"'..name..'"!')
-            end
-        end,
-    })
-    setmetatable(module, {
+do
+    local null = {}
+
+    function Aux_wrap(value)
+        if value == nil then
+            return null
+        else
+            return value
+        end
+    end
+
+    function Aux_unwrap(value)
+        if value == null then
+            return nil
+        else
+            return value
+        end
+    end
+end
+
+function Aux_module(name)
+    local interface, data, private, public, is_public = {}, {}, {}, {}, {}
+    setmetatable(interface, {
+--        __newindex = function()
+--            error('Illegal write on interface of "'..name..'"!')
+--        end,
         __index = function(_, key)
+            if rawget(interface, key) then -- TODO remove
+                return rawget(interface, key) -- TODO remove
+            end -- TODO remove
             if is_public[key] then
                 return data[key]
             end
         end,
     })
-    self.modules[name] = module
-    return data, private, public
-end
-
-function Aux_addon()
-    local addon = {
-        modules = {},
-        module = Aux_module,
-    }
-    setmetatable(addon, {
-        __index = addon.modules,
+    setmetatable(data, {
+        __newindex = function(_, key, value)
+            if rawget(data, key) == nil then
+                error('Assignment of undeclared attribute "'..key..'" of module"'..name..'"!')
+            end
+            rawset(data, key, Aux_wrap(value))
+        end,
+        __index = function(_, key)
+            if rawget(data, key) == nil then
+--                error('Access of undeclared attribute "'..key..'" of module"'..name..'"!')
+            else
+                return Aux_unwrap(rawget(data, key))
+            end
+        end,
     })
-    return addon
+    setmetatable(private, {
+        __newindex = function(_, key, value)
+            if rawget(data, key) ~= nil then
+                error('Multiple declarations of "'..key..'" in module"'..name..'"!')
+            end
+            rawset(data, key, Aux_wrap(value))
+            is_public[key] = nil
+        end,
+        __index = function()
+            error('Illegal read on "private" keyword in"'..name..'"!')
+        end,
+    })
+    setmetatable(public, {
+        __newindex = function(_, key, value)
+            if rawget(data, key) ~= nil then
+                error('Multiple declarations of "'..key..'" in module"'..name..'"!')
+            end
+            rawset(data, key, Aux_wrap(value))
+            is_public[key] = true
+        end,
+        __index = function()
+            error('Illegal read on "public" keyword in"'..name..'"!')
+        end,
+    })
+    return { interface, data, private, public }
 end
 
-Aux = Aux_addon()
+function Aux_addon(name)
+    local interface, data, private, public = unpack(Aux_module(name))
 
-Aux.version = '2.16.2'
-Aux.blizzard_ui_shown = false
-Aux.orig = {}
+    private.modules = { interface }
 
-function Aux:tab(index, name)
-    local m, private, public = self:module(name)
-    self.tabs[index] = self.modules[name]
-    return m, private, public
+    function public.module(name)
+        local module = Aux_module(name)
+        local interface = tremove(module, 1)
+        tinsert(data.modules, interface)
+        public[name] = interface
+        return unpack(module)
+    end
+
+    return { interface, data, private, public }
 end
 
-function Aux.on_load()
-	Aux.log('Aux v'..Aux.version..' loaded.')
+local addon = Aux_addon('Aux')
+Aux = tremove(addon, 1)
+local m, private, public = unpack(addon)
+
+function public.tab(index, name)
+    local ret = { m.module(name) }
+    m.tabs[index] = m[name]
+    return unpack(ret)
+end
+
+function public.on_load()
+    public.version = '2.16.2'
+    public.blizzard_ui_shown = false
+    public.bids_loaded = false
+    public.current_owner_page = nil
+    public.last_owner_page_requested = nil
+
+	m.log('Aux v'..m.version..' loaded.')
+
     tinsert(UISpecialFrames, 'AuxFrame')
 
     do
-        local tab_group = Aux.gui.tab_group(AuxFrame, 'BOTTOM')
+        local tab_group = m.gui.tab_group(AuxFrame, 'BOTTOM')
         tab_group:create_tab('Search')
         tab_group:create_tab('Post')
         tab_group:create_tab('Auctions')
         tab_group:create_tab('Bids')
-        tab_group.on_select = Aux.on_tab_click
-        Aux.tab_group = tab_group
+        tab_group.on_select = function()
+            m.on_tab_click()
+        end
+        public.tab_group = tab_group
     end
 
     do
-        local btn = Aux.gui.button(AuxFrame, 16)
+        local btn = m.gui.button(AuxFrame, 16)
         btn:SetPoint('BOTTOMRIGHT', -6, 6)
         btn:SetWidth(65)
         btn:SetHeight(24)
@@ -82,72 +133,71 @@ function Aux.on_load()
         btn:SetScript('OnClick',function()
             HideUIPanel(this:GetParent())
         end)
-        Aux.close_button = btn
+        public.close_button = btn
     end
 
     do
-        local btn = Aux.gui.button(AuxFrame, 16)
-        btn:SetPoint('RIGHT', Aux.close_button, 'LEFT' , -5, 0)
+        local btn = m.gui.button(AuxFrame, 16)
+        btn:SetPoint('RIGHT', m.close_button, 'LEFT' , -5, 0)
         btn:SetWidth(65)
         btn:SetHeight(24)
         btn:SetText('Default UI')
         btn:SetScript('OnClick',function()
             if AuctionFrame:IsVisible() then
-                Aux.blizzard_ui_shown = false
+                m.blizzard_ui_shown = false
                 HideUIPanel(AuctionFrame)
             else
-                Aux.blizzard_ui_shown = true
+                m.blizzard_ui_shown = true
                 ShowUIPanel(AuctionFrame)
             end
         end)
     end
 
-    for _, module in Aux.modules do
+    for _, module in m.modules do
         if module.LOAD then
             module:LOAD()
         end
     end
-
     Aux.search_frame.on_load()
     Aux.post_frame.on_load()
     Aux.auctions_frame.on_load()
     Aux.bids_frame.on_load()
 end
 
-function Aux.on_event()
+function public.on_event()
 	if event == 'VARIABLES_LOADED' then
-		Aux.on_load()
+		m.on_load()
 	elseif event == 'ADDON_LOADED' then
-		Aux.on_addon_loaded()
+        m.on_addon_loaded()
 	elseif event == 'AUCTION_HOUSE_SHOW' then
-		Aux.on_auction_house_show()
+        m.on_auction_house_show()
 	elseif event == 'AUCTION_HOUSE_CLOSED' then
-		Aux.on_auction_house_closed()
-        Aux.bids_loaded = false
-        Aux.current_owner_page = nil
+        m.on_auction_house_closed()
+        m.bids_loaded = false
+        m.current_owner_page = nil
     elseif event == 'AUCTION_BIDDER_LIST_UPDATE' then
-        Aux.bids_loaded = true
+        m.bids_loaded = true
 	elseif event == 'AUCTION_OWNED_LIST_UPDATE' then
-        Aux.current_owner_page = Aux.last_owner_page_requested or 0
+        m.current_owner_page = m.last_owner_page_requested or 0
     end
 end
 
-function Aux.on_addon_loaded()
+function private.on_addon_loaded()
     if arg1 == 'Blizzard_AuctionUI' then
-        Aux.setup_hooks()
+        m.setup_hooks()
     end
 
     do
         local function cost_label(cost)
             local label = LIGHTYELLOW_FONT_COLOR_CODE..'(Total Cost: '..FONT_COLOR_CODE_CLOSE
-            label = label..(cost and Aux.util.format_money(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
+            label = label..(cost and m.util.format_money(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
             label = label..LIGHTYELLOW_FONT_COLOR_CODE..')'..FONT_COLOR_CODE_CLOSE
             return label
         end
 
         if arg1 == 'Blizzard_CraftUI' then
-            Aux.hook('CraftFrame_SetSelection', function(...)
-                local results = {Aux.orig.CraftFrame_SetSelection(unpack(arg)) }
+            m.hook('CraftFrame_SetSelection', function(...)
+                local results = {m.orig.CraftFrame_SetSelection(unpack(arg)) }
 
                 local id = GetCraftSelectionIndex()
                 local reagent_count = GetCraftNumReagents(id)
@@ -159,10 +209,10 @@ function Aux.on_addon_loaded()
                         total_cost = nil
                         break
                     end
-                    local item_id, suffix_id = Aux.info.parse_hyperlink(link)
+                    local item_id, suffix_id = m.info.parse_hyperlink(link)
                     local count = ({GetCraftReagentInfo(id, i)})[3]
-                    local _, price, limited = Aux.cache.merchant_info(item_id)
-                    local value = price and not limited and price or Aux.history.value(item_id..':'..suffix_id)
+                    local _, price, limited = m.cache.merchant_info(item_id)
+                    local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
                     if not value then
                         total_cost = nil
                         break
@@ -178,8 +228,8 @@ function Aux.on_addon_loaded()
         end
 
         if arg1 == 'Blizzard_TradeSkillUI' then
-            Aux.hook('TradeSkillFrame_SetSelection', function(...)
-                local results = {Aux.orig.TradeSkillFrame_SetSelection(unpack(arg)) }
+            m.hook('TradeSkillFrame_SetSelection', function(...)
+                local results = {m.orig.TradeSkillFrame_SetSelection(unpack(arg)) }
 
                 local id = GetTradeSkillSelectionIndex()
                 local reagent_count = GetTradeSkillNumReagents(id)
@@ -191,10 +241,10 @@ function Aux.on_addon_loaded()
                         total_cost = nil
                         break
                     end
-                    local item_id, suffix_id = Aux.info.parse_hyperlink(link)
+                    local item_id, suffix_id = m.info.parse_hyperlink(link)
                     local count = ({GetTradeSkillReagentInfo(id, i)})[3]
-                    local _, price, limited = Aux.cache.merchant_info(item_id)
-                    local value = price and not limited and price or Aux.history.value(item_id..':'..suffix_id)
+                    local _, price, limited = m.cache.merchant_info(item_id)
+                    local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
                     if not value then
                         total_cost = nil
                         break
@@ -214,11 +264,11 @@ end
 do
     local locked
 
-    function Aux.bid_in_progress()
+    function public.bid_in_progress()
         return locked
     end
 
-    function Aux.place_bid(type, index, amount, on_success)
+    function public.place_bid(type, index, amount, on_success)
 
         if locked then
             return
@@ -229,7 +279,7 @@ do
         if money >= amount then
             locked = true
 
-            local listener = Aux.control.event_listener('CHAT_MSG_SYSTEM')
+            local listener = m.control.event_listener('CHAT_MSG_SYSTEM')
             listener:set_action(function()
                 if arg1 == ERR_AUCTION_BID_PLACED then
                     listener:stop()
@@ -245,11 +295,11 @@ end
 do
     local locked
 
-    function Aux.cancel_in_progress()
+    function public.cancel_in_progress()
         return locked
     end
 
-    function Aux.cancel_auction(index, on_success)
+    function public.cancel_auction(index, on_success)
 
         if locked then
             return
@@ -258,7 +308,7 @@ do
         locked = true
 
         CancelAuction(index)
-        local listener = Aux.control.event_listener('CHAT_MSG_SYSTEM')
+        local listener = m.control.event_listener('CHAT_MSG_SYSTEM')
         listener:set_action(function()
             if arg1 == ERR_AUCTION_REMOVED then
                 listener:stop()
@@ -270,61 +320,61 @@ do
     end
 end
 
-function Aux.log(msg)
+function public.log(msg)
     DEFAULT_CHAT_FRAME:AddMessage('[aux] '..msg, 1, 1, 0)
 end
 
-function Aux.setup_hooks()
+function private.setup_hooks()
 
     local blizzard_ui_on_hide = function()
-        Aux.blizzard_ui_shown = false
+        m.blizzard_ui_shown = false
     end
     AuctionFrame:SetScript('OnHide', blizzard_ui_on_hide)
 
-    Aux.hook('AuctionFrame_OnShow', function(...)
-        if not Aux.blizzard_ui_shown then
-            Aux.control.as_soon_as(function() return AuctionFrame:GetScript('OnHide') == blizzard_ui_on_hide end, function()
+    m.hook('AuctionFrame_OnShow', function(...)
+        if not m.blizzard_ui_shown then
+            m.control.as_soon_as(function() return AuctionFrame:GetScript('OnHide') == blizzard_ui_on_hide end, function()
                 HideUIPanel(AuctionFrame)
             end)
         end
-        return Aux.orig.AuctionFrame_OnShow(unpack(arg))
+        return m.orig.AuctionFrame_OnShow(unpack(arg))
     end)
 
-    Aux.hook('GetOwnerAuctionItems', Aux.GetOwnerAuctionItems)
-    Aux.hook('PickupContainerItem', Aux.PickupContainerItem)
-    Aux.hook('SetItemRef', Aux.SetItemRef)
-    Aux.hook('UseContainerItem', Aux.UseContainerItem)
-    Aux.hook('AuctionFrameAuctions_OnEvent', Aux.AuctionFrameAuctions_OnEvent)
+    m.hook('GetOwnerAuctionItems', m.GetOwnerAuctionItems)
+    m.hook('PickupContainerItem', m.PickupContainerItem)
+    m.hook('SetItemRef', m.SetItemRef)
+    m.hook('UseContainerItem', m.UseContainerItem)
+    m.hook('AuctionFrameAuctions_OnEvent', m.AuctionFrameAuctions_OnEvent)
 
 end
 
-function Aux.GetOwnerAuctionItems(...)
+function private.GetOwnerAuctionItems(...)
     local page = arg[1]
-    Aux.last_owner_page_requested = page
-    return Aux.orig.GetOwnerAuctionItems(unpack(arg))
+    m.last_owner_page_requested = page
+    return m.orig.GetOwnerAuctionItems(unpack(arg))
 end
 
-function Aux.AuctionFrameAuctions_OnEvent(...)
+function private.AuctionFrameAuctions_OnEvent(...)
     if AuctionFrameAuctions:IsVisible() then
-        return Aux.orig.AuctionFrameAuctions_OnEvent(unpack(arg))
+        return m.orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end
 end
 
-function Aux.on_auction_house_show()
+function private.on_auction_house_show()
     AuxFrame:Show()
-    Aux.tab_group:set_tab(1)
+    m.tab_group:set_tab(1)
 end
 
-function Aux.neutral_faction()
+function public.neutral_faction()
     return not UnitFactionGroup('npc')
 end
 
-function Aux.on_auction_house_closed()
-	Aux.post.stop()
-	Aux.stack.stop()
-	Aux.scan.abort()
+function private:on_auction_house_closed()
+	m.post.stop()
+	m.stack.stop()
+	m.scan.abort()
 
-    --    Aux.tabs[previous].CLOSE() TODO
+    --    Aux.tabs[self.active_tab].CLOSE() TODO
     Aux.search_frame.on_close()
     Aux.post_frame.on_close()
     Aux.auctions_frame.on_close()
@@ -333,8 +383,8 @@ function Aux.on_auction_house_closed()
 	AuxFrame:Hide()
 end
 
-function Aux.on_tab_click(index, previous)
-    --    Aux.tabs[previous].CLOSE() TODO
+function private:on_tab_click(index)
+    --    Aux.tabs[self.active_tab].CLOSE() TODO
     Aux.search_frame.on_close()
     Aux.post_frame.on_close()
     Aux.auctions_frame.on_close()
@@ -359,18 +409,18 @@ function Aux.on_tab_click(index, previous)
         Aux.bids_frame.on_open()
     end
 
-    Aux.active_panel = index
+    m.active_tab = index
 end
 
-function Aux.round(v)
+function public.round(v)
 	return floor(v + 0.5)
 end
 
-function Aux.min_bid_increment(current_bid)
+function public.min_bid_increment(current_bid)
     return max(1, floor(current_bid / 100) * 5)
 end
 
-function Aux.price_level_color(pct)
+function public.price_level_color(pct)
     if pct > 135 then
         return 1.0,0.0,0.0 -- red
     elseif pct > 110 then
@@ -386,61 +436,61 @@ end
 
 do -- TODO make it work for other ways to pick up things
     local last_picked_up
-    function Aux.PickupContainerItem(...)
+    function private.PickupContainerItem(...)
         local bag, slot = unpack(arg)
         last_picked_up = { bag, slot }
-        return Aux.orig.PickupContainerItem(unpack(arg))
+        return m.orig.PickupContainerItem(unpack(arg))
     end
-    function Aux.cursor_item()
+    function private.cursor_item()
         if last_picked_up and CursorHasItem() then
-            return Aux.info.container_item(unpack(last_picked_up))
+            return m.info.container_item(unpack(last_picked_up))
         end
     end
 end
 
-function Aux.SetItemRef(...)
+function private.SetItemRef(...)
     local itemstring, text, button = unpack(arg)
     if AuxSearchFrame:IsVisible() and button == 'RightButton' then
-        local item_info = Aux.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
+        local item_info = m.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
-            Aux.search_frame.set_filter(strlower(item_info.name)..'/exact')
-            Aux.search_frame.disable_sniping()
-            Aux.search_frame.execute()
+            m.search_frame.set_filter(strlower(item_info.name)..'/exact')
+            m.search_frame.disable_sniping()
+            m.search_frame.execute()
             return
         end
     end
-    return Aux.orig.SetItemRef(unpack(arg))
+    return m.orig.SetItemRef(unpack(arg))
 end
 
-function Aux.UseContainerItem(...)
+function private.UseContainerItem(...)
     local bag, slot = unpack(arg)
     if IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() then
-        return Aux.orig.UseContainerItem(unpack(arg))
+        return m.orig.UseContainerItem(unpack(arg))
     end
 
     if AuxSearchFrame:IsVisible() then
-        local item_info = Aux.info.container_item(bag, slot)
-        item_info = item_info and Aux.info.item(item_info.item_id)
+        local item_info = m.info.container_item(bag, slot)
+        item_info = item_info and m.info.item(item_info.item_id)
         if item_info then
-            Aux.search_frame.set_filter(strlower(item_info.name)..'/exact')
-            Aux.search_frame.disable_sniping()
-            Aux.search_frame.execute()
+            m.search_frame.set_filter(strlower(item_info.name)..'/exact')
+            m.search_frame.disable_sniping()
+            m.search_frame.execute()
         end
         return
     end
 
     if AuxPostFrame:IsVisible() then
-        local item_info = Aux.info.container_item(bag, slot)
+        local item_info = m.info.container_item(bag, slot)
         if item_info then
-            Aux.post_frame.select_item(item_info.item_key)
+            m.post_frame.select_item(item_info.item_key)
         end
         return
     end
 
-	return Aux.orig.UseContainerItem(unpack(arg))
+	return m.orig.UseContainerItem(unpack(arg))
 end
 
-function Aux.item_class_index(item_class)
+function public.item_class_index(item_class)
     for i, class in ipairs({ GetAuctionItemClasses() }) do
         if strupper(class) == strupper(item_class) then
             return i
@@ -448,7 +498,7 @@ function Aux.item_class_index(item_class)
     end
 end
 
-function Aux.item_subclass_index(class_index, item_subclass)
+function public.item_subclass_index(class_index, item_subclass)
     for i, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
         if strupper(subclass) == strupper(item_subclass) then
             return i
@@ -456,7 +506,7 @@ function Aux.item_subclass_index(class_index, item_subclass)
     end
 end
 
-function Aux.item_slot_index(class_index, subclass_index, slot_name)
+function public.item_slot_index(class_index, subclass_index, slot_name)
     for i, slot in ipairs({ GetAuctionInvTypes(class_index, subclass_index) }) do
         if strupper(getglobal(slot)) == strupper(slot_name) then
             return i
@@ -464,7 +514,7 @@ function Aux.item_slot_index(class_index, subclass_index, slot_name)
     end
 end
 
-function Aux.item_quality_index(item_quality)
+function public.item_quality_index(item_quality)
     for i=0,4 do
         local quality = getglobal('ITEM_QUALITY'..i..'_DESC')
         if strupper(item_quality) == strupper(quality) then
@@ -473,36 +523,24 @@ function Aux.item_quality_index(item_quality)
     end
 end
 
-function Aux.hide_elements(elements)
-    for _, element in pairs(elements) do
-        element:Hide()
-    end
-end
-
-function Aux.show_elements(elements)
-    for _, element in pairs(elements) do
-        element:Show()
-    end
-end
-
-function Aux.is_player(name, current)
+function public.is_player(name, current)
     local realm = GetCVar('realmName')
-    return (not current and Aux.util.safe_index(aux_characters, realm, name)) or UnitName('player') == name
+    return (not current and m.util.safe_index(aux_characters, realm, name)) or UnitName('player') == name
 end
 
-function Aux.unmodified()
+function public.unmodified()
     return not IsShiftKeyDown() and not IsControlKeyDown() and not IsAltKeyDown()
 end
 
-Aux.orig = {}
-function Aux.hook(name, handler, object)
+public.orig = {}
+function public.hook(name, handler, object)
     local orig
     if object then
-        Aux.orig[object] = Aux.orig[object] or {}
-        orig = Aux.orig[object]
+        m.orig[object] = m.orig[object] or {}
+        orig = m.orig[object]
     else
         object = object or getfenv(0)
-        orig = Aux.orig
+        orig = m.orig
     end
 
     if orig[name] then
@@ -513,6 +551,6 @@ function Aux.hook(name, handler, object)
     object[name] = handler
 end
 
-Aux.huge = 2^100000
+public.huge = 2^100000
 
-Aux.null = {}
+public.null = {}
