@@ -284,7 +284,7 @@ function private.snipe(query, search)
 
             search.continuation = true
             if private.current_search() == search then
-                private.enable_resume()
+                private.update_resume()
             end
         end,
     }
@@ -360,7 +360,7 @@ function private.search(queries, resume)
                 search.continuation = {start_query, start_page}
             end
             if private.current_search() == search then
-                private.enable_resume()
+                private.update_resume()
             end
         end,
     }
@@ -514,6 +514,14 @@ function private.disable_resume()
     private.search_box:SetPoint('RIGHT', private.start_button, 'LEFT', -4, 0)
 end
 
+function private.update_resume()
+    if private.current_search().continuation and private.current_search().snipe == private.snipe_button.enabled then
+        private.enable_resume()
+    else
+        private.disable_resume()
+    end
+end
+
 do
     local searches = { [1] = {
         filter_string = '',
@@ -543,11 +551,7 @@ do
             private.next_button:Show()
             private.search_box:SetPoint('LEFT', private.next_button, 'RIGHT', 4, 0)
         end
-        if searches[search_index].continuation and searches[search_index].snipe == private.snipe_button.enabled then
-            private.enable_resume()
-        else
-            private.disable_resume()
-        end
+        private.update_resume()
     end
 
     function private.new_search(filter_string, prettified)

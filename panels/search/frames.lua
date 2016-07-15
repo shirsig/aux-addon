@@ -14,11 +14,7 @@ function Aux.search_frame.create_frames(private, public)
                 else
                     this:UnlockHighlight()
                 end
-                if private.current_search().continuation and private.current_search().snipe == private.snipe_button.enabled then
-                    private.enable_resume()
-                else
-                    private.disable_resume()
-                end
+                private.update_resume()
             elseif arg1 == 'RightButton' then
                 if this.auto then
                     this.auto = false
