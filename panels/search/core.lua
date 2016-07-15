@@ -222,7 +222,11 @@ function public.execute(mode, filter_string)
         Aux.log('Invalid filter: The sniping mode does not support page range filters')
     end
 
-    private.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
+    if filter_string ~= private.current_search().filter_string then
+        private.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
+    else
+        private.results_listing:SetSelectedRecord()
+    end
 
     private.sniping_helper(private.current_search(), queries[1])
 end
@@ -240,6 +244,7 @@ function private.sniping_helper(search, query)
 
     private.update_tab(private.RESULTS)
 
+    local next_page
     search_scan_id = Aux.scan.start{
         type = 'list',
         queries = {query},
@@ -248,9 +253,8 @@ function private.sniping_helper(search, query)
             private.status_bar:set_text('Sniping ...')
         end,
         on_page_loaded = function(_, _, last_page)
-            query.blizzard_query.first_page = last_page - 1
-            query.blizzard_query.last_page = last_page - 1
-            if last_page == 1 then
+            next_page = last_page
+            if last_page == 0 then
                 ignore_page = false
             end
         end,
@@ -270,6 +274,8 @@ function private.sniping_helper(search, query)
                 private.results_listing:SetDatabase(search.records)
             end
 
+            query.blizzard_query.first_page = next_page
+            query.blizzard_query.last_page = next_page
             private.sniping_helper(search, query)
         end,
         on_abort = function()
@@ -342,13 +348,13 @@ function public.snipe(mode, filter_string)
                 private.status_bar:set_text('Resuming scan...')
             end
         end,
-        on_page_loaded = function(_, total_pages)
+        on_page_loaded = function(_, total_scan_pages)
             current_page = current_page + 1
-            total_pages = total_pages + (start_page - 1)
-            total_pages = max(total_pages, 1)
-            current_page = min(current_page, total_pages)
-            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / total_pages)
-            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_pages))
+            total_scan_pages = total_scan_pages + (start_page - 1)
+            total_scan_pages = max(total_scan_pages, 1)
+            current_page = min(current_page, total_scan_pages)
+            private.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / total_scan_pages)
+            private.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_scan_pages))
         end,
         on_page_scanned = function()
             private.results_listing:SetDatabase()
@@ -545,6 +551,7 @@ do
         tinsert(searches, search_index + 1, {
             filter_string = filter_string,
             records = {},
+--            sniping = private.snipe_button:GetChecked() TODO
         })
         while getn(searches) > search_index + 1 do
             tremove(searches)

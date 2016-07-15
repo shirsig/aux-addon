@@ -5,14 +5,14 @@ local PAGE_SIZE = 50
 local state
 local threads = {}
 
-function private.total_pages(total_count)
-    return math.ceil(total_count / PAGE_SIZE)
+function private.total_pages(total_auctions)
+    return math.ceil(total_auctions / PAGE_SIZE)
 end
 
-function private.last_page(total_count)
-    local last_page = max(m.total_pages(total_count) - 1, 0)
-    local last_page_limit = Aux.util.safe_index(m.current_query().blizzard_query, 'last_page')
-    return last_page_limit and min(last_page_limit, last_page) or last_page
+function private.last_page(total_auctions)
+    local last_page = max(m.total_pages(total_auctions) - 1, 0)
+    local last_page_limit = Aux.util.safe_index(m.current_query().blizzard_query, 'last_page') or last_page
+    return min(last_page_limit, last_page)
 end
 
 function private.current_query()
@@ -236,7 +236,7 @@ function private.submit_query(k)
                 m.current_thread().params.on_page_loaded,
                 m.current_thread().page - (m.current_query().blizzard_query.first_page or 0) + 1,
                 m.last_page(m.current_thread().total_auctions) - (m.current_query().blizzard_query.first_page or 0) + 1,
-                m.total_pages(m.current_thread().total_auctions),
+                m.total_pages(m.current_thread().total_auctions) - 1,
                 k
             )
         end)
