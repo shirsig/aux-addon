@@ -14,10 +14,27 @@ end
 private.tabs = {}
 function public.tab(index, name)
     local ret = { m.module(name) }
+    ret[3].ACTIVE = function()
+        return index == m.active_tab
+    end
     m.tabs[index] = m[name]
     return unpack(ret)
 end
-private.active_tab = nil
+do
+    local active_tab_index
+    function private.active_tab()
+        if active_tab_index then
+            return m.tabs[active_tab_index]
+        end
+    end
+    function private.on_tab_click(index)
+        if m.active_tab() then
+            m.active_tab().CLOSE()
+        end
+        active_tab_index = index
+        m.active_tab().OPEN()
+    end
+end
 
 function public.on_load()
     public.version = '3.0.1'
@@ -273,13 +290,13 @@ function private.AuctionFrameAuctions_OnEvent(...)
     end
 end
 
+function public.neutral_faction()
+    return not UnitFactionGroup('npc')
+end
+
 function private.on_auction_house_show()
     AuxFrame:Show()
     m.tab_group:set_tab(1)
-end
-
-function public.neutral_faction()
-    return not UnitFactionGroup('npc')
 end
 
 function private.on_auction_house_closed()
@@ -287,25 +304,9 @@ function private.on_auction_house_closed()
 	m.stack.stop()
 	m.scan.abort()
 
-    m.tabs[m.active_tab].CLOSE()
+    m.active_tab().CLOSE()
 
 	AuxFrame:Hide()
-end
-
-function private.on_tab_click(index)
-    local y = m.active_tab
-    if m.active_tab then
-        m.tabs[m.active_tab].CLOSE()
-    end
-
-    AuxSearchFrame:Hide()
-    AuxPostFrame:Hide()
-    AuxAuctionsFrame:Hide()
-    AuxBidsFrame:Hide()
-
-    m.tabs[index].OPEN()
-
-    m.active_tab = index
 end
 
 function public.round(v)
@@ -350,7 +351,7 @@ end
 
 function private.SetItemRef(...)
     local itemstring, text, button = unpack(arg)
-    if AuxSearchFrame:IsVisible() and button == 'RightButton' then
+    if m.search_tab.ACTIVE() and button == 'RightButton' then
         local item_info = m.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
             m.search_tab.set_filter(strlower(item_info.name)..'/exact')
@@ -368,7 +369,7 @@ function private.UseContainerItem(...)
         return m.orig.UseContainerItem(unpack(arg))
     end
 
-    if AuxSearchFrame:IsVisible() then
+    if m.search_tab.ACTIVE() then
         local item_info = m.info.container_item(bag, slot)
         item_info = item_info and m.info.item(item_info.item_id)
         if item_info then
@@ -379,7 +380,7 @@ function private.UseContainerItem(...)
         return
     end
 
-    if AuxPostFrame:IsVisible() then
+    if m.post_tab.ACTIVE() then
         local item_info = m.info.container_item(bag, slot)
         if item_info then
             m.post_tab.select_item(item_info.item_key)

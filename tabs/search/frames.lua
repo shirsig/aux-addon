@@ -22,7 +22,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     m.frame.saved.recent:SetPoint('TOPRIGHT', -4, -4)
     m.frame.saved.recent:SetPoint('BOTTOMRIGHT', -4, 4)
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 22)
+        local btn = Aux.gui.button(m.frame, 22)
         btn:SetPoint('TOPLEFT', 5, -8)
         btn:SetWidth(70)
         btn:SetHeight(25)
@@ -48,9 +48,9 @@ Aux.search_tab.FRAMES(function(m, public, private)
         btn.auto = false
         private.snipe_button = btn
     end
-    Aux.gui.vertical_line(AuxSearchFrame, 80, nil, 408)
+    Aux.gui.vertical_line(m.frame, 80, nil, 408)
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 26)
+        local btn = Aux.gui.button(m.frame, 26)
         btn:SetPoint('LEFT', m.snipe_button, 'RIGHT', 12, 0)
         btn:SetWidth(30)
         btn:SetHeight(25)
@@ -59,7 +59,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.previous_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 26)
+        local btn = Aux.gui.button(m.frame, 26)
         btn:SetPoint('LEFT', m.previous_button, 'RIGHT', 4, 0)
         btn:SetWidth(30)
         btn:SetHeight(25)
@@ -68,7 +68,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.next_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 22)
+        local btn = Aux.gui.button(m.frame, 22)
         btn:SetPoint('TOPRIGHT', -5, -8)
         btn:SetWidth(70)
         btn:SetHeight(25)
@@ -83,7 +83,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.start_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 22)
+        local btn = Aux.gui.button(m.frame, 22)
         btn:SetPoint('TOPRIGHT', -5, -8)
         btn:SetWidth(70)
         btn:SetHeight(25)
@@ -95,7 +95,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.stop_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 22)
+        local btn = Aux.gui.button(m.frame, 22)
         btn:SetPoint('RIGHT', m.start_button, 'LEFT', -4, 0)
         btn:SetWidth(70)
         btn:SetHeight(25)
@@ -106,7 +106,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.resume_button = btn
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrame)
+        local editbox = Aux.gui.editbox(m.frame)
         editbox:SetMaxLetters(nil)
         editbox:EnableMouse(1)
         editbox.complete = Aux.completion.complete
@@ -135,10 +135,10 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.search_box = editbox
     end
     do
-        Aux.gui.horizontal_line(AuxSearchFrame, -40)
+        Aux.gui.horizontal_line(m.frame, -40)
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 18)
+        local btn = Aux.gui.button(m.frame, 18)
         btn:SetPoint('BOTTOMLEFT', AuxFrameContent, 'TOPLEFT', 10, 8)
         btn:SetWidth(243)
         btn:SetHeight(22)
@@ -147,7 +147,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.search_results_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 18)
+        local btn = Aux.gui.button(m.frame, 18)
         btn:SetPoint('TOPLEFT', m.search_results_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(243)
         btn:SetHeight(22)
@@ -156,7 +156,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.saved_searches_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrame, 18)
+        local btn = Aux.gui.button(m.frame, 18)
         btn:SetPoint('TOPLEFT', m.saved_searches_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(243)
         btn:SetHeight(22)
@@ -165,7 +165,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.new_filter_button = btn
     end
     do
-        local status_bar = Aux.gui.status_bar(AuxSearchFrame)
+        local status_bar = Aux.gui.status_bar(m.frame)
         status_bar:SetWidth(265)
         status_bar:SetHeight(25)
         status_bar:SetPoint('TOPLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, -6)
@@ -253,12 +253,12 @@ Aux.search_tab.FRAMES(function(m, public, private)
         end)
     end
     do
-        local editbox = Aux.gui.editbox(m.frame.filter, '$parentNameInputBox')
+        local editbox = Aux.gui.editbox(m.frame.filter)
         editbox.complete_item = Aux.completion.completor(function() return aux_auctionable_items end)
         editbox:SetPoint('TOPLEFT', 14, -20)
         editbox:SetWidth(260)
         editbox:SetScript('OnChar', function()
-            if m.frame.filterExactCheckButton:GetChecked() then
+            if m.exact_checkbox:GetChecked() then
                 this:complete_item()
             end
         end)
@@ -266,7 +266,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             if IsShiftKeyDown() then
                 m.last_page_editbox:SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
+                m.min_level_input:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -276,28 +276,29 @@ Aux.search_tab.FRAMES(function(m, public, private)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
         label:SetText('Name')
+        private.name_input = editbox
     end
     do
-        local checkbox = CreateFrame('CheckButton', '$parentExactCheckButton', m.frame.filter, 'UICheckButtonTemplate')
+        local checkbox = CreateFrame('CheckButton', nil, m.frame.filter, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPLEFT', m.frame.filterNameInputBox, 'TOPRIGHT', 10, 0)
-        local label = Aux.gui.label(m.frame.filterExactCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', m.frame.filterExactCheckButton, 'TOPLEFT', 1, -3)
+        checkbox:SetPoint('TOPLEFT', m.name_input, 'TOPRIGHT', 10, 0)
+        local label = Aux.gui.label(checkbox, 13)
+        label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', 1, -3)
         label:SetText('Exact')
-        private.show_hidden_checkbox = checkbox
+        private.exact_checkbox = checkbox
     end
     do
-        local editbox = Aux.gui.editbox(m.frame.filter, '$parentMinLevel')
-        editbox:SetPoint('TOPLEFT', m.frame.filterNameInputBox, 'BOTTOMLEFT', 0, -22)
+        local editbox = Aux.gui.editbox(m.frame.filter)
+        editbox:SetPoint('TOPLEFT', m.name_input, 'BOTTOMLEFT', 0, -22)
         editbox:SetWidth(125)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+                m.name_input:SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+                m.max_level_input:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -307,16 +308,17 @@ Aux.search_tab.FRAMES(function(m, public, private)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
         label:SetText('Level Range')
+        private.min_level_input = editbox
     end
     do
-        local editbox = Aux.gui.editbox(m.frame.filter, '$parentMaxLevel')
-        editbox:SetPoint('TOPLEFT', m.frame.filterMinLevel, 'TOPRIGHT', 10, 0)
+        local editbox = Aux.gui.editbox(m.frame.filter)
+        editbox:SetPoint('TOPLEFT', m.min_level_input, 'TOPRIGHT', 10, 0)
         editbox:SetWidth(125)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'MinLevel'):SetFocus()
+                m.min_level_input:SetFocus()
             else
                 m.first_page_editbox:SetFocus()
             end
@@ -328,20 +330,21 @@ Aux.search_tab.FRAMES(function(m, public, private)
         local label = Aux.gui.label(editbox, 13)
         label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
         label:SetText('-')
+        private.max_level_input = editbox
     end
     do
-        local checkbox = CreateFrame('CheckButton', '$parentUsableCheckButton', m.frame.filter, 'UICheckButtonTemplate')
+        local checkbox = CreateFrame('CheckButton', nil, m.frame.filter, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPLEFT', m.frame.filterMaxLevel, 'TOPRIGHT', 10, 0)
-        local label = Aux.gui.label(m.frame.filterUsableCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', m.frame.filterUsableCheckButton, 'TOPLEFT', 1, -3)
+        checkbox:SetPoint('TOPLEFT', m.max_level_input, 'TOPRIGHT', 10, 0)
+        local label = Aux.gui.label(checkbox, 13)
+        label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', 1, -3)
         label:SetText('Usable')
         private.usable_checkbox = checkbox
     end
     do
         local dropdown = Aux.gui.dropdown(m.frame.filter)
-        dropdown:SetPoint('TOPLEFT', m.frame.filterMinLevel, 'BOTTOMLEFT', 0, -18)
+        dropdown:SetPoint('TOPLEFT', m.min_level_input, 'BOTTOMLEFT', 0, -18)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
@@ -403,7 +406,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         editbox:SetMaxLetters(2)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                getglobal(this:GetParent():GetName()..'MaxLevel'):SetFocus()
+                m.max_level_input:SetFocus()
             else
                 m.last_page_editbox:SetFocus()
             end
@@ -427,7 +430,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             if IsShiftKeyDown() then
                 m.first_page_editbox:SetFocus()
             else
-                getglobal(this:GetParent():GetName()..'NameInputBox'):SetFocus()
+                m.name_input:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -441,8 +444,8 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     Aux.gui.vertical_line(m.frame.filter, 332)
     do
-        local label = Aux.gui.label(m.frame.filterUsableCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', m.frame.filterUsableCheckButton, 'TOPLEFT', 1, -3)
+        local label = Aux.gui.label(m.usable_checkbox, 13)
+        label:SetPoint('BOTTOMLEFT', m.usable_checkbox, 'TOPLEFT', 1, -3)
         label:SetText('Usable')
     end
     local function add_modifier(...)

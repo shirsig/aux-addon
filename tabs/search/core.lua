@@ -81,13 +81,13 @@ function public.LOAD()
 end
 
 function public.OPEN()
-    AuxSearchFrame:Show()
+    m.frame:Show()
     m.update_search_listings()
 end
 
 function public.CLOSE()
     m.results_listing:SetSelectedRecord()
-    AuxSearchFrame:Hide()
+    m.frame:Hide()
 end
 
 function private.update_search_listings()
