@@ -32,8 +32,6 @@ tables\listing.lua
 tables\auction_listing.lua
 tables\item_listing.lua
 
-
-tabs\search\core.xml
 tabs\search\core.lua
 tabs\search\frames.lua
 

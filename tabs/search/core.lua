@@ -121,18 +121,18 @@ function private.update_tab(tab)
     m.search_results_button:UnlockHighlight()
     m.saved_searches_button:UnlockHighlight()
     m.new_filter_button:UnlockHighlight()
-    AuxSearchFrameResults:Hide()
-    AuxSearchFrameSaved:Hide()
-    AuxSearchFrameFilter:Hide()
+    m.frame.results:Hide()
+    m.frame.saved:Hide()
+    m.frame.filter:Hide()
 
     if tab == m.RESULTS then
-        AuxSearchFrameResults:Show()
+        m.frame.results:Show()
         m.search_results_button:LockHighlight()
     elseif tab == m.SAVED then
-        AuxSearchFrameSaved:Show()
+        m.frame.saved:Show()
         m.saved_searches_button:LockHighlight()
     elseif tab == m.FILTER then
-        AuxSearchFrameFilter:Show()
+        m.frame.filter:Show()
         m.new_filter_button:LockHighlight()
     end
 end
@@ -159,11 +159,11 @@ function private.add_filter(filter_string, replace)
 end
 
 function private.clear_form()
-    AuxSearchFrameFilterNameInputBox:SetText('')
-    AuxSearchFrameFilterExactCheckButton:SetChecked(nil)
-    AuxSearchFrameFilterMinLevel:SetText('')
-    AuxSearchFrameFilterMaxLevel:SetText('')
-    AuxSearchFrameFilterUsableCheckButton:SetChecked(nil)
+    m.frame.filterNameInputBox:SetText('')
+    m.frame.filterExactCheckButton:SetChecked(nil)
+    m.frame.filterMinLevel:SetText('')
+    m.frame.filterMaxLevel:SetText('')
+    m.frame.filterUsableCheckButton:SetChecked(nil)
     UIDropDownMenu_ClearAll(m.class_dropdown)
     UIDropDownMenu_ClearAll(m.subclass_dropdown)
     UIDropDownMenu_ClearAll(m.slot_dropdown)
@@ -179,21 +179,21 @@ function private.get_form_filter()
         filter_term = filter_term == '' and part or filter_term..'/'..part
     end
 
-    add(AuxSearchFrameFilterNameInputBox:GetText())
+    add(m.frame.filterNameInputBox:GetText())
 
-    if AuxSearchFrameFilterExactCheckButton:GetChecked() then
+    if m.frame.filterExactCheckButton:GetChecked() then
         add('exact')
     end
 
-    if tonumber(AuxSearchFrameFilterMinLevel:GetText()) then
-        add(max(1, min(60, tonumber(AuxSearchFrameFilterMinLevel:GetText()))))
+    if tonumber(m.frame.filterMinLevel:GetText()) then
+        add(max(1, min(60, tonumber(m.frame.filterMinLevel:GetText()))))
     end
 
-    if tonumber(AuxSearchFrameFilterMaxLevel:GetText()) then
-        add(max(1, min(60, tonumber(AuxSearchFrameFilterMaxLevel:GetText()))))
+    if tonumber(m.frame.filterMaxLevel:GetText()) then
+        add(max(1, min(60, tonumber(m.frame.filterMaxLevel:GetText()))))
     end
 
-    if AuxSearchFrameFilterUsableCheckButton:GetChecked() then
+    if m.frame.filterUsableCheckButton:GetChecked() then
         add('usable')
     end
 
@@ -384,7 +384,7 @@ function private.start_search(queries, continuation)
             m.status_bar:update_status(100, 100)
             m.status_bar:set_text('Done Scanning')
 
-            if m.current_search() == search and AuxSearchFrameResults:IsVisible() and getn(search.records) == 0 then
+            if m.current_search() == search and m.frame.results:IsVisible() and getn(search.records) == 0 then
                 m.update_tab(m.SAVED)
             end
 

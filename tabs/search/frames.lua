@@ -1,4 +1,26 @@
 Aux.search_tab.FRAMES(function(m, public, private)
+    private.frame = CreateFrame('Frame', nil, AuxFrame)
+    m.frame:SetAllPoints()
+    m.frame:SetScript('OnUpdate', m.on_update)
+
+    m.frame.filter = CreateFrame('Frame', nil, m.frame, 'AuxFrameBoxTemplate')
+    m.frame.filter:SetAllPoints(AuxFrameContent)
+
+    m.frame.results = CreateFrame('Frame', nil, m.frame, 'AuxFrameBoxTemplate')
+    m.frame.results:SetAllPoints(AuxFrameContent)
+
+    m.frame.saved = CreateFrame('Frame', nil, m.frame, 'AuxFrameBoxTemplate')
+    m.frame.saved:SetAllPoints(AuxFrameContent)
+
+    m.frame.saved.favorite = CreateFrame('Frame', nil, m.frame.saved, 'AuxFrameBoxTemplate')
+    m.frame.saved.favorite:SetWidth(373)
+    m.frame.saved.favorite:SetPoint('TOPLEFT', 4, -4)
+    m.frame.saved.favorite:SetPoint('BOTTOMLEFT', 4, 4)
+
+    m.frame.saved.recent = CreateFrame('Frame', nil, m.frame.saved, 'AuxFrameBoxTemplate')
+    m.frame.saved.recent:SetWidth(373)
+    m.frame.saved.recent:SetPoint('TOPRIGHT', -4, -4)
+    m.frame.saved.recent:SetPoint('BOTTOMRIGHT', -4, 4)
     do
         local btn = Aux.gui.button(AuxSearchFrame, 22)
         btn:SetPoint('TOPLEFT', 5, -8)
@@ -152,7 +174,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.status_bar = status_bar
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameResults, 16)
+        local btn = Aux.gui.button(m.frame.results, 16)
         btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -161,7 +183,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.bid_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameResults, 16)
+        local btn = Aux.gui.button(m.frame.results, 16)
         btn:SetPoint('TOPLEFT', m.bid_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -170,7 +192,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.buyout_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameResults, 16)
+        local btn = Aux.gui.button(m.frame.results, 16)
         btn:SetPoint('TOPLEFT', m.buyout_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -181,7 +203,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         end)
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameSaved, 16)
+        local btn = Aux.gui.button(m.frame.saved, 16)
         btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -198,7 +220,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         end)
     end
     do
-        local btn1 = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn1 = Aux.gui.button(m.frame.filter, 16)
         btn1:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
         btn1:SetWidth(80)
         btn1:SetHeight(24)
@@ -210,7 +232,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             m.execute()
         end)
 
-        local btn2 = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn2 = Aux.gui.button(m.frame.filter, 16)
         btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
         btn2:SetWidth(80)
         btn2:SetHeight(24)
@@ -220,7 +242,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             m.clear_form()
         end)
 
-        local btn3 = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn3 = Aux.gui.button(m.frame.filter, 16)
         btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
         btn3:SetWidth(80)
         btn3:SetHeight(24)
@@ -231,12 +253,12 @@ Aux.search_tab.FRAMES(function(m, public, private)
         end)
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentNameInputBox')
+        local editbox = Aux.gui.editbox(m.frame.filter, '$parentNameInputBox')
         editbox.complete_item = Aux.completion.completor(function() return aux_auctionable_items end)
         editbox:SetPoint('TOPLEFT', 14, -20)
         editbox:SetWidth(260)
         editbox:SetScript('OnChar', function()
-            if AuxSearchFrameFilterExactCheckButton:GetChecked() then
+            if m.frame.filterExactCheckButton:GetChecked() then
                 this:complete_item()
             end
         end)
@@ -256,18 +278,18 @@ Aux.search_tab.FRAMES(function(m, public, private)
         label:SetText('Name')
     end
     do
-        local checkbox = CreateFrame('CheckButton', '$parentExactCheckButton', AuxSearchFrameFilter, 'UICheckButtonTemplate')
+        local checkbox = CreateFrame('CheckButton', '$parentExactCheckButton', m.frame.filter, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPLEFT', AuxSearchFrameFilterNameInputBox, 'TOPRIGHT', 10, 0)
-        local label = Aux.gui.label(AuxSearchFrameFilterExactCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', AuxSearchFrameFilterExactCheckButton, 'TOPLEFT', 1, -3)
+        checkbox:SetPoint('TOPLEFT', m.frame.filterNameInputBox, 'TOPRIGHT', 10, 0)
+        local label = Aux.gui.label(m.frame.filterExactCheckButton, 13)
+        label:SetPoint('BOTTOMLEFT', m.frame.filterExactCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('Exact')
         private.show_hidden_checkbox = checkbox
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentMinLevel')
-        editbox:SetPoint('TOPLEFT', AuxSearchFrameFilterNameInputBox, 'BOTTOMLEFT', 0, -22)
+        local editbox = Aux.gui.editbox(m.frame.filter, '$parentMinLevel')
+        editbox:SetPoint('TOPLEFT', m.frame.filterNameInputBox, 'BOTTOMLEFT', 0, -22)
         editbox:SetWidth(125)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
@@ -287,8 +309,8 @@ Aux.search_tab.FRAMES(function(m, public, private)
         label:SetText('Level Range')
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter, '$parentMaxLevel')
-        editbox:SetPoint('TOPLEFT', AuxSearchFrameFilterMinLevel, 'TOPRIGHT', 10, 0)
+        local editbox = Aux.gui.editbox(m.frame.filter, '$parentMaxLevel')
+        editbox:SetPoint('TOPLEFT', m.frame.filterMinLevel, 'TOPRIGHT', 10, 0)
         editbox:SetWidth(125)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
@@ -308,18 +330,18 @@ Aux.search_tab.FRAMES(function(m, public, private)
         label:SetText('-')
     end
     do
-        local checkbox = CreateFrame('CheckButton', '$parentUsableCheckButton', AuxSearchFrameFilter, 'UICheckButtonTemplate')
+        local checkbox = CreateFrame('CheckButton', '$parentUsableCheckButton', m.frame.filter, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPLEFT', AuxSearchFrameFilterMaxLevel, 'TOPRIGHT', 10, 0)
-        local label = Aux.gui.label(AuxSearchFrameFilterUsableCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', AuxSearchFrameFilterUsableCheckButton, 'TOPLEFT', 1, -3)
+        checkbox:SetPoint('TOPLEFT', m.frame.filterMaxLevel, 'TOPRIGHT', 10, 0)
+        local label = Aux.gui.label(m.frame.filterUsableCheckButton, 13)
+        label:SetPoint('BOTTOMLEFT', m.frame.filterUsableCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('Usable')
         private.usable_checkbox = checkbox
     end
     do
-        local dropdown = Aux.gui.dropdown(AuxSearchFrameFilter)
-        dropdown:SetPoint('TOPLEFT', AuxSearchFrameFilterMinLevel, 'BOTTOMLEFT', 0, -18)
+        local dropdown = Aux.gui.dropdown(m.frame.filter)
+        dropdown:SetPoint('TOPLEFT', m.frame.filterMinLevel, 'BOTTOMLEFT', 0, -18)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
@@ -332,7 +354,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.class_dropdown = dropdown
     end
     do
-        local dropdown = Aux.gui.dropdown(AuxSearchFrameFilter)
+        local dropdown = Aux.gui.dropdown(m.frame.filter)
         dropdown:SetPoint('TOPLEFT', m.class_dropdown, 'BOTTOMLEFT', 0, -18)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
@@ -346,7 +368,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.subclass_dropdown = dropdown
     end
     do
-        local dropdown = Aux.gui.dropdown(AuxSearchFrameFilter)
+        local dropdown = Aux.gui.dropdown(m.frame.filter)
         dropdown:SetPoint('TOPLEFT', m.subclass_dropdown, 'BOTTOMLEFT', 0, -18)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
@@ -360,7 +382,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.slot_dropdown = dropdown
     end
     do
-        local dropdown = Aux.gui.dropdown(AuxSearchFrameFilter)
+        local dropdown = Aux.gui.dropdown(m.frame.filter)
         dropdown:SetPoint('TOPLEFT', m.slot_dropdown, 'BOTTOMLEFT', 0, -18)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
@@ -374,7 +396,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.quality_dropdown = dropdown
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
+        local editbox = Aux.gui.editbox(m.frame.filter)
         editbox:SetPoint('TOPLEFT', m.quality_dropdown, 'BOTTOMLEFT', 0, -18)
         editbox:SetWidth(145)
         editbox:SetNumeric(true)
@@ -396,7 +418,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.first_page_editbox = editbox
     end
     do
-        local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
+        local editbox = Aux.gui.editbox(m.frame.filter)
         editbox:SetPoint('TOPLEFT', m.first_page_editbox, 'TOPRIGHT', 10, 0)
         editbox:SetWidth(145)
         editbox:SetNumeric(true)
@@ -417,10 +439,10 @@ Aux.search_tab.FRAMES(function(m, public, private)
         label:SetText('-')
         private.last_page_editbox = editbox
     end
-    Aux.gui.vertical_line(AuxSearchFrameFilter, 332)
+    Aux.gui.vertical_line(m.frame.filter, 332)
     do
-        local label = Aux.gui.label(AuxSearchFrameFilterUsableCheckButton, 13)
-        label:SetPoint('BOTTOMLEFT', AuxSearchFrameFilterUsableCheckButton, 'TOPLEFT', 1, -3)
+        local label = Aux.gui.label(m.frame.filterUsableCheckButton, 13)
+        label:SetPoint('BOTTOMLEFT', m.frame.filterUsableCheckButton, 'TOPLEFT', 1, -3)
         label:SetText('Usable')
     end
     local function add_modifier(...)
@@ -434,7 +456,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         m.search_box:SetText(current_filter_string)
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPRIGHT', -362, -10)
         btn:SetWidth(50)
         btn:SetHeight(19)
@@ -445,7 +467,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.and_operator_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('LEFT', m.and_operator_button, 'RIGHT', 10, 0)
         btn:SetWidth(50)
         btn:SetHeight(19)
@@ -456,7 +478,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.or_operator_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('LEFT', m.or_operator_button, 'RIGHT', 10, 0)
         btn:SetWidth(50)
         btn:SetHeight(19)
@@ -468,102 +490,102 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     private.modifier_buttons = {}
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.and_operator_button, 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['min-unit-bid'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['min-unit-bid'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['min-unit-buy'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['min-unit-buy'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['max-unit-bid'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['max-unit-bid'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['max-unit-buy'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['max-unit-buy'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['bid-profit'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-profit'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['buy-profit'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['buy-profit'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['bid-vend-profit'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-vend-profit'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['buy-vend-profit'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['buy-vend-profit'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['bid-dis-profit'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-dis-profit'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['buy-dis-profit'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.and_operator_button, 'BOTTOMLEFT', 205, -10)
         m.modifier_buttons['bid-pct'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-pct'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['buy-pct'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['buy-pct'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['item'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['item'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['tooltip'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['tooltip'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['min-lvl'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['min-lvl'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['max-lvl'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['max-lvl'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['rarity'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['rarity'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['left'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['left'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['utilizable'] = btn
     end
     do
-        local btn = Aux.gui.button(AuxSearchFrameFilter, 16)
+        local btn = Aux.gui.button(m.frame.filter, 16)
         btn:SetPoint('TOPLEFT', m.modifier_buttons['utilizable'], 'BOTTOMLEFT', 0, -10)
         m.modifier_buttons['discard'] = btn
     end
@@ -588,7 +610,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         end)
         btn.inputs = {}
         if filter.arity > 0 then
-            local editbox = Aux.gui.editbox(AuxSearchFrameFilter)
+            local editbox = Aux.gui.editbox(m.frame.filter)
             editbox.complete = Aux.completion.completor(function() return ({filter.test()})[2] end)
             editbox:SetPoint('LEFT', btn, 'RIGHT', 10, 0)
             editbox:SetWidth(80)
@@ -605,7 +627,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         end
     end
 
-    private.results_listing = Aux.auction_listing.CreateAuctionResultsTable(AuxSearchFrameResults, Aux.auction_listing.search_config)
+    private.results_listing = Aux.auction_listing.CreateAuctionResultsTable(m.frame.results, Aux.auction_listing.search_config)
     m.results_listing:SetSort(1,2,3,4,5,6,7,8,9)
     m.results_listing:Reset()
     m.results_listing:SetHandler('OnCellClick', function(cell, button)
@@ -673,7 +695,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         end
     }
 
-    private.recent_searches_listing = Aux.listing.CreateScrollingTable(AuxSearchFrameSavedRecent)
+    private.recent_searches_listing = Aux.listing.CreateScrollingTable(m.frame.saved.recent)
     m.recent_searches_listing:SetColInfo({{name='Recent Searches', width=1}})
     m.recent_searches_listing:EnableSorting(false)
     m.recent_searches_listing:DisableSelection(true)
@@ -681,9 +703,9 @@ Aux.search_tab.FRAMES(function(m, public, private)
     m.recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
     m.recent_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
 
-    Aux.gui.vertical_line(AuxSearchFrameSaved, 379)
+    Aux.gui.vertical_line(m.frame.saved, 379)
 
-    private.favorite_searches_listing = Aux.listing.CreateScrollingTable(AuxSearchFrameSavedFavorite)
+    private.favorite_searches_listing = Aux.listing.CreateScrollingTable(m.frame.saved.favorite)
     m.favorite_searches_listing:SetColInfo({{name='Favorite Searches', width=1}})
     m.favorite_searches_listing:EnableSorting(false)
     m.favorite_searches_listing:DisableSelection(true)
