@@ -266,12 +266,8 @@ function private.start_sniping(query, search, continuation)
         ignore_page = not tonumber(continuation)
     end
 
-    local sniping_map = {}
-    for _, record in search.records do
-        sniping_map[record.sniping_signature] = record
-    end
-
     local next_page
+    local new_records = {}
     m.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = {query},
@@ -290,18 +286,27 @@ function private.start_sniping(query, search, continuation)
                 if m.snipe_button.auto then
                     PlaceAuctionBid('list', auction_record.index, auction_record.buyout_price)
                 else
-                    sniping_map[auction_record.sniping_signature] = auction_record
+                    tinsert(new_records, auction_record)
                 end
             end
         end,
         on_complete = function()
-            if Aux.util.set_size(sniping_map) > 1000 then
+            local map = {}
+            for _, record in search.records do
+                map[record.sniping_signature] = record
+            end
+            for _, record in new_records do
+                map[record.sniping_signature] = record
+            end
+            new_records = {}
+            for _, record in map do
+                tinsert(new_records, record)
+            end
+
+            if getn(new_records) > 1000 then
                 StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
             else
-                search.records = {}
-                for _, record in sniping_map do
-                    tinsert(search.records, record)
-                end
+                search.records = new_records
                 m.results_listing:SetDatabase(search.records)
             end
 
