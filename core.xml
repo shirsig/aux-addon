@@ -26,37 +26,6 @@
         </Scripts>
     </GameTooltip>
 
-    <CheckButton name="AuxRadioButtonTemplate" virtual="true">
-        <Size><AbsDimension x="16" y="16"/></Size>
-        <Layers>
-            <Layer level="BACKGROUND">
-                <FontString name="$parentText" inherits="GameFontHighlightSmall">
-                    <Anchors>
-                        <Anchor point="LEFT" relativePoint="RIGHT">
-                            <Offset>
-                                <AbsDimension x="5" y="0"/>
-                            </Offset>
-                        </Anchor>
-                    </Anchors>
-                </FontString>
-            </Layer>
-        </Layers>
-        <Scripts>
-            <OnClick>
-                SendMailRadioButton_OnClick(this:GetID());
-            </OnClick>
-        </Scripts>
-        <NormalTexture file="Interface\Buttons\UI-RadioButton">
-            <TexCoords left="0" right="0.25" top="0" bottom="1"/>
-        </NormalTexture>
-        <HighlightTexture file="Interface\Buttons\UI-RadioButton" alphaMode="ADD">
-            <TexCoords left="0.5" right="0.75" top="0" bottom="1"/>
-        </HighlightTexture>
-        <CheckedTexture file="Interface\Buttons\UI-RadioButton">
-            <TexCoords left="0.25" right="0.5" top="0" bottom="1"/>
-        </CheckedTexture>
-    </CheckButton>
-
     <Frame name="AuxFrameBoxTemplate" virtual="true">
         <Layers>
             <Layer level="BACKGROUND">
