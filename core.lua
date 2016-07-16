@@ -32,12 +32,14 @@ do
             m.active_tab().CLOSE()
         end
         active_tab_index = index
-        m.active_tab().OPEN()
+        if m.active_tab() then
+            m.active_tab().OPEN()
+        end
     end
 end
 
 function public.on_load()
-    public.version = '3.0.2'
+    public.version = '3.0.3'
     public.blizzard_ui_shown = false
     public.bids_loaded = false
     public.current_owner_page = nil
@@ -303,9 +305,7 @@ function private.on_auction_house_closed()
 	m.post.stop()
 	m.stack.stop()
 	m.scan.abort()
-
-    m.active_tab().CLOSE()
-
+    m.tab_group:set_tab()
 	AuxFrame:Hide()
 end
 
