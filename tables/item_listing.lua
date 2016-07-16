@@ -37,7 +37,7 @@ function public.render(item_listing)
 end
 
 function public.create(parent, on_click, on_enter, on_leave, selected)
-	local name = (parent:GetName() or '')..'aux_item_list'
+	local name = 'aux_item_list'
 
 	local id = 1
 	while getglobal(name..id) do

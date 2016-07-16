@@ -11,16 +11,16 @@ function public.LOAD()
 end
 
 function public.OPEN()
-    AuxBidsFrame:Show()
+    m.frame:Show()
     m.scan_bids()
 end
 
 function public.CLOSE()
-    AuxBidsFrame:Hide()
+    m.frame:Hide()
 end
 
 function private.update_listing()
-    if not AuxBidsFrame:IsVisible() then
+    if not m:ACTIVE() then
         return
     end
 
@@ -120,7 +120,7 @@ do
         )
     end
 
-    function public.on_update()
+    function private.on_update()
         if state == IDLE or state == SEARCHING then
             m.buyout_button:Disable()
             m.bid_button:Disable()

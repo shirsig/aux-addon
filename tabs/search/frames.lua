@@ -2,6 +2,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     private.frame = CreateFrame('Frame', nil, AuxFrame)
     m.frame:SetAllPoints()
     m.frame:SetScript('OnUpdate', m.on_update)
+    m.frame:Hide()
 
     m.frame.filter = CreateFrame('Frame', nil, m.frame, 'AuxFrameBoxTemplate')
     m.frame.filter:SetAllPoints(AuxFrameContent)

@@ -10,7 +10,7 @@ function public.LOAD()
 	m.event_frame:SetScript('OnEvent', m.on_event)
 end
 
-function public.on_event()
+function private.on_event()
 	for listener, _ in m.event_listeners do
 		if event == listener.event and not listener.deleted then
 			listener.action()
@@ -18,7 +18,7 @@ function public.on_event()
 	end
 end
 
-function public.on_update()
+function private.on_update()
 	m.event_listeners = Aux.util.set_filter(m.event_listeners, function(l) return not l.deleted end)
 	local threads = {}
 	for thread_id, thread in m.threads do

@@ -1,38 +1,65 @@
 Aux.post_tab.FRAMES(function(m, public, private)
-    Aux.gui.vertical_line(AuxPostFrameContent, 219)
+    private.frame = CreateFrame('Frame', nil, AuxFrame)
+    m.frame:SetAllPoints()
+    m.frame:SetScript('OnUpdate', m.on_update)
+    m.frame:Hide()
 
-    AuxPostParametersItem:EnableMouse()
-    AuxPostParametersItem:SetScript('OnReceiveDrag', function()
+    m.frame.content = CreateFrame('Frame', nil, m.frame, 'AuxFrameBoxTemplate')
+    m.frame.content:SetPoint('TOP', AuxFrame, 'TOP', 0, -8)
+    m.frame.content:SetPoint('BOTTOMLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, 0)
+    m.frame.content:SetPoint('BOTTOMRIGHT', AuxFrameContent, 'BOTTOMRIGHT', 0, 0)
+
+    m.frame.inventory = CreateFrame('Frame', nil, m.frame.content, 'AuxFrameBoxTemplate')
+    m.frame.inventory:SetWidth(212)
+    m.frame.inventory:SetPoint('TOPLEFT', 4, -4)
+    m.frame.inventory:SetPoint('BOTTOMLEFT', 4, 4)
+
+    m.frame.parameters = CreateFrame('Frame', nil, m.frame.content, 'AuxFrameBoxTemplate')
+    m.frame.parameters:SetHeight(177)
+    m.frame.parameters:SetPoint('TOPLEFT', m.frame.inventory, 'TOPRIGHT', 8, 0)
+    m.frame.parameters:SetPoint('TOPRIGHT', -4, 0)
+
+    m.frame.parameters.item = CreateFrame('Button', 'AuxPostItem', m.frame.parameters, 'AuxItemTemplate')
+    m.frame.parameters.item:SetPoint('TOPLEFT', 10, -10)
+
+    m.frame.auctions = CreateFrame('Frame', nil, m.frame.content, 'AuxFrameBoxTemplate')
+    m.frame.auctions:SetHeight(217)
+    m.frame.auctions:SetPoint('BOTTOMLEFT', m.frame.inventory, 'BOTTOMRIGHT', 8, 0)
+    m.frame.auctions:SetPoint('BOTTOMRIGHT', -4, 0)
+
+    Aux.gui.vertical_line(m.frame.content, 219)
+    m.frame.parameters.item:EnableMouse()
+    m.frame.parameters.item:SetScript('OnReceiveDrag', function()
         local item_info = Aux.cursor_item()
         if item_info then
             m.select_item(item_info.item_key)
         end
         ClearCursor()
     end)
-    AuxPostParametersItem:SetScript('OnClick', function()
+    m.frame.parameters.item:SetScript('OnClick', function()
         local item_info = Aux.cursor_item()
         if item_info then
             m.select_item(item_info.item_key)
         end
         ClearCursor()
     end)
-    local highlight = AuxPostParametersItem:CreateTexture()
-    highlight:SetAllPoints(AuxPostParametersItem)
+    local highlight = m.frame.parameters.item:CreateTexture()
+    highlight:SetAllPoints(m.frame.parameters.item)
     highlight:Hide()
     highlight:SetTexture(1, .9, .9, .1)
-    AuxPostParametersItem:SetScript('OnEnter', function()
+    m.frame.parameters.item:SetScript('OnEnter', function()
         highlight:Show()
         if m.selected_item then
             Aux.info.set_tooltip(m.selected_item.itemstring, this, 'ANCHOR_RIGHT')
         end
     end)
-    AuxPostParametersItem:SetScript('OnLeave', function()
+    m.frame.parameters.item:SetScript('OnLeave', function()
         highlight:Hide()
         GameTooltip:Hide()
     end)
 
     do
-        local checkbox = CreateFrame('CheckButton', nil, AuxPostInventory, 'UICheckButtonTemplate')
+        local checkbox = CreateFrame('CheckButton', nil, m.frame.inventory, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
         checkbox:SetPoint('TOPLEFT', 45, -15)
@@ -45,10 +72,10 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.show_hidden_checkbox = checkbox
     end
 
-    Aux.gui.horizontal_line(AuxPostInventory, -48)
+    Aux.gui.horizontal_line(m.frame.inventory, -48)
 
     private.item_listing = Aux.item_listing.create(
-        AuxPostInventory,
+        m.frame.inventory,
         function()
             if arg1 == 'LeftButton' then
                 m.set_item(this.item_record)
@@ -70,7 +97,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         end
     )
 
-    private.auction_listing = Aux.listing.CreateScrollingTable(AuxPostAuctions)
+    private.auction_listing = Aux.listing.CreateScrollingTable(m.frame.auctions)
     m.auction_listing:SetColInfo({
         { name='Auctions', width=.12, align='CENTER' },
         { name='Left', width=.1, align='CENTER' },
@@ -95,7 +122,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
     end)
 
     do
-        local status_bar = Aux.gui.status_bar(AuxPostFrame)
+        local status_bar = Aux.gui.status_bar(m.frame)
         status_bar:SetWidth(265)
         status_bar:SetHeight(25)
         status_bar:SetPoint('TOPLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, -6)
@@ -104,7 +131,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.status_bar = status_bar
     end
     do
-        local btn = Aux.gui.button(AuxPostParameters, 16)
+        local btn = Aux.gui.button(m.frame.parameters, 16)
         btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -113,7 +140,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.post_button = btn
     end
     do
-        local btn = Aux.gui.button(AuxPostParameters, 16)
+        local btn = Aux.gui.button(m.frame.parameters, 16)
         btn:SetPoint('TOPLEFT', m.post_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -126,7 +153,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.refresh_button = btn
     end
     do
-        local slider = Aux.gui.slider(AuxPostParameters)
+        local slider = Aux.gui.slider(m.frame.parameters)
         slider:SetValueStep(1)
         slider:SetPoint('TOPLEFT', 16, -75)
         slider:SetWidth(190)
@@ -159,7 +186,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.stack_size_slider = slider
     end
     do
-        local slider = Aux.gui.slider(AuxPostParameters)
+        local slider = Aux.gui.slider(m.frame.parameters)
         slider:SetValueStep(1)
         slider:SetPoint('TOPLEFT', m.stack_size_slider, 'BOTTOMLEFT', 0, -30)
         slider:SetWidth(190)
@@ -184,7 +211,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.stack_count_slider = slider
     end
     do
-        local dropdown = Aux.gui.dropdown(AuxPostParameters)
+        local dropdown = Aux.gui.dropdown(m.frame.parameters)
         dropdown:SetPoint('TOPLEFT', m.stack_count_slider, 'BOTTOMLEFT', 0, -19)
         dropdown:SetWidth(90)
         dropdown:SetHeight(10)
@@ -201,7 +228,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.duration_dropdown = dropdown
     end
     do
-        local checkbox = CreateFrame('CheckButton', nil, AuxPostParameters, 'UICheckButtonTemplate')
+        local checkbox = CreateFrame('CheckButton', nil, m.frame.parameters, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
         checkbox:SetPoint('TOPRIGHT', -85, -6)
@@ -217,7 +244,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.hide_checkbox = checkbox
     end
     do
-        local editbox = Aux.gui.editbox(AuxPostParameters)
+        local editbox = Aux.gui.editbox(m.frame.parameters)
         editbox:SetPoint('TOPRIGHT', -65, -66)
         editbox:SetJustifyH('RIGHT')
         editbox:SetWidth(150)
@@ -263,7 +290,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.unit_start_price = editbox
     end
     do
-        local editbox = Aux.gui.editbox(AuxPostParameters)
+        local editbox = Aux.gui.editbox(m.frame.parameters)
         editbox:SetPoint('TOPRIGHT', m.unit_start_price, 'BOTTOMRIGHT', 0, -18)
         editbox:SetJustifyH('RIGHT')
         editbox:SetWidth(150)
@@ -307,7 +334,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.unit_buyout_price = editbox
     end
     do
-        local btn = Aux.gui.button(AuxPostParameters, 16)
+        local btn = Aux.gui.button(m.frame.parameters, 16)
         btn:SetPoint('TOPRIGHT', -15, -143)
         btn:SetWidth(150)
         btn:SetHeight(20)

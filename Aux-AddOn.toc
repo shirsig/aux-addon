@@ -32,18 +32,16 @@ tables\listing.lua
 tables\auction_listing.lua
 tables\item_listing.lua
 
+
 tabs\search\core.lua
 tabs\search\frames.lua
 
-tabs\post\core.xml
 tabs\post\core.lua
 tabs\post\frames.lua
 
-tabs\auctions\core.xml
 tabs\auctions\core.lua
 tabs\auctions\frames.lua
 
-tabs\bids\core.xml
 tabs\bids\core.lua
 tabs\bids\frames.lua
 

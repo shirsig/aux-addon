@@ -11,16 +11,16 @@ function public.LOAD()
 end
 
 function public.OPEN()
-    AuxAuctionsFrame:Show()
+    m.frame:Show()
     m.scan_auctions()
 end
 
 function public.CLOSE()
-    AuxAuctionsFrame:Hide()
+    m.frame:Hide()
 end
 
 function private.update_listing()
-    if not AuxAuctionsFrame:IsVisible() then
+    if not m:ACTIVE() then
         return
     end
 
@@ -106,7 +106,7 @@ do
         )
     end
 
-    function public.on_update()
+    function private.on_update()
         if state == IDLE or state == SEARCHING then
             m.cancel_button:Disable()
         end

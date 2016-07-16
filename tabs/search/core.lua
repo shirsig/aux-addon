@@ -524,7 +524,7 @@ do
         )
     end
 
-    function public.on_update()
+    function private.on_update()
         if state == IDLE or state == SEARCHING then
             m.buyout_button:Disable()
             m.bid_button:Disable()

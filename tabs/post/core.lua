@@ -18,7 +18,7 @@ function public.LOAD()
 end
 
 function public.OPEN()
-    AuxPostFrame:Show()
+    m.frame:Show()
 
     m.deposit:SetText('Deposit: '..Aux.money.to_string(0, nil, nil, nil, Aux.gui.inline_color({255, 254, 250, 1})))
 
@@ -32,7 +32,7 @@ end
 
 function public.CLOSE()
     m.selected_item = nil
-    AuxPostFrame:Hide()
+    m.frame:Hide()
 end
 
 function private.default_settings()
@@ -87,7 +87,7 @@ function private.set_unit_buyout_price(amount)
 end
 
 function private.update_inventory_listing()
-    if not AuxPostFrame:IsVisible() then
+    if not m.ACTIVE() then
         return
     end
 
@@ -98,7 +98,7 @@ function private.update_inventory_listing()
 end
 
 function private.update_auction_listing()
-    if not AuxPostFrame:IsVisible() then
+    if not m.ACTIVE() then
         return
     end
 
@@ -276,10 +276,10 @@ function private.update_item_configuration()
 	if not m.selected_item then
         m.refresh_button:Disable()
 
-		AuxPostParametersItemIconTexture:SetTexture(nil)
-        AuxPostParametersItemCount:SetText()
-        AuxPostParametersItemName:SetTextColor(unpack(Aux.gui.config.label_color.enabled))
-        AuxPostParametersItemName:SetText('No item selected')
+        AuxPostItemIconTexture:SetTexture(nil)
+        AuxPostItemCount:SetText()
+        AuxPostItemName:SetTextColor(unpack(Aux.gui.config.label_color.enabled))
+        AuxPostItemName:SetText('No item selected')
 
         m.unit_start_price:Hide()
         m.unit_buyout_price:Hide()
@@ -299,14 +299,14 @@ function private.update_item_configuration()
         m.historical_value_button:Show()
         m.hide_checkbox:Show()
 
-        AuxPostParametersItemIconTexture:SetTexture(m.selected_item.texture)
-        AuxPostParametersItemName:SetText('['..m.selected_item.name..']')
+        AuxPostItemIconTexture:SetTexture(m.selected_item.texture)
+        AuxPostItemName:SetText('['..m.selected_item.name..']')
         local color = ITEM_QUALITY_COLORS[m.selected_item.quality]
-        AuxPostParametersItemName:SetTextColor(color.r, color.g, color.b)
+        AuxPostItemName:SetTextColor(color.r, color.g, color.b)
 		if m.selected_item.aux_quantity > 1 then
-            AuxPostParametersItemCount:SetText(m.selected_item.aux_quantity)
+            AuxPostItemCount:SetText(m.selected_item.aux_quantity)
 		else
-            AuxPostParametersItemCount:SetText()
+            AuxPostItemCount:SetText()
         end
 
         m.stack_size_slider.editbox:SetNumber(m.stack_size_slider:GetValue())
@@ -543,7 +543,7 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
     return entry
 end
 
-function public.on_update()
+function private.on_update()
     if m.refresh then
         m.refresh = false
         m.price_update()

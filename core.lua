@@ -14,8 +14,8 @@ end
 private.tabs = {}
 function public.tab(index, name)
     local ret = { m.module(name) }
-    ret[3].ACTIVE = function()
-        return index == m.active_tab
+    ret[2].ACTIVE = function()
+        return m[name] == m.active_tab()
     end
     m.tabs[index] = m[name]
     return unpack(ret)
@@ -37,7 +37,7 @@ do
 end
 
 function public.on_load()
-    public.version = '3.0.1'
+    public.version = '3.0.2'
     public.blizzard_ui_shown = false
     public.bids_loaded = false
     public.current_owner_page = nil
