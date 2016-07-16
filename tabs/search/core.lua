@@ -159,11 +159,11 @@ function private.add_filter(filter_string, replace)
 end
 
 function private.clear_form()
-    m.frame.filterNameInputBox:SetText('')
-    m.frame.filterExactCheckButton:SetChecked(nil)
-    m.frame.filterMinLevel:SetText('')
-    m.frame.filterMaxLevel:SetText('')
-    m.frame.filterUsableCheckButton:SetChecked(nil)
+    m.name_input:SetText('')
+    m.exact_checkbox:SetChecked(nil)
+    m.min_level_input:SetText('')
+    m.max_level_input:SetText('')
+    m.usable_checkbox:SetChecked(nil)
     UIDropDownMenu_ClearAll(m.class_dropdown)
     UIDropDownMenu_ClearAll(m.subclass_dropdown)
     UIDropDownMenu_ClearAll(m.slot_dropdown)
@@ -179,21 +179,21 @@ function private.get_form_filter()
         filter_term = filter_term == '' and part or filter_term..'/'..part
     end
 
-    add(m.frame.filterNameInputBox:GetText())
+    add(m.name_input:GetText())
 
-    if m.frame.filterExactCheckButton:GetChecked() then
+    if m.exact_checkbox:GetChecked() then
         add('exact')
     end
 
-    if tonumber(m.frame.filterMinLevel:GetText()) then
-        add(max(1, min(60, tonumber(m.frame.filterMinLevel:GetText()))))
+    if tonumber(m.min_level_input:GetText()) then
+        add(max(1, min(60, tonumber(m.min_level_input:GetText()))))
     end
 
-    if tonumber(m.frame.filterMaxLevel:GetText()) then
-        add(max(1, min(60, tonumber(m.frame.filterMaxLevel:GetText()))))
+    if tonumber(m.max_level_input:GetText()) then
+        add(max(1, min(60, tonumber(m.max_level_input:GetText()))))
     end
 
-    if m.frame.filterUsableCheckButton:GetChecked() then
+    if m.usable_checkbox:GetChecked() then
         add('usable')
     end
 
