@@ -1,8 +1,14 @@
 local m, public, private = Aux.module'control'
 
+private.event_frame = CreateFrame('Frame')
 private.event_listeners = {}
 private.threads = {}
 public.thread_id = nil
+
+function public.LOAD()
+	m.event_frame:SetScript('OnUpdate', m.on_update)
+	m.event_frame:SetScript('OnEvent', m.on_event)
+end
 
 function public.on_event()
 	for listener, _ in m.event_listeners do
@@ -47,14 +53,14 @@ function public.event_listener(event, action)
 	
 	function self:start()
 		Aux.util.set_add(m.event_listeners, listener)
-		AuxControlFrame:RegisterEvent(event)
+		m.event_frame:RegisterEvent(event)
 		return self
 	end
 	
 	function self:stop()
 		listener.deleted = true
 		if not Aux.util.any(Aux.util.set_to_array(m.event_listeners), function(l) return l.event == event end) then
-			AuxControlFrame:UnregisterEvent(event)
+			m.event_frame:UnregisterEvent(event)
 		end
 		return self
 	end
