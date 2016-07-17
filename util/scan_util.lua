@@ -322,7 +322,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
 
     if auction_record.blizzard_query then
 
-        local blizzard_query1 = Aux.util.copy_table(auction_record.blizzard_query)
+        local blizzard_query1 = Aux.util.copy(auction_record.blizzard_query)
         blizzard_query1.first_page = auction_record.page
         blizzard_query1.last_page = auction_record.page
         tinsert(queries, {
@@ -330,7 +330,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
         })
 
         if auction_record.page > 0 then
-            local blizzard_query2 = Aux.util.copy_table(auction_record.blizzard_query)
+            local blizzard_query2 = Aux.util.copy(auction_record.blizzard_query)
             blizzard_query2.first_page = auction_record.page - 1
             blizzard_query2.last_page = auction_record.page - 1
             tinsert(queries, {

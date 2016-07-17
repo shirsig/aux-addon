@@ -18,6 +18,12 @@ function public.table_eq(t1, t2)
 		end
 	end
 
+	for key, value in t2 do
+		if t1[key] ~= value then
+			return false
+		end
+	end
+
 	return true
 end
 
@@ -30,7 +36,7 @@ function public.wipe(table)
 	end
 end
 
-function public.copy_table(table)
+function public.copy(table)
 	local copy = {}
 	for k, v in table do
 		copy[k] = v
@@ -95,15 +101,6 @@ function public.safe_index(...)
 	return target
 end
 
-function Aux_PluralizeIf(word, count)
-
-    if count and count == 1 then
-        return word
-    else
-        return word..'s'
-    end
-end
-
 function public.without_errors(f)
     local orig = UIErrorsFrame.AddMessage
     UIErrorsFrame.AddMessage = m.pass
@@ -119,39 +116,12 @@ function public.without_sound(f)
 end
 
 function public.iter(array)
-	local with_index = ipairs(array)
+	local i = 0
 	return function()
-		local _, value = with_index
-		return value
+		local ret = {iter(array, i)}
+		i = ret[1]
+		return ret[2]
 	end
-end
-
-function public.set_add(set, key)
-    set[key] = true
-end
-
-function public.set_remove(set, key)
-    set[key] = nil
-end
-
-function public.set_contains(set, key)
-    return set[key] ~= nil
-end
-
-function public.set_size(set)
-    local size = 0
-	for _,_ in set do
-		size = size + 1
-	end
-	return size
-end
-
-function public.set_to_array(set)
-	local array = {}
-	for element, _ in set do
-		tinsert(array, element)
-	end
-	return array
 end
 
 function public.any(xs, p)
@@ -278,44 +248,40 @@ function public.group_by(tables, equal)
 	return groups
 end
 
-function public.set()
-    local self = {}
+function public.set(...)
+	local set = {}
+	for i=1,arg.n do
+		set[arg[i]] = true
+	end
+	return set
+end
 
-    local data = {}
+function public.set_add(set, key)
+	set[key] = true
+end
 
-    function self:add(value)
-        data[value] = true
-    end
+function public.set_remove(set, key)
+	set[key] = nil
+end
 
-    function self:add_all(values)
-        for _, value in ipairs(values) do
-            self:add(value)
-        end
-    end
+function public.set_contains(set, key)
+	return set[key] ~= nil
+end
 
-    function self:remove(value)
-        data[value] = nil
-    end
+function public.set_size(set)
+	local size = 0
+	for _,_ in set do
+		size = size + 1
+	end
+	return size
+end
 
-    function self:remove_all(values)
-        for _, value in ipairs(values) do
-            self:remove(value)
-        end
-    end
-
-    function self:contains(value)
-        return data[value] ~= nil
-    end
-
-    function self:values()
-        local values = {}
-        for value, _ in data do
-            tinsert(values, value)
-        end
-        return values
-    end
-
-    return self
+function public.set_to_array(set)
+	local array = {}
+	for element, _ in set do
+		tinsert(array, element)
+	end
+	return array
 end
 
 function public.join(array, separator)
