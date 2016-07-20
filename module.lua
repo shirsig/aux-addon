@@ -1,33 +1,15 @@
-local wrap, unwrap = (function()
-    local null = {}
-    return function(value)
-        if value == nil then
-            return null
-        else
-            return value
-        end
-    end,
-    function(value)
-        if value == null then
-            return nil
-        else
-            return value
-        end
-    end
-end)()
-
 function Aux_module(name)
-    local data, is_public, public_interface, private_interface, public, private = {}, {}, {}, {}, {}, {}
+    local data, is_public, is_declared, public_interface, private_interface, public, private = {}, {}, {}, {}, {}, {}, {}
     setmetatable(public_interface, {
         __newindex = function(_, key)
             error('Illegal write of attribute "'..key..'" on public interface of "'..name..'"!')
         end,
         __index = function(_, key)
-            if data[key] == nil then
+            if not is_public[key] then
                 error('Access of undeclared attribute "'..key..'" on public interface of "'..name..'"!')
             end
             if is_public[key] then
-                return unwrap(data[key])
+                return data[key]
             end
         end,
         __call = function(_, key)
@@ -36,28 +18,29 @@ function Aux_module(name)
     })
     setmetatable(private_interface, {
         __newindex = function(_, key, value)
-            if data[key] == nil then
+            if not is_declared[key] then
                 error('Assignment of undeclared attribute "'..key..'" on private interface of "'..name..'"!')
             end
-            data[key] = wrap(value)
+            data[key] = value
         end,
         __index = function(_, key)
-            if data[key] == nil then
+            if not is_declared[key] then
                 error('Access of undeclared attribute "'..key..'" on private interface of "'..name..'"!')
             end
-            return unwrap(data[key])
+            return data[key]
         end,
         __call = function(_, key)
-            return data[key] ~= nil
+            return is_declared[key]
         end
     })
     setmetatable(public, {
         __newindex = function(_, key, value)
-            if data[key] ~= nil then
+            if is_declared[key] then
                 error('Multiple declarations of "'..key..'" in "'..name..'"!')
             end
-            data[key] = wrap(value)
+            data[key] = value
             is_public[key] = true
+            is_declared[key] = true
         end,
         __index = function(_, key)
             error('Illegal read of attribute "'..key..'" on public keyword in "'..name..'"!')
@@ -65,11 +48,11 @@ function Aux_module(name)
     })
     setmetatable(private, {
         __newindex = function(_, key, value)
-            if data[key] ~= nil then
+            if is_declared[key] then
                 error('Multiple declarations of "'..key..'" in "'..name..'"!')
             end
-            data[key] = wrap(value)
-            is_public[key] = nil
+            data[key] = value
+            is_declared[key] = true
         end,
         __index = function(_, key)
             error('Illegal read of attribute "'..key..'" on private keyword in "'..name..'"!')
