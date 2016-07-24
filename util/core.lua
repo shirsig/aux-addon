@@ -7,7 +7,15 @@ function public.id(object)
 	return object
 end
 
-function public.table_eq(t1, t2)
+function public.size(table)
+	local x = 0
+	for _ in table do
+		x = x + 1
+	end
+	return x
+end
+
+function public.eq(t1, t2)
 	if not t1 or not t2 then
 		return false
 	end

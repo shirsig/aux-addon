@@ -505,13 +505,13 @@ function private.refresh_entries()
 				m.existing_auctions[item_key] = nil
                 m.update_historical_value_button()
                 m.status_bar:update_status(100, 100)
-                m.status_bar:set_text('Done Scanning')
+                m.status_bar:set_text('Scan aborted')
 			end,
 			on_complete = function()
 				m.existing_auctions[item_key] = m.existing_auctions[item_key] or {}
                 m.refresh = true
                 m.status_bar:update_status(100, 100)
-                m.status_bar:set_text('Done Scanning')
+                m.status_bar:set_text('Scan complete')
             end,
 		}
 	end

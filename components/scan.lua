@@ -198,6 +198,9 @@ function private.scan_auctions_helper(i, k)
 
         Aux.history.process_auction(auction_info)
 
+        if m.current_thread().params.auto_buy_validator and m.current_thread().params.auto_buy_validator(auction_info) then
+            Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price)
+        end
         if not m.current_query().validator or m.current_query().validator(auction_info) then
             return m.wait_for_callback(m.current_thread().params.on_auction, auction_info, recurse)
         end

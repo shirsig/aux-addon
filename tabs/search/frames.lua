@@ -30,31 +30,29 @@ Aux.search_tab.FRAMES(function(m, public, private)
         local t1 = btn:CreateTexture()
         t1:SetTexture(unpack(Aux.gui.config.text_color.enabled))
         t1:SetWidth(20)
-        t1:SetHeight(3)
-        t1:SetPoint('CENTER', 0, 7)
+        t1:SetHeight(2.5)
+        t1:SetPoint('CENTER', 0, 6.7)
         local t2 = btn:CreateTexture()
         t2:SetTexture(unpack(Aux.gui.config.text_color.enabled))
         t2:SetWidth(20)
-        t2:SetHeight(3)
+        t2:SetHeight(2.5)
         t2:SetPoint('CENTER', 0, 0)
         local t3 = btn:CreateTexture()
         t3:SetTexture(unpack(Aux.gui.config.text_color.enabled))
         t3:SetWidth(20)
-        t3:SetHeight(3)
-        t3:SetPoint('CENTER', 0, -7)
---        btn:SetText('_\n_\n_')
---        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
+        t3:SetHeight(2.5)
+        t3:SetPoint('CENTER', 0, -6.7)
         btn:SetScript('OnClick', function()
-            this.open = not this.open
             if this.open then
-                m.settings:Show()
-                m.controls:Hide()
-            else
                 m.settings:Hide()
                 m.controls:Show()
+            else
+                Aux.scan.abort(m.search_scan_id)
+                m.settings:Show()
+                m.controls:Hide()
             end
+            this.open = not this.open
         end)
-        btn.open = false
         private.settings_button = btn
     end
     do
@@ -75,66 +73,62 @@ Aux.search_tab.FRAMES(function(m, public, private)
     do
         local editbox = Aux.gui.editbox(m.settings)
         editbox:SetBackdropColor(unpack(Aux.gui.config.frame_color))
-        editbox:SetPoint('LEFT', 55, 0)
+        editbox:SetPoint('LEFT', 49, 0)
         editbox:SetWidth(30)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(nil)
         editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                m.max_level_input:SetFocus()
-            else
-                m.last_page_editbox:SetFocus()
-            end
+            m.last_page_input:SetFocus()
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
             m.execute()
         end)
         local label = Aux.gui.label(editbox, 15)
-        label:SetPoint('RIGHT', editbox, 'LEFT', -10, 0)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -5, 0)
         label:SetText('Pages')
-        private.first_page_editbox = editbox
+        private.first_page_input = editbox
     end
     do
         local editbox = Aux.gui.editbox(m.settings)
         editbox:SetBackdropColor(unpack(Aux.gui.config.frame_color))
-        editbox:SetPoint('LEFT', m.first_page_editbox, 'RIGHT', 10, 0)
+        editbox:SetPoint('LEFT', m.first_page_input, 'RIGHT', 10, 0)
         editbox:SetWidth(30)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(nil)
         editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                m.first_page_editbox:SetFocus()
-            else
-                m.name_input:SetFocus()
-            end
+            m.first_page_input:SetFocus()
         end)
         editbox:SetScript('OnEnterPressed', function()
             this:ClearFocus()
             m.execute()
         end)
         local label = Aux.gui.label(editbox, 15)
-        label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
         label:SetText('-')
-        private.last_page_editbox = editbox
+        private.last_page_input = editbox
     end
     do
         local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
-        checkbox:SetPoint('LEFT', 190, 0)
+        checkbox:SetPoint('LEFT', 194, 0)
         checkbox:SetScript('OnClick', function()
-            if m.snipe then
-                m.disable_sniping()
+            m.update_continuation()
+            if this:GetChecked() then
+                m.first_page_input:EnableMouse(nil)
+                m.last_page_input:EnableMouse(nil)
+                m.first_page_input:ClearFocus()
+                m.last_page_input:ClearFocus()
             else
-                m.enable_sniping()
+                m.first_page_input:EnableMouse(true)
+                m.last_page_input:EnableMouse(true)
             end
-            m.update_resume()
         end)
         local label = Aux.gui.label(checkbox, 15)
-        label:SetPoint('RIGHT', checkbox, 'LEFT', -7, 0)
-        label:SetText('Sniping')
-        private.snipe_checkbox = checkbox
+        label:SetPoint('RIGHT', checkbox, 'LEFT', -2, 0)
+        label:SetText('Real Time')
+        public.real_time_checkbox = checkbox
     end
     do
         local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
@@ -148,7 +142,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             end
         end)
         local label = Aux.gui.label(checkbox, 15)
-        label:SetPoint('RIGHT', checkbox, 'LEFT', -7, 0)
+        label:SetPoint('RIGHT', checkbox, 'LEFT', -2, 0)
         label:SetText('Auto Buy')
         private.auto_buy_checkbox = checkbox
     end
@@ -156,17 +150,17 @@ Aux.search_tab.FRAMES(function(m, public, private)
         local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
-        checkbox:SetPoint('LEFT', 405, 0)
+        checkbox:SetPoint('LEFT', 400, 0)
         checkbox:SetScript('OnClick', function()
             if this:GetChecked() then
                 this:SetChecked(nil)
-                if Aux.scan_util.parse_filter_string(m.auto_buy_filter_editbox:GetText()) then
-                    StaticPopup_Show('AUX_SEARCH_AUTO_BUY_FILTER')
-                end
+                StaticPopup_Show('AUX_SEARCH_AUTO_BUY_FILTER')
+            else
+                m.auto_buy_validator = nil
             end
         end)
         local label = Aux.gui.label(checkbox, 15)
-        label:SetPoint('RIGHT', checkbox, 'LEFT', -7, 0)
+        label:SetPoint('RIGHT', checkbox, 'LEFT', -2, 0)
         label:SetText('Auto Buy Filter')
         private.auto_buy_filter_checkbox = checkbox
     end
@@ -176,8 +170,8 @@ Aux.search_tab.FRAMES(function(m, public, private)
         editbox:SetMaxLetters(nil)
         editbox:EnableMouse(1)
         editbox.complete = Aux.completion.complete_filter
-        editbox:SetPoint('LEFT', 430, 0)
-        editbox:SetWidth(290)
+        editbox:SetPoint('RIGHT', -9, 0)
+        editbox:SetWidth(293)
         editbox:SetHeight(25)
         editbox:SetScript('OnChar', function()
             this:complete()
@@ -188,8 +182,11 @@ Aux.search_tab.FRAMES(function(m, public, private)
         editbox:SetScript('OnEnterPressed', function()
             this:HighlightText(0, 0)
             this:ClearFocus()
-            m.execute()
         end)
+        editbox:SetScript('OnTextChanged', function()
+            m.auto_buy_filter_checkbox:SetChecked(nil)
+        end)
+        editbox:SetText(aux_auto_buy_filter)
         private.auto_buy_filter_editbox = editbox
     end
     do
@@ -212,7 +209,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local btn = Aux.gui.button(m.controls, 22)
-        btn:SetPoint('TOPRIGHT', -5, -7)
+        btn:SetPoint('RIGHT', -5, 0)
         btn:SetWidth(70)
         btn:SetHeight(25)
         btn:SetText('Start')
@@ -227,7 +224,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local btn = Aux.gui.button(m.controls, 22)
-        btn:SetPoint('TOPRIGHT', -5, -7)
+        btn:SetPoint('RIGHT', -5, 0)
         btn:SetWidth(70)
         btn:SetHeight(25)
         btn:SetText('Stop')
@@ -270,7 +267,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             local item_info = Aux.cursor_item() and Aux.info.item(Aux.cursor_item().item_id)
             if item_info then
                 m.set_filter(strlower(item_info.name)..'/exact')
-                m.disable_sniping()
+                m.real_time_checkbox:SetChecked(nil)
                 m.execute()
             end
             ClearCursor()
@@ -398,7 +395,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     do
         local editbox = Aux.gui.editbox(m.frame.filter)
         editbox.complete_item = Aux.completion.complete(function() return aux_auctionable_items end)
-        editbox:SetPoint('TOPLEFT', 14, -20)
+        editbox:SetPoint('TOPLEFT', 14, -26)
         editbox:SetWidth(260)
         editbox:SetScript('OnChar', function()
             if m.exact_checkbox:GetChecked() then
@@ -407,7 +404,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         end)
         editbox:SetScript('OnTabPressed', function()
             if IsShiftKeyDown() then
-                m.last_page_editbox:SetFocus()
+                m.max_level_input:SetFocus()
             else
                 m.min_level_input:SetFocus()
             end
@@ -433,7 +430,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local editbox = Aux.gui.editbox(m.frame.filter)
-        editbox:SetPoint('TOPLEFT', m.name_input, 'BOTTOMLEFT', 0, -22)
+        editbox:SetPoint('TOPLEFT', m.name_input, 'BOTTOMLEFT', 0, -28)
         editbox:SetWidth(125)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
@@ -463,7 +460,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             if IsShiftKeyDown() then
                 m.min_level_input:SetFocus()
             else
-                m.first_page_editbox:SetFocus()
+                m.name_input:SetFocus()
             end
         end)
         editbox:SetScript('OnEnterPressed', function()
@@ -471,7 +468,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             m.execute()
         end)
         local label = Aux.gui.label(editbox, 13)
-        label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
         label:SetText('-')
         private.max_level_input = editbox
     end
@@ -487,7 +484,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local dropdown = Aux.gui.dropdown(m.frame.filter)
-        dropdown:SetPoint('TOPLEFT', m.min_level_input, 'BOTTOMLEFT', 0, -18)
+        dropdown:SetPoint('TOPLEFT', m.min_level_input, 'BOTTOMLEFT', 0, -26)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
@@ -501,7 +498,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local dropdown = Aux.gui.dropdown(m.frame.filter)
-        dropdown:SetPoint('TOPLEFT', m.class_dropdown, 'BOTTOMLEFT', 0, -18)
+        dropdown:SetPoint('TOPLEFT', m.class_dropdown, 'BOTTOMLEFT', 0, -22)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
@@ -515,7 +512,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local dropdown = Aux.gui.dropdown(m.frame.filter)
-        dropdown:SetPoint('TOPLEFT', m.subclass_dropdown, 'BOTTOMLEFT', 0, -18)
+        dropdown:SetPoint('TOPLEFT', m.subclass_dropdown, 'BOTTOMLEFT', 0, -22)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
@@ -529,7 +526,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local dropdown = Aux.gui.dropdown(m.frame.filter)
-        dropdown:SetPoint('TOPLEFT', m.slot_dropdown, 'BOTTOMLEFT', 0, -18)
+        dropdown:SetPoint('TOPLEFT', m.slot_dropdown, 'BOTTOMLEFT', 0, -22)
         dropdown:SetWidth(300)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)
@@ -542,11 +539,6 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.quality_dropdown = dropdown
     end
     Aux.gui.vertical_line(m.frame.filter, 332)
-    do
-        local label = Aux.gui.label(m.usable_checkbox, 13)
-        label:SetPoint('BOTTOMLEFT', m.usable_checkbox, 'TOPLEFT', 1, -3)
-        label:SetText('Usable')
-    end
     local function add_modifier(...)
         local current_filter_string = m.search_box:GetText()
         for i=1,arg.n do

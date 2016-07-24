@@ -46,12 +46,12 @@ function public.scan_auctions()
         end,
         on_complete = function()
             m.status_bar:update_status(100, 100)
-            m.status_bar:set_text('Done Scanning')
+            m.status_bar:set_text('Scan complete')
             m.update_listing()
         end,
         on_abort = function()
             m.status_bar:update_status(100, 100)
-            m.status_bar:set_text('Done Scanning')
+            m.status_bar:set_text('Scan aborted')
         end,
     }
 end

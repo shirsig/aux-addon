@@ -24,7 +24,7 @@ end
 
 function private.find_item_slot(partial)
 	for slot in Aux.util.inventory() do
-		if m.matching_item(slot, partial) and not Aux.util.table_eq(slot, m.state.target_slot) then
+		if m.matching_item(slot, partial) and not Aux.util.eq(slot, m.state.target_slot) then
 			return slot
 		end
 	end

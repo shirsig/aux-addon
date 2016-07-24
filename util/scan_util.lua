@@ -339,7 +339,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
         end
 
         local item_query = m.item_query(auction_record.item_id, 1, 1)
-        if not Aux.util.table_eq(auction_record.blizzard_query, item_query.blizzard_query) then
+        if not Aux.util.eq(auction_record.blizzard_query, item_query.blizzard_query) then
             tinsert(queries, item_query)
         end
     end
@@ -402,7 +402,9 @@ function public.item_query(item_id, first_page, last_page)
     local item_info = Aux.info.item(item_id)
 
     if item_info then
-        local filter = m.filter_from_string(item_info.name..'/exact/'..(first_page or '')..':'..(last_page or ''))
+        local filter = m.filter_from_string(item_info.name..'/exact')
+        filter.blizzard_query.first_page = first_page
+        filter.blizzard_query.last_page = last_page
         return {
             validator = filter.validator,
             blizzard_query = filter.blizzard_query,
@@ -488,18 +490,6 @@ function public.filter_from_string(filter_term)
                 if error then
                     return false, suggestions, error
                 end
-            end
-        elseif strfind(str, '^%d*:%d*$') then
-            if not blizzard_filter.first_page and not blizzard_filter.last_page then
-                local _, _, first_page, last_page = strfind(str, '^(%d*):(%d*)$')
-                if tonumber(first_page) and tonumber(first_page) < 1 or tonumber(last_page) and tonumber(last_page) < 1 then
-                    return false, {}, 'Erroneous page range modifier'
-                end
-                blizzard_filter.first_page = tonumber(first_page)
-                blizzard_filter.last_page = tonumber(last_page)
-                prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
-            else
-                return false, {}, 'Erroneous page range modifier'
             end
         elseif tonumber(str) then
             if tonumber(str) < 1 or tonumber(str) > 60 then
@@ -676,6 +666,7 @@ function public.suggestions(blizzard_filter, num_parts)
 end
 
 function public.blizzard_query(filter)
+    local query = { name=filter.name }
 
     local item_info, class_index, subclass_index, slot_index
     if filter.exact then
@@ -686,30 +677,31 @@ function public.blizzard_query(filter)
         slot_index = subclass_index and item_info.slot and Aux.item_slot_index(class_index, subclass_index, item_info.slot)
     end
 
-    return {
-        first_page = filter.first_page and filter.first_page - 1,
-        last_page = filter.last_page and filter.last_page - 1,
-        name = filter.name,
-        min_level = item_info and item_info.level or filter.min_level,
-        max_level = item_info and item_info.level or filter.max_level,
-        class = item_info and class_index or filter.class,
-        subclass = item_info and subclass_index or filter.subclass,
-        slot = item_info and item_info.class and slot_index or filter.slot,
-        usable = item_info and item_info.usable or filter.usable and 1 or 0,
-        quality = item_info and item_info.quality or filter.quality,
-    }
+    if item_info then
+        query.min_level = item_info.level
+        query.max_level = item_info.level
+        query.class = class_index
+        query.subclass = subclass_index
+        query.slot = item_info.class
+        query.usable = item_info.usable
+        query.quality = item_info.quality
+    else
+        query.min_level = filter.min_level
+        query.max_level = filter.max_level
+        query.class = filter.class
+        query.subclass = filter.subclass
+        query.slot = filter.slot
+        query.usable = filter.usable and 1
+        query.quality = filter.quality
+    end
+
+    return query
 end
 
 function public.validator(blizzard_filter, post_filter)
 
     return function(record)
         if blizzard_filter.exact and strlower(Aux.info.item(record.item_id).name) ~= blizzard_filter.name then
-            return
-        end
-        if blizzard_filter.min_level and record.level < blizzard_filter.min_level then
-            return
-        end
-        if blizzard_filter.max_level and record.level > blizzard_filter.max_level then
             return
         end
         if getn(post_filter) > 0 then

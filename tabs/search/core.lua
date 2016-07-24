@@ -2,10 +2,10 @@ local m, public, private = Aux.tab(1, 'search_tab')
 
 aux_favorite_searches = {}
 aux_recent_searches = {}
+aux_auto_buy_filter = ''
 
 private.search_scan_id = 0
-private.snipe_auto = nil
-private.snipe = nil
+private.auto_buy_validator = nil
 
 private.popup_info = {
     rename = {}
@@ -49,7 +49,7 @@ StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
     hideOnEscape = 1,
 }
 StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
-    text = 'Do you want to activate automatic buyout?',
+    text = 'Are you sure you want to activate automatic buyout?',
     button1 = 'Yes',
     button2 = 'No',
     OnAccept = function()
@@ -59,11 +59,28 @@ StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
     hideOnEscape = 1,
 }
 StaticPopupDialogs['AUX_SEARCH_AUTO_BUY_FILTER'] = {
-    text = 'Do you want to activate the automatic buyout filter?',
+    text = 'Are you sure you want to set this filter for automatic buyout?',
     button1 = 'Yes',
     button2 = 'No',
     OnAccept = function()
-        m.auto_buy_filter_checkbox:SetChecked(1)
+        local queries = Aux.scan_util.parse_filter_string(m.auto_buy_filter_editbox:GetText())
+        if queries then
+
+            if getn(queries) > 1 then
+                Aux.log('Error: The auto buy filter supports only one query')
+                return
+            end
+
+            if Aux.util.size(queries[1].blizzard_query) > 0 then
+                Aux.log('Error: The real time mode does not support blizzard filters')
+                return
+            end
+
+            aux_auto_buy_filter = m.auto_buy_filter_editbox:GetText()
+            m.auto_buy_validator = queries[1].validator
+            m.auto_buy_filter_checkbox:SetChecked(1)
+            m.auto_buy_filter_editbox:ClearFocus()
+        end
     end,
     timeout = 0,
     hideOnEscape = 1,
@@ -83,7 +100,6 @@ end
 
 function public.LOAD()
     m.create_frames(m, public, private)
-    m:disable_sniping()
     m.update_search()
     m.update_tab(m.SAVED)
 end
@@ -94,6 +110,7 @@ function public.OPEN()
 end
 
 function public.CLOSE()
+    m.close_settings()
     m.results_listing:SetSelectedRecord()
     m.frame:Hide()
 end
@@ -166,6 +183,12 @@ function private.add_filter(filter_string, replace)
     m.search_box:SetText((old_filter_string or '')..filter_string)
 end
 
+function private.close_settings()
+    if m.settings_button.open then
+        m.settings_button:Click()
+    end
+end
+
 function private.clear_form()
     m.name_input:SetText('')
     m.exact_checkbox:SetChecked(nil)
@@ -176,8 +199,6 @@ function private.clear_form()
     UIDropDownMenu_ClearAll(m.subclass_dropdown)
     UIDropDownMenu_ClearAll(m.slot_dropdown)
     UIDropDownMenu_ClearAll(m.quality_dropdown)
-    m.first_page_editbox:SetText('')
-    m.last_page_editbox:SetText('')
 end
 
 function private.get_form_filter()
@@ -225,20 +246,13 @@ function private.get_form_filter()
         add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
     end
 
-    local first_page, last_page = tonumber(m.first_page_editbox:GetText()), tonumber(m.last_page_editbox:GetText())
-    first_page = first_page and max(1, first_page)
-    last_page = last_page and max(1, last_page)
-    if first_page or last_page then
-        add((first_page or '') .. ':' .. (last_page or ''))
-    end
-
     return filter_term
 end
 
 function private.discard_continuation()
     Aux.scan.abort(m.search_scan_id)
     m.current_search().continuation = nil
-    m.update_resume()
+    m.update_continuation()
 end
 
 function private:enable_stop()
@@ -252,19 +266,7 @@ function private:enable_start()
     m.stop_button:Hide()
 end
 
-function public.enable_sniping()
-    Aux.scan.abort(m.search_scan_id)
-    m.snipe = true
-    m.settings_button:LockHighlight()
-end
-
-function public.disable_sniping()
-    Aux.scan.abort(m.search_scan_id)
-    m.snipe = false
-    m.settings_button:UnlockHighlight()
-end
-
-function private.start_sniping(query, search, continuation)
+function private.start_real_time_scan(query, search, continuation)
 
     local ignore_page
     if not search then
@@ -279,9 +281,10 @@ function private.start_sniping(query, search, continuation)
     m.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = {query},
+        auto_buy_validator = m.auto_buy_validator,
         on_scan_start = function()
             m.status_bar:update_status(99.99, 99.99)
-            m.status_bar:set_text('Sniping ...')
+            m.status_bar:set_text('Scanning last page ...')
         end,
         on_page_loaded = function(_, _, last_page)
             next_page = last_page
@@ -289,10 +292,11 @@ function private.start_sniping(query, search, continuation)
                 ignore_page = false
             end
         end,
-        on_auction = function(auction_record)
+        on_auction = function(auction_record, ctrl)
             if not ignore_page then
-                if m.settings_button.auto then
-                    PlaceAuctionBid('list', auction_record.index, auction_record.buyout_price)
+                if m.auto_buy_checkbox:GetChecked() then
+                    ctrl.suspend()
+                    Aux.place_bid('list', auction_record.index, auction_record.buyout_price, ctrl.resume)
                 else
                     tinsert(new_records, auction_record)
                 end
@@ -320,16 +324,16 @@ function private.start_sniping(query, search, continuation)
 
             query.blizzard_query.first_page = next_page
             query.blizzard_query.last_page = next_page
-            m.start_sniping(query, search)
+            m.start_real_time_scan(query, search)
         end,
         on_abort = function()
             m.status_bar:update_status(100, 100)
-            m.status_bar:set_text('Done Sniping')
+            m.status_bar:set_text('Scan paused')
 
             search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
 
             if m.current_search() == search then
-                m.update_resume()
+                m.update_continuation()
             end
 
             m:enable_start()
@@ -357,6 +361,7 @@ function private.start_search(queries, continuation)
     m.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = queries,
+        auto_buy_validator = m.auto_buy_validator,
         on_scan_start = function()
             m.status_bar:update_status(0,0)
             if continuation then
@@ -380,8 +385,11 @@ function private.start_search(queries, continuation)
             current_query = current_query and current_query + 1 or start_query
             current_page = current_page and 0 or start_page - 1
         end,
-        on_auction = function(auction_record)
-            if getn(search.records) < 1000 then
+        on_auction = function(auction_record, ctrl)
+            if m.auto_buy_checkbox:GetChecked() then
+                ctrl.suspend()
+                Aux.place_bid('list', auction_record.index, auction_record.buyout_price, ctrl.resume)
+            elseif getn(search.records) < 1000 then
                 tinsert(search.records, auction_record)
                 if getn(search.records) == 1000 then
                     StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
@@ -390,7 +398,7 @@ function private.start_search(queries, continuation)
         end,
         on_complete = function()
             m.status_bar:update_status(100, 100)
-            m.status_bar:set_text('Done Scanning')
+            m.status_bar:set_text('Scan complete')
 
             if m.current_search() == search and m.frame.results:IsVisible() and getn(search.records) == 0 then
                 m.update_tab(m.SAVED)
@@ -400,7 +408,7 @@ function private.start_search(queries, continuation)
         end,
         on_abort = function()
             m.status_bar:update_status(100, 100)
-            m.status_bar:set_text('Done Scanning')
+            m.status_bar:set_text('Scan paused')
 
             if current_query then
                 search.continuation = {current_query, current_page + 1}
@@ -408,7 +416,7 @@ function private.start_search(queries, continuation)
                 search.continuation = {start_query, start_page}
             end
             if m.current_search() == search then
-                m.update_resume()
+                m.update_continuation()
             end
 
             m.enable_start()
@@ -425,7 +433,7 @@ function public.execute(resume)
     local queries = Aux.scan_util.parse_filter_string(filter_string)
     if not queries then
         return
-    elseif m.snipe then
+    elseif m.real_time_checkbox:GetChecked() then
         if getn(queries) > 1 then
             Aux.log('Invalid filter: The sniping mode does not support multiple queries')
             return
@@ -442,7 +450,7 @@ function public.execute(resume)
         if resume then
             m.results_listing:SetSelectedRecord()
         else
-            if m.current_search().snipe ~= m.snipe then
+            if m.current_search().real_time ~= m.real_time_checkbox:GetChecked() then
                 m.results_listing:Reset()
             end
             m.current_search().records = {}
@@ -454,12 +462,20 @@ function public.execute(resume)
     m.discard_continuation()
     m:enable_stop()
 
+    m.close_settings()
     m.update_tab(m.RESULTS)
-    if m.snipe then
-        m.current_search().snipe = true
-        m.start_sniping(queries[1], nil, continuation)
+    m.current_search().real_time = m.real_time_checkbox:GetChecked()
+    if m.real_time_checkbox:GetChecked() then
+        m.start_real_time_scan(queries[1], nil, continuation)
     else
-        m.current_search().snipe = false
+        for _, query in queries do
+            if tonumber(m.first_page_input:GetText()) then
+                query.blizzard_query.first_page = Aux.round(max(0, m.first_page_input:GetNumber() - 1))
+            end
+            if tonumber(m.last_page_input:GetText()) then
+                query.blizzard_query.last_page = Aux.round(max(0, m.last_page_input:GetNumber() - 1))
+            end
+        end
         m.start_search(queries, continuation)
     end
 end
@@ -557,8 +573,8 @@ do
     end
 end
 
-function private.update_resume()
-    if m.current_search().continuation and m.current_search().snipe == m.snipe then
+function private.update_continuation()
+    if m.current_search().continuation and m.current_search().real_time == m.real_time_checkbox:GetChecked() then
         m.resume_button:Show()
         m.search_box:SetPoint('RIGHT', m.resume_button, 'LEFT', -4, 0)
     else
@@ -596,7 +612,7 @@ do
             m.next_button:Show()
             m.search_box:SetPoint('LEFT', m.next_button, 'RIGHT', 4, 0)
         end
-        m.update_resume()
+        m.update_continuation()
     end
 
     function private.new_search(filter_string, prettified)

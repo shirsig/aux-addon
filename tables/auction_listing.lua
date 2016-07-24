@@ -655,7 +655,7 @@ local methods = {
         elseif Aux.unmodified() and button == 'RightButton' then -- TODO not when alt (how?)
             Aux.tab_group:set_tab(1)
             Aux.search_tab.set_filter(strlower(Aux.info.item(this.row.data.record.item_id).name)..'/exact')
-            Aux.search_tab.disable_sniping()
+            Aux.search_tab.real_time_checkbox:SetChecked(nil)
             Aux.search_tab.execute()
         else
             local selection = this.rt:GetSelection()
