@@ -48,14 +48,22 @@ StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
     timeout = 0,
     hideOnEscape = 1,
 }
-StaticPopupDialogs['AUX_SEARCH_AUTO_SNIPING'] = {
-    text = 'Do you want to activate automatic buyout for sniping?',
+StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
+    text = 'Do you want to activate automatic buyout?',
     button1 = 'Yes',
     button2 = 'No',
     OnAccept = function()
-        m.snipe_button.auto = true
-        local color = RED_FONT_COLOR
-        m.snipe_button:GetFontString():SetTextColor(color.r, color.g, color.b)
+        m.auto_buy_checkbox:SetChecked(1)
+    end,
+    timeout = 0,
+    hideOnEscape = 1,
+}
+StaticPopupDialogs['AUX_SEARCH_AUTO_BUY_FILTER'] = {
+    text = 'Do you want to activate the automatic buyout filter?',
+    button1 = 'Yes',
+    button2 = 'No',
+    OnAccept = function()
+        m.auto_buy_filter_checkbox:SetChecked(1)
     end,
     timeout = 0,
     hideOnEscape = 1,
@@ -247,13 +255,13 @@ end
 function public.enable_sniping()
     Aux.scan.abort(m.search_scan_id)
     m.snipe = true
-    m.snipe_button:LockHighlight()
+    m.settings_button:LockHighlight()
 end
 
 function public.disable_sniping()
     Aux.scan.abort(m.search_scan_id)
     m.snipe = false
-    m.snipe_button:UnlockHighlight()
+    m.settings_button:UnlockHighlight()
 end
 
 function private.start_sniping(query, search, continuation)
@@ -283,7 +291,7 @@ function private.start_sniping(query, search, continuation)
         end,
         on_auction = function(auction_record)
             if not ignore_page then
-                if m.snipe_button.auto then
+                if m.settings_button.auto then
                     PlaceAuctionBid('list', auction_record.index, auction_record.buyout_price)
                 else
                     tinsert(new_records, auction_record)

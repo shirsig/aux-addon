@@ -54,17 +54,16 @@ function public.inline_color(color)
     return format("|c%02X%02X%02X%02X", a, r, g, b)
 end
 
-function public.panel(parent, name)
-    local panel = CreateFrame('Frame', name, parent)
-    panel:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size})
-    panel:SetBackdropColor(unpack(m.config.frame_color))
-    panel:SetBackdropBorderColor(unpack(m.config.frame_border_color))
+function public.panel(parent)
+    local panel = CreateFrame('Frame', nil, parent)
+    panel:SetBackdrop{bgFile='Interface\\Buttons\\WHITE8X8'}
+    panel:SetBackdropColor(unpack(m.config.content_color))
     return panel
 end
 
 function public.button(parent, text_height, name)
     local button = CreateFrame('Button', name, parent)
-    button:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size})
+    button:SetBackdrop{bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size}
     button:SetBackdropColor(unpack(m.config.content_color))
     button:SetBackdropBorderColor(unpack(m.config.content_border_color))
     local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
@@ -128,7 +127,7 @@ do
             tab.id = id
             tab.group = self
             tab:SetHeight(24)
-            tab:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size})
+            tab:SetBackdrop{bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size}
             tab:SetBackdropColor(0, 0, 0, 0)
             tab:SetBackdropBorderColor(unpack(m.config.frame_border_color))
             local image = tab:CreateTexture(nil, 'BACKGROUND')
@@ -231,7 +230,7 @@ function public.editbox(parent, name)
     editbox:SetHeight(19)
     editbox:SetFont(m.config.content_font, m.config.normal_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
-    editbox:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size})
+    editbox:SetBackdrop{bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size}
     editbox:SetBackdropColor(unpack(m.config.content_color))
     editbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
 
@@ -385,7 +384,7 @@ do
 
         local dropdown = CreateFrame('Frame', 'aux_dropdown'..id, parent, 'UIDropDownMenuTemplate')
 
-        dropdown:SetBackdrop({bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size, insets={top=5,bottom=5}})
+        dropdown:SetBackdrop{bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size, insets={top=5,bottom=5}}
         dropdown:SetBackdropColor(unpack(m.config.content_color))
         dropdown:SetBackdropBorderColor(unpack(m.config.content_border_color))
         local left = getglobal(dropdown:GetName()..'Left'):Hide()
@@ -480,7 +479,7 @@ function public.slider(frame, name)
     slider:SetHeight(6)
     slider:SetHitRectInsets(0, 0, -8, -8)
     slider:SetValue(0)
-    slider:SetBackdrop({ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size })
+    slider:SetBackdrop{ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size }
     slider:SetBackdropColor(unpack(m.config.frame_color))
     slider:SetBackdropBorderColor(unpack(m.config.frame_border_color))
     local thumb_texture = slider:CreateTexture(nil, 'ARTWORK')
@@ -505,7 +504,7 @@ function public.slider(frame, name)
     editbox:SetWidth(70)
     editbox:SetJustifyH('CENTER')
     editbox:EnableMouse(true)
-    editbox:SetBackdrop({ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size })
+    editbox:SetBackdrop{ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size }
     editbox:SetBackdropColor(unpack(m.config.content_color))
     editbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
 --    editbox:SetFont(m.config.content_font, m.config.normal_font_size)
