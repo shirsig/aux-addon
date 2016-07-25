@@ -8,7 +8,7 @@ private.search_scan_id = 0
 private.auto_buy_validator = nil
 
 StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
-    text = 'Table full!\nFurther results from this search will not be displayed.',
+    text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',
     button1 = 'Ok',
     showAlert = 1,
     timeout = 0,
@@ -109,7 +109,6 @@ function private.update_search_listings()
             cols = {{value=name}},
             search = favorite_search,
             index = i,
-            name = name,
         })
     end
     m.favorite_searches_listing:SetData(favorite_search_rows)
@@ -121,7 +120,6 @@ function private.update_search_listings()
             cols = {{value=name}},
             search = recent_search,
             index = i,
-            name = name,
         })
     end
     m.recent_searches_listing:SetData(recent_search_rows)

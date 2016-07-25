@@ -89,7 +89,8 @@ function private.wait_for_list_results(k)
     end)
     listener:start()
     Aux.control.wait_until(function()
-        -- order important, owner_data_complete must be called after an update to request missing data
+        -- short circuiting order important, owner_data_complete must be called iif an update has happened.
+        -- if no update has happened it must not be called for performance reasons, otherwise it must be called to request further missing data if there is any
         local ok = updated and m.owner_data_complete() or last_update and GetTime() - last_update > 5
         updated = false
         return ok
@@ -103,8 +104,8 @@ function private.owner_data_complete()
     if m.current_thread().params.ignore_owner or aux_ignore_owner then
         return true
     end
-    local count = GetNumAuctionItems(m.current_thread().params.type)
-    for i=1,count do
+
+    for i=1,PAGE_SIZE do
         local auction_info = Aux.info.auction(i, m.current_thread().params.type)
         if auction_info and not auction_info.owner then
             return false
@@ -182,11 +183,11 @@ function private.scan_auctions(k)
 end
 
 function private.scan_auctions_helper(i, k)
-    local recurse = function()
-        if i >= (m.current_thread().page_auctions or GetNumAuctionItems(m.current_thread().params.type)) then
+    local recurse = function(retry)
+        if i >= PAGE_SIZE then
             return k()
         else
-            return m.scan_auctions_helper(i + 1, k)
+            return m.scan_auctions_helper(retry and i or i + 1, k)
         end
     end
 
@@ -200,11 +201,11 @@ function private.scan_auctions_helper(i, k)
         Aux.history.process_auction(auction_info)
 
         if m.current_thread().params.auto_buy_validator and m.current_thread().params.auto_buy_validator(auction_info) then
-            return Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, function() return private.scan_auctions_helper(i, k) end)
+            return Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, function() return recurse(true) end)
         elseif not m.current_query().validator or m.current_query().validator(auction_info) then
             return m.wait_for_callback(m.current_thread().params.on_auction, auction_info, function(removed)
                 if removed then
-                    return m.scan_auctions_helper(i, k)
+                    return recurse(true)
                 else
                     return recurse()
                 end
@@ -239,7 +240,7 @@ function private.submit_query(k)
             )
         end
         m.wait_for_results(function()
-            m.current_thread().page_auctions,  m.current_thread().total_auctions = GetNumAuctionItems(m.current_thread().params.type)
+            _,  m.current_thread().total_auctions = GetNumAuctionItems(m.current_thread().params.type)
             m.wait_for_callback(
                 m.current_thread().params.on_page_loaded,
                 m.current_thread().page - (m.current_query().blizzard_query.first_page or 0) + 1,
