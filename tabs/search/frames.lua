@@ -104,7 +104,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             m.execute()
         end)
         local label = Aux.gui.label(editbox, 15)
-        label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
         label:SetText('-')
         private.last_page_input = editbox
     end
