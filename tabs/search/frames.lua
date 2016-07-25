@@ -129,7 +129,6 @@ Aux.search_tab.FRAMES(function(m, public, private)
         label:SetPoint('RIGHT', checkbox, 'LEFT', -1, 0)
         label:SetText('Real Time')
         public.real_time_checkbox = checkbox
-        Aux.log(label:GetLeft()-m.last_page_input:GetRight())
     end
     do
         local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
@@ -146,7 +145,6 @@ Aux.search_tab.FRAMES(function(m, public, private)
         label:SetPoint('RIGHT', checkbox, 'LEFT', -1, 0)
         label:SetText('Auto Buy')
         private.auto_buy_checkbox = checkbox
-        Aux.log(label:GetLeft()-m.real_time_checkbox:GetRight())
     end
     do
         local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
