@@ -82,7 +82,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
             elseif arg1 == 'RightButton' then
                 Aux.tab_group:set_tab(1)
                 Aux.search_tab.set_filter(strlower(Aux.info.item(this.item_record.item_id).name)..'/exact')
-                if m.real_time_button.on then
+                if m.real_time_button:GetChecked() then
                     m.real_time_button:Click()
                 end
                 Aux.search_tab.execute()

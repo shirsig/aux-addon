@@ -27,21 +27,6 @@ Aux.search_tab.FRAMES(function(m, public, private)
         btn:SetPoint('TOPLEFT', 0, 0)
         btn:SetWidth(42)
         btn:SetHeight(42)
-        local t1 = btn:CreateTexture()
-        t1:SetTexture(unpack(Aux.gui.config.text_color.enabled))
-        t1:SetWidth(20)
-        t1:SetHeight(2.5)
-        t1:SetPoint('CENTER', 0, 6.7)
-        local t2 = btn:CreateTexture()
-        t2:SetTexture(unpack(Aux.gui.config.text_color.enabled))
-        t2:SetWidth(20)
-        t2:SetHeight(2.5)
-        t2:SetPoint('CENTER', 0, 0)
-        local t3 = btn:CreateTexture()
-        t3:SetTexture(unpack(Aux.gui.config.text_color.enabled))
-        t3:SetWidth(20)
-        t3:SetHeight(2.5)
-        t3:SetPoint('CENTER', 0, -6.7)
         btn:SetScript('OnClick', function()
             if this.open then
                 m.settings:Hide()
@@ -53,6 +38,15 @@ Aux.search_tab.FRAMES(function(m, public, private)
             end
             this.open = not this.open
         end)
+
+        for _, offset in {15, 10, 5} do
+            local fake_icon_part = btn:CreateFontString()
+            fake_icon_part:SetFont([[Fonts\FRIZQT__.TTF]], 23)
+            fake_icon_part:SetPoint('CENTER', 0, offset)
+            fake_icon_part:SetText('_')
+--            fake_icon:SetTextHeight(28)
+        end
+
         private.settings_button = btn
     end
     do
@@ -72,9 +66,8 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local editbox = Aux.gui.editbox(m.settings)
-        editbox:SetBackdropColor(unpack(Aux.gui.config.frame_color))
-        editbox:SetPoint('LEFT', 80, 0)
-        editbox:SetWidth(30)
+        editbox:SetPoint('LEFT', 70, 0)
+        editbox:SetWidth(50)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(nil)
         editbox:SetScript('OnTabPressed', function()
@@ -84,16 +77,23 @@ Aux.search_tab.FRAMES(function(m, public, private)
             this:ClearFocus()
             m.execute()
         end)
+        editbox:SetScript('OnTextChanged', function()
+            if m.blizzard_page_index(this:GetText()) and not m.real_time_button:GetChecked() then
+                this:SetBackdropColor(unpack(Aux.gui.config.on_color))
+            else
+                this:SetBackdropColor(unpack(Aux.gui.config.off_color))
+            end
+        end)
         local label = Aux.gui.label(editbox, 15)
         label:SetPoint('RIGHT', editbox, 'LEFT', -5, 0)
         label:SetText('Pages')
+        label:SetTextColor(unpack(Aux.gui.config.text_color.enabled))
         private.first_page_input = editbox
     end
     do
         local editbox = Aux.gui.editbox(m.settings)
-        editbox:SetBackdropColor(unpack(Aux.gui.config.frame_color))
         editbox:SetPoint('LEFT', m.first_page_input, 'RIGHT', 10, 0)
-        editbox:SetWidth(30)
+        editbox:SetWidth(50)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(nil)
         editbox:SetScript('OnTabPressed', function()
@@ -103,48 +103,44 @@ Aux.search_tab.FRAMES(function(m, public, private)
             this:ClearFocus()
             m.execute()
         end)
+        editbox:SetScript('OnTextChanged', function()
+            if m.blizzard_page_index(this:GetText()) and not m.real_time_button:GetChecked() then
+                this:SetBackdropColor(unpack(Aux.gui.config.on_color))
+            else
+                this:SetBackdropColor(unpack(Aux.gui.config.off_color))
+            end
+        end)
         local label = Aux.gui.label(editbox, 16)
         label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
         label:SetText('-')
+        label:SetTextColor(unpack(Aux.gui.config.text_color.enabled))
         private.last_page_input = editbox
     end
     do
-        local btn = Aux.gui.button(m.settings, 16)
-        btn:SetBackdropColor(unpack(Aux.gui.config.frame_color))
-        btn:SetPoint('LEFT', 240, 0)
+        local btn = Aux.gui.checkbutton(m.settings, 16)
+        btn:SetPoint('LEFT', 230, 0)
         btn:SetWidth(140)
         btn:SetHeight(25)
         btn:SetText('Real Time Mode')
-        btn:SetBackdropColor(0.7, 0.3, 0.3)
         btn:SetScript('OnClick', function()
-            this.on = not this.on
-            if this.on then
-                this:SetBackdropColor(0.3, 0.7, 0.3)
-                m.first_page_input:EnableMouse(nil)
-                m.last_page_input:EnableMouse(nil)
-                m.first_page_input:ClearFocus()
-                m.last_page_input:ClearFocus()
-            else
-                this:SetBackdropColor(0.7, 0.3, 0.3)
-                m.first_page_input:EnableMouse(true)
-                m.last_page_input:EnableMouse(true)
-            end
+            this:SetChecked(not this:GetChecked())
+            this = m.first_page_input
+            m.first_page_input:GetScript('OnTextChanged')()
+            this = m.last_page_input
+            m.last_page_input:GetScript('OnTextChanged')()
             m.update_continuation()
         end)
         public.real_time_button = btn
     end
     do
-        local btn = Aux.gui.button(m.settings, 16)
-        btn:SetBackdropColor(unpack(Aux.gui.config.frame_color))
-        btn:SetPoint('LEFT', m.real_time_button, 'RIGHT', 30, 0)
+        local btn = Aux.gui.checkbutton(m.settings, 16)
+        btn:SetPoint('LEFT', m.real_time_button, 'RIGHT', 15, 0)
         btn:SetWidth(140)
         btn:SetHeight(25)
         btn:SetText('Auto Buyout Mode')
-        btn:SetBackdropColor(0.7, 0.3, 0.3)
         btn:SetScript('OnClick', function()
-            if this.on then
-                this.on = false
-                this:SetBackdropColor(0.7, 0.3, 0.3)
+            if this:GetChecked() then
+                this:SetChecked(false)
             else
                 StaticPopup_Show('AUX_SEARCH_AUTO_BUY')
             end
@@ -152,21 +148,30 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.auto_buy_button = btn
     end
     do
-        local btn = Aux.gui.button(m.settings, 16)
-        btn:SetBackdropColor(unpack(Aux.gui.config.frame_color))
-        btn:SetPoint('LEFT', m.auto_buy_button, 'RIGHT', 30, 0)
+        local btn = Aux.gui.checkbutton(m.settings, 16)
+        btn:SetPoint('LEFT', m.auto_buy_button, 'RIGHT', 15, 0)
         btn:SetWidth(140)
         btn:SetHeight(25)
         btn:SetText('Auto Buyout Filter')
-        btn:SetBackdropColor(0.7, 0.3, 0.3)
         btn:SetScript('OnClick', function()
-            if this.on then
-                this.on = false
+            if this:GetChecked() then
+                this:SetChecked(false)
+                aux_auto_buy_filter = nil
+                this.prettified = nil
                 m.auto_buy_validator = nil
-                this:SetBackdropColor(0.7, 0.3, 0.3)
             else
                 StaticPopup_Show('AUX_SEARCH_AUTO_BUY_FILTER')
             end
+        end)
+        btn:SetScript('OnEnter', function()
+            if this.prettified then
+                GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+                GameTooltip:AddLine(gsub(this.prettified, ';', '\n\n'), 255/255, 254/255, 250/255, true)
+                GameTooltip:Show()
+            end
+        end)
+        btn:SetScript('OnLeave', function()
+            GameTooltip:Hide()
         end)
         private.auto_buy_filter_button = btn
     end
@@ -248,7 +253,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             local item_info = Aux.cursor_item() and Aux.info.item(Aux.cursor_item().item_id)
             if item_info then
                 m.set_filter(strlower(item_info.name)..'/exact')
-                if m.real_time_button.on then
+                if m.real_time_button:GetChecked() then
                     m.real_time_button:Click()
                 end
                 m.execute()
@@ -758,7 +763,6 @@ Aux.search_tab.FRAMES(function(m, public, private)
             if not data then return end
             GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
             GameTooltip:AddLine(gsub(data.search.prettified, ';', '\n\n'), 255/255, 254/255, 250/255, true)
-            GameTooltip:Show()
             GameTooltip:Show()
         end,
         OnLeave = function()

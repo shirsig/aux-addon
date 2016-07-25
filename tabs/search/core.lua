@@ -19,33 +19,15 @@ StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
     button1 = 'Yes',
     button2 = 'No',
     OnAccept = function()
-        m.auto_buy_button.on = true
-        m.auto_buy_button:SetBackdropColor(0.3, 0.7, 0.3)
+        m.auto_buy_button:SetChecked(true)
     end,
     timeout = 0,
     hideOnEscape = 1,
 }
 do
     local function action()
-        local queries = Aux.scan_util.parse_filter_string(getglobal(this:GetParent():GetName()..'EditBox'):GetText())
-        if queries then
-
-            if getn(queries) > 1 then
-                Aux.log('Error: The automatic buyout filter may contain only one query')
-                return
-            end
-
-            if Aux.util.size(queries[1].blizzard_query) > 0 then
-                Aux.log('Error: The automatic buyout filter does not support Blizzard filters')
-                return
-            end
-
-            aux_auto_buy_filter = m.auto_buy_filter_editbox:GetText()
-            m.auto_buy_validator = queries[1].validator
-            m.auto_buy_filter_button.on = true
-            m.auto_buy_button:SetBackdropColor(0.3, 0.7, 0.3)
-            m.auto_buy_filter_editbox:ClearFocus()
-        end
+        aux_auto_buy_filter = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
+        m.update_auto_buy_filter()
     end
 
     StaticPopupDialogs['AUX_SEARCH_AUTO_BUY_FILTER'] = {
@@ -88,6 +70,7 @@ function public.LOAD()
     m.create_frames(m, public, private)
     m.update_search()
     m.update_tab(m.SAVED)
+    m.update_auto_buy_filter()
 end
 
 function public.OPEN()
@@ -167,6 +150,25 @@ function private.add_filter(filter_string, replace)
     m.search_box:SetText((old_filter_string or '')..filter_string)
 end
 
+function private.update_auto_buy_filter()
+    if aux_auto_buy_filter then
+        local queries = Aux.scan_util.parse_filter_string(aux_auto_buy_filter)
+        if queries then
+            if getn(queries) > 1 then
+                Aux.log('Error: The automatic buyout filter may contain only one query')
+            elseif Aux.util.size(queries[1].blizzard_query) > 0 then
+                Aux.log('Error: The automatic buyout filter does not support Blizzard filters')
+            else
+                m.auto_buy_validator = queries[1].validator
+                m.auto_buy_filter_button.prettified = queries[1].prettified
+                m.auto_buy_filter_button:SetChecked(true)
+                return
+            end
+        end
+    end
+    aux_auto_buy_filter = nil
+end
+
 function private.close_settings()
     if m.settings_button.open then
         m.settings_button:Click()
@@ -198,12 +200,14 @@ function private.get_form_filter()
         add('exact')
     end
 
-    if tonumber(m.min_level_input:GetText()) then
-        add(max(1, min(60, tonumber(m.min_level_input:GetText()))))
+    local min_level = m.blizzard_level(m.min_level_input:GetText())
+    if min_level then
+        add(min_level)
     end
 
-    if tonumber(m.max_level_input:GetText()) then
-        add(max(1, min(60, tonumber(m.max_level_input:GetText()))))
+    local max_level = m.blizzard_level(m.min_level_input:GetText())
+    if max_level then
+        add(max_level)
     end
 
     if m.usable_checkbox:GetChecked() then
@@ -265,7 +269,7 @@ function private.start_real_time_scan(query, search, continuation)
     m.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = {query},
-        auto_buy_validator = m.auto_buy_validator,
+        auto_buy_validator = m.auto_buy_filter_button:GetChecked() and aux_auto_buy_filter and m.auto_buy_validator, -- some redundancy but why not to be save
         on_scan_start = function()
             m.status_bar:update_status(99.99, 99.99)
             m.status_bar:set_text('Scanning last page ...')
@@ -278,7 +282,7 @@ function private.start_real_time_scan(query, search, continuation)
         end,
         on_auction = function(auction_record, ctrl)
             if not ignore_page then
-                if m.auto_buy_button.on then
+                if m.auto_buy_button:GetChecked() then
                     ctrl.suspend()
                     Aux.place_bid('list', auction_record.index, auction_record.buyout_price, function() ctrl.resume(true) end)
                 else
@@ -370,7 +374,7 @@ function private.start_search(queries, continuation)
             current_page = current_page and 0 or start_page - 1
         end,
         on_auction = function(auction_record, ctrl)
-            if m.auto_buy_button.on then
+            if m.auto_buy_button:GetChecked() then
                 ctrl.suspend()
                 Aux.place_bid('list', auction_record.index, auction_record.buyout_price, function() ctrl.resume(true) end)
             elseif getn(search.records) < 1000 then
@@ -417,12 +421,12 @@ function public.execute(resume)
     local queries = Aux.scan_util.parse_filter_string(filter_string)
     if not queries then
         return
-    elseif m.real_time_button.on then
+    elseif m.real_time_button:GetChecked() then
         if getn(queries) > 1 then
-            Aux.log('Invalid filter: The sniping mode does not support multiple queries')
+            Aux.log('Invalid filter: The real time mode does not support multiple queries')
             return
         elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-            Aux.log('Invalid filter: The sniping mode does not support page range filters')
+            Aux.log('Invalid filter: The real time mode does not support page range filters')
             return
         end
     end
@@ -434,7 +438,7 @@ function public.execute(resume)
         if resume then
             m.results_listing:SetSelectedRecord()
         else
-            if m.current_search().real_time ~= m.real_time_button.on then
+            if m.current_search().real_time ~= m.real_time_button:GetChecked() then
                 m.results_listing:Reset()
             end
             m.current_search().records = {}
@@ -448,19 +452,27 @@ function public.execute(resume)
 
     m.close_settings()
     m.update_tab(m.RESULTS)
-    m.current_search().real_time = m.real_time_button.on
-    if m.real_time_button.on then
+    m.current_search().real_time = m.real_time_button:GetChecked()
+    if m.real_time_button:GetChecked() then
         m.start_real_time_scan(queries[1], nil, continuation)
     else
         for _, query in queries do
-            if tonumber(m.first_page_input:GetText()) then
-                query.blizzard_query.first_page = Aux.round(max(0, m.first_page_input:GetNumber() - 1))
-            end
-            if tonumber(m.last_page_input:GetText()) then
-                query.blizzard_query.last_page = Aux.round(max(0, m.last_page_input:GetNumber() - 1))
-            end
+            query.blizzard_query.first_page = m.blizzard_page_index(m.first_page_input:GetText())
+            query.blizzard_query.last_page = m.blizzard_page_index(m.last_page_input:GetText())
         end
         m.start_search(queries, continuation)
+    end
+end
+
+function private.blizzard_page_index(str)
+    if tonumber(str) then
+        return Aux.round(max(0, tonumber(str) - 1))
+    end
+end
+
+function private.blizzard_level(str)
+    if tonumber(str) then
+        return Aux.round(max(1, min(60, tonumber(str))))
     end
 end
 
@@ -558,7 +570,7 @@ do
 end
 
 function private.update_continuation()
-    if m.current_search().continuation and m.current_search().real_time == m.real_time_button.on then
+    if m.current_search().continuation and m.current_search().real_time == m.real_time_button:GetChecked() then
         m.resume_button:Show()
         m.search_box:SetPoint('RIGHT', m.resume_button, 'LEFT', -4, 0)
     else

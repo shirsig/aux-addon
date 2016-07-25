@@ -46,7 +46,8 @@ public.config = {
     normal_button_font_size = 16, -- 15 not working for some clients
     text_color = { enabled = { 255/255, 254/255, 250/255, 1 }, disabled = { 147/255, 151/255, 139/255, 1 } },
     label_color = { enabled = { 216/255, 225/255, 211/255, 1 }, disabled = { 150/255, 148/255, 140/255, 1 } },
-
+    on_color  = {0.3, 0.7, 0.3},
+    off_color  = {0.7, 0.3, 0.3 },
 }
 
 function public.inline_color(color)
@@ -56,14 +57,33 @@ end
 
 function public.panel(parent)
     local panel = CreateFrame('Frame', nil, parent)
-    panel:SetBackdrop{bgFile='Interface\\Buttons\\WHITE8X8'}
+    panel:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]]}
     panel:SetBackdropColor(unpack(m.config.content_color))
     return panel
 end
 
-function public.button(parent, text_height, name)
-    local button = CreateFrame('Button', name, parent)
-    button:SetBackdrop{bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size}
+function public.checkbutton(parent, text_height)
+    local button = m.button(parent, text_height)
+    button.state = false
+    button:SetBackdropColor(unpack(m.config.off_color))
+    function button:SetChecked(state)
+        if state then
+            self:SetBackdropColor(unpack(m.config.on_color))
+            self.state = true
+        else
+            self:SetBackdropColor(unpack(m.config.off_color))
+            self.state = false
+        end
+    end
+    function button:GetChecked()
+        return self.state
+    end
+    return button
+end
+
+function public.button(parent, text_height)
+    local button = CreateFrame('Button', nil, parent)
+    button:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size}
     button:SetBackdropColor(unpack(m.config.content_color))
     button:SetBackdropBorderColor(unpack(m.config.content_border_color))
     local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
@@ -127,7 +147,7 @@ do
             tab.id = id
             tab.group = self
             tab:SetHeight(24)
-            tab:SetBackdrop{bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size}
+            tab:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size}
             tab:SetBackdropColor(0, 0, 0, 0)
             tab:SetBackdropBorderColor(unpack(m.config.frame_border_color))
             local image = tab:CreateTexture(nil, 'BACKGROUND')
@@ -230,7 +250,7 @@ function public.editbox(parent, name)
     editbox:SetHeight(19)
     editbox:SetFont(m.config.content_font, m.config.normal_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
-    editbox:SetBackdrop{bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size}
+    editbox:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size}
     editbox:SetBackdropColor(unpack(m.config.content_color))
     editbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
 
@@ -384,7 +404,7 @@ do
 
         local dropdown = CreateFrame('Frame', 'aux_dropdown'..id, parent, 'UIDropDownMenuTemplate')
 
-        dropdown:SetBackdrop{bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size, insets={top=5,bottom=5}}
+        dropdown:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size, insets={top=5,bottom=5}}
         dropdown:SetBackdropColor(unpack(m.config.content_color))
         dropdown:SetBackdropBorderColor(unpack(m.config.content_border_color))
         local left = getglobal(dropdown:GetName()..'Left'):Hide()
@@ -479,7 +499,7 @@ function public.slider(frame, name)
     slider:SetHeight(6)
     slider:SetHitRectInsets(0, 0, -8, -8)
     slider:SetValue(0)
-    slider:SetBackdrop{ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size }
+    slider:SetBackdrop{ bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size }
     slider:SetBackdropColor(unpack(m.config.frame_color))
     slider:SetBackdropBorderColor(unpack(m.config.frame_border_color))
     local thumb_texture = slider:CreateTexture(nil, 'ARTWORK')
@@ -504,7 +524,7 @@ function public.slider(frame, name)
     editbox:SetWidth(70)
     editbox:SetJustifyH('CENTER')
     editbox:EnableMouse(true)
-    editbox:SetBackdrop{ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size }
+    editbox:SetBackdrop{ bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size }
     editbox:SetBackdropColor(unpack(m.config.content_color))
     editbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
 --    editbox:SetFont(m.config.content_font, m.config.normal_font_size)
@@ -538,7 +558,7 @@ end
 --    checkbox:SetWidth(16)
 --    checkbox:SetHeight(16)
 --    checkbox:SetPoint('TOPLEFT', 4, -4)
---    checkbox:SetBackdrop({ bgFile='Interface\\Buttons\\WHITE8X8', edgeFile='Interface\\Buttons\\WHITE8X8', edgeSize=m.config.edge_size })
+--    checkbox:SetBackdrop({ bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size })
 --    checkbox:SetBackdropColor(unpack(m.config.content_color))
 --    checkbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
 --    local highlight = checkbox:CreateTexture(nil, 'HIGHLIGHT')

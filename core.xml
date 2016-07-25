@@ -80,7 +80,7 @@
 		</Layers>
 	</Frame>
 
-    <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent" clampedToScreen="true">
+    <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent">
         <Size><AbsDimension x="768" y="447"/></Size>
         <Anchors>
             <Anchor point="LEFT">
