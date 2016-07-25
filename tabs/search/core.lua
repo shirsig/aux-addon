@@ -7,25 +7,55 @@ aux_auto_buy_filter = ''
 private.search_scan_id = 0
 private.auto_buy_validator = nil
 
-private.popup_info = {
-    rename = {}
+StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
+    text = 'Table full!\nFurther results from this search will not be displayed.',
+    button1 = 'Ok',
+    showAlert = 1,
+    timeout = 0,
+    hideOnEscape = 1,
 }
-
+StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
+    text = 'Are you sure you want to activate automatic buyout?',
+    button1 = 'Yes',
+    button2 = 'No',
+    OnAccept = function()
+        m.auto_buy_button.on = true
+        m.auto_buy_button:SetBackdropColor(0.3, 0.7, 0.3)
+    end,
+    timeout = 0,
+    hideOnEscape = 1,
+}
 do
     local function action()
-        m.popup_info.rename.name = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
-        m.update_search_listings()
+        local queries = Aux.scan_util.parse_filter_string(getglobal(this:GetParent():GetName()..'EditBox'):GetText())
+        if queries then
+
+            if getn(queries) > 1 then
+                Aux.log('Error: The automatic buyout filter may contain only one query')
+                return
+            end
+
+            if Aux.util.size(queries[1].blizzard_query) > 0 then
+                Aux.log('Error: The automatic buyout filter does not support Blizzard filters')
+                return
+            end
+
+            aux_auto_buy_filter = m.auto_buy_filter_editbox:GetText()
+            m.auto_buy_validator = queries[1].validator
+            m.auto_buy_filter_button.on = true
+            m.auto_buy_button:SetBackdropColor(0.3, 0.7, 0.3)
+            m.auto_buy_filter_editbox:ClearFocus()
+        end
     end
 
-    StaticPopupDialogs['AUX_SEARCH_SAVED_RENAME'] = {
-        text = 'Enter a new name for this search.',
+    StaticPopupDialogs['AUX_SEARCH_AUTO_BUY_FILTER'] = {
+        text = 'Enter a filter for automatic buyout.',
         button1 = 'Accept',
         button2 = 'Cancel',
         hasEditBox = 1,
         OnShow = function()
-            local rename_info = m.popup_info.rename
             local edit_box = getglobal(this:GetName()..'EditBox')
-            edit_box:SetText(rename_info.name or '')
+            edit_box:SetMaxLetters(nil)
             edit_box:SetFocus()
             edit_box:HighlightText()
         end,
@@ -41,50 +71,6 @@ do
         hideOnEscape = 1,
     }
 end
-StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
-    text = 'Table full!\nFurther results from this search will be discarded.',
-    button1 = 'Ok',
-    showAlert = 1,
-    timeout = 0,
-    hideOnEscape = 1,
-}
-StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
-    text = 'Are you sure you want to activate automatic buyout?',
-    button1 = 'Yes',
-    button2 = 'No',
-    OnAccept = function()
-        m.auto_buy_checkbox:SetChecked(1)
-    end,
-    timeout = 0,
-    hideOnEscape = 1,
-}
-StaticPopupDialogs['AUX_SEARCH_AUTO_BUY_FILTER'] = {
-    text = 'Are you sure you want to set this filter for automatic buyout?',
-    button1 = 'Yes',
-    button2 = 'No',
-    OnAccept = function()
-        local queries = Aux.scan_util.parse_filter_string(m.auto_buy_filter_editbox:GetText())
-        if queries then
-
-            if getn(queries) > 1 then
-                Aux.log('Error: The auto buy filter supports only one query')
-                return
-            end
-
-            if Aux.util.size(queries[1].blizzard_query) > 0 then
-                Aux.log('Error: The real time mode does not support blizzard filters')
-                return
-            end
-
-            aux_auto_buy_filter = m.auto_buy_filter_editbox:GetText()
-            m.auto_buy_validator = queries[1].validator
-            m.auto_buy_filter_checkbox:SetChecked(1)
-            m.auto_buy_filter_editbox:ClearFocus()
-        end
-    end,
-    timeout = 0,
-    hideOnEscape = 1,
-}
 
 private.RESULTS, private.SAVED, private.FILTER = 1, 2, 3
 
@@ -118,7 +104,7 @@ end
 function private.update_search_listings()
     local favorite_search_rows = {}
     for i, favorite_search in ipairs(aux_favorite_searches) do
-        local name = favorite_search.name and LIGHTYELLOW_FONT_COLOR_CODE..favorite_search.name..FONT_COLOR_CODE_CLOSE or strsub(favorite_search.prettified, 1, 250)
+        local name = strsub(favorite_search.prettified, 1, 250)
         tinsert(favorite_search_rows, {
             cols = {{value=name}},
             search = favorite_search,
@@ -130,7 +116,7 @@ function private.update_search_listings()
 
     local recent_search_rows = {}
     for i, recent_search in ipairs(aux_recent_searches) do
-        local name = recent_search.name and LIGHTYELLOW_FONT_COLOR_CODE..recent_search.name..FONT_COLOR_CODE_CLOSE or strsub(recent_search.prettified, 1, 250)
+        local name = strsub(recent_search.prettified, 1, 250)
         tinsert(recent_search_rows, {
             cols = {{value=name}},
             search = recent_search,
@@ -294,7 +280,7 @@ function private.start_real_time_scan(query, search, continuation)
         end,
         on_auction = function(auction_record, ctrl)
             if not ignore_page then
-                if m.auto_buy_checkbox:GetChecked() then
+                if m.auto_buy_button.on then
                     ctrl.suspend()
                     Aux.place_bid('list', auction_record.index, auction_record.buyout_price, function() ctrl.resume(true) end)
                 else
@@ -386,7 +372,7 @@ function private.start_search(queries, continuation)
             current_page = current_page and 0 or start_page - 1
         end,
         on_auction = function(auction_record, ctrl)
-            if m.auto_buy_checkbox:GetChecked() then
+            if m.auto_buy_button.on then
                 ctrl.suspend()
                 Aux.place_bid('list', auction_record.index, auction_record.buyout_price, function() ctrl.resume(true) end)
             elseif getn(search.records) < 1000 then
@@ -433,7 +419,7 @@ function public.execute(resume)
     local queries = Aux.scan_util.parse_filter_string(filter_string)
     if not queries then
         return
-    elseif m.real_time_checkbox:GetChecked() then
+    elseif m.real_time_button.on then
         if getn(queries) > 1 then
             Aux.log('Invalid filter: The sniping mode does not support multiple queries')
             return
@@ -450,7 +436,7 @@ function public.execute(resume)
         if resume then
             m.results_listing:SetSelectedRecord()
         else
-            if m.current_search().real_time ~= m.real_time_checkbox:GetChecked() then
+            if m.current_search().real_time ~= m.real_time_button.on then
                 m.results_listing:Reset()
             end
             m.current_search().records = {}
@@ -464,8 +450,8 @@ function public.execute(resume)
 
     m.close_settings()
     m.update_tab(m.RESULTS)
-    m.current_search().real_time = m.real_time_checkbox:GetChecked()
-    if m.real_time_checkbox:GetChecked() then
+    m.current_search().real_time = m.real_time_button.on
+    if m.real_time_button.on then
         m.start_real_time_scan(queries[1], nil, continuation)
     else
         for _, query in queries do
@@ -574,7 +560,7 @@ do
 end
 
 function private.update_continuation()
-    if m.current_search().continuation and m.current_search().real_time == m.real_time_checkbox:GetChecked() then
+    if m.current_search().continuation and m.current_search().real_time == m.real_time_button.on then
         m.resume_button:Show()
         m.search_box:SetPoint('RIGHT', m.resume_button, 'LEFT', -4, 0)
     else

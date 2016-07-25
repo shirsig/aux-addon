@@ -73,7 +73,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     do
         local editbox = Aux.gui.editbox(m.settings)
         editbox:SetBackdropColor(unpack(Aux.gui.config.frame_color))
-        editbox:SetPoint('LEFT', 48, 0)
+        editbox:SetPoint('LEFT', 80, 0)
         editbox:SetWidth(30)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(nil)
@@ -85,7 +85,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             m.execute()
         end)
         local label = Aux.gui.label(editbox, 15)
-        label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -5, 0)
         label:SetText('Pages')
         private.first_page_input = editbox
     end
@@ -103,91 +103,72 @@ Aux.search_tab.FRAMES(function(m, public, private)
             this:ClearFocus()
             m.execute()
         end)
-        local label = Aux.gui.label(editbox, 15)
+        local label = Aux.gui.label(editbox, 16)
         label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
         label:SetText('-')
         private.last_page_input = editbox
     end
     do
-        local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
-        checkbox:SetWidth(22)
-        checkbox:SetHeight(22)
-        checkbox:SetPoint('LEFT', 192, 0)
-        checkbox:SetScript('OnClick', function()
-            m.update_continuation()
-            if this:GetChecked() then
+        local btn = Aux.gui.button(m.settings, 16)
+        btn:SetBackdropColor(unpack(Aux.gui.config.frame_color))
+        btn:SetPoint('LEFT', 240, 0)
+        btn:SetWidth(120)
+        btn:SetHeight(25)
+        btn:SetText('Real Time Mode')
+        btn:SetBackdropColor(0.7, 0.3, 0.3)
+        btn:SetScript('OnClick', function()
+            this.on = not this.on
+            if this.on then
+                this:SetBackdropColor(0.3, 0.7, 0.3)
                 m.first_page_input:EnableMouse(nil)
                 m.last_page_input:EnableMouse(nil)
                 m.first_page_input:ClearFocus()
                 m.last_page_input:ClearFocus()
             else
+                this:SetBackdropColor(0.7, 0.3, 0.3)
                 m.first_page_input:EnableMouse(true)
                 m.last_page_input:EnableMouse(true)
             end
+            m.update_continuation()
         end)
-        local label = Aux.gui.label(checkbox, 15)
-        label:SetPoint('RIGHT', checkbox, 'LEFT', -1, 0)
-        label:SetText('Real Time')
-        public.real_time_checkbox = checkbox
+        public.real_time_button = btn
     end
     do
-        local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
-        checkbox:SetWidth(22)
-        checkbox:SetHeight(22)
-        checkbox:SetPoint('LEFT', 278, 0)
-        checkbox:SetScript('OnClick', function()
-            if this:GetChecked() then
-                this:SetChecked(nil)
+        local btn = Aux.gui.button(m.settings, 16)
+        btn:SetBackdropColor(unpack(Aux.gui.config.frame_color))
+        btn:SetPoint('LEFT', m.real_time_button, 'RIGHT', 30, 0)
+        btn:SetWidth(120)
+        btn:SetHeight(25)
+        btn:SetText('Auto Buy Mode')
+        btn:SetBackdropColor(0.7, 0.3, 0.3)
+        btn:SetScript('OnClick', function()
+            if this.on then
+                this.on = false
+                this:SetBackdropColor(0.7, 0.3, 0.3)
+            else
                 StaticPopup_Show('AUX_SEARCH_AUTO_BUY')
             end
         end)
-        local label = Aux.gui.label(checkbox, 15)
-        label:SetPoint('RIGHT', checkbox, 'LEFT', -1, 0)
-        label:SetText('Auto Buy')
-        private.auto_buy_checkbox = checkbox
+        private.auto_buy_button = btn
     end
     do
-        local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
-        checkbox:SetWidth(22)
-        checkbox:SetHeight(22)
-        checkbox:SetPoint('LEFT', 398, 0)
-        checkbox:SetScript('OnClick', function()
-            if this:GetChecked() then
-                this:SetChecked(nil)
-                StaticPopup_Show('AUX_SEARCH_AUTO_BUY_FILTER')
-            else
+        local btn = Aux.gui.button(m.settings, 16)
+        btn:SetBackdropColor(unpack(Aux.gui.config.frame_color))
+        btn:SetPoint('LEFT', m.auto_buy_button, 'RIGHT', 30, 0)
+        btn:SetWidth(120)
+        btn:SetHeight(25)
+        btn:SetText('Auto Buy Filter')
+        btn:SetBackdropColor(0.7, 0.3, 0.3)
+        btn:SetScript('OnClick', function()
+            if this.on then
+                this.on = false
                 m.auto_buy_validator = nil
+                this:SetBackdropColor(0.7, 0.3, 0.3)
+            else
+                StaticPopup_Show('AUX_SEARCH_AUTO_BUY_FILTER')
             end
         end)
-        local label = Aux.gui.label(checkbox, 15)
-        label:SetPoint('RIGHT', checkbox, 'LEFT', -1, 0)
-        label:SetText('Auto Buy Filter')
-        private.auto_buy_filter_checkbox = checkbox
-    end
-    do
-        local editbox = Aux.gui.editbox(m.settings)
-        editbox:SetBackdropColor(unpack(Aux.gui.config.frame_color))
-        editbox:SetMaxLetters(nil)
-        editbox:EnableMouse(1)
-        editbox.complete = Aux.completion.complete_filter
-        editbox:SetPoint('RIGHT', -11, 0)
-        editbox:SetWidth(295)
-        editbox:SetHeight(25)
-        editbox:SetScript('OnChar', function()
-            this:complete()
-        end)
-        editbox:SetScript('OnTabPressed', function()
-            this:HighlightText(0, 0)
-        end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:HighlightText(0, 0)
-            this:ClearFocus()
-        end)
-        editbox:SetScript('OnTextChanged', function()
-            m.auto_buy_filter_checkbox:SetChecked(nil)
-        end)
-        editbox:SetText(aux_auto_buy_filter)
-        private.auto_buy_filter_editbox = editbox
+        private.auto_buy_filter_button = btn
     end
     do
         local btn = Aux.gui.button(m.controls, 26)
@@ -267,7 +248,9 @@ Aux.search_tab.FRAMES(function(m, public, private)
             local item_info = Aux.cursor_item() and Aux.info.item(Aux.cursor_item().item_id)
             if item_info then
                 m.set_filter(strlower(item_info.name)..'/exact')
-                m.real_time_checkbox:SetChecked(nil)
+                if m.real_time_button.on then
+                    m.real_time_button:Click()
+                end
                 m.execute()
             end
             ClearCursor()
@@ -745,11 +728,6 @@ Aux.search_tab.FRAMES(function(m, public, private)
                 m.search_box:SetText(data.search.filter_string)
             elseif button == 'RightButton' and IsShiftKeyDown() then
                 m.add_filter(data.search.filter_string)
-            elseif button == 'LeftButton' and IsAltKeyDown() then
-                m.popup_info.rename = data.search
-                StaticPopup_Show('AUX_SEARCH_SAVED_RENAME')
-            elseif button == 'RightButton' and IsAltKeyDown() then
-                -- unused
             elseif button == 'LeftButton' and IsControlKeyDown() then
                 if st == m.favorite_searches_listing and data.index > 1 then
                     local temp = aux_favorite_searches[data.index - 1]

@@ -359,7 +359,9 @@ function private.SetItemRef(...)
         local item_info = m.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
             m.search_tab.set_filter(strlower(item_info.name)..'/exact')
-            m.search_tab.real_time_checkbox:SetChecked(nil)
+            if m.real_time_button.on then
+                m.real_time_button:Click()
+            end
             m.search_tab.execute()
             return
         end
@@ -378,7 +380,9 @@ function private.UseContainerItem(...)
         item_info = item_info and m.info.item(item_info.item_id)
         if item_info then
             m.search_tab.set_filter(strlower(item_info.name)..'/exact')
-            m.search_tab.real_time_checkbox:SetChecked(nil)
+            if m.real_time_button.on then
+                m.real_time_button:Click()
+            end
             m.search_tab.execute()
         end
         return
