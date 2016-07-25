@@ -85,7 +85,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             end
         end)
         local label = Aux.gui.label(editbox, 15)
-        label:SetPoint('RIGHT', editbox, 'LEFT', -5, 0)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
         label:SetText('Pages')
         label:SetTextColor(unpack(Aux.gui.config.text_color.enabled))
         private.first_page_input = editbox
