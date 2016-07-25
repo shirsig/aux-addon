@@ -39,7 +39,7 @@ do
 end
 
 function public.on_load()
-    public.version = '3.1.0'
+    public.version = '3.2.0'
     public.blizzard_ui_shown = false
     public.bids_loaded = false
     public.current_owner_page = nil
@@ -359,10 +359,7 @@ function private.SetItemRef(...)
         local item_info = m.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
         if item_info then
             m.search_tab.set_filter(strlower(item_info.name)..'/exact')
-            if m.real_time_button:GetChecked() then
-                m.real_time_button:Click()
-            end
-            m.search_tab.execute()
+            m.search_tab.execute(nil, false)
             return
         end
     end
@@ -380,10 +377,7 @@ function private.UseContainerItem(...)
         item_info = item_info and m.info.item(item_info.item_id)
         if item_info then
             m.search_tab.set_filter(strlower(item_info.name)..'/exact')
-            if m.real_time_button:GetChecked() then
-                m.real_time_button:Click()
-            end
-            m.search_tab.execute()
+            m.search_tab.execute(nil, false)
         end
         return
     end

@@ -66,7 +66,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local editbox = Aux.gui.editbox(m.settings)
-        editbox:SetPoint('LEFT', 70, 0)
+        editbox:SetPoint('LEFT', 75, 0)
         editbox:SetWidth(50)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(nil)
@@ -111,7 +111,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             end
         end)
         local label = Aux.gui.label(editbox, 16)
-        label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
         label:SetText('-')
         label:SetTextColor(unpack(Aux.gui.config.text_color.enabled))
         private.last_page_input = editbox
@@ -253,10 +253,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             local item_info = Aux.cursor_item() and Aux.info.item(Aux.cursor_item().item_id)
             if item_info then
                 m.set_filter(strlower(item_info.name)..'/exact')
-                if m.real_time_button:GetChecked() then
-                    m.real_time_button:Click()
-                end
-                m.execute()
+                m.execute(nil, false)
             end
             ClearCursor()
         end)

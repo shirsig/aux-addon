@@ -412,7 +412,11 @@ function private.start_search(queries, continuation)
     }
 end
 
-function public.execute(resume)
+function public.execute(resume, real_time)
+    if real_time == nil then
+        real_time = m.real_time_button:GetChecked()
+    end
+
     if resume then
         m.search_box:SetText(m.current_search().filter_string)
     end
@@ -421,7 +425,7 @@ function public.execute(resume)
     local queries = Aux.scan_util.parse_filter_string(filter_string)
     if not queries then
         return
-    elseif m.real_time_button:GetChecked() then
+    elseif real_time then
         if getn(queries) > 1 then
             Aux.log('Invalid filter: The real time mode does not support multiple queries')
             return
@@ -438,7 +442,7 @@ function public.execute(resume)
         if resume then
             m.results_listing:SetSelectedRecord()
         else
-            if m.current_search().real_time ~= m.real_time_button:GetChecked() then
+            if m.current_search().real_time ~= real_time then
                 m.results_listing:Reset()
             end
             m.current_search().records = {}
@@ -452,8 +456,8 @@ function public.execute(resume)
 
     m.close_settings()
     m.update_tab(m.RESULTS)
-    m.current_search().real_time = m.real_time_button:GetChecked()
-    if m.real_time_button:GetChecked() then
+    m.current_search().real_time = real_time
+    if real_time then
         m.start_real_time_scan(queries[1], nil, continuation)
     else
         for _, query in queries do
