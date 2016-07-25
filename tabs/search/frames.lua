@@ -73,7 +73,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     do
         local editbox = Aux.gui.editbox(m.settings)
         editbox:SetBackdropColor(unpack(Aux.gui.config.frame_color))
-        editbox:SetPoint('LEFT', 49, 0)
+        editbox:SetPoint('LEFT', 48, 0)
         editbox:SetWidth(30)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(nil)
@@ -85,7 +85,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             m.execute()
         end)
         local label = Aux.gui.label(editbox, 15)
-        label:SetPoint('RIGHT', editbox, 'LEFT', -5, 0)
+        label:SetPoint('RIGHT', editbox, 'LEFT', -4, 0)
         label:SetText('Pages')
         private.first_page_input = editbox
     end
@@ -112,7 +112,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
-        checkbox:SetPoint('LEFT', 194, 0)
+        checkbox:SetPoint('LEFT', 192, 0)
         checkbox:SetScript('OnClick', function()
             m.update_continuation()
             if this:GetChecked() then
@@ -126,15 +126,16 @@ Aux.search_tab.FRAMES(function(m, public, private)
             end
         end)
         local label = Aux.gui.label(checkbox, 15)
-        label:SetPoint('RIGHT', checkbox, 'LEFT', -2, 0)
+        label:SetPoint('RIGHT', checkbox, 'LEFT', -1, 0)
         label:SetText('Real Time')
         public.real_time_checkbox = checkbox
+        Aux.log(label:GetLeft()-m.last_page_input:GetRight())
     end
     do
         local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
-        checkbox:SetPoint('LEFT', 280, 0)
+        checkbox:SetPoint('LEFT', 278, 0)
         checkbox:SetScript('OnClick', function()
             if this:GetChecked() then
                 this:SetChecked(nil)
@@ -142,15 +143,16 @@ Aux.search_tab.FRAMES(function(m, public, private)
             end
         end)
         local label = Aux.gui.label(checkbox, 15)
-        label:SetPoint('RIGHT', checkbox, 'LEFT', -2, 0)
+        label:SetPoint('RIGHT', checkbox, 'LEFT', -1, 0)
         label:SetText('Auto Buy')
         private.auto_buy_checkbox = checkbox
+        Aux.log(label:GetLeft()-m.real_time_checkbox:GetRight())
     end
     do
         local checkbox = CreateFrame('CheckButton', nil, m.settings, 'UICheckButtonTemplate')
         checkbox:SetWidth(22)
         checkbox:SetHeight(22)
-        checkbox:SetPoint('LEFT', 400, 0)
+        checkbox:SetPoint('LEFT', 398, 0)
         checkbox:SetScript('OnClick', function()
             if this:GetChecked() then
                 this:SetChecked(nil)
@@ -160,7 +162,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
             end
         end)
         local label = Aux.gui.label(checkbox, 15)
-        label:SetPoint('RIGHT', checkbox, 'LEFT', -2, 0)
+        label:SetPoint('RIGHT', checkbox, 'LEFT', -1, 0)
         label:SetText('Auto Buy Filter')
         private.auto_buy_filter_checkbox = checkbox
     end
@@ -170,8 +172,8 @@ Aux.search_tab.FRAMES(function(m, public, private)
         editbox:SetMaxLetters(nil)
         editbox:EnableMouse(1)
         editbox.complete = Aux.completion.complete_filter
-        editbox:SetPoint('RIGHT', -9, 0)
-        editbox:SetWidth(293)
+        editbox:SetPoint('RIGHT', -11, 0)
+        editbox:SetWidth(295)
         editbox:SetHeight(25)
         editbox:SetScript('OnChar', function()
             this:complete()
