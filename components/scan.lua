@@ -115,6 +115,7 @@ end
 
 function private.wait_for_callback(...)
 	local ok = true
+    local ret
 
     local f = tremove(arg, 1)
     local k = tremove(arg)
@@ -122,7 +123,7 @@ function private.wait_for_callback(...)
 	if f then
 		tinsert(arg, {
 			suspend = function() ok = false end,
-			resume = function() ok = true end,
+			resume = function(...) ok = true ret = arg end,
 		})
 		f(unpack(arg))
 	end
@@ -130,7 +131,7 @@ function private.wait_for_callback(...)
 	if ok then
 		return k()
     else
-        return Aux.control.wait_until(function() return ok end, k)
+        return Aux.control.wait_until(function() return ok end, function() return k(unpack(ret)) end)
 	end
 end
 
@@ -199,10 +200,15 @@ function private.scan_auctions_helper(i, k)
         Aux.history.process_auction(auction_info)
 
         if m.current_thread().params.auto_buy_validator and m.current_thread().params.auto_buy_validator(auction_info) then
-            Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price)
-        end
-        if not m.current_query().validator or m.current_query().validator(auction_info) then
-            return m.wait_for_callback(m.current_thread().params.on_auction, auction_info, recurse)
+            return Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, function() return private.scan_auctions_helper(i, k) end)
+        elseif not m.current_query().validator or m.current_query().validator(auction_info) then
+            return m.wait_for_callback(m.current_thread().params.on_auction, auction_info, function(removed)
+                if removed then
+                    return m.scan_auctions_helper(i, k)
+                else
+                    return recurse()
+                end
+            end)
         end
     end
 

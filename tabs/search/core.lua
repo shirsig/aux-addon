@@ -296,7 +296,7 @@ function private.start_real_time_scan(query, search, continuation)
             if not ignore_page then
                 if m.auto_buy_checkbox:GetChecked() then
                     ctrl.suspend()
-                    Aux.place_bid('list', auction_record.index, auction_record.buyout_price, ctrl.resume)
+                    Aux.place_bid('list', auction_record.index, auction_record.buyout_price, function() ctrl.resume(true) end)
                 else
                     tinsert(new_records, auction_record)
                 end
@@ -388,7 +388,7 @@ function private.start_search(queries, continuation)
         on_auction = function(auction_record, ctrl)
             if m.auto_buy_checkbox:GetChecked() then
                 ctrl.suspend()
-                Aux.place_bid('list', auction_record.index, auction_record.buyout_price, ctrl.resume)
+                Aux.place_bid('list', auction_record.index, auction_record.buyout_price, function() ctrl.resume(true) end)
             elseif getn(search.records) < 1000 then
                 tinsert(search.records, auction_record)
                 if getn(search.records) == 1000 then
