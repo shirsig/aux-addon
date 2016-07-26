@@ -51,7 +51,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     do
         local panel = CreateFrame('Frame', nil, m.frame)
         panel:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]]}
-        panel:SetBackdropColor(unpack(Aux.gui.config.content_color))
+        panel:SetBackdropColor(unpack(Aux.gui.config.content_color.backdrop))
         panel:SetPoint('LEFT', m.settings_button, 'RIGHT', 0, 0)
         panel:SetPoint('RIGHT', 0, 0)
         panel:SetHeight(42)

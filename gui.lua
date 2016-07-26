@@ -3,11 +3,9 @@ local m, public, private = Aux.module'gui'
 public.config = {
     link_color = { 153, 255, 255, 1 }, -- TODO inline color needs 255, others need /255
     edge_size = 1.5,
-    window_color = { backdrop = { 24/255, 24/255, 24/255, .93 }, border = { 30/255, 30/255, 30/255, 1 } },
-    frame_color = {24/255, 24/255, 24/255, 1},
-    frame_border_color = {1, 1, 1, .03},
-    content_color = {42/255, 42/255, 42/255, 1},
-    content_border_color = {0, 0, 0, 0},
+    window_color = { backdrop = {24/255, 24/255, 24/255, .93}, border = {30/255, 30/255, 30/255, 1} },
+    panel_color = { backdrop = {24/255, 24/255, 24/255, 1}, border = {1, 1, 1, .03} },
+    content_color = { backdrop = {42/255, 42/255, 42/255, 1}, border = {0, 0, 0, 0} },
     content_font = [[Fonts\ARIALN.TTF]],
     normal_font_size = 15,
     text_color = { enabled = { 255/255, 254/255, 250/255, 1 }, disabled = { 147/255, 151/255, 139/255, 1 } },
@@ -41,11 +39,11 @@ function public.set_window_style(frame)
 end
 
 function public.set_panel_style(frame)
-    m.set_frame_style(frame, m.config.frame_color, m.config.frame_border_color)
+    m.set_frame_style(frame, m.config.panel_color.backdrop, m.config.panel_color.border)
 end
 
 function public.set_content_style(frame)
-    m.set_frame_style(frame, m.config.content_color, m.config.content_border_color)
+    m.set_frame_style(frame, m.config.content_color.backdrop, m.config.content_color.border)
 end
 
 function public.panel(parent)
@@ -138,7 +136,7 @@ do
             tab.group = self
             tab:SetHeight(24)
             tab:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size}
-            tab:SetBackdropBorderColor(unpack(m.config.frame_border_color))
+            tab:SetBackdropBorderColor(unpack(m.config.panel_color.border))
             local dock = tab:CreateTexture(nil, 'OVERLAY')
             dock:SetHeight(3)
             if position == 'TOP' then
@@ -148,7 +146,7 @@ do
                 dock:SetPoint('TOPLEFT', 1, 1)
                 dock:SetPoint('TOPRIGHT', -1, 1)
             end
-            dock:SetTexture(unpack(m.config.frame_color))
+            dock:SetTexture(unpack(m.config.panel_color.backdrop))
             tab.dock = dock
             local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
             highlight:SetAllPoints()
@@ -204,13 +202,13 @@ do
                 if tab.group.selected == tab.id then
                     tab.text:SetTextColor(unpack(m.config.label_color.enabled))
                     tab:Disable()
-                    tab:SetBackdropColor(unpack(m.config.frame_color))
+                    tab:SetBackdropColor(unpack(m.config.panel_color.backdrop))
                     tab.dock:Show()
                     tab:SetHeight(29)
                 else
                     tab.text:SetTextColor(unpack(m.config.text_color.enabled))
                     tab:Enable()
-                    tab:SetBackdropColor(unpack(m.config.content_color))
+                    tab:SetBackdropColor(unpack(m.config.content_color.backdrop))
                     tab.dock:Hide()
                     tab:SetHeight(24)
                 end
@@ -367,9 +365,9 @@ function public.horizontal_line(parent, y_offset, inverted_color)
     texture:SetPoint('TOPRIGHT', parent, 'TOPRIGHT', -2, y_offset)
     texture:SetHeight(2)
     if inverted_color then
-        texture:SetTexture(unpack(m.config.frame_color))
+        texture:SetTexture(unpack(m.config.panel_color.backdrop))
     else
-        texture:SetTexture(unpack(m.config.content_color))
+        texture:SetTexture(unpack(m.config.content_color.backdrop))
     end
     return texture
 end
@@ -380,9 +378,9 @@ function public.vertical_line(parent, x_offset, top_offset, bottom_offset, inver
     texture:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', x_offset, bottom_offset or 2)
     texture:SetWidth(2)
     if inverted_color then
-        texture:SetTexture(unpack(m.config.frame_color))
+        texture:SetTexture(unpack(m.config.panel_color.backdrop))
     else
-        texture:SetTexture(unpack(m.config.content_color))
+        texture:SetTexture(unpack(m.config.content_color.backdrop))
     end
     return texture
 end
@@ -395,8 +393,8 @@ do
         local dropdown = CreateFrame('Frame', 'aux_dropdown'..id, parent, 'UIDropDownMenuTemplate')
 
         dropdown:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size, insets={top=5,bottom=5}}
-        dropdown:SetBackdropColor(unpack(m.config.content_color))
-        dropdown:SetBackdropBorderColor(unpack(m.config.content_border_color))
+        dropdown:SetBackdropColor(unpack(m.config.content_color.backdrop))
+        dropdown:SetBackdropBorderColor(unpack(m.config.content_color.border))
         local left = getglobal(dropdown:GetName()..'Left'):Hide()
         local middle = getglobal(dropdown:GetName()..'Middle'):Hide()
         local right = getglobal(dropdown:GetName()..'Right'):Hide()
@@ -492,7 +490,7 @@ function public.slider(frame, name)
     m.set_panel_style(slider)
     local thumb_texture = slider:CreateTexture(nil, 'ARTWORK')
     thumb_texture:SetPoint('CENTER', 0, 0)
-    thumb_texture:SetTexture(unpack(m.config.content_color))
+    thumb_texture:SetTexture(unpack(m.config.content_color.backdrop))
     thumb_texture:SetHeight(15)
     thumb_texture:SetWidth(8)
     slider:SetThumbTexture(thumb_texture)
@@ -545,8 +543,8 @@ end
 --    checkbox:SetHeight(16)
 --    checkbox:SetPoint('TOPLEFT', 4, -4)
 --    checkbox:SetBackdrop({ bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size })
---    checkbox:SetBackdropColor(unpack(m.config.content_color))
---    checkbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
+--    checkbox:SetBackdropColor(unpack(m.config.content_color.backdrop))
+--    checkbox:SetBackdropBorderColor(unpack(m.config.content_color.border))
 --    local highlight = checkbox:CreateTexture(nil, 'HIGHLIGHT')
 --    highlight:SetAllPoints()
 --    highlight:SetTexture(1, 1, 1, .2)
