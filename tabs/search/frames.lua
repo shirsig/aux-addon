@@ -4,21 +4,21 @@ Aux.search_tab.FRAMES(function(m, public, private)
     m.frame:SetScript('OnUpdate', m.on_update)
     m.frame:Hide()
 
-    m.frame.filter = CreateFrame('Frame', nil, m.frame, 'AuxFrameBoxTemplate')
+    m.frame.filter = Aux.gui.panel(m.frame)
     m.frame.filter:SetAllPoints(AuxFrameContent)
 
-    m.frame.results = CreateFrame('Frame', nil, m.frame, 'AuxFrameBoxTemplate')
+    m.frame.results = Aux.gui.panel(m.frame)
     m.frame.results:SetAllPoints(AuxFrameContent)
 
-    m.frame.saved = CreateFrame('Frame', nil, m.frame, 'AuxFrameBoxTemplate')
+    m.frame.saved = Aux.gui.panel(m.frame)
     m.frame.saved:SetAllPoints(AuxFrameContent)
 
-    m.frame.saved.favorite = CreateFrame('Frame', nil, m.frame.saved, 'AuxFrameBoxTemplate')
+    m.frame.saved.favorite = Aux.gui.panel(m.frame.saved)
     m.frame.saved.favorite:SetWidth(373)
     m.frame.saved.favorite:SetPoint('TOPLEFT', 4, -4)
     m.frame.saved.favorite:SetPoint('BOTTOMLEFT', 4, 4)
 
-    m.frame.saved.recent = CreateFrame('Frame', nil, m.frame.saved, 'AuxFrameBoxTemplate')
+    m.frame.saved.recent = Aux.gui.panel(m.frame.saved)
     m.frame.saved.recent:SetWidth(373)
     m.frame.saved.recent:SetPoint('TOPRIGHT', -4, -4)
     m.frame.saved.recent:SetPoint('BOTTOMRIGHT', -4, 4)
@@ -44,13 +44,14 @@ Aux.search_tab.FRAMES(function(m, public, private)
             fake_icon_part:SetFont([[Fonts\FRIZQT__.TTF]], 23)
             fake_icon_part:SetPoint('CENTER', 0, offset)
             fake_icon_part:SetText('_')
---            fake_icon:SetTextHeight(28)
         end
 
         private.settings_button = btn
     end
     do
-        local panel = Aux.gui.panel(m.frame)
+        local panel = CreateFrame('Frame', nil, m.frame)
+        panel:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]]}
+        panel:SetBackdropColor(unpack(Aux.gui.config.content_color))
         panel:SetPoint('LEFT', m.settings_button, 'RIGHT', 0, 0)
         panel:SetPoint('RIGHT', 0, 0)
         panel:SetHeight(42)

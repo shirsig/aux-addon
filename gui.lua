@@ -1,64 +1,47 @@
 local m, public, private = Aux.module'gui'
 
---TSM.designDefaults = {
---    frameColors = {
---        frameBG = { backdrop = { 24, 24, 24, .93 }, border = { 30, 30, 30, 1 } },
---        frame = { backdrop = { 24, 24, 24, 1 }, border = { 255, 255, 255, 0.03 } },
---        content = { backdrop = { 42, 42, 42, 1 }, border = { 0, 0, 0, 0 } },
---    },
---    textColors = {
---        iconRegion = { enabled = { 249, 255, 247, 1 } },
---        text = { enabled = { 255, 254, 250, 1 }, disabled = { 147, 151, 139, 1 } },
---        label = { enabled = { 216, 225, 211, 1 }, disabled = { 150, 148, 140, 1 } },
---        title = { enabled = { 132, 219, 9, 1 } },
---        link = { enabled = { 49, 56, 133, 1 } },
---    },
---    inlineColors = {
---        link = { 153, 255, 255, 1 },
---        link2 = { 153, 255, 255, 1 },
---        category = { 36, 106, 36, 1 },
---        category2 = { 85, 180, 8, 1 },
---        tooltip = { 130, 130, 250, 1 },
---    },
---    edgeSize = 1.5,
---    fonts = {
---        content = "Fonts\\ARIALN.TTF",
---        bold = "Interface\\Addons\\TradeSkillMaster\\Media\\DroidSans-Bold.ttf",
---    },
---    fontSizes = {
---        normal = 15,
---        medium = 13,
---        small = 12,
---    },
---}
-
 public.config = {
-    link_color = { 153, 255, 255, 1 },
-    link_color2 = { 153, 255, 255, 1 }, -- TODO inline color needs 255, others need /255
+    link_color = { 153, 255, 255, 1 }, -- TODO inline color needs 255, others need /255
     edge_size = 1.5,
+    window_color = { backdrop = { 24/255, 24/255, 24/255, .93 }, border = { 30/255, 30/255, 30/255, 1 } },
     frame_color = {24/255, 24/255, 24/255, 1},
     frame_border_color = {1, 1, 1, .03},
     content_color = {42/255, 42/255, 42/255, 1},
     content_border_color = {0, 0, 0, 0},
     content_font = [[Fonts\ARIALN.TTF]],
---    content_font = [[Interface\AddOns\Aux-Addon\ARIALN.TTF]],
     normal_font_size = 15,
-    normal_button_font_size = 16, -- 15 not working for some clients
     text_color = { enabled = { 255/255, 254/255, 250/255, 1 }, disabled = { 147/255, 151/255, 139/255, 1 } },
     label_color = { enabled = { 216/255, 225/255, 211/255, 1 }, disabled = { 150/255, 148/255, 140/255, 1 } },
     on_color  = {0.3, 0.7, 0.3},
-    off_color  = {0.7, 0.3, 0.3 },
+    off_color  = {0.7, 0.3, 0.3},
 }
 
 function public.inline_color(color)
     local r, g, b, a = unpack(color)
-    return format("|c%02X%02X%02X%02X", a, r, g, b)
+    return format('|c%02X%02X%02X%02X', a, r, g, b)
+end
+
+function public.set_frame_style(frame, backdrop_color, border_color)
+    frame:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size, tile=true}
+    frame:SetBackdropColor(unpack(backdrop_color))
+    frame:SetBackdropBorderColor(unpack(border_color))
+end
+
+function public.set_window_style(frame)
+    m.set_frame_style(frame, m.config.window_color.backdrop, m.config.window_color.border)
+end
+
+function public.set_panel_style(frame)
+    m.set_frame_style(frame, m.config.frame_color, m.config.frame_border_color)
+end
+
+function public.set_content_style(frame)
+    m.set_frame_style(frame, m.config.content_color, m.config.content_border_color)
 end
 
 function public.panel(parent)
     local panel = CreateFrame('Frame', nil, parent)
-    panel:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]]}
-    panel:SetBackdropColor(unpack(m.config.content_color))
+    m.set_panel_style(panel)
     return panel
 end
 
@@ -83,9 +66,7 @@ end
 
 function public.button(parent, text_height)
     local button = CreateFrame('Button', nil, parent)
-    button:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size}
-    button:SetBackdropColor(unpack(m.config.content_color))
-    button:SetBackdropBorderColor(unpack(m.config.content_border_color))
+    m.set_content_style(button)
     local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
     highlight:SetAllPoints()
     highlight:SetTexture(1, 1, 1, .2)
@@ -148,12 +129,7 @@ do
             tab.group = self
             tab:SetHeight(24)
             tab:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size}
-            tab:SetBackdropColor(0, 0, 0, 0)
             tab:SetBackdropBorderColor(unpack(m.config.frame_border_color))
-            local image = tab:CreateTexture(nil, 'BACKGROUND')
-            image:SetAllPoints()
-            image:SetTexture(unpack(m.config.content_color))
-            tab.image = image
             local dock = tab:CreateTexture(nil, 'OVERLAY')
             dock:SetHeight(3)
             if position == 'TOP' then
@@ -217,17 +193,15 @@ do
         function self.update_tabs()
             for _, tab in ipairs(self.tabs) do
                 if tab.group.selected == tab.id then
---                    TSMAPI.Design:SetWidgetLabelColor(tab.text)
-                    tab.text:SetTextColor(216/255, 225/255, 211/255) -- TODO
+                    tab.text:SetTextColor(unpack(m.config.label_color.enabled))
                     tab:Disable()
-                    tab.image:SetTexture(unpack(m.config.frame_color))
+                    tab:SetBackdropColor(unpack(m.config.frame_color))
                     tab.dock:Show()
                     tab:SetHeight(29)
                 else
---                    TSMAPI.Design:SetWidgetTextColor(tab.text)
-                    tab.text:SetTextColor(255/255, 254/255, 250/255) -- TODO
+                    tab.text:SetTextColor(unpack(m.config.text_color.enabled))
                     tab:Enable()
-                    tab.image:SetTexture(unpack(m.config.content_color))
+                    tab:SetBackdropColor(unpack(m.config.content_color))
                     tab.dock:Hide()
                     tab:SetHeight(24)
                 end
@@ -238,21 +212,16 @@ do
     end
 end
 
-function public.editbox(parent, name)
+function public.editbox(parent)
 
---        local frame = CreateFrame('Frame', name, parent)
---        frame:Hide()
-
-    local editbox = CreateFrame('EditBox', name, parent)
+    local editbox = CreateFrame('EditBox', nil, parent)
     editbox:SetAutoFocus(false)
     editbox:SetTextInsets(0, 0, 3, 3)
     editbox:SetMaxLetters(256)
     editbox:SetHeight(19)
     editbox:SetFont(m.config.content_font, m.config.normal_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
-    editbox:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size}
-    editbox:SetBackdropColor(unpack(m.config.content_color))
-    editbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
+    m.set_content_style(editbox)
 
     editbox:SetScript('OnEditFocusLost', function()
         this:HighlightText(0, 0)
@@ -280,15 +249,6 @@ function public.editbox(parent, name)
             end
         end)
     end
-
---        local label = frame:CreateFontString(nil, 'OVERLAY')
---        label:SetPoint('TOPLEFT', 0, -2)
---        label:SetPoint('TOPRIGHT', 0, -2)
---        label:SetJustifyH('LEFT')
---        label:SetJustifyV('CENTER')
---        label:SetHeight(18)
---        label:SetFont(m.config.content_font, m.config.normal_font_size)
---        label:SetShadowColor(0, 0, 0, 0)
 
     return editbox
 end
@@ -499,9 +459,7 @@ function public.slider(frame, name)
     slider:SetHeight(6)
     slider:SetHitRectInsets(0, 0, -8, -8)
     slider:SetValue(0)
-    slider:SetBackdrop{ bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size }
-    slider:SetBackdropColor(unpack(m.config.frame_color))
-    slider:SetBackdropBorderColor(unpack(m.config.frame_border_color))
+    m.set_panel_style(slider)
     local thumb_texture = slider:CreateTexture(nil, 'ARTWORK')
     thumb_texture:SetPoint('CENTER', 0, 0)
     thumb_texture:SetTexture(unpack(m.config.content_color))
@@ -524,11 +482,9 @@ function public.slider(frame, name)
     editbox:SetWidth(70)
     editbox:SetJustifyH('CENTER')
     editbox:EnableMouse(true)
-    editbox:SetBackdrop{ bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size }
-    editbox:SetBackdropColor(unpack(m.config.content_color))
-    editbox:SetBackdropBorderColor(unpack(m.config.content_border_color))
+    m.set_content_style(editbox)
 --    editbox:SetFont(m.config.content_font, m.config.normal_font_size)
-    editbox:SetFont(m.config.content_font, m.config.normal_button_font_size)
+    editbox:SetFont(m.config.content_font, m.config.normal_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
 --
 --    local button = CreateFrame('Button', nil, editbox, 'UIPanelButtonTemplate')

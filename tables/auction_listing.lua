@@ -86,7 +86,7 @@ public.search_config = {
         width = 0.06,
         align = 'CENTER',
         set = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color2)..count..'|r') or count
+            local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color)..count..'|r') or count
             if own > 0 then
                 numAuctionsText = numAuctionsText..(' |cffffff00('..own..')|r')
             end
@@ -256,7 +256,7 @@ public.auctions_config = {
         width = 0.06,
         align = 'CENTER',
         set = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color2)..count..'|r') or count
+            local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color)..count..'|r') or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -390,7 +390,7 @@ public.bids_config = {
         width = 0.06,
         align = 'CENTER',
         set = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color2)..count..'|r') or count
+            local numAuctionsText = expandable and (Aux.gui.inline_color(Aux.gui.config.link_color)..count..'|r') or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)

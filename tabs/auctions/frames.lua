@@ -4,7 +4,7 @@ Aux.auctions_tab.FRAMES(function(m, public, private)
     m.frame:SetScript('OnUpdate', m.on_update)
     m.frame:Hide()
 
-    m.frame.listing = CreateFrame('Frame', nil, m.frame, 'AuxFrameBoxTemplate')
+    m.frame.listing = Aux.gui.panel(m.frame)
     m.frame.listing:SetPoint('TOP', AuxFrame, 'TOP', 0, -8)
     m.frame.listing:SetPoint('BOTTOMLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, 0)
     m.frame.listing:SetPoint('BOTTOMRIGHT', AuxFrameContent, 'BOTTOMRIGHT', 0, 0)

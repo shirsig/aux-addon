@@ -18,38 +18,6 @@
 		</Scripts>
 	</Frame>
 
-    <GameTooltip name="AuxTooltip" inherits="GameTooltipTemplate">
-        <Scripts>
-            <OnTooltipAddMoney>
-                this.money = arg1
-            </OnTooltipAddMoney>
-        </Scripts>
-    </GameTooltip>
-
-    <Frame name="AuxFrameBoxTemplate" virtual="true">
-        <Layers>
-            <Layer level="BACKGROUND">
-                <FontString name="$parentTitle" inherits="GameFontHighlight">
-                    <Anchors>
-                        <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT">
-                            <Offset>
-                                <AbsDimension x="9" y="4"/>
-                            </Offset>
-                        </Anchor>
-                    </Anchors>
-                </FontString>
-            </Layer>
-        </Layers>
-        <Backdrop bgFile="Interface\Buttons\WHITE8X8" edgeFile="Interface\Buttons\WHITE8X8" tile="true">
-            <EdgeSize>
-                <AbsValue val="1.5"/>
-            </EdgeSize>
-            <Color r="0.09411764705882353" g="0.09411764705882353" b="0.09411764705882353"/>
-            <!--24/255-->
-            <BorderColor r="1" g="1" b="1" a="0.03"/>
-        </Backdrop>
-    </Frame>
-
 	<Frame name="AuxItemTemplate" virtual="true">
 		<Size><AbsDimension x="193" y="37"/></Size>
 		<Layers>
@@ -80,7 +48,7 @@
 		</Layers>
 	</Frame>
 
-    <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent">
+    <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent" clampedToScreen="true">
         <Size><AbsDimension x="768" y="447"/></Size>
         <Anchors>
             <Anchor point="LEFT">
@@ -115,14 +83,5 @@
                 </Anchors>
             </Frame>
         </Frames>
-        <Backdrop bgFile="Interface\Buttons\WHITE8X8" edgeFile="Interface\Buttons\WHITE8X8" tile="true">
-            <EdgeSize>
-                <AbsValue val="1.5"/>
-            </EdgeSize>
-            <Color r="0.09411764705882353" g="0.09411764705882353" b="0.09411764705882353" a="0.93"/>
-            <!--24/255-->
-            <BorderColor r="0.11764705882352941" g="0.11764705882352941" b="0.11764705882352941" a="1"/>
-            <!--30/255-->
-        </Backdrop>
     </Frame>
 </Ui>

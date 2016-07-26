@@ -39,7 +39,7 @@ do
 end
 
 function public.on_load()
-    public.version = '3.2.0'
+    public.version = '3.3.0'
     public.blizzard_ui_shown = false
     public.bids_loaded = false
     public.current_owner_page = nil
@@ -47,7 +47,13 @@ function public.on_load()
 
 	m.log('Aux v'..m.version..' loaded.')
 
+    Aux.gui.set_window_style(AuxFrame)
     tinsert(UISpecialFrames, 'AuxFrame')
+
+    CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
+    AuxTooltip:SetScript('OnTooltipAddMoney', function()
+        this.money = arg1
+    end)
 
     do
         local tab_group = m.gui.tab_group(AuxFrame, 'BOTTOM')
