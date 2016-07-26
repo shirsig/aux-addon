@@ -19,43 +19,10 @@ Aux.post_tab.FRAMES(function(m, public, private)
     m.frame.parameters:SetPoint('TOPLEFT', m.frame.inventory, 'TOPRIGHT', 2.5, 0)
     m.frame.parameters:SetPoint('TOPRIGHT', 0, 0)
 
-    m.frame.parameters.item = CreateFrame('Button', 'AuxPostItem', m.frame.parameters, 'AuxItemTemplate')
-    m.frame.parameters.item:SetPoint('TOPLEFT', 10, -10)
-
     m.frame.auctions = Aux.gui.panel(m.frame.content)
     m.frame.auctions:SetHeight(228)
     m.frame.auctions:SetPoint('BOTTOMLEFT', m.frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
     m.frame.auctions:SetPoint('BOTTOMRIGHT', 0, 0)
-
-    m.frame.parameters.item:EnableMouse()
-    m.frame.parameters.item:SetScript('OnReceiveDrag', function()
-        local item_info = Aux.cursor_item()
-        if item_info then
-            m.select_item(item_info.item_key)
-        end
-        ClearCursor()
-    end)
-    m.frame.parameters.item:SetScript('OnClick', function()
-        local item_info = Aux.cursor_item()
-        if item_info then
-            m.select_item(item_info.item_key)
-        end
-        ClearCursor()
-    end)
-    local highlight = m.frame.parameters.item:CreateTexture()
-    highlight:SetAllPoints(m.frame.parameters.item)
-    highlight:Hide()
-    highlight:SetTexture(1, .9, .9, .1)
-    m.frame.parameters.item:SetScript('OnEnter', function()
-        highlight:Show()
-        if m.selected_item then
-            Aux.info.set_tooltip(m.selected_item.itemstring, this, 'ANCHOR_RIGHT')
-        end
-    end)
-    m.frame.parameters.item:SetScript('OnLeave', function()
-        highlight:Hide()
-        GameTooltip:Hide()
-    end)
 
     do
         local checkbox = CreateFrame('CheckButton', nil, m.frame.inventory, 'UICheckButtonTemplate')
@@ -149,6 +116,41 @@ Aux.post_tab.FRAMES(function(m, public, private)
             m.refresh = true
         end)
         private.refresh_button = btn
+    end
+    do
+        local item = Aux.gui.item(m.frame.parameters)
+        item:SetPoint('TOPLEFT', 10, -10)
+        item:EnableMouse()
+        item:SetScript('OnReceiveDrag', function()
+            local item_info = Aux.cursor_item()
+            if item_info then
+                m.select_item(item_info.item_key)
+            end
+            ClearCursor()
+        end)
+        item:SetScript('OnClick', function()
+            local item_info = Aux.cursor_item()
+            if item_info then
+                m.select_item(item_info.item_key)
+            end
+            ClearCursor()
+        end)
+        local highlight = item:CreateTexture()
+        highlight:SetPoint('TOPLEFT', -2, 2)
+        highlight:SetPoint('BOTTOMRIGHT', 2, -2)
+        highlight:Hide()
+        highlight:SetTexture(1, .9, .9, .1)
+        item:SetScript('OnEnter', function()
+            highlight:Show()
+            if m.selected_item then
+                Aux.info.set_tooltip(m.selected_item.itemstring, this, 'ANCHOR_RIGHT')
+            end
+        end)
+        item:SetScript('OnLeave', function()
+            highlight:Hide()
+            GameTooltip:Hide()
+        end)
+        private.item = item
     end
     do
         local slider = Aux.gui.slider(m.frame.parameters)

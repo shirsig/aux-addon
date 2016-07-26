@@ -276,10 +276,10 @@ function private.update_item_configuration()
 	if not m.selected_item then
         m.refresh_button:Disable()
 
-        AuxPostItemIconTexture:SetTexture(nil)
-        AuxPostItemCount:SetText()
-        AuxPostItemName:SetTextColor(unpack(Aux.gui.config.label_color.enabled))
-        AuxPostItemName:SetText('No item selected')
+        m.item.texture:SetTexture(nil)
+        m.item.count:SetText()
+        m.item.name:SetTextColor(unpack(Aux.gui.config.label_color.enabled))
+        m.item.name:SetText('No item selected')
 
         m.unit_start_price:Hide()
         m.unit_buyout_price:Hide()
@@ -299,14 +299,14 @@ function private.update_item_configuration()
         m.historical_value_button:Show()
         m.hide_checkbox:Show()
 
-        AuxPostItemIconTexture:SetTexture(m.selected_item.texture)
-        AuxPostItemName:SetText('['..m.selected_item.name..']')
+        m.item.texture:SetTexture(m.selected_item.texture)
+        m.item.name:SetText('['..m.selected_item.name..']')
         local color = ITEM_QUALITY_COLORS[m.selected_item.quality]
-        AuxPostItemName:SetTextColor(color.r, color.g, color.b)
+        m.item.name:SetTextColor(color.r, color.g, color.b)
 		if m.selected_item.aux_quantity > 1 then
-            AuxPostItemCount:SetText(m.selected_item.aux_quantity)
+            m.item.count:SetText(m.selected_item.aux_quantity)
 		else
-            AuxPostItemCount:SetText()
+            m.item.count:SetText()
         end
 
         m.stack_size_slider.editbox:SetNumber(m.stack_size_slider:GetValue())

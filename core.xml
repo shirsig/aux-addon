@@ -18,36 +18,6 @@
 		</Scripts>
 	</Frame>
 
-	<Frame name="AuxItemTemplate" virtual="true">
-		<Size><AbsDimension x="193" y="37"/></Size>
-		<Layers>
-			<Layer level="BORDER">
-				<Texture name="$parentIconTexture">
-					<Size><AbsDimension x="32" y="32"/></Size>
-					<Anchors><Anchor point="LEFT"><Offset><AbsDimension x="2" y="0"/></Offset></Anchor></Anchors>
-				</Texture>
-				<Texture file="Interface\Buttons\UI-Quickslot2">
-					<Size><AbsDimension x="60" y="60"/></Size>
-					<Anchors><Anchor point="CENTER" relativeTo="$parentIconTexture"><Offset><AbsDimension x="0" y="0"/></Offset></Anchor></Anchors>
-				</Texture>
-				<FontString name="$parentCount" inherits="NumberFontNormal" justifyH="RIGHT">
-					<Anchors><Anchor point="BOTTOMRIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="-5" y="2"/></Offset></Anchor></Anchors>
-				</FontString>
-				<FontString name="$parentName" font="Fonts\ARIALN.TTF" justifyH="LEFT">
-                    <FontHeight>
-                        <AbsValue val="14"/>
-                    </FontHeight>
-					<Anchors>
-						<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$parentIconTexture"><Offset><AbsDimension x="10" y="0"/></Offset></Anchor>
-						<Anchor point="RIGHT"><Offset><AbsDimension x="-10" y="0"/></Offset></Anchor>
-						<Anchor point="TOP"><Offset><AbsDimension x="0" y="-5"/></Offset></Anchor>
-						<Anchor point="BOTTOM"><Offset><AbsDimension x="0" y="5"/></Offset></Anchor>
-					</Anchors>
-				</FontString>
-			</Layer>
-		</Layers>
-	</Frame>
-
     <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent" clampedToScreen="true">
         <Size><AbsDimension x="768" y="447"/></Size>
         <Anchors>

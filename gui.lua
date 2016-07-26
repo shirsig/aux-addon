@@ -16,6 +16,15 @@ public.config = {
     off_color  = {0.7, 0.3, 0.3},
 }
 
+do
+    local x = 0
+
+    function private.id()
+        x = x + 1
+        return 'Aux_frame'..x
+    end
+end
+
 function public.inline_color(color)
     local r, g, b, a = unpack(color)
     return format('|c%02X%02X%02X%02X', a, r, g, b)
@@ -322,6 +331,27 @@ function public.status_bar(parent)
     end
 
     return self
+end
+
+function public.item(parent)
+    local item = CreateFrame('Button', nil, parent)
+    item:SetWidth(193)
+    item:SetHeight(40)
+    local icon = CreateFrame('CheckButton', m.id(), item, 'ActionButtonTemplate')
+    icon:SetPoint('LEFT', 2, 0.5)
+    icon:SetHighlightTexture(nil)
+    icon:RegisterForClicks()
+    icon:EnableMouse(nil)
+    item.texture = getglobal(icon:GetName()..'Icon')
+    item.texture:SetTexCoord(0.06,0.94,0.06,0.94)
+    item.name = Aux.gui.label(icon)
+    item.name:SetJustifyH('LEFT')
+    item.name:SetPoint('LEFT', icon, 'RIGHT', 10, 0)
+    item.name:SetPoint('RIGHT', item, 'RIGHT', -10, 0.5)
+    item.name:SetPoint('TOP', item, 'TOP', -5, 0)
+    item.name:SetPoint('BOTTOM', item, 'BOTTOM', 5, 0)
+    item.count = getglobal(icon:GetName()..'Count')
+    return item
 end
 
 function public.label(parent, size)

@@ -1,6 +1,6 @@
 local m, public, private = Aux.module'item_listing'
 
-local ROW_HEIGHT = 38
+local ROW_HEIGHT = 39
 
 function public.render(item_listing)
 
@@ -20,14 +20,14 @@ function public.render(item_listing)
 			elseif not row.mouse_over then
 				row.highlight:Hide()
 			end
-			getglobal(row.item:GetName()..'IconTexture'):SetTexture(item_record.texture)
-			getglobal(row.item:GetName()..'Name'):SetText('['..item_record.name..']')
+			row.item.texture:SetTexture(item_record.texture)
+			row.item.name:SetText('['..item_record.name..']')
 			local color = ITEM_QUALITY_COLORS[item_record.quality]
-			getglobal(row.item:GetName()..'Name'):SetTextColor(color.r, color.g, color.b)
+			row.item.name:SetTextColor(color.r, color.g, color.b)
 			if item_record.aux_quantity > 1 then
-				getglobal(row.item:GetName()..'Count'):SetText(item_record.aux_quantity)
+				row.item.count:SetText(item_record.aux_quantity)
 			else
-				getglobal(row.item:GetName()..'Count'):SetText()
+				row.item.count:SetText()
 			end
             row:Show()
         else
@@ -73,8 +73,8 @@ function public.create(parent, on_click, on_enter, on_leave, selected)
 	while total_height + ROW_HEIGHT < max_height do
 			local row = CreateFrame('Button', nil, content)
 			row:SetHeight(ROW_HEIGHT)
-			row:SetWidth(193)
-			row:SetPoint('TOPLEFT', content, 0, -((row_index-1) * ROW_HEIGHT))
+			row:SetWidth(195)
+			row:SetPoint('TOPLEFT', content, 2, -((row_index-1) * ROW_HEIGHT))
 			row:SetScript('OnClick', on_click)
 			row:SetScript('OnEnter', function()
 				row.highlight:Show()
@@ -87,13 +87,15 @@ function public.create(parent, on_click, on_enter, on_leave, selected)
 				on_leave()
 			end)
 
-			local item = CreateFrame('Frame', name..'_item'..row_index, row, 'AuxItemTemplate')
-			row.item = item
-			item:SetPoint('CENTER', 4, 0)
+			row.item = Aux.gui.item(row)
+			row.item:EnableMouse(nil)
+			row.item:SetScale(0.9)
+			row.item:SetPoint('LEFT', 2, 0)
+			row.item:SetPoint('RIGHT', 2, 0)
 			row:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 			
 			local highlight = row:CreateTexture()
-			highlight:SetAllPoints(item)
+			highlight:SetAllPoints(row)
 			highlight:Hide()
 			highlight:SetTexture(1, .9, .9, .1)
 			row.highlight = highlight
