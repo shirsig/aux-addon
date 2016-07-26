@@ -227,7 +227,7 @@ local methods = {
         -- update the frame
         st.scrollBar:ClearAllPoints()
         st.scrollBar:SetPoint('BOTTOMRIGHT', st, -1, 1)
-        st.scrollBar:SetPoint('TOPRIGHT', st, -1, -st.sizes.headHeight - ST_HEAD_SPACE)
+        st.scrollBar:SetPoint('TOPRIGHT', st, -1, -st.sizes.headHeight - ST_HEAD_SPACE - 1)
 
         if st.sizes.headHeight > 0 then
             st.headLine:Show()
