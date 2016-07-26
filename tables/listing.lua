@@ -5,7 +5,7 @@ local ST_COUNT = 0
 local ST_ROW_HEIGHT = 15
 local ST_ROW_TEXT_SIZE = 13
 local ST_HEAD_HEIGHT = 27
-local ST_HEAD_SPACE = 4
+local ST_HEAD_SPACE = 2
 local DEFAULT_COL_INFO = {{width=1}}
 
 
@@ -402,7 +402,6 @@ local methods = {
 
     SetColInfo = function(st, colInfo)
         colInfo = colInfo or DEFAULT_COL_INFO
---        TSMAPI:Assert(type(colInfo) == 'table' and type(colInfo[1]) == 'table', "Invalid colInfo argument.")
         st.colInfo = colInfo
         st:Redraw()
     end,

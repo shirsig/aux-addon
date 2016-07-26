@@ -15,7 +15,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
     m.frame.inventory:SetPoint('BOTTOMLEFT', 0, 0)
 
     m.frame.parameters = Aux.gui.panel(m.frame.content)
-    m.frame.parameters:SetHeight(171)
+    m.frame.parameters:SetHeight(173)
     m.frame.parameters:SetPoint('TOPLEFT', m.frame.inventory, 'TOPRIGHT', 2.5, 0)
     m.frame.parameters:SetPoint('TOPRIGHT', 0, 0)
 
@@ -23,7 +23,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
     m.frame.parameters.item:SetPoint('TOPLEFT', 10, -10)
 
     m.frame.auctions = Aux.gui.panel(m.frame.content)
-    m.frame.auctions:SetHeight(230)
+    m.frame.auctions:SetHeight(228)
     m.frame.auctions:SetPoint('BOTTOMLEFT', m.frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
     m.frame.auctions:SetPoint('BOTTOMRIGHT', 0, 0)
 
