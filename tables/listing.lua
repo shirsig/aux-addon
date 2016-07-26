@@ -363,10 +363,10 @@ local methods = {
         row:SetHeight(ST_ROW_HEIGHT)
         local rowNum = getn(st.rows) + 1
         if rowNum == 1 then
-            row:SetPoint('TOPLEFT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE))
+            row:SetPoint('TOPLEFT', 2, -(st.sizes.headHeight + ST_HEAD_SPACE))
             row:SetPoint('TOPRIGHT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE))
         else
-            row:SetPoint('TOPLEFT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
+            row:SetPoint('TOPLEFT', 2, -(st.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
             row:SetPoint('TOPRIGHT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
         end
         local highlight = row:CreateTexture()
