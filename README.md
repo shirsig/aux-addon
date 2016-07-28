@@ -5,10 +5,10 @@ The most advanced auction house addOn for the 1.12 client with some features mor
 ## Core Features
 
 ### General
-* Completely independent replacement for the blizzard interface.
+* Completely independent replacement for the Blizzard interface.
 * Elegant look based on the retail addOn TSM.
 * Many convenient shortcuts.
-* Convenient access to the unaltered blizzard interface.
+* Convenient access to the unaltered Blizzard interface.
 
 ### Search
 * Automatic scanning of all pages for a query.
@@ -62,6 +62,7 @@ For the auction listings in the search, auctions and bids tabs the following sho
 - Shift-click on a row to copy the link to the chatframe.
 - Left-click on a header to sort.
 - Right-click on a header of a price column to switch between unit and stack price.
+
 Furthermore
 - Double-click in editboxes will highlight everything.
 
@@ -72,8 +73,8 @@ Furthermore
 
 #### Search Results
 ![Alt text](http://i.imgur.com/7SPm1Js.png)
-- Bids prices for your own active bids are colored in green.
-- Bids prices for other auctions with an active bid are colored in orange.
+- Bid prices for your own active bids are colored in green.
+- Bid prices for other auctions with an active bid are colored in orange.
 
 #### Saved Searches
 ![Alt text](http://i.imgur.com/Aih51u9.png)
@@ -87,7 +88,7 @@ Furthermore
 #### New Filter
 ![Alt text](http://i.imgur.com/YSQbSC1.png)
 While it is faster to type filters directly into the search box this subtab serves as a tutorial to learn how to formulate queries.
-The filters on the left side are blizzard filters which may reduce the number of pages to be scanned and those on the right side are post filters which do not affect the scan time but can be combined with logical operators to formulate very complex filters.
+The filters on the left side are Blizzard filters which may reduce the number of pages to be scanned and those on the right side are post filters which do not affect the scan time but can be combined with logical operators to formulate very complex filters.
 ### Post
 ![Alt text](http://i.imgur.com/eydxjoH.png)
 - When entering prices **g**, **s** and **c** denote gold, silver and copper respectively.
@@ -106,12 +107,12 @@ The filters on the left side are blizzard filters which may reduce the number of
 ![Alt text](http://i.imgur.com/wrYwgZS.png)
 
 ## Search Filters
-AddOns do not have any additional blizzard filters available to them beyond the ones in the default auction house interface, nor do they have any other ways to combine them.
+AddOns do not have any additional Blizzard filters available to them beyond the ones in the default auction house interface, nor do they have any other ways to combine them.
 Of course it is possible for an addOn to apply arbitrary filters after the Blizzard query but only the Blizzard query will affect the number of pages to be scanned and thus the time it takes for a scan.
 Since the Vanilla API will only let you request a page every 4 seconds having no Blizzard query in your filter can lead to very long scan times.
 
 Aux queries are separated by semicolons and always contain exactly one Blizzard query. The Blizzard query may be empty, i.e., all pages are scanned, which can be useful for collecting historical data.
-The real time mode only supports empty blizzard queries.
+The real time mode only supports empty Blizzard queries.
 Semicolons always mean "or", i.e., **q1;q2;q3** means all items matching **q1** or **q2** or **q3** will be listed.
 
 The parts of individual queries are separated by slashes, e.g., **q1p1/q1p2;q2p1/q2p2/q2p3**. All parts either belong to the Blizzard filter or the post processing filter.
@@ -141,7 +142,7 @@ This will scan the auction house for cloth armor which has a requirement of at l
 
 ## Historical Value
 
-Aux condenses the auctions you've scanned during a day (midnight to midnight) into a single value, similarly to retail Auctioneer's "stat-simple" module.
+Aux condenses the prices you've scanned during a day (midnight to midnight) into a single value, similarly to retail Auctioneer's "stat-simple" module.
 This daily value is calculated as the minimum buyout of the day, increased by 15% if lower than the highest price of the day, which in practice gives a very similar value to that of retail TSM while using much less memory.
 Limiting the memory usage is important because like Auctioneer and unlike TSM Aux is using a day based instead of scan based interval and thus has to store the daily progress in the savedvariables.
 Finally these daily values are collected in a list of the last 11 of them from which the market value is taken as the median. The values are weighted by their age but it doesn't have a large effect unless they're older than a month.
