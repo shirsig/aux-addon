@@ -48,22 +48,22 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'ignore' and arguments[2] == 'owner' then
         aux_ignore_owner = not aux_ignore_owner
         Aux.log('Ignoring of owner '..(aux_ignore_owner and 'enabled' or 'disabled')..'.')
-    elseif arguments[1] == 'addchar' then
+    elseif arguments[1] == 'chars' and arguments[2] == 'add' then
 		local realm = GetCVar('realmName')
 		aux_characters[realm] = aux_characters[realm] or {}
-		for i=2,getn(arguments) do
+		for i=3,getn(arguments) do
 			local name = string.gsub(strlower(arguments[i]), '^%l', strupper)
 			if not aux_characters[realm][name] then
 				aux_characters[realm][name] = true
 				Aux.log('Character "'..name..'" added.')
 			end
 		end
-	elseif arguments[1] == 'delchar' then
+	elseif arguments[1] == 'chars' and arguments[2] == 'remove' then
 		local realm = GetCVar('realmName')
 		if not aux_characters[realm] then
 			return
 		end
-		for i=2,getn(arguments) do
+		for i=3,getn(arguments) do
 			local name = string.gsub(strlower(arguments[i]), '^%l', strupper)
 			if aux_characters[realm][name] then
 				aux_characters[realm][name] = nil
