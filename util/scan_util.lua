@@ -475,7 +475,7 @@ function public.query(filter_term)
         local str = parts[i]
         i = i + 1
 
-        if str == 'or*' then
+        if str == 'and*' or str == 'or*' then
             if polish_notation_counter > 1 then
                 break
             end
@@ -728,6 +728,8 @@ function public.validator(blizzard_filter, post_filter)
                     tinsert(stack, a or b)
                 elseif op == 'not' then
                     tinsert(stack, not tremove(stack))
+                elseif op == 'and*' then
+                    stack = {Aux.util.all(stack, Aux.util.id)}
                 elseif op == 'or*' then
                     stack = {Aux.util.any(stack, Aux.util.id)}
                 else
