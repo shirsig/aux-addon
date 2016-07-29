@@ -482,10 +482,14 @@ function public.query(filter_term)
             polish_notation_counter = 0
             tinsert(post_filters, str)
             prettified:append('|cffffff00'..str..'|r')
-        elseif polish_notation_counter > 0 or strfind(str, '^and[2-9]?$') or strfind(str, '^or[2-9]?$') or str == 'not' then
+        elseif polish_notation_counter > 0
+                or (function(_, _, m) return m == '' or m and tonumber(m) > 2 end)(strfind(str, '^and(%d*)$'))
+                or (function(_, _, m) return m == '' or m and tonumber(m) > 2 end)(strfind(str, '^or(%d*)$'))
+                or str == 'not'
+        then
             polish_notation_counter = polish_notation_counter == 0 and polish_notation_counter + 1 or polish_notation_counter
-            if strfind(str, '^and[2-9]?$') or strfind(str, '^or[2-9]?$') then
-                local and_match, or_match = {strfind(str, '^(and)([2-9]?)$')}, {strfind(str, '^(or)([2-9]?)$') }
+            if strfind(str, '^and%d*$') or strfind(str, '^or%d*$') then
+                local and_match, or_match = {strfind(str, '^(and)(%d*)$')}, {strfind(str, '^(or)(%d*)$') }
                 local op = and_match[3] or or_match[3]
                 local count = (tonumber(and_match[4]) or tonumber(or_match[4]) or 2) - 1
                 polish_notation_counter = polish_notation_counter + count
