@@ -80,7 +80,7 @@ end
 
 function public.CLOSE()
     m.close_settings()
-    m.results_listing:SetSelectedRecord()
+    m.current_search().table:SetSelectedRecord()
     m.frame:Hide()
 end
 
@@ -307,9 +307,7 @@ function private.start_real_time_scan(query, search, continuation)
                 StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
             else
                 search.records = new_records
-                if m.current_search() == search then
-                    m.results_listing:SetDatabase(search.records)
-                end
+                search.table:SetDatabase(search.records)
             end
 
             query.blizzard_query.first_page = next_page
@@ -335,6 +333,8 @@ end
 function private.start_search(queries, continuation)
     local current_query, current_page, total_queries, start_query, start_page
 
+    local search = m.current_search()
+
     total_queries = getn(queries)
 
     if continuation then
@@ -343,12 +343,12 @@ function private.start_search(queries, continuation)
             tremove(queries, 1)
         end
         queries[1].blizzard_query.first_page = (queries[1].blizzard_query.first_page or 0) + start_page - 1
-        m.results_listing:SetSelectedRecord()
+        search.table:SetSelectedRecord()
     else
         start_query, start_page = 1, 1
     end
 
-    local search = m.current_search()
+
     m.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = queries,
@@ -370,9 +370,7 @@ function private.start_search(queries, continuation)
             search.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_scan_pages))
         end,
         on_page_scanned = function()
-            if m.current_search() == search then
-                m.results_listing:SetDatabase()
-            end
+            search.table:SetDatabase()
         end,
         on_start_query = function(query)
             current_query = current_query and current_query + 1 or start_query
@@ -449,15 +447,15 @@ function public.execute(resume, real_time)
     m.search_box:ClearFocus()
 
     if resume then
-        m.results_listing:SetSelectedRecord()
+        m.current_search().table:SetSelectedRecord()
     else
         if filter_string ~= m.current_search().filter_string then
             m.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
         else
             m.current_search().records = {}
-            m.results_listing:SetDatabase(m.current_search().records)
+            m.current_search().table:SetDatabase(m.current_search().records)
             if m.current_search().real_time ~= real_time then
-                m.results_listing:Reset()
+                m.current_search().table:Reset()
             end
         end
         m.current_search().real_time = m.real_time_button:GetChecked()
@@ -501,9 +499,9 @@ function private.test(record)
     end
 end
 
-function private.record_remover(record)
+function private.record_remover(table, record)
     return function()
-        m.results_listing:RemoveAuctionRecord(record)
+        table:RemoveAuctionRecord(record)
     end
 end
 
@@ -518,7 +516,9 @@ do
     local found_index
 
     function private.find_auction(record)
-        if not m.results_listing:ContainsRecord(record) or Aux.is_player(record.owner) then
+        local search = m.current_search()
+
+        if not search.table:ContainsRecord(record) or Aux.is_player(record.owner) then
             return
         end
 
@@ -532,10 +532,10 @@ do
             end,
             function()
                 state = IDLE
-                m.record_remover(record)()
+                m.record_remover(search.table, record)()
             end,
             function(index)
-                if Aux.util.safe_index(m.results_listing:GetSelection(), 'record') ~= record then
+                if Aux.util.safe_index(search.table:GetSelection(), 'record') ~= record then
                     return
                 end
 
@@ -544,11 +544,11 @@ do
 
                 if not record.high_bidder then
                     m.bid_button:SetScript('OnClick', function()
-                        if m.test(record)(index) and m.results_listing:ContainsRecord(record) then
+                        if m.test(record)(index) and search.table:ContainsRecord(record) then
                             Aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
                                 Aux.info.bid_update(record)
-                                m.results_listing:SetDatabase()
-                            end or m.record_remover(record))
+                                search.table:SetDatabase()
+                            end or m.record_remover(search.table, record))
                         end
                     end)
                     m.bid_button:Enable()
@@ -556,8 +556,8 @@ do
 
                 if record.buyout_price > 0 then
                     m.buyout_button:SetScript('OnClick', function()
-                        if m.test(record)(index) and m.results_listing:ContainsRecord(record) then
-                            Aux.place_bid('list', index, record.buyout_price, m.record_remover(record))
+                        if m.test(record)(index) and search.table:ContainsRecord(record) then
+                            Aux.place_bid('list', index, record.buyout_price, m.record_remover(search.table, record))
                         end
                     end)
                     m.buyout_button:Enable()
@@ -576,7 +576,7 @@ do
             return
         end
 
-        local selection = m.results_listing:GetSelection()
+        local selection = m.current_search().table:GetSelection()
         if not selection then
             state = IDLE
         elseif selection and state == IDLE then
@@ -601,15 +601,6 @@ function private.update_continuation()
     end
 end
 
-function private.new_status_bar()
-    local status_bar = Aux.gui.status_bar(m.frame)
-    status_bar:SetAllPoints(m.status_bar_frame)
-    status_bar:update_status(100, 100)
-    status_bar:set_text('')
-    status_bar:Hide()
-    return status_bar
-end
-
 do
     local searches = {}
     local search_index = 1
@@ -620,13 +611,15 @@ do
 
     function private.update_search(index)
         searches[search_index].status_bar:Hide()
+        searches[search_index].table:Hide()
+        searches[search_index].table:SetSelectedRecord()
 
         search_index = index
 
         searches[search_index].status_bar:Show()
+        searches[search_index].table:Show()
+
         m.search_box:SetText(searches[search_index].filter_string)
-        m.results_listing:Reset()
-        m.results_listing:SetDatabase(searches[search_index].records)
         if search_index == 1 then
             m.previous_button:Disable()
         else
@@ -658,14 +651,26 @@ do
         while getn(searches) > search_index do
             tremove(searches)
         end
-        tinsert(searches, {
+        local search = {
             filter_string = filter_string,
             records = {},
-            status_bar = m.new_status_bar(),
-        })
+        }
+        tinsert(searches, search)
         if getn(searches) > 5 then
             tremove(searches, 1)
+            tinsert(m.status_bars, tremove(m.status_bars, 1))
+            tinsert(m.tables, tremove(m.tables, 1))
+            search_index = 4
         end
+
+        search.status_bar = m.status_bars[getn(searches)]
+        search.status_bar:update_status(100, 100)
+        search.status_bar:set_text('')
+
+        search.table = m.tables[getn(searches)]
+        search.table:SetSort(1,2,3,4,5,6,7,8,9)
+        search.table:Reset()
+        search.table:SetDatabase(search.records)
 
         m.update_search(getn(searches))
     end

@@ -317,7 +317,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         btn:SetText('Clear')
         btn:SetScript('OnClick', function()
             while tremove(m.current_search().records) do end
-            m.results_listing:SetDatabase()
+            m.m.current_search().table:SetDatabase()
         end)
     end
     do
@@ -699,22 +699,31 @@ Aux.search_tab.FRAMES(function(m, public, private)
         end
     end
 
-    private.results_listing = Aux.auction_listing.CreateAuctionResultsTable(m.frame.results, Aux.auction_listing.search_config)
-    m.results_listing:SetSort(1,2,3,4,5,6,7,8,9)
-    m.results_listing:Reset()
-    m.results_listing:SetHandler('OnCellClick', function(cell, button)
-        if IsAltKeyDown() and m.results_listing:GetSelection().record == cell.row.data.record then
-            if button == 'LeftButton' and m.buyout_button:IsEnabled() then
-                m.buyout_button:Click()
-            elseif button == 'RightButton' and m.bid_button:IsEnabled() then
-                m.bid_button:Click()
+    private.status_bars = {}
+    private.tables = {}
+    for _=1,5  do
+        local status_bar = Aux.gui.status_bar(m.frame)
+        status_bar:SetAllPoints(m.status_bar_frame)
+        status_bar:Hide()
+        tinsert(m.status_bars, status_bar)
+
+        local table = Aux.auction_listing.CreateAuctionResultsTable(m.frame.results, Aux.auction_listing.search_config)
+        table:SetHandler('OnCellClick', function(cell, button)
+            if IsAltKeyDown() and m.current_search().table:GetSelection().record == cell.row.data.record then
+                if button == 'LeftButton' and m.buyout_button:IsEnabled() then
+                    m.buyout_button:Click()
+                elseif button == 'RightButton' and m.bid_button:IsEnabled() then
+                    m.bid_button:Click()
+                end
             end
-        end
-    end)
-    m.results_listing:SetHandler('OnSelectionChanged', function(rt, datum)
-        if not datum then return end
-        m.find_auction(datum.record)
-    end)
+        end)
+        table:SetHandler('OnSelectionChanged', function(rt, datum)
+            if not datum then return end
+            m.find_auction(datum.record)
+        end)
+        table:Hide()
+        tinsert(m.tables, table)
+    end
 
     local handlers = {
         OnClick = function(st, data, _, button)
