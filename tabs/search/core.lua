@@ -606,6 +606,7 @@ function private.new_status_bar()
     status_bar:SetAllPoints(m.status_bar_frame)
     status_bar:update_status(100, 100)
     status_bar:set_text('')
+    status_bar:Hide()
     return status_bar
 end
 
