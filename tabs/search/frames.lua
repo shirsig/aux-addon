@@ -285,7 +285,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.new_filter_button = btn
     end
     do
-        local frame = CreateFrame('Frame')
+        local frame = CreateFrame('Frame', nil, m.frame)
         frame:SetWidth(265)
         frame:SetHeight(25)
         frame:SetPoint('TOPLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, -6)
