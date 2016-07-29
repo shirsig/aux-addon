@@ -402,7 +402,7 @@ function public.item_query(item_id, first_page, last_page)
     local item_info = Aux.info.item(item_id)
 
     if item_info then
-        local filter = m.filter_from_string(item_info.name..'/exact')
+        local filter = m.query(item_info.name..'/exact')
         filter.blizzard_query.first_page = first_page
         filter.blizzard_query.last_page = last_page
         return {
@@ -419,7 +419,7 @@ function public.parse_filter_string(filter_string)
     for _, str in ipairs(parts) do
         str = Aux.util.trim(str)
 
-        local filter, _, error = m.filter_from_string(str)
+        local filter, _, error = m.query(str)
 
         if not filter then
             Aux.log('Invalid filter: '..error)
@@ -435,16 +435,16 @@ function public.parse_filter_string(filter_string)
     return filters
 end
 
-function public.filter_from_string(filter_term)
+function public.query(filter_term)
     local parts = Aux.util.map(Aux.util.split(filter_term, '/'), function(part) return strlower(Aux.util.trim(part)) end)
 
-    local blizzard_filter = {}
-    local post_filter = {}
+    local blizzard_filters = {}
+    local post_filters = {}
     local prettified = m.filter_builder()
     local polish_notation_counter = 0
     local i = 1
 
-    local function non_blizzard_modifier(str)
+    local function post_filter(str)
         local filter = m.filters[str]
         if filter then
             prettified:append('|cffffff00'..str..'|r')
@@ -465,7 +465,7 @@ function public.filter_from_string(filter_term)
 
         local test, suggestions, error = filter.test(unpack(args))
         if test then
-            tinsert(post_filter, test)
+            tinsert(post_filters, test)
         else
             return error, i > getn(parts) and suggestions or {}
         end
@@ -475,18 +475,30 @@ function public.filter_from_string(filter_term)
         local str = parts[i]
         i = i + 1
 
-        if polish_notation_counter > 0 or str == 'and' or str == 'or' or str == 'not' then
+        if str == 'or*' then
+            if polish_notation_counter > 1 then
+                break
+            end
+            polish_notation_counter = 0
+            tinsert(post_filters, str)
+            prettified:append('|cffffff00'..str..'|r')
+        elseif polish_notation_counter > 0 or strfind(str, '^and[2-9]?$') or strfind(str, '^or[2-9]?$') or str == 'not' then
             polish_notation_counter = polish_notation_counter == 0 and polish_notation_counter + 1 or polish_notation_counter
-            if str == 'and' or str == 'or' then
-                polish_notation_counter = polish_notation_counter + 1
-                tinsert(post_filter, str)
+            if strfind(str, '^and[2-9]?$') or strfind(str, '^or[2-9]?$') then
+                local and_match, or_match = {strfind(str, '^(and)([2-9]?)$')}, {strfind(str, '^(or)([2-9]?)$') }
+                local op = and_match[3] or or_match[3]
+                local count = (tonumber(and_match[4]) or tonumber(or_match[4]) or 2) - 1
+                polish_notation_counter = polish_notation_counter + count
+                for _=1,count do
+                    tinsert(post_filters, op)
+                end
                 prettified:append('|cffffff00'..str..'|r')
             elseif str == 'not' then
-                tinsert(post_filter, str)
+                tinsert(post_filters, str)
                 prettified:append('|cffffff00'..str..'|r')
             elseif str ~= '' then
                 polish_notation_counter = polish_notation_counter - 1
-                local error, suggestions = non_blizzard_modifier(str)
+                local error, suggestions = post_filter(str)
                 if error then
                     return false, suggestions, error
                 end
@@ -495,60 +507,60 @@ function public.filter_from_string(filter_term)
             if tonumber(str) < 1 or tonumber(str) > 60 then
                 return false, {}, 'Erroneous level range modifier'
             end
-            if not blizzard_filter.min_level then
-                blizzard_filter.min_level = tonumber(str)
+            if not blizzard_filters.min_level then
+                blizzard_filters.min_level = tonumber(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
-            elseif not blizzard_filter.max_level and tonumber(str) >= blizzard_filter.min_level then
-                blizzard_filter.max_level = tonumber(str)
+            elseif not blizzard_filters.max_level and tonumber(str) >= blizzard_filters.min_level then
+                blizzard_filters.max_level = tonumber(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, {}, 'Erroneous level range modifier'
             end
-        elseif Aux.item_class_index(str) and not (blizzard_filter.class and not blizzard_filter.subclass and str == strlower(({ GetAuctionItemClasses() })[10])) then
-            if not blizzard_filter.class then
-                blizzard_filter.class = Aux.item_class_index(str)
+        elseif Aux.item_class_index(str) and not (blizzard_filters.class and not blizzard_filters.subclass and str == strlower(({ GetAuctionItemClasses() })[10])) then
+            if not blizzard_filters.class then
+                blizzard_filters.class = Aux.item_class_index(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, {}, 'Erroneous item class modifier'
             end
-        elseif blizzard_filter.class and Aux.item_subclass_index(blizzard_filter.class, str) then
-            if not blizzard_filter.subclass then
-                blizzard_filter.subclass = Aux.item_subclass_index(blizzard_filter.class, str)
+        elseif blizzard_filters.class and Aux.item_subclass_index(blizzard_filters.class, str) then
+            if not blizzard_filters.subclass then
+                blizzard_filters.subclass = Aux.item_subclass_index(blizzard_filters.class, str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, {}, 'Erroneous item subclass modifier'
             end
-        elseif blizzard_filter.subclass and Aux.item_slot_index(blizzard_filter.class, blizzard_filter.subclass, str) then
-            if not blizzard_filter.slot then
-                blizzard_filter.slot = Aux.item_slot_index(blizzard_filter.class, blizzard_filter.subclass, str)
+        elseif blizzard_filters.subclass and Aux.item_slot_index(blizzard_filters.class, blizzard_filters.subclass, str) then
+            if not blizzard_filters.slot then
+                blizzard_filters.slot = Aux.item_slot_index(blizzard_filters.class, blizzard_filters.subclass, str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, {}, 'Erroneous item slot modifier'
             end
         elseif Aux.item_quality_index(str) then
-            if not blizzard_filter.quality then
-                blizzard_filter.quality = Aux.item_quality_index(str)
+            if not blizzard_filters.quality then
+                blizzard_filters.quality = Aux.item_quality_index(str)
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, {}, 'Erroneous rarity modifier'
             end
         elseif str == 'usable' then
-            if not blizzard_filter.usable then
-                blizzard_filter.usable = true
+            if not blizzard_filters.usable then
+                blizzard_filters.usable = true
                 prettified:append(Aux.gui.inline_color({216, 225, 211, 1})..str..'|r')
             else
                 return false, {}, 'Erroneous usable only modifier'
             end
         elseif str == 'exact' then
-            if not blizzard_filter.exact then
-                blizzard_filter.exact = true
+            if not blizzard_filters.exact then
+                blizzard_filters.exact = true
             else
                 return false, {}, 'Erroneous exact only modifier'
             end
         elseif i == 2 and not m.filters[str] then
-            blizzard_filter.name = str
+            blizzard_filters.name = str
         elseif str ~= '' then
-            local error, suggestions = non_blizzard_modifier(str)
+            local error, suggestions = post_filter(str)
             if error then
                 return false, suggestions, error
             end
@@ -557,44 +569,44 @@ function public.filter_from_string(filter_term)
         end
     end
 
-    if polish_notation_counter ~= 0 then
+    if polish_notation_counter > 0 then
         local suggestions = {}
-        for filter, _ in pairs(m.filters) do
+        for filter, _ in m.filters do
             tinsert(suggestions, strlower(filter))
-            tinsert(suggestions, 'and')
-            tinsert(suggestions, 'or')
-            tinsert(suggestions, 'not')
         end
+        tinsert(suggestions, 'and')
+        tinsert(suggestions, 'or')
+        tinsert(suggestions, 'not')
         return false, i > getn(parts) and suggestions, 'Malformed expression'
     end
 
-    if blizzard_filter.exact then
-        if blizzard_filter.min_level
-                or blizzard_filter.max_level
-                or blizzard_filter.class
-                or blizzard_filter.subclass
-                or blizzard_filter.slot
-                or blizzard_filter.quality
-                or blizzard_filter.usable
-                or not blizzard_filter.name
+    if blizzard_filters.exact then
+        if blizzard_filters.min_level
+                or blizzard_filters.max_level
+                or blizzard_filters.class
+                or blizzard_filters.subclass
+                or blizzard_filters.slot
+                or blizzard_filters.quality
+                or blizzard_filters.usable
+                or not blizzard_filters.name
         then
             return false, {}, 'Erroneous exact only modifier'
         else
-            prettified:prepend(Aux.info.display_name(Aux.cache.item_id(blizzard_filter.name)) or Aux.gui.inline_color({216, 225, 211, 1})..'['..blizzard_filter.name..']|r')
+            prettified:prepend(Aux.info.display_name(Aux.cache.item_id(blizzard_filters.name)) or Aux.gui.inline_color({216, 225, 211, 1})..'['..blizzard_filters.name..']|r')
         end
-    elseif blizzard_filter.name then
-        if blizzard_filter.name == '' then
+    elseif blizzard_filters.name then
+        if blizzard_filters.name == '' then
             prettified:prepend('|cffff0000'..'No Filter'..'|r')
         else
-            prettified:prepend(Aux.gui.inline_color({216, 225, 211, 1})..blizzard_filter.name..'|r')
+            prettified:prepend(Aux.gui.inline_color({216, 225, 211, 1})..blizzard_filters.name..'|r')
         end
     end
 
     return {
-        blizzard_query = m.blizzard_query(blizzard_filter),
-        validator = m.validator(blizzard_filter, post_filter),
+        blizzard_query = m.blizzard_query(blizzard_filters),
+        validator = m.validator(blizzard_filters, post_filters),
         prettified = prettified:get(),
-    }, m.suggestions(blizzard_filter, getn(parts))
+    }, m.suggestions(blizzard_filters, getn(parts))
 end
 
 function public.suggestions(blizzard_filter, num_parts)
@@ -716,6 +728,8 @@ function public.validator(blizzard_filter, post_filter)
                     tinsert(stack, a or b)
                 elseif op == 'not' then
                     tinsert(stack, not tremove(stack))
+                elseif op == 'or*' then
+                    stack = {Aux.util.any(stack, Aux.util.id)}
                 else
                     tinsert(stack, op(record) and true or false)
                 end

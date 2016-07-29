@@ -31,9 +31,8 @@ function public.start(params)
         m.abort(m.threads[params.type].id)
     end
 
-    local thread_id = Aux.control.new_thread(function()
-        return m.wait_for_callback(m.current_thread().params.on_scan_start, m.scan)
-    end)
+    local thread_id = Aux.control.new_thread(Aux.f(m.wait_for_callback, params.on_scan_start, m.scan))
+
     m.threads[params.type] = {
         id = thread_id,
         params = params,
@@ -69,16 +68,14 @@ function private.wait_for_results(k)
 end
 
 function private.wait_for_owner_results(k)
-    local updated
-    if m.current_thread().page == Aux.current_owner_page then
-        updated = true
-    else
-        Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', function()
-            updated = true
-        end)
-    end
 
-    Aux.control.wait_until(function() return updated end, k)
+    local c = Aux.control.wait_for(k)
+
+    if m.current_thread().page == Aux.current_owner_page then
+        return c()
+    else
+        return Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', c)
+    end
 end
 
 function private.wait_for_list_results(k)
@@ -201,7 +198,9 @@ function private.scan_auctions_helper(i, k)
         Aux.history.process_auction(auction_info)
 
         if m.current_thread().params.auto_buy_validator and m.current_thread().params.auto_buy_validator(auction_info) then
-            return Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, function() return recurse(true) end)
+            local c = Aux.control.wait_for(recurse)
+            Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, Aux.f(c, true))
+            Aux.control.new_thread(Aux.control.sleep, 10, Aux.f(c, false))
         elseif not m.current_query().validator or m.current_query().validator(auction_info) then
             return m.wait_for_callback(m.current_thread().params.on_auction, auction_info, function(removed)
                 if removed then

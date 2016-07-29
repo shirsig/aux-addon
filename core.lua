@@ -71,9 +71,7 @@ function public.on_load()
         btn:SetWidth(65)
         btn:SetHeight(24)
         btn:SetText('Close')
-        btn:SetScript('OnClick',function()
-            HideUIPanel(this:GetParent())
-        end)
+        btn:SetScript('OnClick', Aux.f(HideUIPanel, AuxFrame))
         public.close_button = btn
     end
 
@@ -198,6 +196,25 @@ function private.on_addon_loaded()
     end
 end
 
+function public.f(func, ...)
+    return function()
+        return func(unpack(arg))
+    end
+end
+
+function public.m(object, method, ...)
+    return m.f(object[method], object, unpack(arg))
+end
+
+do
+    local x = 0
+
+    function public.unique()
+        x = x + 1
+        return x
+    end
+end
+
 do
     local locked
 
@@ -274,9 +291,7 @@ function private.setup_hooks()
 
     m.hook('AuctionFrame_OnShow', function(...)
         if not m.blizzard_ui_shown then
-            m.control.as_soon_as(function() return AuctionFrame:GetScript('OnHide') == blizzard_ui_on_hide end, function()
-                HideUIPanel(AuctionFrame)
-            end)
+            m.control.as_soon_as(function() return AuctionFrame:GetScript('OnHide') == blizzard_ui_on_hide end, Aux.f(HideUIPanel, AuctionFrame))
         end
         return m.orig.AuctionFrame_OnShow(unpack(arg))
     end)

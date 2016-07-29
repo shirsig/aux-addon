@@ -11,7 +11,7 @@ function public.LOAD()
 end
 
 function private.on_event()
-	for listener, _ in m.event_listeners do
+	for _, listener in m.event_listeners do
 		if event == listener.event and not listener.deleted then
 			listener.action()
 		end
@@ -19,7 +19,7 @@ function private.on_event()
 end
 
 function private.on_update()
-	m.event_listeners = Aux.util.set_filter(m.event_listeners, function(l) return not l.deleted end)
+	m.event_listeners = Aux.util.filter(m.event_listeners, function(l) return not l.deleted end)
 	local threads = {}
 	for thread_id, thread in m.threads do
 		if not thread.killed then
@@ -52,14 +52,14 @@ function public.event_listener(event, action)
 	end
 	
 	function self:start()
-		Aux.util.set_add(m.event_listeners, listener)
+		tinsert(m.event_listeners, listener)
 		m.event_frame:RegisterEvent(event)
 		return self
 	end
 	
 	function self:stop()
 		listener.deleted = true
-		if not Aux.util.any(Aux.util.set_to_array(m.event_listeners), function(l) return l.event == event end) then
+		if not Aux.util.any(m.event_listeners, function(l) return l.event == event end) then
 			m.event_frame:UnregisterEvent(event)
 		end
 		return self
@@ -84,19 +84,13 @@ function public.on_next_update(callback)
 end
 
 function public.as_soon_as(p, callback)
-	return m.new_thread(function()
-		return m.wait_until(p, callback)
-	end)
+	return m.new_thread(m.wait_until, p, callback)
 end
 
-do
-	local next_thread_id = 1
-	function public.new_thread(k)
-		local thread_id = next_thread_id
-		next_thread_id = next_thread_id + 1
-		m.threads[thread_id] = { k = k }
-		return thread_id
-	end
+function public.new_thread(k, ...)
+	local thread_id = Aux.unique()
+	m.threads[thread_id] = { k = Aux.f(k, unpack(arg)) }
+	return thread_id
 end
 
 function public.kill_thread(thread_id)
@@ -105,21 +99,31 @@ function public.kill_thread(thread_id)
 	end
 end
 
-function public.wait(...)
-	if type(arg[1]) == 'number' then
-		local count = tremove(arg, 1)
-		m.wait_until(function() count = count - 1 return count <= 0 end, unpack(arg))
-	else
-		local k = tremove(arg, 1)
-		m.threads[m.thread_id].k = function() return k(unpack(arg)) end
+function public.wait_for(k)
+	local ret
+	m.wait_until(function() return ret end, function() return k(unpack(ret)) end)
+	return function(...)
+		ret = arg
 	end
 end
 
-function public.wait_until(p, ...)
-	local k = tremove(arg, 1)
+function public.sleep(dt, ...)
+	local t0 = GetTime()
+	return m.wait_until(function() return GetTime() - t0 >= dt end, unpack(arg))
+end
+
+function public.wait(k, ...)
+	if type(k) == 'number' then
+		m.wait_until(function() k = k - 1 return k <= 0 end, unpack(arg))
+	else
+		m.threads[m.thread_id].k = Aux.f(k, unpack(arg))
+	end
+end
+
+function public.wait_until(p, k, ...)
 	if p() then
 		return k(unpack(arg))
 	else
-		return m.wait(m.wait_until, p, function() return k(unpack(arg)) end)
+		return m.wait(m.wait_until, p, Aux.f(k, unpack(arg)))
 	end
 end

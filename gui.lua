@@ -125,7 +125,7 @@ do
             id = id,
             frame = parent,
             tabs = {},
-            on_select = function() end,
+            on_select = Aux.util.pass,
         }
 
         function self:create_tab(text)
@@ -230,20 +230,14 @@ function public.editbox(parent)
     editbox:SetShadowColor(0, 0, 0, 0)
     m.set_content_style(editbox)
 
-    editbox:SetScript('OnEditFocusLost', function()
-        this:HighlightText(0, 0)
-    end)
+    editbox:SetScript('OnEditFocusLost', Aux.m(editbox, 'HighlightText', 0, 0))
 
-    editbox:SetScript('OnEscapePressed', function()
-        this:ClearFocus()
-    end)
+    editbox:SetScript('OnEscapePressed', Aux.m(editbox, 'ClearFocus'))
 
     do
         local last_time, last_x, last_y
 
-        editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-        end)
+        editbox:SetScript('OnEditFocusGained', Aux.m(editbox, 'HighlightText'))
 
         editbox:SetScript('OnMouseUp', function()
             local x, y = GetCursorPosition()

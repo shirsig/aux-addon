@@ -5,24 +5,17 @@ private.state = nil
 function private.process()
 	if m.state.posted < m.state.count then
 
-		local stacking_complete, target_slot
+		local stacking_complete
 
-		Aux.stack.start(
-			m.state.item_key,
-			m.state.stack_size,
-			function(slot)
-				stacking_complete = true
-				target_slot = slot
-			end
-		)
-
-		return Aux.control.wait_until(function() return stacking_complete end, function()
-			if target_slot then
-				return m.post_auction(target_slot, m.process)
+		local c = Aux.control.wait_for(function(slot)
+			if slot then
+				return m.post_auction(slot, m.process)
 			else
 				return m.stop()
 			end
 		end)
+
+		return Aux.stack.start(m.state.item_key, m.state.stack_size, c)
 	end
 
 	return m.stop()
@@ -41,20 +34,21 @@ function private.post_auction(slot, k)
 
 		StartAuction(max(1, Aux.round(m.state.unit_start_price * item_info.aux_quantity)), Aux.round(m.state.unit_buyout_price * item_info.aux_quantity), m.state.duration)
 
-		local posted
-		local listener = Aux.control.event_listener('CHAT_MSG_SYSTEM')
-		listener:set_action(function()
-			if arg1 == ERR_AUCTION_STARTED then
-				posted = true
-				listener:stop()
-			end
-		end)
-		listener:start()
-		Aux.control.wait_until(function() return posted end, function()
+		local c = Aux.control.wait_for(function()
 			m.state.posted = m.state.posted + 1
 			return k()
 		end)
 
+		local posted
+		local listener = Aux.control.event_listener('CHAT_MSG_SYSTEM')
+		listener:set_action(function()
+			if arg1 == ERR_AUCTION_STARTED then
+				listener:stop()
+				c()
+			end
+		end)
+		listener:start()
+		
 	else
 		return m.stop()
 	end

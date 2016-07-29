@@ -185,9 +185,7 @@ function private.scan_wdb()
 
 		if item_id <= MAX_ITEM_ID then
 			local t0 = GetTime()
-			Aux.control.as_soon_as(function() return GetTime() - t0 > 0.1 end, function()
-				return helper(item_id)
-			end)
+			Aux.control.as_soon_as(function() return GetTime() - t0 > 0.1 end, Aux.f(helper, item_id))
 		else
 			sort(aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 		end
@@ -209,9 +207,7 @@ function public.populate_wdb()
 			AuxTooltip:SetHyperlink('item:'..item_id)
 		end
 
-		Aux.control.on_next_update(function()
-			return helper(item_id + 1)
-		end)
+		Aux.control.on_next_update(Aux.f(helper, item_id + 1))
 	end
 
 	helper(MIN_ITEM_ID)

@@ -284,7 +284,8 @@ function private.start_real_time_scan(query, search, continuation)
             if not ignore_page then
                 if search.auto_buy then
                     ctrl.suspend()
-                    Aux.place_bid('list', auction_record.index, auction_record.buyout_price, function() ctrl.resume(true) end)
+                    Aux.place_bid('list', auction_record.index, auction_record.buyout_price, Aux.f(ctrl.resume, true))
+                    Aux.control.new_thread(Aux.control.sleep, 10, Aux.f(ctrl.resume, false))
                 else
                     tinsert(new_records, auction_record)
                 end
@@ -376,7 +377,8 @@ function private.start_search(queries, continuation)
         on_auction = function(auction_record, ctrl)
             if search.auto_buy then
                 ctrl.suspend()
-                Aux.place_bid('list', auction_record.index, auction_record.buyout_price, function() ctrl.resume(true) end)
+                Aux.place_bid('list', auction_record.index, auction_record.buyout_price, Aux.f(ctrl.resume, true))
+                Aux.control.new_thread(Aux.control.sleep, 10, Aux.f(ctrl.resume, false))
             elseif getn(search.records) < 1000 then
                 tinsert(search.records, auction_record)
                 if getn(search.records) == 1000 then
