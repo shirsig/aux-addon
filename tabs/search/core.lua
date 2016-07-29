@@ -243,15 +243,14 @@ function private.discard_continuation()
     m.update_continuation()
 end
 
-function private:enable_stop()
-    Aux.scan.abort(m.search_scan_id)
-    m.stop_button:Show()
-    m.start_button:Hide()
-end
-
-function private:enable_start()
-    m.start_button:Show()
-    m.stop_button:Hide()
+function private:update_start_stop()
+    if m.current_search().active then
+        m.stop_button:Show()
+        m.start_button:Hide()
+    else
+        m.start_button:Show()
+        m.stop_button:Hide()
+    end
 end
 
 function private.start_real_time_scan(query, search, continuation)
@@ -308,7 +307,9 @@ function private.start_real_time_scan(query, search, continuation)
                 StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
             else
                 search.records = new_records
-                m.results_listing:SetDatabase(search.records)
+                if m.current_search() == search then
+                    m.results_listing:SetDatabase(search.records)
+                end
             end
 
             query.blizzard_query.first_page = next_page
@@ -325,7 +326,8 @@ function private.start_real_time_scan(query, search, continuation)
                 m.update_continuation()
             end
 
-            m:enable_start()
+            search.active = false
+            m.update_start_stop()
         end,
     }
 end
@@ -368,7 +370,9 @@ function private.start_search(queries, continuation)
             search.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_scan_pages))
         end,
         on_page_scanned = function()
-            m.results_listing:SetDatabase()
+            if m.current_search() == search then
+                m.results_listing:SetDatabase()
+            end
         end,
         on_start_query = function(query)
             current_query = current_query and current_query + 1 or start_query
@@ -394,7 +398,8 @@ function private.start_search(queries, continuation)
                 m.update_tab(m.SAVED)
             end
 
-            m.enable_start()
+            search.active = false
+            m.update_start_stop()
         end,
         on_abort = function()
             search.status_bar:update_status(100, 100)
@@ -409,7 +414,8 @@ function private.start_search(queries, continuation)
                 m.update_continuation()
             end
 
-            m.enable_start()
+            search.active = false
+            m.update_start_stop()
         end,
     }
 end
@@ -462,7 +468,8 @@ function public.execute(resume, real_time)
 
     local continuation = resume and m.current_search().continuation
     m.discard_continuation()
-    m:enable_stop()
+    m.current_search().active = true
+    m.update_start_stop()
 
     m.update_tab(m.RESULTS)
     if real_time then
@@ -529,6 +536,10 @@ do
                 m.record_remover(record)()
             end,
             function(index)
+                if Aux.util.safe_index(m.results_listing:GetSelection(), 'record') ~= record then
+                    return
+                end
+
                 state = FOUND
                 found_index = index
 
@@ -628,6 +639,7 @@ do
             m.next_button:Show()
             m.search_box:SetPoint('LEFT', m.next_button, 'RIGHT', 4, 0)
         end
+        m.update_start_stop()
         m.update_continuation()
     end
 
