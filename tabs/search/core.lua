@@ -151,7 +151,7 @@ function private.add_filter(filter_string, replace)
 end
 
 function private.update_auto_buy_filter()
-    if aux_auto_buy_filter then
+    if aux_auto_buy_filter ~= '' then
         local queries = Aux.scan_util.parse_filter_string(aux_auto_buy_filter)
         if queries then
             if getn(queries) > 1 then
@@ -166,7 +166,7 @@ function private.update_auto_buy_filter()
             end
         end
     end
-    aux_auto_buy_filter = nil
+    aux_auto_buy_filter = ''
 end
 
 function private.close_settings()
