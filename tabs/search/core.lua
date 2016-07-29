@@ -446,7 +446,6 @@ function public.execute(resume, real_time)
         end
     end
 
-    m.search_box:HighlightText(0, 0)
     m.search_box:ClearFocus()
 
     if resume then
@@ -671,14 +670,12 @@ do
     end
 
     function private.previous_search()
-        m.search_box:HighlightText(0, 0)
         m.search_box:ClearFocus()
         m.update_search(search_index - 1)
         m.update_tab(m.RESULTS)
     end
 
     function private.next_search()
-        m.search_box:HighlightText(0, 0)
         m.search_box:ClearFocus()
         m.update_search(search_index + 1)
         m.update_tab(m.RESULTS)

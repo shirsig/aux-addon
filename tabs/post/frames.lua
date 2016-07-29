@@ -119,7 +119,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
     end
     do
         local item = Aux.gui.item(m.frame.parameters)
-        item:SetPoint('TOPLEFT', 10, -10)
+        item:SetPoint('TOPLEFT', 10, -8)
         item:EnableMouse()
         item:SetScript('OnReceiveDrag', function()
             local item_info = Aux.cursor_item()
@@ -155,7 +155,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
     do
         local slider = Aux.gui.slider(m.frame.parameters)
         slider:SetValueStep(1)
-        slider:SetPoint('TOPLEFT', 16, -75)
+        slider:SetPoint('TOPLEFT', 16, -73)
         slider:SetWidth(190)
         slider:SetScript('OnValueChanged', function()
             m.quantity_update(true)
@@ -178,11 +178,9 @@ Aux.post_tab.FRAMES(function(m, public, private)
                 m.unit_start_price:SetFocus()
             end
         end)
-        slider.editbox:SetWidth(50)
         slider.editbox:SetNumeric(true)
         slider.editbox:SetMaxLetters(3)
         slider.label:SetText('Stack Size')
-        slider.label:SetTextHeight(13)
         private.stack_size_slider = slider
     end
     do
@@ -204,15 +202,13 @@ Aux.post_tab.FRAMES(function(m, public, private)
                 m.unit_start_price:SetFocus()
             end
         end)
-        slider.editbox:SetWidth(50)
         slider.editbox:SetNumeric(true)
         slider.label:SetText('Stack Count')
-        slider.label:SetTextHeight(13)
         private.stack_count_slider = slider
     end
     do
         local dropdown = Aux.gui.dropdown(m.frame.parameters)
-        dropdown:SetPoint('TOPLEFT', m.stack_count_slider, 'BOTTOMLEFT', 0, -19)
+        dropdown:SetPoint('TOPLEFT', m.stack_count_slider, 'BOTTOMLEFT', 0, -21)
         dropdown:SetWidth(90)
         dropdown:SetHeight(10)
         local label = Aux.gui.label(dropdown, 13)

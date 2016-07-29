@@ -474,9 +474,9 @@ do
     end
 end
 
-function public.slider(frame, name)
+function public.slider(frame)
 
-    local slider = CreateFrame('Slider', name, frame)
+    local slider = CreateFrame('Slider', nil, frame)
     slider:SetOrientation('HORIZONTAL')
     slider:SetHeight(6)
     slider:SetHitRectInsets(0, 0, -8, -8)
@@ -494,29 +494,14 @@ function public.slider(frame, name)
     label:SetPoint('BOTTOMRIGHT', slider, 'TOPRIGHT', 6, 6)
     label:SetJustifyH('LEFT')
     label:SetHeight(13)
-    label:SetFont(m.config.content_font, m.config.normal_font_size)
+    label:SetFont(m.config.content_font, 13)
     label:SetTextColor(unpack(m.config.label_color.enabled))
 
-    local editbox = CreateFrame('EditBox', nil, slider)
-    editbox:SetAutoFocus(false)
+    local editbox = m.editbox(slider)
     editbox:SetPoint('LEFT', slider, 'RIGHT', 5, 0)
-    editbox:SetHeight(15)
-    editbox:SetWidth(70)
+    editbox:SetWidth(50)
     editbox:SetJustifyH('CENTER')
-    editbox:EnableMouse(true)
-    m.set_content_style(editbox)
---    editbox:SetFont(m.config.content_font, m.config.normal_font_size)
-    editbox:SetFont(m.config.content_font, m.config.normal_font_size)
-    editbox:SetShadowColor(0, 0, 0, 0)
---
---    local button = CreateFrame('Button', nil, editbox, 'UIPanelButtonTemplate')
---    button:SetWidth(40)
---    button:SetHeight(20)
---    button:SetPoint('LEFT', editbox, 'RIGHT', 2, 0)
---    button:SetText(OKAY)
---    button:SetScript('OnClick', Button_OnClick)
---    button:Hide()
---
+
     slider.label = label
     slider.editbox = editbox
     return slider
