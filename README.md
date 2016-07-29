@@ -87,7 +87,7 @@ Furthermore
 
 #### New Filter
 ![Alt text](http://i.imgur.com/YSQbSC1.png)
-While it is faster to type filters directly into the search box this subtab serves as a tutorial to learn how to formulate queries.
+While it is faster to type filters directly into the search box this sub-tab serves as a tutorial to learn how to formulate queries.
 The filters on the left side are Blizzard filters which may reduce the number of pages to be scanned and those on the right side are post filters which do not affect the scan time but can be combined with logical operators to formulate very complex filters.
 ### Post
 ![Alt text](http://i.imgur.com/eydxjoH.png)

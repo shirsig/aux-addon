@@ -32,7 +32,6 @@ Aux.search_tab.FRAMES(function(m, public, private)
                 m.settings:Hide()
                 m.controls:Show()
             else
-                Aux.scan.abort(m.search_scan_id)
                 m.settings:Show()
                 m.controls:Hide()
             end
@@ -129,7 +128,6 @@ Aux.search_tab.FRAMES(function(m, public, private)
             m.first_page_input:GetScript('OnTextChanged')()
             this = m.last_page_input
             m.last_page_input:GetScript('OnTextChanged')()
-            m.update_continuation()
         end)
         public.real_time_button = btn
     end
@@ -245,11 +243,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         editbox:SetScript('OnTabPressed', function()
             this:HighlightText(0, 0)
         end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:HighlightText(0, 0)
-            this:ClearFocus()
-            m.execute()
-        end)
+        editbox:SetScript('OnEnterPressed', m.execute)
         editbox:SetScript('OnReceiveDrag', function()
             local item_info = Aux.cursor_item() and Aux.info.item(Aux.cursor_item().item_id)
             if item_info then

@@ -269,7 +269,7 @@ function private.start_real_time_scan(query, search, continuation)
     m.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = {query},
-        auto_buy_validator = m.auto_buy_filter_button:GetChecked() and aux_auto_buy_filter and m.auto_buy_validator, -- some redundancy but why not to be save
+        auto_buy_validator = search.auto_buy_validator,
         on_scan_start = function()
             m.status_bar:update_status(99.99, 99.99)
             m.status_bar:set_text('Scanning last page ...')
@@ -282,7 +282,7 @@ function private.start_real_time_scan(query, search, continuation)
         end,
         on_auction = function(auction_record, ctrl)
             if not ignore_page then
-                if m.auto_buy_button:GetChecked() then
+                if search.auto_buy then
                     ctrl.suspend()
                     Aux.place_bid('list', auction_record.index, auction_record.buyout_price, function() ctrl.resume(true) end)
                 else
@@ -349,7 +349,7 @@ function private.start_search(queries, continuation)
     m.search_scan_id = Aux.scan.start{
         type = 'list',
         queries = queries,
-        auto_buy_validator = m.auto_buy_validator,
+        auto_buy_validator = search.auto_buy_validator,
         on_scan_start = function()
             m.status_bar:update_status(0,0)
             if continuation then
@@ -374,7 +374,7 @@ function private.start_search(queries, continuation)
             current_page = current_page and 0 or start_page - 1
         end,
         on_auction = function(auction_record, ctrl)
-            if m.auto_buy_button:GetChecked() then
+            if search.auto_buy then
                 ctrl.suspend()
                 Aux.place_bid('list', auction_record.index, auction_record.buyout_price, function() ctrl.resume(true) end)
             elseif getn(search.records) < 1000 then
@@ -413,7 +413,10 @@ function private.start_search(queries, continuation)
 end
 
 function public.execute(resume, real_time)
-    if real_time == nil then
+
+    if resume then
+        real_time = m.current_search().real_time
+    elseif real_time == nil then
         real_time = m.real_time_button:GetChecked()
     end
 
@@ -435,19 +438,22 @@ function public.execute(resume, real_time)
         end
     end
 
-    if filter_string ~= m.current_search().filter_string then
+    m.search_box:HighlightText(0, 0)
+    m.search_box:ClearFocus()
+
+    if resume then
+        m.results_listing:SetSelectedRecord()
+    elseif filter_string ~= m.current_search().filter_string then
         m.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
     else
-        m.search_box:ClearFocus()
-        if resume then
-            m.results_listing:SetSelectedRecord()
-        else
-            if m.current_search().real_time ~= real_time then
-                m.results_listing:Reset()
-            end
-            m.current_search().records = {}
-            m.results_listing:SetDatabase(m.current_search().records)
+        if m.current_search().real_time ~= real_time then
+            m.results_listing:Reset()
         end
+        m.current_search().records = {}
+        m.current_search().real_time = m.real_time_button:GetChecked()
+        m.current_search().auto_buy = m.auto_buy_button:GetChecked()
+        m.current_search().auto_buy_validator = m.auto_buy_filter_button:GetChecked() and m.auto_buy_validator -- some redundancy but why not to be save
+        m.results_listing:SetDatabase(m.current_search().records)
     end
 
     local continuation = resume and m.current_search().continuation
@@ -456,7 +462,6 @@ function public.execute(resume, real_time)
 
     m.close_settings()
     m.update_tab(m.RESULTS)
-    m.current_search().real_time = real_time
     if real_time then
         m.start_real_time_scan(queries[1], nil, continuation)
     else
@@ -574,7 +579,7 @@ do
 end
 
 function private.update_continuation()
-    if m.current_search().continuation and m.current_search().real_time == m.real_time_button:GetChecked() then
+    if m.current_search().continuation then
         m.resume_button:Show()
         m.search_box:SetPoint('RIGHT', m.resume_button, 'LEFT', -4, 0)
     else
@@ -596,7 +601,6 @@ do
 
     function private.update_search()
         Aux.scan.abort(m.search_scan_id)
-        m.search_box:ClearFocus()
         m.search_box:SetText(searches[search_index].filter_string)
         m.results_listing:Reset()
         m.results_listing:SetDatabase(searches[search_index].records)
@@ -628,6 +632,9 @@ do
         tinsert(searches, search_index + 1, {
             filter_string = filter_string,
             records = {},
+            real_time = m.real_time_button:GetChecked(),
+            auto_buy = m.auto_buy_button:GetChecked(),
+            auto_buy_validator = m.auto_buy_filter_button:GetChecked() and m.auto_buy_validator, -- some redundancy but why not to be save
         })
         while getn(searches) > search_index + 1 do
             tremove(searches)
@@ -640,12 +647,16 @@ do
     end
 
     function private.previous_search()
+        m.search_box:HighlightText(0, 0)
+        m.search_box:ClearFocus()
         search_index = search_index - 1
         m.update_search()
         m.update_tab(m.RESULTS)
     end
 
     function private.next_search()
+        m.search_box:HighlightText(0, 0)
+        m.search_box:ClearFocus()
         search_index = search_index + 1
         m.update_search()
         m.update_tab(m.RESULTS)

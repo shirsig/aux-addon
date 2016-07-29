@@ -285,11 +285,7 @@ function public.auctionable(tooltip, quality, lootable)
 end
 
 function public.tooltip(setter)
-	for i = 1, TOOLTIP_LENGTH do
-		getglobal('AuxTooltipTextLeft'..i):SetText()
-		getglobal('AuxTooltipTextRight'..i):SetText()
-	end
-	
+
 	AuxTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
     AuxTooltip.money = 0
 	setter(AuxTooltip)
@@ -298,10 +294,10 @@ function public.tooltip(setter)
 	local tooltip = { money=AuxTooltip.money }
 	for i = 1, TOOLTIP_LENGTH do
 
-		local left_text = getglobal('AuxTooltipTextLeft'..i):GetText()
+		local left_text = getglobal('AuxTooltipTextLeft'..i):GetText() or ''
 		local left_color = { getglobal('AuxTooltipTextLeft'..i):GetTextColor() }
 		
-		local right_text = getglobal('AuxTooltipTextRight'..i):GetText()
+		local right_text = getglobal('AuxTooltipTextRight'..i):IsVisible() and getglobal('AuxTooltipTextRight'..i):GetText() or '' -- the right text is only hidden, not cleared
 		local right_color = { getglobal('AuxTooltipTextRight'..i):GetTextColor() }
 
         if left_text or right_text then
@@ -312,11 +308,6 @@ function public.tooltip(setter)
                 right_color = right_color,
             })
         end
-	end
-	
-	for i = 1, TOOLTIP_LENGTH do
-		getglobal('AuxTooltipTextLeft'..i):SetText()
-		getglobal('AuxTooltipTextRight'..i):SetText()
 	end
 	
 	return tooltip
