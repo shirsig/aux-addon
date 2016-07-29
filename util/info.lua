@@ -84,23 +84,13 @@ function public.auction_sell_item()
 	local name, texture, count, quality, usable, vendor_price = GetAuctionSellItemInfo()
 
 	if name then
-
-        local unit_vendor_price = vendor_price / count
-        local tooltip = m.tooltip(function(tt) tt:SetAuctionSellItem() end)
-        local charges = m.item_charges(tooltip)
-        local aux_quantity = charges > 1 and charges or count
-
         return {
 			name = name,
 			texture = texture,
             quality = quality,
-			stack_size = count,
+			count = count,
 			usable = usable,
-            vendor_price = vendor_price,
-            unit_vendor_price = unit_vendor_price,
-
-            tooltip = tooltip,
-            aux_quantity = aux_quantity,
+            vendor_price = vendor_price, -- it seems for charge items this is always the price for full charges
 		}
 	end
 end
@@ -328,7 +318,7 @@ function private.item_charges(tooltip)
     return 1
 end
 
-function private.max_item_charges(item_id)
+function public.max_item_charges(item_id)
     return ({
         -- wizard oil
         [20744] = 5,

@@ -285,17 +285,15 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.new_filter_button = btn
     end
     do
-        local status_bar = Aux.gui.status_bar(m.frame)
-        status_bar:SetWidth(265)
-        status_bar:SetHeight(25)
-        status_bar:SetPoint('TOPLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, -6)
-        status_bar:update_status(100, 100)
-        status_bar:set_text('')
-        private.status_bar = status_bar
+        local frame = CreateFrame('Frame')
+        frame:SetWidth(265)
+        frame:SetHeight(25)
+        frame:SetPoint('TOPLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, -6)
+        private.status_bar_frame = frame
     end
     do
         local btn = Aux.gui.button(m.frame.results, 16)
-        btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.status_bar_frame, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Bid')
@@ -324,7 +322,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local btn = Aux.gui.button(m.frame.saved, 16)
-        btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
+        btn:SetPoint('TOPLEFT', m.status_bar_frame, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Favorite')
@@ -341,7 +339,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local btn1 = Aux.gui.button(m.frame.filter, 16)
-        btn1:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
+        btn1:SetPoint('TOPLEFT', m.status_bar_frame, 'TOPRIGHT', 5, 0)
         btn1:SetWidth(80)
         btn1:SetHeight(24)
         btn1:SetText('Search')

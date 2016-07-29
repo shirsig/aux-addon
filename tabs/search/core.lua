@@ -68,7 +68,7 @@ end
 
 function public.LOAD()
     m.create_frames(m, public, private)
-    m.update_search()
+    m.new_search('')
     m.update_tab(m.SAVED)
     m.update_auto_buy_filter()
 end
@@ -271,8 +271,8 @@ function private.start_real_time_scan(query, search, continuation)
         queries = {query},
         auto_buy_validator = search.auto_buy_validator,
         on_scan_start = function()
-            m.status_bar:update_status(99.99, 99.99)
-            m.status_bar:set_text('Scanning last page ...')
+            search.status_bar:update_status(99.99, 99.99)
+            search.status_bar:set_text('Scanning last page ...')
         end,
         on_page_loaded = function(_, _, last_page)
             next_page = last_page
@@ -315,8 +315,8 @@ function private.start_real_time_scan(query, search, continuation)
             m.start_real_time_scan(query, search)
         end,
         on_abort = function()
-            m.status_bar:update_status(100, 100)
-            m.status_bar:set_text('Scan paused')
+            search.status_bar:update_status(100, 100)
+            search.status_bar:set_text('Scan paused')
 
             search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
 
@@ -351,11 +351,11 @@ function private.start_search(queries, continuation)
         queries = queries,
         auto_buy_validator = search.auto_buy_validator,
         on_scan_start = function()
-            m.status_bar:update_status(0,0)
+            search.status_bar:update_status(0,0)
             if continuation then
-                m.status_bar:set_text('Resuming scan...')
+                search.status_bar:set_text('Resuming scan...')
             else
-                m.status_bar:set_text('Scanning auctions...')
+                search.status_bar:set_text('Scanning auctions...')
             end
         end,
         on_page_loaded = function(_, total_scan_pages)
@@ -363,8 +363,8 @@ function private.start_search(queries, continuation)
             total_scan_pages = total_scan_pages + (start_page - 1)
             total_scan_pages = max(total_scan_pages, 1)
             current_page = min(current_page, total_scan_pages)
-            m.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / total_scan_pages)
-            m.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_scan_pages))
+            search.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / total_scan_pages)
+            search.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_scan_pages))
         end,
         on_page_scanned = function()
             m.results_listing:SetDatabase()
@@ -385,8 +385,8 @@ function private.start_search(queries, continuation)
             end
         end,
         on_complete = function()
-            m.status_bar:update_status(100, 100)
-            m.status_bar:set_text('Scan complete')
+            search.status_bar:update_status(100, 100)
+            search.status_bar:set_text('Scan complete')
 
             if m.current_search() == search and m.frame.results:IsVisible() and getn(search.records) == 0 then
                 m.update_tab(m.SAVED)
@@ -395,8 +395,8 @@ function private.start_search(queries, continuation)
             m.enable_start()
         end,
         on_abort = function()
-            m.status_bar:update_status(100, 100)
-            m.status_bar:set_text('Scan paused')
+            search.status_bar:update_status(100, 100)
+            search.status_bar:set_text('Scan paused')
 
             if current_query then
                 search.continuation = {current_query, current_page + 1}
@@ -443,24 +443,25 @@ function public.execute(resume, real_time)
 
     if resume then
         m.results_listing:SetSelectedRecord()
-    elseif filter_string ~= m.current_search().filter_string then
-        m.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
     else
-        if m.current_search().real_time ~= real_time then
-            m.results_listing:Reset()
+        if filter_string ~= m.current_search().filter_string then
+            m.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
+        else
+            m.current_search().records = {}
+            m.results_listing:SetDatabase(m.current_search().records)
+            if m.current_search().real_time ~= real_time then
+                m.results_listing:Reset()
+            end
         end
-        m.current_search().records = {}
         m.current_search().real_time = m.real_time_button:GetChecked()
         m.current_search().auto_buy = m.auto_buy_button:GetChecked()
-        m.current_search().auto_buy_validator = m.auto_buy_filter_button:GetChecked() and m.auto_buy_validator -- some redundancy but why not to be save
-        m.results_listing:SetDatabase(m.current_search().records)
+        m.current_search().auto_buy_validator = m.auto_buy_filter_button:GetChecked() and m.auto_buy_validator -- some redundancy to be save
     end
 
     local continuation = resume and m.current_search().continuation
     m.discard_continuation()
     m:enable_stop()
 
-    m.close_settings()
     m.update_tab(m.RESULTS)
     if real_time then
         m.start_real_time_scan(queries[1], nil, continuation)
@@ -517,7 +518,7 @@ do
         state = SEARCHING
         scan_id = Aux.scan_util.find(
             record,
-            m.status_bar,
+            m.current_search().status_bar,
             function()
                 state = IDLE
             end,
@@ -588,28 +589,37 @@ function private.update_continuation()
     end
 end
 
+function private.new_status_bar()
+    local status_bar = Aux.gui.status_bar(m.frame)
+    status_bar:SetAllPoints(m.status_bar_frame)
+    status_bar:update_status(100, 100)
+    status_bar:set_text('')
+    return status_bar
+end
+
 do
-    local searches = { [1] = {
-        filter_string = '',
-        records = {},
-    }}
+    local searches = {}
     local search_index = 1
 
     function private.current_search()
         return searches[search_index]
     end
 
-    function private.update_search()
-        Aux.scan.abort(m.search_scan_id)
+    function private.update_search(index)
+        searches[search_index].status_bar:Hide()
+
+        search_index = index
+
+        searches[search_index].status_bar:Show()
         m.search_box:SetText(searches[search_index].filter_string)
         m.results_listing:Reset()
         m.results_listing:SetDatabase(searches[search_index].records)
-        if search_index == 1 or search_index == 0 then
+        if search_index == 1 then
             m.previous_button:Disable()
         else
             m.previous_button:Enable()
         end
-        if search_index == getn(searches) or search_index == 0 then
+        if search_index == getn(searches) then
             m.next_button:Hide()
             m.search_box:SetPoint('LEFT', m.previous_button, 'RIGHT', 4, 0)
         else
@@ -620,45 +630,43 @@ do
     end
 
     function private.new_search(filter_string, prettified)
-        tinsert(aux_recent_searches, 1, {
-            filter_string = filter_string,
-            prettified = prettified,
-        })
-        while getn(aux_recent_searches) > 50 do
-            tremove(aux_recent_searches)
+        if prettified then
+            tinsert(aux_recent_searches, 1, {
+                filter_string = filter_string,
+                prettified = prettified,
+            })
+            while getn(aux_recent_searches) > 50 do
+                tremove(aux_recent_searches)
+            end
+            m.update_search_listings()
         end
-        m.update_search_listings()
 
-        tinsert(searches, search_index + 1, {
-            filter_string = filter_string,
-            records = {},
-            real_time = m.real_time_button:GetChecked(),
-            auto_buy = m.auto_buy_button:GetChecked(),
-            auto_buy_validator = m.auto_buy_filter_button:GetChecked() and m.auto_buy_validator, -- some redundancy but why not to be save
-        })
-        while getn(searches) > search_index + 1 do
+        while getn(searches) > search_index do
             tremove(searches)
         end
+        tinsert(searches, {
+            filter_string = filter_string,
+            records = {},
+            status_bar = m.new_status_bar(),
+        })
         if getn(searches) > 5 then
             tremove(searches, 1)
         end
-        search_index = getn(searches)
-        m.update_search()
+
+        m.update_search(getn(searches))
     end
 
     function private.previous_search()
         m.search_box:HighlightText(0, 0)
         m.search_box:ClearFocus()
-        search_index = search_index - 1
-        m.update_search()
+        m.update_search(search_index - 1)
         m.update_tab(m.RESULTS)
     end
 
     function private.next_search()
         m.search_box:HighlightText(0, 0)
         m.search_box:ClearFocus()
-        search_index = search_index + 1
-        m.update_search()
+        m.update_search(search_index + 1)
         m.update_tab(m.RESULTS)
     end
 end

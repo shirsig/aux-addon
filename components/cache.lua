@@ -24,8 +24,9 @@ function public.LOAD()
 	Aux.control.event_listener('NEW_AUCTION_UPDATE', function()
 		local info = Aux.info.auction_sell_item()
 		if info then
-			if Aux.cache.item_id(info.name) then
-				aux_merchant_sell[Aux.cache.item_id(info.name)] = info.vendor_price / info.aux_quantity
+			local item_id = Aux.cache.item_id(info.name)
+			if item_id then
+				aux_merchant_sell[Aux.cache.item_id(info.name)] = info.vendor_price / (Aux.info.max_item_charges(item_id) or info.count)
 			end
 		end
 	end):start()

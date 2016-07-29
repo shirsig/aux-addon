@@ -39,7 +39,7 @@ do
 end
 
 function public.on_load()
-    public.version = '3.4.1'
+    public.version = '3.4.2'
     public.blizzard_ui_shown = false
     public.bids_loaded = false
     public.current_owner_page = nil

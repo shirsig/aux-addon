@@ -122,9 +122,9 @@ do
             m.find_auction(selection.record)
         elseif state == FOUND and not m.test(selection.record)(found_index) then
             m.cancel_button:Disable()
---            if not Aux.bid_in_progress() then
+            if not Aux.cancel_in_progress() then
                 state = IDLE
---            end
+            end
         end
     end
 end

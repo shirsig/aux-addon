@@ -366,7 +366,7 @@ function private.unit_vendor_price(item_key)
                 ClearCursor()
 
                 if auction_sell_item then
-                    return auction_sell_item.unit_vendor_price
+                    return auction_sell_item.vendor_price / auction_sell_item.count
                 end
             end
         end
