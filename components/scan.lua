@@ -19,17 +19,11 @@ function private.current_query()
 end
 
 function private.current_thread()
-    for _, thread in m.threads do
-        if thread.id == Aux.control.thread_id then
-            return thread
-        end
-    end
+    return Aux.util.filter(m.threads, function(thread) return thread.id == Aux.control.thread_id end)[1]
 end
 
 function public.start(params)
-    if m.threads[params.type] then
-        m.abort(m.threads[params.type].id)
-    end
+    Aux.safe(m).abort(Aux.safe(m).threads[params.type].id)
 
     local thread_id = Aux.control.new_thread(Aux.f(m.wait_for_callback, params.on_scan_start, m.scan))
 
@@ -51,15 +45,13 @@ function public.abort(scan_id)
     end
 
     for _, thread in ipairs(aborted_threads) do
-        if thread.params.on_abort then
-            thread.params.on_abort()
-        end
+        Aux.safe(thread.params.on_abort)()
     end
 end
 
 function private.wait_for_results(k)
     if m.current_thread().params.type == 'bidder' then
-        return Aux.control.wait_until(function() return Aux.bids_loaded end, k)
+        return Aux.control.when(function() return Aux.bids_loaded end, k)
     elseif m.current_thread().params.type == 'owner' then
         return m.wait_for_owner_results(k)
     elseif m.current_thread().params.type == 'list' then
@@ -85,7 +77,7 @@ function private.wait_for_list_results(k)
         updated = true
     end)
     listener:start()
-    Aux.control.wait_until(function()
+    Aux.control.when(function()
         -- short circuiting order important, owner_data_complete must be called iif an update has happened.
         -- if no update has happened it must not be called for performance reasons, otherwise it must be called to request further missing data if there is any
         local ok = updated and m.owner_data_complete() or last_update and GetTime() - last_update > 5
@@ -129,7 +121,7 @@ function private.wait_for_callback(...)
 	if ok then
 		return k()
     else
-        return Aux.control.wait_until(function() return ok end, function() return k(unpack(ret)) end)
+        return Aux.control.when(function() return ok end, function() return k(unpack(ret)) end)
 	end
 end
 
@@ -197,11 +189,11 @@ function private.scan_auctions_helper(i, k)
 
         Aux.history.process_auction(auction_info)
 
-        if m.current_thread().params.auto_buy_validator and m.current_thread().params.auto_buy_validator(auction_info) then
+        if Aux.safe(m).current_thread().params.auto_buy_validator(auction_info)/false then
             local c = Aux.control.wait_for(recurse)
             Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, Aux.f(c, true))
             Aux.control.new_thread(Aux.control.sleep, 10, Aux.f(c, false))
-        elseif not m.current_query().validator or m.current_query().validator(auction_info) then
+        elseif Aux.safe(m).current_query().validator(auction_info)/true then
             return m.wait_for_callback(m.current_thread().params.on_auction, auction_info, function(removed)
                 if removed then
                     return recurse(true)
@@ -216,17 +208,16 @@ function private.scan_auctions_helper(i, k)
 end
 
 function private.submit_query(k)
-    Aux.control.wait_until(function() return m.current_thread().params.type ~= 'list' or CanSendAuctionQuery() end, function()
+    Aux.control.when(function() return m.current_thread().params.type ~= 'list' or CanSendAuctionQuery() end, function()
 
-        if m.current_thread().params.on_submit_query then
-            m.current_thread().params.on_submit_query()
-        end
+        Aux.safe(m).current_thread().params.on_submit_query()
+
         if m.current_thread().params.type == 'bidder' then
             GetBidderAuctionItems(m.current_thread().page)
         elseif m.current_thread().params.type == 'owner' then
             GetOwnerAuctionItems(m.current_thread().page)
         else
-            local blizzard_query = Aux.safe(m.current_query().blizzard_query)/{}
+            local blizzard_query = Aux.safe(m).current_query().blizzard_query/{}
             QueryAuctionItems(
                 blizzard_query.name,
                 blizzard_query.min_level,

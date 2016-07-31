@@ -718,7 +718,7 @@ function public.validator(blizzard_filter, post_filter)
 
     return function(record)
         if blizzard_filter.exact and strlower(Aux.info.item(record.item_id).name) ~= blizzard_filter.name then
-            return
+            return false
         end
         if getn(post_filter) > 0 then
             local stack = {}

@@ -84,7 +84,7 @@ function public.on_next_update(callback)
 end
 
 function public.as_soon_as(p, callback)
-	return m.new_thread(m.wait_until, p, callback)
+	return m.new_thread(m.when, p, callback)
 end
 
 function public.new_thread(k, ...)
@@ -101,7 +101,7 @@ end
 
 function public.wait_for(k)
 	local ret
-	m.wait_until(function() return ret end, function() return k(unpack(ret)) end)
+	m.when(function() return ret end, function() return k(unpack(ret)) end)
 	return function(...)
 		ret = arg
 	end
@@ -109,21 +109,21 @@ end
 
 function public.sleep(dt, ...)
 	local t0 = GetTime()
-	return m.wait_until(function() return GetTime() - t0 >= dt end, unpack(arg))
+	return m.when(function() return GetTime() - t0 >= dt end, unpack(arg))
 end
 
 function public.wait(k, ...)
 	if type(k) == 'number' then
-		m.wait_until(function() k = k - 1 return k <= 0 end, unpack(arg))
+		m.when(function() k = k - 1 return k <= 0 end, unpack(arg))
 	else
 		m.threads[m.thread_id].k = Aux.f(k, unpack(arg))
 	end
 end
 
-function public.wait_until(p, k, ...)
+function public.when(p, k, ...)
 	if p() then
 		return k(unpack(arg))
 	else
-		return m.wait(m.wait_until, p, Aux.f(k, unpack(arg)))
+		return m.wait(m.when, p, Aux.f(k, unpack(arg)))
 	end
 end

@@ -57,28 +57,61 @@ function public.f(func, ...)
 end
 
 do
-    local safe_nil = setmetatable({}, {
-        __index = function(self) return self end,
-        __call = function(self) return self end,
-        __div = function(_, value) return value end
-    })
+    local data = {}
+    local eq = function() return true end
+    local proto = setmetatable({}, { __eq = eq })
+    local safe_nil
+
+    local function unsafe(object)
+        if object == proto then
+            return -object
+        else
+            return object
+        end
+    end
+
+    local safe_mt = {
+        __index = function(self, key)
+            key = unsafe(key)
+            if data[self] == nil or key == nil then
+                return safe_nil
+            else
+                return m.safe(data[self][key])
+            end
+        end,
+        __call = function(self, ...)
+            if data[self] == nil then
+                return safe_nil
+            end
+            for i=1,arg.n do
+                if arg[i] == proto and -arg[i] == nil then
+                    return safe_nil
+                else
+                    arg[i] = unsafe(arg[i])
+                end
+            end
+            return m.safe(data[self](unpack(arg)))
+        end,
+        __div = function(self, default)
+            if data[self] == nil then
+                return default
+            else
+                return data[self]
+            end
+        end,
+        __unm = function(self)
+            return data[self]
+        end,
+        __eq = eq,
+    }
 
     function public.safe(object)
-        return (object == nil or object == safe_nil) and safe_nil or setmetatable({}, {
-            __index = function(_, key)
-                return m.safe(key) ~= safe_nil and m.safe(object[key]) or safe_nil
-            end,
-            __call = function(_, ...)
-                for i=1,arg.n do
-                    if safe(arg[i]) == safe_nil then
-                        return safe_nil
-                    end
-                end
-                return object(unpack(arg))
-            end,
-            __div = function() return object end
-        })
+        local self = {}
+        data[self] = unsafe(object)
+        return setmetatable(self, safe_mt)
     end
+
+    safe_nil = m.safe()
 end
 
 do
@@ -497,7 +530,7 @@ function public.hook(name, handler, object)
     end
 
     if orig[name] then
-        error('"'..name..'" is already hooked!')
+        error('"'..name..'" is already hooked.')
     end
 
     orig[name] = object[name]

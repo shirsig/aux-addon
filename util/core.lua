@@ -3,8 +3,14 @@ local m, public, private = Aux.module'util'
 function public.pass()
 end
 
-function public.id(object)
-	return object
+function public.id(value)
+	return value
+end
+
+function public.const(value)
+	return function()
+		return value
+	end
 end
 
 function public.size(table)
@@ -147,7 +153,7 @@ end
 
 function public.filter(xs, p)
 	local ys = {}
-	for _, x in ipairs(xs) do
+	for _, x in xs do
 		if p(x) then
 			tinsert(ys, x)
 		end

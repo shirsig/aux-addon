@@ -64,7 +64,7 @@ function private.move_item(from_slot, to_slot, amount, k)
 	SplitContainerItem(from_slot[1], from_slot[2], amount)
 	PickupContainerItem(unpack(to_slot))
 
-	return Aux.control.wait_until(function() return m.stack_size(to_slot) == expected_size end, k)
+	return Aux.control.when(function() return m.stack_size(to_slot) == expected_size end, k)
 end
 
 function private.process()
