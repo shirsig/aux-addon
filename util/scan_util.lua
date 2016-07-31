@@ -79,13 +79,9 @@ public.filters = {
                 return false, {'poor', 'common', 'uncommon', 'rare', 'epic'}, 'Erroneous rarity modifier'
             end
 
-            local code = ({
-                ['poor'] = 0,
-                ['common'] = 1,
-                ['uncommon'] = 2,
-                ['rare'] = 3,
-                ['epic'] = 4,
-            })[rarity or '']
+            local code = Aux.util.key(rarity, {'poor', 'common', 'uncommon', 'rare', 'epic'})
+            code = code and code - 1
+
             if not code then
                 return false, {}, 'Erroneous rarity modifier'
             end

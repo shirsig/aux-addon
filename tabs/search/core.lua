@@ -229,7 +229,7 @@ function private.get_form_filter()
         end
     end
 
-    local quality = UIDropDownMenu_GetSelectedValue(m.quality_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.quality_dropdown)
+    local quality = UIDropDownMenu_GetSelectedValue(m.quality_dropdown) >= 0 and UIDropDownMenu_GetSelectedValue(m.quality_dropdown)
     if quality then
         add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
     end
@@ -765,7 +765,7 @@ function private.initialize_quality_dropdown()
 
 	UIDropDownMenu_AddButton{
 		text = ALL,
-        value = 0,
+        value = -1,
 		func = on_click,
 	}
 	for i=0,4 do
@@ -775,5 +775,61 @@ function private.initialize_quality_dropdown()
 			func = on_click,
 		}
 	end
+end
+
+function private.initialize_filter_dropdown()
+    local function on_click()
+        UIDropDownMenu_SetSelectedValue(m.filter_dropdown, this.value)
+        m.filter_button:SetText(this.value)
+        if Aux.safe(Aux).scan_util.filters[this.value].arity/0 == 0 then
+            m.filter_input:Hide()
+        else
+            m.filter_input:Show()
+        end
+    end
+
+    for _, filter in {'and', 'or', 'not', 'min-unit-buy', 'max-unit-bid', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard'} do
+        UIDropDownMenu_AddButton{
+            text = filter,
+            value = filter,
+            func = on_click,
+        }
+    end
+end
+
+do
+    local stack = {}
+
+    function private.add_post_filter()
+        local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown) or ''
+        local input = m.filter_input:GetText()
+        if Aux.safe(Aux).scan_util.filters[name].test(input)/true then
+            local filter = name
+            if Aux.safe(Aux).scan_util.filters[name].arity/0 > 0 then
+                filter = filter..'/'..input
+            end
+
+            local filters = m.filter_display:GetText() or ''
+            if filters ~= '' then
+                filters = filters..'|n'
+            end
+            for _=1,getn(stack) do
+                filters = filters..'    '
+            end
+            m.filter_display:SetText(filters..filter)
+
+            m.filter_input:SetText('')
+            m.filter_input:ClearFocus()
+
+            if Aux.util.set('and', 'or')[filter] then
+                tinsert(stack, 2)
+            else
+                local top = tremove(stack)
+                if top and top > 1 then
+                    tinsert(stack, top - 1)
+                end
+            end
+        end
+    end
 end
 

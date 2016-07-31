@@ -3,6 +3,22 @@ local m, public, private = Aux.module'util'
 function public.pass()
 end
 
+function public.sum(...)
+	local x = 0
+	for i=1,arg.n do
+		x = x + arg[i]
+	end
+	return x
+end
+
+function public.product(...)
+	local x = 0
+	for i=1,arg.n do
+		x = x * arg[i]
+	end
+	return x
+end
+
 function public.id(value)
 	return value
 end
@@ -179,10 +195,10 @@ function public.take(n, xs)
 	return ys
 end
 
-function public.index_of(value, array)
-	for i, item in ipairs(array) do
-		if item == value then
-			return i
+function public.key(value, t)
+	for k, v in t do
+		if v == value then
+			return k
 		end
 	end
 end

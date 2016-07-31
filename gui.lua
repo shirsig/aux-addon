@@ -14,15 +14,6 @@ public.config = {
     off_color  = {0.7, 0.3, 0.3},
 }
 
-do
-    local x = 0
-
-    function private.id()
-        x = x + 1
-        return 'Aux_frame'..x
-    end
-end
-
 function public.inline_color(color)
     local r, g, b, a = unpack(color)
     return format('|c%02X%02X%02X%02X', a, r, g, b)
@@ -329,7 +320,7 @@ function public.item(parent)
     local item = CreateFrame('Button', nil, parent)
     item:SetWidth(193)
     item:SetHeight(40)
-    local icon = CreateFrame('CheckButton', m.id(), item, 'ActionButtonTemplate')
+    local icon = CreateFrame('CheckButton', 'aux_frame'..Aux.unique(), item, 'ActionButtonTemplate')
     icon:SetPoint('LEFT', 2, 0.5)
     icon:SetHighlightTexture(nil)
     icon:RegisterForClicks()
@@ -379,99 +370,53 @@ function public.vertical_line(parent, x_offset, top_offset, bottom_offset, inver
     return texture
 end
 
-do
-    local id = 0
-    function public.dropdown(parent)
-        id = id + 1
 
-        local dropdown = CreateFrame('Frame', 'aux_dropdown'..id, parent, 'UIDropDownMenuTemplate')
+function public.dropdown(parent)
+    local dropdown = CreateFrame('Frame', 'aux_frame'..Aux.unique(), parent, 'UIDropDownMenuTemplate')
 
-        dropdown:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size, insets={top=5,bottom=5}}
-        dropdown:SetBackdropColor(unpack(m.config.content_color.backdrop))
-        dropdown:SetBackdropBorderColor(unpack(m.config.content_color.border))
-        local left = getglobal(dropdown:GetName()..'Left'):Hide()
-        local middle = getglobal(dropdown:GetName()..'Middle'):Hide()
-        local right = getglobal(dropdown:GetName()..'Right'):Hide()
+    dropdown:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size, insets={top=5,bottom=5}}
+    dropdown:SetBackdropColor(unpack(m.config.content_color.backdrop))
+    dropdown:SetBackdropBorderColor(unpack(m.config.content_color.border))
+    local left = getglobal(dropdown:GetName()..'Left'):Hide()
+    local middle = getglobal(dropdown:GetName()..'Middle'):Hide()
+    local right = getglobal(dropdown:GetName()..'Right'):Hide()
 
-        local button = getglobal(dropdown:GetName()..'Button')
-        button:ClearAllPoints()
-        button:SetPoint('RIGHT', dropdown, 0, 0)
+    local button = getglobal(dropdown:GetName()..'Button')
+    button:ClearAllPoints()
+    button:SetPoint('RIGHT', dropdown, 0, 0)
 
-        local text = getglobal(dropdown:GetName()..'Text')
-        text:ClearAllPoints()
-        text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
-        text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
-        text:SetFont(m.config.content_font, 13)
-        text:SetShadowColor(0, 0, 0, 0)
+    local text = getglobal(dropdown:GetName()..'Text')
+    text:ClearAllPoints()
+    text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
+    text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
+    text:SetFont(m.config.content_font, 13)
+    text:SetShadowColor(0, 0, 0, 0)
 
-    --
-    --    dropdown:ClearAllPoints()
-    --    dropdown:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -7, 0)
-    --    dropdown:SetScript("OnHide", nil)
-    --    dropdown:SetScript("OnEnter", Control_OnEnter)
-    --    dropdown:SetScript("OnLeave", Control_OnLeave)
-    --    dropdown:SetScript("OnMouseUp", function(self, button) Dropdown_TogglePullout(self.obj.button, button) end)
-    --    TSMAPI.Design:SetContentColor(dropdown)
-    --
-    --    local left = _G[dropdown:GetName().."Left"]
-    --    local middle = _G[dropdown:GetName().."Middle"]
-    --    local right = _G[dropdown:GetName().."Right"]
-    --
-    --    middle:ClearAllPoints()
-    --    right:ClearAllPoints()
-    --
-    --    middle:SetPoint("LEFT", left, "RIGHT", 0, 0)
-    --    middle:SetPoint("RIGHT", right, "LEFT", 0, 0)
-    --    right:SetPoint("TOPRIGHT", dropdown, "TOPRIGHT", 0, 17)
-    --
-    --    local button = _G[dropdown:GetName().."Button"]
-    --    button:RegisterForClicks("AnyUp")
-    --    button:SetScript("OnEnter", Control_OnEnter)
-    --    button:SetScript("OnLeave", Control_OnLeave)
-    --    button:SetScript("OnClick", Dropdown_TogglePullout)
-    --    button:ClearAllPoints()
-    --    button:SetPoint("RIGHT", dropdown, 0, 0)
-    --
-    --    local text = _G[dropdown:GetName().."Text"]
-    --    text:ClearAllPoints()
-    --    text:SetPoint("RIGHT", button, "LEFT", -2, 0)
-    --    text:SetPoint("LEFT", dropdown, "LEFT", 8, 0)
-    --    text:SetFont(TSMAPI.Design:GetContentFont("normal"))
-    --    text:SetShadowColor(0, 0, 0, 0)
-    --
-    --    local label = frame:CreateFontString(nil, "OVERLAY")
-    --    label:SetPoint("TOPLEFT", frame, "TOPLEFT", 0, 0)
-    --    label:SetPoint("TOPRIGHT", frame, "TOPRIGHT", 0, 0)
-    --    label:SetJustifyH("LEFT")
-    --    label:SetHeight(18)
-    --    label:SetFont(TSMAPI.Design:GetContentFont("small"))
-    --    label:SetShadowColor(0, 0, 0, 0)
-    --    label:Hide()
-    --
-    --    left:Hide()
-    --    middle:Hide()
-    --    right:Hide()
-    --
-    --    local widget = {
-    --        frame = frame,
-    --        label = label,
-    --        dropdown = dropdown,
-    --        text = text,
-    --        button = button,
-    --        count = count,
-    --        alignoffset = 30,
-    --        type = Type,
-    --    }
-    --    for method, func in pairs(methods) do
-    --        widget[method] = func
-    --    end
-    --    frame.obj = widget
-    --    dropdown.obj = widget
-    --    text.obj = widget
-    --    button.obj = widget
+--
+--    dropdown:ClearAllPoints()
+--    dropdown:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -7, 0)
+--    dropdown:SetScript("OnHide", nil)
+--    dropdown:SetScript("OnEnter", Control_OnEnter)
+--    dropdown:SetScript("OnLeave", Control_OnLeave)
+--    dropdown:SetScript("OnMouseUp", function(self, button) Dropdown_TogglePullout(self.obj.button, button) end)
+--    TSMAPI.Design:SetContentColor(dropdown)
+--
+--    middle:ClearAllPoints()
+--    right:ClearAllPoints()
+--
+--    middle:SetPoint("LEFT", left, "RIGHT", 0, 0)
+--    middle:SetPoint("RIGHT", right, "LEFT", 0, 0)
+--    right:SetPoint("TOPRIGHT", dropdown, "TOPRIGHT", 0, 17)
+--
+--    local button = _G[dropdown:GetName().."Button"]
+--    button:RegisterForClicks("AnyUp")
+--    button:SetScript("OnEnter", Control_OnEnter)
+--    button:SetScript("OnLeave", Control_OnLeave)
+--    button:SetScript("OnClick", Dropdown_TogglePullout)
+--    button:ClearAllPoints()
+--    button:SetPoint("RIGHT", dropdown, 0, 0)
 
-        return dropdown
-    end
+    return dropdown
 end
 
 function public.slider(frame)
