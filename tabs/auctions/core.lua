@@ -63,12 +63,6 @@ function private.test(record)
     end
 end
 
-function private.record_remover(record)
-    return function()
-        m.listing:RemoveAuctionRecord(record)
-    end
-end
-
 do
     local scan_id = 0
     local IDLE, SEARCHING, FOUND = {}, {}, {}
@@ -90,7 +84,7 @@ do
             end,
             function()
                 state = IDLE
-                m.record_remover(record)()
+                m.listing:RemoveAuctionRecord(record)
             end,
             function(index)
                 state = FOUND
@@ -98,7 +92,7 @@ do
 
                 m.cancel_button:SetScript('OnClick', function()
                     if m.test(record)(index) and m.listing:ContainsRecord(record) then
-                        Aux.cancel_auction(index, m.record_remover(record))
+                        Aux.cancel_auction(index, Aux.f(m.listing.RemoveAuctionRecord, m.listing, record))
                     end
                 end)
                 m.cancel_button:Enable()

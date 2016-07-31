@@ -63,12 +63,6 @@ function private.test(record)
     end
 end
 
-function private.record_remover(record)
-    return function()
-        m.listing:RemoveAuctionRecord(record)
-    end
-end
-
 do
     local scan_id = 0
     local IDLE, SEARCHING, FOUND = {}, {}, {}
@@ -90,7 +84,7 @@ do
             end,
             function()
                 state = IDLE
-                m.record_remover(record)()
+                m.listing:RemoveAuctionRecord(record)
             end,
             function(index)
                 state = FOUND
@@ -102,7 +96,7 @@ do
                             Aux.place_bid('bidder', index, record.bid_price, record.bid_price < record.buyout_price and function()
                                 Aux.info.bid_update(record)
                                 m.listing:SetDatabase()
-                            end or m.record_remover(record))
+                            end or Aux.f(m.listing.RemoveAuctionRecord, m.listing, record))
                         end
                     end)
                     m.bid_button:Enable()
@@ -111,7 +105,7 @@ do
                 if record.buyout_price > 0 then
                     m.buyout_button:SetScript('OnClick', function()
                         if m.test(record)(index) and m.listing:ContainsRecord(record) then
-                            Aux.place_bid('bidder', index, record.buyout_price, m.record_remover(record))
+                            Aux.place_bid('bidder', index, record.buyout_price, Aux.f(m.listing.RemoveAuctionRecord, m.listing, record))
                         end
                     end)
                     m.buyout_button:Enable()
