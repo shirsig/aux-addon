@@ -230,14 +230,14 @@ function public.editbox(parent)
     editbox:SetShadowColor(0, 0, 0, 0)
     m.set_content_style(editbox)
 
-    editbox:SetScript('OnEditFocusLost', Aux.m(editbox, 'HighlightText', 0, 0))
+    editbox:SetScript('OnEditFocusLost', Aux.f(editbox.HighlightText, editbox, 0, 0))
 
-    editbox:SetScript('OnEscapePressed', Aux.m(editbox, 'ClearFocus'))
+    editbox:SetScript('OnEscapePressed', Aux.f(editbox.ClearFocus, editbox))
 
     do
         local last_time, last_x, last_y
 
-        editbox:SetScript('OnEditFocusGained', Aux.m(editbox, 'HighlightText'))
+        editbox:SetScript('OnEditFocusGained', Aux.f(editbox.HighlightText, editbox))
 
         editbox:SetScript('OnMouseUp', function()
             local x, y = GetCursorPosition()

@@ -96,19 +96,6 @@ function public.bag_type(bag)
 	end
 end
 
-function public.safe_index(...)
-	local target = arg[1]
-
-	for i=2,arg.n do
-		if not target then
-			return
-		end
-		target = target[arg[i]]
-	end
-
-	return target
-end
-
 function public.without_errors(f)
     local orig = UIErrorsFrame.AddMessage
     UIErrorsFrame.AddMessage = m.pass

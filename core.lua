@@ -38,12 +38,64 @@ do
     end
 end
 
+function public.get(table, key)
+    return table[key]
+end
+
+function public.set(table, key, value)
+    table[key] = value
+end
+
+function public.f(func, ...)
+    local params = arg
+    return function(...)
+        for i=1,arg.n do
+            tinsert(params, arg[i])
+        end
+        return func(unpack(params))
+    end
+end
+
+do
+    local safe_nil = setmetatable({}, {
+        __index = function(self) return self end,
+        __call = function(self) return self end,
+        __div = function(_, value) return value end
+    })
+
+    function public.safe(object)
+        return (object == nil or object == safe_nil) and safe_nil or setmetatable({}, {
+            __index = function(_, key)
+                return m.safe(key) ~= safe_nil and m.safe(object[key]) or safe_nil
+            end,
+            __call = function(_, ...)
+                for i=1,arg.n do
+                    if safe(arg[i]) == safe_nil then
+                        return safe_nil
+                    end
+                end
+                return object(unpack(arg))
+            end,
+            __div = function() return object end
+        })
+    end
+end
+
+do
+    local x = 0
+
+    function public.unique()
+        x = x + 1
+        return x
+    end
+end
+
 function public.on_load()
     public.version = '3.5.2'
-    public.blizzard_ui_shown = false
     public.bids_loaded = false
     public.current_owner_page = nil
     public.last_owner_page_requested = nil
+    private.auction_frame_loaded = nil
 
 	m.log('Aux v'..m.version..' loaded.')
 
@@ -71,7 +123,7 @@ function public.on_load()
         btn:SetWidth(65)
         btn:SetHeight(24)
         btn:SetText('Close')
-        btn:SetScript('OnClick', Aux.f(HideUIPanel, AuxFrame))
+        btn:SetScript('OnClick', m.f(HideUIPanel, AuxFrame))
         public.close_button = btn
     end
 
@@ -83,10 +135,8 @@ function public.on_load()
         btn:SetText('Default UI')
         btn:SetScript('OnClick',function()
             if AuctionFrame:IsVisible() then
-                m.blizzard_ui_shown = false
                 HideUIPanel(AuctionFrame)
             else
-                m.blizzard_ui_shown = true
                 ShowUIPanel(AuctionFrame)
             end
         end)
@@ -103,7 +153,7 @@ function public.on_event()
 	if event == 'VARIABLES_LOADED' then
 		m.on_load()
 	elseif event == 'ADDON_LOADED' then
-        m.on_addon_loaded()
+        m.safe(m.on_addon_load[arg1])()
 	elseif event == 'AUCTION_HOUSE_SHOW' then
         m.on_auction_house_show()
 	elseif event == 'AUCTION_HOUSE_CLOSED' then
@@ -117,101 +167,96 @@ function public.on_event()
     end
 end
 
-function private.on_addon_loaded()
-    if arg1 == 'Blizzard_AuctionUI' then
-        m.setup_hooks()
-    end
+private.on_addon_load = {}
+function m.on_addon_load.Blizzard_AuctionUI()
 
-    do
-        local function cost_label(cost)
-            local label = LIGHTYELLOW_FONT_COLOR_CODE..'(Total Cost: '..FONT_COLOR_CODE_CLOSE
-            label = label..(cost and m.util.format_money(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
-            label = label..LIGHTYELLOW_FONT_COLOR_CODE..')'..FONT_COLOR_CODE_CLOSE
-            return label
+    AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
+    AuctionFrame:SetScript('OnHide', nil)
+
+    m.hook('ShowUIPanel', function(...)
+        if arg[1] == AuctionFrame then
+            return AuctionFrame:Show()
         end
+        return m.orig.ShowUIPanel(unpack(arg))
+    end)
 
-        if arg1 == 'Blizzard_CraftUI' then
-            m.hook('CraftFrame_SetSelection', function(...)
-                local results = {m.orig.CraftFrame_SetSelection(unpack(arg)) }
-
-                local id = GetCraftSelectionIndex()
-                local reagent_count = GetCraftNumReagents(id)
-
-                local total_cost = 0
-                for i=1,reagent_count do
-                    local link = GetCraftReagentItemLink(id, i)
-                    if not link then
-                        total_cost = nil
-                        break
-                    end
-                    local item_id, suffix_id = m.info.parse_hyperlink(link)
-                    local count = ({GetCraftReagentInfo(id, i)})[3]
-                    local _, price, limited = m.cache.merchant_info(item_id)
-                    local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
-                    if not value then
-                        total_cost = nil
-                        break
-                    else
-                        total_cost = total_cost + value * count
-                    end
-                end
-
-                CraftReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
-
-                return unpack(results)
-            end)
-        end
-
-        if arg1 == 'Blizzard_TradeSkillUI' then
-            m.hook('TradeSkillFrame_SetSelection', function(...)
-                local results = {m.orig.TradeSkillFrame_SetSelection(unpack(arg)) }
-
-                local id = GetTradeSkillSelectionIndex()
-                local reagent_count = GetTradeSkillNumReagents(id)
-
-                local total_cost = 0
-                for i=1,reagent_count do
-                    local link = GetTradeSkillReagentItemLink(id, i)
-                    if not link then
-                        total_cost = nil
-                        break
-                    end
-                    local item_id, suffix_id = m.info.parse_hyperlink(link)
-                    local count = ({GetTradeSkillReagentInfo(id, i)})[3]
-                    local _, price, limited = m.cache.merchant_info(item_id)
-                    local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
-                    if not value then
-                        total_cost = nil
-                        break
-                    else
-                        total_cost = total_cost + value * count
-                    end
-                end
-
-                TradeSkillReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
-
-                return unpack(results)
-            end)
-        end
-    end
+    m.hook('GetOwnerAuctionItems', m.GetOwnerAuctionItems)
+    m.hook('PickupContainerItem', m.PickupContainerItem)
+    m.hook('PickupInventoryItem', m.PickupInventoryItem)
+    m.hook('SetItemRef', m.SetItemRef)
+    m.hook('UseContainerItem', m.UseContainerItem)
+    m.hook('AuctionFrameAuctions_OnEvent', m.AuctionFrameAuctions_OnEvent)
 end
-
-function public.f(func, ...)
-    return function()
-        return func(unpack(arg))
-    end
-end
-
-function public.m(object, method, ...)
-    return m.f(object[method], object, unpack(arg))
-end
-
 do
-    local x = 0
+    local function cost_label(cost)
+        local label = LIGHTYELLOW_FONT_COLOR_CODE..'(Total Cost: '..FONT_COLOR_CODE_CLOSE
+        label = label..(cost and m.util.format_money(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
+        label = label..LIGHTYELLOW_FONT_COLOR_CODE..')'..FONT_COLOR_CODE_CLOSE
+        return label
+    end
 
-    function public.unique()
-        x = x + 1
-        return x
+    function m.on_addon_load.Blizzard_CraftUI()
+        m.hook('CraftFrame_SetSelection', function(...)
+            local results = {m.orig.CraftFrame_SetSelection(unpack(arg)) }
+
+            local id = GetCraftSelectionIndex()
+            local reagent_count = GetCraftNumReagents(id)
+
+            local total_cost = 0
+            for i=1,reagent_count do
+                local link = GetCraftReagentItemLink(id, i)
+                if not link then
+                    total_cost = nil
+                    break
+                end
+                local item_id, suffix_id = m.info.parse_hyperlink(link)
+                local count = ({GetCraftReagentInfo(id, i)})[3]
+                local _, price, limited = m.cache.merchant_info(item_id)
+                local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
+                if not value then
+                    total_cost = nil
+                    break
+                else
+                    total_cost = total_cost + value * count
+                end
+            end
+
+            CraftReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
+
+            return unpack(results)
+        end)
+    end
+
+    function m.on_addon_load.Blizzard_TradeSkillUI()
+        m.hook('TradeSkillFrame_SetSelection', function(...)
+            local results = {m.orig.TradeSkillFrame_SetSelection(unpack(arg)) }
+
+            local id = GetTradeSkillSelectionIndex()
+            local reagent_count = GetTradeSkillNumReagents(id)
+
+            local total_cost = 0
+            for i=1,reagent_count do
+                local link = GetTradeSkillReagentItemLink(id, i)
+                if not link then
+                    total_cost = nil
+                    break
+                end
+                local item_id, suffix_id = m.info.parse_hyperlink(link)
+                local count = ({GetTradeSkillReagentInfo(id, i)})[3]
+                local _, price, limited = m.cache.merchant_info(item_id)
+                local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
+                if not value then
+                    total_cost = nil
+                    break
+                else
+                    total_cost = total_cost + value * count
+                end
+            end
+
+            TradeSkillReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
+
+            return unpack(results)
+        end)
     end
 end
 
@@ -278,31 +323,12 @@ do
     end
 end
 
-function public.log(msg)
-    DEFAULT_CHAT_FRAME:AddMessage('[aux] '..msg, 1, 1, 0)
-end
-
-function private.setup_hooks()
-
-    local blizzard_ui_on_hide = function()
-        m.blizzard_ui_shown = false
+function public.log(...)
+    local msg = '[aux]'
+    for i=1,arg.n do
+        msg = msg..' '..tostring(arg[i])
     end
-    AuctionFrame:SetScript('OnHide', blizzard_ui_on_hide)
-
-    m.hook('AuctionFrame_OnShow', function(...)
-        if not m.blizzard_ui_shown then
-            m.control.as_soon_as(function() return AuctionFrame:GetScript('OnHide') == blizzard_ui_on_hide end, Aux.f(HideUIPanel, AuctionFrame))
-        end
-        return m.orig.AuctionFrame_OnShow(unpack(arg))
-    end)
-
-    m.hook('GetOwnerAuctionItems', m.GetOwnerAuctionItems)
-    m.hook('PickupContainerItem', m.PickupContainerItem)
-    m.hook('PickupInventoryItem', m.PickupInventoryItem)
-    m.hook('SetItemRef', m.SetItemRef)
-    m.hook('UseContainerItem', m.UseContainerItem)
-    m.hook('AuctionFrameAuctions_OnEvent', m.AuctionFrameAuctions_OnEvent)
-
+    DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 1, 0)
 end
 
 function private.GetOwnerAuctionItems(...)
@@ -322,6 +348,9 @@ function public.neutral_faction()
 end
 
 function private.on_auction_house_show()
+    if AuctionFrame:IsVisible() then
+        AuctionFrame:Hide()
+    end
     AuxFrame:Show()
     m.tab_group:set_tab(1)
 end
@@ -449,7 +478,7 @@ end
 
 function public.is_player(name, current)
     local realm = GetCVar('realmName')
-    return (not current and m.util.safe_index(aux_characters, realm, name)) or UnitName('player') == name
+    return (not current and m.safe(aux_characters)[realm][name]/false) or UnitName('player') == name
 end
 
 function public.unmodified()

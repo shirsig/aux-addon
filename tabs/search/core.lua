@@ -535,7 +535,7 @@ do
                 m.record_remover(search.table, record)()
             end,
             function(index)
-                if Aux.util.safe_index(search.table:GetSelection(), 'record') ~= record then
+                if Aux.safe(search.table:GetSelection()).record/nil ~= record then
                     return
                 end
 

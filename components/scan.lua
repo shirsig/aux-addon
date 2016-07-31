@@ -10,7 +10,7 @@ end
 
 function private.last_page(total_auctions)
     local last_page = max(m.total_pages(total_auctions) - 1, 0)
-    local last_page_limit = Aux.util.safe_index(m.current_query().blizzard_query, 'last_page') or last_page
+    local last_page_limit = Aux.safe(m.current_query().blizzard_query).last_page/last_page
     return min(last_page_limit, last_page)
 end
 
@@ -226,16 +226,17 @@ function private.submit_query(k)
         elseif m.current_thread().params.type == 'owner' then
             GetOwnerAuctionItems(m.current_thread().page)
         else
+            local blizzard_query = Aux.safe(m.current_query().blizzard_query)/{}
             QueryAuctionItems(
-                Aux.util.safe_index(m.current_query().blizzard_query, 'name'),
-                Aux.util.safe_index(m.current_query().blizzard_query, 'min_level'),
-                Aux.util.safe_index(m.current_query().blizzard_query, 'max_level'),
-                Aux.util.safe_index(m.current_query().blizzard_query, 'slot'),
-                Aux.util.safe_index(m.current_query().blizzard_query, 'class'),
-                Aux.util.safe_index(m.current_query().blizzard_query, 'subclass'),
+                blizzard_query.name,
+                blizzard_query.min_level,
+                blizzard_query.max_level,
+                blizzard_query.slot,
+                blizzard_query.class,
+                blizzard_query.subclass,
                 m.current_thread().page,
-                Aux.util.safe_index(m.current_query().blizzard_query, 'usable'),
-                Aux.util.safe_index(m.current_query().blizzard_query, 'quality')
+                blizzard_query.usable,
+                blizzard_query.quality
             )
         end
         m.wait_for_results(function()
