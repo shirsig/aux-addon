@@ -317,7 +317,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         btn:SetText('Clear')
         btn:SetScript('OnClick', function()
             while tremove(m.current_search().records) do end
-            m.m.current_search().table:SetDatabase()
+            m.current_search().table:SetDatabase()
         end)
     end
     do
