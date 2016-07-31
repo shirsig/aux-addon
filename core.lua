@@ -1,10 +1,10 @@
-local addon = Aux_module('Aux')
+local addon = Aux_module()
 Aux = tremove(addon, 1)
 local m, public, private = unpack(addon)
 
 private.modules = { Aux }
 function public.module(name)
-    local module = Aux_module(name)
+    local module = Aux_module()
     local public_interface = tremove(module, 1)
     tinsert(m.modules, public_interface)
     public[name] = public_interface
