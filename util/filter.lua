@@ -236,7 +236,7 @@ function private.blizzard_filter_parser()
             end
             if not filters.min_level then
                 filter = {'min_level', str}
-            elseif not filters.max_level and tonumber(str) >= filters.min_level then
+            elseif not filters.max_level and tonumber(str) >= tonumber(filters.min_level) then
                 filter = {'max_level', str}
             else
                 return nil, 'Erroneous level range modifier'
@@ -247,13 +247,13 @@ function private.blizzard_filter_parser()
             else
                 return nil, 'Erroneous item class modifier'
             end
-        elseif filters.class and Aux.info.item_subclass_index(filters.class, str) then
+        elseif filters.class and Aux.info.item_subclass_index(Aux.info.item_class_index(filters.class), str) then
             if not filters.subclass then
                 filter = {'subclass', str}
             else
                 return nil, 'Erroneous item subclass modifier'
             end
-        elseif filters.subclass and Aux.info.item_slot_index(filters.class, filters.subclass, str) then
+        elseif filters.subclass and Aux.info.item_slot_index(Aux.info.item_class_index(filters.class), Aux.info.item_subclass_index(Aux.info.item_class_index(filters.class), filters.subclass), str) then
             if not filters.slot then
                 filter = {'slot', str}
             else
@@ -307,6 +307,29 @@ function private.blizzard_filter_parser()
     end
 end
 
+function private.parse_parameter(input_type, str)
+    if input_type == 'money' then
+        local money = Aux.money.from_string(str)
+        if money and money > 0 then
+            return money
+        end
+    elseif input_type == 'number' then
+        local number = tonumber(str)
+        if number then
+            return number
+        end
+    elseif input_type == 'string' then
+        if str ~= '' then
+            return str
+        end
+    elseif type(input_type) == 'table' then
+        local choice = Aux.util.key(str, input_type)
+        if choice then
+            return choice
+        end
+    end
+end
+
 function private.parse_query_string(str)
     local components = { blizzard = {}, post = {} }
     local blizzard_filter_parser = m.blizzard_filter_parser()
@@ -320,33 +343,20 @@ function private.parse_query_string(str)
             tinsert(components.post, {'operator', op, arity})
             polish_notation_counter = polish_notation_counter + (arity or 1) - 1
         elseif m.filters[parts[i]] then
-            local component = {'filter', parts[i] }
-            if m.filters[parts[i]].input_type == 'money' then
-                tinsert(component, Aux.safe(Aux.money.from_string(parts[i + 1] or ''))/0)
-                if component[3] <= 0 then
-                    return nil, 'Invalid money input for '..parts[i]
+            local input_type = m.filters[parts[i]].input_type
+            if input_type ~= '' then
+                if not parts[i + 1] or not m.parse_parameter(input_type, parts[i + 1]) then
+                    if type(input_type) == 'table' then
+                        return nil, 'Invalid input of type choice for '..parts[i], input_type
+                    else
+                        return nil, 'Invalid input of type '..input_type..' for '..parts[i]
+                    end
                 end
+                tinsert(components.post, {'filter', parts[i], parts[i + 1]})
                 i = i + 1
-            elseif m.filters[parts[i]].input_type == 'number' then
-                tinsert(component, tonumber(parts[i + 1]))
-                if not component[3] then
-                    return nil, 'Invalid number input for '..parts[i]
-                end
-                i = i + 1
-            elseif m.filters[parts[i]].input_type == 'string' then
-                tinsert(component, parts[i + 1])
-                if component[3] == '' then
-                    return nil, 'Invalid string input for '..parts[i]
-                end
-                i = i + 1
-            elseif type(m.filters[parts[i]].input_type) == 'table' then
-                tinsert(component, parts[i + 1])
-                if not Aux.util.key(component[3], m.filters[parts[i]].input_type) then
-                    return nil, 'Invalid input choice for '..parts[i], m.filters[parts[i]].input_type
-                end
-                i = i + 1
+            else
+                tinsert(components.post, {'filter', parts[i]})
             end
-            tinsert(components.post, component)
             polish_notation_counter = polish_notation_counter - 1
         else
             local component, error = blizzard_filter_parser(parts[i], i == 1)
@@ -382,7 +392,7 @@ function public.query(query_string)
     local components, error, suggestions = m.parse_query_string(query_string)
 
     if not components then
-        return nil, error, suggestions
+        return nil, suggestions or {}, error
     end
 
     return {
@@ -399,7 +409,7 @@ function public.queries(query_string)
     for _, str in ipairs(parts) do
         str = Aux.util.trim(str)
 
-        local query, error = m.query(str)
+        local query, _, error = m.query(str)
 
         if not query then
             Aux.log('Invalid filter:', error)
@@ -451,14 +461,14 @@ function private.suggestions(components)
 
     -- subclasses
     if blizzard_filters.class and not blizzard_filters.subclass then
-        for _, subclass in ipairs({ GetAuctionItemSubClasses(blizzard_filters.class) }) do
+        for _, subclass in ipairs({ GetAuctionItemSubClasses(Aux.info.item_class_index(blizzard_filters.class)) }) do
             tinsert(suggestions, subclass)
         end
     end
 
     -- slots
     if blizzard_filters.class and blizzard_filters.subclass and not blizzard_filters.slot then
-        for _, invtype in ipairs({ GetAuctionInvTypes(blizzard_filters.class, blizzard_filters.subclass) }) do
+        for _, invtype in ipairs({ GetAuctionInvTypes(Aux.info.item_class_index(blizzard_filters.class), Aux.info.item_subclass_index(Aux.info.item_class_index(blizzard_filters.class), blizzard_filters.subclass)) }) do
             tinsert(suggestions, getglobal(invtype))
         end
     end
@@ -556,9 +566,9 @@ function private.blizzard_query(components)
     else
         query.min_level = tonumber(filters.min_level)
         query.max_level = tonumber(filters.max_level)
-        query.class = filters.class and Aux.info.item_class_index(filters.class)
-        query.subclass = query.class and Aux.info.item_subclass_index(query.class, filters.subclass)
-        query.slot = query.subclass and Aux.info.item_slot_index(query.class, query.subclass, filters.slot)
+        query.class = filters.class and filters.class and Aux.info.item_class_index(filters.class)
+        query.subclass = query.class and filters.subclass and Aux.info.item_subclass_index(query.class, filters.subclass)
+        query.slot = query.subclass and filters.slot and Aux.info.item_slot_index(query.class, query.subclass, filters.slot)
         query.usable = filters.usable and 1
         query.quality = filters.quality and Aux.info.item_quality_index(filters.quality)
     end
@@ -570,7 +580,7 @@ function private.validator(components)
 
     local validators = {}
     for _, filter in Aux.util.filter(components.post, function(component) return component[1] == 'filter' end) do
-        validators[filter[2]] = m.filters[filter[2]].validator(filter[3])
+        validators[filter[2]] = m.filters[filter[2]].validator(m.parse_parameter(m.filters[filter[2]].input_type, filter[3]))
     end
 
     return function(record)

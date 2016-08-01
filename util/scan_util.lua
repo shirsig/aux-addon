@@ -75,12 +75,12 @@ function public.item_query(item_id, first_page, last_page)
     local item_info = Aux.info.item(item_id)
 
     if item_info then
-        local filter = Aux.filter.query(item_info.name..'/exact')
-        filter.blizzard_query.first_page = first_page
-        filter.blizzard_query.last_page = last_page
+        local query = Aux.filter.query(item_info.name..'/exact')
+        query.blizzard_query.first_page = first_page
+        query.blizzard_query.last_page = last_page
         return {
-            validator = filter.validator,
-            blizzard_query = filter.blizzard_query,
+            validator = query.validator,
+            blizzard_query = query.blizzard_query,
         }
     end
 end
