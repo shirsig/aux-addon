@@ -56,62 +56,33 @@ function public.f(func, ...)
     end
 end
 
-do
-    local data = {}
-    local eq = function() return true end
-    local proto = setmetatable({}, { __eq = eq })
-    local safe_nil
-
-    local function unsafe(object)
-        if object == proto then
-            return -object
-        else
-            return object
-        end
-    end
-
-    local safe_mt = {
+function public.safe(value)
+    return setmetatable({},{
         __index = function(self, key)
-            key = unsafe(key)
-            if data[self] == nil or key == nil then
-                return safe_nil
+            if value ~= nil and key ~= nil then
+                return m.safe(value[key])
             else
-                return m.safe(data[self][key])
+                return m.safe(nil)
             end
         end,
         __call = function(self, ...)
-            if data[self] == nil then
-                return safe_nil
-            end
-            for i=1,arg.n do
-                if arg[i] == proto and -arg[i] == nil then
-                    return safe_nil
-                else
-                    arg[i] = unsafe(arg[i])
+            if value ~= nil then
+                if type(value) ~= 'function' then
+                    error('', 2)
                 end
-            end
-            return m.safe(data[self](unpack(arg)))
-        end,
-        __div = function(self, default)
-            if data[self] == nil then
-                return default
+                return m.safe(value(unpack(arg)))
             else
-                return data[self]
+                return m.safe(nil)
             end
         end,
-        __unm = function(self)
-            return data[self]
+        __div = function(self, alt)
+            if value ~= nil then
+                return value
+            else
+                return alt
+            end
         end,
-        __eq = eq,
-    }
-
-    function public.safe(object)
-        local self = {}
-        data[self] = unsafe(object)
-        return setmetatable(self, safe_mt)
-    end
-
-    safe_nil = m.safe()
+    })
 end
 
 do
@@ -474,39 +445,6 @@ function private.UseContainerItem(...)
     end
 
 	return m.orig.UseContainerItem(unpack(arg))
-end
-
-function public.item_class_index(item_class)
-    for i, class in ipairs({ GetAuctionItemClasses() }) do
-        if strupper(class) == strupper(item_class) then
-            return i
-        end
-    end
-end
-
-function public.item_subclass_index(class_index, item_subclass)
-    for i, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
-        if strupper(subclass) == strupper(item_subclass) then
-            return i
-        end
-    end
-end
-
-function public.item_slot_index(class_index, subclass_index, slot_name)
-    for i, slot in ipairs({ GetAuctionInvTypes(class_index, subclass_index) }) do
-        if strupper(getglobal(slot)) == strupper(slot_name) then
-            return i
-        end
-    end
-end
-
-function public.item_quality_index(item_quality)
-    for i=0,4 do
-        local quality = getglobal('ITEM_QUALITY'..i..'_DESC')
-        if strupper(item_quality) == strupper(quality) then
-            return i
-        end
-    end
 end
 
 function public.is_player(name, current)

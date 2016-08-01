@@ -152,7 +152,7 @@ end
 
 function private.update_auto_buy_filter()
     if aux_auto_buy_filter ~= '' then
-        local queries = Aux.scan_util.parse_filter_string(aux_auto_buy_filter)
+        local queries = Aux.filter.queries(aux_auto_buy_filter)
         if queries then
             if getn(queries) > 1 then
                 Aux.log('Error: The automatic buyout filter may contain only one query')
@@ -431,7 +431,7 @@ function public.execute(resume, real_time)
     end
     local filter_string = m.search_box:GetText()
 
-    local queries = Aux.scan_util.parse_filter_string(filter_string)
+    local queries = Aux.filter.queries(filter_string)
     if not queries then
         return
     elseif real_time then
@@ -460,7 +460,7 @@ function public.execute(resume, real_time)
         end
         m.current_search().real_time = m.real_time_button:GetChecked()
         m.current_search().auto_buy = m.auto_buy_button:GetChecked()
-        m.current_search().auto_buy_validator = m.auto_buy_filter_button:GetChecked() and m.auto_buy_validator -- some redundancy to be save
+        m.current_search().auto_buy_validator = m.auto_buy_validator
     end
 
     local continuation = resume and m.current_search().continuation
@@ -781,7 +781,7 @@ function private.initialize_filter_dropdown()
     local function on_click()
         UIDropDownMenu_SetSelectedValue(m.filter_dropdown, this.value)
         m.filter_button:SetText(this.value)
-        if Aux.safe(Aux).scan_util.filters[this.value].arity/0 == 0 then
+        if Aux.safe(Aux.filter.filters[this.value]).input_type/'' == '' then
             m.filter_input:Hide()
         else
             m.filter_input:Show()
@@ -803,9 +803,9 @@ do
     function private.add_post_filter()
         local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown) or ''
         local input = m.filter_input:GetText()
-        if Aux.safe(Aux).scan_util.filters[name].test(input)/true then
+        if Aux.safe(Aux.filter.filters[name]).validator(input)/true then
             local filter = name
-            if Aux.safe(Aux).scan_util.filters[name].arity/0 > 0 then
+            if Aux.safe(Aux.filter.filters)[name].input_type ~= '' then
                 filter = filter..'/'..input
             end
 

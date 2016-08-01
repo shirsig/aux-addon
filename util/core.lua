@@ -114,7 +114,7 @@ function public.bag_type(bag)
 	if link then
 		local item_id = Aux.info.parse_hyperlink(GetInventoryItemLink('player', ContainerIDToInventoryID(bag)))
 		local item_info = Aux.info.item(item_id)
-		return Aux.item_subclass_index(3, item_info.subclass)
+		return Aux.info.item_subclass_index(3, item_info.subclass)
 	end
 end
 

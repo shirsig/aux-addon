@@ -327,7 +327,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         btn:SetHeight(24)
         btn:SetText('Favorite')
         btn:SetScript('OnClick', function()
-            local filters = Aux.scan_util.parse_filter_string(m.search_box:GetText())
+            local filters = Aux.filter.queries(m.search_box:GetText())
             if filters then
                 tinsert(aux_favorite_searches, 1, {
                     filter_string = m.search_box:GetText(),
@@ -545,8 +545,8 @@ Aux.search_tab.FRAMES(function(m, public, private)
         --            editbox:SetNumeric(true)
         --            editbox:SetMaxLetters(2)
         input:SetScript('OnChar', function()
-            local filter = Aux.safe(Aux).scan_util.filters[UIDropDownMenu_GetSelectedValue(m.filter_dropdown)]
-            Aux.completion.complete(this, function() return ({filter.test()/nil})[2] end)
+--            local filter = Aux.filter.filters[UIDropDownMenu_GetSelectedValue(m.filter_dropdown) or ''] -- TODO
+--            Aux.completion.complete(this, function() return filter and ({filter.validator()})[3] or {} end)
         end)
         input:SetScript('OnEnterPressed', m.add_post_filter)
         private.filter_input = input

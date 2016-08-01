@@ -15,6 +15,7 @@ util\persistence.lua
 util\sort.lua
 util\money.lua
 util\info.lua
+util\filter.lua
 util\scan_util.lua
 
 
