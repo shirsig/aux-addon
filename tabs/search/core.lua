@@ -460,7 +460,7 @@ function public.execute(resume, real_time)
         end
         m.current_search().real_time = m.real_time_button:GetChecked()
         m.current_search().auto_buy = m.auto_buy_button:GetChecked()
-        m.current_search().auto_buy_validator = m.auto_buy_filter_button:GetChecked() and m.auto_buy_validator -- some redundancy to be save
+        m.current_search().auto_buy_validator = m.auto_buy_validator
     end
 
     local continuation = resume and m.current_search().continuation
