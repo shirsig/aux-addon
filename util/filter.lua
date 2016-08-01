@@ -330,18 +330,16 @@ function private.parse_parameter(input_type, str)
     end
 end
 
-function private.parse_query_string(str)
+function public.parse_query_string(str)
     local components = { blizzard = {}, post = {} }
     local blizzard_filter_parser = m.blizzard_filter_parser()
     local parts = Aux.util.map(Aux.util.split(str, '/'), function(part) return strlower(Aux.util.trim(part)) end)
 
-    local polish_notation_counter = 0
     local i = 1
     while parts[i] do
         local op, arity = m.operator(parts[i])
         if op then
             tinsert(components.post, {'operator', op, arity})
-            polish_notation_counter = polish_notation_counter + (arity or 1) - 1
         elseif m.filters[parts[i]] then
             local input_type = m.filters[parts[i]].input_type
             if input_type ~= '' then
@@ -357,7 +355,6 @@ function private.parse_query_string(str)
             else
                 tinsert(components.post, {'filter', parts[i]})
             end
-            polish_notation_counter = polish_notation_counter - 1
         else
             local component, error = blizzard_filter_parser(parts[i], i == 1)
             if component then
@@ -366,23 +363,11 @@ function private.parse_query_string(str)
                 return nil, error
             elseif parts[i] ~= '' then
                 tinsert(components.post, {'filter', 'tooltip', parts[i]})
-                polish_notation_counter = polish_notation_counter - 1
             else
                 return nil, 'Empty modifier'
             end
         end
         i = i + 1
-    end
-
-    if polish_notation_counter > 0 then
-        local suggestions = {}
-        for filter, _ in m.filters do
-            tinsert(suggestions, strlower(filter))
-        end
-        tinsert(suggestions, 'and')
-        tinsert(suggestions, 'or')
-        tinsert(suggestions, 'not')
-        return nil, 'Malformed expression', i > getn(parts) and suggestions
     end
 
     return components
@@ -395,10 +380,31 @@ function public.query(query_string)
         return nil, suggestions or {}, error
     end
 
+    local polish_notation_counter = 0
+    for _, component in components.post do
+        if component[1] == 'operator' then
+            polish_notation_counter = max(polish_notation_counter, 1)
+            polish_notation_counter = polish_notation_counter + (component[2] or 1) - 1
+        elseif component[1] == 'filter' then
+            polish_notation_counter = polish_notation_counter - 1
+        end
+    end
+
+    if polish_notation_counter > 0 then
+        local suggestions = {}
+        for filter, _ in m.filters do
+            tinsert(suggestions, strlower(filter))
+        end
+        tinsert(suggestions, 'and')
+        tinsert(suggestions, 'or')
+        tinsert(suggestions, 'not')
+        return nil, {}, 'Malformed expression' --, i > getn(parts) and suggestions
+    end
+
     return {
         blizzard_query = m.blizzard_query(components),
         validator = m.validator(components),
-        prettified = m.prettified(components),
+        prettified = m.prettified_query_string(components),
     }, m.suggestions(components)
 end
 
@@ -495,7 +501,44 @@ function private.suggestions(components)
     return suggestions
 end
 
-function private.prettified(components)
+function public.indented_post_query_string(components)
+    local stack = {}
+    local str = ''
+
+    for _, component in components.post do
+
+        if str ~= '' then
+            str = str..'|n'
+        end
+        for _=1,getn(stack) do
+            str = str..'    '
+        end
+
+        if component[1] == 'operator' and component[2] then
+            local suffix = ''
+            if not component[3] then
+                suffix = '*'
+            elseif component[3] > 2 then
+                suffix = component[3]
+            end
+            str = str..'|cffffff00'..component[2]..suffix..'|r'
+            tinsert(stack, component[3])
+        elseif component[1] == 'filter' then
+            str = str..'|cffffff00'..component[2]..'|r'
+            if component[3] then
+                str = str..': '..'|cffff9218'..component[3]..'|r'
+            end
+            local top = tremove(stack)
+            if top and top > 1 then
+                tinsert(stack, top - 1)
+            end
+        end
+    end
+
+    return str
+end
+
+function private.prettified_query_string(components)
     local prettified = m.query_builder()
 
     local blizzard_filters = {}
@@ -579,8 +622,10 @@ end
 function private.validator(components)
 
     local validators = {}
-    for _, filter in Aux.util.filter(components.post, function(component) return component[1] == 'filter' end) do
-        validators[filter[2]] = m.filters[filter[2]].validator(m.parse_parameter(m.filters[filter[2]].input_type, filter[3]))
+    for i, component in components.post do
+        if component[1] == 'filter' then
+            validators[i] = m.filters[component[2]].validator(m.parse_parameter(m.filters[component[2]].input_type, component[3]))
+        end
     end
 
     return function(record)
@@ -606,16 +651,22 @@ function private.validator(components)
                     tinsert(stack, Aux.util.any(args, Aux.util.id))
                 end
             elseif type == 'filter' then
-                tinsert(stack, validators[name](record) and true or false)
+                tinsert(stack, validators[i](record) and true or false)
             end
         end
         return Aux.util.all(stack, Aux.util.id)
     end
 end
 
-function private.query_builder()
-    local filter = ''
+function public.query_builder(str)
+    local filter = str or ''
     return {
+        appended = function(part)
+            return m.query_builder(filter == '' and part or filter..'/'..part)
+        end,
+        prepended = function(part)
+            return m.query_builder(filter == '' and part or part..'/'..filter)
+        end,
         append = function(part)
             filter = filter == '' and part or filter..'/'..part
         end,

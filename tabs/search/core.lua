@@ -785,6 +785,7 @@ function private.initialize_filter_dropdown()
             m.filter_input:Hide()
         else
             m.filter_input:Show()
+            m.filter_input:SetFocus()
         end
     end
 
@@ -797,38 +798,31 @@ function private.initialize_filter_dropdown()
     end
 end
 
-do
-    local stack = {}
+function private.import_query_string()
 
-    function private.add_post_filter()
-        local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown) or ''
-        local input = m.filter_input:GetText()
-        if Aux.safe(Aux.filter.filters[name]).validator(input)/true then
-            local filter = name
-            if Aux.safe(Aux.filter.filters)[name].input_type ~= '' then
-                filter = filter..'/'..input
-            end
+end
 
-            local filters = m.filter_display:GetText() or ''
-            if filters ~= '' then
-                filters = filters..'|n'
-            end
-            for _=1,getn(stack) do
-                filters = filters..'    '
-            end
-            m.filter_display:SetText(filters..filter)
+function private.export_query_string()
 
+end
+
+private.post_query = {}
+
+function private.add_post_filter()
+    local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown)
+    if name then
+        local filter = name
+        if Aux.filter.filters[name] and Aux.filter.filters[name].input_type ~= '' then
+            filter = filter..'/'..m.filter_input:GetText()
+        end
+
+        local components, error, suggestions = Aux.filter.parse_query_string(filter)
+
+        if components then
+            tinsert(m.post_query, components[1])
+            m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_query))
             m.filter_input:SetText('')
             m.filter_input:ClearFocus()
-
-            if Aux.util.set('and', 'or')[filter] then
-                tinsert(stack, 2)
-            else
-                local top = tremove(stack)
-                if top and top > 1 then
-                    tinsert(stack, top - 1)
-                end
-            end
         end
     end
 end
