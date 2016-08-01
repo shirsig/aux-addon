@@ -508,9 +508,17 @@ function private.prettified(components)
 
     for _, component in components.post do
         if component[1] == 'operator' then
-            prettified.append('|cffffff00'..component[2]..(component[3] or '*')..'|r')
+            local suffix = ''
+            if not component[3] then
+                suffix = '*'
+            elseif component[3] > 2 then
+                suffix = component[3]
+            end
+            prettified.append('|cffffff00'..component[2]..suffix..'|r')
         elseif component[1] == 'filter' then
-            prettified.append('|cffffff00'..component[2]..'|r')
+            if component[2] ~= 'tooltip' then
+                prettified.append('|cffffff00'..component[2]..'|r')
+            end
             if component[3] then
                 prettified.append('|cffff9218'..component[3]..'|r')
             end
