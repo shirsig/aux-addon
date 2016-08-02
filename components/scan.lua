@@ -5,26 +5,26 @@ local PAGE_SIZE = 50
 private.threads = {}
 private.last_query_time = {}
 
+private.th = Aux.dynamic_table(function()
+    return Aux.util.filter(m.threads, function(thread) return thread.id == Aux.control.thread_id end)[1]
+end)
+
+private.q = Aux.dynamic_table(function()
+    return m.th.params.queries[m.th.query_index]
+end)
+
 function private.total_pages(total_auctions)
     return math.ceil(total_auctions / PAGE_SIZE)
 end
 
 function private.last_page(total_auctions)
     local last_page = max(m.total_pages(total_auctions) - 1, 0)
-    local last_page_limit = Aux.safe(m.q.blizzard_query).last_page/last_page
+    local last_page_limit = Aux.index(m.q.blizzard_query).last_page/last_page
     return min(last_page_limit, last_page)
 end
 
-private.th = Aux.t(function()
-    return Aux.util.filter(m.threads, function(thread) return thread.id == Aux.control.thread_id end)[1]
-end)
-
-private.q = Aux.t(function()
-    return m.th.params.queries[m.th.query_index]
-end)
-
 function public.start(params)
-    m.abort(Aux.safe(m.threads[params.type]).id/0)
+    m.abort(Aux.index(m.threads[params.type]).id/0)
 
     local thread_id = Aux.control.new_thread(Aux.f(m.wait_for_callback, params.on_scan_start, m.scan))
 
@@ -46,7 +46,7 @@ function public.abort(scan_id)
     end
 
     for _, thread in ipairs(aborted_threads) do
-        Aux.safe(thread.params.on_abort)()
+        Aux.call(thread.params.on_abort)
     end
 end
 
@@ -194,11 +194,11 @@ function private.scan_page_helper(i)
 
         Aux.history.process_auction(auction_info)
 
-        if Aux.safe(m.th.params.auto_buy_validator)(auction_info)/false then
+        if Aux.call(m.th.params.auto_buy_validator, auction_info)/false then
             local c = Aux.control.await(recurse)
             Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, Aux.f(c, true))
             Aux.control.new_thread(Aux.control.sleep, 10, Aux.f(c, false))
-        elseif Aux.safe(m.q.validator)(auction_info)/true then
+        elseif Aux.call(m.q.validator, auction_info)/true then
             return m.wait_for_callback(m.th.params.on_auction, auction_info, function(removed)
                 if removed then
                     return recurse(true)
@@ -214,14 +214,14 @@ end
 
 function private.submit_query()
     Aux.control.when(function() return m.th.params.type ~= 'list' or CanSendAuctionQuery() end, function()
-        Aux.safe(m.th.params.on_submit_query)()
+        Aux.call(m.th.params.on_submit_query)
         m.last_query_time[m.th.params.type] = GetTime()
         if m.th.params.type == 'bidder' then
             GetBidderAuctionItems(m.th.page)
         elseif m.th.params.type == 'owner' then
             GetOwnerAuctionItems(m.th.page)
         else
-            local blizzard_query = Aux.safe(m.q.blizzard_query)/{}
+            local blizzard_query = Aux.option(m.q.blizzard_query)/{}
             QueryAuctionItems(
                 blizzard_query.name,
                 blizzard_query.min_level,

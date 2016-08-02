@@ -475,7 +475,7 @@ do
                 search.table:RemoveAuctionRecord(record)
             end,
             function(index)
-                if Aux.safe(search.table:GetSelection()).record/nil ~= record then
+                if Aux.index(search.table:GetSelection()).record/nil ~= record then
                     return
                 end
 
@@ -731,11 +731,11 @@ function private.initialize_filter_dropdown()
     local function on_click()
         UIDropDownMenu_SetSelectedValue(m.filter_dropdown, this.value)
         m.filter_button:SetText(this.value)
-        if Aux.safe(Aux.filter.filters[this.value]).input_type/'' == '' and this.value ~= 'and' and this.value ~= 'or' then
+        if Aux.index(Aux.filter.filters[this.value]).input_type/'' == '' and this.value ~= 'and' and this.value ~= 'or' then
             m.filter_input:Hide()
         else
             local _, _, suggestions = Aux.filter.parse_query_string(UIDropDownMenu_GetSelectedValue(m.filter_dropdown)..'/')
-            m.filter_input:SetNumeric(Aux.safe(Aux.filter.filters[this.value]).input_type/'number' == 'number')
+            m.filter_input:SetNumeric(Aux.index(Aux.filter.filters[this.value]).input_type/'number' == 'number')
             m.filter_input.complete = Aux.completion.complete(function() return suggestions or {} end)
             m.filter_input:Show()
             m.filter_input:SetFocus()

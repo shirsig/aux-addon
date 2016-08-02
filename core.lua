@@ -46,58 +46,82 @@ function public.set(table, key, value)
     table[key] = value
 end
 
-function public.t(func)
-    return setmetatable({}, {
-        __newindex = function(_, key, value)
-            func()[key] = value
-        end,
-        __index = function(_, key)
-            if func() == nil then error('', 2) end
-            return func()[key]
-        end,
-        __call = function()
-            return func()
-        end,
-    })
-end
-
-function public.f(func, ...)
+function public.f(f, ...)
     local params = arg
     return function(...)
         for i=1,arg.n do
             tinsert(params, arg[i])
         end
-        return func(unpack(params))
+        return f(unpack(params))
     end
 end
 
-function public.safe(value)
-    return setmetatable({},{
+do
+    local dynamic_table_mt = {
+        __newindex = function(self, key, value)
+            rawget(self, '_f')()[key] = value
+        end,
         __index = function(self, key)
-            if value ~= nil and key ~= nil then
-                return m.safe(value[key])
-            else
-                return m.safe(nil)
+            return rawget(self, '_f')()[key]
+        end,
+        __call = function(self)
+            return rawget(self, '_f')()
+        end,
+    }
+    function public.dynamic_table(f)
+        return setmetatable({ _f=f }, dynamic_table_mt)
+    end
+end
+
+function public.call(f, ...)
+    return m.option(f)..function()
+        return m.option(f(unpack(arg)))
+    end
+end
+
+do
+    local index_mt = {
+        __index = function(self, key)
+            return m.option(rawget(self, '_value'))..function()
+                return m.option(rawget(self, '_value')[key])
             end
         end,
-        __call = function(self, ...)
-            if value ~= nil then
-                if type(value) ~= 'function' then
-                    error('', 2)
-                end
-                return m.safe(value(unpack(arg)))
+    }
+    function public.index(value)
+        return setmetatable({ _value=value }, index_mt)
+    end
+end
+
+do
+    local option_mt = {
+        __call = function(self, f)
+            if rawget(self, '_value') ~= nil then
+                return m.option(f(rawget(self, '_value')))
             else
-                return m.safe(nil)
+                return self
             end
         end,
         __div = function(self, alt)
-            if value ~= nil then
-                return value
+            if rawget(self, '_value') ~= nil then
+                return rawget(self, '_value')
             else
                 return alt
             end
         end,
-    })
+        __unm = function(self, alt)
+            return rawget(self, '_value') ~= nil
+        end,
+        __concat = function(self, f)
+            if rawget(self, '_value') ~= nil then
+                return f(rawget(self, '_value'))
+            else
+                return self
+            end
+        end,
+    }
+    function public.option(value)
+        return setmetatable({ _value=value }, option_mt)
+    end
 end
 
 do
@@ -172,7 +196,7 @@ function public.on_event()
 	if event == 'VARIABLES_LOADED' then
 		m.on_load()
 	elseif event == 'ADDON_LOADED' then
-        m.safe(m.on_addon_load[arg1])()
+        m.call(m.on_addon_load[arg1])
 	elseif event == 'AUCTION_HOUSE_SHOW' then
         m.on_auction_house_show()
 	elseif event == 'AUCTION_HOUSE_CLOSED' then
@@ -464,7 +488,7 @@ end
 
 function public.is_player(name, current)
     local realm = GetCVar('realmName')
-    return (not current and m.safe(aux_characters)[realm][name]/false) or UnitName('player') == name
+    return (not current and m.index(aux_characters[realm])[name]/false) or UnitName('player') == name
 end
 
 function public.unmodified()
