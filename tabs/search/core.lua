@@ -728,7 +728,7 @@ function private.initialize_filter_dropdown()
     local function on_click()
         UIDropDownMenu_SetSelectedValue(m.filter_dropdown, this.value)
         m.filter_button:SetText(this.value)
-        if Aux.safe(Aux.filter.filters[this.value]).input_type/'' == '' then
+        if Aux.safe(Aux.filter.filters[this.value]).input_type/'' == '' and this.value ~= 'and' and this.value ~= 'or' then
             m.filter_input:Hide()
         else
             local _, _, suggestions = Aux.filter.parse_query_string(UIDropDownMenu_GetSelectedValue(m.filter_dropdown)..'/')
@@ -861,6 +861,13 @@ function private.add_post_filter()
     local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown)
     if name then
         local filter = name
+        if not Aux.filter.filters[name] and filter == 'and' or filter == 'or' then
+            if not tonumber(m.filter_input:GetText()) and m.filter_input:GetText() ~= '*' then
+                Aux.log('Invalid operator suffix')
+                return
+            end
+            filter = filter..m.filter_input:GetText()
+        end
         if Aux.filter.filters[name] and Aux.filter.filters[name].input_type ~= '' then
             filter = filter..'/'..m.filter_input:GetText()
         end

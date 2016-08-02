@@ -559,15 +559,17 @@ function public.indented_post_query_string(components)
                 suffix = component[3]
             end
             str = str..'|cffffff00'..component[2]..suffix..'|r'
-            tinsert(stack, component[3])
+            tinsert(stack, component[3] or '*')
         elseif component[1] == 'filter' then
             str = str..'|cffffff00'..component[2]..'|r'
             if component[3] then
                 str = str..': '..'|cffff9218'..component[3]..'|r'
             end
             local top = tremove(stack)
-            if top and top > 1 then
+            if tonumber(top) and top > 1 then
                 tinsert(stack, top - 1)
+            elseif top == '*' then
+                tinsert(stack, top)
             end
         end
     end
