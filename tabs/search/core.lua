@@ -821,7 +821,7 @@ function private.set_form(filters)
             UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, subclass_index)
         elseif filter[1] == 'slot' then
             UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown) -- TODO, wtf, why is this needed
-            UIDropDownMenu_SetSelectedValue(m.slot_dropdown, Aux.info.item_slot_index(class_index, subclass_index, filter[2]))
+            UIDropDownMenu_SetSelectedValue(m.slot_dropdown, ({GetAuctionInvTypes(class_index, subclass_index)})[Aux.info.item_slot_index(class_index, subclass_index, filter[2])])
         elseif filter[1] == 'quality' then
             UIDropDownMenu_Initialize(m.quality_dropdown, m.initialize_quality_dropdown) -- TODO, wtf, why is this needed
             UIDropDownMenu_SetSelectedValue(m.quality_dropdown, Aux.info.item_quality_index(filter[2]))
