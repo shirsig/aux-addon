@@ -112,13 +112,6 @@ function public.await(k)
 	})
 end
 
-function public.loop(k, ...)
-	local stop = k(unpack(arg))
-	if not stop then
-		return m.wait(m.loop, k, unpack(arg))
-	end
-end
-
 function public.sleep(dt, ...)
 	local t0 = GetTime()
 	return m.when(function() return GetTime() - t0 >= dt end, unpack(arg))
