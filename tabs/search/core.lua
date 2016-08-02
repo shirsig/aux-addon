@@ -875,3 +875,8 @@ function private.add_post_filter()
     end
 end
 
+function private.remove_post_filter()
+    tremove(m.post_components)
+    m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_components))
+end
+

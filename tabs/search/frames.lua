@@ -526,7 +526,14 @@ Aux.search_tab.FRAMES(function(m, public, private)
         btn:SetWidth(170)
         btn:SetHeight(25)
         btn:SetPoint('CENTER', m.filter_dropdown, 'CENTER', 0, 0)
-        btn:SetScript('OnClick', m.add_post_filter)
+        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
+        btn:SetScript('OnClick', function()
+            if arg1 == 'LeftButton' then
+                m.add_post_filter()
+            elseif arg1 == 'RightButton' then
+                m.remove_post_filter()
+            end
+        end)
         private.filter_button = btn
     end
     do
@@ -541,6 +548,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
 --            Aux.completion.complete(this, function() return filter and ({filter.validator()})[3] or {} end)
         end)
         input:SetScript('OnEnterPressed', m.add_post_filter)
+        input:Hide()
         private.filter_input = input
     end
     do
