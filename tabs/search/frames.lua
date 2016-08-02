@@ -526,8 +526,8 @@ Aux.search_tab.FRAMES(function(m, public, private)
             UIDropDownMenu_Initialize(this, m.initialize_filter_dropdown)
         end)
         getglobal(dropdown:GetName()..'Text'):Hide()
-        local label = Aux.gui.label(dropdown, 17)
-        label:SetPoint('RIGHT', dropdown, 'LEFT', -13, 0)
+        local label = Aux.gui.label(dropdown, Aux.gui.config.normal_font_size)
+        label:SetPoint('RIGHT', dropdown, 'LEFT', -15, 0)
         label:SetText('Post Filter')
         private.filter_dropdown = dropdown
     end

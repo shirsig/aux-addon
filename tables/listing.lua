@@ -297,7 +297,7 @@ local methods = {
         local colNum = getn(st.headCols) + 1
         local col = CreateFrame('Button', st:GetName()..'HeadCol'..colNum, st.contentFrame)
         if colNum == 1 then
-            col:SetPoint('TOPLEFT', 0, 0)
+            col:SetPoint('TOPLEFT', 0, -1)
         else
             col:SetPoint('TOPLEFT', st.headCols[colNum - 1], 'TOPRIGHT')
         end
@@ -308,11 +308,11 @@ local methods = {
 
         local text = col:CreateFontString()
         text:SetJustifyV('CENTER')
-        text:SetFont(Aux.gui.config.font, 15)
+        text:SetFont(Aux.gui.config.font, Aux.gui.config.normal_font_size)
         text:SetTextColor(unpack(Aux.gui.config.text_color.enabled))
+        text:SetAllPoints()
         col.text = text
         col:SetFontString(text)
-        text:SetAllPoints()
 
         local tex = col:CreateTexture()
         tex:SetAllPoints()
