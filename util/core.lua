@@ -19,22 +19,26 @@ function public.product(...)
 	return x
 end
 
-function public.id(value)
-	return value
+function public.id(x)
+	return x
 end
 
-function public.const(value)
+function public.const(x)
 	return function()
-		return value
+		return x
 	end
 end
 
-function public.size(table)
+function public.size(t)
 	local x = 0
-	for _ in table do
+	for _ in t do
 		x = x + 1
 	end
 	return x
+end
+
+function public.round(x)
+	return floor(x + 0.5)
 end
 
 function public.eq(t1, t2)
@@ -57,18 +61,18 @@ function public.eq(t1, t2)
 	return true
 end
 
-function public.wipe(table)
-	while getn(table) > 0 do
-		tremove(table)
+function public.wipe(t)
+	while getn(t) > 0 do
+		tremove(t)
 	end
-	for k, _ in table do
-		table[k] = nil
+	for k, _ in t do
+		t[k] = nil
 	end
 end
 
-function public.copy(table)
+function public.copy(t)
 	local copy = {}
-	for k, v in table do
+	for k, v in t do
 		copy[k] = v
 	end
 	return copy
@@ -80,10 +84,10 @@ function public.cons(element, list)
 	return new_list
 end
 
-function public.trim(string)
-	string = gsub(string, '^%s*', '')
-	string = gsub(string, '%s*$', '')
-	return string
+function public.trim(str)
+	str = gsub(str, '^%s*', '')
+	str = gsub(str, '%s*$', '')
+	return str
 end
 
 function public.inventory()
@@ -199,51 +203,6 @@ function public.key(value, t)
 	for k, v in t do
 		if v == value then
 			return k
-		end
-	end
-end
-
-local GSC_GOLD = "ffd100"
-local GSC_SILVER = "e6e6e6"
-local GSC_COPPER = "c8602c"
-local GSC_RED = "ff0000"
-
-local GSC_3 = "|cff"..GSC_GOLD.."%d|cff000000.|cff"..GSC_SILVER.."%02d|cff000000.|cff"..GSC_COPPER.."%02d|r"
-local GSC_2 = "|cff"..GSC_SILVER.."%d|cff000000.|cff"..GSC_COPPER.."%02d|r"
-local GSC_1 = "|cff"..GSC_COPPER.."%d|r"
-
-local GSC_3N = "|cff"..GSC_RED.."(|cff"..GSC_GOLD.."%d|cff000000.|cff"..GSC_SILVER.."%02d|cff000000.|cff"..GSC_COPPER.."%02d|cff"..GSC_RED..")|r"
-local GSC_2N = "|cff"..GSC_RED.."(|cff"..GSC_SILVER.."%d|cff000000.|cff"..GSC_COPPER.."%02d|cff"..GSC_RED..")|r"
-local GSC_1N = "|cff"..GSC_RED.."(|cff"..GSC_COPPER.."%d|cff"..GSC_RED..")|r"
-
-function public.money_string(money)
-	money = floor(tonumber(money) or 0)
-	local negative = money < 0
-	money = abs(money)
-
-	local g = floor(money / 10000)
-	money = money - g * 10000
-	local s = floor(money / 100)
-	money = money - s * 100
-	local c = money
-
-	if g > 0 then
-		if negative then
-			return format(GSC_3N, g, s, c)
-		else
-			return format(GSC_3, g, s, c)
-		end
-	elseif s > 0 then
-		if negative then
-			return format(GSC_2N, s, c)
-		else
-			return format(GSC_2, s, c)
-		end
-	else
-		if negative then
-			return format(GSC_1N, c)
-		else
-			return format(GSC_1, c)
 		end
 	end
 end

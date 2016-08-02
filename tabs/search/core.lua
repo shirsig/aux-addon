@@ -432,13 +432,13 @@ end
 
 function private.blizzard_page_index(str)
     if tonumber(str) then
-        return Aux.round(max(0, tonumber(str) - 1))
+        return Aux.util.round(max(0, tonumber(str) - 1))
     end
 end
 
 function private.blizzard_level(str)
     if tonumber(str) then
-        return Aux.round(max(1, min(60, tonumber(str))))
+        return Aux.util.round(max(1, min(60, tonumber(str))))
     end
 end
 
@@ -872,7 +872,7 @@ function private.add_post_component()
         local filter = name
         if not Aux.filter.filters[name] and filter == 'and' or filter == 'or' then
             local arity = m.filter_input:GetText()
-            arity = tonumber(arity) and Aux.round(tonumber(arity))
+            arity = tonumber(arity) and Aux.util.round(tonumber(arity))
             if arity and arity < 2 then
                 Aux.log('Invalid operator suffix')
                 return

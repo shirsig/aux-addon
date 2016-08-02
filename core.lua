@@ -406,10 +406,6 @@ function private.on_auction_house_closed()
 	AuxFrame:Hide()
 end
 
-function public.round(v)
-	return floor(v + 0.5)
-end
-
 function public.min_bid_increment(current_bid)
     return max(1, floor(current_bid / 100) * 5)
 end

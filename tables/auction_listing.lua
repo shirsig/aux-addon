@@ -520,9 +520,9 @@ function private.record_percentage(record)
     local historical_value = Aux.history.value(record.item_key) or 0
     if historical_value > 0 then
         if record.unit_buyout_price > 0 then
-            return Aux.round(100 * record.unit_buyout_price / historical_value, 1)
+            return Aux.util.round(100 * record.unit_buyout_price / historical_value, 1)
         end
-        return nil, Aux.round(100 * record.unit_bid_price / historical_value, 1)
+        return nil, Aux.util.round(100 * record.unit_bid_price / historical_value, 1)
     end
 end
 

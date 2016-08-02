@@ -144,9 +144,9 @@ function private.update_auction_listing()
                     { value=Aux.auction_listing.time_left(auction_record.duration) },
                     { value=auction_record.stack_size == stack_size and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size },
                     { value=Aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
-                    { value=historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---' },
+                    { value=historical_value and Aux.auction_listing.percentage_historical(Aux.util.round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---' },
                     { value=auction_record.unit_buyout_price > 0 and Aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---' },
-                    { value=auction_record.unit_buyout_price > 0 and historical_value and Aux.auction_listing.percentage_historical(Aux.round(auction_record.unit_buyout_price / historical_value * 100)) or '---' },
+                    { value=auction_record.unit_buyout_price > 0 and historical_value and Aux.auction_listing.percentage_historical(Aux.util.round(auction_record.unit_buyout_price / historical_value * 100)) or '---' },
                 },
                 record = auction_record,
             })
@@ -189,12 +189,12 @@ function private.price_update()
         local start_price_input = m.get_unit_start_price()
         settings.start_price = start_price_input
         local historical_value = Aux.history.value(m.selected_item.key)
-        m.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(start_price_input / historical_value * 100)) or '---')
+        m.start_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.util.round(start_price_input / historical_value * 100)) or '---')
 
         local buyout_price_input = m.get_unit_buyout_price()
         settings.buyout_price = buyout_price_input
         local historical_value = Aux.history.value(m.selected_item.key)
-        m.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.round(buyout_price_input / historical_value * 100)) or '---')
+        m.buyout_price_percentage:SetText(historical_value and Aux.auction_listing.percentage_historical(Aux.util.round(buyout_price_input / historical_value * 100)) or '---')
 
         m.write_settings(settings)
     end
@@ -327,8 +327,8 @@ function private.update_item_configuration()
 end
 
 function private.undercut(record, stack_size, stack)
-    local start_price = Aux.round(record.unit_blizzard_bid * (stack and record.stack_size or stack_size))
-    local buyout_price = Aux.round(record.unit_buyout_price * (stack and record.stack_size or stack_size))
+    local start_price = Aux.util.round(record.unit_blizzard_bid * (stack and record.stack_size or stack_size))
+    local buyout_price = Aux.util.round(record.unit_buyout_price * (stack and record.stack_size or stack_size))
 
     if not record.own then
         start_price = max(0, start_price - 1)

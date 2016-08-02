@@ -32,7 +32,7 @@ function private.post_auction(slot, k)
 		ClickAuctionSellItemButton()
 		ClearCursor()
 
-		StartAuction(max(1, Aux.round(m.state.unit_start_price * item_info.aux_quantity)), Aux.round(m.state.unit_buyout_price * item_info.aux_quantity), m.state.duration)
+		StartAuction(max(1, Aux.util.round(m.state.unit_start_price * item_info.aux_quantity)), Aux.util.round(m.state.unit_buyout_price * item_info.aux_quantity), m.state.duration)
 
 		local c = Aux.control.await(function()
 			m.state.posted = m.state.posted + 1
