@@ -3,6 +3,22 @@ local m, public, private = Aux.module'util'
 function public.pass()
 end
 
+function public.sum(...)
+	local x = 0
+	for i=1,arg.n do
+		x = x + arg[i]
+	end
+	return x
+end
+
+function public.product(...)
+	local x = 0
+	for i=1,arg.n do
+		x = x * arg[i]
+	end
+	return x
+end
+
 function public.id(value)
 	return value
 end
@@ -98,7 +114,7 @@ function public.bag_type(bag)
 	if link then
 		local item_id = Aux.info.parse_hyperlink(GetInventoryItemLink('player', ContainerIDToInventoryID(bag)))
 		local item_info = Aux.info.item(item_id)
-		return Aux.item_subclass_index(3, item_info.subclass)
+		return Aux.info.item_subclass_index(3, item_info.subclass)
 	end
 end
 
@@ -179,10 +195,10 @@ function public.take(n, xs)
 	return ys
 end
 
-function public.index_of(value, array)
-	for i, item in ipairs(array) do
-		if item == value then
-			return i
+function public.key(value, t)
+	for k, v in t do
+		if v == value then
+			return k
 		end
 	end
 end

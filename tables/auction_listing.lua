@@ -900,7 +900,7 @@ local methods = {
     end,
 
     RemoveAuctionRecord = function(self, record)
-        local index = Aux.util.index_of(record, self.records)
+        local index = Aux.util.key(record, self.records)
         if index then
             tremove(self.records, index)
         end
@@ -910,7 +910,7 @@ local methods = {
     RemoveSelectedRecord = function(self, count)
         count = count or 1
         for i=1, count do
-            local index = Aux.util.index_of(self.selected, self.records)
+            local index = Aux.util.key(self.selected, self.records)
             if index then
                 tremove(self.records, index)
             end
@@ -927,7 +927,7 @@ local methods = {
     end,
 
     ContainsRecord = function(rt, record)
-        if Aux.util.index_of(record, rt.records) then
+        if Aux.util.key(record, rt.records) then
             return true
         end
     end,

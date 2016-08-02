@@ -327,7 +327,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         btn:SetHeight(24)
         btn:SetText('Favorite')
         btn:SetScript('OnClick', function()
-            local filters = Aux.scan_util.parse_filter_string(m.search_box:GetText())
+            local filters = Aux.filter.queries(m.search_box:GetText())
             if filters then
                 tinsert(aux_favorite_searches, 1, {
                     filter_string = m.search_box:GetText(),
@@ -344,9 +344,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         btn1:SetHeight(24)
         btn1:SetText('Search')
         btn1:SetScript('OnClick', function()
-            m.search_box:SetText('')
-            m.add_filter()
-            m.clear_form()
+            m.export_query_string()
             m.execute()
         end)
 
@@ -354,21 +352,15 @@ Aux.search_tab.FRAMES(function(m, public, private)
         btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
         btn2:SetWidth(80)
         btn2:SetHeight(24)
-        btn2:SetText('Add')
-        btn2:SetScript('OnClick', function()
-            m.add_filter()
-            m.clear_form()
-        end)
+        btn2:SetText('Export')
+        btn2:SetScript('OnClick', m.export_query_string)
 
         local btn3 = Aux.gui.button(m.frame.filter, 16)
         btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
         btn3:SetWidth(80)
         btn3:SetHeight(24)
-        btn3:SetText('Replace')
-        btn3:SetScript('OnClick', function()
-            m.add_filter(nil, true)
-            m.clear_form()
-        end)
+        btn3:SetText('Import')
+        btn3:SetScript('OnClick', m.import_query_string)
     end
     do
         local editbox = Aux.gui.editbox(m.frame.filter)
@@ -517,186 +509,54 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.quality_dropdown = dropdown
     end
     Aux.gui.vertical_line(m.frame.filter, 332)
-    local function add_modifier(...)
-        local current_filter_string = m.search_box:GetText()
-        for i=1,arg.n do
-            if current_filter_string ~= '' and strsub(current_filter_string, -1) ~= '/' then
-                current_filter_string = current_filter_string..'/'
-            end
-            current_filter_string = current_filter_string..arg[i]
-        end
-        m.search_box:SetText(current_filter_string)
-    end
     do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPRIGHT', -362, -10)
-        btn:SetWidth(50)
-        btn:SetHeight(19)
-        btn:SetText('and')
-        btn:SetScript('OnClick', function()
-            add_modifier('and')
+        local dropdown = Aux.gui.dropdown(m.frame.filter)
+        dropdown:SetPoint('TOPRIGHT', -210, -10)
+        dropdown:SetWidth(170)
+        dropdown:SetHeight(10)
+        UIDropDownMenu_Initialize(dropdown, m.initialize_filter_dropdown)
+        dropdown:SetScript('OnShow', function()
+            UIDropDownMenu_Initialize(this, m.initialize_filter_dropdown)
         end)
-        private.and_operator_button = btn
+        getglobal(dropdown:GetName()..'Text'):Hide()
+        private.filter_dropdown = dropdown
     end
     do
         local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('LEFT', m.and_operator_button, 'RIGHT', 10, 0)
-        btn:SetWidth(50)
-        btn:SetHeight(19)
-        btn:SetText('or')
+        btn:SetWidth(170)
+        btn:SetHeight(25)
+        btn:SetPoint('CENTER', m.filter_dropdown, 'CENTER', 0, 0)
+        btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
         btn:SetScript('OnClick', function()
-            add_modifier('or')
-        end)
-        private.or_operator_button = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('LEFT', m.or_operator_button, 'RIGHT', 10, 0)
-        btn:SetWidth(50)
-        btn:SetHeight(19)
-        btn:SetText('not')
-        btn:SetScript('OnClick', function()
-            add_modifier('not')
-        end)
-        private.not_operator_button = btn
-    end
-    private.modifier_buttons = {}
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.and_operator_button, 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['min-unit-bid'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['min-unit-bid'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['min-unit-buy'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['min-unit-buy'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['max-unit-bid'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['max-unit-bid'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['max-unit-buy'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['max-unit-buy'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['bid-profit'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-profit'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['buy-profit'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['buy-profit'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['bid-vend-profit'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-vend-profit'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['buy-vend-profit'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['buy-vend-profit'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['bid-dis-profit'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-dis-profit'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['buy-dis-profit'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.and_operator_button, 'BOTTOMLEFT', 205, -10)
-        m.modifier_buttons['bid-pct'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['bid-pct'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['buy-pct'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['buy-pct'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['item'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['item'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['tooltip'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['tooltip'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['min-lvl'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['min-lvl'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['max-lvl'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['max-lvl'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['rarity'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['rarity'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['left'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['left'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['utilizable'] = btn
-    end
-    do
-        local btn = Aux.gui.button(m.frame.filter, 16)
-        btn:SetPoint('TOPLEFT', m.modifier_buttons['utilizable'], 'BOTTOMLEFT', 0, -10)
-        m.modifier_buttons['discard'] = btn
-    end
-    for modifier_name, btn in m.modifier_buttons do
-        local modifier_name = modifier_name
-        local btn = btn
-
-        local filter = Aux.scan_util.filters[modifier_name]
-
-        btn:SetWidth(100)
-        btn:SetHeight(19)
-        btn:SetText(modifier_name)
-        btn:SetScript('OnClick', function()
-            local args = Aux.util.map(btn.inputs, function(input) return input:GetText() end)
-            if filter.test(unpack(args)) then
-                add_modifier(modifier_name, unpack(args))
-                for _, input in btn.inputs do
-                    input:SetText('')
-                    input:ClearFocus()
-                end
+            if arg1 == 'LeftButton' then
+                m.add_post_filter()
+            elseif arg1 == 'RightButton' then
+                m.remove_post_filter()
             end
         end)
-        btn.inputs = {}
-        if filter.arity > 0 then
-            local editbox = Aux.gui.editbox(m.frame.filter)
-            editbox.complete = Aux.completion.complete(function() return ({filter.test()})[2] end)
-            editbox:SetPoint('LEFT', btn, 'RIGHT', 10, 0)
-            editbox:SetWidth(80)
-            --            editbox:SetNumeric(true)
-            --            editbox:SetMaxLetters(2)
-            editbox:SetScript('OnChar', function()
-                this:complete()
-            end)
-            local on_click = btn:GetScript('OnClick')
-            editbox:SetScript('OnEnterPressed', function()
-                on_click()
-            end)
-            tinsert(btn.inputs, editbox)
-        end
+        private.filter_button = btn
+    end
+    do
+        local input = Aux.gui.editbox(m.frame.filter)
+        input:SetPoint('LEFT', m.filter_dropdown, 'RIGHT', 10, 0)
+        input:SetWidth(150)
+        input:SetHeight(25)
+        --            editbox:SetNumeric(true)
+        --            editbox:SetMaxLetters(2)
+        input:SetScript('OnChar', function()
+--            local filter = Aux.filter.filters[UIDropDownMenu_GetSelectedValue(m.filter_dropdown) or ''] -- TODO
+--            Aux.completion.complete(this, function() return filter and ({filter.validator()})[3] or {} end)
+        end)
+        input:SetScript('OnEnterPressed', m.add_post_filter)
+        input:Hide()
+        private.filter_input = input
+    end
+    do
+        local label = Aux.gui.label(m.frame.filter, 13)
+        label:SetPoint('TOPLEFT', 350, -53)
+        label:SetWidth(300)
+        label:SetJustifyH('LEFT')
+        private.filter_display = label
     end
 
     private.status_bars = {}

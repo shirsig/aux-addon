@@ -75,7 +75,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
     m.auction_listing:EnableSorting(false)
     m.auction_listing:DisableSelection(true)
     m.auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
-        local column_index = Aux.util.index_of(column, column.row.cols)
+        local column_index = Aux.util.key(column, column.row.cols)
         local unit_start_price, unit_buyout_price = m.undercut(row_data.record, m.stack_size_slider:GetValue(), button == 'RightButton')
         if column_index == 3 then
             m.stack_size_slider:SetValue(row_data.record.stack_size)
