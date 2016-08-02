@@ -735,6 +735,7 @@ function private.initialize_filter_dropdown()
             m.filter_input:Hide()
         else
             local _, _, suggestions = Aux.filter.parse_query_string(UIDropDownMenu_GetSelectedValue(m.filter_dropdown)..'/')
+            m.filter_input:SetNumeric(Aux.safe(Aux.filter.filters[this.value]).input_type/'number' == 'number')
             m.filter_input.complete = Aux.completion.complete(function() return suggestions or {} end)
             m.filter_input:Show()
             m.filter_input:SetFocus()
@@ -757,7 +758,7 @@ function private.get_form()
         query_string = query_string == '' and part or query_string..'/'..part
     end
 
-    add('"'..m.name_input:GetText()..'"')
+    add(Aux.filter.quote(m.name_input:GetText()))
 
     if m.exact_checkbox:GetChecked() then
         add('exact')
@@ -811,7 +812,7 @@ function private.set_form(components)
             if name and strsub(name, 1, 1) == '"' and strsub(name, -1, -1) == '"' then
                 name = strsub(name, 2, -2)
             end
-            m.name_input:SetText(name)
+            m.name_input:SetText(Aux.filter.unquote(filter[2]))
         elseif filter[1] == 'exact' then
             m.exact_checkbox:SetChecked(true)
         elseif filter[1] == 'min_level' then
@@ -863,16 +864,18 @@ end
 
 private.post_components = {}
 
-function private.add_post_filter()
+function private.add_post_component()
     local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown)
     if name then
         local filter = name
         if not Aux.filter.filters[name] and filter == 'and' or filter == 'or' then
-            if m.filter_input:GetText() ~= '' and m.filter_input:GetText() ~= '*' and (tonumber(m.filter_input:GetText() or 3 <= 2)) then
+            local arity = m.filter_input:GetText()
+            arity = tonumber(arity) and Aux.round(tonumber(arity))
+            if arity and arity < 2 then
                 Aux.log('Invalid operator suffix')
                 return
             end
-            filter = filter..m.filter_input:GetText()
+            filter = filter..Aux.filter.operator_suffix(arity)
         end
         if Aux.filter.filters[name] and Aux.filter.filters[name].input_type ~= '' then
             filter = filter..'/'..m.filter_input:GetText()

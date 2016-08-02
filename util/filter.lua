@@ -518,13 +518,7 @@ function public.query_string(components)
 
     for _, component in components.post do
         if component[1] == 'operator' then
-            local suffix = ''
-            if not component[3] then
-                suffix = '*'
-            elseif component[3] > 2 then
-                suffix = component[3]
-            end
-            prettified.append(component[2]..suffix)
+            prettified.append(component[2]..m.operator_suffix(component[3]))
         elseif component[1] == 'filter' then
             prettified.append(component[2])
             if component[3] then
@@ -553,13 +547,7 @@ function public.indented_post_query_string(components)
 
         if component[1] == 'operator' and component[2] then
             no_line_break = component[2] == 'not'
-            local suffix = ''
-            if not component[3] then
-                suffix = '*'
-            elseif component[3] > 2 then
-                suffix = component[3]
-            end
-            str = str..'|cffffff00'..component[2]..suffix..'|r'
+            str = str..'|cffffff00'..component[2]..m.operator_suffix(component[3])..'|r'
             tinsert(stack, component[3] or '*')
         elseif component[1] == 'filter' then
             str = str..'|cffffff00'..component[2]..'|r'
@@ -586,17 +574,17 @@ function private.prettified_query_string(components)
     for _, filter in components.blizzard do
         blizzard_filters[filter[1]] = filter[2] or true
         if filter[1] == 'exact' then
-            prettified.prepend(Aux.info.display_name(Aux.cache.item_id(blizzard_filters.name)) or Aux.gui.inline_color({216, 225, 211, 1})..'['..blizzard_filters.name..']|r')
+            prettified.prepend(Aux.info.display_name(Aux.cache.item_id(m.unquote(blizzard_filters.name))) or Aux.gui.inline_color({216, 225, 211, 1})..'['..m.unquote(blizzard_filters.name)..']|r')
         elseif filter[1] ~= 'name' then
             prettified.append(Aux.gui.inline_color({216, 225, 211, 1})..(filter[2] or filter[1])..'|r')
         end
     end
 
-    if not blizzard_filters.exact then
-        if blizzard_filters.name == '' then
+    if blizzard_filters.name and not blizzard_filters.exact then
+        if m.unquote(blizzard_filters.name) == '' then
             prettified.prepend('|cffff0000'..'No Filter'..'|r')
-        elseif blizzard_filters.name then
-            prettified.prepend(Aux.gui.inline_color({216, 225, 211, 1})..blizzard_filters.name..'|r')
+        else
+            prettified.prepend(Aux.gui.inline_color({216, 225, 211, 1})..m.unquote(blizzard_filters.name)..'|r')
         end
     end
 
@@ -622,17 +610,34 @@ function private.prettified_query_string(components)
     return prettified.get()
 end
 
+function public.quote(name)
+    return '<'..name..'>'
+end
+
+function public.unquote(name)
+    if name and strsub(name, 1, 1) == '<' and strsub(name, -1, -1) == '>' then
+        name = strsub(name, 2, -2)
+    end
+    return name
+end
+
+function public.operator_suffix(arity)
+    if not arity then
+        return '*'
+    elseif arity == 2 then
+        return ''
+    else
+        return arity
+    end
+end
+
 function private.blizzard_query(components)
     local filters = {}
     for _, filter in components.blizzard do
         filters[filter[1]] = filter[2] or true
     end
 
-    local name = filters.name
-    if name and strsub(name, 1, 1) == '"' and strsub(name, -1, -1) == '"' then
-        name = strsub(name, 2, -2)
-    end
-    local query = { name=name }
+    local query = { name = filters.name and m.unquote(filters.name) }
 
     local item_info, class_index, subclass_index, slot_index
     if filters.exact then
