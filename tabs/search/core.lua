@@ -182,6 +182,9 @@ function private.clear_form()
     UIDropDownMenu_ClearAll(m.subclass_dropdown)
     UIDropDownMenu_ClearAll(m.slot_dropdown)
     UIDropDownMenu_ClearAll(m.quality_dropdown)
+    m.filter_input:ClearFocus()
+    m.post_components = {}
+    m.update_filter_display()
 end
 
 function private.discard_continuation()
@@ -797,12 +800,12 @@ function private.get_form()
     return query_string
 end
 
-function private.set_form(filters)
+function private.set_form(components)
     m.clear_form()
 
     local class_index, subclass_index
 
-    for _, filter in filters do
+    for _, filter in components.blizzard do
         if filter[1] == 'name' then
             m.name_input:SetText(filter[2])
         elseif filter[1] == 'exact' then
@@ -829,14 +832,15 @@ function private.set_form(filters)
             UIDropDownMenu_SetSelectedValue(m.quality_dropdown, Aux.info.item_quality_index(filter[2]))
         end
     end
+
+    m.post_components = components.post
+    m.update_filter_display()
 end
 
 function private.import_query_string()
     local components, error = Aux.filter.parse_query_string(m.search_box:GetText())
     if components then
-        m.set_form(components.blizzard)
-        m.post_components = components.post
-        m.update_filter_display()
+        m.set_form(components)
     else
         Aux.log(error)
     end
@@ -846,9 +850,7 @@ function private.export_query_string()
     local components, error = Aux.filter.parse_query_string(m.get_form())
     if components then
         m.search_box:SetText(Aux.filter.query_string({blizzard=components.blizzard, post=m.post_components}))
-        m.clear_form()
         m.filter_input:ClearFocus()
-        m.post_components = {}
         m.update_filter_display()
     else
         Aux.log(error)
@@ -894,7 +896,7 @@ function private.update_filter_display()
     local lines = getn(Aux.util.filter(m.post_components, function(component) return component[1] == 'operator' and component[2] ~= 'not' end))
     local width_scale = max(200/m.filter_display:GetStringWidth())
     local height_scale = min((200 / lines) / 18)
-    m.filter_display_scale:SetScale(min(1, width_scale, height_scale))
+    m.filter_display.scale_frame:SetScale(min(1, width_scale, height_scale))
     m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_components))
 end
 
