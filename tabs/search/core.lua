@@ -796,6 +796,7 @@ function private.get_form()
 end
 
 function private.set_form(filters)
+    m.clear_form()
 
     local class_index, subclass_index
 
