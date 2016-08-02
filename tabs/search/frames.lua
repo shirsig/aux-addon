@@ -361,13 +361,6 @@ Aux.search_tab.FRAMES(function(m, public, private)
         btn3:SetHeight(24)
         btn3:SetText('Import')
         btn3:SetScript('OnClick', m.import_query_string)
-
-        local btn4 = Aux.gui.button(m.frame.filter, 16)
-        btn4:SetPoint('LEFT', btn3, 'RIGHT', 5, 0)
-        btn4:SetWidth(80)
-        btn4:SetHeight(24)
-        btn4:SetText('Clear')
-        btn4:SetScript('OnClick', m.clear_form)
     end
     do
         local editbox = Aux.gui.editbox(m.frame.filter)
