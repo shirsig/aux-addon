@@ -209,8 +209,8 @@ function private.operator(str)
         return 'not', 1
     end
 
-    local _, _, and_op, and_arity = strfind(str, '^(and)(%d*)$')
-    local _, _, or_op, or_arity = strfind(str, '^(or)(%d*)$')
+    local _, _, and_op, and_arity = strfind(str, '^(and)(.*)$')
+    local _, _, or_op, or_arity = strfind(str, '^(or)(.*)$')
 
     local op = and_op or or_op
     local arity = and_arity or or_arity
@@ -218,7 +218,7 @@ function private.operator(str)
     if op then
         if arity == '' then
             return op, 2
-        elseif tonumber(arity) > 2 then
+        elseif tonumber(arity) and tonumber(arity) > 2 then
             return op, tonumber(arity)
         elseif arity == '*' then
             return op
