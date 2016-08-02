@@ -347,10 +347,12 @@ function public.parse_query_string(str)
             local input_type = m.filters[parts[i]].input_type
             if input_type ~= '' then
                 if not parts[i + 1] or not m.parse_parameter(input_type, parts[i + 1]) then
-                    if type(input_type) == 'table' then
-                        return nil, 'Invalid input of type choice for '..parts[i], input_type
+                    if parts[i] == 'item' then
+                        return nil, 'Invalid item name', aux_auctionable_items
+                    elseif type(input_type) == 'table' then
+                        return nil, 'Invalid choice for '..parts[i], input_type
                     else
-                        return nil, 'Invalid input of type '..input_type..' for '..parts[i]
+                        return nil, 'Invalid input for '..parts[i]..'. Expecting: '..input_type
                     end
                 end
                 tinsert(components.post, {'filter', parts[i], parts[i + 1]})
