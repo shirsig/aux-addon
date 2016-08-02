@@ -568,11 +568,12 @@ function public.indented_post_query_string(components)
             if component[3] then
                 str = str..': '..'|cffff9218'..component[3]..'|r'
             end
-            local top = tremove(stack)
-            if tonumber(top) and top > 1 then
-                tinsert(stack, top - 1)
-            elseif top == '*' then
-                tinsert(stack, top)
+            while getn(stack) > 0 and stack[getn(stack)] ~= '*' do
+                local top = tremove(stack)
+                if tonumber(top) and top > 1 then
+                    tinsert(stack, top - 1)
+                    break
+                end
             end
         end
     end
