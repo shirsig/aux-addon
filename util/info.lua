@@ -223,7 +223,7 @@ end
 
 function public.tooltip_find(pattern, tooltip)
     local count = 0
-    for _, line in tooltip do
+    for _, line in ipairs(tooltip) do
         if line.left_text and strfind(line.left_text, pattern) then
             count = count + 1
         end
@@ -237,7 +237,7 @@ end
 
 function public.load_tooltip(frame, tooltip)
     frame:ClearLines()
-    for _, line in tooltip do
+    for _, line in ipairs(tooltip) do
         if line.right_text then
             frame:AddDoubleLine(line.left_text, line.right_text, line.left_color[1], line.left_color[2], line.left_color[3], line.right_color[1], line.right_color[2], line.right_color[3])
         else
