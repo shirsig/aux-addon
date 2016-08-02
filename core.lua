@@ -134,7 +134,7 @@ do
 end
 
 function public.on_load()
-    public.version = '3.6.1'
+    public.version = '3.6.2'
     public.bids_loaded = false
     public.current_owner_page = nil
     public.last_owner_page_requested = nil
