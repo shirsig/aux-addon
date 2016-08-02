@@ -541,11 +541,13 @@ function public.indented_post_query_string(components)
 
     for _, component in components do
 
-        if str ~= '' then
-            str = str..(no_line_break and ' ' or '|n')
-        end
-        for _=1,getn(stack) do
-            str = str..'    '
+        if no_line_break then
+            str = str..' '
+        else
+            str = str..'|n'
+            for _=1,getn(stack) do
+                str = str..'    '
+            end
         end
 
         if component[1] == 'operator' and component[2] then

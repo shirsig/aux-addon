@@ -553,7 +553,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local label = Aux.gui.label(m.frame.filter, 13)
-        label:SetPoint('TOPLEFT', 350, -53)
+        label:SetPoint('TOPLEFT', 350, -40)
         label:SetWidth(300)
         label:SetJustifyH('LEFT')
         private.filter_display = label
