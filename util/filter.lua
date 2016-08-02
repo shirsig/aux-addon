@@ -387,7 +387,7 @@ function public.query(query_string)
     for _, component in components.post do
         if component[1] == 'operator' then
             polish_notation_counter = max(polish_notation_counter, 1)
-            polish_notation_counter = polish_notation_counter + (component[2] or 1) - 1
+            polish_notation_counter = polish_notation_counter + (tonumber(component[2]) or 1) - 1
         elseif component[1] == 'filter' then
             polish_notation_counter = polish_notation_counter - 1
         end
@@ -469,7 +469,7 @@ function private.suggestions(components)
     end
 
     -- subclasses
-    local class_index = Aux.info.item_class_index(blizzard_filters.class or '')
+    local class_index = blizzard_filters.class and Aux.info.item_class_index(blizzard_filters.class)
     if class_index and not blizzard_filters.subclass then
         for _, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
             tinsert(suggestions, subclass)
@@ -477,9 +477,9 @@ function private.suggestions(components)
     end
 
     -- slots
-    local subclass_index = Aux.info.item_subclass_index(class_index, blizzard_filters.subclass or '')
+    local subclass_index = class_index and blizzard_filters.subclass and Aux.info.item_subclass_index(class_index, blizzard_filters.subclass)
     if subclass_index and not blizzard_filters.slot then
-        for _, invtype in ipairs({ GetAuctionInvTypes(class_index, Aux.info.item_subclass_index(Aux.info.item_class_index(blizzard_filters.class), blizzard_filters.subclass)) }) do
+        for _, invtype in ipairs({ GetAuctionInvTypes(class_index, Aux.info.item_subclass_index(class_index, blizzard_filters.subclass)) }) do
             tinsert(suggestions, getglobal(invtype))
         end
     end

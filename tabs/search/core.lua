@@ -171,9 +171,12 @@ end
 
 function private.clear_form()
     m.name_input:SetText('')
+    m.name_input:ClearFocus()
     m.exact_checkbox:SetChecked(nil)
     m.min_level_input:SetText('')
+    m.min_level_input:ClearFocus()
     m.max_level_input:SetText('')
+    m.max_level_input:ClearFocus()
     m.usable_checkbox:SetChecked(nil)
     UIDropDownMenu_ClearAll(m.class_dropdown)
     UIDropDownMenu_ClearAll(m.subclass_dropdown)
@@ -841,6 +844,7 @@ function private.export_query_string()
     if components then
         m.search_box:SetText(Aux.filter.query_string({blizzard=components.blizzard, post=m.post_components}))
         m.clear_form()
+        m.filter_input:ClearFocus()
         m.post_components = {}
         m.filter_display:SetText('')
     else
@@ -852,7 +856,7 @@ private.post_components = {}
 
 function private.add_post_filter()
     local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown)
-    if name and not strfind(Aux.filter.indented_post_query_string(m.post_components), '|n', 20) then
+    if name and getn(Aux.util.filter(m.post_components, function(component) return component[1] == 'operator' end)) < 20 then
         local filter = name
         if Aux.filter.filters[name] and Aux.filter.filters[name].input_type ~= '' then
             filter = filter..'/'..m.filter_input:GetText()
