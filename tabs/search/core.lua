@@ -836,7 +836,7 @@ function private.import_query_string()
     if components then
         m.set_form(components.blizzard)
         m.post_components = components.post
-        m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_components))
+        m.filter_display:SetText(Aux.filter.indented_post_query_string(Aux.util.take(20, m.post_components)))
     else
         Aux.log(error)
     end
@@ -859,7 +859,7 @@ private.post_components = {}
 
 function private.add_post_filter()
     local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown)
-    if name and getn(Aux.util.filter(m.post_components, function(component) return component[1] == 'operator' end)) < 20 then
+    if name then
         local filter = name
         if Aux.filter.filters[name] and Aux.filter.filters[name].input_type ~= '' then
             filter = filter..'/'..m.filter_input:GetText()
@@ -869,7 +869,7 @@ function private.add_post_filter()
 
         if components then
             tinsert(m.post_components, components.post[1])
-            m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_components))
+            m.filter_display:SetText(Aux.filter.indented_post_query_string(Aux.util.take(20, m.post_components)))
             m.filter_input:SetText('')
             m.filter_input:ClearFocus()
         else
@@ -880,6 +880,6 @@ end
 
 function private.remove_post_filter()
     tremove(m.post_components)
-    m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_components))
+    m.filter_display:SetText(Aux.filter.indented_post_query_string(Aux.util.take(20, m.post_components)))
 end
 
