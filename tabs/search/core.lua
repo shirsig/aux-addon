@@ -845,7 +845,7 @@ function private.set_form(components)
 end
 
 function private.import_query_string()
-    local components, error = Aux.filter.parse_query_string(m.search_box:GetText())
+    local components, error = Aux.filter.parse_query_string(({strfind(m.search_box:GetText(), '^([^;]*)')})[3])
     if components then
         m.set_form(components)
     else
