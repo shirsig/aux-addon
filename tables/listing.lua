@@ -308,7 +308,7 @@ local methods = {
 
         local text = col:CreateFontString()
         text:SetJustifyV('CENTER')
-        text:SetFont(Aux.gui.config.font, Aux.gui.config.normal_font_size)
+        text:SetFont(Aux.gui.config.font, Aux.gui.config.medium_font_size)
         text:SetTextColor(unpack(Aux.gui.config.text_color.enabled))
         text:SetAllPoints()
         col.text = text
@@ -394,7 +394,7 @@ local methods = {
             if st.sizes.headFontSize then
                 col.text:SetFont(Aux.gui.config.font, st.sizes.headFontSize)
             else
-                col.text:SetFont(Aux.gui.config.font, 15)
+                col.text:SetFont(Aux.gui.config.font, Aux.gui.config.medium_font_size)
             end
         end
         st:Redraw()

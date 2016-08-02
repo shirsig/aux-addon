@@ -7,7 +7,11 @@ public.config = {
     panel_color = { backdrop = {24/255, 24/255, 24/255, 1}, border = {1, 1, 1, .03} },
     content_color = { backdrop = {42/255, 42/255, 42/255, 1}, border = {0, 0, 0, 0} },
     font = [[Fonts\ARIALN.TTF]],
-    normal_font_size = 15,
+    tiny_font_size = 12,
+    small_font_size = 13,
+    medium_font_size = 15,
+    large_font_size = 18,
+    huge_font_size = 23,
     text_color = { enabled = { 255/255, 254/255, 250/255, 1 }, disabled = { 147/255, 151/255, 139/255, 1 } },
     label_color = { enabled = { 216/255, 225/255, 211/255, 1 }, disabled = { 150/255, 148/255, 140/255, 1 } },
     on_color  = {0.3, 0.7, 0.3},
@@ -105,7 +109,7 @@ end
 
 do
     local id = 0
-    function public.tab_group(parent, position)
+    function public.tab_group(parent, orientation)
         id = id + 1
 
         local frame = CreateFrame('Frame', nil, parent)
@@ -130,10 +134,10 @@ do
             tab:SetBackdropBorderColor(unpack(m.config.panel_color.border))
             local dock = tab:CreateTexture(nil, 'OVERLAY')
             dock:SetHeight(3)
-            if position == 'TOP' then
+            if orientation == 'UP' then
                 dock:SetPoint('BOTTOMLEFT', 1, -1)
                 dock:SetPoint('BOTTOMRIGHT', -1, -1)
-            else
+            elseif orientation == 'DOWN' then
                 dock:SetPoint('TOPLEFT', 1, 1)
                 dock:SetPoint('TOPRIGHT', -1, 1)
             end
@@ -150,7 +154,7 @@ do
             tab.text:SetPoint('RIGHT', -3, -1)
             tab.text:SetJustifyH('CENTER')
             tab.text:SetJustifyV('CENTER')
-            tab.text:SetFont(m.config.font, 18)
+            tab.text:SetFont(m.config.font, m.config.large_font_size)
             tab:SetFontString(tab.text)
 
             tab:SetText(text)
@@ -163,15 +167,15 @@ do
             end)
 
             if getn(self.tabs) == 0 then
-                if position == 'TOP' then
+                if orientation == 'UP' then
                     tab:SetPoint('BOTTOMLEFT', self.frame, 'TOPLEFT', 4, -1)
-                else
+                elseif orientation == 'DOWN' then
                     tab:SetPoint('TOPLEFT', self.frame, 'BOTTOMLEFT', 4, 1)
                 end
             else
-                if position == 'TOP' then
+                if orientation == 'UP' then
                     tab:SetPoint('BOTTOMLEFT', self.tabs[getn(self.tabs)], 'BOTTOMRIGHT', 4, 0)
-                else
+                elseif orientation == 'DOWN' then
                     tab:SetPoint('TOPLEFT', self.tabs[getn(self.tabs)], 'TOPRIGHT', 4, 0)
                 end
             end
@@ -217,7 +221,7 @@ function public.editbox(parent)
     editbox:SetTextInsets(0, 0, 3, 3)
     editbox:SetMaxLetters(256)
     editbox:SetHeight(19)
-    editbox:SetFont(m.config.font, m.config.normal_font_size)
+    editbox:SetFont(m.config.font, m.config.medium_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
     m.set_content_style(editbox)
 
@@ -339,7 +343,7 @@ end
 
 function public.label(parent, size)
     local label = parent:CreateFontString()
-    label:SetFont(m.config.font, size or m.config.normal_font_size)
+    label:SetFont(m.config.font, size or m.config.medium_font_size)
     label:SetTextColor(unpack(m.config.label_color.enabled))
     return label
 end
@@ -389,7 +393,7 @@ function public.dropdown(parent)
     text:ClearAllPoints()
     text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
     text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
-    text:SetFont(m.config.font, 13)
+    text:SetFont(m.config.font, m.config.small_font_size)
     text:SetShadowColor(0, 0, 0, 0)
 
 --
@@ -419,9 +423,9 @@ function public.dropdown(parent)
     return dropdown
 end
 
-function public.slider(frame)
+function public.slider(parent)
 
-    local slider = CreateFrame('Slider', nil, frame)
+    local slider = CreateFrame('Slider', nil, parent)
     slider:SetOrientation('HORIZONTAL')
     slider:SetHeight(6)
     slider:SetHitRectInsets(0, 0, -8, -8)
@@ -439,7 +443,7 @@ function public.slider(frame)
     label:SetPoint('BOTTOMRIGHT', slider, 'TOPRIGHT', 6, 6)
     label:SetJustifyH('LEFT')
     label:SetHeight(13)
-    label:SetFont(m.config.font, 13)
+    label:SetFont(m.config.font, m.config.small_font_size)
     label:SetTextColor(unpack(m.config.label_color.enabled))
 
     local editbox = m.editbox(slider)
@@ -485,7 +489,7 @@ end
 --    text:SetHeight(18)
 --    text:SetPoint('LEFT', checkbox, 'RIGHT')
 --    text:SetPoint('RIGHT')
---    text:SetFont(m.config.font, m.config.normal_font_size)
+--    text:SetFont(m.config.font, m.config.medium_font_size)
 --
 --    checkbox.text = text
 --    return checkbox

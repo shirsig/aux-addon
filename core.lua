@@ -112,7 +112,7 @@ function public.on_load()
     end)
 
     do
-        local tab_group = m.gui.tab_group(AuxFrame, 'BOTTOM')
+        local tab_group = m.gui.tab_group(AuxFrame, 'DOWN')
         tab_group:create_tab('Search')
         tab_group:create_tab('Post')
         tab_group:create_tab('Auctions')

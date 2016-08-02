@@ -1073,7 +1073,7 @@ function public.CreateAuctionResultsTable(parent, config)
         local text = cell:CreateFontString()
         text:SetJustifyH('CENTER')
         text:SetJustifyV('CENTER')
-        text:SetFont(Aux.gui.config.font, 12)
+        text:SetFont(Aux.gui.config.font, Aux.gui.config.tiny_font_size)
         text:SetTextColor(unpack(Aux.gui.config.label_color.enabled))
         cell:SetFontString(text)
         if not column_config.isPrice then cell:SetText(column_config.title or '') end -- TODO
