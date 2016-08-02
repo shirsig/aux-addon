@@ -23,7 +23,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
     m.frame.saved.recent:SetPoint('TOPRIGHT', 0, 0)
     m.frame.saved.recent:SetPoint('BOTTOMRIGHT', 0, 0)
     do
-        local btn = Aux.gui.button(m.frame, 22)
+        local btn = Aux.gui.button(m.frame)
         btn:SetPoint('TOPLEFT', 0, 0)
         btn:SetWidth(42)
         btn:SetHeight(42)
@@ -117,7 +117,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.last_page_input = editbox
     end
     do
-        local btn = Aux.gui.checkbutton(m.settings, 16)
+        local btn = Aux.gui.checkbutton(m.settings)
         btn:SetPoint('LEFT', 230, 0)
         btn:SetWidth(140)
         btn:SetHeight(25)
@@ -132,7 +132,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         public.real_time_button = btn
     end
     do
-        local btn = Aux.gui.checkbutton(m.settings, 16)
+        local btn = Aux.gui.checkbutton(m.settings)
         btn:SetPoint('LEFT', m.real_time_button, 'RIGHT', 15, 0)
         btn:SetWidth(140)
         btn:SetHeight(25)
@@ -147,7 +147,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.auto_buy_button = btn
     end
     do
-        local btn = Aux.gui.checkbutton(m.settings, 16)
+        local btn = Aux.gui.checkbutton(m.settings)
         btn:SetPoint('LEFT', m.auto_buy_button, 'RIGHT', 15, 0)
         btn:SetWidth(140)
         btn:SetHeight(25)
@@ -175,7 +175,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.auto_buy_filter_button = btn
     end
     do
-        local btn = Aux.gui.button(m.controls, 26)
+        local btn = Aux.gui.button(m.controls)
         btn:SetPoint('LEFT', 5, 0)
         btn:SetWidth(30)
         btn:SetHeight(25)
@@ -184,7 +184,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.previous_button = btn
     end
     do
-        local btn = Aux.gui.button(m.controls, 26)
+        local btn = Aux.gui.button(m.controls)
         btn:SetPoint('LEFT', m.previous_button, 'RIGHT', 4, 0)
         btn:SetWidth(30)
         btn:SetHeight(25)
@@ -193,7 +193,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.next_button = btn
     end
     do
-        local btn = Aux.gui.button(m.controls, 22)
+        local btn = Aux.gui.button(m.controls, Aux.gui.config.huge_font_size)
         btn:SetPoint('RIGHT', -5, 0)
         btn:SetWidth(70)
         btn:SetHeight(25)
@@ -208,7 +208,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.start_button = btn
     end
     do
-        local btn = Aux.gui.button(m.controls, 22)
+        local btn = Aux.gui.button(m.controls, Aux.gui.config.huge_font_size)
         btn:SetPoint('RIGHT', -5, 0)
         btn:SetWidth(70)
         btn:SetHeight(25)
@@ -220,7 +220,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.stop_button = btn
     end
     do
-        local btn = Aux.gui.button(m.controls, 22)
+        local btn = Aux.gui.button(m.controls, Aux.gui.config.huge_font_size)
         btn:SetPoint('RIGHT', m.start_button, 'LEFT', -4, 0)
         btn:SetWidth(70)
         btn:SetHeight(25)
@@ -258,7 +258,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         Aux.gui.horizontal_line(m.frame, -40)
     end
     do
-        local btn = Aux.gui.button(m.frame, 18)
+        local btn = Aux.gui.button(m.frame, Aux.gui.config.large_font_size)
         btn:SetPoint('BOTTOMLEFT', AuxFrameContent, 'TOPLEFT', 10, 8)
         btn:SetWidth(243)
         btn:SetHeight(22)
@@ -267,7 +267,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.search_results_button = btn
     end
     do
-        local btn = Aux.gui.button(m.frame, 18)
+        local btn = Aux.gui.button(m.frame, Aux.gui.config.large_font_size)
         btn:SetPoint('TOPLEFT', m.search_results_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(243)
         btn:SetHeight(22)
@@ -276,7 +276,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.saved_searches_button = btn
     end
     do
-        local btn = Aux.gui.button(m.frame, 18)
+        local btn = Aux.gui.button(m.frame, Aux.gui.config.large_font_size)
         btn:SetPoint('TOPLEFT', m.saved_searches_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(243)
         btn:SetHeight(22)

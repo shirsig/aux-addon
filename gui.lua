@@ -67,6 +67,7 @@ function public.checkbutton(parent, text_height)
 end
 
 function public.button(parent, text_height)
+    text_height = text_height or m.config.medium_font_size
     local button = CreateFrame('Button', nil, parent)
     m.set_content_style(button)
     local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
