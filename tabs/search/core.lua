@@ -731,6 +731,8 @@ function private.initialize_filter_dropdown()
         if Aux.safe(Aux.filter.filters[this.value]).input_type/'' == '' then
             m.filter_input:Hide()
         else
+            local _, _, suggestions = Aux.filter.parse_query_string(UIDropDownMenu_GetSelectedValue(m.filter_dropdown)..'/')
+            m.filter_input.complete = Aux.completion.complete(function() return suggestions or {} end)
             m.filter_input:Show()
             m.filter_input:SetFocus()
         end
