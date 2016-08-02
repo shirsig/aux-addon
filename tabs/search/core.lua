@@ -877,7 +877,7 @@ function private.add_post_component()
                 Aux.log('Invalid operator suffix')
                 return
             end
-            filter = filter..Aux.filter.operator_suffix(arity)
+            filter = filter..(arity or '')
         end
         if Aux.filter.filters[name] and Aux.filter.filters[name].input_type ~= '' then
             filter = filter..'/'..m.filter_input:GetText()

@@ -209,19 +209,17 @@ function private.operator(str)
         return 'not', 1
     end
 
-    local _, _, and_op, and_arity = strfind(str, '^(and)(.*)$')
-    local _, _, or_op, or_arity = strfind(str, '^(or)(.*)$')
+    local _, _, and_op, and_arity = strfind(str, '^(and)(%d*)$')
+    local _, _, or_op, or_arity = strfind(str, '^(or)(%d*)$')
 
     local op = and_op or or_op
     local arity = and_arity or or_arity
 
     if op then
         if arity == '' then
-            return op, 2
-        elseif tonumber(arity) and tonumber(arity) > 2 then
-            return op, tonumber(arity)
-        elseif arity == '*' then
             return op
+        elseif tonumber(arity) and tonumber(arity) >= 2 then
+            return op, tonumber(arity)
         end
     end
 end
@@ -518,7 +516,7 @@ function public.query_string(components)
 
     for _, component in components.post do
         if component[1] == 'operator' then
-            prettified.append(component[2]..m.operator_suffix(component[3]))
+            prettified.append(component[2]..(tonumber(component[3]) or ''))
         elseif component[1] == 'filter' then
             prettified.append(component[2])
             if component[3] then
@@ -547,7 +545,7 @@ function public.indented_post_query_string(components)
 
         if component[1] == 'operator' and component[2] then
             no_line_break = component[2] == 'not'
-            str = str..'|cffffff00'..component[2]..m.operator_suffix(component[3])..'|r'
+            str = str..'|cffffff00'..component[2]..(tonumber(component[3]) or '')..'|r'
             tinsert(stack, component[3] or '*')
         elseif component[1] == 'filter' then
             str = str..'|cffffff00'..component[2]..'|r'
@@ -590,13 +588,7 @@ function private.prettified_query_string(components)
 
     for _, component in components.post do
         if component[1] == 'operator' then
-            local suffix = ''
-            if not component[3] then
-                suffix = '*'
-            elseif component[3] > 2 then
-                suffix = component[3]
-            end
-            prettified.append('|cffffff00'..component[2]..suffix..'|r')
+            prettified.append('|cffffff00'..component[2]..(tonumber(component[3]) or '')..'|r')
         elseif component[1] == 'filter' then
             if component[2] ~= 'tooltip' then
                 prettified.append('|cffffff00'..component[2]..'|r')
@@ -619,16 +611,6 @@ function public.unquote(name)
         name = strsub(name, 2, -2)
     end
     return name
-end
-
-function public.operator_suffix(arity)
-    if not arity then
-        return '*'
-    elseif arity == 2 then
-        return ''
-    else
-        return arity
-    end
 end
 
 function private.blizzard_query(components)
