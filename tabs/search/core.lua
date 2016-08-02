@@ -758,7 +758,9 @@ function private.get_form()
         query_string = query_string == '' and part or query_string..'/'..part
     end
 
-    add(Aux.filter.quote(m.name_input:GetText()))
+    local name = m.name_input:GetText()
+    name = name == '' and name or Aux.filter.quote(name)
+    add(name)
 
     if m.exact_checkbox:GetChecked() then
         add('exact')
