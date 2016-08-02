@@ -768,7 +768,7 @@ function private.get_form()
         add(min_level)
     end
 
-    local max_level = m.blizzard_level(m.min_level_input:GetText())
+    local max_level = m.blizzard_level(m.max_level_input:GetText())
     if max_level then
         add(max_level)
     end
