@@ -628,7 +628,11 @@ function private.blizzard_query(components)
         filters[filter[1]] = filter[2] or true
     end
 
-    local query = { name=filters.name }
+    local name = filters.name
+    if name and strsub(name, 1, 1) == '"' and strsub(name, -1, -1) == '"' then
+        name = strsub(name, 2, -2)
+    end
+    local query = { name=name }
 
     local item_info, class_index, subclass_index, slot_index
     if filters.exact then

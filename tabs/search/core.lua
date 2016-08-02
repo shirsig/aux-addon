@@ -757,7 +757,7 @@ function private.get_form()
         query_string = query_string == '' and part or query_string..'/'..part
     end
 
-    add(m.name_input:GetText())
+    add('"'..m.name_input:GetText()..'"')
 
     if m.exact_checkbox:GetChecked() then
         add('exact')
@@ -807,7 +807,11 @@ function private.set_form(components)
 
     for _, filter in components.blizzard do
         if filter[1] == 'name' then
-            m.name_input:SetText(filter[2])
+            local name = filter[2]
+            if name and strsub(name, 1, 1) == '"' and strsub(name, -1, -1) == '"' then
+                name = strsub(name, 2, -2)
+            end
+            m.name_input:SetText(name)
         elseif filter[1] == 'exact' then
             m.exact_checkbox:SetChecked(true)
         elseif filter[1] == 'min_level' then
