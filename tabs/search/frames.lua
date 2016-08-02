@@ -551,11 +551,14 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.filter_input = input
     end
     do
-        local label = Aux.gui.label(m.frame.filter, 13)
-        label:SetPoint('TOPLEFT', 350, -40)
-        label:SetWidth(300)
-        label:SetJustifyH('LEFT')
-        private.filter_display = label
+        local display = CreateFrame('SimpleHTML', nil, m.frame.filter)
+        display:SetPoint('TOPLEFT', 348, -50)
+        display:SetWidth(395)
+        display:SetHeight(270)
+        display:SetFont('p', Aux.gui.config.font, 13)
+        display:SetJustifyH('LEFT')
+        Aux.gui.set_content_style(display)
+        private.filter_display = display
     end
 
     private.status_bars = {}

@@ -541,12 +541,11 @@ function public.indented_post_query_string(components)
     local stack = {}
     local str = ''
 
-    for _, component in components do
-
+    for i, component in components do
         if no_line_break then
             str = str..' '
-        else
-            str = str..'|n'
+        elseif i > 1 then
+            str = str..'</p><p>'
             for _=1,getn(stack) do
                 str = str..'    '
             end
@@ -576,7 +575,7 @@ function public.indented_post_query_string(components)
         end
     end
 
-    return str
+    return '<html><body><p>'..str..'</p></body></html>'
 end
 
 function private.prettified_query_string(components)

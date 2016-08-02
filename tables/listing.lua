@@ -308,7 +308,7 @@ local methods = {
 
         local text = col:CreateFontString()
         text:SetJustifyV('CENTER')
-        text:SetFont(Aux.gui.config.content_font, 15)
+        text:SetFont(Aux.gui.config.font, 15)
         text:SetTextColor(unpack(Aux.gui.config.text_color.enabled))
         col.text = text
         col:SetFontString(text)
@@ -336,7 +336,7 @@ local methods = {
         local colNum = getn(row.cols) + 1
         local col = CreateFrame('Button', nil, row)
         local text = col:CreateFontString()
-        text:SetFont(Aux.gui.config.content_font, ST_ROW_TEXT_SIZE)
+        text:SetFont(Aux.gui.config.font, ST_ROW_TEXT_SIZE)
         text:SetJustifyV('CENTER')
         text:SetPoint('TOPLEFT', 1, -1)
         text:SetPoint('BOTTOMRIGHT', -1, 1)
@@ -392,9 +392,9 @@ local methods = {
         -- update the text size of the head cols
         for _, col in ipairs(st.headCols) do
             if st.sizes.headFontSize then
-                col.text:SetFont(Aux.gui.config.content_font, st.sizes.headFontSize)
+                col.text:SetFont(Aux.gui.config.font, st.sizes.headFontSize)
             else
-                col.text:SetFont(Aux.gui.config.content_font, 15)
+                col.text:SetFont(Aux.gui.config.font, 15)
             end
         end
         st:Redraw()

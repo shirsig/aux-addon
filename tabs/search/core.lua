@@ -862,7 +862,7 @@ function private.add_post_filter()
     if name then
         local filter = name
         if not Aux.filter.filters[name] and filter == 'and' or filter == 'or' then
-            if not tonumber(m.filter_input:GetText()) and m.filter_input:GetText() ~= '*' then
+            if m.filter_input:GetText() ~= '' and m.filter_input:GetText() ~= '*' and (tonumber(m.filter_input:GetText() or 3 <= 2)) then
                 Aux.log('Invalid operator suffix')
                 return
             end

@@ -6,7 +6,7 @@ public.config = {
     window_color = { backdrop = {24/255, 24/255, 24/255, .93}, border = {30/255, 30/255, 30/255, 1} },
     panel_color = { backdrop = {24/255, 24/255, 24/255, 1}, border = {1, 1, 1, .03} },
     content_color = { backdrop = {42/255, 42/255, 42/255, 1}, border = {0, 0, 0, 0} },
-    content_font = [[Fonts\ARIALN.TTF]],
+    font = [[Fonts\ARIALN.TTF]],
     normal_font_size = 15,
     text_color = { enabled = { 255/255, 254/255, 250/255, 1 }, disabled = { 147/255, 151/255, 139/255, 1 } },
     label_color = { enabled = { 216/255, 225/255, 211/255, 1 }, disabled = { 150/255, 148/255, 140/255, 1 } },
@@ -72,7 +72,7 @@ function public.button(parent, text_height)
     button.highlight = highlight
     do
         local label = button:CreateFontString()
-        label:SetFont(m.config.content_font, text_height)
+        label:SetFont(m.config.font, text_height)
         label:SetPoint('CENTER', 0, 0)
         label:SetJustifyH('CENTER')
         label:SetJustifyV('CENTER')
@@ -150,7 +150,7 @@ do
             tab.text:SetPoint('RIGHT', -3, -1)
             tab.text:SetJustifyH('CENTER')
             tab.text:SetJustifyV('CENTER')
-            tab.text:SetFont(m.config.content_font, 18)
+            tab.text:SetFont(m.config.font, 18)
             tab:SetFontString(tab.text)
 
             tab:SetText(text)
@@ -217,7 +217,7 @@ function public.editbox(parent)
     editbox:SetTextInsets(0, 0, 3, 3)
     editbox:SetMaxLetters(256)
     editbox:SetHeight(19)
-    editbox:SetFont(m.config.content_font, m.config.normal_font_size)
+    editbox:SetFont(m.config.font, m.config.normal_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
     m.set_content_style(editbox)
 
@@ -339,7 +339,7 @@ end
 
 function public.label(parent, size)
     local label = parent:CreateFontString()
-    label:SetFont(m.config.content_font, size or m.config.normal_font_size)
+    label:SetFont(m.config.font, size or m.config.normal_font_size)
     label:SetTextColor(unpack(m.config.label_color.enabled))
     return label
 end
@@ -389,7 +389,7 @@ function public.dropdown(parent)
     text:ClearAllPoints()
     text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
     text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
-    text:SetFont(m.config.content_font, 13)
+    text:SetFont(m.config.font, 13)
     text:SetShadowColor(0, 0, 0, 0)
 
 --
@@ -439,7 +439,7 @@ function public.slider(frame)
     label:SetPoint('BOTTOMRIGHT', slider, 'TOPRIGHT', 6, 6)
     label:SetJustifyH('LEFT')
     label:SetHeight(13)
-    label:SetFont(m.config.content_font, 13)
+    label:SetFont(m.config.font, 13)
     label:SetTextColor(unpack(m.config.label_color.enabled))
 
     local editbox = m.editbox(slider)
@@ -485,7 +485,7 @@ end
 --    text:SetHeight(18)
 --    text:SetPoint('LEFT', checkbox, 'RIGHT')
 --    text:SetPoint('RIGHT')
---    text:SetFont(m.config.content_font, m.config.normal_font_size)
+--    text:SetFont(m.config.font, m.config.normal_font_size)
 --
 --    checkbox.text = text
 --    return checkbox
