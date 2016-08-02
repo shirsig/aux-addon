@@ -236,7 +236,6 @@ function public.tooltip_find(pattern, tooltip)
 end
 
 function public.load_tooltip(frame, tooltip)
-    frame:ClearLines()
     for _, line in ipairs(tooltip) do
         if line.right_text then
             frame:AddDoubleLine(line.left_text, line.right_text, line.left_color[1], line.left_color[2], line.left_color[3], line.right_color[1], line.right_color[2], line.right_color[3])
@@ -244,10 +243,10 @@ function public.load_tooltip(frame, tooltip)
             frame:AddLine(line.left_text, line.left_color[1], line.left_color[2], line.left_color[3], true)
         end
     end
---    for i = 1,TOOLTIP_LENGTH do -- TODO why is this needed?
---        getglobal(frame:GetName()..'TextLeft'..i):SetJustifyH('LEFT')
---        getglobal(frame:GetName()..'TextRight'..i):SetJustifyH('LEFT')
---    end
+    for i = 1,TOOLTIP_LENGTH do -- TODO why is this needed?
+        getglobal(frame:GetName()..'TextLeft'..i):SetJustifyH('LEFT')
+        getglobal(frame:GetName()..'TextRight'..i):SetJustifyH('LEFT')
+    end
 end
 
 function public.display_name(item_id, plain, uncolored)
@@ -276,32 +275,31 @@ function public.auctionable(tooltip, quality, lootable)
 end
 
 function public.tooltip(setter)
-
-	AuxTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+    AuxTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
     AuxTooltip.money = 0
-	setter(AuxTooltip)
-	AuxTooltip:Show()
+    setter(AuxTooltip)
+    AuxTooltip:Show()
 
-	local tooltip = { money=AuxTooltip.money }
-	for i = 1, TOOLTIP_LENGTH do
+    local tooltip = { money=AuxTooltip.money }
+    for i = 1, TOOLTIP_LENGTH do
 
-		local left_text = getglobal('AuxTooltipTextLeft'..i):GetText() or ''
-		local left_color = { getglobal('AuxTooltipTextLeft'..i):GetTextColor() }
-		
-		local right_text = getglobal('AuxTooltipTextRight'..i):IsVisible() and getglobal('AuxTooltipTextRight'..i):GetText() or '' -- the right text is only hidden, not cleared
-		local right_color = { getglobal('AuxTooltipTextRight'..i):GetTextColor() }
+        local left_text = getglobal('AuxTooltipTextLeft'..i):GetText()
+        local left_color = { getglobal('AuxTooltipTextLeft'..i):GetTextColor() }
+
+        local right_text = getglobal('AuxTooltipTextRight'..i):IsVisible() and getglobal('AuxTooltipTextRight'..i):GetText()
+        local right_color = { getglobal('AuxTooltipTextRight'..i):GetTextColor() }
 
         if left_text or right_text then
-		    tinsert(tooltip, {
+            tinsert(tooltip, {
                 left_text = left_text,
                 left_color = left_color,
                 right_text = right_text,
                 right_color = right_color,
             })
         end
-	end
-	
-	return tooltip
+    end
+
+    return tooltip
 end
 
 function private.item_charges(tooltip)
