@@ -86,7 +86,7 @@ Furthermore
 - Control-left/right-click will move an entry up/down in the favorites.
 
 #### New Filter
-![Alt text](http://i.imgur.com/YSQbSC1.png)
+![Alt text](http://i.imgur.com/eFgp9B2.png)
 While it is faster to type filters directly into the search box this sub-tab serves as a tutorial to learn how to formulate queries.
 The filters on the left side are Blizzard filters which may reduce the number of pages to be scanned and those on the right side are post filters which do not affect the scan time but can be combined with logical operators to formulate very complex filters.
 ### Post
