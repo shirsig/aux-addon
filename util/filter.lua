@@ -227,6 +227,7 @@ function private.operator(str)
 end
 
 function private.blizzard_filter_parser()
+    local class_index, subclass_index
     local filters = {}
     return function(str, first)
         local filter
@@ -242,18 +243,20 @@ function private.blizzard_filter_parser()
                 return nil, 'Erroneous level range modifier'
             end
         elseif Aux.info.item_class_index(str) and not (filters.class and not filters.subclass and str == strlower(({ GetAuctionItemClasses() })[10])) then
+            class_index = Aux.info.item_class_index(str)
             if not filters.class then
                 filter = {'class', str}
             else
                 return nil, 'Erroneous item class modifier'
             end
-        elseif filters.class and Aux.info.item_subclass_index(Aux.info.item_class_index(filters.class), str) then
+        elseif class_index and Aux.info.item_subclass_index(class_index, str) then
+            subclass_index = Aux.info.item_subclass_index(class_index, str)
             if not filters.subclass then
                 filter = {'subclass', str}
             else
                 return nil, 'Erroneous item subclass modifier'
             end
-        elseif filters.subclass and Aux.info.item_slot_index(Aux.info.item_class_index(filters.class), Aux.info.item_subclass_index(Aux.info.item_class_index(filters.class), filters.subclass), str) then
+        elseif subclass_index and Aux.info.item_slot_index(class_index, subclass_index, str) then
             if not filters.slot then
                 filter = {'slot', str}
             else
@@ -466,15 +469,17 @@ function private.suggestions(components)
     end
 
     -- subclasses
-    if blizzard_filters.class and not blizzard_filters.subclass then
-        for _, subclass in ipairs({ GetAuctionItemSubClasses(Aux.info.item_class_index(blizzard_filters.class)) }) do
+    local class_index = Aux.info.item_class_index(blizzard_filters.class or '')
+    if class_index and not blizzard_filters.subclass then
+        for _, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
             tinsert(suggestions, subclass)
         end
     end
 
     -- slots
-    if blizzard_filters.class and blizzard_filters.subclass and not blizzard_filters.slot then
-        for _, invtype in ipairs({ GetAuctionInvTypes(Aux.info.item_class_index(blizzard_filters.class), Aux.info.item_subclass_index(Aux.info.item_class_index(blizzard_filters.class), blizzard_filters.subclass)) }) do
+    local subclass_index = Aux.info.item_subclass_index(class_index, blizzard_filters.subclass or '')
+    if subclass_index and not blizzard_filters.slot then
+        for _, invtype in ipairs({ GetAuctionInvTypes(class_index, Aux.info.item_subclass_index(Aux.info.item_class_index(blizzard_filters.class), blizzard_filters.subclass)) }) do
             tinsert(suggestions, getglobal(invtype))
         end
     end
@@ -501,20 +506,50 @@ function private.suggestions(components)
     return suggestions
 end
 
+function public.query_string(components)
+    local prettified = m.query_builder()
+
+    local blizzard_filters = {}
+    for _, filter in components.blizzard do
+        prettified.append((filter[2] or filter[1]))
+    end
+
+    for _, component in components.post do
+        if component[1] == 'operator' then
+            local suffix = ''
+            if not component[3] then
+                suffix = '*'
+            elseif component[3] > 2 then
+                suffix = component[3]
+            end
+            prettified.append(component[2]..suffix)
+        elseif component[1] == 'filter' then
+            prettified.append(component[2])
+            if component[3] then
+                prettified.append(component[3])
+            end
+        end
+    end
+
+    return prettified.get()
+end
+
 function public.indented_post_query_string(components)
+    local no_line_break
     local stack = {}
     local str = ''
 
-    for _, component in components.post do
+    for _, component in components do
 
         if str ~= '' then
-            str = str..'|n'
+            str = str..(no_line_break and ' ' or '|n')
         end
         for _=1,getn(stack) do
             str = str..'    '
         end
 
         if component[1] == 'operator' and component[2] then
+            no_line_break = component[2] == 'not'
             local suffix = ''
             if not component[3] then
                 suffix = '*'

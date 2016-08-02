@@ -133,21 +133,15 @@ function public.set_filter(filter_string)
     m.search_box:SetText(filter_string)
 end
 
-function private.add_filter(filter_string, replace)
-    filter_string = filter_string or m.get_form_filter()
+function public.add_filter(filter_string)
+    local old_filter_string = m.search_box:GetText()
+    old_filter_string = Aux.util.trim(old_filter_string)
 
-
-    local old_filter_string
-    if not replace then
-        old_filter_string = m.search_box:GetText()
-        old_filter_string = Aux.util.trim(old_filter_string)
-
-        if strlen(old_filter_string) > 0 then
-            old_filter_string = old_filter_string..';'
-        end
+    if old_filter_string ~= '' then
+        old_filter_string = old_filter_string..';'
     end
 
-    m.search_box:SetText((old_filter_string or '')..filter_string)
+    m.search_box:SetText(old_filter_string..filter_string)
 end
 
 function private.update_auto_buy_filter()
@@ -185,56 +179,6 @@ function private.clear_form()
     UIDropDownMenu_ClearAll(m.subclass_dropdown)
     UIDropDownMenu_ClearAll(m.slot_dropdown)
     UIDropDownMenu_ClearAll(m.quality_dropdown)
-end
-
-function private.get_form_filter()
-    local filter_term = ''
-
-    local function add(part)
-        filter_term = filter_term == '' and part or filter_term..'/'..part
-    end
-
-    add(m.name_input:GetText())
-
-    if m.exact_checkbox:GetChecked() then
-        add('exact')
-    end
-
-    local min_level = m.blizzard_level(m.min_level_input:GetText())
-    if min_level then
-        add(min_level)
-    end
-
-    local max_level = m.blizzard_level(m.min_level_input:GetText())
-    if max_level then
-        add(max_level)
-    end
-
-    if m.usable_checkbox:GetChecked() then
-        add('usable')
-    end
-
-    local class = UIDropDownMenu_GetSelectedValue(m.class_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.class_dropdown)
-    if class then
-        local classes = { GetAuctionItemClasses() }
-        add(strlower(classes[class]))
-        local subclass = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
-        if subclass then
-            local subclasses = {GetAuctionItemSubClasses(class)}
-            add(strlower(subclasses[subclass]))
-            local slot = UIDropDownMenu_GetSelectedValue(m.slot_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.slot_dropdown)
-            if slot then
-                add(strlower(getglobal(slot)))
-            end
-        end
-    end
-
-    local quality = UIDropDownMenu_GetSelectedValue(m.quality_dropdown) >= 0 and UIDropDownMenu_GetSelectedValue(m.quality_dropdown)
-    if quality then
-        add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
-    end
-
-    return filter_term
 end
 
 function private.discard_continuation()
@@ -798,19 +742,117 @@ function private.initialize_filter_dropdown()
     end
 end
 
-function private.import_query_string()
+function private.get_form()
+    local query_string = ''
 
+    local function add(part)
+        query_string = query_string == '' and part or query_string..'/'..part
+    end
+
+    add(m.name_input:GetText())
+
+    if m.exact_checkbox:GetChecked() then
+        add('exact')
+    end
+
+    local min_level = m.blizzard_level(m.min_level_input:GetText())
+    if min_level then
+        add(min_level)
+    end
+
+    local max_level = m.blizzard_level(m.min_level_input:GetText())
+    if max_level then
+        add(max_level)
+    end
+
+    if m.usable_checkbox:GetChecked() then
+        add('usable')
+    end
+
+    local class = UIDropDownMenu_GetSelectedValue(m.class_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.class_dropdown)
+    if class then
+        local classes = { GetAuctionItemClasses() }
+        add(strlower(classes[class]))
+        local subclass = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
+        if subclass then
+            local subclasses = {GetAuctionItemSubClasses(class)}
+            add(strlower(subclasses[subclass]))
+            local slot = UIDropDownMenu_GetSelectedValue(m.slot_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.slot_dropdown)
+            if slot then
+                add(strlower(getglobal(slot)))
+            end
+        end
+    end
+
+    local quality = UIDropDownMenu_GetSelectedValue(m.quality_dropdown)
+    if quality and quality >= 0 then
+        add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
+    end
+
+    return query_string
+end
+
+function private.set_form(filters)
+
+    local class_index, subclass_index
+
+    for _, filter in filters do
+        if filter[1] == 'name' then
+            m.name_input:SetText(filter[2])
+        elseif filter[1] == 'exact' then
+            m.exact_checkbox:SetChecked(true)
+        elseif filter[1] == 'min_level' then
+            m.min_level_input:SetText(tonumber(filter[2]))
+        elseif filter[1] == 'max_level' then
+            m.max_level_input:SetText(tonumber(filter[2]))
+        elseif filter[1] == 'usable' then
+            m.usable_checkbox:SetChecked(true)
+        elseif filter[1] == 'class' then
+            class_index = Aux.info.item_class_index(filter[2])
+            UIDropDownMenu_Initialize(m.class_dropdown, m.initialize_class_dropdown) -- TODO, wtf, why is this needed
+            UIDropDownMenu_SetSelectedValue(m.class_dropdown, class_index)
+        elseif filter[1] == 'subclass' then
+            subclass_index = Aux.info.item_subclass_index(class_index, filter[2])
+            UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown) -- TODO, wtf, why is this needed
+            UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, subclass_index)
+        elseif filter[1] == 'slot' then
+            UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown) -- TODO, wtf, why is this needed
+            UIDropDownMenu_SetSelectedValue(m.slot_dropdown, Aux.info.item_slot_index(class_index, subclass_index, filter[2]))
+        elseif filter[1] == 'quality' then
+            UIDropDownMenu_Initialize(m.quality_dropdown, m.initialize_quality_dropdown) -- TODO, wtf, why is this needed
+            UIDropDownMenu_SetSelectedValue(m.quality_dropdown, Aux.info.item_quality_index(filter[2]))
+        end
+    end
+end
+
+function private.import_query_string()
+    local components, error = Aux.filter.parse_query_string(m.search_box:GetText())
+    if components then
+        m.set_form(components.blizzard)
+        m.post_components = components.post
+        m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_components))
+    else
+        Aux.log(error)
+    end
 end
 
 function private.export_query_string()
-
+    local components, error = Aux.filter.parse_query_string(m.get_form())
+    if components then
+        m.search_box:SetText(Aux.filter.query_string({blizzard=components.blizzard, post=m.post_components}))
+        m.clear_form()
+        m.post_components = {}
+        m.filter_display:SetText('')
+    else
+        Aux.log(error)
+    end
 end
 
-private.post_query = {}
+private.post_components = {}
 
 function private.add_post_filter()
     local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown)
-    if name then
+    if name and not strfind(Aux.filter.indented_post_query_string(m.post_components), '|n', 20) then
         local filter = name
         if Aux.filter.filters[name] and Aux.filter.filters[name].input_type ~= '' then
             filter = filter..'/'..m.filter_input:GetText()
@@ -819,10 +861,12 @@ function private.add_post_filter()
         local components, error, suggestions = Aux.filter.parse_query_string(filter)
 
         if components then
-            tinsert(m.post_query, components[1])
-            m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_query))
+            tinsert(m.post_components, components.post[1])
+            m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_components))
             m.filter_input:SetText('')
             m.filter_input:ClearFocus()
+        else
+            Aux.log(error)
         end
     end
 end
