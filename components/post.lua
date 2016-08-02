@@ -7,7 +7,7 @@ function private.process()
 
 		local stacking_complete
 
-		local c = Aux.control.wait_for(function(slot)
+		local c = Aux.control.await(function(slot)
 			if slot then
 				return m.post_auction(slot, m.process)
 			else
@@ -34,7 +34,7 @@ function private.post_auction(slot, k)
 
 		StartAuction(max(1, Aux.round(m.state.unit_start_price * item_info.aux_quantity)), Aux.round(m.state.unit_buyout_price * item_info.aux_quantity), m.state.duration)
 
-		local c = Aux.control.wait_for(function()
+		local c = Aux.control.await(function()
 			m.state.posted = m.state.posted + 1
 			return k()
 		end)

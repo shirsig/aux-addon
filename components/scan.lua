@@ -3,6 +3,7 @@ local m, public, private = Aux.module'scan'
 local PAGE_SIZE = 50
 
 private.threads = {}
+private.last_query_time = {}
 
 function private.total_pages(total_auctions)
     return math.ceil(total_auctions / PAGE_SIZE)
@@ -10,17 +11,17 @@ end
 
 function private.last_page(total_auctions)
     local last_page = max(m.total_pages(total_auctions) - 1, 0)
-    local last_page_limit = Aux.safe(m.current_query().blizzard_query).last_page/last_page
+    local last_page_limit = Aux.safe(m.q.blizzard_query).last_page/last_page
     return min(last_page_limit, last_page)
 end
 
-function private.current_query()
-    return m.current_thread().params.queries[m.current_thread().query_index]
-end
-
-function private.current_thread()
+private.th = Aux.t(function()
     return Aux.util.filter(m.threads, function(thread) return thread.id == Aux.control.thread_id end)[1]
-end
+end)
+
+private.q = Aux.t(function()
+    return m.th.params.queries[m.th.query_index]
+end)
 
 function public.start(params)
     m.abort(Aux.safe(m.threads[params.type]).id/0)
@@ -49,53 +50,66 @@ function public.abort(scan_id)
     end
 end
 
-function private.wait_for_results(k)
-    if m.current_thread().params.type == 'bidder' then
-        return Aux.control.when(function() return Aux.bids_loaded end, k)
-    elseif m.current_thread().params.type == 'owner' then
-        return m.wait_for_owner_results(k)
-    elseif m.current_thread().params.type == 'list' then
-        return m.wait_for_list_results(k)
+function private.timeout(type)
+    return GetTime() - m.last_query_time[type] > 11
+end
+
+function private.wait_for_results()
+    local c = Aux.control.await(function()
+        if m.timeout(m.th.params.type) then
+            return m.submit_query()
+        else
+            _,  m.th.total_auctions = GetNumAuctionItems(m.th.params.type)
+            return m.wait_for_callback(
+                m.th.params.on_page_loaded,
+                m.th.page - (m.q.blizzard_query.first_page or 0) + 1,
+                m.last_page(m.th.total_auctions) - (m.q.blizzard_query.first_page or 0) + 1,
+                m.total_pages(m.th.total_auctions) - 1,
+                m.scan_page
+            )
+        end
+    end)
+    Aux.control.as_soon_as(Aux.f(m.timeout, m.th.params.type), c)
+    if m.th.params.type == 'bidder' then
+        return Aux.control.as_soon_as(function() return Aux.bids_loaded end, c)
+    elseif m.th.params.type == 'owner' then
+        return m.wait_for_owner_results(c)
+    elseif m.th.params.type == 'list' then
+        return m.wait_for_list_results(c)
     end
 end
 
-function private.wait_for_owner_results(k)
-
-    local c = Aux.control.wait_for(k)
-
-    if m.current_thread().page == Aux.current_owner_page then
+function private.wait_for_owner_results(c)
+    if m.th.page == Aux.current_owner_page then
         return c()
     else
-        return Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', c)
+        Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', c)
     end
 end
 
-function private.wait_for_list_results(k)
+function private.wait_for_list_results(c)
     local updated, last_update
     local listener = Aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE', function()
         last_update = GetTime()
         updated = true
     end)
     listener:start()
-    Aux.control.when(function()
+    local ignore_owner = m.th.params.ignore_owner or aux_ignore_owner
+    Aux.control.as_soon_as(function()
         -- short circuiting order important, owner_data_complete must be called iif an update has happened.
         -- if no update has happened it must not be called for performance reasons, otherwise it must be called to request further missing data if there is any
-        local ok = updated and m.owner_data_complete() or last_update and GetTime() - last_update > 5
+        local ok = updated and (ignore_owner or m.owner_data_complete()) or last_update and GetTime() - last_update > 5
         updated = false
         return ok
     end, function()
         listener:stop()
-        return k()
+        return c()
     end)
 end
 
 function private.owner_data_complete()
-    if m.current_thread().params.ignore_owner or aux_ignore_owner then
-        return true
-    end
-
     for i=1,PAGE_SIZE do
-        local auction_info = Aux.info.auction(i, m.current_thread().params.type)
+        local auction_info = Aux.info.auction(i, m.th.params.type)
         if auction_info and not auction_info.owner then
             return false
         end
@@ -126,17 +140,17 @@ function private.wait_for_callback(...)
 end
 
 function private.scan()
-    m.current_thread().query_index = m.current_thread().query_index and m.current_thread().query_index + 1 or 1
-    if m.current_query() then
-        if m.current_query().blizzard_query then
-            m.current_thread().page = m.current_query().blizzard_query.first_page or 0
+    m.th.query_index = m.th.query_index and m.th.query_index + 1 or 1
+    if m.q() then
+        if m.q.blizzard_query then
+            m.th.page = m.q.blizzard_query.first_page or 0
         else
-            m.current_thread().page = nil
+            m.th.page = nil
         end
-        m.wait_for_callback(m.current_thread().params.on_start_query, m.current_thread().query_index, m.process_query)
+        m.wait_for_callback(m.th.params.on_start_query, m.th.query_index, m.process_query)
     else
-        local on_complete = m.current_thread().params.on_complete
-        m.threads[m.current_thread().params.type] = nil
+        local on_complete = m.th.params.on_complete
+        m.threads[m.th.params.type] = nil
         if on_complete then
             return on_complete()
         end
@@ -144,57 +158,48 @@ function private.scan()
 end
 
 function private.process_query()
-    if m.current_query().blizzard_query then
-        return m.submit_query(m.scan_page)
+    if m.q.blizzard_query then
+        return m.submit_query()
     else
         return m.scan_page()
     end
 end
 
 function private.scan_page()
-    m.scan_auctions(function()
-
-        m.wait_for_callback(m.current_thread().params.on_page_scanned, function()
-
-            if m.current_query().blizzard_query and m.current_thread().page < m.last_page(m.current_thread().total_auctions) then
-                m.current_thread().page = m.current_thread().page + 1
-                return m.process_query()
-            else
-                return m.scan()
-            end
-
-        end)
-    end)
+	return m.scan_page_helper(1)
 end
 
-function private.scan_auctions(k)
-	return m.scan_auctions_helper(1, k)
-end
-
-function private.scan_auctions_helper(i, k)
+function private.scan_page_helper(i)
     local recurse = function(retry)
         if i >= PAGE_SIZE then
-            return k()
+            m.wait_for_callback(m.th.params.on_page_scanned, function()
+                if m.q.blizzard_query and m.th.page < m.last_page(m.th.total_auctions) then
+                    m.th.page = m.th.page + 1
+                    return m.process_query()
+                else
+                    return m.scan()
+                end
+            end)
         else
-            return m.scan_auctions_helper(retry and i or i + 1, k)
+            return m.scan_page_helper(retry and i or i + 1)
         end
     end
 
-    local auction_info = Aux.info.auction(i, m.current_thread().params.type)
-    if auction_info and (auction_info.owner or m.current_thread().params.ignore_owner or aux_ignore_owner) then
+    local auction_info = Aux.info.auction(i, m.th.params.type)
+    if auction_info and (auction_info.owner or m.th.params.ignore_owner or aux_ignore_owner) then
         auction_info.index = i
-        auction_info.page = m.current_thread().page
-        auction_info.blizzard_query = m.current_query().blizzard_query
-        auction_info.query_type = m.current_thread().params.type
+        auction_info.page = m.th.page
+        auction_info.blizzard_query = m.q.blizzard_query
+        auction_info.query_type = m.th.params.type
 
         Aux.history.process_auction(auction_info)
 
-        if Aux.safe(m.current_thread().params.auto_buy_validator)(auction_info)/false then
-            local c = Aux.control.wait_for(recurse)
+        if Aux.safe(m.th.params.auto_buy_validator)(auction_info)/false then
+            local c = Aux.control.await(recurse)
             Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, Aux.f(c, true))
             Aux.control.new_thread(Aux.control.sleep, 10, Aux.f(c, false))
-        elseif Aux.safe(m.current_query().validator)(auction_info)/true then
-            return m.wait_for_callback(m.current_thread().params.on_auction, auction_info, function(removed)
+        elseif Aux.safe(m.q.validator)(auction_info)/true then
+            return m.wait_for_callback(m.th.params.on_auction, auction_info, function(removed)
                 if removed then
                     return recurse(true)
                 else
@@ -207,17 +212,16 @@ function private.scan_auctions_helper(i, k)
     return recurse()
 end
 
-function private.submit_query(k)
-    Aux.control.when(function() return m.current_thread().params.type ~= 'list' or CanSendAuctionQuery() end, function()
-
-        Aux.safe(m.current_thread().params.on_submit_query)()
-
-        if m.current_thread().params.type == 'bidder' then
-            GetBidderAuctionItems(m.current_thread().page)
-        elseif m.current_thread().params.type == 'owner' then
-            GetOwnerAuctionItems(m.current_thread().page)
+function private.submit_query()
+    Aux.control.when(function() return m.th.params.type ~= 'list' or CanSendAuctionQuery() end, function()
+        Aux.safe(m.th.params.on_submit_query)()
+        m.last_query_time[m.th.params.type] = GetTime()
+        if m.th.params.type == 'bidder' then
+            GetBidderAuctionItems(m.th.page)
+        elseif m.th.params.type == 'owner' then
+            GetOwnerAuctionItems(m.th.page)
         else
-            local blizzard_query = Aux.safe(m.current_query().blizzard_query)/{}
+            local blizzard_query = Aux.safe(m.q.blizzard_query)/{}
             QueryAuctionItems(
                 blizzard_query.name,
                 blizzard_query.min_level,
@@ -225,20 +229,11 @@ function private.submit_query(k)
                 blizzard_query.slot,
                 blizzard_query.class,
                 blizzard_query.subclass,
-                m.current_thread().page,
+                m.th.page,
                 blizzard_query.usable,
                 blizzard_query.quality
             )
         end
-        m.wait_for_results(function()
-            _,  m.current_thread().total_auctions = GetNumAuctionItems(m.current_thread().params.type)
-            m.wait_for_callback(
-                m.current_thread().params.on_page_loaded,
-                m.current_thread().page - (m.current_query().blizzard_query.first_page or 0) + 1,
-                m.last_page(m.current_thread().total_auctions) - (m.current_query().blizzard_query.first_page or 0) + 1,
-                m.total_pages(m.current_thread().total_auctions) - 1,
-                k
-            )
-        end)
+        return m.wait_for_results()
     end)
 end

@@ -403,7 +403,7 @@ function public.query(query_string)
         tinsert(suggestions, 'and')
         tinsert(suggestions, 'or')
         tinsert(suggestions, 'not')
-        return nil, suggestions, 'Malformed expression' --, i > getn(parts) and suggestions TODO
+        return nil, suggestions, 'Malformed expression'
     end
 
     return {

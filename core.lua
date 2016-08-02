@@ -46,6 +46,21 @@ function public.set(table, key, value)
     table[key] = value
 end
 
+function public.t(func)
+    return setmetatable({}, {
+        __newindex = function(_, key, value)
+            func()[key] = value
+        end,
+        __index = function(_, key)
+            if func() == nil then error('', 2) end
+            return func()[key]
+        end,
+        __call = function()
+            return func()
+        end,
+    })
+end
+
 function public.f(func, ...)
     local params = arg
     return function(...)

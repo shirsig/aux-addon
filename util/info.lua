@@ -223,7 +223,7 @@ end
 
 function public.tooltip_find(pattern, tooltip)
     local count = 0
-    for _, line in ipairs(tooltip) do
+    for _, line in tooltip do
         if line.left_text and strfind(line.left_text, pattern) then
             count = count + 1
         end
@@ -236,17 +236,18 @@ function public.tooltip_find(pattern, tooltip)
 end
 
 function public.load_tooltip(frame, tooltip)
-    for _, line in ipairs(tooltip) do
+    frame:ClearLines()
+    for _, line in tooltip do
         if line.right_text then
             frame:AddDoubleLine(line.left_text, line.right_text, line.left_color[1], line.left_color[2], line.left_color[3], line.right_color[1], line.right_color[2], line.right_color[3])
         else
             frame:AddLine(line.left_text, line.left_color[1], line.left_color[2], line.left_color[3], true)
         end
     end
-    for i = 1,TOOLTIP_LENGTH do -- TODO why is this needed?
-        getglobal(frame:GetName()..'TextLeft'..i):SetJustifyH('LEFT')
-        getglobal(frame:GetName()..'TextRight'..i):SetJustifyH('LEFT')
-    end
+--    for i = 1,TOOLTIP_LENGTH do -- TODO why is this needed?
+--        getglobal(frame:GetName()..'TextLeft'..i):SetJustifyH('LEFT')
+--        getglobal(frame:GetName()..'TextRight'..i):SetJustifyH('LEFT')
+--    end
 end
 
 function public.display_name(item_id, plain, uncolored)

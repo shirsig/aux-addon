@@ -175,7 +175,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.auto_buy_filter_button = btn
     end
     do
-        local btn = Aux.gui.button(m.controls)
+        local btn = Aux.gui.button(m.controls, 25)
         btn:SetPoint('LEFT', 5, 0)
         btn:SetWidth(30)
         btn:SetHeight(25)
@@ -184,7 +184,7 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.previous_button = btn
     end
     do
-        local btn = Aux.gui.button(m.controls)
+        local btn = Aux.gui.button(m.controls, 25)
         btn:SetPoint('LEFT', m.previous_button, 'RIGHT', 4, 0)
         btn:SetWidth(30)
         btn:SetHeight(25)

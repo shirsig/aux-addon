@@ -99,11 +99,23 @@ function public.kill_thread(thread_id)
 	end
 end
 
-function public.wait_for(k)
+function public.await(k)
 	local ret
 	m.when(function() return ret end, function() return k(unpack(ret)) end)
-	return function(...)
-		ret = arg
+	return setmetatable({}, {
+		__call = function(self, ...)
+			ret = arg
+		end,
+		__unm = function()
+			return ret ~= nil
+		end
+	})
+end
+
+function public.loop(k, ...)
+	local stop = k(unpack(arg))
+	if not stop then
+		return m.wait(m.loop, k, unpack(arg))
 	end
 end
 
