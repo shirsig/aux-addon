@@ -551,13 +551,18 @@ Aux.search_tab.FRAMES(function(m, public, private)
         private.filter_input = input
     end
     do
-        local display = CreateFrame('SimpleHTML', nil, m.frame.filter)
-        display:SetPoint('TOPLEFT', 348, -50)
-        display:SetWidth(395)
-        display:SetHeight(270)
-        display:SetFont('p', Aux.gui.config.font, 13)
+        local frame = CreateFrame('Frame', nil, m.frame.filter)
+        frame:SetWidth(395)
+        frame:SetHeight(270)
+        frame:SetPoint('TOPLEFT', 348, -50)
+        Aux.gui.set_content_style(frame)
+        local scale_frame = CreateFrame('Frame', nil, frame)
+        scale_frame:SetAllPoints()
+        local display = Aux.gui.label(scale_frame, 18)
+        display:SetAllPoints()
         display:SetJustifyH('LEFT')
-        Aux.gui.set_content_style(display)
+        display:SetJustifyV('TOP')
+        private.filter_display_scale = scale_frame
         private.filter_display = display
     end
 

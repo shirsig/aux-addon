@@ -545,7 +545,7 @@ function public.indented_post_query_string(components)
         if no_line_break then
             str = str..' '
         elseif i > 1 then
-            str = str..'</p><p>'
+            str = str..'|n'
             str = str..Aux.gui.inline_color({42, 42, 42, 1})
             for _=1,getn(stack) do
                 str = str..'----'
@@ -577,7 +577,7 @@ function public.indented_post_query_string(components)
         end
     end
 
-    return '<html><body><p>'..str..'</p></body></html>'
+    return str
 end
 
 function private.prettified_query_string(components)

@@ -836,7 +836,7 @@ function private.import_query_string()
     if components then
         m.set_form(components.blizzard)
         m.post_components = components.post
-        m.filter_display:SetText(Aux.filter.indented_post_query_string(Aux.util.take(20, m.post_components)))
+        m.update_filter_display()
     else
         Aux.log(error)
     end
@@ -849,7 +849,7 @@ function private.export_query_string()
         m.clear_form()
         m.filter_input:ClearFocus()
         m.post_components = {}
-        m.filter_display:SetText('')
+        m.update_filter_display()
     else
         Aux.log(error)
     end
@@ -876,7 +876,7 @@ function private.add_post_filter()
 
         if components then
             tinsert(m.post_components, components.post[1])
-            m.filter_display:SetText(Aux.filter.indented_post_query_string(Aux.util.take(20, m.post_components)))
+            m.update_filter_display()
             m.filter_input:SetText('')
             m.filter_input:ClearFocus()
         else
@@ -887,6 +887,14 @@ end
 
 function private.remove_post_filter()
     tremove(m.post_components)
-    m.filter_display:SetText(Aux.filter.indented_post_query_string(Aux.util.take(20, m.post_components)))
+    m.update_filter_display()
+end
+
+function private.update_filter_display()
+    local lines = getn(Aux.util.filter(m.post_components, function(component) return component[1] == 'operator' and component[2] ~= 'not' end))
+    local width_scale = max(200/m.filter_display:GetStringWidth())
+    local height_scale = min((200 / lines) / 18)
+    m.filter_display_scale:SetScale(min(1, width_scale, height_scale))
+    m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_components))
 end
 
