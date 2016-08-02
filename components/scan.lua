@@ -83,7 +83,7 @@ function private.wait_for_owner_results(c)
     if m.th.page == Aux.current_owner_page then
         return c()
     else
-        Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', c)
+        return Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', c)
     end
 end
 
@@ -98,7 +98,7 @@ function private.wait_for_list_results(c)
     end)
     local type = m.th.params.type
     local ignore_owner = m.th.params.ignore_owner or aux_ignore_owner
-    Aux.control.as_soon_as(function()
+    return Aux.control.as_soon_as(function()
         -- short circuiting order important, owner_data_complete must be called iif an update has happened.
         local ok = updated and (ignore_owner or m.owner_data_complete(type)) or last_update and GetTime() - last_update > 5
         updated = false
@@ -146,7 +146,7 @@ function private.scan()
         else
             m.th.page = nil
         end
-        m.wait_for_callback(m.th.params.on_start_query, m.th.query_index, m.process_query)
+        return m.wait_for_callback(m.th.params.on_start_query, m.th.query_index, m.process_query)
     else
         local on_complete = m.th.params.on_complete
         m.threads[m.th.params.type] = nil
@@ -196,7 +196,7 @@ function private.scan_page_helper(i)
         if Aux.call(m.th.params.auto_buy_validator, auction_info)/false then
             local c = Aux.control.await(recurse)
             Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, Aux.f(c, true))
-            Aux.control.new_thread(Aux.control.sleep, 10, Aux.f(c, false))
+            return Aux.control.new_thread(Aux.control.sleep, 10, Aux.f(c, false))
         elseif Aux.call(m.q.validator, auction_info)/true then
             return m.wait_for_callback(m.th.params.on_auction, auction_info, function(removed)
                 if removed then
