@@ -89,27 +89,26 @@ end
 
 function private.wait_for_list_results(c)
     local updated, last_update
-    local listener = Aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE', function()
+    Aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE', function()
+        if -c then
+            return Aux.control.kill
+        end
         last_update = GetTime()
         updated = true
     end)
-    listener:start()
+    local type = m.th.params.type
     local ignore_owner = m.th.params.ignore_owner or aux_ignore_owner
     Aux.control.as_soon_as(function()
         -- short circuiting order important, owner_data_complete must be called iif an update has happened.
-        -- if no update has happened it must not be called for performance reasons, otherwise it must be called to request further missing data if there is any
-        local ok = updated and (ignore_owner or m.owner_data_complete()) or last_update and GetTime() - last_update > 5
+        local ok = updated and (ignore_owner or m.owner_data_complete(type)) or last_update and GetTime() - last_update > 5
         updated = false
         return ok
-    end, function()
-        listener:stop()
-        return c()
-    end)
+    end, c)
 end
 
-function private.owner_data_complete()
+function private.owner_data_complete(type)
     for i=1,PAGE_SIZE do
-        local auction_info = Aux.info.auction(i, m.th.params.type)
+        local auction_info = Aux.info.auction(i, type)
         if auction_info and not auction_info.owner then
             return false
         end

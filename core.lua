@@ -62,6 +62,7 @@ do
             rawget(self, '_f')()[key] = value
         end,
         __index = function(self, key)
+            if rawget(self, '_f')() == nil then error('', 2) end
             return rawget(self, '_f')()[key]
         end,
         __call = function(self)
@@ -150,6 +151,8 @@ function public.on_load()
         this.money = arg1
     end)
 
+    Aux.control.event_listener('CURSOR_UPDATE', m.CURSOR_UPDATE)
+
     do
         local tab_group = m.gui.tab_group(AuxFrame, 'DOWN')
         tab_group:create_tab('Search')
@@ -225,7 +228,6 @@ function m.on_addon_load.Blizzard_AuctionUI()
 
     m.hook('GetOwnerAuctionItems', m.GetOwnerAuctionItems)
     m.hook('PickupContainerItem', m.PickupContainerItem)
-    m.hook('PickupInventoryItem', m.PickupInventoryItem)
     m.hook('SetItemRef', m.SetItemRef)
     m.hook('UseContainerItem', m.UseContainerItem)
     m.hook('AuctionFrameAuctions_OnEvent', m.AuctionFrameAuctions_OnEvent)
@@ -321,17 +323,13 @@ do
         if money >= amount then
             locked = true
 
-            local listener = m.control.event_listener('CHAT_MSG_SYSTEM')
-            listener:set_action(function()
+            m.control.event_listener('CHAT_MSG_SYSTEM', function()
                 if arg1 == ERR_AUCTION_BID_PLACED then
-                    listener:stop()
-                    if on_success then
-                        on_success()
-                    end
+                    Aux.call(on_success)
                     locked = false
+                    return Aux.control.kill
                 end
             end)
-            listener:start()
         end
     end
 end
@@ -352,17 +350,13 @@ do
         locked = true
 
         CancelAuction(index)
-        local listener = m.control.event_listener('CHAT_MSG_SYSTEM')
-        listener:set_action(function()
+        m.control.event_listener('CHAT_MSG_SYSTEM', function()
             if arg1 == ERR_AUCTION_REMOVED then
-                listener:stop()
-                if on_success then
-                    on_success()
-                end
+                Aux.call(on_success)
                 locked = false
+                return Aux.control.kill
             end
         end)
-        listener:start()
     end
 end
 
@@ -426,14 +420,15 @@ end
 
 do -- TODO make it work for other ways to pick up things
     local last_picked_up
+    function private.CURSOR_UPDATE()
+        last_picked_up = nil
+    end
     function private.PickupContainerItem(...)
         local bag, slot = unpack(arg)
-        last_picked_up = { bag, slot }
+        Aux.control.on_next_update(function()
+            last_picked_up = { bag, slot }
+        end)
         return m.orig.PickupContainerItem(unpack(arg))
-    end
-    function private.PickupInventoryItem(...)
-        last_picked_up = nil
-        return m.orig.PickupInventoryItem(unpack(arg))
     end
     function public.cursor_item()
         if last_picked_up and CursorHasItem() then

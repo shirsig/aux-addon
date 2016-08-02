@@ -40,15 +40,12 @@ function private.post_auction(slot, k)
 		end)
 
 		local posted
-		local listener = Aux.control.event_listener('CHAT_MSG_SYSTEM')
-		listener:set_action(function()
+		Aux.control.event_listener('CHAT_MSG_SYSTEM', function()
 			if arg1 == ERR_AUCTION_STARTED then
-				listener:stop()
 				c()
+				return Aux.control.kill
 			end
 		end)
-		listener:start()
-		
 	else
 		return m.stop()
 	end

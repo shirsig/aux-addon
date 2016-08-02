@@ -4,6 +4,7 @@ private.event_frame = CreateFrame('Frame')
 private.event_listeners = {}
 private.threads = {}
 public.thread_id = nil
+public.kill = {}
 
 function public.LOAD()
 	m.event_frame:SetScript('OnUpdate', m.on_update)
@@ -13,12 +14,18 @@ end
 function private.on_event()
 	for _, listener in m.event_listeners do
 		if event == listener.event and not listener.deleted then
-			listener.action()
+			listener.deleted = (listener.action() == m.kill)
 		end
 	end
 end
 
 function private.on_update()
+	for _, listener in m.event_listeners do
+		if not Aux.util.any(m.event_listeners, function(l) return not l.deleted and l.event == listener.event end) then
+			m.event_frame:UnregisterEvent(listener.event)
+		end
+	end
+
 	m.event_listeners = Aux.util.filter(m.event_listeners, function(l) return not l.deleted end)
 	local threads = {}
 	for thread_id, thread in m.threads do
@@ -43,40 +50,15 @@ function private.on_update()
 end
 
 function public.event_listener(event, action)
-	local self = {}
-	
-	local listener = { event=event, action=action }
-	
-	function self:set_action(action)
-		listener.action = action
-	end
-	
-	function self:start()
-		tinsert(m.event_listeners, listener)
-		m.event_frame:RegisterEvent(event)
-		return self
-	end
-	
-	function self:stop()
-		listener.deleted = true
-		if not Aux.util.any(m.event_listeners, function(l) return l.event == event end) then
-			m.event_frame:UnregisterEvent(event)
-		end
-		return self
-	end
-	
-	return self
+	tinsert(m.event_listeners, { event=event, action=action })
+	m.event_frame:RegisterEvent(event)
 end
 
 function public.on_next_event(event, callback)
-	local listener = m.event_listener(event)
-	
-	listener:set_action(function()
-		listener:stop()
-		return callback()
+	m.event_listener(event, function()
+		callback()
+		return m.kill
 	end)
-	
-	listener:start()
 end
 
 function public.on_next_update(callback)

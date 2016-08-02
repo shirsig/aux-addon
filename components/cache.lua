@@ -14,10 +14,10 @@ aux_characters = {}
 function public.LOAD()
 	m.scan_wdb()
 
-	Aux.control.event_listener('MERCHANT_SHOW', m.on_merchant_show):start()
-	Aux.control.event_listener('MERCHANT_CLOSED', m.on_merchant_closed):start()
-	Aux.control.event_listener('MERCHANT_UPDATE', m.on_merchant_update):start()
-	Aux.control.event_listener('BAG_UPDATE', m.on_bag_update):start()
+	Aux.control.event_listener('MERCHANT_SHOW', m.on_merchant_show)
+	Aux.control.event_listener('MERCHANT_CLOSED', m.on_merchant_closed)
+	Aux.control.event_listener('MERCHANT_UPDATE', m.on_merchant_update)
+	Aux.control.event_listener('BAG_UPDATE', m.on_bag_update)
 
 	CreateFrame('Frame', nil, MerchantFrame):SetScript('OnUpdate', m.merchant_on_update)
 
@@ -29,7 +29,7 @@ function public.LOAD()
 				aux_merchant_sell[Aux.cache.item_id(info.name)] = info.vendor_price / (Aux.info.max_item_charges(item_id) or info.count)
 			end
 		end
-	end):start()
+	end)
 end
 
 do
