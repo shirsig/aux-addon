@@ -546,11 +546,9 @@ function public.indented_post_query_string(components)
             str = str..' '
         elseif i > 1 then
             str = str..'|n'
-            str = str..Aux.gui.inline_color({42, 42, 42, 1})
             for _=1,getn(stack) do
-                str = str..'----'
+                str = str..'    '
             end
-            str = str..'|r'
         end
 
         if component[1] == 'operator' and component[2] then
