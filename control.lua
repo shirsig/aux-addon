@@ -14,7 +14,6 @@ do
 	local active_listener
 
 	function public.kill(...)
-		Aux.log(arg.n) --TODO
 		active_listener.killed = arg.n == 0 or arg[1]
 	end
 
@@ -80,7 +79,6 @@ function public.thread(k, ...)
 end
 
 function public.kill_thread(thread_id)
-	Aux.log('kek')
 	if m.threads[thread_id] then
 		m.threads[thread_id].killed = true
 	end

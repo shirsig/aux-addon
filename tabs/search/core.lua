@@ -902,7 +902,7 @@ function private.remove_post_filter()
 end
 
 function private.update_filter_display()
-    local lines = getn(Aux.util.filter(m.post_components, function(component) return component[1] == 'operator' and component[2] ~= 'not' end))
+    local lines = Aux.util.size(Aux.util.filter(m.post_components, function(component) return component[1] == 'operator' and component[2] ~= 'not' end))
     local width_scale = max(200/m.filter_display:GetStringWidth())
     local height_scale = min((200 / lines) / 18)
     m.filter_display.scale_frame:SetScale(min(1, width_scale, height_scale))

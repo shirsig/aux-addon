@@ -91,10 +91,10 @@ function private.update_inventory_listing()
         return
     end
 
-    Aux.item_listing.populate(m.item_listing, Aux.util.filter(m.inventory_records, function(record)
+    Aux.item_listing.populate(m.item_listing, Aux.util.values(Aux.util.filter(m.inventory_records, function(record)
         local settings = m.read_settings(record.key)
         return record.aux_quantity > 0 and (not settings.hidden or m.show_hidden_checkbox:GetChecked())
-    end))
+    end)))
 end
 
 function private.update_auction_listing()
@@ -174,7 +174,7 @@ function private.update_auction_listing()
 end
 
 function public.select_item(item_key)
-    for _, inventory_record in ipairs(Aux.util.filter(m.inventory_records, function(record) return record.aux_quantity > 0 end)) do
+    for _, inventory_record in Aux.util.filter(m.inventory_records, function(record) return record.aux_quantity > 0 end) do
         if inventory_record.key == item_key then
             m.set_item(inventory_record)
             break

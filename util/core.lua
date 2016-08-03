@@ -21,8 +21,28 @@ function public.size(t)
 	return x
 end
 
-function public.round(x)
-	return floor(x + 0.5)
+function public.key(value, t)
+	for k, v in t do
+		if v == value then
+			return k
+		end
+	end
+end
+
+function public.keys(t)
+	local ks = {}
+	for k in t do
+		tinsert(ks, k)
+	end
+	return ks
+end
+
+function public.values(t)
+	local vs = {}
+	for _, v in t do
+		tinsert(vs, v)
+	end
+	return vs
 end
 
 function public.eq(t1, t2)
@@ -45,6 +65,118 @@ function public.eq(t1, t2)
 	return true
 end
 
+function public.any(xs, p)
+	local holds = false
+	for _, x in xs do
+		holds = holds or p(x)
+	end
+	return holds
+end
+
+function public.all(xs, p)
+	local holds = true
+	for _, x in xs do
+		holds = holds and p(x)
+	end
+	return holds
+end
+
+function public.filter(xs, p)
+	local ys = {}
+	for k, x in xs do
+		if p(x, k) then
+			ys[k] = x
+		end
+	end
+	return ys
+end
+
+function public.map(xs, f)
+	local ys = {}
+	for k, x in xs do
+		ys[k] = f(x, k)
+	end
+	return ys
+end
+
+do
+	local mt = {
+		__call = function(self)
+			return
+		end,
+	}
+
+	--	local methods = {}
+	--
+	--	function methods:add(key)
+	--		self[key] = true
+	--	end
+	--
+	--	function methods:remove(key)
+	--		self[key] = nil
+	--	end
+	--
+	--	function methods:size()
+	--		local size = 0
+	--		for _,_ in self do
+	--			size = size + 1
+	--		end
+	--		return size
+	--	end
+	--
+	--	function methods:elements()
+	--		local elements = {}
+	--		for element, _ in self do
+	--			tinsert(elements, element)
+	--		end
+	--		return elements
+	--	end
+
+	function public.set(...)
+		local self = {}
+		for i=1,arg.n do
+			self[arg[i]] = true
+		end
+		return setmetatable(self, mt)
+	end
+end
+
+function public.join(array, separator)
+	local str = ''
+	for i, element in ipairs(array) do
+		if i > 1 then
+			str = str..separator
+		end
+		str = str..element
+	end
+	return str
+end
+
+function public.split(str, separator)
+	local parts = {}
+	while true do
+		local start_index, _ = strfind(str, separator, 1, true)
+
+		if start_index then
+			local part = strsub(str, 1, start_index - 1)
+			tinsert(parts, part)
+			str = strsub(str, start_index + 1)
+		else
+			local part = strsub(str, 1)
+			tinsert(parts, part)
+			return parts
+		end
+	end
+end
+
+function public.tokenize(str)
+	local tokens = {}
+	for token in string.gfind(str, '%S+') do
+		tinsert(tokens, token)
+	end
+	return tokens
+end
+
 function public.wipe(t)
 	while getn(t) > 0 do
 		tremove(t)
@@ -62,16 +194,12 @@ function public.copy(t)
 	return copy
 end
 
-function public.cons(element, list)
-	local new_list = public.copy_table(list)
-	tinsert(new_list, 1, element)
-	return new_list
+function public.round(x)
+	return floor(x + 0.5)
 end
 
 function public.trim(str)
-	str = gsub(str, '^%s*', '')
-	str = gsub(str, '%s*$', '')
-	return str
+	return gsub(str, '^%s*(.-)%s*$', '%1')
 end
 
 function public.inventory()
@@ -120,162 +248,6 @@ function public.without_sound(f)
     SetCVar('MasterSoundEffects', orig)
 end
 
-function public.any(xs, p)
-	local holds = false
-	for _, x in xs do
-		holds = holds or p(x)
-	end
-	return holds
-end
-
-function public.all(xs, p)
-	local holds = true
-	for _, x in xs do
-		holds = holds and p(x)
-	end
-	return holds
-end
-
-function public.set_filter(xs, p)
-	local ys = {}
-	for x, _ in xs do
-		if p(x) then
-			m.set_add(ys, x)
-		end
-	end
-	return ys
-end
-
-function public.filter(xs, p)
-	local ys = {}
-	for k, x in xs do
-		if p(x) then
-			ys[k] = x
-		end
-	end
-	return ys
-end
-
-function public.map(xs, f)
-	local ys = {}
-	for k, x in xs do
-		ys[k] = f(x)
-	end
-	return ys
-end
-
-function public.take(n, xs)
-	local ys = {}
-	for i=1,min(n, getn(xs)) do
-		tinsert(ys, xs[i])
-	end
-	return ys
-end
-
-function public.key(value, t)
-	for k, v in t do
-		if v == value then
-			return k
-		end
-	end
-end
-
-function public.group_by(tables, equal)
-	local groups = {}
-	for _, table in ipairs(tables) do
-        local found_group
-		for _, group in ipairs(groups) do
-			if equal(table, group[1]) then
-				tinsert(group, table)
-                found_group = true
-			end
-        end
-        if not found_group then
-		    tinsert(groups, { table })
-        end
-	end
-	return groups
-end
-
-do
-	local mt = {
-		__call = function(self)
-			return
-		end,
-	}
-
-	local methods = {}
-
-	function methods:add(key)
-		self[key] = true
-	end
-
-	function methods:remove(key)
-		self[key] = nil
-	end
-
-	function methods:size()
-		local size = 0
-		for _,_ in self do
-			size = size + 1
-		end
-		return size
-	end
-
-	function methods:elements()
-		local elements = {}
-		for element, _ in self do
-			tinsert(elements, element)
-		end
-		return elements
-	end
-
-	function public.set(...)
-		local self = {}
-		for i=1,arg.n do
-			set[arg[i]] = true
-		end
-		return setmetatable(self, mt)
-	end
-end
-
-function public.join(array, separator)
-	local str = ''
-	for i, element in ipairs(array) do
-		if i > 1 then
-			str = str..separator
-		end
-		str = str..element
-	end
-	return str
-end
-
-function public.split(str, separator)
-
-	local array = {}
-	while true do
-		local start_index, _ = strfind(str, separator, 1, true)
-
-		if start_index then
-			local part = strsub(str, 1, start_index - 1)
-			tinsert(array, part)
-			str = strsub(str, start_index + 1)
-		else
-			local part = strsub(str, 1)
-			tinsert(array, part)
-			return array
-		end
-	end
-end
-
-function public.tokenize(str)
-	local tokens = {}
-	for token in string.gfind(str, '%S+') do
-		tinsert(tokens, token)
-	end
-	return tokens
-end
-
 function public.format_money(money, exact, color)
 	color = color or '|r'
 
@@ -290,7 +262,7 @@ function public.format_money(money, exact, color)
 
 	if not exact and money >= 10000 then
 		-- Round to nearest silver
-		money = math.floor(money / 100 + 0.5) * 100
+		money = floor(money / 100 + 0.5) * 100
 	end
 	local g, s, c = Aux.money.to_GSC(money)
 

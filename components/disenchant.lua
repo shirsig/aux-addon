@@ -36,7 +36,7 @@ do
 	}
 
 	function public.source(item_id)
-	    return data[item_id] and unpack(data[item_id])
+	    return unpack(data[item_id] or {})
 	end
 end
 
@@ -84,14 +84,14 @@ function public.value(slot, quality, level)
 end
 
 function public.distribution(slot, quality, level)
-    if not (m.armor[slot] or m.weapon[slot]) or level == 0 then
+    if not (m.armor(slot) or m.weapon(slot)) or level == 0 then
         return {}
     end
 
     local function p(probability_armor, probability_weapon)
-        if m.armor[slot] then
+        if m.armor(slot) then
             return probability_armor
-        elseif m.weapon[slot] then
+        elseif m.weapon(slot) then
             return probability_weapon
         end
     end

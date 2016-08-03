@@ -1,15 +1,51 @@
 local m, public, private = Aux.module'scan'
 
-local PAGE_SIZE = 50
+private.PAGE_SIZE = 50
 
-private.threads = {}
 private.last_query_time = {}
 
-private.state = Aux.dynamic_table(function()
-    return Aux.util.filter(m.threads, function(thread) return thread.id == Aux.control.thread_id end)[1]
-end)
+do
+	local scan_states = {}
 
-private.q = Aux.dynamic_table(function()
+	function public.start(params)
+		for old_state in {scan_states[params.type]} do
+			m.abort(old_state.id)
+		end
+		local thread_id = Aux.control.thread(Aux.f(m.wait_for_callback, params.on_scan_start, m.scan))
+		scan_states[params.type] = {
+			id = thread_id,
+			params = params,
+		}
+		return thread_id
+	end
+
+	function public.abort(scan_id)
+		local aborted = {}
+		for type, state in scan_states do
+			if not scan_id or state.id == scan_id then
+				Aux.control.kill_thread(state.id)
+				scan_states[type] = nil
+				tinsert(aborted, state)
+			end
+		end
+		for _, state in aborted do
+			Aux.safe_call(state.params.on_abort)
+		end
+	end
+
+	function private.complete()
+		local on_complete = m.state.params.on_complete
+		scan_states[m.state.params.type] = nil
+		Aux.safe_call(on_complete)
+	end
+
+	private.state = Aux.dynamic_table(function()
+		local _, state = next(Aux.util.filter(scan_states, function(state) return state.id == Aux.control.thread_id end))
+		return state
+	end)
+end
+
+private.query = Aux.dynamic_table(function()
     return m.state.params.queries[m.state.query_index]
 end)
 
@@ -36,58 +72,20 @@ function private.wait_for_callback(...)
 end
 
 function private.total_pages(total_auctions)
-    return math.ceil(total_auctions / PAGE_SIZE)
+    return ceil(total_auctions / m.PAGE_SIZE)
 end
 
 function private.last_page(total_auctions)
     local last_page = max(m.total_pages(total_auctions) - 1, 0)
-    local last_page_limit = m.q.blizzard_query and m.q.blizzard_query.last_page or last_page
+    local last_page_limit = m.query.blizzard_query and m.query.blizzard_query.last_page or last_page
     return min(last_page_limit, last_page)
 end
 
-function public.start(params)
-    if m.threads[params.type] then
-        m.abort(m.threads[params.type].id)
-    end
-
-    local thread_id = Aux.control.thread(Aux.f(m.wait_for_callback, params.on_scan_start, m.scan))
-
-    m.threads[params.type] = {
-        id = thread_id,
-        params = params,
-    }
-    return thread_id
-end
-
-function public.abort(scan_id)
-    local aborted_threads = {}
-    for t, thread in m.threads do
-        if not scan_id or thread.id == scan_id then
-            Aux.control.kill_thread(thread.id)
-            m.threads[t] = nil
-            tinsert(aborted_threads, thread)
-        end
-    end
-
-    for _, thread in aborted_threads do
-        Aux.safe_call(thread.params.on_abort)
-    end
-end
-
-function private.complete()
-	local on_complete = m.state.params.on_complete
-	m.threads[m.state.params.type] = nil
-	if on_complete then
-		return on_complete()
-	end
-end
-
 function private.scan()
-	Aux.log(Aux.control.thread_id)
 	m.state.query_index = m.state.query_index and m.state.query_index + 1 or 1
-	if m.q() then
-		if m.q.blizzard_query then
-			m.state.page = m.q.blizzard_query.first_page or 0
+	if m.query() then
+		if m.query.blizzard_query then
+			m.state.page = m.query.blizzard_query.first_page or 0
 		else
 			m.state.page = nil
 		end
@@ -98,7 +96,7 @@ function private.scan()
 end
 
 function private.process_query()
-	if m.q.blizzard_query then
+	if m.query.blizzard_query then
 		return m.submit_query()
 	else
 		return m.scan_page()
@@ -114,7 +112,7 @@ function private.submit_query()
 		elseif m.state.params.type == 'owner' then
 			GetOwnerAuctionItems(m.state.page)
 		else
-			local blizzard_query = m.q.blizzard_query or {}
+			local blizzard_query = m.query.blizzard_query or {}
 			QueryAuctionItems(
 				blizzard_query.name,
 				blizzard_query.min_level,
@@ -134,9 +132,9 @@ end
 function private.scan_page(i)
 	i = i or 1
 	local recurse = function(retry)
-		if i >= PAGE_SIZE then
+		if i >= m.PAGE_SIZE then
 			m.wait_for_callback(m.state.params.on_page_scanned, function()
-				if m.q.blizzard_query and m.state.page < m.last_page(m.state.total_auctions) then
+				if m.query.blizzard_query and m.state.page < m.last_page(m.state.total_auctions) then
 					m.state.page = m.state.page + 1
 					return m.process_query()
 				else
@@ -152,7 +150,7 @@ function private.scan_page(i)
 	if auction_info and (auction_info.owner or m.state.params.ignore_owner or aux_ignore_owner) then
 		auction_info.index = i
 		auction_info.page = m.state.page
-		auction_info.blizzard_query = m.q.blizzard_query
+		auction_info.blizzard_query = m.query.blizzard_query
 		auction_info.query_type = m.state.params.type
 
 		Aux.history.process_auction(auction_info)
@@ -161,7 +159,7 @@ function private.scan_page(i)
 			local c = Aux.control.await(recurse)
 			Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, Aux.f(c, true))
 			return Aux.control.thread(Aux.control.sleep, 10, Aux.f(c, false))
-		elseif not m.q.validator or m.q.validator(auction_info) then
+		elseif not m.query.validator or m.query.validator(auction_info) then
 			return m.wait_for_callback(m.state.params.on_auction, auction_info, function(removed)
 				if removed then
 					return recurse(true)
@@ -187,8 +185,8 @@ function private.wait_for_results()
             _,  m.state.total_auctions = GetNumAuctionItems(m.state.params.type)
             return m.wait_for_callback(
                 m.state.params.on_page_loaded,
-                m.state.page - (m.q.blizzard_query.first_page or 0) + 1,
-                m.last_page(m.state.total_auctions) - (m.q.blizzard_query.first_page or 0) + 1,
+                m.state.page - (m.query.blizzard_query.first_page or 0) + 1,
+                m.last_page(m.state.total_auctions) - (m.query.blizzard_query.first_page or 0) + 1,
                 m.total_pages(m.state.total_auctions) - 1,
                 m.scan_page
             )
@@ -232,7 +230,7 @@ function private.wait_for_list_results(c)
 end
 
 function private.owner_data_complete(type)
-    for i=1,PAGE_SIZE do
+    for i=1,m.PAGE_SIZE do
         local auction_info = Aux.info.auction(i, type)
         if auction_info and not auction_info.owner then
             return false
