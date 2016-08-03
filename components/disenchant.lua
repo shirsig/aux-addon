@@ -1,69 +1,74 @@
 local m, public, private = Aux.module'disenchant'
 
-function public.source(item_id)
+private.UNCOMMON = 2
+private.RARE = 3
+private.EPIC = 4
 
-    local info = {
-        [10940] = {'DUST', '1-20'},
-        [11083] = {'DUST', '21-30'},
-        [11137] = {'DUST', '31-40'},
-        [11176] = {'DUST', '41-50'},
-        [16204] = {'DUST', '51-60'},
+do
+	local data = {
+		[10940] = {'DUST', '1-20'},
+		[11083] = {'DUST', '21-30'},
+		[11137] = {'DUST', '31-40'},
+		[11176] = {'DUST', '41-50'},
+		[16204] = {'DUST', '51-60'},
 
-        [10938] = {'ESSENCE', '1-10'},
-        [10939] = {'ESSENCE', '11-15'},
-        [10998] = {'ESSENCE', '16-20'},
-        [11082] = {'ESSENCE', '21-25'},
-        [11134] = {'ESSENCE', '26-30'},
-        [11135] = {'ESSENCE', '31-35'},
-        [11174] = {'ESSENCE', '36-40'},
-        [11175] = {'ESSENCE', '41-45'},
-        [16202] = {'ESSENCE', '46-50'},
-        [16203] = {'ESSENCE', '51-60'},
+		[10938] = {'ESSENCE', '1-10'},
+		[10939] = {'ESSENCE', '11-15'},
+		[10998] = {'ESSENCE', '16-20'},
+		[11082] = {'ESSENCE', '21-25'},
+		[11134] = {'ESSENCE', '26-30'},
+		[11135] = {'ESSENCE', '31-35'},
+		[11174] = {'ESSENCE', '36-40'},
+		[11175] = {'ESSENCE', '41-45'},
+		[16202] = {'ESSENCE', '46-50'},
+		[16203] = {'ESSENCE', '51-60'},
 
-        [10978] = {'SHARD', '1-20'},
-        [11084] = {'SHARD', '21-25'},
-        [11138] = {'SHARD', '26-30'},
-        [11139] = {'SHARD', '31-35'},
-        [11177] = {'SHARD', '36-40'},
-        [11178] = {'SHARD', '41-45'},
-        [14343] = {'SHARD', '46-50'},
-        [14344] = {'SHARD', '51-60'},
+		[10978] = {'SHARD', '1-20'},
+		[11084] = {'SHARD', '21-25'},
+		[11138] = {'SHARD', '26-30'},
+		[11139] = {'SHARD', '31-35'},
+		[11177] = {'SHARD', '36-40'},
+		[11178] = {'SHARD', '41-45'},
+		[14343] = {'SHARD', '46-50'},
+		[14344] = {'SHARD', '51-60'},
 
-        [20725] = {'CRYSTAL', '51+'},
-    }
+		[20725] = {'CRYSTAL', '51+'},
+	}
 
-    return unpack(info[item_id] or {})
+	function public.source(item_id)
+	    return data[item_id] and unpack(data[item_id])
+	end
 end
 
-local armor = {
-    INVTYPE_HEAD = true,
-    INVTYPE_NECK = true,
-    INVTYPE_SHOULDER = true,
-    INVTYPE_BODY = true,
-    INVTYPE_CHEST = true,
-    INVTYPE_ROBE = true,
-    INVTYPE_WAIST = true,
-    INVTYPE_LEGS = true,
-    INVTYPE_FEET = true,
-    INVTYPE_WRIST = true,
-    INVTYPE_HAND = true,
-    INVTYPE_FINGER = true,
-    INVTYPE_TRINKET = true,
-    INVTYPE_CLOAK = true,
-    INVTYPE_HOLDABLE = true,
-}
+function public.LOAD()
+	private.armor = Aux.util.set(
+		'INVTYPE_HEAD',
+		'INVTYPE_NECK',
+		'INVTYPE_SHOULDER',
+		'INVTYPE_BODY',
+		'INVTYPE_CHEST',
+		'INVTYPE_ROBE',
+		'INVTYPE_WAIST',
+		'INVTYPE_LEGS',
+		'INVTYPE_FEET',
+		'INVTYPE_WRIST',
+		'INVTYPE_HAND',
+		'INVTYPE_FINGER',
+		'INVTYPE_TRINKET',
+		'INVTYPE_CLOAK',
+		'INVTYPE_HOLDABLE'
+	)
 
-local weapon = {
-    INVTYPE_2HWEAPON = true,
-    INVTYPE_WEAPONMAINHAND = true,
-    INVTYPE_WEAPON = true,
-    INVTYPE_WEAPONOFFHAND = true,
-    INVTYPE_SHIELD = true,
-    INVTYPE_RANGED = true,
-    INVTYPE_RANGEDRIGHT = true,
-}
-
-local UNCOMMON, RARE, EPIC = 2, 3, 4
+	private.weapon = Aux.util.set(
+		'INVTYPE_2HWEAPON' ,
+		'INVTYPE_WEAPONMAINHAND',
+		'INVTYPE_WEAPON',
+		'INVTYPE_WEAPONOFFHAND',
+		'INVTYPE_SHIELD',
+		'INVTYPE_RANGED',
+		'INVTYPE_RANGEDRIGHT'
+	)
+end
 
 function public.value(slot, quality, level)
     local expectation
@@ -79,19 +84,19 @@ function public.value(slot, quality, level)
 end
 
 function public.distribution(slot, quality, level)
-    if not (armor[slot] or weapon[slot]) or level == 0 then
+    if not (m.armor[slot] or m.weapon[slot]) or level == 0 then
         return {}
     end
 
     local function p(probability_armor, probability_weapon)
-        if armor[slot] then
+        if m.armor[slot] then
             return probability_armor
-        elseif weapon[slot] then
+        elseif m.weapon[slot] then
             return probability_weapon
         end
     end
 
-    if quality == UNCOMMON then
+    if quality == m.UNCOMMON then
         if level <= 10 then
             return {
                 {item_id=10940, min_quantity=1, max_quantity=2, probability=p(0.8, 0.2)},
@@ -158,7 +163,7 @@ function public.distribution(slot, quality, level)
                 {item_id=14344, min_quantity=1, max_quantity=1, probability=p(0.05, 0.03)},
             }
         end
-    elseif quality == RARE then
+    elseif quality == m.RARE then
         if level <= 20 then
             return {{item_id=10978, min_quantity=1, max_quantity=1, probability=1}}
         elseif level <= 25 then
@@ -178,7 +183,7 @@ function public.distribution(slot, quality, level)
         elseif level <= 60 then
             return {{item_id=14344, min_quantity=1, max_quantity=1, probability=0.995}, {item_id=20725, min_quantity=1, max_quantity=1, probability=0.005}}
         end
-    elseif quality == EPIC then
+    elseif quality == m.EPIC then
         if level <= 40 then
             return {{item_id=11177, min_quantity=2, max_quantity=4, probability=1}}
         elseif level <= 45 then

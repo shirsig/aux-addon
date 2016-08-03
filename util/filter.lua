@@ -457,7 +457,7 @@ function private.suggestions(components)
     tinsert(suggestions, 'not')
     tinsert(suggestions, 'tt')
 
-    for filter, _ in pairs(m.filters) do
+    for filter, _ in m.filters do
         tinsert(suggestions, strlower(filter))
     end
 

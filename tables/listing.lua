@@ -10,7 +10,7 @@ local DEFAULT_COL_INFO = {{width=1}}
 
 
 local function GetTableIndex(tbl, value)
-    for i, v in pairs(tbl) do
+    for i, v in tbl do
         if value == v then
             return i
         end
@@ -344,7 +344,7 @@ local methods = {
         col:SetFontString(text)
         col:SetHeight(ST_ROW_HEIGHT)
         col:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-        for name, func in pairs(defaultColScripts) do
+        for name, func in defaultColScripts do
             col:SetScript(name, func)
         end
         col.st = st
@@ -443,7 +443,7 @@ function public.CreateScrollingTable(parent)
     st.headLine = Aux.gui.horizontal_line(st, 0)
 
     -- add all the methods
-    for name, func in pairs(methods) do
+    for name, func in methods do
         st[name] = func
     end
 

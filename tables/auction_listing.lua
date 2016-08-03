@@ -1010,7 +1010,7 @@ function public.CreateAuctionResultsTable(parent, config)
     rt.records = {}
     rt.rowInfo = { numDisplayRows=0 }
 
-    for name, func in pairs(methods) do
+    for name, func in methods do
         rt[name] = func
     end
 

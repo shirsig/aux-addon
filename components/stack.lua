@@ -126,7 +126,7 @@ end
 function public.start(item_key, size, callback)
 	m.stop()
 
-	local thread_id = Aux.control.new_thread(m.process)
+	local thread_id = Aux.control.thread(m.process)
 
 	m.state = {
 		thread_id = thread_id,

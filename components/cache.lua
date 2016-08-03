@@ -150,65 +150,59 @@ function private.merchant_sell_scan()
 	for slot in Aux.util.inventory() do
 		local item_info = Aux.info.container_item(unpack(slot))
 		if item_info then
-			aux_merchant_sell[item_info.item_id] = item_info.tooltip.money / item_info.aux_quantity
+			aux_merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity
 		end
 	end
 end
 
-function private.scan_wdb()
+function private.scan_wdb(item_id)
+	item_id = item_id or MIN_ITEM_ID
 
-	local function helper(item_id)
-		local processed = 0
-		while processed <= 100 and item_id <= MAX_ITEM_ID do
-			local itemstring = 'item:'..item_id
-			local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
-			if name and not aux_item_ids[strlower(name)] then
-				aux_item_ids[strlower(name)] = item_id
-				aux_items[item_id] = Aux.persistence.write(items_schema, {
-					name = name,
-					quality = quality,
-					level = level,
-					class = class,
-					subclass = subclass,
-					slot = slot,
-					max_stack = max_stack,
-					texture = texture,
-				})
-				local tooltip = Aux.info.tooltip(function(tt) tt:SetHyperlink(itemstring) end)
-				if Aux.info.auctionable(tooltip, quality) then
-					tinsert(aux_auctionable_items, strlower(name))
-				end
-				processed = processed + 1
+	local processed = 0
+	while processed <= 100 and item_id <= MAX_ITEM_ID do
+		local itemstring = 'item:'..item_id
+		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
+		if name and not aux_item_ids[strlower(name)] then
+			aux_item_ids[strlower(name)] = item_id
+			aux_items[item_id] = Aux.persistence.write(items_schema, {
+				name = name,
+				quality = quality,
+				level = level,
+				class = class,
+				subclass = subclass,
+				slot = slot,
+				max_stack = max_stack,
+				texture = texture,
+			})
+			local tooltip = Aux.info.tooltip(function(tt) tt:SetHyperlink(itemstring) end)
+			if Aux.info.auctionable(tooltip, quality) then
+				tinsert(aux_auctionable_items, strlower(name))
 			end
-			item_id = item_id + 1
+			processed = processed + 1
 		end
-
-		if item_id <= MAX_ITEM_ID then
-			local t0 = GetTime()
-			Aux.control.as_soon_as(function() return GetTime() - t0 > 0.1 end, Aux.f(helper, item_id))
-		else
-			sort(aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
-		end
+		item_id = item_id + 1
 	end
 
-	helper(MIN_ITEM_ID)
+	if item_id <= MAX_ITEM_ID then
+		local t0 = GetTime()
+		Aux.control.as_soon_as(function() return GetTime() - t0 > 0.1 end, m.scan_wdb, item_id)
+	else
+		sort(aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
+	end
 end
 
-function public.populate_wdb()
+function public.populate_wdb(item_id)
+	item_id = item_id or MIN_ITEM_ID
 
-	local function helper(item_id)
-		if item_id > MAX_ITEM_ID then
-			Aux.log('Cache populated.')
-			return
-		end
-
-		if not GetItemInfo('item:'..item_id) then
-			Aux.log('Fetching item '..item_id..'.')
-			AuxTooltip:SetHyperlink('item:'..item_id)
-		end
-
-		Aux.control.on_next_update(Aux.f(helper, item_id + 1))
+	if item_id > MAX_ITEM_ID then
+		Aux.log('Cache populated.')
+		return
 	end
 
-	helper(MIN_ITEM_ID)
+	if not GetItemInfo('item:'..item_id) then
+		Aux.log('Fetching item '..item_id..'.')
+		AuxTooltip:SetHyperlink('item:'..item_id)
+	end
+
+	Aux.control.thread(m.populate_wdb, item_id + 1)
 end

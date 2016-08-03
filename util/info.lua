@@ -2,35 +2,41 @@ local m, public, private = Aux.module'info'
 
 local TOOLTIP_LENGTH = 30
 
-function public.inventory_index(slot)
-    local inventory_index_map = {
-        INVTYPE_AMMO = {0},
-        INVTYPE_HEAD = {1},
-        INVTYPE_NECK = {2},
-        INVTYPE_SHOULDER = {3},
-        INVTYPE_BODY = {4},
-        INVTYPE_CHEST = {5},
-        INVTYPE_ROBE = {5},
-        INVTYPE_WAIST = {6},
-        INVTYPE_LEGS = {7},
-        INVTYPE_FEET = {8},
-        INVTYPE_WRIST = {9},
-        INVTYPE_HAND = {10},
-        INVTYPE_FINGER = {11, 12},
-        INVTYPE_TRINKET = {13, 14},
-        INVTYPE_CLOAK = {15},
-        INVTYPE_2HWEAPON = {16, 17},
-        INVTYPE_WEAPONMAINHAND = {16, 17},
-        INVTYPE_WEAPON = {16, 17},
-        INVTYPE_WEAPONOFFHAND = {16, 17},
-        INVTYPE_HOLDABLE = {16, 17},
-        INVTYPE_SHIELD = {16, 17},
-        INVTYPE_RANGED = {18},
-        INVTYPE_RANGEDRIGHT = {18},
-        INVTYPE_TABARD = {19},
-    }
+CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
+AuxTooltip:SetScript('OnTooltipAddMoney', function()
+	this.money = arg1
+end)
 
-    return unpack(inventory_index_map[slot] or {})
+do
+	local inventory_index_map = {
+		INVTYPE_AMMO = {0},
+		INVTYPE_HEAD = {1},
+		INVTYPE_NECK = {2},
+		INVTYPE_SHOULDER = {3},
+		INVTYPE_BODY = {4},
+		INVTYPE_CHEST = {5},
+		INVTYPE_ROBE = {5},
+		INVTYPE_WAIST = {6},
+		INVTYPE_LEGS = {7},
+		INVTYPE_FEET = {8},
+		INVTYPE_WRIST = {9},
+		INVTYPE_HAND = {10},
+		INVTYPE_FINGER = {11, 12},
+		INVTYPE_TRINKET = {13, 14},
+		INVTYPE_CLOAK = {15},
+		INVTYPE_2HWEAPON = {16, 17},
+		INVTYPE_WEAPONMAINHAND = {16, 17},
+		INVTYPE_WEAPON = {16, 17},
+		INVTYPE_WEAPONOFFHAND = {16, 17},
+		INVTYPE_HOLDABLE = {16, 17},
+		INVTYPE_SHIELD = {16, 17},
+		INVTYPE_RANGED = {18},
+		INVTYPE_RANGEDRIGHT = {18},
+		INVTYPE_TABARD = {19},
+	}
+	function public.inventory_index(slot)
+	    return unpack(inventory_index_map[slot] or {})
+	end
 end
 
 function public.container_item(bag, slot)
@@ -44,7 +50,7 @@ function public.container_item(bag, slot)
     local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
 
     local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
-    local tooltip = m.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
+    local tooltip, tooltip_money = m.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
     local max_charges = m.max_item_charges(item_id)
     local charges = max_charges and m.item_charges(tooltip)
     local aux_quantity = charges or count
@@ -74,6 +80,7 @@ function public.container_item(bag, slot)
         lootable = lootable,
 
         tooltip = tooltip,
+	    tooltip_money = tooltip_money,
         max_charges = max_charges,
         charges = charges,
         aux_quantity = aux_quantity,
@@ -110,7 +117,7 @@ function public.auction(index, query_type)
     local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(query_type, index)
 
 	local duration = GetAuctionItemTimeLeft(query_type, index)
-    local tooltip = m.tooltip(function(tt) tt:SetAuctionItem(query_type, index) end)
+    local tooltip, tooltip_money = m.tooltip(function(tt) tt:SetAuctionItem(query_type, index) end)
     local max_charges = m.max_item_charges(item_id)
     local charges = max_charges and m.item_charges(tooltip)
     local aux_quantity = charges or count
@@ -155,6 +162,7 @@ function public.auction(index, query_type)
         usable = usable,
 
         tooltip = tooltip,
+	    tooltip_money = tooltip_money,
         max_charges = max_charges,
         charges = charges,
         aux_quantity = aux_quantity,
@@ -223,7 +231,7 @@ end
 
 function public.tooltip_find(pattern, tooltip)
     local count = 0
-    for _, line in ipairs(tooltip) do
+    for _, line in tooltip do
         if line.left_text and strfind(line.left_text, pattern) then
             count = count + 1
         end
@@ -236,7 +244,7 @@ function public.tooltip_find(pattern, tooltip)
 end
 
 function public.load_tooltip(frame, tooltip)
-    for _, line in ipairs(tooltip) do
+    for _, line in tooltip do
         if line.right_text then
             frame:AddDoubleLine(line.left_text, line.right_text, line.left_color[1], line.left_color[2], line.left_color[3], line.right_color[1], line.right_color[2], line.right_color[3])
         else
@@ -249,14 +257,14 @@ function public.load_tooltip(frame, tooltip)
     end
 end
 
-function public.display_name(item_id, plain, uncolored)
+function public.display_name(item_id, no_brackets, no_color)
     local item_info = Aux.info.item(item_id)
     if item_info then
         local name = item_info.name
-        if not plain then
+        if not no_brackets then
             name = '['..name..']'
         end
-        if not uncolored then
+        if not no_color then
             name = ({GetItemQualityColor(item_info.quality)})[4]..name..FONT_COLOR_CODE_CLOSE
         end
         return name
@@ -280,7 +288,7 @@ function public.tooltip(setter)
     setter(AuxTooltip)
     AuxTooltip:Show()
 
-    local tooltip = { money=AuxTooltip.money }
+    local tooltip = {}
     for i = 1,TOOLTIP_LENGTH do
         local left_text = getglobal('AuxTooltipTextLeft'..i):GetText()
         local left_color = { getglobal('AuxTooltipTextLeft'..i):GetTextColor() }
@@ -298,7 +306,7 @@ function public.tooltip(setter)
         end
     end
 
-    return tooltip
+    return tooltip, AuxTooltip.money
 end
 
 function private.item_charges(tooltip)

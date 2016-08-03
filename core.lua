@@ -38,31 +38,28 @@ do
     end
 end
 
-function public.get(table, key)
-    return table[key]
-end
+--unpack(arg) TODO
 
-function public.set(table, key, value)
-    table[key] = value
-end
+--m.enum TODO
+--.INVTYPE_HEAD
+--.INVTYPE_NECK
+--.INVTYPE_SHOULDER
+--()
 
-function public.f(f, ...)
-    local params = arg
-    return function(...)
-        for i=1,arg.n do
-            tinsert(params, arg[i])
-        end
-        return f(unpack(params))
-    end
+do
+	local x = 0
+	function public.unique()
+		x = x + 1
+		return x
+	end
 end
 
 do
-    local dynamic_table_mt = {
+    local mt = {
         __newindex = function(self, key, value)
             rawget(self, '_f')()[key] = value
         end,
         __index = function(self, key)
-            if rawget(self, '_f')() == nil then error('', 2) end
             return rawget(self, '_f')()[key]
         end,
         __call = function(self)
@@ -70,68 +67,33 @@ do
         end,
     }
     function public.dynamic_table(f)
-        return setmetatable({ _f=f }, dynamic_table_mt)
+        return setmetatable({ _f=f }, mt)
     end
 end
 
-function public.call(f, ...)
-    return m.option(f)..function()
-        return m.option(f(unpack(arg)))
+function public.f(f, ...)
+	local params = arg
+	return function(...)
+		for i=1,arg.n do
+			tinsert(params, arg[i])
+		end
+		return f(unpack(params))
+	end
+end
+
+function public.safe_call(f, ...)
+    if f then
+        return f(unpack(arg))
     end
 end
 
-do
-    local index_mt = {
-        __index = function(self, key)
-            return m.option(rawget(self, '_value'))..function()
-                return m.option(rawget(self, '_value')[key])
-            end
-        end,
-    }
-    function public.index(value)
-        return setmetatable({ _value=value }, index_mt)
-    end
-end
-
-do
-    local option_mt = {
-        __call = function(self, f)
-            if rawget(self, '_value') ~= nil then
-                return m.option(f(rawget(self, '_value')))
-            else
-                return self
-            end
-        end,
-        __div = function(self, alt)
-            if rawget(self, '_value') ~= nil then
-                return rawget(self, '_value')
-            else
-                return alt
-            end
-        end,
-        __unm = function(self, alt)
-            return rawget(self, '_value') ~= nil
-        end,
-        __concat = function(self, f)
-            if rawget(self, '_value') ~= nil then
-                return f(rawget(self, '_value'))
-            else
-                return self
-            end
-        end,
-    }
-    function public.option(value)
-        return setmetatable({ _value=value }, option_mt)
-    end
-end
-
-do
-    local x = 0
-
-    function public.unique()
-        x = x + 1
-        return x
-    end
+function public.safe_index(t, ...)
+	for i=1,arg.n do
+		if t then
+			t = t[arg[i]]
+		end
+	end
+	return t
 end
 
 function public.on_load()
@@ -145,11 +107,6 @@ function public.on_load()
 
     Aux.gui.set_window_style(AuxFrame)
     tinsert(UISpecialFrames, 'AuxFrame')
-
-    CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
-    AuxTooltip:SetScript('OnTooltipAddMoney', function()
-        this.money = arg1
-    end)
 
     Aux.control.event_listener('CURSOR_UPDATE', m.CURSOR_UPDATE)
 
@@ -199,7 +156,7 @@ function public.on_event()
 	if event == 'VARIABLES_LOADED' then
 		m.on_load()
 	elseif event == 'ADDON_LOADED' then
-        m.call(m.on_addon_load[arg1])
+        m.safe_call(m.on_addon_load[arg1])
 	elseif event == 'AUCTION_HOUSE_SHOW' then
         m.on_auction_house_show()
 	elseif event == 'AUCTION_HOUSE_CLOSED' then
@@ -325,9 +282,9 @@ do
 
             m.control.event_listener('CHAT_MSG_SYSTEM', function()
                 if arg1 == ERR_AUCTION_BID_PLACED then
-                    Aux.call(on_success)
+                    Aux.safe_call(on_success)
                     locked = false
-                    return Aux.control.kill
+                    Aux.control.kill()
                 end
             end)
         end
@@ -352,9 +309,9 @@ do
         CancelAuction(index)
         m.control.event_listener('CHAT_MSG_SYSTEM', function()
             if arg1 == ERR_AUCTION_REMOVED then
-                Aux.call(on_success)
+                Aux.safe_call(on_success)
                 locked = false
-                return Aux.control.kill
+                Aux.control.kill()
             end
         end)
     end
@@ -425,8 +382,8 @@ do -- TODO make it work for other ways to pick up things
     end
     function private.PickupContainerItem(...)
         local bag, slot = unpack(arg)
-        Aux.control.on_next_update(function()
-            last_picked_up = { bag, slot }
+        Aux.control.thread(function()
+            last_picked_up = {bag, slot}
         end)
         return m.orig.PickupContainerItem(unpack(arg))
     end
@@ -479,7 +436,7 @@ end
 
 function public.is_player(name, current)
     local realm = GetCVar('realmName')
-    return (not current and m.index(aux_characters[realm])[name]/false) or UnitName('player') == name
+    return not current and Aux.safe_index(aux_characters, realm, name) or UnitName('player') == name
 end
 
 function public.unmodified()

@@ -234,7 +234,7 @@ function private.start_real_time_scan(query, search, continuation)
                 if search.auto_buy then
                     ctrl.suspend()
                     Aux.place_bid('list', auction_record.index, auction_record.buyout_price, Aux.f(ctrl.resume, true))
-                    Aux.control.new_thread(Aux.control.sleep, 10, Aux.f(ctrl.resume, false))
+                    Aux.control.thread(Aux.control.sleep, 10, Aux.f(ctrl.resume, false))
                 else
                     tinsert(new_records, auction_record)
                 end
@@ -330,7 +330,7 @@ function private.start_search(queries, continuation)
             if search.auto_buy then
                 ctrl.suspend()
                 Aux.place_bid('list', auction_record.index, auction_record.buyout_price, Aux.f(ctrl.resume, true))
-                Aux.control.new_thread(Aux.control.sleep, 10, Aux.f(ctrl.resume, false))
+                Aux.control.thread(Aux.control.sleep, 10, Aux.f(ctrl.resume, false))
             elseif getn(search.records) < 1000 then
                 tinsert(search.records, auction_record)
                 if getn(search.records) == 1000 then
@@ -475,7 +475,7 @@ do
                 search.table:RemoveAuctionRecord(record)
             end,
             function(index)
-                if Aux.index(search.table:GetSelection()).record/nil ~= record then
+                if search.table:GetSelection() and search.table:GetSelection().record ~= record then
                     return
                 end
 
@@ -643,7 +643,7 @@ function private.initialize_class_dropdown()
         func = on_click,
     }
 
-    for i, class in pairs({ GetAuctionItemClasses() }) do
+    for i, class in { GetAuctionItemClasses() } do
         UIDropDownMenu_AddButton{
             text = class,
             value = i,
@@ -670,7 +670,7 @@ function private.initialize_subclass_dropdown()
             func = on_click,
         }
 
-        for i, subclass in pairs({ GetAuctionItemSubClasses(class_index) }) do
+        for i, subclass in { GetAuctionItemSubClasses(class_index) } do
             UIDropDownMenu_AddButton{
                 text = subclass,
                 value = i,
@@ -696,7 +696,7 @@ function private.initialize_slot_dropdown()
             func = on_click,
         }
 
-        for i, slot in pairs({ GetAuctionInvTypes(class_index, subclass_index) }) do
+        for i, slot in { GetAuctionInvTypes(class_index, subclass_index) } do
             local slot_name = getglobal(slot)
             UIDropDownMenu_AddButton{
                 text = slot_name,
@@ -731,11 +731,11 @@ function private.initialize_filter_dropdown()
     local function on_click()
         UIDropDownMenu_SetSelectedValue(m.filter_dropdown, this.value)
         m.filter_button:SetText(this.value)
-        if Aux.index(Aux.filter.filters[this.value]).input_type/'' == '' and this.value ~= 'and' and this.value ~= 'or' then
+        if (not Aux.filter.filters[this.value] or Aux.filter.filters[this.value].input_type == '') and this.value ~= 'and' and this.value ~= 'or' then
             m.filter_input:Hide()
         else
             local _, _, suggestions = Aux.filter.parse_query_string(UIDropDownMenu_GetSelectedValue(m.filter_dropdown)..'/')
-            m.filter_input:SetNumeric(Aux.index(Aux.filter.filters[this.value]).input_type/'number' == 'number')
+            m.filter_input:SetNumeric(not Aux.filter.filters[this.value] or Aux.filter.filters[this.value].input_type == 'number')
             m.filter_input.complete = Aux.completion.complete(function() return suggestions or {} end)
             m.filter_input:Show()
             m.filter_input:SetFocus()

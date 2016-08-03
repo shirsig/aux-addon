@@ -3,22 +3,6 @@ local m, public, private = Aux.module'util'
 function public.pass()
 end
 
-function public.sum(...)
-	local x = 0
-	for i=1,arg.n do
-		x = x + arg[i]
-	end
-	return x
-end
-
-function public.product(...)
-	local x = 0
-	for i=1,arg.n do
-		x = x * arg[i]
-	end
-	return x
-end
-
 function public.id(x)
 	return x
 end
@@ -104,7 +88,7 @@ function public.inventory()
 		end
 
 		if bag <= 4 then
-			return { bag, slot }, m.bag_type(bag)
+			return {bag, slot}, m.bag_type(bag)
 		end
 	end
 end
@@ -136,18 +120,9 @@ function public.without_sound(f)
     SetCVar('MasterSoundEffects', orig)
 end
 
-function public.iter(array)
-	local i = 0
-	return function()
-		local ret = {iter(array, i)}
-		i = ret[1]
-		return ret[2]
-	end
-end
-
 function public.any(xs, p)
 	local holds = false
-	for _, x in ipairs(xs) do
+	for _, x in xs do
 		holds = holds or p(x)
 	end
 	return holds
@@ -155,7 +130,7 @@ end
 
 function public.all(xs, p)
 	local holds = true
-	for _, x in ipairs(xs) do
+	for _, x in xs do
 		holds = holds and p(x)
 	end
 	return holds
@@ -173,9 +148,9 @@ end
 
 function public.filter(xs, p)
 	local ys = {}
-	for _, x in xs do
+	for k, x in xs do
 		if p(x) then
-			tinsert(ys, x)
+			ys[k] = x
 		end
 	end
 	return ys
@@ -183,18 +158,16 @@ end
 
 function public.map(xs, f)
 	local ys = {}
-	for _, x in xs do
-		tinsert(ys, f(x))
+	for k, x in xs do
+		ys[k] = f(x)
 	end
 	return ys
 end
 
 function public.take(n, xs)
 	local ys = {}
-	for i=1,n do
-		if xs[i] then
-			tinsert(ys, xs[i])
-		end
+	for i=1,min(n, getn(xs)) do
+		tinsert(ys, xs[i])
 	end
 	return ys
 end
@@ -224,40 +197,46 @@ function public.group_by(tables, equal)
 	return groups
 end
 
-function public.set(...)
-	local set = {}
-	for i=1,arg.n do
-		set[arg[i]] = true
+do
+	local mt = {
+		__call = function(self)
+			return
+		end,
+	}
+
+	local methods = {}
+
+	function methods:add(key)
+		self[key] = true
 	end
-	return set
-end
 
-function public.set_add(set, key)
-	set[key] = true
-end
-
-function public.set_remove(set, key)
-	set[key] = nil
-end
-
-function public.set_contains(set, key)
-	return set[key] ~= nil
-end
-
-function public.set_size(set)
-	local size = 0
-	for _,_ in set do
-		size = size + 1
+	function methods:remove(key)
+		self[key] = nil
 	end
-	return size
-end
 
-function public.set_to_array(set)
-	local array = {}
-	for element, _ in set do
-		tinsert(array, element)
+	function methods:size()
+		local size = 0
+		for _,_ in self do
+			size = size + 1
+		end
+		return size
 	end
-	return array
+
+	function methods:elements()
+		local elements = {}
+		for element, _ in self do
+			tinsert(elements, element)
+		end
+		return elements
+	end
+
+	function public.set(...)
+		local self = {}
+		for i=1,arg.n do
+			set[arg[i]] = true
+		end
+		return setmetatable(self, mt)
+	end
 end
 
 function public.join(array, separator)
@@ -269,14 +248,6 @@ function public.join(array, separator)
 		str = str..element
 	end
 	return str
-end
-
-function public.tokenize(str)
-	local tokens = {}
-	for token in string.gfind(str, '%S+') do
-		tinsert(tokens, token)
-	end
-	return tokens
 end
 
 function public.split(str, separator)
@@ -295,6 +266,14 @@ function public.split(str, separator)
 			return array
 		end
 	end
+end
+
+function public.tokenize(str)
+	local tokens = {}
+	for token in string.gfind(str, '%S+') do
+		tinsert(tokens, token)
+	end
+	return tokens
 end
 
 function public.format_money(money, exact, color)
@@ -319,15 +298,15 @@ function public.format_money(money, exact, color)
 
 	local fmt = GSC_START
 	if g > 0 then
-		gsc = gsc..string.format(fmt, GSC_GOLD, g)
+		gsc = gsc..format(fmt, GSC_GOLD, g)
 		fmt = GSC_PART
 	end
 	if s > 0 or c > 0 then
-		gsc = gsc..string.format(fmt, GSC_SILVER, s)
+		gsc = gsc..format(fmt, GSC_SILVER, s)
 		fmt = GSC_PART
 	end
 	if c > 0 then
-		gsc = gsc..string.format(fmt, GSC_COPPER, c)
+		gsc = gsc..format(fmt, GSC_COPPER, c)
 	end
 	if gsc == '' then
 		gsc = GSC_NONE

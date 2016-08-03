@@ -462,7 +462,7 @@ function private.update_inventory_records()
     end
 
     m.inventory_records = {}
-    for _, auction_candidate in pairs(auction_candidate_map) do
+    for _, auction_candidate in auction_candidate_map do
         tinsert(m.inventory_records, auction_candidate)
     end
     sort(m.inventory_records, function(a, b) return a.name < b.name end)

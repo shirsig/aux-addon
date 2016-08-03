@@ -43,7 +43,7 @@ function private.post_auction(slot, k)
 		Aux.control.event_listener('CHAT_MSG_SYSTEM', function()
 			if arg1 == ERR_AUCTION_STARTED then
 				c()
-				return Aux.control.kill
+				Aux.control.kill()
 			end
 		end)
 	else
@@ -69,7 +69,7 @@ end
 function public.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, callback)
 	m.stop()
 
-	local thread_id = Aux.control.new_thread(m.process)
+	local thread_id = Aux.control.thread(m.process)
 
 	m.state = {
 		thread_id = thread_id,

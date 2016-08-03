@@ -73,13 +73,13 @@ function SlashCmdList.AUX(command)
 	elseif arguments[1] == 'chars' then
 		local realm = GetCVar('realmName')
 		local chars = {}
-		for name, _ in pairs(aux_characters[realm] or {}) do
+		for name, _ in aux_characters[realm] or {} do
 			tinsert(chars, name)
 		end
 		if getn(chars) > 0 then
 			Aux.log('Your characters: "'..Aux.util.join(chars, ', ')..'".')
 		else
-			Aux.log('You don\'t have any additional characters. Type "/aux addchar NAME" to add one.')
+			Aux.log('You don\'t have any additional characters. To add your characters type "/aux chars add NAME1 NAME2 NAME3...".')
 		end
 	else
 		Aux.log('Unknown command: "'..command..'"')

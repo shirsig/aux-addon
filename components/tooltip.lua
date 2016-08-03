@@ -48,7 +48,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
     quantity = IsShiftKeyDown() and quantity or 1
 
     if aux_tooltip_disenchant_source then
-        local color = {r=0.7, g=0.7, b=0.7 }
+        local color = {r=0.7, g=0.7, b=0.7}
 
         local type, range = Aux.disenchant.source(item_id)
 
@@ -105,7 +105,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
         end
     end
 
-    local color = {r=1, g=1, b=0.6 }
+    local color = {r=1, g=1, b=0.6}
 
     local auctionable = not item_info or Aux.info.auctionable(Aux.info.tooltip(function(tt) tt:SetHyperlink(item_info.itemstring) end), item_info.quality)
     local item_key = (item_id or 0)..':'..(suffix_id or 0)
