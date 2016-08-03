@@ -52,7 +52,6 @@ function private.find_charge_item_slot()
 end
 
 function private.move_item(from_slot, to_slot, amount, k)
-
 	if m.locked(from_slot) or m.locked(to_slot) then
 		return Aux.control.wait(k)
 	end
@@ -80,7 +79,6 @@ function private.process()
 		m.state.target_slot = m.find_charge_item_slot()
 		return m.stop()
 	end
-
 	if m.stack_size(m.state.target_slot) > m.state.target_size then
 		local slot = m.find_item_slot(true) or m.find_empty_slot()
 		if slot then
@@ -102,24 +100,18 @@ function private.process()
 			)
 		end
 	end
-		
 	return m.stop()
 end
 
 function public.stop()
 	if m.state then
 		Aux.control.kill_thread(m.state.thread_id)
-
 		local callback, slot = m.state.callback, m.state.target_slot
 		if slot and not m.matching_item(slot) then
 			slot = nil
 		end
-		
 		m.state = nil
-		
-		if callback then
-			callback(slot)
-		end
+		Aux.safe_call(callback, slot)
 	end
 end
 
@@ -127,7 +119,6 @@ function public.start(item_key, size, callback)
 	m.stop()
 
 	local thread_id = Aux.control.thread(m.process)
-
 	m.state = {
 		thread_id = thread_id,
 		item_key = item_key,

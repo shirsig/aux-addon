@@ -1,7 +1,7 @@
 local m, public, private = Aux.module'control'
 
 private.event_frame = CreateFrame('Frame')
-private.event_listeners = {}
+private.listeners = {}
 private.threads = {}
 public.thread_id = nil
 
@@ -10,34 +10,22 @@ function public.LOAD()
 	m.event_frame:SetScript('OnEvent', m.on_event)
 end
 
-do
-	local active_listener
-
-	function public.kill(...)
-		active_listener.killed = arg.n == 0 or arg[1]
-	end
-
-	function private.on_event()
-		for thread_id, listener in m.event_listeners do
-			if event == listener.event and not listener.killed then
-				m.thread_id = thread_id
-				active_listener = listener
-				listener.cb()
-				active_listener = nil
-				m.thread_id = nil
-			end
+function private.on_event()
+	for _, listener in m.listeners do
+		if event == listener.event and not listener.killed then
+			listener.cb(listener.kill)
 		end
 	end
 end
 
 function private.on_update()
-	for _, listener in m.event_listeners do
-		if not Aux.util.any(m.event_listeners, function(l) return not l.killed and l.event == listener.event end) then
+	for _, listener in m.listeners do
+		if not Aux.util.any(m.listeners, function(l) return not l.killed and l.event == listener.event end) then
 			m.event_frame:UnregisterEvent(listener.event)
 		end
 	end
 
-	m.event_listeners = Aux.util.filter(m.event_listeners, function(l) return not l.killed end)
+	m.listeners = Aux.util.filter(m.listeners, function(l) return not l.killed end)
 	m.threads = Aux.util.filter(m.threads, function(th) return not th.killed end)
 
 	for thread_id, thread in m.threads do
@@ -54,17 +42,29 @@ function private.on_update()
 	end
 end
 
+function public.kill_listener(listener_id)
+	for _, listener in {m.listeners[listener_id]} do
+		listener.killed = true
+	end
+end
+
+function public.kill_thread(thread_id)
+	for _, thread in {m.threads[thread_id]} do
+		thread.killed = true
+	end
+end
+
 function public.event_listener(event, cb)
-	local thread_id = Aux.unique()
-	m.event_listeners[thread_id] = { event=event, cb=cb }
+	local listener_id = Aux.unique()
+	m.listeners[listener_id] = { event=event, cb=cb, kill=function(...) if arg.n == 0 or arg[1] then m.kill_listener(listener_id) end end }
 	m.event_frame:RegisterEvent(event)
-	return thread_id
+	return listener_id
 end
 
 function public.on_next_event(event, callback)
-	m.event_listener(event, function()
+	m.event_listener(event, function(kill)
 		callback()
-		m.kill()
+		kill()
 	end)
 end
 
@@ -76,12 +76,6 @@ function public.thread(k, ...)
 	local thread_id = Aux.unique()
 	m.threads[thread_id] = { k = Aux.f(k, unpack(arg)) }
 	return thread_id
-end
-
-function public.kill_thread(thread_id)
-	if m.threads[thread_id] then
-		m.threads[thread_id].killed = true
-	end
 end
 
 function public.await(k)

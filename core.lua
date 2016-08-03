@@ -295,11 +295,11 @@ do
         if money >= amount then
             locked = true
 
-            m.control.event_listener('CHAT_MSG_SYSTEM', function()
+            m.control.event_listener('CHAT_MSG_SYSTEM', function(kill)
                 if arg1 == ERR_AUCTION_BID_PLACED then
                     Aux.safe_call(on_success)
                     locked = false
-                    Aux.control.kill()
+                    kill()
                 end
             end)
         end
@@ -322,11 +322,11 @@ do
         locked = true
 
         CancelAuction(index)
-        m.control.event_listener('CHAT_MSG_SYSTEM', function()
+        m.control.event_listener('CHAT_MSG_SYSTEM', function(kill)
             if arg1 == ERR_AUCTION_REMOVED then
                 Aux.safe_call(on_success)
                 locked = false
-                Aux.control.kill()
+                kill()
             end
         end)
     end

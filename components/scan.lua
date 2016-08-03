@@ -8,7 +8,7 @@ do
 	local scan_states = {}
 
 	function public.start(params)
-		for old_state in {scan_states[params.type]} do
+		for _, old_state in {scan_states[params.type]} do
 			m.abort(old_state.id)
 		end
 		local thread_id = Aux.control.thread(Aux.f(m.wait_for_callback, params.on_scan_start, m.scan))
@@ -215,8 +215,8 @@ end
 
 function private.wait_for_list_results(c)
     local updated, last_update
-    Aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE', function()
-	    Aux.control.kill(-c)
+    Aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE', function(kill)
+	    kill(-c)
         last_update = GetTime()
         updated = true
     end)
