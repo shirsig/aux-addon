@@ -1,11 +1,11 @@
-local m, public, private = Aux.module'filter'
+local m, public, private = aux.module'filter'
 
 function private.default_filter(str)
     return {
         input_type = '',
         validator = function()
             return function(auction_record)
-                return Aux.util.any(auction_record.tooltip, function(entry)
+                return aux.util.any(auction_record.tooltip, function(entry)
                     return strfind(strupper(entry.left_text or ''), strupper(str or ''), 1, true) or strfind(strupper(entry.right_text or ''), strupper(str or ''), 1, true)
                 end)
             end
@@ -19,7 +19,7 @@ public.filters = {
         input_type = '',
         validator = function()
             return function(auction_record)
-                return auction_record.usable and not Aux.info.tooltip_match(ITEM_SPELL_KNOWN, auction_record.tooltip)
+                return auction_record.usable and not aux.info.tooltip_match(ITEM_SPELL_KNOWN, auction_record.tooltip)
             end
         end,
     },
@@ -35,7 +35,7 @@ public.filters = {
         input_type = 'string',
         validator = function(name)
             return function(auction_record)
-                return strlower(Aux.info.item(auction_record.item_id).name) == name
+                return strlower(aux.info.item(auction_record.item_id).name) == name
             end
         end
     },
@@ -43,7 +43,7 @@ public.filters = {
     ['left'] = {
         input_type = {'30m', '2h', '8h', '24h'},
         validator = function(duration)
-            local code = Aux.util.key(duration, {'30m', '2h', '8h', '24h'})
+            local code = aux.util.key(duration, {'30m', '2h', '8h', '24h'})
             return function(auction_record)
                 return auction_record.duration == code
             end
@@ -53,7 +53,7 @@ public.filters = {
     ['rarity'] = {
         input_type = {'poor', 'common', 'uncommon', 'rare', 'epic'},
         validator = function(rarity)
-            local code = Aux.util.key(rarity, {'poor', 'common', 'uncommon', 'rare', 'epic'}) - 1
+            local code = aux.util.key(rarity, {'poor', 'common', 'uncommon', 'rare', 'epic'}) - 1
             return function(auction_record)
                 return auction_record.quality == code
             end
@@ -119,8 +119,8 @@ public.filters = {
         validator = function(pct)
             return function(auction_record)
                 return auction_record.unit_buyout_price > 0
-                        and Aux.history.value(auction_record.item_key)
-                        and auction_record.unit_buyout_price / Aux.history.value(auction_record.item_key) * 100 <= pct
+                        and aux.history.value(auction_record.item_key)
+                        and auction_record.unit_buyout_price / aux.history.value(auction_record.item_key) * 100 <= pct
             end
         end
     },
@@ -130,8 +130,8 @@ public.filters = {
         validator = function(pct)
             return function(auction_record)
                 return auction_record.unit_buyout_price > 0
-                        and Aux.history.value(auction_record.item_key)
-                        and auction_record.unit_buyout_price / Aux.history.value(auction_record.item_key) * 100 <= pct
+                        and aux.history.value(auction_record.item_key)
+                        and auction_record.unit_buyout_price / aux.history.value(auction_record.item_key) * 100 <= pct
             end
         end
     },
@@ -140,7 +140,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                return Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
+                return aux.history.value(auction_record.item_key) and aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
             end
         end
     },
@@ -149,7 +149,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                return auction_record.buyout_price > 0 and Aux.history.value(auction_record.item_key) and Aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
+                return auction_record.buyout_price > 0 and aux.history.value(auction_record.item_key) and aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
             end
         end
     },
@@ -158,7 +158,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local disenchant_value = Aux.disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
+                local disenchant_value = aux.disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
                 return disenchant_value and disenchant_value - auction_record.bid_price >= amount
             end
         end
@@ -168,7 +168,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local disenchant_value = Aux.disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
+                local disenchant_value = aux.disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
                 return auction_record.buyout_price > 0 and disenchant_value and disenchant_value - auction_record.buyout_price >= amount
             end
         end
@@ -178,7 +178,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local vendor_price = Aux.cache.merchant_info(auction_record.item_id)
+                local vendor_price = aux.cache.merchant_info(auction_record.item_id)
                 return vendor_price and vendor_price * auction_record.aux_quantity - auction_record.bid_price >= amount
             end
         end
@@ -188,7 +188,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local vendor_price = Aux.cache.merchant_info(auction_record.item_id)
+                local vendor_price = aux.cache.merchant_info(auction_record.item_id)
                 return auction_record.buyout_price > 0 and vendor_price and vendor_price * auction_record.aux_quantity - auction_record.buyout_price >= amount
             end
         end
@@ -240,27 +240,27 @@ function private.blizzard_filter_parser()
             else
                 return nil, 'Erroneous level range modifier'
             end
-        elseif Aux.info.item_class_index(str) and not (filters.class and not filters.subclass and str == strlower(({ GetAuctionItemClasses() })[10])) then
-            class_index = Aux.info.item_class_index(str)
+        elseif aux.info.item_class_index(str) and not (filters.class and not filters.subclass and str == strlower(({ GetAuctionItemClasses() })[10])) then
+            class_index = aux.info.item_class_index(str)
             if not filters.class then
                 filter = {'class', str}
             else
                 return nil, 'Erroneous item class modifier'
             end
-        elseif class_index and Aux.info.item_subclass_index(class_index, str) then
-            subclass_index = Aux.info.item_subclass_index(class_index, str)
+        elseif class_index and aux.info.item_subclass_index(class_index, str) then
+            subclass_index = aux.info.item_subclass_index(class_index, str)
             if not filters.subclass then
                 filter = {'subclass', str}
             else
                 return nil, 'Erroneous item subclass modifier'
             end
-        elseif subclass_index and Aux.info.item_slot_index(class_index, subclass_index, str) then
+        elseif subclass_index and aux.info.item_slot_index(class_index, subclass_index, str) then
             if not filters.slot then
                 filter = {'slot', str}
             else
                 return nil, 'Erroneous item slot modifier'
             end
-        elseif Aux.info.item_quality_index(str) then
+        elseif aux.info.item_quality_index(str) then
             if not filters.quality then
                 filter = {'quality', str}
             else
@@ -310,7 +310,7 @@ end
 
 function private.parse_parameter(input_type, str)
     if input_type == 'money' then
-        local money = Aux.money.from_string(str)
+        local money = aux.money.from_string(str)
         if money and money > 0 then
             return money
         end
@@ -324,7 +324,7 @@ function private.parse_parameter(input_type, str)
             return str
         end
     elseif type(input_type) == 'table' then
-        local choice = Aux.util.key(str, input_type)
+        local choice = aux.util.key(str, input_type)
         if choice then
             return choice
         end
@@ -334,7 +334,7 @@ end
 function public.parse_query_string(str)
     local components = { blizzard = {}, post = {} }
     local blizzard_filter_parser = m.blizzard_filter_parser()
-    local parts = Aux.util.map(Aux.util.split(str, '/'), function(part) return strlower(Aux.util.trim(part)) end)
+    local parts = aux.util.map(aux.util.split(str, '/'), function(part) return strlower(aux.util.trim(part)) end)
 
     local i = 1
     while parts[i] do
@@ -412,16 +412,16 @@ function public.query(query_string)
 end
 
 function public.queries(query_string)
-    local parts = Aux.util.split(query_string, ';')
+    local parts = aux.util.split(query_string, ';')
 
     local queries = {}
     for _, str in ipairs(parts) do
-        str = Aux.util.trim(str)
+        str = aux.util.trim(str)
 
         local query, _, error = m.query(str)
 
         if not query then
-            Aux.log('Invalid filter:', error)
+            aux.log('Invalid filter:', error)
             return
         else
             tinsert(queries, query)
@@ -469,7 +469,7 @@ function private.suggestions(components)
     end
 
     -- subclasses
-    local class_index = blizzard_filters.class and Aux.info.item_class_index(blizzard_filters.class)
+    local class_index = blizzard_filters.class and aux.info.item_class_index(blizzard_filters.class)
     if class_index and not blizzard_filters.subclass then
         for _, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
             tinsert(suggestions, subclass)
@@ -477,9 +477,9 @@ function private.suggestions(components)
     end
 
     -- slots
-    local subclass_index = class_index and blizzard_filters.subclass and Aux.info.item_subclass_index(class_index, blizzard_filters.subclass)
+    local subclass_index = class_index and blizzard_filters.subclass and aux.info.item_subclass_index(class_index, blizzard_filters.subclass)
     if subclass_index and not blizzard_filters.slot then
-        for _, invtype in ipairs({ GetAuctionInvTypes(class_index, Aux.info.item_subclass_index(class_index, blizzard_filters.subclass)) }) do
+        for _, invtype in ipairs({ GetAuctionInvTypes(class_index, aux.info.item_subclass_index(class_index, blizzard_filters.subclass)) }) do
             tinsert(suggestions, getglobal(invtype))
         end
     end
@@ -572,9 +572,9 @@ function private.prettified_query_string(components)
     for _, filter in components.blizzard do
         blizzard_filters[filter[1]] = filter[2] or true
         if filter[1] == 'exact' then
-            prettified.prepend(Aux.info.display_name(Aux.cache.item_id(m.unquote(blizzard_filters.name))) or Aux.gui.inline_color({216, 225, 211, 1})..'['..m.unquote(blizzard_filters.name)..']|r')
+            prettified.prepend(aux.info.display_name(aux.cache.item_id(m.unquote(blizzard_filters.name))) or aux.gui.inline_color({216, 225, 211, 1})..'['..m.unquote(blizzard_filters.name)..']|r')
         elseif filter[1] ~= 'name' then
-            prettified.append(Aux.gui.inline_color({216, 225, 211, 1})..(filter[2] or filter[1])..'|r')
+            prettified.append(aux.gui.inline_color({216, 225, 211, 1})..(filter[2] or filter[1])..'|r')
         end
     end
 
@@ -582,7 +582,7 @@ function private.prettified_query_string(components)
         if m.unquote(blizzard_filters.name) == '' then
             prettified.prepend('|cffff0000'..'No Filter'..'|r')
         else
-            prettified.prepend(Aux.gui.inline_color({216, 225, 211, 1})..m.unquote(blizzard_filters.name)..'|r')
+            prettified.prepend(aux.gui.inline_color({216, 225, 211, 1})..m.unquote(blizzard_filters.name)..'|r')
         end
     end
 
@@ -623,11 +623,11 @@ function private.blizzard_query(components)
 
     local item_info, class_index, subclass_index, slot_index
     if filters.exact then
-        local item_id = Aux.cache.item_id(filters.name)
-        item_info = Aux.info.item(item_id)
-        class_index = item_info and Aux.info.item_class_index(item_info.class)
-        subclass_index = class_index and item_info.subclass and Aux.info.item_subclass_index(class_index, item_info.subclass)
-        slot_index = subclass_index and item_info.slot and Aux.info.item_slot_index(class_index, subclass_index, item_info.slot)
+        local item_id = aux.cache.item_id(filters.name)
+        item_info = aux.info.item(item_id)
+        class_index = item_info and aux.info.item_class_index(item_info.class)
+        subclass_index = class_index and item_info.subclass and aux.info.item_subclass_index(class_index, item_info.subclass)
+        slot_index = subclass_index and item_info.slot and aux.info.item_slot_index(class_index, subclass_index, item_info.slot)
     end
 
     if item_info then
@@ -641,11 +641,11 @@ function private.blizzard_query(components)
     else
         query.min_level = tonumber(filters.min_level)
         query.max_level = tonumber(filters.max_level)
-        query.class = filters.class and filters.class and Aux.info.item_class_index(filters.class)
-        query.subclass = query.class and filters.subclass and Aux.info.item_subclass_index(query.class, filters.subclass)
-        query.slot = query.subclass and filters.slot and Aux.info.item_slot_index(query.class, query.subclass, filters.slot)
+        query.class = filters.class and filters.class and aux.info.item_class_index(filters.class)
+        query.subclass = query.class and filters.subclass and aux.info.item_subclass_index(query.class, filters.subclass)
+        query.slot = query.subclass and filters.slot and aux.info.item_slot_index(query.class, query.subclass, filters.slot)
         query.usable = filters.usable and 1
-        query.quality = filters.quality and Aux.info.item_quality_index(filters.quality)
+        query.quality = filters.quality and aux.info.item_quality_index(filters.quality)
     end
 
     return query
@@ -662,7 +662,7 @@ function private.validator(components)
 
     return function(record)
         for _, filter in components.blizzard do
-            if filter[1] == 'exact' and strlower(Aux.info.item(record.item_id).name) ~= components.blizzard[1][2] then
+            if filter[1] == 'exact' and strlower(aux.info.item(record.item_id).name) ~= components.blizzard[1][2] then
                 return false
             end
         end
@@ -678,15 +678,15 @@ function private.validator(components)
                 if name == 'not' then
                     tinsert(stack, not args[1])
                 elseif name == 'and' then
-                    tinsert(stack, Aux.util.all(args, Aux.util.id))
+                    tinsert(stack, aux.util.all(args, aux.util.id))
                 elseif name == 'or' then
-                    tinsert(stack, Aux.util.any(args, Aux.util.id))
+                    tinsert(stack, aux.util.any(args, aux.util.id))
                 end
             elseif type == 'filter' then
                 tinsert(stack, validators[i](record) and true or false)
             end
         end
-        return Aux.util.all(stack, Aux.util.id)
+        return aux.util.all(stack, aux.util.id)
     end
 end
 

@@ -1,4 +1,4 @@
-local m, public, private = Aux.tab(4, 'bids_tab')
+local m, public, private = aux.tab(4, 'bids_tab')
 
 private.auction_records = nil
 
@@ -34,7 +34,7 @@ function public.scan_bids()
 
     m.auction_records = {}
     m.update_listing()
-    Aux.scan.start{
+    aux.scan.start{
         type = 'bidder',
         queries = {{ blizzard_query = {} }},
         on_page_loaded = function(page, total_pages)
@@ -58,7 +58,7 @@ end
 
 function private.test(record)
     return function(index)
-        local auction_info = Aux.info.auction(index, 'bidder')
+        local auction_info = aux.info.auction(index, 'bidder')
         return auction_info and auction_info.search_signature == record.search_signature
     end
 end
@@ -74,9 +74,9 @@ do
             return
         end
 
-        Aux.scan.abort(scan_id)
+        aux.scan.abort(scan_id)
         state = SEARCHING
-        scan_id = Aux.scan_util.find(
+        scan_id = aux.scan_util.find(
             record,
             m.status_bar,
             function()
@@ -93,10 +93,10 @@ do
                 if not record.high_bidder then
                     m.bid_button:SetScript('OnClick', function()
                         if m.test(record)(index) and m.listing:ContainsRecord(record) then
-                            Aux.place_bid('bidder', index, record.bid_price, record.bid_price < record.buyout_price and function()
-                                Aux.info.bid_update(record)
+                            aux.place_bid('bidder', index, record.bid_price, record.bid_price < record.buyout_price and function()
+                                aux.info.bid_update(record)
                                 m.listing:SetDatabase()
-                            end or Aux.f(m.listing.RemoveAuctionRecord, m.listing, record))
+                            end or aux.f(m.listing.RemoveAuctionRecord, m.listing, record))
                         end
                     end)
                     m.bid_button:Enable()
@@ -105,7 +105,7 @@ do
                 if record.buyout_price > 0 then
                     m.buyout_button:SetScript('OnClick', function()
                         if m.test(record)(index) and m.listing:ContainsRecord(record) then
-                            Aux.place_bid('bidder', index, record.buyout_price, Aux.f(m.listing.RemoveAuctionRecord, m.listing, record))
+                            aux.place_bid('bidder', index, record.buyout_price, aux.f(m.listing.RemoveAuctionRecord, m.listing, record))
                         end
                     end)
                     m.buyout_button:Enable()
@@ -132,7 +132,7 @@ do
         elseif state == FOUND and not m.test(selection.record)(found_index) then
             m.buyout_button:Disable()
             m.bid_button:Disable()
-            if not Aux.bid_in_progress() then
+            if not aux.bid_in_progress() then
                 state = IDLE
             end
         end

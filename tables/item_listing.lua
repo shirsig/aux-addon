@@ -1,4 +1,4 @@
-local m, public, private = Aux.module'item_listing'
+local m, public, private = aux.module'item_listing'
 
 local ROW_HEIGHT = 39
 
@@ -60,7 +60,7 @@ function public.create(parent, on_click, on_enter, on_leave, selected)
 	scrollBar:SetWidth(12)
 	local thumbTex = scrollBar:GetThumbTexture()
 	thumbTex:SetPoint('CENTER', 0, 0)
-	thumbTex:SetTexture(unpack(Aux.gui.config.content_color.backdrop))
+	thumbTex:SetTexture(unpack(aux.gui.config.content_color.backdrop))
 	thumbTex:SetHeight(50)
 	thumbTex:SetWidth(12)
 	getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
@@ -87,7 +87,7 @@ function public.create(parent, on_click, on_enter, on_leave, selected)
 				on_leave()
 			end)
 
-			row.item = Aux.gui.item(row)
+			row.item = aux.gui.item(row)
 			row.item:EnableMouse(nil)
 			row.item:SetScale(0.9)
 			row.item:SetPoint('LEFT', 2.5, 0)

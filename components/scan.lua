@@ -1,4 +1,4 @@
-local m, public, private = Aux.module'scan'
+local m, public, private = aux.module'scan'
 
 private.PAGE_SIZE = 50
 
@@ -11,7 +11,7 @@ do
 		for _, old_state in {scan_states[params.type]} do
 			m.abort(old_state.id)
 		end
-		local thread_id = Aux.control.thread(Aux.f(m.wait_for_callback, params.on_scan_start, m.scan))
+		local thread_id = aux.control.thread(aux.f(m.wait_for_callback, params.on_scan_start, m.scan))
 		scan_states[params.type] = {
 			id = thread_id,
 			params = params,
@@ -23,29 +23,29 @@ do
 		local aborted = {}
 		for type, state in scan_states do
 			if not scan_id or state.id == scan_id then
-				Aux.control.kill_thread(state.id)
+				aux.control.kill_thread(state.id)
 				scan_states[type] = nil
 				tinsert(aborted, state)
 			end
 		end
 		for _, state in aborted do
-			Aux.safe_call(state.params.on_abort)
+			aux.safe_call(state.params.on_abort)
 		end
 	end
 
 	function private.complete()
 		local on_complete = m.state.params.on_complete
 		scan_states[m.state.params.type] = nil
-		Aux.safe_call(on_complete)
+		aux.safe_call(on_complete)
 	end
 
-	private.state = Aux.dynamic_table(function()
-		local _, state = next(Aux.util.filter(scan_states, function(state) return state.id == Aux.control.thread_id end))
+	private.state = aux.dynamic_table(function()
+		local _, state = next(aux.util.filter(scan_states, function(state) return state.id == aux.control.thread_id end))
 		return state
 	end)
 end
 
-private.query = Aux.dynamic_table(function()
+private.query = aux.dynamic_table(function()
     return m.state.params.queries[m.state.query_index]
 end)
 
@@ -67,7 +67,7 @@ function private.wait_for_callback(...)
 	if ok then
 		return k()
 	else
-		return Aux.control.when(function() return ok end, function() return k(unpack(ret)) end)
+		return aux.control.when(function() return ok end, function() return k(unpack(ret)) end)
 	end
 end
 
@@ -104,8 +104,8 @@ function private.process_query()
 end
 
 function private.submit_query()
-	Aux.control.when(function() return m.state.params.type ~= 'list' or CanSendAuctionQuery() end, function()
-		Aux.safe_call(m.state.params.on_submit_query)
+	aux.control.when(function() return m.state.params.type ~= 'list' or CanSendAuctionQuery() end, function()
+		aux.safe_call(m.state.params.on_submit_query)
 		m.last_query_time[m.state.params.type] = GetTime()
 		if m.state.params.type == 'bidder' then
 			GetBidderAuctionItems(m.state.page)
@@ -146,19 +146,19 @@ function private.scan_page(i)
 		end
 	end
 
-	local auction_info = Aux.info.auction(i, m.state.params.type)
+	local auction_info = aux.info.auction(i, m.state.params.type)
 	if auction_info and (auction_info.owner or m.state.params.ignore_owner or aux_ignore_owner) then
 		auction_info.index = i
 		auction_info.page = m.state.page
 		auction_info.blizzard_query = m.query.blizzard_query
 		auction_info.query_type = m.state.params.type
 
-		Aux.history.process_auction(auction_info)
+		aux.history.process_auction(auction_info)
 
-		if Aux.safe_call(m.state.params.auto_buy_validator, auction_info) then
-			local c = Aux.control.await(recurse)
-			Aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, Aux.f(c, true))
-			return Aux.control.thread(Aux.control.sleep, 10, Aux.f(c, false))
+		if aux.safe_call(m.state.params.auto_buy_validator, auction_info) then
+			local c = aux.control.await(recurse)
+			aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, aux.f(c, true))
+			return aux.control.thread(aux.control.sleep, 10, aux.f(c, false))
 		elseif not m.query.validator or m.query.validator(auction_info) then
 			return m.wait_for_callback(m.state.params.on_auction, auction_info, function(removed)
 				if removed then
@@ -178,7 +178,7 @@ function private.timeout(type)
 end
 
 function private.wait_for_results()
-    local c = Aux.control.await(function()
+    local c = aux.control.await(function()
         if m.timeout(m.state.params.type) then
             return m.submit_query()
         else
@@ -194,10 +194,10 @@ function private.wait_for_results()
     end)
 
     local type = m.state.params.type
-    Aux.control.as_soon_as(function() return -c or m.timeout(type) end, c)
+    aux.control.as_soon_as(function() return -c or m.timeout(type) end, c)
 
     if m.state.params.type == 'bidder' then
-        return Aux.control.as_soon_as(function() return Aux.bids_loaded end, c)
+        return aux.control.as_soon_as(function() return aux.bids_loaded end, c)
     elseif m.state.params.type == 'owner' then
         return m.wait_for_owner_results(c)
     elseif m.state.params.type == 'list' then
@@ -206,22 +206,22 @@ function private.wait_for_results()
 end
 
 function private.wait_for_owner_results(c)
-    if m.state.page == Aux.current_owner_page then
+    if m.state.page == aux.current_owner_page then
         return c()
     else
-        return Aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', c)
+        return aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', c)
     end
 end
 
 function private.wait_for_list_results(c)
     local updated, last_update
-    Aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE', function(kill)
+    aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE', function(kill)
 	    kill(-c)
         last_update = GetTime()
         updated = true
     end)
     local ignore_owner = m.state.params.ignore_owner or aux_ignore_owner
-    return Aux.control.as_soon_as(function()
+    return aux.control.as_soon_as(function()
         -- short circuiting order important, owner_data_complete must be called iif an update has happened.
         local ok = updated and (ignore_owner or m.owner_data_complete('list')) or last_update and GetTime() - last_update > 5
         updated = false
@@ -231,7 +231,7 @@ end
 
 function private.owner_data_complete(type)
     for i=1,m.PAGE_SIZE do
-        local auction_info = Aux.info.auction(i, type)
+        local auction_info = aux.info.auction(i, type)
         if auction_info and not auction_info.owner then
             return false
         end

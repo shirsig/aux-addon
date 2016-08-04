@@ -1,4 +1,4 @@
-local m, public, private = Aux.module'persistence'
+local m, public, private = aux.module'persistence'
 
 aux_datasets = {}
 
@@ -6,7 +6,7 @@ do
     local realm, faction
 
     function public.LOAD()
-        Aux.control.as_soon_as(function() faction = UnitFactionGroup('player') return faction end, Aux.util.pass)
+        aux.control.as_soon_as(function() faction = UnitFactionGroup('player') return faction end, aux.util.pass)
         realm = GetCVar('realmName')
     end
 
@@ -60,8 +60,8 @@ function public.read_list(schema, str)
 
     local separator = schema[2]
     local element_type = schema[3]
-    local parts = Aux.util.split(str, separator)
-    return Aux.util.map(parts, function(part)
+    local parts = aux.util.split(str, separator)
+    return aux.util.map(parts, function(part)
         return m.read(element_type, part)
     end)
 end
@@ -69,16 +69,16 @@ end
 function public.write_list(schema, list)
     local separator = schema[2]
     local element_type = schema[3]
-    local parts = Aux.util.map(list, function(element)
+    local parts = aux.util.map(list, function(element)
         return m.write(element_type, element)
     end)
-    return Aux.util.join(parts, separator)
+    return aux.util.join(parts, separator)
 end
 
 function public.read_record(schema, str)
     local separator = schema[2]
     local record = {}
-    local parts = Aux.util.split(str, separator)
+    local parts = aux.util.split(str, separator)
     for i=3,getn(schema) do
         local key, type = next(schema[i])
         record[key] = m.read(type, parts[i - 2])
@@ -91,9 +91,10 @@ function public.write_record(schema, record)
     local parts = {}
     for i=3,getn(schema) do
         local key, type = next(schema[i])
+        aux.log(type, record[key], m.write(type, record[key]))
         tinsert(parts, m.write(type, record[key]))
     end
-    return Aux.util.join(parts, separator)
+    return aux.util.join(parts, separator)
 end
 
 function public.serialize(data, separator, compactor)

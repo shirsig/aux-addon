@@ -1,4 +1,4 @@
-local m, public, private = Aux.module'listing'
+local m, public, private = aux.module'listing'
 
 local ST_COUNT = 0
 
@@ -308,8 +308,8 @@ local methods = {
 
         local text = col:CreateFontString()
         text:SetJustifyV('CENTER')
-        text:SetFont(Aux.gui.config.font, Aux.gui.config.medium_font_size)
-        text:SetTextColor(unpack(Aux.gui.config.text_color.enabled))
+        text:SetFont(aux.gui.config.font, aux.gui.config.medium_font_size)
+        text:SetTextColor(unpack(aux.gui.config.text_color.enabled))
         text:SetAllPoints()
         col.text = text
         col:SetFontString(text)
@@ -336,7 +336,7 @@ local methods = {
         local colNum = getn(row.cols) + 1
         local col = CreateFrame('Button', nil, row)
         local text = col:CreateFontString()
-        text:SetFont(Aux.gui.config.font, ST_ROW_TEXT_SIZE)
+        text:SetFont(aux.gui.config.font, ST_ROW_TEXT_SIZE)
         text:SetJustifyV('CENTER')
         text:SetPoint('TOPLEFT', 1, -1)
         text:SetPoint('BOTTOMRIGHT', -1, 1)
@@ -392,9 +392,9 @@ local methods = {
         -- update the text size of the head cols
         for _, col in ipairs(st.headCols) do
             if st.sizes.headFontSize then
-                col.text:SetFont(Aux.gui.config.font, st.sizes.headFontSize)
+                col.text:SetFont(aux.gui.config.font, st.sizes.headFontSize)
             else
-                col.text:SetFont(Aux.gui.config.font, Aux.gui.config.medium_font_size)
+                col.text:SetFont(aux.gui.config.font, aux.gui.config.medium_font_size)
             end
         end
         st:Redraw()
@@ -433,14 +433,14 @@ function public.CreateScrollingTable(parent)
     st.scrollBar = scrollBar
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
-    thumbTex:SetTexture(unpack(Aux.gui.config.content_color.backdrop))
+    thumbTex:SetTexture(unpack(aux.gui.config.content_color.backdrop))
     thumbTex:SetHeight(50)
     thumbTex:SetWidth(12)
     getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
     getglobal(scrollBar:GetName()..'ScrollDownButton'):Hide()
 
     -- create head line at default position
-    st.headLine = Aux.gui.horizontal_line(st, 0)
+    st.headLine = aux.gui.horizontal_line(st, 0)
 
     -- add all the methods
     for name, func in methods do

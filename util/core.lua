@@ -1,4 +1,4 @@
-local m, public, private = Aux.module'util'
+local m, public, private = aux.module'util'
 
 function public.pass()
 end
@@ -141,13 +141,11 @@ do
 	end
 end
 
-function public.join(array, separator)
-	local str = ''
-	for i, element in ipairs(array) do
-		if i > 1 then
-			str = str..separator
-		end
-		str = str..element
+function public.join(parts, separator)
+	local str = parts[1]
+	for i=2,getn(parts) do
+		if not parts[i] then break end
+		str = str..separator..parts[i]
 	end
 	return str
 end
@@ -226,11 +224,10 @@ function public.bag_type(bag)
 		return 1
 	end
 
-	local link = GetInventoryItemLink('player', ContainerIDToInventoryID(bag))
-	if link then
-		local item_id = Aux.info.parse_hyperlink(GetInventoryItemLink('player', ContainerIDToInventoryID(bag)))
-		local item_info = Aux.info.item(item_id)
-		return Aux.info.item_subclass_index(3, item_info.subclass)
+	if GetInventoryItemLink('player', ContainerIDToInventoryID(bag)) then
+		local item_id = aux.info.parse_hyperlink(GetInventoryItemLink('player', ContainerIDToInventoryID(bag)))
+		local item_info = aux.info.item(item_id)
+		return aux.info.item_subclass_index(3, item_info.subclass)
 	end
 end
 
@@ -264,7 +261,7 @@ function public.format_money(money, exact, color)
 		-- Round to nearest silver
 		money = floor(money / 100 + 0.5) * 100
 	end
-	local g, s, c = Aux.money.to_GSC(money)
+	local g, s, c = aux.money.to_GSC(money)
 
 	local gsc = ''
 

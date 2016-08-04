@@ -1,4 +1,4 @@
-local m, public, private = Aux.module'history'
+local m, public, private = aux.module'history'
 
 local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}}}
 private.value_cache = {}
@@ -14,7 +14,7 @@ function private.new_record()
 end
 
 function private.load_data()
-	local dataset = Aux.persistence.load_dataset()
+	local dataset = aux.persistence.load_dataset()
 	dataset.history = dataset.history or {}
 	return dataset.history
 end
@@ -24,7 +24,7 @@ function private.read_record(item_key)
 
 	local record
 	if data[item_key] then
-		record = Aux.persistence.read(history_schema, data[item_key])
+		record = aux.persistence.read(history_schema, data[item_key])
 	else
 		record = m.new_record()
 	end
@@ -40,7 +40,7 @@ end
 function private.write_record(item_key, record)
 	m.value_cache[item_key] = nil
 	local data = m.load_data()
-	data[item_key] = Aux.persistence.write(history_schema, record)
+	data[item_key] = aux.persistence.write(history_schema, record)
 end
 
 function public.process_auction(auction_record)
@@ -72,7 +72,7 @@ function public.value(item_key)
 			local weighted_values = {}
 			local total_weight = 0
 			for _, data_point in item_record.data_points do
-				local weight = 0.99^Aux.util.round((item_record.data_points[1].time - data_point.time) / (60*60*24))
+				local weight = 0.99^aux.util.round((item_record.data_points[1].time - data_point.time) / (60*60*24))
 				total_weight = total_weight + weight
 				tinsert(weighted_values, {value = data_point.market_value, weight = weight})
 			end

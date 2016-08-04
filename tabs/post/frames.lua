@@ -1,4 +1,4 @@
-Aux.post_tab.FRAMES(function(m, public, private)
+aux.post_tab.FRAMES(function(m, public, private)
     private.frame = CreateFrame('Frame', nil, AuxFrame)
     m.frame:SetAllPoints()
     m.frame:SetScript('OnUpdate', m.on_update)
@@ -9,17 +9,17 @@ Aux.post_tab.FRAMES(function(m, public, private)
     m.frame.content:SetPoint('BOTTOMLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, 0)
     m.frame.content:SetPoint('BOTTOMRIGHT', AuxFrameContent, 'BOTTOMRIGHT', 0, 0)
 
-    m.frame.inventory = Aux.gui.panel(m.frame.content)
+    m.frame.inventory = aux.gui.panel(m.frame.content)
     m.frame.inventory:SetWidth(212)
     m.frame.inventory:SetPoint('TOPLEFT', 0, 0)
     m.frame.inventory:SetPoint('BOTTOMLEFT', 0, 0)
 
-    m.frame.parameters = Aux.gui.panel(m.frame.content)
+    m.frame.parameters = aux.gui.panel(m.frame.content)
     m.frame.parameters:SetHeight(173)
     m.frame.parameters:SetPoint('TOPLEFT', m.frame.inventory, 'TOPRIGHT', 2.5, 0)
     m.frame.parameters:SetPoint('TOPRIGHT', 0, 0)
 
-    m.frame.auctions = Aux.gui.panel(m.frame.content)
+    m.frame.auctions = aux.gui.panel(m.frame.content)
     m.frame.auctions:SetHeight(228)
     m.frame.auctions:SetPoint('BOTTOMLEFT', m.frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
     m.frame.auctions:SetPoint('BOTTOMRIGHT', 0, 0)
@@ -32,27 +32,27 @@ Aux.post_tab.FRAMES(function(m, public, private)
         checkbox:SetScript('OnClick', function()
             m.refresh = true
         end)
-        local label = Aux.gui.label(checkbox, Aux.gui.config.small_font_size)
+        local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
         label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
         label:SetText('Show hidden items')
         private.show_hidden_checkbox = checkbox
     end
 
-    Aux.gui.horizontal_line(m.frame.inventory, -48)
+    aux.gui.horizontal_line(m.frame.inventory, -48)
 
-    private.item_listing = Aux.item_listing.create(
+    private.item_listing = aux.item_listing.create(
         m.frame.inventory,
         function()
             if arg1 == 'LeftButton' then
                 m.set_item(this.item_record)
             elseif arg1 == 'RightButton' then
-                Aux.tab_group:set_tab(1)
-                Aux.search_tab.set_filter(strlower(Aux.info.item(this.item_record.item_id).name)..'/exact')
-                Aux.search_tab.execute(nil, false)
+                aux.tab_group:set_tab(1)
+                aux.search_tab.set_filter(strlower(aux.info.item(this.item_record.item_id).name)..'/exact')
+                aux.search_tab.execute(nil, false)
             end
         end,
         function()
-            Aux.info.set_tooltip(this.item_record.itemstring, this, 'ANCHOR_RIGHT')
+            aux.info.set_tooltip(this.item_record.itemstring, this, 'ANCHOR_RIGHT')
         end,
         function()
             GameTooltip:Hide()
@@ -62,7 +62,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         end
     )
 
-    private.auction_listing = Aux.listing.CreateScrollingTable(m.frame.auctions)
+    private.auction_listing = aux.listing.CreateScrollingTable(m.frame.auctions)
     m.auction_listing:SetColInfo({
         { name='Auctions', width=.12, align='CENTER' },
         { name='Left', width=.1, align='CENTER' },
@@ -75,7 +75,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
     m.auction_listing:EnableSorting(false)
     m.auction_listing:DisableSelection(true)
     m.auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
-        local column_index = Aux.util.key(column, column.row.cols)
+        local column_index = aux.util.key(column, column.row.cols)
         local unit_start_price, unit_buyout_price = m.undercut(row_data.record, m.stack_size_slider:GetValue(), button == 'RightButton')
         if column_index == 3 then
             m.stack_size_slider:SetValue(row_data.record.stack_size)
@@ -87,7 +87,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
     end)
 
     do
-        local status_bar = Aux.gui.status_bar(m.frame)
+        local status_bar = aux.gui.status_bar(m.frame)
         status_bar:SetWidth(265)
         status_bar:SetHeight(25)
         status_bar:SetPoint('TOPLEFT', AuxFrameContent, 'BOTTOMLEFT', 0, -6)
@@ -96,7 +96,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.status_bar = status_bar
     end
     do
-        local btn = Aux.gui.button(m.frame.parameters, 16)
+        local btn = aux.gui.button(m.frame.parameters, 16)
         btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
@@ -105,31 +105,31 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.post_button = btn
     end
     do
-        local btn = Aux.gui.button(m.frame.parameters, 16)
+        local btn = aux.gui.button(m.frame.parameters, 16)
         btn:SetPoint('TOPLEFT', m.post_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(80)
         btn:SetHeight(24)
         btn:SetText('Refresh')
         btn:SetScript('OnClick', function()
-            Aux.scan.abort(m.scan_id)
+            aux.scan.abort(m.scan_id)
             m.refresh_entries()
             m.refresh = true
         end)
         private.refresh_button = btn
     end
     do
-        local item = Aux.gui.item(m.frame.parameters)
+        local item = aux.gui.item(m.frame.parameters)
         item:SetPoint('TOPLEFT', 10, -8)
         item:EnableMouse()
         item:SetScript('OnReceiveDrag', function()
-            local item_info = Aux.cursor_item()
+            local item_info = aux.cursor_item()
             if item_info then
                 m.select_item(item_info.item_key)
             end
             ClearCursor()
         end)
         item:SetScript('OnClick', function()
-            local item_info = Aux.cursor_item()
+            local item_info = aux.cursor_item()
             if item_info then
                 m.select_item(item_info.item_key)
             end
@@ -143,7 +143,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         item:SetScript('OnEnter', function()
             highlight:Show()
             if m.selected_item then
-                Aux.info.set_tooltip(m.selected_item.itemstring, this, 'ANCHOR_RIGHT')
+                aux.info.set_tooltip(m.selected_item.itemstring, this, 'ANCHOR_RIGHT')
             end
         end)
         item:SetScript('OnLeave', function()
@@ -153,7 +153,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.item = item
     end
     do
-        local slider = Aux.gui.slider(m.frame.parameters)
+        local slider = aux.gui.slider(m.frame.parameters)
         slider:SetValueStep(1)
         slider:SetPoint('TOPLEFT', 16, -73)
         slider:SetWidth(190)
@@ -184,7 +184,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.stack_size_slider = slider
     end
     do
-        local slider = Aux.gui.slider(m.frame.parameters)
+        local slider = aux.gui.slider(m.frame.parameters)
         slider:SetValueStep(1)
         slider:SetPoint('TOPLEFT', m.stack_size_slider, 'BOTTOMLEFT', 0, -30)
         slider:SetWidth(190)
@@ -207,18 +207,18 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.stack_count_slider = slider
     end
     do
-        local dropdown = Aux.gui.dropdown(m.frame.parameters)
+        local dropdown = aux.gui.dropdown(m.frame.parameters)
         dropdown:SetPoint('TOPLEFT', m.stack_count_slider, 'BOTTOMLEFT', 0, -21)
         dropdown:SetWidth(90)
         dropdown:SetHeight(10)
-        local label = Aux.gui.label(dropdown, Aux.gui.config.small_font_size)
+        local label = aux.gui.label(dropdown, aux.gui.config.small_font_size)
         label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
         label:SetText('Duration')
         UIDropDownMenu_Initialize(dropdown, m.initialize_duration_dropdown)
         dropdown:SetScript('OnShow', function()
             UIDropDownMenu_Initialize(this, m.initialize_duration_dropdown)
         end)
-        local label = Aux.gui.label(dropdown, Aux.gui.config.medium_font_size)
+        local label = aux.gui.label(dropdown, aux.gui.config.medium_font_size)
         label:SetPoint('LEFT', dropdown, 'RIGHT', 25, 0)
         private.deposit = label
         private.duration_dropdown = dropdown
@@ -234,18 +234,18 @@ Aux.post_tab.FRAMES(function(m, public, private)
             m.write_settings(settings)
             m.refresh = true
         end)
-        local label = Aux.gui.label(checkbox, Aux.gui.config.small_font_size)
+        local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
         label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
         label:SetText('Hide this item')
         private.hide_checkbox = checkbox
     end
     do
-        local editbox = Aux.gui.editbox(m.frame.parameters)
+        local editbox = aux.gui.editbox(m.frame.parameters)
         editbox:SetPoint('TOPRIGHT', -65, -66)
         editbox:SetJustifyH('RIGHT')
         editbox:SetWidth(150)
         editbox:SetScript('OnTextChanged', function()
-            this.pretty:SetText(Aux.money.to_string(m.get_unit_start_price(), true, nil, 3))
+            this.pretty:SetText(aux.money.to_string(m.get_unit_start_price(), true, nil, 3))
             m.refresh = true
         end)
         editbox:SetScript('OnTabPressed', function()
@@ -265,19 +265,19 @@ Aux.post_tab.FRAMES(function(m, public, private)
             this.pretty:Hide()
         end)
         editbox:SetScript('OnEditFocusLost', function()
-            this:SetText(Aux.money.to_string(m.get_unit_start_price(), true, nil, 3, nil, true))
+            this:SetText(aux.money.to_string(m.get_unit_start_price(), true, nil, 3, nil, true))
             this.pretty:Show()
         end)
-        editbox.pretty = Aux.gui.label(editbox, Aux.gui.config.medium_font_size)
+        editbox.pretty = aux.gui.label(editbox, aux.gui.config.medium_font_size)
         editbox.pretty:SetAllPoints()
         editbox.pretty:SetJustifyH('RIGHT')
         do
-            local label = Aux.gui.label(editbox, Aux.gui.config.small_font_size)
+            local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
             label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
             label:SetText('Unit Starting Price')
         end
         do
-            local label = Aux.gui.label(editbox, Aux.gui.config.small_font_size)
+            local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
             label:SetPoint('LEFT', editbox, 'RIGHT', 3, 0)
             label:SetWidth(50)
             label:SetJustifyH('CENTER')
@@ -286,12 +286,12 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.unit_start_price = editbox
     end
     do
-        local editbox = Aux.gui.editbox(m.frame.parameters)
+        local editbox = aux.gui.editbox(m.frame.parameters)
         editbox:SetPoint('TOPRIGHT', m.unit_start_price, 'BOTTOMRIGHT', 0, -18)
         editbox:SetJustifyH('RIGHT')
         editbox:SetWidth(150)
         editbox:SetScript('OnTextChanged', function()
-            this.pretty:SetText(Aux.money.to_string(m.get_unit_buyout_price(), true, nil, 3))
+            this.pretty:SetText(aux.money.to_string(m.get_unit_buyout_price(), true, nil, 3))
             m.refresh = true
         end)
         editbox:SetScript('OnTabPressed', function()
@@ -309,19 +309,19 @@ Aux.post_tab.FRAMES(function(m, public, private)
             this.pretty:Hide()
         end)
         editbox:SetScript('OnEditFocusLost', function()
-            this:SetText(Aux.money.to_string(m.get_unit_buyout_price(), true, nil, 3, nil, true))
+            this:SetText(aux.money.to_string(m.get_unit_buyout_price(), true, nil, 3, nil, true))
             this.pretty:Show()
         end)
-        editbox.pretty = Aux.gui.label(editbox, Aux.gui.config.medium_font_size)
+        editbox.pretty = aux.gui.label(editbox, aux.gui.config.medium_font_size)
         editbox.pretty:SetAllPoints()
         editbox.pretty:SetJustifyH('RIGHT')
         do
-            local label = Aux.gui.label(editbox, Aux.gui.config.small_font_size)
+            local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
             label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
             label:SetText('Unit Buyout Price')
         end
         do
-            local label = Aux.gui.label(editbox, Aux.gui.config.small_font_size)
+            local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
             label:SetPoint('LEFT', editbox, 'RIGHT', 3, 0)
             label:SetWidth(50)
             label:SetJustifyH('CENTER')
@@ -330,7 +330,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
         private.unit_buyout_price = editbox
     end
     do
-        local btn = Aux.gui.button(m.frame.parameters, 16)
+        local btn = aux.gui.button(m.frame.parameters, 16)
         btn:SetPoint('TOPRIGHT', -15, -143)
         btn:SetWidth(150)
         btn:SetHeight(20)
@@ -343,7 +343,7 @@ Aux.post_tab.FRAMES(function(m, public, private)
                 m.set_unit_buyout_price(this.amount)
             end
         end)
-        local label = Aux.gui.label(btn, Aux.gui.config.small_font_size)
+        local label = aux.gui.label(btn, aux.gui.config.small_font_size)
         label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
         label:SetText('Historical Value')
         private.historical_value_button = btn

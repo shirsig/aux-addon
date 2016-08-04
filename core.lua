@@ -1,9 +1,9 @@
-local addon = Aux_module()
-Aux = tremove(addon, 1)
+local addon = aux_module()
+aux = tremove(addon, 1)
 local m, public, private = unpack(addon)
 
 --m.enum TODO
---setmetatable({}, { AUX -> aux
+--setmetatable({}, { aux -> aux
 --	__index = function(self, key)
 --		self[key] = true
 --		return self
@@ -24,9 +24,9 @@ local m, public, private = unpack(addon)
 
 -- ipairs TODO
 
-private.modules = { Aux }
+private.modules = { aux }
 function public.module(name)
-    local module = Aux_module()
+    local module = aux_module()
     local public_interface = tremove(module, 1)
     tinsert(m.modules, public_interface)
     public[name] = public_interface
@@ -117,12 +117,12 @@ function public.on_load()
     public.last_owner_page_requested = nil
     private.auction_frame_loaded = nil
 
-	m.log('Aux v'..m.version..' loaded.')
+	m.log('aux v'..m.version..' loaded.')
 
-    Aux.gui.set_window_style(AuxFrame)
+    aux.gui.set_window_style(AuxFrame)
     tinsert(UISpecialFrames, 'AuxFrame')
 
-    Aux.control.event_listener('CURSOR_UPDATE', m.CURSOR_UPDATE)
+    aux.control.event_listener('CURSOR_UPDATE', m.CURSOR_UPDATE)
 
     do
         local tab_group = m.gui.tab_group(AuxFrame, 'DOWN')
@@ -296,7 +296,7 @@ do
 
             m.control.event_listener('CHAT_MSG_SYSTEM', function(kill)
                 if arg1 == ERR_AUCTION_BID_PLACED then
-                    Aux.safe_call(on_success)
+                    aux.safe_call(on_success)
                     locked = false
                     kill()
                 end
@@ -323,7 +323,7 @@ do
         CancelAuction(index)
         m.control.event_listener('CHAT_MSG_SYSTEM', function(kill)
             if arg1 == ERR_AUCTION_REMOVED then
-                Aux.safe_call(on_success)
+                aux.safe_call(on_success)
                 locked = false
                 kill()
             end
@@ -396,7 +396,7 @@ do -- TODO make it work for other ways to pick up things
     end
     function private.PickupContainerItem(...)
         local bag, slot = unpack(arg)
-        Aux.control.thread(function()
+        aux.control.thread(function()
             last_picked_up = {bag, slot}
         end)
         return m.orig.PickupContainerItem(unpack(arg))
@@ -450,7 +450,7 @@ end
 
 function public.is_player(name, current)
     local realm = GetCVar('realmName')
-    return not current and Aux.safe_index(aux_characters, realm, name) or UnitName('player') == name
+    return not current and aux.safe_index(aux_characters, realm, name) or UnitName('player') == name
 end
 
 function public.unmodified()

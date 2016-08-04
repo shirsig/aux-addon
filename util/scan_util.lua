@@ -1,9 +1,9 @@
-local m, public, private = Aux.module'scan_util'
+local m, public, private = aux.module'scan_util'
 
 function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
     local function test(index)
-        local auction_info = Aux.info.auction(index, auction_record.query_type)
+        local auction_info = aux.info.auction(index, auction_record.query_type)
         return auction_info and auction_info.search_signature == auction_record.search_signature
     end
 
@@ -12,7 +12,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
 
     if auction_record.blizzard_query then
 
-        local blizzard_query1 = Aux.util.copy(auction_record.blizzard_query)
+        local blizzard_query1 = aux.util.copy(auction_record.blizzard_query)
         blizzard_query1.first_page = auction_record.page
         blizzard_query1.last_page = auction_record.page
         tinsert(queries, {
@@ -20,7 +20,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
         })
 
         if auction_record.page > 0 then
-            local blizzard_query2 = Aux.util.copy(auction_record.blizzard_query)
+            local blizzard_query2 = aux.util.copy(auction_record.blizzard_query)
             blizzard_query2.first_page = auction_record.page - 1
             blizzard_query2.last_page = auction_record.page - 1
             tinsert(queries, {
@@ -29,14 +29,14 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
         end
 
         local item_query = m.item_query(auction_record.item_id, 1, 1)
-        if not Aux.util.eq(auction_record.blizzard_query, item_query.blizzard_query) then
+        if not aux.util.eq(auction_record.blizzard_query, item_query.blizzard_query) then
             tinsert(queries, item_query)
         end
     end
 
 
     local found
-    return Aux.scan.start{
+    return aux.scan.start{
         type = auction_record.query_type,
         queries = queries,
         on_scan_start = function()
@@ -72,10 +72,10 @@ end
 
 function public.item_query(item_id, first_page, last_page)
 
-    local item_info = Aux.info.item(item_id)
+    local item_info = aux.info.item(item_id)
 
     if item_info then
-        local query = Aux.filter.query(item_info.name..'/exact')
+        local query = aux.filter.query(item_info.name..'/exact')
         query.blizzard_query.first_page = first_page
         query.blizzard_query.last_page = last_page
         return {

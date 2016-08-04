@@ -1,4 +1,4 @@
-local m, public, private = Aux.module'gui'
+local m, public, private = aux.module'gui'
 
 public.config = {
     link_color = { 153, 255, 255, 1 }, -- TODO inline color needs 255, others need /255
@@ -121,7 +121,7 @@ do
             id = id,
             frame = parent,
             tabs = {},
-            on_select = Aux.util.pass,
+            on_select = aux.util.pass,
         }
 
         function self:create_tab(text)
@@ -226,14 +226,14 @@ function public.editbox(parent)
     editbox:SetShadowColor(0, 0, 0, 0)
     m.set_content_style(editbox)
 
-    editbox:SetScript('OnEditFocusLost', Aux.f(editbox.HighlightText, editbox, 0, 0))
+    editbox:SetScript('OnEditFocusLost', aux.f(editbox.HighlightText, editbox, 0, 0))
 
-    editbox:SetScript('OnEscapePressed', Aux.f(editbox.ClearFocus, editbox))
+    editbox:SetScript('OnEscapePressed', aux.f(editbox.ClearFocus, editbox))
 
     do
         local last_time, last_x, last_y
 
-        editbox:SetScript('OnEditFocusGained', Aux.f(editbox.HighlightText, editbox))
+        editbox:SetScript('OnEditFocusGained', aux.f(editbox.HighlightText, editbox))
 
         editbox:SetScript('OnMouseUp', function()
             local x, y = GetCursorPosition()
@@ -325,14 +325,14 @@ function public.item(parent)
     local item = CreateFrame('Button', nil, parent)
     item:SetWidth(193)
     item:SetHeight(40)
-    local icon = CreateFrame('CheckButton', 'aux_frame'..Aux.unique(), item, 'ActionButtonTemplate')
+    local icon = CreateFrame('CheckButton', 'aux_frame'..aux.unique(), item, 'ActionButtonTemplate')
     icon:SetPoint('LEFT', 2, 0.5)
     icon:SetHighlightTexture(nil)
     icon:RegisterForClicks()
     icon:EnableMouse(nil)
     item.texture = getglobal(icon:GetName()..'Icon')
     item.texture:SetTexCoord(0.06,0.94,0.06,0.94)
-    item.name = Aux.gui.label(icon)
+    item.name = aux.gui.label(icon)
     item.name:SetJustifyH('LEFT')
     item.name:SetPoint('LEFT', icon, 'RIGHT', 10, 0)
     item.name:SetPoint('RIGHT', item, 'RIGHT', -10, 0.5)
@@ -377,7 +377,7 @@ end
 
 
 function public.dropdown(parent)
-    local dropdown = CreateFrame('Frame', 'aux_frame'..Aux.unique(), parent, 'UIDropDownMenuTemplate')
+    local dropdown = CreateFrame('Frame', 'aux_frame'..aux.unique(), parent, 'UIDropDownMenuTemplate')
 
     dropdown:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size, insets={top=5,bottom=5}}
     dropdown:SetBackdropColor(unpack(m.config.content_color.backdrop))

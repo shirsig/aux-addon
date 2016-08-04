@@ -1,4 +1,4 @@
-local m, public, private = Aux.module'control'
+local m, public, private = aux.module'control'
 
 private.event_frame = CreateFrame('Frame')
 private.listeners = {}
@@ -20,13 +20,13 @@ end
 
 function private.on_update()
 	for _, listener in m.listeners do
-		if not Aux.util.any(m.listeners, function(l) return not l.killed and l.event == listener.event end) then
+		if not aux.util.any(m.listeners, function(l) return not l.killed and l.event == listener.event end) then
 			m.event_frame:UnregisterEvent(listener.event)
 		end
 	end
 
-	m.listeners = Aux.util.filter(m.listeners, function(l) return not l.killed end)
-	m.threads = Aux.util.filter(m.threads, function(th) return not th.killed end)
+	m.listeners = aux.util.filter(m.listeners, function(l) return not l.killed end)
+	m.threads = aux.util.filter(m.threads, function(th) return not th.killed end)
 
 	for thread_id, thread in m.threads do
 		if not thread.killed then
@@ -55,7 +55,7 @@ function public.kill_thread(thread_id)
 end
 
 function public.event_listener(event, cb)
-	local listener_id = Aux.unique()
+	local listener_id = aux.unique()
 	m.listeners[listener_id] = { event=event, cb=cb, kill=function(...) if arg.n == 0 or arg[1] then m.kill_listener(listener_id) end end }
 	m.event_frame:RegisterEvent(event)
 	return listener_id
@@ -73,8 +73,8 @@ function public.as_soon_as(p, ...)
 end
 
 function public.thread(k, ...)
-	local thread_id = Aux.unique()
-	m.threads[thread_id] = { k = Aux.f(k, unpack(arg)) }
+	local thread_id = aux.unique()
+	m.threads[thread_id] = { k = aux.f(k, unpack(arg)) }
 	return thread_id
 end
 
@@ -100,7 +100,7 @@ function public.wait(k, ...)
 	if type(k) == 'number' then
 		m.when(function() k = k - 1 return k <= 1 end, unpack(arg))
 	else
-		m.threads[m.thread_id].k = Aux.f(k, unpack(arg))
+		m.threads[m.thread_id].k = aux.f(k, unpack(arg))
 	end
 end
 
@@ -108,6 +108,6 @@ function public.when(p, k, ...)
 	if p() then
 		return k(unpack(arg))
 	else
-		return m.wait(m.when, p, Aux.f(k, unpack(arg)))
+		return m.wait(m.when, p, aux.f(k, unpack(arg)))
 	end
 end

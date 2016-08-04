@@ -1,4 +1,4 @@
-# Aux - WoW 1.12 AddOn
+# aux - WoW 1.12 AddOn
 
 The most advanced auction house addOn for the 1.12 client with some features more advanced than anything even on retail.
 
@@ -111,7 +111,7 @@ AddOns do not have any additional Blizzard filters available to them beyond the 
 Of course it is possible for an addOn to apply arbitrary filters after the Blizzard query but only the Blizzard query will affect the number of pages to be scanned and thus the time it takes for a scan.
 Since the Vanilla API will only let you request a page every 4 seconds having no Blizzard query in your filter can lead to very long scan times.
 
-Aux queries are separated by semicolons and always contain exactly one Blizzard query. The Blizzard query may be empty, i.e., all pages are scanned, which can be useful for collecting historical data.
+aux queries are separated by semicolons and always contain exactly one Blizzard query. The Blizzard query may be empty, i.e., all pages are scanned, which can be useful for collecting historical data.
 The real time mode only supports empty Blizzard queries.
 Semicolons always mean "or", i.e., **q1;q2;q3** means all items matching **q1** or **q2** or **q3** will be listed.
 
@@ -142,9 +142,9 @@ This will scan the auction house for cloth armor which has a requirement of at l
 
 ## Historical Value
 
-Aux condenses the prices you've scanned during a day (midnight to midnight) into a single value, similarly to retail Auctioneer's "stat-simple" module.
+aux condenses the prices you've scanned during a day (midnight to midnight) into a single value, similarly to retail Auctioneer's "stat-simple" module.
 This daily value is calculated as the minimum buyout of the day, increased by 15% if lower than the highest price of the day, which in practice gives a very similar value to that of retail TSM while using much less memory.
-Limiting the memory usage is important because like Auctioneer and unlike TSM Aux is using a day based instead of scan based interval and thus has to store the daily progress in the savedvariables.
+Limiting the memory usage is important because like Auctioneer and unlike TSM aux is using a day based instead of scan based interval and thus has to store the daily progress in the savedvariables.
 Finally these daily values are collected in a list of the last 11 of them from which the market value is taken as the median. The values are weighted by their age but it doesn't have a large effect unless they're older than a month.
 
 The bottom line is that you get a fairly accurate market value for both very active markets as well as rarer items that has a reasonably short reaction time to market changes, recovers easily and never needs to be reset while still being reasonably stable and hard to manipulate and dealing with outliers very well, not getting distorted by multiple scans per day, not needing a single full scan per day but instead naturally picking up every price you scan while going about your usual business, letting you focus on a certain part of the auction house by scanning only that part regularly and avoiding information overload by giving you a single concise value for the tooltip.

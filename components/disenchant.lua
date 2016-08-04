@@ -1,4 +1,4 @@
-local m, public, private = Aux.module'disenchant'
+local m, public, private = aux.module'disenchant'
 
 private.UNCOMMON = 2
 private.RARE = 3
@@ -41,7 +41,7 @@ do
 end
 
 function public.LOAD()
-	private.armor = Aux.util.set(
+	private.armor = aux.util.set(
 		'INVTYPE_HEAD',
 		'INVTYPE_NECK',
 		'INVTYPE_SHOULDER',
@@ -59,7 +59,7 @@ function public.LOAD()
 		'INVTYPE_HOLDABLE'
 	)
 
-	private.weapon = Aux.util.set(
+	private.weapon = aux.util.set(
 		'INVTYPE_2HWEAPON' ,
 		'INVTYPE_WEAPONMAINHAND',
 		'INVTYPE_WEAPON',
@@ -73,7 +73,7 @@ end
 function public.value(slot, quality, level)
     local expectation
     for _, event in m.distribution(slot, quality, level) do
-        local value = Aux.history.value(event.item_id..':'..0)
+        local value = aux.history.value(event.item_id..':'..0)
         if not value then
             return
         else

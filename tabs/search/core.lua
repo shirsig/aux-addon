@@ -1,4 +1,4 @@
-local m, public, private = Aux.tab(1, 'search_tab')
+local m, public, private = aux.tab(1, 'search_tab')
 
 aux_favorite_searches = {}
 aux_recent_searches = {}
@@ -86,7 +86,7 @@ end
 
 function private.update_search_listings()
     local favorite_search_rows = {}
-    for i, favorite_search in ipairs(aux_favorite_searches) do
+    for i, favorite_search in aux_favorite_searches do
         local name = strsub(favorite_search.prettified, 1, 250)
         tinsert(favorite_search_rows, {
             cols = {{value=name}},
@@ -97,7 +97,7 @@ function private.update_search_listings()
     m.favorite_searches_listing:SetData(favorite_search_rows)
 
     local recent_search_rows = {}
-    for i, recent_search in ipairs(aux_recent_searches) do
+    for i, recent_search in aux_recent_searches do
         local name = strsub(recent_search.prettified, 1, 250)
         tinsert(recent_search_rows, {
             cols = {{value=name}},
@@ -135,7 +135,7 @@ end
 
 function public.add_filter(filter_string)
     local old_filter_string = m.search_box:GetText()
-    old_filter_string = Aux.util.trim(old_filter_string)
+    old_filter_string = aux.util.trim(old_filter_string)
 
     if old_filter_string ~= '' then
         old_filter_string = old_filter_string..';'
@@ -146,12 +146,12 @@ end
 
 function private.update_auto_buy_filter()
     if aux_auto_buy_filter ~= '' then
-        local queries = Aux.filter.queries(aux_auto_buy_filter)
+        local queries = aux.filter.queries(aux_auto_buy_filter)
         if queries then
             if getn(queries) > 1 then
-                Aux.log('Error: The automatic buyout filter may contain only one query')
-            elseif Aux.util.size(queries[1].blizzard_query) > 0 then
-                Aux.log('Error: The automatic buyout filter does not support Blizzard filters')
+                aux.log('Error: The automatic buyout filter may contain only one query')
+            elseif aux.util.size(queries[1].blizzard_query) > 0 then
+                aux.log('Error: The automatic buyout filter does not support Blizzard filters')
             else
                 m.auto_buy_validator = queries[1].validator
                 m.auto_buy_filter_button.prettified = queries[1].prettified
@@ -188,7 +188,7 @@ function private.clear_form()
 end
 
 function private.discard_continuation()
-    Aux.scan.abort(m.search_scan_id)
+    aux.scan.abort(m.search_scan_id)
     m.current_search().continuation = nil
     m.update_continuation()
 end
@@ -215,7 +215,7 @@ function private.start_real_time_scan(query, search, continuation)
 
     local next_page
     local new_records = {}
-    m.search_scan_id = Aux.scan.start{
+    m.search_scan_id = aux.scan.start{
         type = 'list',
         queries = {query},
         auto_buy_validator = search.auto_buy_validator,
@@ -233,8 +233,8 @@ function private.start_real_time_scan(query, search, continuation)
             if not ignore_page then
                 if search.auto_buy then
                     ctrl.suspend()
-                    Aux.place_bid('list', auction_record.index, auction_record.buyout_price, Aux.f(ctrl.resume, true))
-                    Aux.control.thread(Aux.control.sleep, 10, Aux.f(ctrl.resume, false))
+                    aux.place_bid('list', auction_record.index, auction_record.buyout_price, aux.f(ctrl.resume, true))
+                    aux.control.thread(aux.control.sleep, 10, aux.f(ctrl.resume, false))
                 else
                     tinsert(new_records, auction_record)
                 end
@@ -299,7 +299,7 @@ function private.start_search(queries, continuation)
     end
 
 
-    m.search_scan_id = Aux.scan.start{
+    m.search_scan_id = aux.scan.start{
         type = 'list',
         queries = queries,
         auto_buy_validator = search.auto_buy_validator,
@@ -329,8 +329,8 @@ function private.start_search(queries, continuation)
         on_auction = function(auction_record, ctrl)
             if search.auto_buy then
                 ctrl.suspend()
-                Aux.place_bid('list', auction_record.index, auction_record.buyout_price, Aux.f(ctrl.resume, true))
-                Aux.control.thread(Aux.control.sleep, 10, Aux.f(ctrl.resume, false))
+                aux.place_bid('list', auction_record.index, auction_record.buyout_price, aux.f(ctrl.resume, true))
+                aux.control.thread(aux.control.sleep, 10, aux.f(ctrl.resume, false))
             elseif getn(search.records) < 1000 then
                 tinsert(search.records, auction_record)
                 if getn(search.records) == 1000 then
@@ -381,15 +381,15 @@ function public.execute(resume, real_time)
     end
     local filter_string = m.search_box:GetText()
 
-    local queries = Aux.filter.queries(filter_string)
+    local queries = aux.filter.queries(filter_string)
     if not queries then
         return
     elseif real_time then
         if getn(queries) > 1 then
-            Aux.log('Invalid filter: The real time mode does not support multiple queries')
+            aux.log('Invalid filter: The real time mode does not support multiple queries')
             return
         elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-            Aux.log('Invalid filter: The real time mode does not support page range filters')
+            aux.log('Invalid filter: The real time mode does not support page range filters')
             return
         end
     end
@@ -400,7 +400,7 @@ function public.execute(resume, real_time)
         m.current_search().table:SetSelectedRecord()
     else
         if filter_string ~= m.current_search().filter_string then
-            m.new_search(filter_string, Aux.util.join(Aux.util.map(queries, function(filter) return filter.prettified end), ';'))
+            m.new_search(filter_string, aux.util.join(aux.util.map(queries, function(filter) return filter.prettified end), ';'))
         else
             m.current_search().records = {}
             m.current_search().table:SetDatabase(m.current_search().records)
@@ -432,19 +432,19 @@ end
 
 function private.blizzard_page_index(str)
     if tonumber(str) then
-        return Aux.util.round(max(0, tonumber(str) - 1))
+        return aux.util.round(max(0, tonumber(str) - 1))
     end
 end
 
 function private.blizzard_level(str)
     if tonumber(str) then
-        return Aux.util.round(max(1, min(60, tonumber(str))))
+        return aux.util.round(max(1, min(60, tonumber(str))))
     end
 end
 
 function private.test(record)
     return function(index)
-        local auction_info = Aux.info.auction(index)
+        local auction_info = aux.info.auction(index)
         return auction_info and auction_info.search_signature == record.search_signature
     end
 end
@@ -458,13 +458,13 @@ do
     function private.find_auction(record)
         local search = m.current_search()
 
-        if not search.table:ContainsRecord(record) or Aux.is_player(record.owner) then
+        if not search.table:ContainsRecord(record) or aux.is_player(record.owner) then
             return
         end
 
-        Aux.scan.abort(scan_id)
+        aux.scan.abort(scan_id)
         state = SEARCHING
-        scan_id = Aux.scan_util.find(
+        scan_id = aux.scan_util.find(
             record,
             m.current_search().status_bar,
             function()
@@ -485,10 +485,10 @@ do
                 if not record.high_bidder then
                     m.bid_button:SetScript('OnClick', function()
                         if m.test(record)(index) and search.table:ContainsRecord(record) then
-                            Aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
-                                Aux.info.bid_update(record)
+                            aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
+                                aux.info.bid_update(record)
                                 search.table:SetDatabase()
-                            end or Aux.f(search.table.RemoveAuctionRecord, search.table, record))
+                            end or aux.f(search.table.RemoveAuctionRecord, search.table, record))
                         end
                     end)
                     m.bid_button:Enable()
@@ -497,7 +497,7 @@ do
                 if record.buyout_price > 0 then
                     m.buyout_button:SetScript('OnClick', function()
                         if m.test(record)(index) and search.table:ContainsRecord(record) then
-                            Aux.place_bid('list', index, record.buyout_price, Aux.f(search.table.RemoveAuctionRecord, search.table, record))
+                            aux.place_bid('list', index, record.buyout_price, aux.f(search.table.RemoveAuctionRecord, search.table, record))
                         end
                     end)
                     m.buyout_button:Enable()
@@ -524,7 +524,7 @@ do
         elseif state == FOUND and not m.test(selection.record)(found_index) then
             m.buyout_button:Disable()
             m.bid_button:Disable()
-            if not Aux.bid_in_progress() then
+            if not aux.bid_in_progress() then
                 state = IDLE
             end
         end
@@ -731,12 +731,12 @@ function private.initialize_filter_dropdown()
     local function on_click()
         UIDropDownMenu_SetSelectedValue(m.filter_dropdown, this.value)
         m.filter_button:SetText(this.value)
-        if (not Aux.filter.filters[this.value] or Aux.filter.filters[this.value].input_type == '') and this.value ~= 'and' and this.value ~= 'or' then
+        if (not aux.filter.filters[this.value] or aux.filter.filters[this.value].input_type == '') and this.value ~= 'and' and this.value ~= 'or' then
             m.filter_input:Hide()
         else
-            local _, _, suggestions = Aux.filter.parse_query_string(UIDropDownMenu_GetSelectedValue(m.filter_dropdown)..'/')
-            m.filter_input:SetNumeric(not Aux.filter.filters[this.value] or Aux.filter.filters[this.value].input_type == 'number')
-            m.filter_input.complete = Aux.completion.complete(function() return suggestions or {} end)
+            local _, _, suggestions = aux.filter.parse_query_string(UIDropDownMenu_GetSelectedValue(m.filter_dropdown)..'/')
+            m.filter_input:SetNumeric(not aux.filter.filters[this.value] or aux.filter.filters[this.value].input_type == 'number')
+            m.filter_input.complete = aux.completion.complete(function() return suggestions or {} end)
             m.filter_input:Show()
             m.filter_input:SetFocus()
         end
@@ -759,7 +759,7 @@ function private.get_form()
     end
 
     local name = m.name_input:GetText()
-    name = name == '' and name or Aux.filter.quote(name)
+    name = name == '' and name or aux.filter.quote(name)
     add(name)
 
     if m.exact_checkbox:GetChecked() then
@@ -814,7 +814,7 @@ function private.set_form(components)
             if name and strsub(name, 1, 1) == '"' and strsub(name, -1, -1) == '"' then
                 name = strsub(name, 2, -2)
             end
-            m.name_input:SetText(Aux.filter.unquote(filter[2]))
+            m.name_input:SetText(aux.filter.unquote(filter[2]))
         elseif filter[1] == 'exact' then
             m.exact_checkbox:SetChecked(true)
         elseif filter[1] == 'min_level' then
@@ -824,19 +824,19 @@ function private.set_form(components)
         elseif filter[1] == 'usable' then
             m.usable_checkbox:SetChecked(true)
         elseif filter[1] == 'class' then
-            class_index = Aux.info.item_class_index(filter[2])
+            class_index = aux.info.item_class_index(filter[2])
             UIDropDownMenu_Initialize(m.class_dropdown, m.initialize_class_dropdown) -- TODO, wtf, why is this needed
             UIDropDownMenu_SetSelectedValue(m.class_dropdown, class_index)
         elseif filter[1] == 'subclass' then
-            subclass_index = Aux.info.item_subclass_index(class_index, filter[2])
+            subclass_index = aux.info.item_subclass_index(class_index, filter[2])
             UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown) -- TODO, wtf, why is this needed
             UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, subclass_index)
         elseif filter[1] == 'slot' then
             UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown) -- TODO, wtf, why is this needed
-            UIDropDownMenu_SetSelectedValue(m.slot_dropdown, ({GetAuctionInvTypes(class_index, subclass_index)})[Aux.info.item_slot_index(class_index, subclass_index, filter[2])])
+            UIDropDownMenu_SetSelectedValue(m.slot_dropdown, ({GetAuctionInvTypes(class_index, subclass_index)})[aux.info.item_slot_index(class_index, subclass_index, filter[2])])
         elseif filter[1] == 'quality' then
             UIDropDownMenu_Initialize(m.quality_dropdown, m.initialize_quality_dropdown) -- TODO, wtf, why is this needed
-            UIDropDownMenu_SetSelectedValue(m.quality_dropdown, Aux.info.item_quality_index(filter[2]))
+            UIDropDownMenu_SetSelectedValue(m.quality_dropdown, aux.info.item_quality_index(filter[2]))
         end
     end
 
@@ -845,22 +845,22 @@ function private.set_form(components)
 end
 
 function private.import_query_string()
-    local components, error = Aux.filter.parse_query_string(({strfind(m.search_box:GetText(), '^([^;]*)')})[3])
+    local components, error = aux.filter.parse_query_string(({strfind(m.search_box:GetText(), '^([^;]*)')})[3])
     if components then
         m.set_form(components)
     else
-        Aux.log(error)
+        aux.log(error)
     end
 end
 
 function private.export_query_string()
-    local components, error = Aux.filter.parse_query_string(m.get_form())
+    local components, error = aux.filter.parse_query_string(m.get_form())
     if components then
-        m.search_box:SetText(Aux.filter.query_string({blizzard=components.blizzard, post=m.post_components}))
+        m.search_box:SetText(aux.filter.query_string({blizzard=components.blizzard, post=m.post_components}))
         m.filter_input:ClearFocus()
         m.update_filter_display()
     else
-        Aux.log(error)
+        aux.log(error)
     end
 end
 
@@ -870,20 +870,20 @@ function private.add_post_component()
     local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown)
     if name then
         local filter = name
-        if not Aux.filter.filters[name] and filter == 'and' or filter == 'or' then
+        if not aux.filter.filters[name] and filter == 'and' or filter == 'or' then
             local arity = m.filter_input:GetText()
-            arity = tonumber(arity) and Aux.util.round(tonumber(arity))
+            arity = tonumber(arity) and aux.util.round(tonumber(arity))
             if arity and arity < 2 then
-                Aux.log('Invalid operator suffix')
+                aux.log('Invalid operator suffix')
                 return
             end
             filter = filter..(arity or '')
         end
-        if Aux.filter.filters[name] and Aux.filter.filters[name].input_type ~= '' then
+        if aux.filter.filters[name] and aux.filter.filters[name].input_type ~= '' then
             filter = filter..'/'..m.filter_input:GetText()
         end
 
-        local components, error, suggestions = Aux.filter.parse_query_string(filter)
+        local components, error, suggestions = aux.filter.parse_query_string(filter)
 
         if components then
             tinsert(m.post_components, components.post[1])
@@ -891,7 +891,7 @@ function private.add_post_component()
             m.filter_input:SetText('')
             m.filter_input:ClearFocus()
         else
-            Aux.log(error)
+            aux.log(error)
         end
     end
 end
@@ -902,10 +902,10 @@ function private.remove_post_filter()
 end
 
 function private.update_filter_display()
-    local lines = Aux.util.size(Aux.util.filter(m.post_components, function(component) return component[1] == 'operator' and component[2] ~= 'not' end))
+    local lines = aux.util.size(aux.util.filter(m.post_components, function(component) return component[1] == 'operator' and component[2] ~= 'not' end))
     local width_scale = max(200/m.filter_display:GetStringWidth())
     local height_scale = min((200 / lines) / 18)
     m.filter_display.scale_frame:SetScale(min(1, width_scale, height_scale))
-    m.filter_display:SetText(Aux.filter.indented_post_query_string(m.post_components))
+    m.filter_display:SetText(aux.filter.indented_post_query_string(m.post_components))
 end
 

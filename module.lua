@@ -1,4 +1,4 @@
-function Aux_module()
+function aux_module()
     local data, is_public, is_declared, public_interface, private_interface, public, private = {}, {}, {}, {}, {}, {}, {}
     setmetatable(public_interface, {
         __newindex = function()
