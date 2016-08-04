@@ -1,6 +1,8 @@
 local m, public, private = aux.module'cache'
 
-local MIN_ITEM_ID, MAX_ITEM_ID = 1, 30000
+private.MIN_ITEM_ID = 1
+private.MAX_ITEM_ID = 30000
+
 local items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
 local merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'} }
 
@@ -156,10 +158,10 @@ function private.merchant_sell_scan()
 end
 
 function private.scan_wdb(item_id)
-	item_id = item_id or MIN_ITEM_ID
+	item_id = item_id or m.MIN_ITEM_ID
 
 	local processed = 0
-	while processed <= 100 and item_id <= MAX_ITEM_ID do
+	while processed <= 100 and item_id <= m.MAX_ITEM_ID do
 		local itemstring = 'item:'..item_id
 		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 		if name and not aux_item_ids[strlower(name)] then
@@ -183,7 +185,7 @@ function private.scan_wdb(item_id)
 		item_id = item_id + 1
 	end
 
-	if item_id <= MAX_ITEM_ID then
+	if item_id <= m.MAX_ITEM_ID then
 		local t0 = GetTime()
 		aux.control.as_soon_as(function() return GetTime() - t0 > 0.1 end, m.scan_wdb, item_id)
 	else
@@ -192,9 +194,9 @@ function private.scan_wdb(item_id)
 end
 
 function public.populate_wdb(item_id)
-	item_id = item_id or MIN_ITEM_ID
+	item_id = item_id or m.MIN_ITEM_ID
 
-	if item_id > MAX_ITEM_ID then
+	if item_id > m.MAX_ITEM_ID then
 		aux.log('Cache populated.')
 		return
 	end

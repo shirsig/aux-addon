@@ -310,7 +310,7 @@ function public.tooltip(setter)
 end
 
 function private.item_charges(tooltip)
-	for _, line in ipairs(tooltip) do
+	for _, line in tooltip do
         local pattern = '^'..gsub(gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)')..'$'
 
         local _, _, left_charges_string = strfind(line.left_text or '', pattern)
@@ -350,7 +350,7 @@ function public.max_item_charges(item_id)
 end
 
 function public.durability(tooltip)
-    for _, line in ipairs(tooltip) do
+    for _, line in tooltip do
         local pattern = '^'..gsub(gsub(DURABILITY_TEMPLATE, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)')..'$'
         local _, _, left_durability_string, left_max_durability_string = strfind(line.left_text or '', pattern)
         local _, _, right_durability_string, right_max_durability_string = strfind(line.right_text or '', pattern)
@@ -393,7 +393,7 @@ function public.item(item_id, suffix_id)
 end
 
 function public.item_class_index(item_class)
-    for i, class in ipairs({ GetAuctionItemClasses() }) do
+    for i, class in { GetAuctionItemClasses() } do
         if strupper(class) == strupper(item_class) then
             return i
         end
@@ -401,7 +401,7 @@ function public.item_class_index(item_class)
 end
 
 function public.item_subclass_index(class_index, item_subclass)
-    for i, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
+    for i, subclass in { GetAuctionItemSubClasses(class_index) } do
         if strupper(subclass) == strupper(item_subclass) then
             return i
         end
@@ -409,7 +409,7 @@ function public.item_subclass_index(class_index, item_subclass)
 end
 
 function public.item_slot_index(class_index, subclass_index, slot_name)
-    for i, slot in ipairs({ GetAuctionInvTypes(class_index, subclass_index) }) do
+    for i, slot in { GetAuctionInvTypes(class_index, subclass_index) } do
         if strupper(getglobal(slot)) == strupper(slot_name) then
             return i
         end

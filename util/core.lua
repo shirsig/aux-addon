@@ -142,7 +142,7 @@ do
 end
 
 function public.join(parts, separator)
-	local str = parts[1]
+	local str = parts[1] or ''
 	for i=2,getn(parts) do
 		if not parts[i] then break end
 		str = str..separator..parts[i]

@@ -22,8 +22,6 @@ local m, public, private = unpack(addon)
 --for notnil in {maybenil} do TODO
 --end
 
--- ipairs TODO
-
 private.modules = { aux }
 function public.module(name)
     local module = aux_module()

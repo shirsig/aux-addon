@@ -107,7 +107,7 @@ function private.update_auction_listing()
         local unit_start_price = m.get_unit_start_price()
         local unit_buyout_price = m.get_unit_buyout_price()
 
-        for i, auction_record in ipairs(m.existing_auctions[m.selected_item.key] or {}) do
+        for i, auction_record in m.existing_auctions[m.selected_item.key] or {} do
 
             local blizzard_bid_undercut, buyout_price_undercut = m.undercut(auction_record, m.stack_size_slider:GetValue())
             blizzard_bid_undercut = aux.money.from_string(aux.money.to_string(blizzard_bid_undercut, true, nil, 3))
@@ -234,7 +234,7 @@ function private.post_auctions()
 
                 m.update_inventory_records()
                 m.selected_item = nil
-                for _, record in ipairs(m.inventory_records) do
+                for _, record in m.inventory_records do
                     if record.key == key then
                         m.set_item(record)
                     end
@@ -520,7 +520,7 @@ end
 function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
     m.existing_auctions[key] = m.existing_auctions[key] or {}
     local entry
-    for _, existing_entry in ipairs(m.existing_auctions[key]) do
+    for _, existing_entry in m.existing_auctions[key] do
         if unit_blizzard_bid == existing_entry.unit_blizzard_bid and unit_buyout_price == existing_entry.unit_buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration and aux.is_player(owner) == existing_entry.own then
             entry = existing_entry
         end

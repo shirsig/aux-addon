@@ -194,7 +194,7 @@ do
         end
 
         function self.update_tabs()
-            for _, tab in ipairs(self.tabs) do
+            for _, tab in self.tabs do
                 if tab.group.selected == tab.id then
                     tab.text:SetTextColor(unpack(m.config.label_color.enabled))
                     tab:Disable()

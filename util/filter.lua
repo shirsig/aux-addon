@@ -415,7 +415,7 @@ function public.queries(query_string)
     local parts = aux.util.split(query_string, ';')
 
     local queries = {}
-    for _, str in ipairs(parts) do
+    for _, str in parts do
         str = aux.util.trim(str)
 
         local query, _, error = m.query(str)
@@ -463,7 +463,7 @@ function private.suggestions(components)
 
     -- classes
     if not blizzard_filters.class then
-        for _, class in ipairs({ GetAuctionItemClasses() }) do
+        for _, class in { GetAuctionItemClasses() } do
             tinsert(suggestions, class)
         end
     end
@@ -471,7 +471,7 @@ function private.suggestions(components)
     -- subclasses
     local class_index = blizzard_filters.class and aux.info.item_class_index(blizzard_filters.class)
     if class_index and not blizzard_filters.subclass then
-        for _, subclass in ipairs({ GetAuctionItemSubClasses(class_index) }) do
+        for _, subclass in { GetAuctionItemSubClasses(class_index) } do
             tinsert(suggestions, subclass)
         end
     end
@@ -479,7 +479,7 @@ function private.suggestions(components)
     -- slots
     local subclass_index = class_index and blizzard_filters.subclass and aux.info.item_subclass_index(class_index, blizzard_filters.subclass)
     if subclass_index and not blizzard_filters.slot then
-        for _, invtype in ipairs({ GetAuctionInvTypes(class_index, aux.info.item_subclass_index(class_index, blizzard_filters.subclass)) }) do
+        for _, invtype in { GetAuctionInvTypes(class_index, aux.info.item_subclass_index(class_index, blizzard_filters.subclass)) } do
             tinsert(suggestions, getglobal(invtype))
         end
     end

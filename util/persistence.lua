@@ -91,7 +91,6 @@ function public.write_record(schema, record)
     local parts = {}
     for i=3,getn(schema) do
         local key, type = next(schema[i])
-        aux.log(type, record[key], m.write(type, record[key]))
         tinsert(parts, m.write(type, record[key]))
     end
     return aux.util.join(parts, separator)
