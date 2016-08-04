@@ -7,7 +7,8 @@ function private.process()
 
 		local stacking_complete
 
-		local c = aux.control.await(function(slot)
+		local send_signal, signal_received = aux.util.signal()
+		aux.control.when(signal_received, function(slot)
 			if slot then
 				return m.post_auction(slot, m.process)
 			else
@@ -15,7 +16,7 @@ function private.process()
 			end
 		end)
 
-		return aux.stack.start(m.state.item_key, m.state.stack_size, c)
+		return aux.stack.start(m.state.item_key, m.state.stack_size, send_signal)
 	end
 
 	return m.stop()
@@ -34,7 +35,8 @@ function private.post_auction(slot, k)
 
 		StartAuction(max(1, aux.util.round(m.state.unit_start_price * item_info.aux_quantity)), aux.util.round(m.state.unit_buyout_price * item_info.aux_quantity), m.state.duration)
 
-		local c = aux.control.await(function()
+		local send_signal, signal_received = aux.util.signal()
+		aux.control.when(signal_received, function()
 			m.state.posted = m.state.posted + 1
 			return k()
 		end)
@@ -42,7 +44,7 @@ function private.post_auction(slot, k)
 		local posted
 		aux.control.event_listener('CHAT_MSG_SYSTEM', function(kill)
 			if arg1 == ERR_AUCTION_STARTED then
-				c()
+				send_signal()
 				kill()
 			end
 		end)

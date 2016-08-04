@@ -2,8 +2,6 @@ local m, public, private = aux.module'scan'
 
 private.PAGE_SIZE = 50
 
-private.last_query_time = {}
-
 do
 	local scan_states = {}
 
@@ -50,7 +48,8 @@ private.query = aux.dynamic_table(function()
 end)
 
 function private.wait_for_callback(...)
-	local ok = true
+	local send_signal, signal_received = aux.util.signal()
+	local suspended
 	local ret
 
 	local f = tremove(arg, 1)
@@ -58,17 +57,16 @@ function private.wait_for_callback(...)
 
 	if f then
 		tinsert(arg, {
-			suspend = function() ok = false end,
-			resume = function(...) ok = true ret = arg end,
+			suspend = function() suspended = true end,
+			resume = send_signal,
 		})
 		f(unpack(arg))
 	end
-
-	if ok then
-		return k()
-	else
-		return aux.control.when(function() return ok end, function() return k(unpack(ret)) end)
+	if not suspended then
+		send_signal()
 	end
+
+	return aux.control.when(signal_received, function() return k(unpack(signal_received())) end)
 end
 
 function private.total_pages(total_auctions)
@@ -106,7 +104,7 @@ end
 function private.submit_query()
 	aux.control.when(function() return m.state.params.type ~= 'list' or CanSendAuctionQuery() end, function()
 		aux.safe_call(m.state.params.on_submit_query)
-		m.last_query_time[m.state.params.type] = GetTime()
+		m.state.last_query_time = GetTime()
 		if m.state.params.type == 'bidder' then
 			GetBidderAuctionItems(m.state.page)
 		elseif m.state.params.type == 'owner' then
@@ -156,9 +154,10 @@ function private.scan_page(i)
 		aux.history.process_auction(auction_info)
 
 		if aux.safe_call(m.state.params.auto_buy_validator, auction_info) then
-			local c = aux.control.await(recurse)
-			aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, aux.f(c, true))
-			return aux.control.thread(aux.control.sleep, 10, aux.f(c, false))
+			local send_signal, signal_received = aux.util.signal()
+			aux.control.when(signal_received, recurse)
+			aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, aux.f(send_signal, true))
+			return aux.control.thread(aux.control.when, aux.util.later(GetTime(), 10), aux.f(send_signal, false))
 		elseif not m.query.validator or m.query.validator(auction_info) then
 			return m.wait_for_callback(m.state.params.on_auction, auction_info, function(removed)
 				if removed then
@@ -173,13 +172,11 @@ function private.scan_page(i)
 	return recurse()
 end
 
-function private.timeout(type)
-    return GetTime() - m.last_query_time[type] > 11
-end
-
 function private.wait_for_results()
-    local c = aux.control.await(function()
-        if m.timeout(m.state.params.type) then
+	local timeout = aux.util.later(m.state.last_query_time, 10)
+	local send_signal, signal_received = aux.util.signal()
+	aux.control.when(signal_received, function()
+        if timeout() then
             return m.submit_query()
         else
             _,  m.state.total_auctions = GetNumAuctionItems(m.state.params.type)
@@ -193,40 +190,39 @@ function private.wait_for_results()
         end
     end)
 
-    local type = m.state.params.type
-    aux.control.as_soon_as(function() return -c or m.timeout(type) end, c)
+    aux.control.thread(aux.control.when, timeout, send_signal)
 
     if m.state.params.type == 'bidder' then
-        return aux.control.as_soon_as(function() return aux.bids_loaded end, c)
+        return aux.control.thread(aux.control.when, function() return aux.bids_loaded end, send_signal)
     elseif m.state.params.type == 'owner' then
-        return m.wait_for_owner_results(c)
+        return m.wait_for_owner_results(send_signal)
     elseif m.state.params.type == 'list' then
-        return m.wait_for_list_results(c)
+        return m.wait_for_list_results(send_signal, signal_received)
     end
 end
 
-function private.wait_for_owner_results(c)
+function private.wait_for_owner_results(send_signal)
     if m.state.page == aux.current_owner_page then
-        return c()
+        return send_signal()
     else
-        return aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', c)
+        return aux.control.on_next_event('AUCTION_OWNED_LIST_UPDATE', send_signal)
     end
 end
 
-function private.wait_for_list_results(c)
+function private.wait_for_list_results(send_signal, signal_received)
     local updated, last_update
     aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE', function(kill)
-	    kill(-c)
+	    kill(signal_received())
         last_update = GetTime()
         updated = true
     end)
     local ignore_owner = m.state.params.ignore_owner or aux_ignore_owner
-    return aux.control.as_soon_as(function()
+    return aux.control.thread(aux.control.when, function()
         -- short circuiting order important, owner_data_complete must be called iif an update has happened.
         local ok = updated and (ignore_owner or m.owner_data_complete('list')) or last_update and GetTime() - last_update > 5
         updated = false
         return ok
-    end, c)
+    end, send_signal)
 end
 
 function private.owner_data_complete(type)

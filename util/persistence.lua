@@ -6,7 +6,7 @@ do
     local realm, faction
 
     function public.LOAD()
-        aux.control.as_soon_as(function() faction = UnitFactionGroup('player') return faction end, aux.util.pass)
+        aux.control.thread(aux.control.when, function() faction = UnitFactionGroup('player') return faction end, aux.util.pass)
         realm = GetCVar('realmName')
     end
 

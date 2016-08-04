@@ -68,32 +68,10 @@ function public.on_next_event(event, callback)
 	end)
 end
 
-function public.as_soon_as(p, ...)
-	return m.thread(m.when, p, unpack(arg))
-end
-
 function public.thread(k, ...)
 	local thread_id = aux.unique()
 	m.threads[thread_id] = { k = aux.f(k, unpack(arg)) }
 	return thread_id
-end
-
-function public.await(k)
-	local ret
-	m.when(function() return ret end, function() return k(unpack(ret)) end)
-	return setmetatable({}, {
-		__call = function(_, ...)
-			ret = arg
-		end,
-		__unm = function()
-			return ret ~= nil
-		end
-	})
-end
-
-function public.sleep(seconds, ...)
-	local t0 = GetTime()
-	return m.when(function() return GetTime() - t0 >= seconds end, unpack(arg))
 end
 
 function public.wait(k, ...)

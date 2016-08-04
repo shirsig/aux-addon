@@ -1,5 +1,5 @@
 SLASH_AUX1 = '/aux'
-function SlashCmdList.aux(command)
+function SlashCmdList.AUX(command)
 	if not command then return end
 	local arguments = aux.util.tokenize(command)
     if arguments[1] == 'clear' and arguments[2] == 'history' then

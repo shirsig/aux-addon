@@ -231,6 +231,22 @@ function public.bag_type(bag)
 	end
 end
 
+function public.later(t0, t)
+	return function()
+		return GetTime() - t0 > t
+	end
+end
+
+function public.signal()
+	local params
+	return function(...)
+		params = arg
+	end,
+	function()
+		return params
+	end
+end
+
 function public.without_errors(f)
     local orig = UIErrorsFrame.AddMessage
     UIErrorsFrame.AddMessage = m.pass

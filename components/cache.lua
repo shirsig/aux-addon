@@ -187,7 +187,7 @@ function private.scan_wdb(item_id)
 
 	if item_id <= m.MAX_ITEM_ID then
 		local t0 = GetTime()
-		aux.control.as_soon_as(function() return GetTime() - t0 > 0.1 end, m.scan_wdb, item_id)
+		aux.control.thread(aux.control.when, function() return GetTime() - t0 > 0.1 end, m.scan_wdb, item_id)
 	else
 		sort(aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 	end
