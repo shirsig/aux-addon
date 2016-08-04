@@ -19,6 +19,11 @@ local m, public, private = unpack(addon)
 --.INVTYPE_SHOULDER
 --()
 
+--for notnil in {maybenil} do TODO
+--end
+
+-- ipairs TODO
+
 private.modules = { Aux }
 function public.module(name)
     local module = Aux_module()
@@ -54,12 +59,6 @@ do
         end
     end
 end
-
---for notnil in {maybenil} do TODO
---end
-
--- ipairs TODO
---unpack(arg) TODO
 
 do
 	local x = 0
