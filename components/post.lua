@@ -8,7 +8,8 @@ function private.process()
 		local stacking_complete
 
 		local send_signal, signal_received = aux.util.signal()
-		aux.control.when(signal_received, function(slot)
+		aux.control.when(signal_received, function()
+			local slot = signal_received()[1]
 			if slot then
 				return m.post_auction(slot, m.process)
 			else
