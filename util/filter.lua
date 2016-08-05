@@ -42,20 +42,18 @@ public.filters = {
 
     ['left'] = {
         input_type = {'30m', '2h', '8h', '24h'},
-        validator = function(duration)
-            local code = aux.util.key(duration, {'30m', '2h', '8h', '24h'})
+        validator = function(index)
             return function(auction_record)
-                return auction_record.duration == code
+                return auction_record.duration == index
             end
         end
     },
 
     ['rarity'] = {
         input_type = {'poor', 'common', 'uncommon', 'rare', 'epic'},
-        validator = function(rarity)
-            local code = aux.util.key(rarity, {'poor', 'common', 'uncommon', 'rare', 'epic'}) - 1
+        validator = function(index)
             return function(auction_record)
-                return auction_record.quality == code
+                return auction_record.quality == index - 1
             end
         end
     },
