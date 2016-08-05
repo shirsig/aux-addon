@@ -1,7 +1,5 @@
 local m, public, private = aux.module'info'
 
-local TOOLTIP_LENGTH = 30
-
 CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
 AuxTooltip:SetScript('OnTooltipAddMoney', function()
 	this.money = arg1
@@ -40,51 +38,48 @@ do
 end
 
 function public.container_item(bag, slot)
-	local hyperlink = GetContainerItemLink(bag, slot)
-	
-	if not hyperlink then
-		return
+    for _, hyperlink in {GetContainerItemLink(bag, slot)} do
+
+        local item_id, suffix_id, unique_id, enchant_id = m.parse_hyperlink(hyperlink)
+        local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
+
+        local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
+        local tooltip, tooltip_money = m.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
+        local max_charges = m.max_item_charges(item_id)
+        local charges = max_charges and m.item_charges(tooltip)
+        local aux_quantity = charges or count
+
+        return {
+            item_id = item_id,
+            suffix_id = suffix_id,
+            unique_id = unique_id,
+            enchant_id = enchant_id,
+
+            hyperlink = hyperlink,
+            itemstring = item_info.itemstring,
+            item_key = item_id..':'..suffix_id,
+
+            name = item_info.name,
+            texture = texture,
+            level = item_info.level,
+            type = item_info.type,
+            subtype = item_info.subtype,
+            slot = item_info.slot,
+            quality = item_info.quality,
+            max_stack = item_info.max_stack,
+
+            count = count,
+            locked = locked,
+            readable = readable,
+            lootable = lootable,
+
+            tooltip = tooltip,
+    	    tooltip_money = tooltip_money,
+            max_charges = max_charges,
+            charges = charges,
+            aux_quantity = aux_quantity,
+        }
     end
-
-    local item_id, suffix_id, unique_id, enchant_id = m.parse_hyperlink(hyperlink)
-    local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
-
-    local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
-    local tooltip, tooltip_money = m.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
-    local max_charges = m.max_item_charges(item_id)
-    local charges = max_charges and m.item_charges(tooltip)
-    local aux_quantity = charges or count
-
-    return {
-        item_id = item_id,
-        suffix_id = suffix_id,
-        unique_id = unique_id,
-        enchant_id = enchant_id,
-
-        hyperlink = hyperlink,
-        itemstring = item_info.itemstring,
-        item_key = item_id..':'..suffix_id,
-
-        name = item_info.name,
-        texture = texture,
-        level = item_info.level,
-        type = item_info.type,
-        subtype = item_info.subtype,
-        slot = item_info.slot,
-        quality = item_info.quality,
-        max_stack = item_info.max_stack,
-
-        count = count,
-        locked = locked,
-        readable = readable,
-        lootable = lootable,
-
-        tooltip = tooltip,
-	    tooltip_money = tooltip_money,
-        max_charges = max_charges,
-        charges = charges,
-        aux_quantity = aux_quantity,
-    }
 end
 
 function public.auction_sell_item()
@@ -105,68 +100,65 @@ end
 function public.auction(index, query_type)
     query_type = query_type or 'list'
 
-	local hyperlink = GetAuctionItemLink(query_type, index)
-	
-	if not hyperlink then
-		return
-	end
+	for _, hyperlink in {GetAuctionItemLink(query_type, index)} do
 
-    local item_id, suffix_id, unique_id, enchant_id = m.parse_hyperlink(hyperlink)
-    local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
+        local item_id, suffix_id, unique_id, enchant_id = m.parse_hyperlink(hyperlink)
+        local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
 
-    local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(query_type, index)
+        local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(query_type, index)
 
-	local duration = GetAuctionItemTimeLeft(query_type, index)
-    local tooltip, tooltip_money = m.tooltip(function(tt) tt:SetAuctionItem(query_type, index) end)
-    local max_charges = m.max_item_charges(item_id)
-    local charges = max_charges and m.item_charges(tooltip)
-    local aux_quantity = charges or count
-    local blizzard_bid = high_bid > 0 and high_bid or start_price
-    local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
+    	local duration = GetAuctionItemTimeLeft(query_type, index)
+        local tooltip, tooltip_money = m.tooltip(function(tt) tt:SetAuctionItem(query_type, index) end)
+        local max_charges = m.max_item_charges(item_id)
+        local charges = max_charges and m.item_charges(tooltip)
+        local aux_quantity = charges or count
+        local blizzard_bid = high_bid > 0 and high_bid or start_price
+        local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
 
-    return {
-        item_id = item_id,
-        suffix_id = suffix_id,
-        unique_id = unique_id,
-        enchant_id = enchant_id,
+        return {
+            item_id = item_id,
+            suffix_id = suffix_id,
+            unique_id = unique_id,
+            enchant_id = enchant_id,
 
-        hyperlink = hyperlink,
-        itemstring = item_info.itemstring,
-        item_key = item_id..':'..suffix_id,
-        search_signature = aux.util.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), aux_ignore_owner and (aux.is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
-        sniping_signature = aux.util.join({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, aux_ignore_owner and (aux.is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
+            hyperlink = hyperlink,
+            itemstring = item_info.itemstring,
+            item_key = item_id..':'..suffix_id,
+            search_signature = aux.util.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), aux_ignore_owner and (aux.is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+            sniping_signature = aux.util.join({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, aux_ignore_owner and (aux.is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
 
-        name = name,
-        texture = texture,
-        level = item_info.level,
-        type = item_info.type,
-        subtype = item_info.subtype,
-        slot = item_info.slot,
-        quality = quality,
-        max_stack = item_info.max_stack,
+            name = name,
+            texture = texture,
+            level = item_info.level,
+            type = item_info.type,
+            subtype = item_info.subtype,
+            slot = item_info.slot,
+            quality = quality,
+            max_stack = item_info.max_stack,
 
-        count = count,
-        start_price = start_price,
-        high_bid = high_bid,
-        min_increment = min_increment,
-        blizzard_bid = blizzard_bid,
-        bid_price = bid_price,
-        buyout_price = buyout_price,
-        unit_blizzard_bid = blizzard_bid / aux_quantity,
-        unit_bid_price = bid_price / aux_quantity,
-        unit_buyout_price = buyout_price / aux_quantity,
-        high_bidder = high_bidder,
-        owner = owner,
-        sale_status = sale_status,
-        duration = duration,
-        usable = usable,
+            count = count,
+            start_price = start_price,
+            high_bid = high_bid,
+            min_increment = min_increment,
+            blizzard_bid = blizzard_bid,
+            bid_price = bid_price,
+            buyout_price = buyout_price,
+            unit_blizzard_bid = blizzard_bid / aux_quantity,
+            unit_bid_price = bid_price / aux_quantity,
+            unit_buyout_price = buyout_price / aux_quantity,
+            high_bidder = high_bidder,
+            owner = owner,
+            sale_status = sale_status,
+            duration = duration,
+            usable = usable,
 
-        tooltip = tooltip,
-	    tooltip_money = tooltip_money,
-        max_charges = max_charges,
-        charges = charges,
-        aux_quantity = aux_quantity,
-    }
+            tooltip = tooltip,
+    	    tooltip_money = tooltip_money,
+            max_charges = max_charges,
+            charges = charges,
+            aux_quantity = aux_quantity,
+        }
+    end
 end
 
 function public.bid_update(auction_record)
@@ -244,6 +236,7 @@ function public.tooltip_find(pattern, tooltip)
 end
 
 function public.load_tooltip(frame, tooltip)
+    tooltip:ClearLines()
     for _, line in tooltip do
         if line.right_text then
             frame:AddDoubleLine(line.left_text, line.right_text, line.left_color[1], line.left_color[2], line.left_color[3], line.right_color[1], line.right_color[2], line.right_color[3])
@@ -251,15 +244,14 @@ function public.load_tooltip(frame, tooltip)
             frame:AddLine(line.left_text, line.left_color[1], line.left_color[2], line.left_color[3], true)
         end
     end
-    for i = 1,TOOLTIP_LENGTH do -- TODO why is this needed?
+    for i =1,getn(tooltip) do -- TODO why is this needed?
         getglobal(frame:GetName()..'TextLeft'..i):SetJustifyH('LEFT')
         getglobal(frame:GetName()..'TextRight'..i):SetJustifyH('LEFT')
     end
 end
 
 function public.display_name(item_id, no_brackets, no_color)
-    local item_info = aux.info.item(item_id)
-    if item_info then
+    for _, item_info in {aux.info.item(item_id)} do
         local name = item_info.name
         if not no_brackets then
             name = '['..name..']'
@@ -289,21 +281,13 @@ function public.tooltip(setter)
     AuxTooltip:Show()
 
     local tooltip = {}
-    for i = 1,TOOLTIP_LENGTH do
-        local left_text = getglobal('AuxTooltipTextLeft'..i):GetText()
-        local left_color = { getglobal('AuxTooltipTextLeft'..i):GetTextColor() }
-
-        local right_text = getglobal('AuxTooltipTextRight'..i):IsVisible() and getglobal('AuxTooltipTextRight'..i):GetText() -- the right side is only hidden, not cleared
-        local right_color = { getglobal('AuxTooltipTextRight'..i):GetTextColor() }
-
-        if left_text or right_text then
-            tinsert(tooltip, {
-                left_text = left_text,
-                left_color = left_color,
-                right_text = right_text,
-                right_color = right_color,
-            })
-        end
+    for i = 1,AuxTooltip:NumLines() do
+        tinsert(tooltip, {
+            left_text = getglobal('AuxTooltipTextLeft'..i):GetText(),
+            left_color = {getglobal('AuxTooltipTextLeft'..i):GetTextColor()},
+            right_text = getglobal('AuxTooltipTextRight'..i):IsVisible() and getglobal('AuxTooltipTextRight'..i):GetText(),
+            right_color = {getglobal('AuxTooltipTextRight'..i):GetTextColor()},
+        })
     end
 
     return tooltip, AuxTooltip.money

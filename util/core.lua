@@ -45,6 +45,10 @@ function public.values(t)
 	return vs
 end
 
+function public.select(i, ...)
+	return arg[i]
+end
+
 function public.eq(t1, t2)
 	if not t1 or not t2 then
 		return false

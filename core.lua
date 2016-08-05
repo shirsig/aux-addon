@@ -2,26 +2,6 @@ local addon = aux_module()
 aux = tremove(addon, 1)
 local m, public, private = unpack(addon)
 
---m.enum TODO
---setmetatable({}, { aux -> aux
---	__index = function(self, key)
---		self[key] = true
---		return self
---	end,
---	__call = function(self, key)
---		for key in self do
---			decl[key] =
---		end
---	end,
---})
---.INVTYPE_HEAD
---.INVTYPE_NECK
---.INVTYPE_SHOULDER
---()
-
---for notnil in {maybenil} do TODO
---end
-
 private.modules = { aux }
 function public.module(name)
     local module = aux_module()
