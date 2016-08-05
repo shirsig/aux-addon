@@ -236,7 +236,7 @@ function public.tooltip_find(pattern, tooltip)
 end
 
 function public.load_tooltip(frame, tooltip)
-    tooltip:ClearLines()
+    frame:ClearLines()
     for _, line in tooltip do
         if line.right_text then
             frame:AddDoubleLine(line.left_text, line.right_text, line.left_color[1], line.left_color[2], line.left_color[3], line.right_color[1], line.right_color[2], line.right_color[3])
