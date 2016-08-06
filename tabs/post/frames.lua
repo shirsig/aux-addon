@@ -25,15 +25,13 @@ aux.post_tab.FRAMES(function(m, public, private)
     m.frame.auctions:SetPoint('BOTTOMRIGHT', 0, 0)
 
     do
-        local checkbox = CreateFrame('CheckButton', nil, m.frame.inventory, 'UICheckButtonTemplate')
-        checkbox:SetWidth(22)
-        checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPLEFT', 45, -15)
+	    local checkbox = aux.gui.checkbox(m.frame.inventory)
+        checkbox:SetPoint('TOPLEFT', 49, -16)
         checkbox:SetScript('OnClick', function()
             m.refresh = true
         end)
         local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
-        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
+        label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
         label:SetText('Show hidden items')
         private.show_hidden_checkbox = checkbox
     end
@@ -224,10 +222,8 @@ aux.post_tab.FRAMES(function(m, public, private)
         private.duration_dropdown = dropdown
     end
     do
-        local checkbox = CreateFrame('CheckButton', nil, m.frame.parameters, 'UICheckButtonTemplate')
-        checkbox:SetWidth(22)
-        checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPRIGHT', -85, -6)
+	    local checkbox = aux.gui.checkbox(m.frame.parameters)
+        checkbox:SetPoint('TOPRIGHT', -83, -6)
         checkbox:SetScript('OnClick', function()
             local settings = m.read_settings()
             settings.hidden = this:GetChecked()
@@ -235,7 +231,7 @@ aux.post_tab.FRAMES(function(m, public, private)
             m.refresh = true
         end)
         local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
-        label:SetPoint('LEFT', checkbox, 'RIGHT', 2, 1)
+        label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
         label:SetText('Hide this item')
         private.hide_checkbox = checkbox
     end

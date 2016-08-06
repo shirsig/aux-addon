@@ -13,14 +13,14 @@ function public.FRAMES(f)
     private.create_frames = f
 end
 
-function public.LOAD()
+function m.LOAD()
     m.create_frames(m, public, private)
 end
 
 function public.OPEN()
     m.frame:Show()
 
-    m.deposit:SetText('Deposit: '..aux.money.to_string(0, nil, nil, nil, aux.gui.inline_color({255, 254, 250, 1})))
+    m.deposit:SetText('Deposit: '..aux.money.to_string(0, nil, nil, nil, aux.gui.inline_color.text.enabled))
 
     m.set_unit_start_price(0)
     m.set_unit_buyout_price(0)
@@ -278,7 +278,7 @@ function private.update_item_configuration()
 
         m.item.texture:SetTexture(nil)
         m.item.count:SetText()
-        m.item.name:SetTextColor(unpack(aux.gui.config.label_color.enabled))
+        m.item.name:SetTextColor(unpack(aux.gui.color.label.enabled))
         m.item.name:SetText('No item selected')
 
         m.unit_start_price:Hide()
@@ -319,7 +319,7 @@ function private.update_item_configuration()
             stack_count = m.stack_count_slider:GetValue()
             local deposit = floor(m.selected_item.unit_vendor_price * deposit_factor * (m.selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(m.duration_dropdown) / 120
 
-            m.deposit:SetText('Deposit: '..aux.money.to_string(deposit, nil, nil, nil, aux.gui.inline_color({255, 254, 250, 1})))
+            m.deposit:SetText('Deposit: '..aux.money.to_string(deposit, nil, nil, nil, aux.gui.inline_color.text.enabled))
         end
 
         m.refresh_button:Enable()

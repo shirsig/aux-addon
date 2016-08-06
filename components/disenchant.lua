@@ -40,7 +40,7 @@ do
 	end
 end
 
-function public.LOAD()
+function m.LOAD()
 	private.armor = aux.util.set(
 		'INVTYPE_HEAD',
 		'INVTYPE_NECK',

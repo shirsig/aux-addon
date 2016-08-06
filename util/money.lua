@@ -63,7 +63,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	
 	if is_negative then
 		if color then
-			text = color..'-|r'..text
+			text = color..'-'..FONT_COLOR_CODE_CLOSE..text
 		else
 			text = '-'..text
 		end
@@ -99,7 +99,7 @@ function public.format_number(num, pad, decimal_padding, color)
 	num = format('%0'..padding..'.0'..(decimal_padding or 0)..'f', num)
 	
 	if color then
-		return color..num..'|r'
+		return color..num..FONT_COLOR_CODE_CLOSE
 	else
 		return num
 	end

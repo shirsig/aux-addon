@@ -5,7 +5,7 @@ private.listeners = {}
 private.threads = {}
 public.thread_id = nil
 
-function public.LOAD()
+function m.LOAD()
 	m.event_frame:SetScript('OnUpdate', m.on_update)
 	m.event_frame:SetScript('OnEvent', m.on_event)
 end
@@ -55,7 +55,7 @@ function public.kill_thread(thread_id)
 end
 
 function public.event_listener(event, cb)
-	local listener_id = aux.unique()
+	local listener_id = aux.id()
 	m.listeners[listener_id] = { event=event, cb=cb, kill=function(...) if arg.n == 0 or arg[1] then m.kill_listener(listener_id) end end }
 	m.event_frame:RegisterEvent(event)
 	return listener_id
@@ -69,8 +69,8 @@ function public.on_next_event(event, callback)
 end
 
 function public.thread(k, ...)
-	local thread_id = aux.unique()
-	m.threads[thread_id] = { k = aux.f(k, unpack(arg)) }
+	local thread_id = aux.id()
+	m.threads[thread_id] = { k = aux._(k, unpack(arg)) }
 	return thread_id
 end
 
@@ -78,7 +78,7 @@ function public.wait(k, ...)
 	if type(k) == 'number' then
 		m.when(function() k = k - 1 return k <= 1 end, unpack(arg))
 	else
-		m.threads[m.thread_id].k = aux.f(k, unpack(arg))
+		m.threads[m.thread_id].k = aux._(k, unpack(arg))
 	end
 end
 
@@ -86,6 +86,6 @@ function public.when(p, k, ...)
 	if p() then
 		return k(unpack(arg))
 	else
-		return m.wait(m.when, p, aux.f(k, unpack(arg)))
+		return m.wait(m.when, p, aux._(k, unpack(arg)))
 	end
 end

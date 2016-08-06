@@ -2,13 +2,17 @@ local addon = aux_module()
 aux = tremove(addon, 1)
 local m, public, private = unpack(addon)
 
-private.modules = { aux }
+private.modules = {}
+function private.initialize_module(public_declarator)
+	public_declarator.LOAD = nil
+end
+m.initialize_module(public)
 function public.module(name)
-    local module = aux_module()
-    local public_interface = tremove(module, 1)
+    local public_interface, private_interface, public_declarator, private_declarator = unpack(aux_module())
+    m.initialize_module(public_declarator)
     tinsert(m.modules, public_interface)
     public[name] = public_interface
-    return unpack(module)
+    return private_interface, public_declarator, private_declarator
 end
 
 private.tabs = {}
@@ -40,46 +44,104 @@ end
 
 do
 	local x = 0
-	function public.unique()
+	function public.id()
 		x = x + 1
 		return x
 	end
 end
 
 do
-    local mt = {
-        __newindex = function(self, key, value)
-            rawget(self, '_f')()[key] = value
-        end,
-        __index = function(self, key)
-            return rawget(self, '_f')()[key]
-        end,
-        __call = function(self)
-            return rawget(self, '_f')()
-        end,
-    }
-    function public.dynamic_table(f)
-        return setmetatable({ _f=f }, mt)
-    end
-end
-
-function public.f(f, ...)
-	local params = arg
-	return function(...)
-		for i=1,arg.n do
-			tinsert(params, arg[i])
-		end
-		return f(unpack(params))
+	local mt = {
+		__newindex = function(self, name, method)
+			if strsub(name, 1, 2) == '__' then
+				self._metatable[name] = method
+			else
+				self._methods[name] = method
+			end
+		end,
+		__call = function(self, ...)
+			setmetatable(self._methods, self._metatable.__index)
+			self._metatable.__index =self._methods
+			local object = setmetatable({}, self._metatable)
+			for name, method in self._methods do
+				object[name] = method
+			end
+			self._constructor(object, unpack(arg))
+			return object
+		end,
+	}
+	function public.class(constructor)
+		return setmetatable({_constructor=constructor, _methods={}, _metatable={}}, mt)
 	end
 end
 
-function public.safe_call(f, ...)
+public.this = {}
+do
+	local formal_parameters = {}
+	for i=1,9 do
+		local key = 'arg'..i
+		public[key] = {}
+		formal_parameters[m[key]] = i
+	end
+	local function call(f, arg1, arg2)
+		local params = {}
+		for i=1,arg1.n do
+			if arg1[i] == m.this then
+				tinsert(params, this)
+			elseif formal_parameters[arg1[i]] then
+				tinsert(params, arg2[formal_parameters[arg1[i]]])
+			else
+				tinsert(params, arg1[i])
+			end
+		end
+		return f(unpack(params))
+	end
+	function public._(f, ...)
+		local arg1 = arg
+		return function(...)
+			return call(f, arg1, arg)
+		end
+	end
+end
+
+do
+    local mt = {
+        __newindex = function(self, key, value)
+	        self._f()[key] = value
+        end,
+        __index = function(self, key)
+            return self._f()[key]
+        end,
+        __call = function(self)
+            return self._f()
+        end,
+    }
+    function public.dynamic_table(f)
+        return setmetatable({_f=f}, mt)
+    end
+end
+
+do
+	local mt = {
+		__index = function(self, key)
+			return self:_cb(key)
+		end,
+		__call = function(self)
+			return self:_cb()
+		end,
+	}
+	function public.index_function(cb)
+		return setmetatable({_cb = cb}, mt)
+	end
+end
+
+function public.call(f, ...)
     if f then
         return f(unpack(arg))
     end
 end
 
-function public.safe_index(t, ...)
+function public.index(t, ...)
 	for i=1,arg.n do
 		if t then
 			t = t[arg[i]]
@@ -118,7 +180,7 @@ function public.on_load()
         btn:SetWidth(65)
         btn:SetHeight(24)
         btn:SetText('Close')
-        btn:SetScript('OnClick', m.f(HideUIPanel, AuxFrame))
+        btn:SetScript('OnClick', m._(HideUIPanel, AuxFrame))
         public.close_button = btn
     end
 
@@ -138,9 +200,7 @@ function public.on_load()
     end
 
     for _, module in m.modules do
-        if module('LOAD') then
-            module.LOAD()
-        end
+	    m.call(module.LOAD)
     end
 end
 
@@ -148,7 +208,7 @@ function public.on_event()
 	if event == 'VARIABLES_LOADED' then
 		m.on_load()
 	elseif event == 'ADDON_LOADED' then
-        m.safe_call(m.on_addon_load[arg1])
+        m.call(m.on_addon_load[arg1])
 	elseif event == 'AUCTION_HOUSE_SHOW' then
         m.on_auction_house_show()
 	elseif event == 'AUCTION_HOUSE_CLOSED' then
@@ -274,7 +334,7 @@ do
 
             m.control.event_listener('CHAT_MSG_SYSTEM', function(kill)
                 if arg1 == ERR_AUCTION_BID_PLACED then
-                    aux.safe_call(on_success)
+                    aux.call(on_success)
                     locked = false
                     kill()
                 end
@@ -301,7 +361,7 @@ do
         CancelAuction(index)
         m.control.event_listener('CHAT_MSG_SYSTEM', function(kill)
             if arg1 == ERR_AUCTION_REMOVED then
-                aux.safe_call(on_success)
+                aux.call(on_success)
                 locked = false
                 kill()
             end
@@ -428,7 +488,7 @@ end
 
 function public.is_player(name, current)
     local realm = GetCVar('realmName')
-    return not current and aux.safe_index(aux_characters, realm, name) or UnitName('player') == name
+    return not current and aux.index(aux_characters, realm, name) or UnitName('player') == name
 end
 
 function public.unmodified()

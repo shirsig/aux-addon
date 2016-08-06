@@ -6,7 +6,7 @@ private.game_tooltip_hooks = {}
 private.hooked_setter = nil
 private.game_tooltip_money = nil
 
-function public.LOAD()
+function m.LOAD()
     for func, hook in m.game_tooltip_hooks do
         local func, hook = func, hook
         aux.hook(
@@ -28,7 +28,7 @@ function public.LOAD()
         local name, _, quality = GetItemInfo(arg[1])
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
             local _, _, _, hex = GetItemQualityColor(quality)
-            local link = hex.. '|H'..arg[1]..'|h['..name..']|h|r'
+            local link = hex.. '|H'..arg[1]..'|h['..name..']|h'..FONT_COLOR_CODE_CLOSE
             m.extend_tooltip(ItemRefTooltip, link, 1)
         end
         return result
@@ -131,7 +131,7 @@ function m.game_tooltip_hooks:SetHyperlink(itemstring)
     local name, _, quality = GetItemInfo(itemstring)
     if name then
         local _, _, _, hex = GetItemQualityColor(quality)
-        local link = hex.. '|H'..itemstring..'|h['..name..']|h|r'
+        local link = hex.. '|H'..itemstring..'|h['..name..']|h'..FONT_COLOR_CODE_CLOSE
         m.extend_tooltip(GameTooltip, link, 1)
     end
 end
@@ -183,7 +183,7 @@ function m.game_tooltip_hooks:SetInboxItem(index)
     if id then
         local _, itemstring, quality = GetItemInfo(id)
         local _, _, _, hex = GetItemQualityColor(tonumber(quality))
-        local link = hex.. '|H'..itemstring..'|h['..name..']|h|r'
+        local link = hex.. '|H'..itemstring..'|h['..name..']|h'..FONT_COLOR_CODE_CLOSE
         m.extend_tooltip(GameTooltip, link, quantity)
     end
 end

@@ -50,7 +50,7 @@ aux.search_tab.FRAMES(function(m, public, private)
     do
         local panel = CreateFrame('Frame', nil, m.frame)
         panel:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]]}
-        panel:SetBackdropColor(unpack(aux.gui.config.content_color.backdrop))
+        panel:SetBackdropColor(unpack(aux.gui.color.content.backdrop))
         panel:SetPoint('LEFT', m.settings_button, 'RIGHT', 0, 0)
         panel:SetPoint('RIGHT', 0, 0)
         panel:SetHeight(42)
@@ -79,15 +79,15 @@ aux.search_tab.FRAMES(function(m, public, private)
         end)
         editbox:SetScript('OnTextChanged', function()
             if m.blizzard_page_index(this:GetText()) and not m.real_time_button:GetChecked() then
-                this:SetBackdropColor(unpack(aux.gui.config.on_color))
+                this:SetBackdropColor(unpack(aux.gui.color.state.enabled))
             else
-                this:SetBackdropColor(unpack(aux.gui.config.off_color))
+                this:SetBackdropColor(unpack(aux.gui.color.state.disabled))
             end
         end)
         local label = aux.gui.label(editbox, aux.gui.config.medium_font_size)
         label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
         label:SetText('Pages')
-        label:SetTextColor(unpack(aux.gui.config.text_color.enabled))
+        label:SetTextColor(unpack(aux.gui.color.text.enabled))
         private.first_page_input = editbox
     end
     do
@@ -105,15 +105,15 @@ aux.search_tab.FRAMES(function(m, public, private)
         end)
         editbox:SetScript('OnTextChanged', function()
             if m.blizzard_page_index(this:GetText()) and not m.real_time_button:GetChecked() then
-                this:SetBackdropColor(unpack(aux.gui.config.on_color))
+                this:SetBackdropColor(unpack(aux.gui.color.state.enabled))
             else
-                this:SetBackdropColor(unpack(aux.gui.config.off_color))
+                this:SetBackdropColor(unpack(aux.gui.color.state.disabled))
             end
         end)
         local label = aux.gui.label(editbox, aux.gui.config.medium_font_size)
         label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
         label:SetText('-')
-        label:SetTextColor(unpack(aux.gui.config.text_color.enabled))
+        label:SetTextColor(unpack(aux.gui.color.text.enabled))
         private.last_page_input = editbox
     end
     do
@@ -379,19 +379,17 @@ aux.search_tab.FRAMES(function(m, public, private)
                 m.min_level_input:SetFocus()
             end
         end)
-        editbox:SetScript('OnEnterPressed', aux.f(editbox.ClearFocus, editbox))
+        editbox:SetScript('OnEnterPressed', aux._(editbox.ClearFocus, editbox))
         local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
         label:SetText('Name')
         private.name_input = editbox
     end
     do
-        local checkbox = CreateFrame('CheckButton', nil, m.frame.filter, 'UICheckButtonTemplate')
-        checkbox:SetWidth(22)
-        checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPLEFT', m.name_input, 'TOPRIGHT', 10, 0)
+        local checkbox = aux.gui.checkbox(m.frame.filter)
+        checkbox:SetPoint('TOPLEFT', m.name_input, 'TOPRIGHT', 16, 0)
         local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
-        label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', 1, -3)
+        label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
         label:SetText('Exact')
         private.exact_checkbox = checkbox
     end
@@ -408,7 +406,7 @@ aux.search_tab.FRAMES(function(m, public, private)
                 m.max_level_input:SetFocus()
             end
         end)
-        editbox:SetScript('OnEnterPressed', aux.f(editbox.ClearFocus, editbox))
+        editbox:SetScript('OnEnterPressed', aux._(editbox.ClearFocus, editbox))
         local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
         label:SetText('Level Range')
@@ -427,19 +425,17 @@ aux.search_tab.FRAMES(function(m, public, private)
                 m.name_input:SetFocus()
             end
         end)
-        editbox:SetScript('OnEnterPressed', aux.f(editbox.ClearFocus, editbox))
+        editbox:SetScript('OnEnterPressed', aux._(editbox.ClearFocus, editbox))
         local label = aux.gui.label(editbox, aux.gui.config.medium_font_size)
         label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
         label:SetText('-')
         private.max_level_input = editbox
     end
     do
-        local checkbox = CreateFrame('CheckButton', nil, m.frame.filter, 'UICheckButtonTemplate')
-        checkbox:SetWidth(22)
-        checkbox:SetHeight(22)
-        checkbox:SetPoint('TOPLEFT', m.max_level_input, 'TOPRIGHT', 10, 0)
+	    local checkbox = aux.gui.checkbox(m.frame.filter)
+        checkbox:SetPoint('TOPLEFT', m.max_level_input, 'TOPRIGHT', 16, 0)
         local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
-        label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', 1, -3)
+	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
         label:SetText('Usable')
         private.usable_checkbox = checkbox
     end

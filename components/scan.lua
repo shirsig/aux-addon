@@ -9,7 +9,7 @@ do
 		for _, old_state in {scan_states[params.type]} do
 			m.abort(old_state.id)
 		end
-		local thread_id = aux.control.thread(aux.f(m.wait_for_callback, params.on_scan_start, m.scan))
+		local thread_id = aux.control.thread(aux._(m.wait_for_callback, params.on_scan_start, m.scan))
 		scan_states[params.type] = {
 			id = thread_id,
 			params = params,
@@ -27,14 +27,14 @@ do
 			end
 		end
 		for _, state in aborted do
-			aux.safe_call(state.params.on_abort)
+			aux.call(state.params.on_abort)
 		end
 	end
 
 	function private.complete()
 		local on_complete = m.state.params.on_complete
 		scan_states[m.state.params.type] = nil
-		aux.safe_call(on_complete)
+		aux.call(on_complete)
 	end
 
 	private.state = aux.dynamic_table(function()
@@ -103,7 +103,7 @@ end
 
 function private.submit_query()
 	aux.control.when(function() return m.state.params.type ~= 'list' or CanSendAuctionQuery() end, function()
-		aux.safe_call(m.state.params.on_submit_query)
+		aux.call(m.state.params.on_submit_query)
 		m.state.last_query_time = GetTime()
 		if m.state.params.type == 'bidder' then
 			GetBidderAuctionItems(m.state.page)
@@ -153,11 +153,11 @@ function private.scan_page(i)
 
 		aux.history.process_auction(auction_info)
 
-		if aux.safe_call(m.state.params.auto_buy_validator, auction_info) then
+		if aux.call(m.state.params.auto_buy_validator, auction_info) then
 			local send_signal, signal_received = aux.util.signal()
 			aux.control.when(signal_received, recurse)
-			aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, aux.f(send_signal, true))
-			return aux.control.thread(aux.control.when, aux.util.later(GetTime(), 10), aux.f(send_signal, false))
+			aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, aux._(send_signal, true))
+			return aux.control.thread(aux.control.when, aux.util.later(GetTime(), 10), aux._(send_signal, false))
 		elseif not m.query.validator or m.query.validator(auction_info) then
 			return m.wait_for_callback(m.state.params.on_auction, auction_info, function(removed)
 				if removed then

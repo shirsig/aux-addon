@@ -309,7 +309,7 @@ local methods = {
         local text = col:CreateFontString()
         text:SetJustifyV('CENTER')
         text:SetFont(aux.gui.config.font, aux.gui.config.medium_font_size)
-        text:SetTextColor(unpack(aux.gui.config.text_color.enabled))
+        text:SetTextColor(unpack(aux.gui.color.text.enabled))
         text:SetAllPoints()
         col.text = text
         col:SetFontString(text)
@@ -433,7 +433,7 @@ function public.CreateScrollingTable(parent)
     st.scrollBar = scrollBar
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
-    thumbTex:SetTexture(unpack(aux.gui.config.content_color.backdrop))
+    thumbTex:SetTexture(unpack(aux.gui.color.content.backdrop))
     thumbTex:SetHeight(50)
     thumbTex:SetWidth(12)
     getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()

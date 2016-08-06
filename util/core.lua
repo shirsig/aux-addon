@@ -1,18 +1,5 @@
 local m, public, private = aux.module'util'
 
-function public.pass()
-end
-
-function public.id(x)
-	return x
-end
-
-function public.const(x)
-	return function()
-		return x
-	end
-end
-
 function public.size(t)
 	local x = 0
 	for _ in t do
@@ -72,7 +59,11 @@ end
 function public.any(xs, p)
 	local holds = false
 	for _, x in xs do
-		holds = holds or p(x)
+		if p then
+			holds = holds or p(x)
+		else
+			holds = holds or x
+		end
 	end
 	return holds
 end
@@ -80,7 +71,11 @@ end
 function public.all(xs, p)
 	local holds = true
 	for _, x in xs do
-		holds = holds and p(x)
+		if p then
+			holds = holds and p(x)
+		else
+			holds = holds and x
+		end
 	end
 	return holds
 end
@@ -227,7 +222,6 @@ function public.bag_type(bag)
 	if bag == 0 then
 		return 1
 	end
-
 	if GetInventoryItemLink('player', ContainerIDToInventoryID(bag)) then
 		local item_id = aux.info.parse_hyperlink(GetInventoryItemLink('player', ContainerIDToInventoryID(bag)))
 		local item_info = aux.info.item(item_id)
@@ -251,22 +245,8 @@ function public.signal()
 	end
 end
 
-function public.without_errors(f)
-    local orig = UIErrorsFrame.AddMessage
-    UIErrorsFrame.AddMessage = m.pass
-    f()
-    UIErrorsFrame.AddMessage = orig
-end
-
-function public.without_sound(f)
-    local orig = GetCVar('MasterSoundEffects')
-    SetCVar('MasterSoundEffects', 0)
-    f()
-    SetCVar('MasterSoundEffects', orig)
-end
-
 function public.format_money(money, exact, color)
-	color = color or '|r'
+	color = color or FONT_COLOR_CODE_CLOSE
 
 	local TEXT_NONE = '0'
 
@@ -275,7 +255,7 @@ function public.format_money(money, exact, color)
 	local GSC_COPPER = 'c8602c'
 	local GSC_START = '|cff%s%d|r'
 	local GSC_PART = color..'.|cff%s%02d|r'
-	local GSC_NONE = '|cffa0a0a0'..TEXT_NONE..'|r'
+	local GSC_NONE = '|cffa0a0a0'..TEXT_NONE..FONT_COLOR_CODE_CLOSE
 
 	if not exact and money >= 10000 then
 		-- Round to nearest silver

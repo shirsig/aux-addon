@@ -1,44 +1,105 @@
 local m, public, private = aux.module'gui'
 
 public.config = {
-    link_color = { 153, 255, 255, 1 }, -- TODO inline color needs 255, others need /255
+	color = {
+		text = {enabled = {255, 254, 250, 1}, disabled = {147, 151, 139, 1}},
+		label = {enabled = {216, 225, 211, 1}, disabled = {150, 148, 140, 1}},
+		link = {153, 255, 255, 1},
+		window = {backdrop = {24, 24, 24, .93}, border = {30, 30, 30, 1}},
+		panel = {backdrop = {24, 24, 24, 1}, border = {255, 255, 255, .03}},
+		content = {backdrop = {42, 42, 42, 1}, border = {0, 0, 0, 0}},
+		state = {enabled = {60, 180, 60}, disabled = {180, 60, 60}},
+	},
     edge_size = 1.5,
-    window_color = { backdrop = {24/255, 24/255, 24/255, .93}, border = {30/255, 30/255, 30/255, 1} },
-    panel_color = { backdrop = {24/255, 24/255, 24/255, 1}, border = {1, 1, 1, .03} },
-    content_color = { backdrop = {42/255, 42/255, 42/255, 1}, border = {0, 0, 0, 0} },
     font = [[Fonts\ARIALN.TTF]],
     tiny_font_size = 12,
     small_font_size = 13,
     medium_font_size = 15,
     large_font_size = 18,
     huge_font_size = 23,
-    text_color = { enabled = { 255/255, 254/255, 250/255, 1 }, disabled = { 147/255, 151/255, 139/255, 1 } },
-    label_color = { enabled = { 216/255, 225/255, 211/255, 1 }, disabled = { 150/255, 148/255, 140/255, 1 } },
-    on_color  = {0.3, 0.7, 0.3},
-    off_color  = {0.7, 0.3, 0.3},
 }
 
-function public.inline_color(color)
-    local r, g, b, a = unpack(color)
-    return format('|c%02X%02X%02X%02X', a, r, g, b)
+public.color = aux.index_function(function(self, key)
+	self._t = (rawget(self, '_t') or m.config.color)[key]
+	if getn(self._t) == 0 then
+		return self
+	end
+	local color = aux.util.copy(self._t)
+	self._t = nil
+	for i=1,3 do
+		color[i] = color[i]/255
+	end
+	return color
+end)
+
+public.inline_color = aux.index_function(function(self, key)
+	self._t = (rawget(self, '_t') or m.config.color)[key]
+	if getn(self._t) == 0 then
+		return self
+	end
+	local color = aux.util.copy(self._t)
+	self._t = nil
+	tinsert(color, 1, tremove(color))
+	return format('|c%02X%02X%02X%02X', unpack(color))
+end)
+
+function m.LOAD()
+
+	aux.hook('ToggleDropDownMenu', function(...)
+		local ret = {aux.orig.ToggleDropDownMenu(unpack(arg))}
+		local dropdown = getglobal(arg[4] or '') or this:GetParent()
+		if strfind(dropdown:GetName() or '', 'aux_frame') then
+			m.set_content_style(DropDownList1Backdrop)
+			DropDownList1:SetWidth(dropdown:GetWidth() * 0.9)
+			DropDownList1:SetHeight(DropDownList1:GetHeight() - 8)
+			DropDownList1:SetPoint('TOPLEFT', dropdown, 'BOTTOMLEFT', -2, 0)
+			for i=1,UIDROPDOWNMENU_MAXBUTTONS do
+				local button = getglobal('DropDownList1Button'..i)
+				button:SetPoint('TOPLEFT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 8)
+				button:SetWidth(dropdown:GetWidth() - 30)
+				local text = button:GetFontString()
+				text:SetFont(m.config.font, m.config.medium_font_size)
+				text:SetPoint('TOPLEFT', 18, 0)
+				text:SetPoint('BOTTOMRIGHT', -8, 0)
+				local highlight = getglobal('DropDownList1Button'..i..'Highlight')
+				highlight:ClearAllPoints()
+				highlight:SetDrawLayer('OVERLAY')
+				highlight:SetHeight(14)
+				highlight:SetPoint('LEFT', 5, 0)
+				highlight:SetPoint('RIGHT', -3, 0)
+				local check = getglobal('DropDownList1Button'..i..'Check')
+				check:SetWidth(16)
+				check:SetHeight(16)
+				check:SetPoint('LEFT', 3, -1)
+			end
+			while getn(arg) < 4 do
+				tinsert(arg, nil)
+			end
+			tinsert(arg, 0)
+			tinsert(arg, 10)
+
+		end
+		return unpack(ret)
+	end)
+
 end
 
 function public.set_frame_style(frame, backdrop_color, border_color)
-    frame:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size, tile=true}
-    frame:SetBackdropColor(unpack(backdrop_color))
-    frame:SetBackdropBorderColor(unpack(border_color))
+	frame:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size, tile=true}
+	frame:SetBackdropColor(unpack(backdrop_color))
+	frame:SetBackdropBorderColor(unpack(border_color))
 end
 
 function public.set_window_style(frame)
-    m.set_frame_style(frame, m.config.window_color.backdrop, m.config.window_color.border)
+    m.set_frame_style(frame, m.color.window.backdrop, m.color.window.border)
 end
 
 function public.set_panel_style(frame)
-    m.set_frame_style(frame, m.config.panel_color.backdrop, m.config.panel_color.border)
+    m.set_frame_style(frame, m.color.panel.backdrop, m.color.panel.border)
 end
 
 function public.set_content_style(frame)
-    m.set_frame_style(frame, m.config.content_color.backdrop, m.config.content_color.border)
+    m.set_frame_style(frame, m.color.content.backdrop, m.color.content.border)
 end
 
 function public.panel(parent)
@@ -50,13 +111,13 @@ end
 function public.checkbutton(parent, text_height)
     local button = m.button(parent, text_height)
     button.state = false
-    button:SetBackdropColor(unpack(m.config.off_color))
+    button:SetBackdropColor(unpack(m.color.state.disabled))
     function button:SetChecked(state)
         if state then
-            self:SetBackdropColor(unpack(m.config.on_color))
+            self:SetBackdropColor(unpack(m.color.state.enabled))
             self.state = true
         else
-            self:SetBackdropColor(unpack(m.config.off_color))
+            self:SetBackdropColor(unpack(m.color.state.disabled))
             self.state = false
         end
     end
@@ -82,17 +143,17 @@ function public.button(parent, text_height)
         label:SetJustifyH('CENTER')
         label:SetJustifyV('CENTER')
         label:SetHeight(text_height)
-        label:SetTextColor(unpack(m.config.text_color.enabled))
+        label:SetTextColor(unpack(m.color.text.enabled))
         button:SetFontString(label)
     end
     button.default_Enable = button.Enable
     function button:Enable()
-        self:GetFontString():SetTextColor(unpack(m.config.text_color.enabled))
+        self:GetFontString():SetTextColor(unpack(m.color.text.enabled))
         return self:default_Enable()
     end
     button.default_Disable = button.Disable
     function button:Disable()
-        self:GetFontString():SetTextColor(unpack(m.config.text_color.disabled))
+        self:GetFontString():SetTextColor(unpack(m.color.text.disabled))
         return self:default_Disable()
     end
 
@@ -121,7 +182,6 @@ do
             id = id,
             frame = parent,
             tabs = {},
-            on_select = aux.util.pass,
         }
 
         function self:create_tab(text)
@@ -132,7 +192,7 @@ do
             tab.group = self
             tab:SetHeight(24)
             tab:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size}
-            tab:SetBackdropBorderColor(unpack(m.config.panel_color.border))
+            tab:SetBackdropBorderColor(unpack(m.color.panel.border))
             local dock = tab:CreateTexture(nil, 'OVERLAY')
             dock:SetHeight(3)
             if orientation == 'UP' then
@@ -142,7 +202,7 @@ do
                 dock:SetPoint('TOPLEFT', 1, 1)
                 dock:SetPoint('TOPRIGHT', -1, 1)
             end
-            dock:SetTexture(unpack(m.config.panel_color.backdrop))
+            dock:SetTexture(unpack(m.color.panel.backdrop))
             tab.dock = dock
             local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
             highlight:SetAllPoints()
@@ -183,28 +243,27 @@ do
 
             m.resize_tab(tab, tab:GetFontString():GetStringWidth(), 4)
 
-            -- tab:Show()
             tinsert(self.tabs, tab)
         end
 
         function self:set_tab(id)
             self.selected = id
             self.update_tabs()
-            self.on_select(id)
+            aux.call(self.on_select, id)
         end
 
         function self.update_tabs()
             for _, tab in self.tabs do
                 if tab.group.selected == tab.id then
-                    tab.text:SetTextColor(unpack(m.config.label_color.enabled))
+                    tab.text:SetTextColor(unpack(m.color.label.enabled))
                     tab:Disable()
-                    tab:SetBackdropColor(unpack(m.config.panel_color.backdrop))
+                    tab:SetBackdropColor(unpack(m.color.panel.backdrop))
                     tab.dock:Show()
                     tab:SetHeight(29)
                 else
-                    tab.text:SetTextColor(unpack(m.config.text_color.enabled))
+                    tab.text:SetTextColor(unpack(m.color.text.enabled))
                     tab:Enable()
-                    tab:SetBackdropColor(unpack(m.config.content_color.backdrop))
+                    tab:SetBackdropColor(unpack(m.color.content.backdrop))
                     tab.dock:Hide()
                     tab:SetHeight(24)
                 end
@@ -225,24 +284,19 @@ function public.editbox(parent)
     editbox:SetFont(m.config.font, m.config.medium_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
     m.set_content_style(editbox)
-
-    editbox:SetScript('OnEditFocusLost', aux.f(editbox.HighlightText, editbox, 0, 0))
-
-    editbox:SetScript('OnEscapePressed', aux.f(editbox.ClearFocus, editbox))
-
+    editbox:SetScript('OnEditFocusGained', aux._(editbox.HighlightText, editbox))
+    editbox:SetScript('OnEditFocusLost', aux._(editbox.HighlightText, editbox, 0, 0))
+    editbox:SetScript('OnEscapePressed', aux._(editbox.ClearFocus, editbox))
     do
         local last_time, last_x, last_y
-
-        editbox:SetScript('OnEditFocusGained', aux.f(editbox.HighlightText, editbox))
-
         editbox:SetScript('OnMouseUp', function()
             local x, y = GetCursorPosition()
-            if last_time and last_time > GetTime() - .5 and abs(x - last_x) < 10 and abs(y - last_y) < 10 then
+            if last_time and GetTime() - last_time < .5 and x == last_x and y == last_y then
+	            last_time = nil
                 this:HighlightText()
-                last_time = nil
             else
                 last_time = GetTime()
-                last_x, last_y = GetCursorPosition()
+                last_x, last_y = x, y
             end
         end)
     end
@@ -300,7 +354,7 @@ function public.status_bar(parent)
         text_frame:SetFrameLevel(level + 4)
         text_frame:SetAllPoints(self)
         local text = m.label(text_frame)
-        text:SetTextColor(unpack(m.config.text_color.enabled))
+        text:SetTextColor(unpack(m.color.text.enabled))
         text:SetPoint('CENTER', 0, 0)
         self.text = text
     end
@@ -325,7 +379,7 @@ function public.item(parent)
     local item = CreateFrame('Button', nil, parent)
     item:SetWidth(193)
     item:SetHeight(40)
-    local icon = CreateFrame('CheckButton', 'aux_frame'..aux.unique(), item, 'ActionButtonTemplate')
+    local icon = CreateFrame('CheckButton', 'aux_frame'..aux.id(), item, 'ActionButtonTemplate')
     icon:SetPoint('LEFT', 2, 0.5)
     icon:SetHighlightTexture(nil)
     icon:RegisterForClicks()
@@ -345,7 +399,7 @@ end
 function public.label(parent, size)
     local label = parent:CreateFontString()
     label:SetFont(m.config.font, size or m.config.medium_font_size)
-    label:SetTextColor(unpack(m.config.label_color.enabled))
+    label:SetTextColor(unpack(m.color.label.enabled))
     return label
 end
 
@@ -355,9 +409,9 @@ function public.horizontal_line(parent, y_offset, inverted_color)
     texture:SetPoint('TOPRIGHT', parent, 'TOPRIGHT', -2, y_offset)
     texture:SetHeight(2)
     if inverted_color then
-        texture:SetTexture(unpack(m.config.panel_color.backdrop))
+        texture:SetTexture(unpack(m.color.panel.backdrop))
     else
-        texture:SetTexture(unpack(m.config.content_color.backdrop))
+        texture:SetTexture(unpack(m.color.content.backdrop))
     end
     return texture
 end
@@ -368,20 +422,20 @@ function public.vertical_line(parent, x_offset, top_offset, bottom_offset, inver
     texture:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', x_offset, bottom_offset or 2)
     texture:SetWidth(2)
     if inverted_color then
-        texture:SetTexture(unpack(m.config.panel_color.backdrop))
+        texture:SetTexture(unpack(m.color.panel.backdrop))
     else
-        texture:SetTexture(unpack(m.config.content_color.backdrop))
+        texture:SetTexture(unpack(m.color.content.backdrop))
     end
     return texture
 end
 
 
 function public.dropdown(parent)
-    local dropdown = CreateFrame('Frame', 'aux_frame'..aux.unique(), parent, 'UIDropDownMenuTemplate')
+    local dropdown = CreateFrame('Frame', 'aux_frame'..aux.id(), parent, 'UIDropDownMenuTemplate')
 
     dropdown:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size, insets={top=5,bottom=5}}
-    dropdown:SetBackdropColor(unpack(m.config.content_color.backdrop))
-    dropdown:SetBackdropBorderColor(unpack(m.config.content_color.border))
+    dropdown:SetBackdropColor(unpack(m.color.content.backdrop))
+    dropdown:SetBackdropBorderColor(unpack(m.color.content.border))
     local left = getglobal(dropdown:GetName()..'Left'):Hide()
     local middle = getglobal(dropdown:GetName()..'Middle'):Hide()
     local right = getglobal(dropdown:GetName()..'Right'):Hide()
@@ -394,7 +448,7 @@ function public.dropdown(parent)
     text:ClearAllPoints()
     text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
     text:SetPoint('LEFT', dropdown, 'LEFT', 8, 0)
-    text:SetFont(m.config.font, m.config.small_font_size)
+    text:SetFont(m.config.font, m.config.medium_font_size)
     text:SetShadowColor(0, 0, 0, 0)
 
 --
@@ -434,7 +488,7 @@ function public.slider(parent)
     m.set_panel_style(slider)
     local thumb_texture = slider:CreateTexture(nil, 'ARTWORK')
     thumb_texture:SetPoint('CENTER', 0, 0)
-    thumb_texture:SetTexture(unpack(m.config.content_color.backdrop))
+    thumb_texture:SetTexture(unpack(m.color.content.backdrop))
     thumb_texture:SetHeight(15)
     thumb_texture:SetWidth(8)
     slider:SetThumbTexture(thumb_texture)
@@ -445,7 +499,7 @@ function public.slider(parent)
     label:SetJustifyH('LEFT')
     label:SetHeight(13)
     label:SetFont(m.config.font, m.config.small_font_size)
-    label:SetTextColor(unpack(m.config.label_color.enabled))
+    label:SetTextColor(unpack(m.color.label.enabled))
 
     local editbox = m.editbox(slider)
     editbox:SetPoint('LEFT', slider, 'RIGHT', 5, 0)
@@ -457,41 +511,16 @@ function public.slider(parent)
     return slider
 end
 
---function m.checkbox()
---    local frame = CreateFrame('Button', nil, UIParent)
---    frame:Hide()
---    frame:EnableMouse(true)
---    frame:SetScript("OnEnter", Control_OnEnter)
---    frame:SetScript("OnLeave", Control_OnLeave)
---    frame:SetScript("OnMouseDown", CheckBox_OnMouseDown)
---    frame:SetScript("OnMouseUp", CheckBox_OnMouseUp)
---
---    local checkbox = CreateFrame('Button', nil, frame)
---    checkbox:EnableMouse(false)
---    checkbox:SetWidth(16)
---    checkbox:SetHeight(16)
---    checkbox:SetPoint('TOPLEFT', 4, -4)
---    checkbox:SetBackdrop({ bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size })
---    checkbox:SetBackdropColor(unpack(m.config.content_color.backdrop))
---    checkbox:SetBackdropBorderColor(unpack(m.config.content_color.border))
---    local highlight = checkbox:CreateTexture(nil, 'HIGHLIGHT')
---    highlight:SetAllPoints()
---    highlight:SetTexture(1, 1, 1, .2)
---    highlight:SetBlendMode('BLEND')
---
---    local check = checkbox:CreateTexture(nil, 'OVERLAY')
---    check:SetTexture([[Interface\Buttons\UI-CheckBox-Check]])
---    check:SetTexCoord(.12, .88, .12, .88)
---    check:SetBlendMode('BLEND')
---    check:SetPoint('BOTTOMRIGHT')
---
---    local text = frame:CreateFontString(nil, 'OVERLAY')
---    text:SetJustifyH('LEFT')
---    text:SetHeight(18)
---    text:SetPoint('LEFT', checkbox, 'RIGHT')
---    text:SetPoint('RIGHT')
---    text:SetFont(m.config.font, m.config.medium_font_size)
---
---    checkbox.text = text
---    return checkbox
---end
+function public.checkbox(parent)
+    local checkbox = CreateFrame('CheckButton', nil, parent, 'UICheckButtonTemplate')
+    checkbox:SetWidth(16)
+    checkbox:SetHeight(16)
+	m.set_content_style(checkbox)
+    checkbox:SetNormalTexture(nil)
+    checkbox:SetPushedTexture(nil)
+    checkbox:GetHighlightTexture():SetAllPoints()
+    checkbox:GetHighlightTexture():SetTexture(1, 1, 1, .2)
+    checkbox:GetCheckedTexture():SetTexCoord(.12, .88, .12, .88)
+    checkbox:GetHighlightTexture('BLEND')
+    return checkbox
+end

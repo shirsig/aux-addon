@@ -6,7 +6,7 @@ function public.FRAMES(f)
     private.create_frames = f
 end
 
-function public.LOAD()
+function m.LOAD()
     m.create_frames(m, public, private)
 end
 
@@ -92,7 +92,7 @@ do
 
                 m.cancel_button:SetScript('OnClick', function()
                     if m.test(record)(index) and m.listing:ContainsRecord(record) then
-                        aux.cancel_auction(index, aux.f(m.listing.RemoveAuctionRecord, m.listing, record))
+                        aux.cancel_auction(index, aux._(m.listing.RemoveAuctionRecord, m.listing, record))
                     end
                 end)
                 m.cancel_button:Enable()

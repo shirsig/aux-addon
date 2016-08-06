@@ -5,8 +5,8 @@ aux_datasets = {}
 do
     local realm, faction
 
-    function public.LOAD()
-        aux.control.thread(aux.control.when, function() faction = UnitFactionGroup('player') return faction end, aux.util.pass)
+    function m.LOAD()
+        aux.control.thread(aux.control.when, function() faction = UnitFactionGroup('player') return faction end, function() end)
         realm = GetCVar('realmName')
     end
 

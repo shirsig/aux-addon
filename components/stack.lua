@@ -111,7 +111,7 @@ function public.stop()
 			slot = nil
 		end
 		m.state = nil
-		aux.safe_call(callback, slot)
+		aux.call(callback, slot)
 	end
 end
 

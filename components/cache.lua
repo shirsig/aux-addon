@@ -13,7 +13,7 @@ aux_merchant_buy = {}
 aux_merchant_sell = {}
 aux_characters = {}
 
-function public.LOAD()
+function m.LOAD()
 	m.scan_wdb()
 
 	aux.control.event_listener('MERCHANT_SHOW', m.on_merchant_show)

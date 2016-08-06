@@ -86,7 +86,7 @@ public.search_config = {
         width = 0.06,
         align = 'CENTER',
         set = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and (aux.gui.inline_color(aux.gui.config.link_color)..count..'|r') or count
+            local numAuctionsText = expandable and aux.gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
             if own > 0 then
                 numAuctionsText = numAuctionsText..(' |cffffff00('..own..')|r')
             end
@@ -132,7 +132,7 @@ public.search_config = {
         width = 0.13,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
+            cell:SetText(aux.is_player(record.owner) and ('|cffffff00'..record.owner..FONT_COLOR_CODE_CLOSE) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -256,7 +256,7 @@ public.auctions_config = {
         width = 0.06,
         align = 'CENTER',
         set = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and (aux.gui.inline_color(aux.gui.config.link_color)..count..'|r') or count
+            local numAuctionsText = expandable and aux.gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -390,7 +390,7 @@ public.bids_config = {
         width = 0.06,
         align = 'CENTER',
         set = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and (aux.gui.inline_color(aux.gui.config.link_color)..count..'|r') or count
+            local numAuctionsText = expandable and aux.gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -433,7 +433,7 @@ public.bids_config = {
         width = 0.13,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(aux.is_player(record.owner) and ('|cffffff00'..record.owner..'|r') or (record.owner or '---'))
+            cell:SetText(aux.is_player(record.owner) and ('|cffffff00'..record.owner..FONT_COLOR_CODE_CLOSE) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -996,7 +996,7 @@ local methods = {
 
 function public.CreateAuctionResultsTable(parent, config)
 
-    local rtName = 'aux_frame'..aux.unique()
+    local rtName = 'aux_frame'..aux.id()
     RT_COUNT = RT_COUNT + 1
     local rt = CreateFrame('Frame', rtName, parent)
     rt.config = config
@@ -1047,7 +1047,7 @@ function public.CreateAuctionResultsTable(parent, config)
     scrollBar:SetWidth(10)
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
-    thumbTex:SetTexture(unpack(aux.gui.config.content_color.backdrop))
+    thumbTex:SetTexture(unpack(aux.gui.color.content.backdrop))
     thumbTex:SetHeight(150)
     thumbTex:SetWidth(scrollBar:GetWidth())
     getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
@@ -1074,7 +1074,7 @@ function public.CreateAuctionResultsTable(parent, config)
         text:SetJustifyH('CENTER')
         text:SetJustifyV('CENTER')
         text:SetFont(aux.gui.config.font, aux.gui.config.tiny_font_size)
-        text:SetTextColor(unpack(aux.gui.config.label_color.enabled))
+        text:SetTextColor(unpack(aux.gui.color.label.enabled))
         cell:SetFontString(text)
         if not column_config.isPrice then cell:SetText(column_config.title or '') end -- TODO
         text:SetAllPoints()
