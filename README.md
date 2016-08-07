@@ -131,7 +131,7 @@ For using a tooltip filter as the first filter part there is an explicit **toolt
 
 Here are some queries I use myself for illustration:
 
-**or/and/buy-profit/5g/buy-pct/60/and/and/bid-profit/5g/bid-pct/60/left/30m**<br/>
+**or/and2/buy-profit/5g/buy-pct/60/and3/bid-profit/5g/bid-pct/60/left/30m**<br/>
 This filter will search the whole auction house for auctions either with a buyout price of 5g or more higher than the market value and 60% or less of the market value or a bid price for which the same is true and in addition only 30m or less remaining.
 
 **recipe/usable/not/libram**<br/>
