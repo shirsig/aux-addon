@@ -92,16 +92,14 @@ do
 	end
 
 	function private.new_search(filter_string, prettified)
-		if prettified then
-			tinsert(aux_recent_searches, 1, {
-				filter_string = filter_string,
-				prettified = prettified,
-			})
-			while getn(aux_recent_searches) > 50 do
-				tremove(aux_recent_searches)
-			end
-			m.update_search_listings()
+		tinsert(aux_recent_searches, 1, {
+			filter_string = filter_string,
+			prettified = prettified,
+		})
+		while getn(aux_recent_searches) > 50 do
+			tremove(aux_recent_searches)
 		end
+		m.update_search_listings()
 
 		while getn(searches) > search_index do
 			tremove(searches)
