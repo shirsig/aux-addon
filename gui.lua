@@ -45,7 +45,37 @@ public.inline_color = aux.index_function(function(self, key)
 	return format('|c%02X%02X%02X%02X', unpack(color))
 end)
 
+do
+	local dropdown
+
+	function public.menu(...)
+		UIDropDownMenu_Initialize(dropdown, function()
+			for i=1,arg.n-1 do
+				UIDropDownMenu_AddButton{
+					text = arg[i],
+					value = i,
+					func = function()
+						return arg[arg.n](this.value)
+					end,
+				}
+			end
+		end, 'MENU')
+		dropdown:SetPoint('BOTTOMLEFT', GetCursorPosition())
+		ToggleDropDownMenu(nil, nil, dropdown, nil, 0, 0)
+	end
+
+	function private.initialize_menu()
+		dropdown = CreateFrame('Frame', 'aux_frame'..aux.id(), UIParent, 'UIDropDownMenuTemplate')
+		dropdown:SetWidth(1)
+		dropdown:SetHeight(1)
+		dropdown:SetAlpha(0)
+	end
+
+end
+
 function m.LOAD()
+	m.initialize_menu()
+
 	local backdrop = DropDownList1Backdrop:GetBackdrop()
 	aux.hook('ToggleDropDownMenu', function(...)
 		local ret = {aux.orig.ToggleDropDownMenu(unpack(arg))}
@@ -93,7 +123,6 @@ function m.LOAD()
 		end
 		return unpack(ret)
 	end)
-
 end
 
 function public.set_frame_style(frame, backdrop_color, border_color, left, right, top, bottom)

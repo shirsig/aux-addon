@@ -347,7 +347,7 @@ aux.post_tab.FRAMES(function(m, public, private)
         btn:SetWidth(150)
         btn:SetHeight(20)
         btn:GetFontString():SetJustifyH('RIGHT')
-        btn:GetFontString():SetPoint('RIGHT', 0, 0)
+        btn:GetFontString():SetPoint('RIGHT', -2, 0)
         btn:SetScript('OnClick', function()
             if this.amount then
                 m.set_unit_start_price(this.amount)
