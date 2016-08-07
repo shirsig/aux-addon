@@ -13,8 +13,11 @@ public.config = {
     edge_size = 1.5,
     font = [[Fonts\ARIALN.TTF]],
     small_font_size = 13,
+	small_font_size2 = 14,
     medium_font_size = 15,
-    large_font_size = 18,
+	medium_font_size2 = 16,
+	large_font_size = 17,
+	large_font_size2 = 18,
     huge_font_size = 23,
 }
 
@@ -78,8 +81,6 @@ function m.LOAD()
 				local text = button:GetFontString()
 				text:SetFont([[Fonts\FRIZQT__.ttf]], 10)
 				text:SetShadowOffset(1, -1)
---				text:SetPoint('TOPLEFT', 18, 0)
---				text:SetPoint('BOTTOMRIGHT', -8, 0)
 				local highlight = getglobal('DropDownList1Button'..i..'Highlight')
 				highlight:SetAllPoints()
 				highlight:SetDrawLayer('BACKGROUND')
@@ -219,7 +220,7 @@ function public.tab_group(parent, orientation)
         tab.text:SetPoint('RIGHT', -3, -1)
         tab.text:SetJustifyH('CENTER')
         tab.text:SetJustifyV('CENTER')
-        tab.text:SetFont(m.config.font, m.config.large_font_size)
+        tab.text:SetFont(m.config.font, m.config.large_font_size2)
         tab:SetFontString(tab.text)
 
         tab:SetText(text)
@@ -389,12 +390,10 @@ function public.item(parent)
     icon:EnableMouse(nil)
     item.texture = getglobal(icon:GetName()..'Icon')
     item.texture:SetTexCoord(0.06,0.94,0.06,0.94)
-    item.name = aux.gui.label(icon)
+    item.name = aux.gui.label(icon, 15)
     item.name:SetJustifyH('LEFT')
     item.name:SetPoint('LEFT', icon, 'RIGHT', 10, 0)
     item.name:SetPoint('RIGHT', item, 'RIGHT', -10, 0.5)
-    item.name:SetPoint('TOP', item, 'TOP', -5, 0)
-    item.name:SetPoint('BOTTOM', item, 'BOTTOM', 5, 0)
     item.count = getglobal(icon:GetName()..'Count')
     item.count:SetTextHeight(17)
     return item
@@ -484,6 +483,7 @@ function public.slider(parent)
     local editbox = m.editbox(slider)
     editbox:SetPoint('LEFT', slider, 'RIGHT', 5, 0)
     editbox:SetWidth(50)
+    editbox:SetHeight(18)
     editbox:SetJustifyH('CENTER')
     editbox:SetFont(m.config.font, 17)
 

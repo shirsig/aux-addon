@@ -911,9 +911,9 @@ function private.remove_post_filter()
 end
 
 function private.update_filter_display()
-    local lines = aux.util.size(aux.util.filter(m.post_components, function(component) return component[1] == 'operator' and component[2] ~= 'not' end))
-    local width_scale = max(260/m.filter_display:GetStringWidth())
-    local height_scale = min((200 / lines) / 18)
+    local lines = aux.util.size(aux.util.filter(m.post_components, function(component) return not (component[1] == 'operator' and component[2] == 'not') end))
+    local width_scale = 250/m.filter_display:GetStringWidth()
+    local height_scale = (180 / lines) / 18
     m.filter_display.scale_frame:SetScale(min(1, width_scale, height_scale))
     m.filter_display:SetText(aux.filter.indented_post_query_string(m.post_components))
 end

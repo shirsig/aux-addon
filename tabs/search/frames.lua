@@ -258,7 +258,7 @@ aux.search_tab.FRAMES(function(m, public, private)
         aux.gui.horizontal_line(m.frame, -40)
     end
     do
-        local btn = aux.gui.button(m.frame, aux.gui.config.large_font_size)
+        local btn = aux.gui.button(m.frame, aux.gui.config.large_font_size2)
         btn:SetPoint('BOTTOMLEFT', AuxFrameContent, 'TOPLEFT', 10, 8)
         btn:SetWidth(243)
         btn:SetHeight(22)
@@ -267,7 +267,7 @@ aux.search_tab.FRAMES(function(m, public, private)
         private.search_results_button = btn
     end
     do
-        local btn = aux.gui.button(m.frame, aux.gui.config.large_font_size)
+        local btn = aux.gui.button(m.frame, aux.gui.config.large_font_size2)
         btn:SetPoint('TOPLEFT', m.search_results_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(243)
         btn:SetHeight(22)
@@ -276,7 +276,7 @@ aux.search_tab.FRAMES(function(m, public, private)
         private.saved_searches_button = btn
     end
     do
-        local btn = aux.gui.button(m.frame, aux.gui.config.large_font_size)
+        local btn = aux.gui.button(m.frame, aux.gui.config.large_font_size2)
         btn:SetPoint('TOPLEFT', m.saved_searches_button, 'TOPRIGHT', 5, 0)
         btn:SetWidth(243)
         btn:SetHeight(22)
@@ -541,7 +541,7 @@ aux.search_tab.FRAMES(function(m, public, private)
         aux.gui.set_content_style(frame)
         local scale_frame = CreateFrame('Frame', nil, frame)
         scale_frame:SetAllPoints()
-        local display = aux.gui.label(scale_frame, aux.gui.config.large_font_size)
+        local display = aux.gui.label(scale_frame, aux.gui.config.large_font_size2)
         display:SetAllPoints()
         display:SetJustifyH('LEFT')
         display:SetJustifyV('TOP')

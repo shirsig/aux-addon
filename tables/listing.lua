@@ -4,7 +4,7 @@ local ST_COUNT = 0
 
 local ST_ROW_HEIGHT = 15
 local ST_ROW_TEXT_SIZE = 14
-local ST_HEAD_HEIGHT = 27
+local ST_HEAD_HEIGHT = 26.3
 local ST_HEAD_SPACE = 2
 local DEFAULT_COL_INFO = {{width=1}}
 
