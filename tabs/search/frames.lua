@@ -243,14 +243,6 @@ aux.search_tab.FRAMES(function(m, public, private)
             this:HighlightText(0, 0)
         end)
         editbox:SetScript('OnEnterPressed', m.execute)
-        editbox:SetScript('OnReceiveDrag', function()
-            local item_info = aux.cursor_item() and aux.info.item(aux.cursor_item().item_id)
-            if item_info then
-                m.set_filter(strlower(item_info.name)..'/exact')
-                m.execute(nil, false)
-            end
-            ClearCursor()
-        end)
         private.search_box = editbox
     end
     do

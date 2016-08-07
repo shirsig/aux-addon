@@ -61,7 +61,7 @@ function private.move_item(from_slot, to_slot, amount, k)
 
 	ClearCursor()
 	SplitContainerItem(from_slot[1], from_slot[2], amount)
-	PickupContainerItem(unpack(to_slot))
+	aux.orig.PickupContainerItem(unpack(to_slot))
 
 	return aux.control.when(function() return m.stack_size(to_slot) == expected_size end, k)
 end

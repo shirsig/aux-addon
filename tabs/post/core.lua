@@ -17,7 +17,7 @@ function m.LOAD()
     m.create_frames(m, public, private)
 end
 
-function public.OPEN()
+function m.OPEN()
     m.frame:Show()
 
     m.deposit:SetText('Deposit: '..aux.money.to_string(0, nil, nil, nil, aux.gui.inline_color.text.enabled))
@@ -30,9 +30,17 @@ function public.OPEN()
     m.refresh = true
 end
 
-function public.CLOSE()
+function m.CLOSE()
     m.selected_item = nil
     m.frame:Hide()
+end
+
+function m.PICKUP_ITEM(item_info)
+	m.select_item(item_info.item_key)
+end
+
+function m.USE_ITEM(item_info)
+	m.select_item(item_info.item_key)
 end
 
 function private.default_settings()
@@ -358,7 +366,7 @@ function private.unit_vendor_price(item_key)
 
             if aux.info.auctionable(item_info.tooltip, nil, item_info.lootable) then
                 ClearCursor()
-                PickupContainerItem(unpack(slot))
+                aux.orig.PickupContainerItem(unpack(slot))
                 ClickAuctionSellItemButton()
                 local auction_sell_item = aux.info.auction_sell_item()
                 ClearCursor()

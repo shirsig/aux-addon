@@ -10,12 +10,12 @@ function m.LOAD()
     m.create_frames(m, public, private)
 end
 
-function public.OPEN()
+function m.OPEN()
     m.frame:Show()
     m.scan_bids()
 end
 
-function public.CLOSE()
+function m.CLOSE()
     m.frame:Hide()
 end
 

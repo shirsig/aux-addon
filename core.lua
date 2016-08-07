@@ -2,6 +2,37 @@ local addon = aux_module()
 aux = tremove(addon, 1)
 local m, public, private = unpack(addon)
 
+do
+	local mt = {
+		__newindex = function(self, key, value)
+			self._f()[key] = value
+		end,
+		__index = function(self, key)
+			return self._f()[key]
+		end,
+		__call = function(self)
+			return self._f()
+		end,
+	}
+	function public.dynamic_table(f)
+		return setmetatable({_f=f}, mt)
+	end
+end
+
+do
+	local mt = {
+		__index = function(self, key)
+			return self:_cb(key)
+		end,
+		__call = function(self)
+			return self:_cb()
+		end,
+	}
+	function public.index_function(cb)
+		return setmetatable({_cb = cb}, mt)
+	end
+end
+
 private.modules = {}
 function private.initialize_module(public_declarator)
 	public_declarator.LOAD = nil
@@ -17,20 +48,21 @@ end
 
 private.tabs = {}
 function public.tab(index, name)
-    local ret = { m.module(name) }
-    ret[2].ACTIVE = function()
+    local tab = {m.module(name)}
+    tab[2].ACTIVE = function()
         return m[name] == m.active_tab()
     end
+    for _, handler in {'OPEN', 'CLOSE', 'CLICK_LINK', 'PICKUP_ITEM', 'USE_ITEM'} do
+        tab[2][handler] = nil
+    end
     m.tabs[index] = m[name]
-    return unpack(ret)
+    return unpack(tab)
 end
 do
     local active_tab_index
-    function private.active_tab()
-        if active_tab_index then
-            return m.tabs[active_tab_index]
-        end
-    end
+    private.active_tab = m.dynamic_table(function()
+	    return m.tabs[active_tab_index]
+    end)
     function private.on_tab_click(index)
         if m.active_tab() then
             m.active_tab().CLOSE()
@@ -104,37 +136,6 @@ do
 	end
 end
 
-do
-    local mt = {
-        __newindex = function(self, key, value)
-	        self._f()[key] = value
-        end,
-        __index = function(self, key)
-            return self._f()[key]
-        end,
-        __call = function(self)
-            return self._f()
-        end,
-    }
-    function public.dynamic_table(f)
-        return setmetatable({_f=f}, mt)
-    end
-end
-
-do
-	local mt = {
-		__index = function(self, key)
-			return self:_cb(key)
-		end,
-		__call = function(self)
-			return self:_cb()
-		end,
-	}
-	function public.index_function(cb)
-		return setmetatable({_cb = cb}, mt)
-	end
-end
-
 function public.call(f, ...)
     if f then
         return f(unpack(arg))
@@ -161,8 +162,6 @@ function public.on_load()
 
     aux.gui.set_window_style(AuxFrame)
     tinsert(UISpecialFrames, 'AuxFrame')
-
-    aux.control.event_listener('CURSOR_UPDATE', m.CURSOR_UPDATE)
 
     do
         local tab_group = m.gui.tab_group(AuxFrame, 'DOWN')
@@ -427,63 +426,34 @@ function public.price_level_color(pct)
     end
 end
 
-do -- TODO make it work for other ways to pick up things
-    local last_picked_up
-    function private.CURSOR_UPDATE()
-        last_picked_up = nil
-    end
-    function private.PickupContainerItem(...)
-        local bag, slot = unpack(arg)
-        aux.control.thread(function()
-            last_picked_up = {bag, slot}
-        end)
-        return m.orig.PickupContainerItem(unpack(arg))
-    end
-    function public.cursor_item()
-        if last_picked_up and CursorHasItem() then
-            return m.info.container_item(unpack(last_picked_up))
-        end
-    end
+function private.SetItemRef(...)
+	if not arg[3] == 'RightButton' or not m.active_tab.CLICK_LINK or not strfind(arg[1], '^item:%d+') then
+		return m.orig.SetItemRef(unpack(arg))
+	end
+	local item_info = m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))
+	if item_info then
+		return m.active_tab.CLICK_LINK(item_info)
+	end
 end
 
-function private.SetItemRef(...)
-    local itemstring, text, button = unpack(arg)
-    if m.search_tab.ACTIVE() and button == 'RightButton' then
-        local item_info = m.info.item(tonumber(({strfind(itemstring, '^item:(%d+)')})[3]))
-        if item_info then
-            m.search_tab.set_filter(strlower(item_info.name)..'/exact')
-            m.search_tab.execute(nil, false)
-            return
-        end
-    end
-    return m.orig.SetItemRef(unpack(arg))
+function private.PickupContainerItem(...)
+	if IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() or not m.active_tab.PICKUP_ITEM then
+		return m.orig.PickupContainerItem(unpack(arg))
+	end
+	local item_info = m.info.container_item(arg[1], arg[2])
+	if item_info then
+		return m.active_tab.PICKUP_ITEM(item_info)
+	end
 end
 
 function private.UseContainerItem(...)
-    local bag, slot = unpack(arg)
-    if IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() then
+    if IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() or not m.active_tab.USE_ITEM then
         return m.orig.UseContainerItem(unpack(arg))
     end
-
-    if m.search_tab.ACTIVE() then
-        local item_info = m.info.container_item(bag, slot)
-        item_info = item_info and m.info.item(item_info.item_id)
-        if item_info then
-            m.search_tab.set_filter(strlower(item_info.name)..'/exact')
-            m.search_tab.execute(nil, false)
-        end
-        return
+    local item_info = m.info.container_item(arg[1], arg[2])
+    if item_info then
+        return m.active_tab.USE_ITEM(item_info)
     end
-
-    if m.post_tab.ACTIVE() then
-        local item_info = m.info.container_item(bag, slot)
-        if item_info then
-            m.post_tab.select_item(item_info.item_key)
-        end
-        return
-    end
-
-	return m.orig.UseContainerItem(unpack(arg))
 end
 
 function public.is_player(name, current)

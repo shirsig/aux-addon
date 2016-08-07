@@ -144,15 +144,30 @@ function m.LOAD()
 	m.current_search().placeholder = true
 end
 
-function public.OPEN()
+function m.OPEN()
     m.frame:Show()
     m.update_search_listings()
 end
 
-function public.CLOSE()
+function m.CLOSE()
     m.close_settings()
     m.current_search().table:SetSelectedRecord()
     m.frame:Hide()
+end
+
+function m.CLICK_LINK(item_info)
+	m.set_filter(strlower(item_info.name)..'/exact')
+	m.execute(nil, false)
+end
+
+function m.PICKUP_ITEM(item_info)
+	m.set_filter(strlower(item_info.name)..'/exact')
+	m.execute(nil, false)
+end
+
+function m.USE_ITEM(item_info)
+	m.set_filter(strlower(item_info.name)..'/exact')
+	m.execute(nil, false)
 end
 
 function private.update_search_listings()

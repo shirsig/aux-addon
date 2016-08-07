@@ -118,34 +118,13 @@ aux.post_tab.FRAMES(function(m, public, private)
     do
         local item = aux.gui.item(m.frame.parameters)
         item:SetPoint('TOPLEFT', 6, -6)
-        item:EnableMouse()
-        item:SetScript('OnReceiveDrag', function()
-            local item_info = aux.cursor_item()
-            if item_info then
-                m.select_item(item_info.item_key)
-            end
-            ClearCursor()
-        end)
-        item:SetScript('OnClick', function()
-            local item_info = aux.cursor_item()
-            if item_info then
-                m.select_item(item_info.item_key)
-            end
-            ClearCursor()
-        end)
-        local highlight = item:CreateTexture()
-        highlight:SetPoint('TOPLEFT', -2.5, 2)
-        highlight:SetPoint('BOTTOMRIGHT', 2.5, -2)
-        highlight:Hide()
-        highlight:SetTexture(1, .9, .9, .1)
-        item:SetScript('OnEnter', function()
-            highlight:Show()
+        item.button:EnableMouse(true)
+        item.button:SetScript('OnEnter', function()
             if m.selected_item then
                 aux.info.set_tooltip(m.selected_item.itemstring, this, 'ANCHOR_RIGHT')
             end
         end)
-        item:SetScript('OnLeave', function()
-            highlight:Hide()
+        item.button:SetScript('OnLeave', function()
             GameTooltip:Hide()
         end)
         private.item = item
