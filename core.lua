@@ -427,7 +427,7 @@ function public.price_level_color(pct)
 end
 
 function private.SetItemRef(...)
-	if not arg[3] == 'RightButton' or not m.active_tab.CLICK_LINK or not strfind(arg[1], '^item:%d+') then
+	if not arg[3] == 'RightButton' or not m.active_tab.CLICK_LINK or not m.active_tab() or not strfind(arg[1], '^item:%d+') then
 		return m.orig.SetItemRef(unpack(arg))
 	end
 	local item_info = m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))
@@ -437,7 +437,7 @@ function private.SetItemRef(...)
 end
 
 function private.PickupContainerItem(...)
-	if IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() or not m.active_tab.PICKUP_ITEM then
+	if IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() or not m.active_tab() or not m.active_tab.PICKUP_ITEM then
 		return m.orig.PickupContainerItem(unpack(arg))
 	end
 	local item_info = m.info.container_item(arg[1], arg[2])
@@ -447,7 +447,7 @@ function private.PickupContainerItem(...)
 end
 
 function private.UseContainerItem(...)
-    if IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() or not m.active_tab.USE_ITEM then
+    if IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() or not m.active_tab() or not m.active_tab.USE_ITEM then
         return m.orig.UseContainerItem(unpack(arg))
     end
     local item_info = m.info.container_item(arg[1], arg[2])
