@@ -56,15 +56,117 @@ end
 
 private.RESULTS, private.SAVED, private.FILTER = 1, 2, 3
 
+do
+	local searches = {}
+	local search_index = 0
+
+	function private.current_search()
+		return searches[search_index]
+	end
+
+	function private.update_search(index)
+		searches[search_index].status_bar:Hide()
+		searches[search_index].table:Hide()
+		searches[search_index].table:SetSelectedRecord()
+
+		search_index = index
+
+		searches[search_index].status_bar:Show()
+		searches[search_index].table:Show()
+
+		m.search_box:SetText(searches[search_index].filter_string)
+		if search_index <= 1 then
+			m.previous_button:Disable()
+		else
+			m.previous_button:Enable()
+		end
+		if search_index == getn(searches) then
+			m.next_button:Hide()
+			m.search_box:SetPoint('LEFT', m.previous_button, 'RIGHT', 4, 0)
+		else
+			m.next_button:Show()
+			m.search_box:SetPoint('LEFT', m.next_button, 'RIGHT', 4, 0)
+		end
+		m.update_start_stop()
+		m.update_continuation()
+	end
+
+	function private.new_search(filter_string, prettified)
+		if prettified then
+			tinsert(aux_recent_searches, 1, {
+				filter_string = filter_string,
+				prettified = prettified,
+			})
+			while getn(aux_recent_searches) > 50 do
+				tremove(aux_recent_searches)
+			end
+			m.update_search_listings()
+		end
+
+		while getn(searches) > search_index do
+			tremove(searches)
+		end
+		local search = {
+			filter_string = filter_string,
+			records = {},
+		}
+		tinsert(searches, search)
+		if getn(searches) > 5 then
+			tremove(searches, 1)
+			tinsert(m.status_bars, tremove(m.status_bars, 1))
+			tinsert(m.tables, tremove(m.tables, 1))
+			search_index = 4
+		end
+
+		search.status_bar = m.status_bars[getn(searches)]
+		search.status_bar:update_status(100, 100)
+		search.status_bar:set_text('')
+
+		search.table = m.tables[getn(searches)]
+		search.table:SetSort(1,2,3,4,5,6,7,8,9)
+		search.table:Reset()
+		search.table:SetDatabase(search.records)
+
+		m.update_search(getn(searches))
+	end
+
+	function private.previous_search()
+		m.search_box:ClearFocus()
+		m.update_search(search_index - 1)
+		m.update_tab(m.RESULTS)
+	end
+
+	function private.next_search()
+		m.search_box:ClearFocus()
+		m.update_search(search_index + 1)
+		m.update_tab(m.RESULTS)
+	end
+
+	function private.initialize_search_state()
+		searches[0] = {
+			table = m.tables[1],
+			status_bar = m.status_bars[1],
+			records = {},
+			filter_string = ''
+		}
+		searches[0].table:SetDatabase(searches[0].records)
+		searches[0].status_bar:update_status(100, 100)
+		searches[0].status_bar:set_text('')
+		m.update_search(0)
+		searches[0].filter_string = nil
+	end
+
+end
+
 function public.FRAMES(f)
     private.create_frames = f
 end
 
 function m.LOAD()
-    m.create_frames(m, public, private)
-    m.new_search('')
-    m.update_tab(m.SAVED)
-    m.update_auto_buy_filter()
+	m.create_frames(m, public, private)
+	m.update_tab(m.SAVED)
+	m.update_auto_buy_filter()
+	m.initialize_search_state()
 end
 
 function public.OPEN()
@@ -532,93 +634,6 @@ function private.update_continuation()
     else
         m.resume_button:Hide()
         m.search_box:SetPoint('RIGHT', m.start_button, 'LEFT', -4, 0)
-    end
-end
-
-do
-    local searches = {}
-    local search_index = 1
-
-    function private.current_search()
-        return searches[search_index]
-    end
-
-    function private.update_search(index)
-        searches[search_index].status_bar:Hide()
-        searches[search_index].table:Hide()
-        searches[search_index].table:SetSelectedRecord()
-
-        search_index = index
-
-        searches[search_index].status_bar:Show()
-        searches[search_index].table:Show()
-
-        m.search_box:SetText(searches[search_index].filter_string)
-        if search_index == 1 then
-            m.previous_button:Disable()
-        else
-            m.previous_button:Enable()
-        end
-        if search_index == getn(searches) then
-            m.next_button:Hide()
-            m.search_box:SetPoint('LEFT', m.previous_button, 'RIGHT', 4, 0)
-        else
-            m.next_button:Show()
-            m.search_box:SetPoint('LEFT', m.next_button, 'RIGHT', 4, 0)
-        end
-        m.update_start_stop()
-        m.update_continuation()
-    end
-
-    function private.new_search(filter_string, prettified)
-        if prettified then
-            tinsert(aux_recent_searches, 1, {
-                filter_string = filter_string,
-                prettified = prettified,
-            })
-            while getn(aux_recent_searches) > 50 do
-                tremove(aux_recent_searches)
-            end
-            m.update_search_listings()
-        end
-
-        while getn(searches) > search_index do
-            tremove(searches)
-        end
-        local search = {
-            filter_string = filter_string,
-            records = {},
-        }
-        tinsert(searches, search)
-        if getn(searches) > 5 then
-            tremove(searches, 1)
-            tinsert(m.status_bars, tremove(m.status_bars, 1))
-            tinsert(m.tables, tremove(m.tables, 1))
-            search_index = 4
-        end
-
-        search.status_bar = m.status_bars[getn(searches)]
-        search.status_bar:update_status(100, 100)
-        search.status_bar:set_text('')
-
-        search.table = m.tables[getn(searches)]
-        search.table:SetSort(1,2,3,4,5,6,7,8,9)
-        search.table:Reset()
-        search.table:SetDatabase(search.records)
-
-        m.update_search(getn(searches))
-    end
-
-    function private.previous_search()
-        m.search_box:ClearFocus()
-        m.update_search(search_index - 1)
-        m.update_tab(m.RESULTS)
-    end
-
-    function private.next_search()
-        m.search_box:ClearFocus()
-        m.update_search(search_index + 1)
-        m.update_tab(m.RESULTS)
     end
 end
 
