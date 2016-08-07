@@ -216,7 +216,6 @@ aux.search_tab.FRAMES(function(m, public, private)
         btn:SetScript('OnClick', function()
             aux.scan.abort(m.search_scan_id)
         end)
-        btn:Hide()
         private.stop_button = btn
     end
     do

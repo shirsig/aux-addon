@@ -58,7 +58,7 @@ private.RESULTS, private.SAVED, private.FILTER = 1, 2, 3
 
 do
 	local searches = {}
-	local search_index = 0
+	local search_index = 1
 
 	function private.current_search()
 		return searches[search_index]
@@ -75,7 +75,7 @@ do
 		searches[search_index].table:Show()
 
 		m.search_box:SetText(searches[search_index].filter_string)
-		if search_index <= 1 then
+		if search_index == 1 then
 			m.previous_button:Disable()
 		else
 			m.previous_button:Enable()
@@ -91,16 +91,7 @@ do
 		m.update_continuation()
 	end
 
-	function private.new_search(filter_string, prettified)
-		tinsert(aux_recent_searches, 1, {
-			filter_string = filter_string,
-			prettified = prettified,
-		})
-		while getn(aux_recent_searches) > 50 do
-			tremove(aux_recent_searches)
-		end
-		m.update_search_listings()
-
+	function private.new_search(filter_string)
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
@@ -139,20 +130,6 @@ do
 		m.update_search(search_index + 1)
 		m.update_tab(m.RESULTS)
 	end
-
-	function private.initialize_search_state()
-		searches[0] = {
-			placeholder = true,
-			table = m.tables[1],
-			status_bar = m.status_bars[1],
-			filter_string = ''
-		}
-		searches[0].table:SetDatabase({})
-		searches[0].status_bar:update_status(100, 100)
-		searches[0].status_bar:set_text('')
-		m.update_search(0)
-	end
-
 end
 
 function public.FRAMES(f)
@@ -163,7 +140,8 @@ function m.LOAD()
 	m.create_frames(m, public, private)
 	m.update_tab(m.SAVED)
 	m.update_auto_buy_filter()
-	m.initialize_search_state()
+	m.new_search('')
+	m.current_search().placeholder = true
 end
 
 function public.OPEN()
@@ -493,7 +471,13 @@ function public.execute(resume, real_time)
         m.current_search().table:SetSelectedRecord()
     else
         if filter_string ~= m.current_search().filter_string or m.current_search().placeholder then
-            m.new_search(filter_string, aux.util.join(aux.util.map(queries, function(filter) return filter.prettified end), ';'))
+	        if m.current_search().placeholder then
+		        m.current_search().filter_string = filter_string
+		        m.current_search().placeholder = false
+	        else
+		        m.new_search(filter_string)
+	        end
+			m.new_recent_search(filter_string, aux.util.join(aux.util.map(queries, function(filter) return filter.prettified end), ';'))
         else
             m.current_search().records = {}
             m.current_search().table:SetDatabase(m.current_search().records)
@@ -922,5 +906,16 @@ function private.update_filter_display()
     local height_scale = (180 / lines) / 18
     m.filter_display.scale_frame:SetScale(min(1, width_scale, height_scale))
     m.filter_display:SetText(aux.filter.indented_post_query_string(m.post_components))
+end
+
+function private.new_recent_search(filter_string, prettified)
+	tinsert(aux_recent_searches, 1, {
+		filter_string = filter_string,
+		prettified = prettified,
+	})
+	while getn(aux_recent_searches) > 50 do
+		tremove(aux_recent_searches)
+	end
+	m.update_search_listings()
 end
 
