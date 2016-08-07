@@ -8,7 +8,7 @@ public.config = {
 		window = {backdrop = {24, 24, 24, .93}, border = {30, 30, 30, 1}},
 		panel = {backdrop = {24, 24, 24, 1}, border = {255, 255, 255, .03}},
 		content = {backdrop = {42, 42, 42, 1}, border = {0, 0, 0, 0}},
-		state = {enabled = {70, 165, 70}, disabled = {190, 70, 70}},
+		state = {enabled = {70, 175, 70}, disabled = {190, 70, 70}},
 	},
     edge_size = 1.5,
     font = [[Fonts\ARIALN.TTF]],
