@@ -357,7 +357,7 @@ function public.status_bar(parent)
         local text_frame = CreateFrame('Frame', nil, self)
         text_frame:SetFrameLevel(level + 4)
         text_frame:SetAllPoints(self)
-        local text = m.label(text_frame)
+        local text = m.label(text_frame, 15)
         text:SetTextColor(unpack(m.color.text.enabled))
         text:SetPoint('CENTER', 0, 0)
         self.text = text
