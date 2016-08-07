@@ -84,7 +84,7 @@ aux.search_tab.FRAMES(function(m, public, private)
                 this:SetBackdropColor(unpack(aux.gui.color.state.disabled))
             end
         end)
-        local label = aux.gui.label(editbox, 14)
+        local label = aux.gui.label(editbox, 16)
         label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
         label:SetText('Pages')
         label:SetTextColor(unpack(aux.gui.color.text.enabled))
