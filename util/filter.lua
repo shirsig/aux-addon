@@ -262,7 +262,7 @@ function private.blizzard_filter_parser()
             if not filters.quality then
                 filter = {'quality', str}
             else
-                return nil, 'Erroneous rarity modifier'
+                return nil, 'Erroneous quality modifier'
             end
         elseif str == 'usable' then
             if not filters.usable then
@@ -514,7 +514,7 @@ function public.query_string(components)
 
     for _, component in components.post do
         if component[1] == 'operator' then
-            prettified.append(component[2]..(tonumber(component[3]) or ''))
+            prettified.append(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or ''))
         elseif component[1] == 'filter' then
             prettified.append(component[2])
             if component[3] then
@@ -543,7 +543,7 @@ function public.indented_post_query_string(components)
 
         if component[1] == 'operator' and component[2] then
             no_line_break = component[2] == 'not'
-            str = str..'|cffffff00'..component[2]..(tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE
+            str = str..'|cffffff00'..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE
             tinsert(stack, component[3] or '*')
         elseif component[1] == 'filter' then
             str = str..'|cffffff00'..component[2]..FONT_COLOR_CODE_CLOSE
@@ -586,7 +586,7 @@ function private.prettified_query_string(components)
 
     for _, component in components.post do
         if component[1] == 'operator' then
-            prettified.append('|cffffff00'..component[2]..(tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE)
+			prettified.append('|cffffff00'..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE)
         elseif component[1] == 'filter' then
             if component[2] ~= 'tooltip' then
                 prettified.append('|cffffff00'..component[2]..FONT_COLOR_CODE_CLOSE)

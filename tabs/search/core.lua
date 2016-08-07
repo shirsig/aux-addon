@@ -630,11 +630,14 @@ end
 
 function private.initialize_class_dropdown()
     local function on_click()
-        if this.value ~= UIDropDownMenu_GetSelectedValue(m.class_dropdown) then
+	    local old_value = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
+	    UIDropDownMenu_SetSelectedValue(m.class_dropdown, this.value)
+	    if this.value ~= old_value then
             UIDropDownMenu_ClearAll(m.subclass_dropdown)
+            UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown)
             UIDropDownMenu_ClearAll(m.slot_dropdown)
+            UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
         end
-        UIDropDownMenu_SetSelectedValue(m.class_dropdown, this.value)
     end
 
     UIDropDownMenu_AddButton{
@@ -655,15 +658,19 @@ end
 function private.initialize_subclass_dropdown()
 
     local function on_click()
-        if this.value ~= UIDropDownMenu_GetSelectedValue(m.subclass_dropdown) then
+	    local old_value = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
+	    UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, this.value)
+	    if this.value ~= old_value then
             UIDropDownMenu_ClearAll(m.slot_dropdown)
+            UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
         end
-        UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, this.value)
     end
 
     local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
 
     if class_index and GetAuctionItemSubClasses(class_index) then
+	    m.subclass_dropdown.button:Enable()
+
         UIDropDownMenu_AddButton{
             text = ALL,
             value = 0,
@@ -677,6 +684,8 @@ function private.initialize_subclass_dropdown()
                 func = on_click,
             }
         end
+    else
+	    m.subclass_dropdown.button:Disable()
     end
 end
 
@@ -690,6 +699,8 @@ function private.initialize_slot_dropdown()
     local subclass_index = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
 
     if class_index and subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
+	    m.slot_dropdown.button:Enable()
+
         UIDropDownMenu_AddButton{
             text = ALL,
             value = 0,
@@ -704,6 +715,8 @@ function private.initialize_slot_dropdown()
                 func = on_click,
             }
         end
+    else
+	    m.slot_dropdown.button:Disable()
     end
 end
 
@@ -825,17 +838,13 @@ function private.set_form(components)
             m.usable_checkbox:SetChecked(true)
         elseif filter[1] == 'class' then
             class_index = aux.info.item_class_index(filter[2])
-            UIDropDownMenu_Initialize(m.class_dropdown, m.initialize_class_dropdown) -- TODO, wtf, why is this needed
             UIDropDownMenu_SetSelectedValue(m.class_dropdown, class_index)
         elseif filter[1] == 'subclass' then
             subclass_index = aux.info.item_subclass_index(class_index, filter[2])
-            UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown) -- TODO, wtf, why is this needed
             UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, subclass_index)
         elseif filter[1] == 'slot' then
-            UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown) -- TODO, wtf, why is this needed
             UIDropDownMenu_SetSelectedValue(m.slot_dropdown, ({GetAuctionInvTypes(class_index, subclass_index)})[aux.info.item_slot_index(class_index, subclass_index, filter[2])])
         elseif filter[1] == 'quality' then
-            UIDropDownMenu_Initialize(m.quality_dropdown, m.initialize_quality_dropdown) -- TODO, wtf, why is this needed
             UIDropDownMenu_SetSelectedValue(m.quality_dropdown, aux.info.item_quality_index(filter[2]))
         end
     end
@@ -903,7 +912,7 @@ end
 
 function private.update_filter_display()
     local lines = aux.util.size(aux.util.filter(m.post_components, function(component) return component[1] == 'operator' and component[2] ~= 'not' end))
-    local width_scale = max(200/m.filter_display:GetStringWidth())
+    local width_scale = max(260/m.filter_display:GetStringWidth())
     local height_scale = min((200 / lines) / 18)
     m.filter_display.scale_frame:SetScale(min(1, width_scale, height_scale))
     m.filter_display:SetText(aux.filter.indented_post_query_string(m.post_components))

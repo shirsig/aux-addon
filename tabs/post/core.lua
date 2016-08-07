@@ -281,8 +281,8 @@ function private.update_item_configuration()
         m.item.name:SetTextColor(unpack(aux.gui.color.label.enabled))
         m.item.name:SetText('No item selected')
 
-        m.unit_start_price:Hide()
-        m.unit_buyout_price:Hide()
+        m.start_price_frame:Hide()
+        m.buyout_price_frame:Hide()
         m.stack_size_slider:Hide()
         m.stack_count_slider:Hide()
         m.deposit:Hide()
@@ -290,8 +290,8 @@ function private.update_item_configuration()
         m.historical_value_button:Hide()
         m.hide_checkbox:Hide()
     else
-        m.unit_start_price:Show()
-        m.unit_buyout_price:Show()
+        m.start_price_frame:Show()
+        m.buyout_price_frame:Show()
         m.stack_size_slider:Show()
         m.stack_count_slider:Show()
         m.deposit:Show()
@@ -396,7 +396,7 @@ function private.set_item(item)
 
     m.selected_item = item
 
-    UIDropDownMenu_Initialize(m.duration_dropdown, m.initialize_duration_dropdown) -- TODO, wtf, why is this needed
+--    UIDropDownMenu_Initialize(m.duration_dropdown, m.initialize_duration_dropdown) -- TODO, wtf, why is this needed
     UIDropDownMenu_SetSelectedValue(m.duration_dropdown, settings.duration)
 
     m.hide_checkbox:SetChecked(settings.hidden)

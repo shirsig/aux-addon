@@ -1000,7 +1000,6 @@ function public.CreateAuctionResultsTable(parent, config)
     RT_COUNT = RT_COUNT + 1
     local rt = CreateFrame('Frame', rtName, parent)
     rt.config = config
---    local numRows = TSM.db.profile.auctionResultRows
     local numRows = 16
     rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT-HEAD_SPACE) / numRows
     rt.scrollDisabled = nil
@@ -1039,7 +1038,6 @@ function public.CreateAuctionResultsTable(parent, config)
     rt.scrollFrame = scrollFrame
     FauxScrollFrame_Update(rt.scrollFrame, 0, numRows, rt.ROW_HEIGHT)
 
-    -- make the scroll bar consistent with the TSM theme
     local scrollBar = getglobal(scrollFrame:GetName()..'ScrollBar')
     scrollBar:ClearAllPoints()
     scrollBar:SetPoint('BOTTOMRIGHT', rt, -4, 4)
@@ -1073,7 +1071,7 @@ function public.CreateAuctionResultsTable(parent, config)
         local text = cell:CreateFontString()
         text:SetJustifyH('CENTER')
         text:SetJustifyV('CENTER')
-        text:SetFont(aux.gui.config.font, aux.gui.config.tiny_font_size)
+        text:SetFont(aux.gui.config.font, 12)
         text:SetTextColor(unpack(aux.gui.color.label.enabled))
         cell:SetFontString(text)
         if not column_config.isPrice then cell:SetText(column_config.title or '') end -- TODO

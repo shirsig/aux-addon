@@ -65,10 +65,10 @@ aux.post_tab.FRAMES(function(m, public, private)
         { name='Auctions', width=.12, align='CENTER' },
         { name='Left', width=.1, align='CENTER' },
         { name='Qty', width=.08, align='CENTER' },
-        { name='Bid/ea', width=.23, align='RIGHT' },
-        { name='Bid Pct', width=.12, align='CENTER' },
-        { name='Buy/ea', width=.23, align='RIGHT' },
-        { name='Buy Pct', width=.12, align='CENTER' }
+        { name='Bid/ea', width=.22, align='RIGHT' },
+        { name='Bid Pct', width=.13, align='CENTER' },
+        { name='Buy/ea', width=.22, align='RIGHT' },
+        { name='Buy Pct', width=.13, align='CENTER' }
     })
     m.auction_listing:EnableSorting(false)
     m.auction_listing:DisableSelection(true)
@@ -117,7 +117,7 @@ aux.post_tab.FRAMES(function(m, public, private)
     end
     do
         local item = aux.gui.item(m.frame.parameters)
-        item:SetPoint('TOPLEFT', 10, -8)
+        item:SetPoint('TOPLEFT', 6, -6)
         item:EnableMouse()
         item:SetScript('OnReceiveDrag', function()
             local item_info = aux.cursor_item()
@@ -153,7 +153,7 @@ aux.post_tab.FRAMES(function(m, public, private)
     do
         local slider = aux.gui.slider(m.frame.parameters)
         slider:SetValueStep(1)
-        slider:SetPoint('TOPLEFT', 16, -73)
+        slider:SetPoint('TOPLEFT', 13, -73)
         slider:SetWidth(190)
         slider:SetScript('OnValueChanged', function()
             m.quantity_update(true)
@@ -208,9 +208,8 @@ aux.post_tab.FRAMES(function(m, public, private)
         local dropdown = aux.gui.dropdown(m.frame.parameters)
         dropdown:SetPoint('TOPLEFT', m.stack_count_slider, 'BOTTOMLEFT', 0, -21)
         dropdown:SetWidth(90)
-        dropdown:SetHeight(10)
         local label = aux.gui.label(dropdown, aux.gui.config.small_font_size)
-        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -1)
         label:SetText('Duration')
         UIDropDownMenu_Initialize(dropdown, m.initialize_duration_dropdown)
         dropdown:SetScript('OnShow', function()
@@ -236,10 +235,16 @@ aux.post_tab.FRAMES(function(m, public, private)
         private.hide_checkbox = checkbox
     end
     do
-        local editbox = aux.gui.editbox(m.frame.parameters)
-        editbox:SetPoint('TOPRIGHT', -65, -66)
-        editbox:SetJustifyH('RIGHT')
-        editbox:SetWidth(150)
+	    local frame = CreateFrame('Frame', nil, m.frame.parameters)
+	    private.start_price_frame = frame
+	    aux.gui.set_content_style(frame)
+	    frame:SetPoint('TOPRIGHT', -71, -50)
+	    frame:SetWidth(180)
+	    frame:SetHeight(22)
+	    local editbox = aux.gui.editbox(frame)
+	    editbox:SetAllPoints()
+	    editbox:SetJustifyH('RIGHT')
+        editbox:SetFont(aux.gui.config.font, 17)
         editbox:SetScript('OnTextChanged', function()
             this.pretty:SetText(aux.money.to_string(m.get_unit_start_price(), true, nil, 3))
             m.refresh = true
@@ -253,28 +258,29 @@ aux.post_tab.FRAMES(function(m, public, private)
                 m.unit_buyout_price:SetFocus()
             end
         end)
-        editbox:SetScript('OnEnterPressed', function()
-            this:ClearFocus()
-        end)
         editbox:SetScript('OnEditFocusGained', function()
-            this:HighlightText()
-            this.pretty:Hide()
+	        this:HighlightText()
+	        this.pretty:Hide()
+	        this:SetAlpha(1)
         end)
         editbox:SetScript('OnEditFocusLost', function()
-            this:SetText(aux.money.to_string(m.get_unit_start_price(), true, nil, 3, nil, true))
-            this.pretty:Show()
+	        this:SetText(aux.money.to_string(m.get_unit_start_price(), true, nil, 3, nil, true))
+	        this.pretty:Show()
+	        this:SetAlpha(0)
         end)
-        editbox.pretty = aux.gui.label(editbox, aux.gui.config.medium_font_size)
-        editbox.pretty:SetAllPoints()
+	    editbox:SetAlpha(0)
+        editbox.pretty = aux.gui.label(frame, 17)
+        editbox.pretty:SetPoint('LEFT', 1, 0)
+        editbox.pretty:SetPoint('RIGHT', -2, 0)
         editbox.pretty:SetJustifyH('RIGHT')
         do
-            local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
-            label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+            local label = aux.gui.label(frame, aux.gui.config.small_font_size)
+            label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
             label:SetText('Unit Starting Price')
         end
         do
-            local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
-            label:SetPoint('LEFT', editbox, 'RIGHT', 3, 0)
+            local label = aux.gui.label(frame, 14)
+            label:SetPoint('LEFT', frame, 'RIGHT', 8, 0)
             label:SetWidth(50)
             label:SetJustifyH('CENTER')
             private.start_price_percentage = label
@@ -282,10 +288,16 @@ aux.post_tab.FRAMES(function(m, public, private)
         private.unit_start_price = editbox
     end
     do
-        local editbox = aux.gui.editbox(m.frame.parameters)
-        editbox:SetPoint('TOPRIGHT', m.unit_start_price, 'BOTTOMRIGHT', 0, -18)
-        editbox:SetJustifyH('RIGHT')
-        editbox:SetWidth(150)
+	    local frame = CreateFrame('Frame', nil, m.frame.parameters)
+	    private.buyout_price_frame = frame
+	    aux.gui.set_content_style(frame)
+	    frame:SetPoint('TOPRIGHT', m.unit_start_price, 'BOTTOMRIGHT', 0, -19)
+	    frame:SetWidth(180)
+	    frame:SetHeight(22)
+        local editbox = aux.gui.editbox(frame)
+	    editbox:SetAllPoints()
+	    editbox:SetJustifyH('RIGHT')
+        editbox:SetFont(aux.gui.config.font, 17)
         editbox:SetScript('OnTextChanged', function()
             this.pretty:SetText(aux.money.to_string(m.get_unit_buyout_price(), true, nil, 3))
             m.refresh = true
@@ -303,22 +315,26 @@ aux.post_tab.FRAMES(function(m, public, private)
         editbox:SetScript('OnEditFocusGained', function()
             this:HighlightText()
             this.pretty:Hide()
+	        this:SetAlpha(1)
         end)
         editbox:SetScript('OnEditFocusLost', function()
             this:SetText(aux.money.to_string(m.get_unit_buyout_price(), true, nil, 3, nil, true))
             this.pretty:Show()
+	        this:SetAlpha(0)
         end)
-        editbox.pretty = aux.gui.label(editbox, aux.gui.config.medium_font_size)
-        editbox.pretty:SetAllPoints()
+	    editbox:SetAlpha(0)
+        editbox.pretty = aux.gui.label(frame, 17)
+        editbox.pretty:SetPoint('LEFT', 1, 0)
+        editbox.pretty:SetPoint('RIGHT', -2, 0)
         editbox.pretty:SetJustifyH('RIGHT')
         do
-            local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
-            label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
+            local label = aux.gui.label(frame, aux.gui.config.small_font_size)
+            label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
             label:SetText('Unit Buyout Price')
         end
         do
-            local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
-            label:SetPoint('LEFT', editbox, 'RIGHT', 3, 0)
+            local label = aux.gui.label(frame, 14)
+            label:SetPoint('LEFT', frame, 'RIGHT', 8, 0)
             label:SetWidth(50)
             label:SetJustifyH('CENTER')
             private.buyout_price_percentage = label
@@ -326,11 +342,10 @@ aux.post_tab.FRAMES(function(m, public, private)
         private.unit_buyout_price = editbox
     end
     do
-        local btn = aux.gui.button(m.frame.parameters, 16)
-        btn:SetPoint('TOPRIGHT', -15, -143)
+        local btn = aux.gui.button(m.frame.parameters, 14)
+        btn:SetPoint('TOPRIGHT', -14, -146)
         btn:SetWidth(150)
         btn:SetHeight(20)
-        btn:GetFontString():SetTextHeight(15)
         btn:GetFontString():SetJustifyH('RIGHT')
         btn:GetFontString():SetPoint('RIGHT', 0, 0)
         btn:SetScript('OnClick', function()

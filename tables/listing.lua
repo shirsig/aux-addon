@@ -3,7 +3,7 @@ local m, public, private = aux.module'listing'
 local ST_COUNT = 0
 
 local ST_ROW_HEIGHT = 15
-local ST_ROW_TEXT_SIZE = 13
+local ST_ROW_TEXT_SIZE = 14
 local ST_HEAD_HEIGHT = 27
 local ST_HEAD_SPACE = 2
 local DEFAULT_COL_INFO = {{width=1}}
@@ -308,7 +308,7 @@ local methods = {
 
         local text = col:CreateFontString()
         text:SetJustifyV('CENTER')
-        text:SetFont(aux.gui.config.font, aux.gui.config.medium_font_size)
+        text:SetFont(aux.gui.config.font, 16)
         text:SetTextColor(unpack(aux.gui.color.text.enabled))
         text:SetAllPoints()
         col.text = text
@@ -427,7 +427,6 @@ function public.CreateScrollingTable(parent)
     scrollFrame:SetAllPoints(contentFrame)
     st.scrollFrame = scrollFrame
 
-    -- make the scroll bar consistent with the TSM theme
     local scrollBar = getglobal(scrollFrame:GetName()..'ScrollBar')
     scrollBar:SetWidth(12)
     st.scrollBar = scrollBar

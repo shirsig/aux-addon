@@ -84,7 +84,7 @@ aux.search_tab.FRAMES(function(m, public, private)
                 this:SetBackdropColor(unpack(aux.gui.color.state.disabled))
             end
         end)
-        local label = aux.gui.label(editbox, aux.gui.config.medium_font_size)
+        local label = aux.gui.label(editbox, 14)
         label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
         label:SetText('Pages')
         label:SetTextColor(unpack(aux.gui.color.text.enabled))
@@ -365,7 +365,7 @@ aux.search_tab.FRAMES(function(m, public, private)
     do
         local editbox = aux.gui.editbox(m.frame.filter)
         editbox.complete_item = aux.completion.complete(function() return aux_auctionable_items end)
-        editbox:SetPoint('TOPLEFT', 14, -26)
+        editbox:SetPoint('TOPLEFT', 14, -25)
         editbox:SetWidth(260)
         editbox:SetScript('OnChar', function()
             if m.exact_checkbox:GetChecked() then
@@ -395,7 +395,7 @@ aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local editbox = aux.gui.editbox(m.frame.filter)
-        editbox:SetPoint('TOPLEFT', m.name_input, 'BOTTOMLEFT', 0, -28)
+        editbox:SetPoint('TOPLEFT', m.name_input, 'BOTTOMLEFT', 0, -26)
         editbox:SetWidth(125)
         editbox:SetNumeric(true)
         editbox:SetMaxLetters(2)
@@ -441,11 +441,10 @@ aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local dropdown = aux.gui.dropdown(m.frame.filter)
-        dropdown:SetPoint('TOPLEFT', m.min_level_input, 'BOTTOMLEFT', 0, -26)
+        dropdown:SetPoint('TOPLEFT', m.min_level_input, 'BOTTOMLEFT', 0, -24)
         dropdown:SetWidth(300)
-        dropdown:SetHeight(10)
         local label = aux.gui.label(dropdown, aux.gui.config.small_font_size)
-        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -1)
         label:SetText('Item Class')
         UIDropDownMenu_Initialize(dropdown, m.initialize_class_dropdown)
         dropdown:SetScript('OnShow', function()
@@ -455,52 +454,49 @@ aux.search_tab.FRAMES(function(m, public, private)
     end
     do
         local dropdown = aux.gui.dropdown(m.frame.filter)
-        dropdown:SetPoint('TOPLEFT', m.class_dropdown, 'BOTTOMLEFT', 0, -22)
+        private.subclass_dropdown = dropdown
+        dropdown:SetPoint('TOPLEFT', m.class_dropdown, 'BOTTOMLEFT', 0, -23)
         dropdown:SetWidth(300)
-        dropdown:SetHeight(10)
         local label = aux.gui.label(dropdown, aux.gui.config.small_font_size)
-        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -1)
         label:SetText('Item Subclass')
         UIDropDownMenu_Initialize(dropdown, m.initialize_subclass_dropdown)
         dropdown:SetScript('OnShow', function()
             UIDropDownMenu_Initialize(this, m.initialize_subclass_dropdown)
         end)
-        private.subclass_dropdown = dropdown
     end
     do
         local dropdown = aux.gui.dropdown(m.frame.filter)
-        dropdown:SetPoint('TOPLEFT', m.subclass_dropdown, 'BOTTOMLEFT', 0, -22)
+        private.slot_dropdown = dropdown
+        dropdown:SetPoint('TOPLEFT', m.subclass_dropdown, 'BOTTOMLEFT', 0, -23)
         dropdown:SetWidth(300)
-        dropdown:SetHeight(10)
         local label = aux.gui.label(dropdown, aux.gui.config.small_font_size)
-        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -1)
         label:SetText('Item Slot')
         UIDropDownMenu_Initialize(dropdown, m.initialize_slot_dropdown)
         dropdown:SetScript('OnShow', function()
             UIDropDownMenu_Initialize(this, m.initialize_slot_dropdown)
         end)
-        private.slot_dropdown = dropdown
+
     end
     do
         local dropdown = aux.gui.dropdown(m.frame.filter)
-        dropdown:SetPoint('TOPLEFT', m.slot_dropdown, 'BOTTOMLEFT', 0, -22)
+        private.quality_dropdown = dropdown
+        dropdown:SetPoint('TOPLEFT', m.slot_dropdown, 'BOTTOMLEFT', 0, -23)
         dropdown:SetWidth(300)
-        dropdown:SetHeight(10)
         local label = aux.gui.label(dropdown, aux.gui.config.small_font_size)
-        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
-        label:SetText('Min Rarity')
+        label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -1)
+        label:SetText('Min Quality')
         UIDropDownMenu_Initialize(dropdown, m.initialize_quality_dropdown)
         dropdown:SetScript('OnShow', function()
             UIDropDownMenu_Initialize(this, m.initialize_quality_dropdown)
         end)
-        private.quality_dropdown = dropdown
     end
     aux.gui.vertical_line(m.frame.filter, 332)
     do
         local dropdown = aux.gui.dropdown(m.frame.filter)
         dropdown:SetPoint('TOPRIGHT', -177, -10)
         dropdown:SetWidth(150)
-        dropdown:SetHeight(10)
         UIDropDownMenu_Initialize(dropdown, m.initialize_filter_dropdown)
         dropdown:SetScript('OnShow', function()
             UIDropDownMenu_Initialize(this, m.initialize_filter_dropdown)
@@ -530,7 +526,6 @@ aux.search_tab.FRAMES(function(m, public, private)
         local input = aux.gui.editbox(m.frame.filter)
         input:SetPoint('LEFT', m.filter_dropdown, 'RIGHT', 10, 0)
         input:SetWidth(150)
-        input:SetHeight(25)
         input:SetScript('OnChar', function()
             this:complete()
         end)
