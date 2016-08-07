@@ -52,6 +52,7 @@ function m.LOAD()
 		local dropdown = getglobal(arg[4] or '') or this:GetParent()
 		if strfind(dropdown:GetName() or '', 'aux_frame') then
 			m.set_content_style(DropDownList1Backdrop)
+			DropDownList1Backdrop:SetBackdropBorderColor(1, 1, 1, 0.03)
 			DropDownList1:SetWidth(dropdown:GetWidth() * 0.9)
 			DropDownList1:SetHeight(DropDownList1:GetHeight() - 10)
 			DropDownList1:SetPoint('TOPLEFT', dropdown, 'BOTTOMLEFT', -2, -2)
