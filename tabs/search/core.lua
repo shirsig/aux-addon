@@ -144,16 +144,15 @@ do
 
 	function private.initialize_search_state()
 		searches[0] = {
+			placeholder = true,
 			table = m.tables[1],
 			status_bar = m.status_bars[1],
-			records = {},
 			filter_string = ''
 		}
-		searches[0].table:SetDatabase(searches[0].records)
+		searches[0].table:SetDatabase({})
 		searches[0].status_bar:update_status(100, 100)
 		searches[0].status_bar:set_text('')
 		m.update_search(0)
-		searches[0].filter_string = nil
 	end
 
 end
@@ -495,7 +494,7 @@ function public.execute(resume, real_time)
     if resume then
         m.current_search().table:SetSelectedRecord()
     else
-        if filter_string ~= m.current_search().filter_string then
+        if filter_string ~= m.current_search().filter_string or m.current_search().placeholder then
             m.new_search(filter_string, aux.util.join(aux.util.map(queries, function(filter) return filter.prettified end), ';'))
         else
             m.current_search().records = {}
