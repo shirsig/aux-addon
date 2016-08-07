@@ -56,12 +56,6 @@ end
 
 private.RESULTS, private.SAVED, private.FILTER = 1, 2, 3
 
-private.elements = {
-    [m.RESULTS] = {},
-    [m.SAVED] = {},
-    [m.FILTER] = {},
-}
-
 function public.FRAMES(f)
     private.create_frames = f
 end
