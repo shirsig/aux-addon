@@ -10,7 +10,7 @@ function public.render(item_listing)
 
 	local rows = item_listing.rows
 
-	for i, row in ipairs(rows) do
+	for i, row in rows do
 		local item_record = item_listing.item_records[i + offset]
 
         if item_record then
@@ -36,7 +36,7 @@ function public.render(item_listing)
 	end
 end
 
-function public.create(parent, on_click, on_enter, on_leave, selected)
+function public.create(parent, on_click, selected)
 	local name = 'aux_item_list'
 
 	local id = 1
@@ -75,25 +75,28 @@ function public.create(parent, on_click, on_enter, on_leave, selected)
 			row:SetHeight(ROW_HEIGHT)
 			row:SetWidth(195)
 			row:SetPoint('TOPLEFT', content, 2, -((row_index-1) * ROW_HEIGHT))
+			row:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 			row:SetScript('OnClick', on_click)
 			row:SetScript('OnEnter', function()
 				row.highlight:Show()
-				on_enter()
 			end)
 			row:SetScript('OnLeave', function()
 				if not selected(row.item_record) then
 					row.highlight:Hide()
 				end
-				on_leave()
 			end)
 
 			row.item = aux.gui.item(row)
-			row.item:EnableMouse(nil)
 			row.item:SetScale(0.9)
 			row.item:SetPoint('LEFT', 2.5, 0)
 			row.item:SetPoint('RIGHT', -2.5, 0)
-			row:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-			
+			row.item.button:SetScript('OnEnter', function()
+				aux.info.set_tooltip(row.item_record.itemstring, this, 'ANCHOR_RIGHT')
+			end)
+			row.item.button:SetScript('OnLeave', function()
+				GameTooltip:Hide()
+			end)
+
 			local highlight = row:CreateTexture()
 			highlight:SetAllPoints(row)
 			highlight:Hide()

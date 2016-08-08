@@ -25,8 +25,6 @@ function private.item_column_init(rt, cell)
     cell.spacer = spacer
 
     local iconBtn = CreateFrame('Button', nil, cell)
-    iconBtn:SetBackdrop({edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5})
-    iconBtn:SetBackdropBorderColor(0, 1, 0, 0)
     iconBtn:SetPoint('TOPLEFT', spacer, 'TOPRIGHT')
     iconBtn:SetHeight(rt.ROW_HEIGHT)
     iconBtn:SetWidth(rt.ROW_HEIGHT)
@@ -37,6 +35,8 @@ function private.item_column_init(rt, cell)
     local icon = iconBtn:CreateTexture(nil, 'ARTWORK')
     icon:SetPoint('TOPLEFT', 2, -2)
     icon:SetPoint('BOTTOMRIGHT', -2, 2)
+    icon:SetTexCoord(.08, .94, .08, .94)
+
     cell.iconBtn = iconBtn
     cell.icon = icon
 
@@ -556,12 +556,12 @@ local methods = {
     OnContentSizeChanged = function()
         local width = arg1
         local rt = this:GetParent()
-        for i, cell in ipairs(rt.headCells) do
+        for _, cell in rt.headCells do
             cell:SetWidth(cell.info.width * width)
         end
 
-        for _, row in ipairs(rt.rows) do
-            for i, cell in ipairs(row.cells) do
+        for _, row in rt.rows do
+            for i, cell in row.cells do
                 cell:SetWidth(rt.headCells[i].info.width * width)
             end
         end
@@ -574,7 +574,7 @@ local methods = {
 
         if button == 'RightButton' and rt.headCells[this.columnIndex].info.isPrice then
             aux_price_per_unit = not aux_price_per_unit
-            for i, cell in ipairs(rt.headCells) do
+            for _, cell in rt.headCells do
                 if cell.info.isPrice then
                     cell:SetText(cell.info.title[aux_price_per_unit and 1 or 2])
                 end
@@ -720,7 +720,7 @@ local methods = {
 
         for _, info in ipairs(self.rowInfo) do
             local totalAuctions, totalPlayerAuctions = 0, 0
-            for _, childInfo in ipairs(info.children) do
+            for _, childInfo in info.children do
                 totalAuctions = totalAuctions + childInfo.numAuctions
                 if aux.is_player(childInfo.record.owner) then
                     totalPlayerAuctions = totalPlayerAuctions + childInfo.numAuctions
@@ -733,10 +733,10 @@ local methods = {
 
     UpdateRows = function(self)
         -- hide all the rows
-        for _, row in ipairs(self.rows) do row:Hide() end
+        for _, row in self.rows do row:Hide() end
 
         -- update sorting highlights
-        for _, cell in ipairs(self.headCells) do
+        for _, cell in self.headCells do
             local tex = cell:GetNormalTexture()
             tex:SetTexture([[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]])
             tex:SetTexCoord(0.017, 1, 0.083, 0.909)
@@ -785,7 +785,7 @@ local methods = {
                 return tostring(a) < tostring(b)
             end
 
-            for i, info in ipairs(self.rowInfo) do
+            for _, info in ipairs(self.rowInfo) do
                 sort(info.children, sort_helper)
             end
             sort(self.rowInfo, sort_helper)
@@ -794,11 +794,11 @@ local methods = {
 
         -- update all the rows
         local rowIndex = 1 - FauxScrollFrame_GetOffset(self.scrollFrame)
-        for i, info in ipairs(self.rowInfo) do
+        for _, info in ipairs(self.rowInfo) do
             if self.expanded[info.expandKey] then
                 -- show each of the rows for this base item since it's expanded
-                for j, childInfo in ipairs(info.children) do
-                    self:SetRowInfo(rowIndex, childInfo.record, childInfo.numAuctions, 0, j > 1, false, info.expandKey, childInfo.numAuctions)
+                for i, childInfo in info.children do
+                    self:SetRowInfo(rowIndex, childInfo.record, childInfo.numAuctions, 0, i > 1, false, info.expandKey, childInfo.numAuctions)
                     rowIndex = rowIndex + 1
                 end
             else
@@ -821,7 +821,7 @@ local methods = {
         end
         row.data = {record=record, expandable=expandable, indented=indented, numAuctions=numAuctions, expandKey=expandKey}
 
-        for i, column_config in ipairs(self.config) do
+        for i, column_config in self.config do
             column_config.set(row.cells[i], record, displayNumAuctions, numPlayerAuctions, expandable, indented)
         end
     end,
@@ -835,7 +835,7 @@ local methods = {
         self.selected = selectedData and self.selected or nil
 
         -- show / hide highlight accordingly
-        for _, row in ipairs(self.rows) do
+        for _, row in self.rows do
             if self.selected and row.data and row.data.record.search_signature == self.selected.search_signature then
                 row.highlight:Show()
             else
@@ -873,7 +873,7 @@ local methods = {
         -- get index of selected row
         local prevSelectedIndex
         if rt.selected then
-            for index, row in ipairs(rt.rows) do
+            for index, row in rt.rows do
                 if row:IsVisible() and row.data and row.data.record == rt.selected then
                     prevSelectedIndex = index
                 end
@@ -973,7 +973,7 @@ local methods = {
         if not self.selected then return end
         local selectedData
         for _, info in ipairs(self.rowInfo) do
-            for _, childInfo in ipairs(info.children) do
+            for _, childInfo in info.children do
                 if childInfo.record.search_signature == self.selected.search_signature then
                     selectedData = childInfo
                     break
@@ -986,7 +986,7 @@ local methods = {
     GetTotalAuctions = function(self)
         local numResults = 0
         for _, info in ipairs(self.rowInfo) do
-            for _, childInfo in ipairs(info.children) do
+            for _, childInfo in info.children do
                 numResults = numResults + childInfo.numAuctions
             end
         end
@@ -1014,7 +1014,7 @@ function public.CreateAuctionResultsTable(parent, config)
     end
 
     rt:SetScript('OnShow', function()
-        for i, cell in ipairs(this.headCells) do
+        for _, cell in this.headCells do
             if cell.info.isPrice then
                 cell:SetText(cell.info.title[aux_price_per_unit and 1 or 2])
             end
@@ -1053,7 +1053,7 @@ function public.CreateAuctionResultsTable(parent, config)
 
     -- create the header cells
     rt.headCells = {}
-    for i, column_config in ipairs(rt.config) do
+    for i, column_config in rt.config do
         local cell = CreateFrame('Button', rtName..'HeadCol'..i, rt.contentFrame)
         cell:SetHeight(HEAD_HEIGHT)
         if i == 1 then

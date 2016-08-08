@@ -920,6 +920,8 @@ do
 		end
 		m.filter_display:SetWidth(widest_line)
 		m.filter_display:SetText(text)
+		local scroll_frame = m.filter_display:GetParent()
+		scroll_frame:SetHorizontalScroll(max(scroll_frame:GetWidth() - widest_line, scroll_frame:GetHorizontalScroll()))
 	end
 end
 

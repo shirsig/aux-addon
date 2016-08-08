@@ -126,7 +126,7 @@ local methods = {
                     st.rows[i].highlight:Hide()
                 end
 
-                for colNum, col in ipairs(st.rows[i].cols) do
+                for colNum, col in st.rows[i].cols do
                     if st.colInfo[colNum] then
                         local colData = data.cols[colNum]
                         if type(colData.value) == 'function' then
@@ -250,7 +250,7 @@ local methods = {
         end
 
         -- adjust head col widths
-        for colNum, col in ipairs(st.headCols) do
+        for colNum, col in st.headCols do
             if st.colInfo[colNum] then
                 col:Show()
                 col:SetWidth(st.colInfo[colNum].width * width)
@@ -268,7 +268,7 @@ local methods = {
         end
 
         -- adjust rows widths
-        for rowNum, row in ipairs(st.rows) do
+        for rowNum, row in st.rows do
             if rowNum > st.sizes.numRows then
                 row.data = nil
                 row:Hide()
@@ -278,7 +278,7 @@ local methods = {
                 while getn(row.cols) < getn(st.colInfo) do
                     st:AddRowCol(rowNum)
                 end
-                for colNum, col in ipairs(row.cols) do
+                for colNum, col in row.cols do
                     if st.headCols[colNum] and st.colInfo[colNum] then
                         col:Show()
                         col:SetWidth(st.colInfo[colNum].width * width)
@@ -324,7 +324,7 @@ local methods = {
         tinsert(st.headCols, col)
 
         -- add new cells to the rows
-        for rowNum, row in ipairs(st.rows) do
+        for rowNum, row in st.rows do
             while getn(row.cols) < getn(st.headCols) do
                 st:AddRowCol(rowNum)
             end
@@ -390,7 +390,7 @@ local methods = {
     SetHeadFontSize = function(st, size)
         st.sizes.headFontSize = size
         -- update the text size of the head cols
-        for _, col in ipairs(st.headCols) do
+        for _, col in st.headCols do
             if st.sizes.headFontSize then
                 col.text:SetFont(aux.gui.config.font, st.sizes.headFontSize)
             else

@@ -50,12 +50,6 @@ private.item_listing = aux.item_listing.create(
             aux.search_tab.execute(nil, false)
         end
     end,
-    function()
-        aux.info.set_tooltip(this.item_record.itemstring, this, 'ANCHOR_RIGHT')
-    end,
-    function()
-        GameTooltip:Hide()
-    end,
     function(item_record)
         return item_record == m.selected_item
     end
@@ -119,7 +113,6 @@ end
 do
     local item = aux.gui.item(m.frame.parameters)
     item:SetPoint('TOPLEFT', 6, -6)
-    item.button:EnableMouse(true)
     item.button:SetScript('OnEnter', function()
         if m.selected_item then
             aux.info.set_tooltip(m.selected_item.itemstring, this, 'ANCHOR_RIGHT')
