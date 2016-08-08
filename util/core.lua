@@ -100,8 +100,8 @@ end
 
 do
 	local mt = {
-		__call = function(self)
-			return
+		__call = function(self, key)
+			return self[key]
 		end,
 	}
 

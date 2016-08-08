@@ -8,44 +8,6 @@ public.last_owner_page_requested = nil
 
 do
 	local mt = {
-		__newindex = function(self, name, method)
-			if strsub(name, 1, 2) == '__' then
-				self._metatable[name] = method
-			else
-				self._methods[name] = method
-			end
-		end,
-		__call = function(self, ...)
-			if self._metatable.__index then
-				setmetatable(self._methods, {__index=self._metatable.__index})
-				self._metatable.__index = self._methods
-			end
-
-			local object = setmetatable({}, self._metatable)
-			self._constructor(object, unpack(arg))
-			return object
-		end,
-	}
-	function public.class(constructor)
-		return setmetatable({_constructor=constructor, _methods={}, _metatable={}}, mt)
-	end
-end
-
---public.dynamic_table = m.class(function(self, f)
---		self._f = f
---end)
---function m.dynamic_table:__newindex(key, value)
---	self._f()[key] = value
---end
---function m.dynamic_table:__index(key)
---	return self._f()[key]
---end
---function m.dynamic_table:__call()
---	return self._f()
---end
-
-do
-	local mt = {
 		__newindex = function(self, key, value)
 			self._f()[key] = value
 		end,

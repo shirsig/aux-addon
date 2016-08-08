@@ -6,7 +6,7 @@ local public_interface_mt = {
 	end,
 	__index = function(self, key)
 		if __[self].public[key] then
-			return __[self].data[key]
+			return __[self].attributes[key]
 		else
 			error('Read of undeclared "'..key..'".', 2)
 		end
@@ -17,13 +17,13 @@ local private_interface_mt = {
 		if not __[self].declared[key] then
 			error('Write of undeclared "'..key..'".', 2)
 		end
-		__[self].data[key] = value
+		__[self].attributes[key] = value
 	end,
 	__index = function(self, key)
 		if not __[self].declared[key] then
 			error('Read of undeclared "'..key..'".', 2)
 		end
-		return __[self].data[key]
+		return __[self].attributes[key]
 	end,
 }
 local public_declarator_mt = {
@@ -31,7 +31,7 @@ local public_declarator_mt = {
 		if __[self].declared[key] then
 			error('Multiple declarations of "'..key..'".', 2)
 		end
-		__[self].data[key] = value
+		__[self].attributes[key] = value
 		__[self].public[key] = true
 		__[self].declared[key] = true
 	end,
@@ -44,7 +44,7 @@ local private_declarator_mt = {
 		if __[self].declared[key] then
 			error('Multiple declarations of "'..key..'".', 2)
 		end
-		__[self].data[key] = value
+		__[self].attributes[key] = value
 		__[self].declared[key] = true
 	end,
 	__index = function()
@@ -53,10 +53,10 @@ local private_declarator_mt = {
 }
 
 function aux_module()
-	local dataset = {data={}, public={}, declared={}}
+	local data = {attributes={}, public={}, declared={}}
     local module = {setmetatable({}, public_interface_mt), setmetatable({}, private_interface_mt), setmetatable({}, public_declarator_mt), setmetatable({}, private_declarator_mt)}
 	for _, component in module do
-		__[component] = dataset
+		__[component] = data
 	end
     return module
 end
