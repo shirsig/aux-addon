@@ -1,4 +1,4 @@
-local m, public, private = aux.tab(1, 'search_tab')
+local m, public, private = aux.tab(1, 'Search', 'search_tab')
 
 aux_favorite_searches = {}
 aux_recent_searches = {}
@@ -132,12 +132,7 @@ do
 	end
 end
 
-function public.FRAMES(f)
-    private.create_frames = f
-end
-
 function m.LOAD()
-	m.create_frames(m, public, private)
 	m.update_tab(m.SAVED)
 	m.update_auto_buy_filter()
 	m.new_search('')
@@ -712,7 +707,7 @@ function private.initialize_slot_dropdown()
             func = on_click,
         }
 
-        for i, slot in { GetAuctionInvTypes(class_index, subclass_index) } do
+        for _, slot in { GetAuctionInvTypes(class_index, subclass_index) } do
             local slot_name = getglobal(slot)
             UIDropDownMenu_AddButton{
                 text = slot_name,
@@ -916,10 +911,6 @@ function private.remove_post_filter()
 end
 
 function private.update_filter_display()
-    local lines = aux.util.size(aux.util.filter(m.post_components, function(component) return not (component[1] == 'operator' and component[2] == 'not') end))
-    local width_scale = 250/m.filter_display:GetStringWidth()
-    local height_scale = (180 / lines) / 18
-    m.filter_display.scale_frame:SetScale(min(1, width_scale, height_scale))
     m.filter_display:SetText(aux.filter.indented_post_query_string(m.post_components))
 end
 

@@ -1,23 +1,4 @@
 <Ui xsi:schemaLocation="http://www.blizzard.com/wow/ui/">
-
-	<Script file="core.lua"/>
-
-	<Frame>
-      <Scripts>
-			<OnLoad>
-				this:RegisterEvent('VARIABLES_LOADED')
-				this:RegisterEvent('ADDON_LOADED')
-				this:RegisterEvent('AUCTION_HOUSE_SHOW')
-				this:RegisterEvent('AUCTION_HOUSE_CLOSED')
-                this:RegisterEvent('AUCTION_BIDDER_LIST_UPDATE')
-                this:RegisterEvent('AUCTION_OWNED_LIST_UPDATE')
-			</OnLoad>
-			<OnEvent>
-				aux:on_event()
-			</OnEvent>
-		</Scripts>
-	</Frame>
-
     <Frame name="AuxFrame" toplevel="true" movable="true" enableMouse="true" hidden="true" parent="UIParent" clampedToScreen="true">
         <Size><AbsDimension x="768" y="447"/></Size>
         <Anchors>

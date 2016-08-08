@@ -1,4 +1,4 @@
-local m, public, private = aux.tab(2, 'post_tab')
+local m, public, private = aux.tab(2, 'Post', 'post_tab')
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
@@ -8,14 +8,6 @@ private.inventory_records = nil
 private.scan_id = 0
 private.selected_item = nil
 private.refresh = nil
-
-function public.FRAMES(f)
-    private.create_frames = f
-end
-
-function m.LOAD()
-    m.create_frames(m, public, private)
-end
 
 function m.OPEN()
     m.frame:Show()
@@ -236,7 +228,7 @@ function private.post_auctions()
 			stack_count,
 			function(posted)
                 local new_auction_record
-				for i = 1, posted do
+				for i=1,posted do
                     new_auction_record = m.record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
                 end
 

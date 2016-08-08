@@ -1,14 +1,6 @@
-local m, public, private = aux.tab(4, 'bids_tab')
+local m, public, private = aux.tab(4, 'Bids', 'bids_tab')
 
 private.auction_records = nil
-
-function public.FRAMES(f)
-    private.create_frames = f
-end
-
-function m.LOAD()
-    m.create_frames(m, public, private)
-end
 
 function m.OPEN()
     m.frame:Show()
