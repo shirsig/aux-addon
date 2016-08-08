@@ -1001,13 +1001,13 @@ function public.CreateAuctionResultsTable(parent, config)
     local rt = CreateFrame('Frame', rtName, parent)
     rt.config = config
     local numRows = 16
-    rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT-HEAD_SPACE) / numRows
+    rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / numRows
     rt.scrollDisabled = nil
     rt.expanded = {}
     rt.handlers = {}
     rt.sorts = {}
     rt.records = {}
-    rt.rowInfo = { numDisplayRows=0 }
+    rt.rowInfo = {numDisplayRows=0}
 
     for name, func in methods do
         rt[name] = func
