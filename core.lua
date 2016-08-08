@@ -414,17 +414,3 @@ end
 function public.min_bid_increment(current_bid)
 	return max(1, floor(current_bid / 100) * 5)
 end
-
-function public.price_level_color(pct)
-	if pct > 135 then
-		return 1.0,0.0,0.0 -- red
-	elseif pct > 110 then
-		return 1.0,0.6,0.1 -- orange
-	elseif pct > 80 then
-		return 1.0,1.0,0.0 -- yellow
-	elseif pct > 50 then
-		return 0.1,1.0,0.1 -- green
-	else
-		return 0.2,0.6,1.0 -- blue
-	end
-end
