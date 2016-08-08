@@ -911,17 +911,21 @@ function private.remove_post_filter()
 end
 
 do
+	local text
+
 	function private.update_filter_display()
-		local text = aux.filter.indented_post_query_string(m.post_components)
+		text = aux.filter.indented_post_query_string(m.post_components)
+		m.filter_display:SetWidth(m.filter_display_width())
+		m.filter_display:SetText(text)
+	end
+
+	function private.filter_display_width()
 		local widest_line = 0
 		for line in string.gfind(text, '<p>(.-)</p>') do
 			m.filter_display.measure:SetText(line)
 			widest_line = max(widest_line, m.filter_display.measure:GetStringWidth())
 		end
-		m.filter_display:SetWidth(widest_line)
-		m.filter_display:SetText(text)
-		local scroll_frame = m.filter_display:GetParent()
-		scroll_frame:SetHorizontalScroll(max(scroll_frame:GetWidth() - widest_line, scroll_frame:GetHorizontalScroll()))
+		return widest_line
 	end
 end
 

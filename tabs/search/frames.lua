@@ -546,7 +546,8 @@ do
 		    local x, y = GetCursorPosition()
 		    local new_x_offset = this.x_offset + x - this.x
 		    local new_y_offset = this.y_offset + y - this.y
-		    this:SetHorizontalScroll(min(0, new_x_offset - this.x_extra))
+
+		    this:SetHorizontalScroll(min(0, max((this:GetWidth() - m.filter_display_width())*m.filter_display:GetScale() - 2, new_x_offset - this.x_extra)))
 		    this:SetVerticalScroll(max(0, new_y_offset - this.y_extra))
 		    this.x_extra = max(this.x_extra, new_x_offset)
 		    this.y_extra = min(this.y_extra, new_y_offset)
