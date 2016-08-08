@@ -535,9 +535,9 @@ function public.indented_post_query_string(components)
         if no_line_break then
             str = str..' '
         elseif i > 1 then
-            str = str..'|n'
+            str = str..'</p><p>'
             for _=1,getn(stack) do
-                str = str..'    '
+                str = str..aux.gui.inline_color.content.backdrop..'----'..FONT_COLOR_CODE_CLOSE
             end
         end
         no_line_break = component[1] == 'operator' and component[2] == 'not'
@@ -559,7 +559,7 @@ function public.indented_post_query_string(components)
         end
     end
 
-    return str
+    return '<html><body><p>'..str..'</p></body></html>'
 end
 
 function private.prettified_query_string(components)

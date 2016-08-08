@@ -910,8 +910,17 @@ function private.remove_post_filter()
     m.update_filter_display()
 end
 
-function private.update_filter_display()
-    m.filter_display:SetText(aux.filter.indented_post_query_string(m.post_components))
+do
+	function private.update_filter_display()
+		local text = aux.filter.indented_post_query_string(m.post_components)
+		local widest_line = 0
+		for line in string.gfind(text, '<p>(.-)</p>') do
+			m.filter_display.measure:SetText(line)
+			widest_line = max(widest_line, m.filter_display.measure:GetStringWidth())
+		end
+		m.filter_display:SetWidth(widest_line)
+		m.filter_display:SetText(text)
+	end
 end
 
 function private.new_recent_search(filter_string, prettified)

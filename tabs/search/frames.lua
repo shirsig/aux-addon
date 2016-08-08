@@ -535,6 +535,7 @@ do
     scroll_frame:SetScript('OnMouseWheel', function()
 	    local child = this:GetScrollChild()
 	    child:SetScale(max(.3, min(1, child:GetScale() + arg1/10)))
+	    m.update_filter_display()
     end)
     scroll_frame:RegisterForDrag('LeftButton')
     scroll_frame:SetScript('OnDragStart', function()
@@ -555,16 +556,16 @@ do
 	    this:SetScript('OnUpdate', nil)
     end)
     aux.gui.set_content_style(scroll_frame)
-    local scroll_child = CreateFrame('Frame', nil, scroll_frame)
+    local scroll_child = CreateFrame('SimpleHTML', nil, scroll_frame)
+    scroll_frame:SetScrollChild(scroll_child)
+    scroll_child:SetFont('p', [[Fonts\ARIALN.TTF]], 26)
     scroll_child:SetWidth(1)
     scroll_child:SetHeight(1)
-    scroll_frame:SetScrollChild(scroll_child)
-    local display = aux.gui.label(scroll_child, 24)
-    display:SetPoint('TOPLEFT', 0, 0)
-    display:SetJustifyH('LEFT')
-    display:SetJustifyV('TOP')
-    display.scale_frame = scale_frame
-    private.filter_display = display
+    scroll_child:SetScript('OnHyperlinkClick', function()
+    end)
+    scroll_child.measure = scroll_child:CreateFontString()
+    scroll_child.measure:SetFont([[Fonts\ARIALN.TTF]], 26)
+    private.filter_display = scroll_child
 end
 
 private.status_bars = {}
