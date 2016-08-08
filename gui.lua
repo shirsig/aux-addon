@@ -9,6 +9,8 @@ public.config = {
 		panel = {backdrop = {24, 24, 24, 1}, border = {255, 255, 255, .03}},
 		content = {backdrop = {42, 42, 42, 1}, border = {0, 0, 0, 0}},
 		state = {enabled = {70, 180, 70}, disabled = {190, 70, 70}},
+		money1 = {gold = {255, 215, 10, 1}, silver = {252, 199, 207, 1}, copper = {237, 165, 95, 1}},
+		money2 = {gold = {}, silver = {}, copper = {}},
 	},
     edge_size = 1.5,
     font = [[Fonts\ARIALN.TTF]],
