@@ -535,7 +535,6 @@ do
     scroll_frame:SetScript('OnMouseWheel', function()
 	    local child = this:GetScrollChild()
 	    child:SetScale(max(.3, min(1, child:GetScale() + arg1/10)))
-	    aux.log(child:GetEffectiveScale())
     end)
     scroll_frame:RegisterForDrag('LeftButton')
     scroll_frame:SetScript('OnDragStart', function()
