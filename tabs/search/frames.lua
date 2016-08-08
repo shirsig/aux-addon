@@ -536,16 +536,14 @@ do
 	    this.x, this.y = GetCursorPosition()
 	    this.x_offset, this.y_offset = this:GetHorizontalScroll(), this:GetVerticalScroll()
 		this.x_extra, this.y_extra = 0, 0
-	    aux.log('kek')
 	    this:SetScript('OnUpdate', function()
 		    local x, y = GetCursorPosition()
 		    local new_x_offset = this.x_offset + x - this.x
 		    local new_y_offset = this.y_offset + y - this.y
-		    aux.log(this.x_extra)
 		    this:SetHorizontalScroll(min(0, new_x_offset - this.x_extra))
 		    this:SetVerticalScroll(max(0, new_y_offset - this.y_extra))
-		    this.x_extra = max(0, new_x_offset)
-		    this.y_extra = min(0, new_y_offset)
+		    this.x_extra = max(this.x_extra, new_x_offset)
+		    this.y_extra = min(this.y_extra, new_y_offset)
 	    end)
     end)
     scroll_frame:SetScript('OnDragStop', function()
