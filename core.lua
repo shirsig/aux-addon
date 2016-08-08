@@ -258,8 +258,7 @@ function private.SetItemRef(...)
 	if arg[3] ~= 'RightButton' or not m.index(m.active_tab.module[1], 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return m.orig.SetItemRef(unpack(arg))
 	end
-	local item_info = m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))
-	if item_info then
+	for _, item_info in {m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))} do
 		return m.active_tab.module[1].CLICK_LINK(item_info)
 	end
 end
@@ -268,8 +267,7 @@ function private.PickupContainerItem(...)
 	if m.modified() or not m.index(m.active_tab(), 'module', 1, 'PICKUP_ITEM') then
 		return m.orig.PickupContainerItem(unpack(arg))
 	end
-	local item_info = m.info.container_item(arg[1], arg[2])
-	if item_info then
+	for _, item_info in {m.info.container_item(arg[1], arg[2])} do
 		return m.active_tab.module[1].PICKUP_ITEM(item_info)
 	end
 end
@@ -278,8 +276,7 @@ function private.UseContainerItem(...)
     if m.modified() or not m.index(m.active_tab(), 'module', 1, 'USE_ITEM') then
         return m.orig.UseContainerItem(unpack(arg))
     end
-    local item_info = m.info.container_item(arg[1], arg[2])
-    if item_info then
+    for _, item_info in {m.info.container_item(arg[1], arg[2])} do
         return m.active_tab.module[1].USE_ITEM(item_info)
     end
 end
