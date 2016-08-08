@@ -540,9 +540,8 @@ function public.indented_post_query_string(components)
                 str = str..'    '
             end
         end
-
+        no_line_break = component[1] == 'operator' and component[2] == 'not'
         if component[1] == 'operator' and component[2] then
-            no_line_break = component[2] == 'not'
             str = str..'|cffffff00'..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE
             tinsert(stack, component[3] or '*')
         elseif component[1] == 'filter' then
