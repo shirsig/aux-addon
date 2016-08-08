@@ -1,6 +1,6 @@
 local m, public, private = aux.module'aux'
 
-public.version = '3.8.0'
+public.version = '3.9.0'
 
 public.bids_loaded = false
 public.current_owner_page = nil
