@@ -265,7 +265,7 @@ function private.SetItemRef(...)
 end
 
 function private.PickupContainerItem(...)
-	if m.modified() or not m.index(m.active_tab, 'module', 1, 'PICKUP_ITEM') then
+	if m.modified() or not m.index(m.active_tab(), 'module', 1, 'PICKUP_ITEM') then
 		return m.orig.PickupContainerItem(unpack(arg))
 	end
 	local item_info = m.info.container_item(arg[1], arg[2])
@@ -275,7 +275,7 @@ function private.PickupContainerItem(...)
 end
 
 function private.UseContainerItem(...)
-    if m.modified() or not m.index(m.active_tab, 'module', 1, 'USE_ITEM') then
+    if m.modified() or not m.index(m.active_tab(), 'module', 1, 'USE_ITEM') then
         return m.orig.UseContainerItem(unpack(arg))
     end
     local item_info = m.info.container_item(arg[1], arg[2])
