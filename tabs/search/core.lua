@@ -156,11 +156,6 @@ function m.CLICK_LINK(item_info)
 	m.execute(nil, false)
 end
 
-function m.PICKUP_ITEM(item_info)
-	m.set_filter(strlower(item_info.name)..'/exact')
-	m.execute(nil, false)
-end
-
 function m.USE_ITEM(item_info)
 	m.set_filter(strlower(item_info.name)..'/exact')
 	m.execute(nil, false)

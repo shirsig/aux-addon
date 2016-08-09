@@ -31,10 +31,6 @@ function m.CLOSE()
     m.frame:Hide()
 end
 
-function m.PICKUP_ITEM(item_info)
-	m.select_item(item_info.item_key)
-end
-
 function m.USE_ITEM(item_info)
 	m.select_item(item_info.item_key)
 end
@@ -362,7 +358,7 @@ function private.unit_vendor_price(item_key)
 
             if aux.info.auctionable(item_info.tooltip, nil, item_info.lootable) then
                 ClearCursor()
-                aux.orig.PickupContainerItem(unpack(slot))
+                PickupContainerItem(unpack(slot))
                 ClickAuctionSellItemButton()
                 local auction_sell_item = aux.info.auction_sell_item()
                 ClearCursor()

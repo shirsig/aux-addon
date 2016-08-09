@@ -30,7 +30,7 @@ function private.post_auction(slot, k)
 		ClearCursor()
 		ClickAuctionSellItemButton()
 		ClearCursor()
-		aux.orig.PickupContainerItem(unpack(slot))
+		PickupContainerItem(unpack(slot))
 		ClickAuctionSellItemButton()
 		ClearCursor()
 

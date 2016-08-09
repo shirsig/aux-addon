@@ -41,7 +41,7 @@ function public.tab(index, title, name)
 	tab.module[2].ACTIVE = function()
 		return tab == m.active_tab()
 	end
-	for _, handler in {'OPEN', 'CLOSE', 'CLICK_LINK', 'PICKUP_ITEM', 'USE_ITEM'} do
+	for _, handler in {'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do
 		tab.module[3][handler] = nil
 	end
 	m.tabs[index] = tab
@@ -111,7 +111,7 @@ function public.VARIABLES_LOADED()
 		btn:SetWidth(65)
 		btn:SetHeight(24)
 		btn:SetText('Close')
-		btn:SetScript('OnClick', m._(HideUIPanel, m.frame))
+		btn:SetScript('OnClick', m._(m.frame.hide, m.frame))
 		public.close_button = btn
 	end
 
@@ -169,7 +169,6 @@ function m.ADDON_LOADED.Blizzard_AuctionUI()
 	end)
 
 	m.hook('GetOwnerAuctionItems', m.GetOwnerAuctionItems)
-	m.hook('PickupContainerItem', m.PickupContainerItem)
 	m.hook('SetItemRef', m.SetItemRef)
 	m.hook('UseContainerItem', m.UseContainerItem)
 	m.hook('AuctionFrameAuctions_OnEvent', m.AuctionFrameAuctions_OnEvent)
@@ -285,15 +284,6 @@ function private.SetItemRef(...)
 	end
 	for _, item_info in {m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))} do
 		return m.active_tab.module[1].CLICK_LINK(item_info)
-	end
-end
-
-function private.PickupContainerItem(...)
-	if m.modified() or not m.index(m.active_tab(), 'module', 1, 'PICKUP_ITEM') then
-		return m.orig.PickupContainerItem(unpack(arg))
-	end
-	for _, item_info in {m.info.container_item(arg[1], arg[2])} do
-		return m.active_tab.module[1].PICKUP_ITEM(item_info)
 	end
 end
 
