@@ -1,5 +1,85 @@
 local m, public, private = aux.module'search_tab'
 
+function private.valid_level_input(str)
+	local number = tonumber(str)
+	local bounded = number and aux.util.bound(1, 60, number)
+	if number ~= bounded or strfind(str, '^0') then
+		return false, bounded
+	else
+		return true
+	end
+end
+
+private.blizzard_query = {}
+
+private.blizzard_filter = setmetatable({}, {
+	__newindex = function(_, key, value)
+		m.update_form(key, value)
+		m.blizzard_query[key] = value
+	end,
+})
+
+function private.update_form(key, value)
+
+	if key == 'class' and value ~= m.blizzard_query.class then
+		m.blizzard_query.class = value
+		UIDropDownMenu_ClearAll(m.subclass_dropdown)
+		UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown)
+		m.blizzard_query.subclass = nil
+		if value and GetAuctionItemSubClasses(value) then
+			m.subclass_dropdown.button:Enable()
+		else
+			m.subclass_dropdown.button:Disable()
+		end
+		UIDropDownMenu_ClearAll(m.slot_dropdown)
+		UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
+		m.blizzard_query.slot = nil
+		m.slot_dropdown.button:Disable()
+	elseif key == 'subclass' and value ~= m.blizzard_query.subclass then
+		m.blizzard_query.subclass = value
+		UIDropDownMenu_ClearAll(m.slot_dropdown)
+		UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
+		m.blizzard_query.slot = nil
+		if value and GetAuctionInvTypes(m.blizzard_query.class, value) then
+			m.slot_dropdown.button:Enable()
+		else
+			m.slot_dropdown.button:Disable()
+		end
+	else
+		m.blizzard_query[key] = value
+	end
+
+	if key == 'exact' then
+		if value then
+			for _, key in {'class', 'subclass', 'slot', 'quality'} do
+				m[key..'_dropdown'].button:Disable()
+			end
+		else
+			m.class_dropdown.button:Enable()
+		end
+		for _, key in {'min_level', 'max_level'} do
+			if value then
+				m[key..'_input']:Disable()
+			else
+				m[key..'_input']:Enable()
+			end
+		end
+		if value then
+			m.usable_checkbox:Disable()
+		else
+			m.usable_checkbox:Enable()
+		end
+	end
+
+	if aux.util.set('min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality')[key] then
+		if value then
+			m.exact_checkbox:Disable()
+		elseif not aux.util.any({'min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'}, function(key) return m.blizzard_query[key] end) then
+			m.exact_checkbox:Enable()
+		end
+	end
+end
+
 function private.get_form_query()
 	local query_string = ''
 
@@ -306,14 +386,8 @@ end
 
 function private.initialize_class_dropdown()
 	local function on_click()
-		local old_value = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
 		UIDropDownMenu_SetSelectedValue(m.class_dropdown, this.value)
-		if this.value ~= old_value then
-			UIDropDownMenu_ClearAll(m.subclass_dropdown)
-			UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown)
-			UIDropDownMenu_ClearAll(m.slot_dropdown)
-			UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
-		end
+		m.blizzard_filter.class = this.value
 	end
 
 	if not m.exact_checkbox:GetChecked() then
@@ -338,58 +412,47 @@ function private.initialize_class_dropdown()
 end
 
 function private.initialize_subclass_dropdown()
-
 	local function on_click()
-		local old_value = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
 		UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, this.value)
-		if this.value ~= old_value then
-			UIDropDownMenu_ClearAll(m.slot_dropdown)
-			UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
-		end
+		m.blizzard_filter.subclass = this.value
 	end
 
 	local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
 
-	if class_index and GetAuctionItemSubClasses(class_index) and not m.exact_checkbox:GetChecked() then
-		m.subclass_dropdown.button:Enable()
-
+	if class_index and GetAuctionItemSubClasses(class_index) then
 		UIDropDownMenu_AddButton{
 			text = ALL,
 			value = 0,
 			func = on_click,
 		}
 
-		for i, subclass in { GetAuctionItemSubClasses(class_index) } do
+		for i, subclass in {GetAuctionItemSubClasses(class_index)} do
 			UIDropDownMenu_AddButton{
 				text = subclass,
 				value = i,
 				func = on_click,
 			}
 		end
-	else
-		m.subclass_dropdown.button:Disable()
 	end
 end
 
 function private.initialize_slot_dropdown()
-
 	local function on_click()
 		UIDropDownMenu_SetSelectedValue(m.slot_dropdown, this.value)
+		m.blizzard_filter.slot = this.value
 	end
 
 	local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
 	local subclass_index = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
 
-	if class_index and subclass_index and GetAuctionInvTypes(class_index, subclass_index) and not m.exact_checkbox:GetChecked() then
-		m.slot_dropdown.button:Enable()
-
+	if subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
 		UIDropDownMenu_AddButton{
 			text = ALL,
 			value = 0,
 			func = on_click,
 		}
 
-		for _, slot in { GetAuctionInvTypes(class_index, subclass_index) } do
+		for _, slot in {GetAuctionInvTypes(class_index, subclass_index)} do
 			local slot_name = getglobal(slot)
 			UIDropDownMenu_AddButton{
 				text = slot_name,
@@ -397,15 +460,13 @@ function private.initialize_slot_dropdown()
 				func = on_click,
 			}
 		end
-	else
-		m.slot_dropdown.button:Disable()
 	end
 end
 
 function private.initialize_quality_dropdown()
-
 	local function on_click()
 		UIDropDownMenu_SetSelectedValue(m.quality_dropdown, this.value)
+		m.blizzard_filter.quality = this.value
 	end
 
 	UIDropDownMenu_AddButton{

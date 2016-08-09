@@ -366,6 +366,9 @@ function private.create_frames()
 	        end
 	    end)
 	    editbox:SetScript('OnTabPressed', function()
+		    if m.blizzard_query.exact then
+			    return
+		    end
 	        if IsShiftKeyDown() then
 	            m.max_level_input:SetFocus()
 	        else
@@ -382,12 +385,7 @@ function private.create_frames()
 	    local checkbox = aux.gui.checkbox(m.frame.filter)
 	    checkbox:SetPoint('TOPLEFT', m.name_input, 'TOPRIGHT', 16, 0)
 	    checkbox:SetScript('OnClick', function()
-		    UIDropDownMenu_ClearAll(m.class_dropdown)
-		    UIDropDownMenu_Initialize(m.class_dropdown, m.initialize_class_dropdown)
-	        UIDropDownMenu_ClearAll(m.subclass_dropdown)
-	        UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown)
-	        UIDropDownMenu_ClearAll(m.slot_dropdown)
-	        UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
+		    m.blizzard_filter.exact = this:GetChecked()
 	    end)
 	    local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
@@ -399,7 +397,6 @@ function private.create_frames()
 	    editbox:SetPoint('TOPLEFT', m.name_input, 'BOTTOMLEFT', 0, -26)
 	    editbox:SetWidth(125)
 	    editbox:SetNumeric(true)
-	    editbox:SetMaxLetters(2)
 	    editbox:SetScript('OnTabPressed', function()
 	        if IsShiftKeyDown() then
 	            m.name_input:SetFocus()
@@ -408,6 +405,14 @@ function private.create_frames()
 	        end
 	    end)
 	    editbox:SetScript('OnEnterPressed', aux._(editbox.ClearFocus, editbox))
+	    editbox:SetScript('OnTextChanged', function()
+		    local valid, number = m.valid_level_input(this:GetText())
+		    if valid then
+			    m.blizzard_filter.min_level = number
+		    else
+		        this:SetText(number)
+		    end
+	    end)
 	    local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Level Range')
@@ -418,7 +423,6 @@ function private.create_frames()
 	    editbox:SetPoint('TOPLEFT', m.min_level_input, 'TOPRIGHT', 10, 0)
 	    editbox:SetWidth(125)
 	    editbox:SetNumeric(true)
-	    editbox:SetMaxLetters(2)
 	    editbox:SetScript('OnTabPressed', function()
 	        if IsShiftKeyDown() then
 	            m.min_level_input:SetFocus()
@@ -427,6 +431,14 @@ function private.create_frames()
 	        end
 	    end)
 	    editbox:SetScript('OnEnterPressed', aux._(editbox.ClearFocus, editbox))
+	    editbox:SetScript('OnTextChanged', function()
+		    local valid, number = m.valid_level_input(this:GetText())
+		    if valid then
+			    m.blizzard_filter.max_level = number
+		    else
+			    this:SetText(number)
+		    end
+	    end)
 	    local label = aux.gui.label(editbox, aux.gui.config.medium_font_size)
 	    label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
 	    label:SetText('-')
@@ -435,6 +447,9 @@ function private.create_frames()
 	do
 	    local checkbox = aux.gui.checkbox(m.frame.filter)
 	    checkbox:SetPoint('TOPLEFT', m.max_level_input, 'TOPRIGHT', 16, 0)
+	    checkbox:SetScript('OnClick', function()
+		    m.blizzard_filter.usable = this:GetChecked()
+	    end)
 	    local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Usable')

@@ -45,7 +45,7 @@ function private.item_column_init(rt, cell)
     local icon = iconBtn:CreateTexture(nil, 'ARTWORK')
     icon:SetPoint('TOPLEFT', 2, -2)
     icon:SetPoint('BOTTOMRIGHT', -2, 2)
-    icon:SetTexCoord(.08, .94, .08, .94)
+    icon:SetTexCoord(.07, .93, .08, .94)
 
     cell.iconBtn = iconBtn
     cell.icon = icon

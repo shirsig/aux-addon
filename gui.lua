@@ -22,29 +22,26 @@ public.config = {
 }
 
 function private.color_accessor(callback)
-	return aux.index_function({callback=callback}, function(self, key)
-		self.private.table = m.config.color
-		return aux.index_function(self.private, function(self, key)
-			self.private.table = self.private.table[key]
-			if getn(self.private.table) == 0 then
-				return self.public
-			else
-				return callback(aux.util.copy(self.private.table))
-			end
-		end)[key]
+	return aux.index_function({callback=callback, table=m.config.color}, function(self, key)
+		self.private.table = self.private.table[key]
+		if getn(self.private.table) == 0 then
+			return self.public
+		else
+			local color = aux.util.copy(self.private.table)
+			self.private.table = m.config.color
+			return callback(color)
+		end
 	end)
 end
 
 public.color = m.color_accessor(function(color)
-	for i=1,3 do
-		color[i] = color[i]/255
-	end
-	return color
+	local r, g, b, a = unpack(color)
+	return {r/255, g/255, b/255, a}
 end)
 
 public.inline_color = m.color_accessor(function(color)
-	tinsert(color, 1, tremove(color))
-	return format('|c%02X%02X%02X%02X', unpack(color))
+	local r, g, b, a = unpack(color)
+	return format('|c%02X%02X%02X%02X', a, r, g, b)
 end)
 
 do
@@ -354,6 +351,17 @@ function public.editbox(parent)
                 last_x, last_y = x, y
             end
         end)
+    end
+
+    function editbox:Enable()
+	    editbox:EnableMouse(true)
+	    editbox:SetTextColor(unpack(m.color.text.enabled))
+    end
+
+    function editbox:Disable()
+	    editbox:EnableMouse(false)
+	    editbox:SetTextColor(unpack(m.color.text.disabled))
+	    editbox:ClearFocus()
     end
 
     return editbox
