@@ -195,6 +195,7 @@ function private.data_link_click()
 end
 
 function private.remove_component(index)
+	index = index or m.filter_builder_state.selected
 	if m.filter_builder_state.selected >= index then
 		m.filter_builder_state.selected = max(m.filter_builder_state.selected - 1, min(1, getn(m.post_filter)))
 	end
