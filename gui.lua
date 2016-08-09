@@ -45,13 +45,18 @@ public.inline_color = aux.index_function(function(self, key)
 	return format('|c%02X%02X%02X%02X', unpack(color))
 end)
 
---/run aux.gui.menu('kek', 'kuk', 'kok', function() end)
 do
-	local dropdown
+	local id = 0
+	function public.name()
+		id = id + 1
+		return 'aux_frame'..id
+	end
+end
+
+do
+	local menu
 
 	function public.menu(...)
-		local mythis = this
-		this = dropdown
 		UIMenu_Initialize()
 		for i=1,arg.n-1 do
 			UIMenu_AddButton(
@@ -62,36 +67,16 @@ do
 				end
 			)
 		end
-		dropdown:SetPoint('BOTTOMLEFT', GetCursorPosition())
-		dropdown:Show()
-		this = mythis
+		menu:SetPoint('BOTTOMLEFT', GetCursorPosition())
+		menu:Show()
 	end
 
---	function public.menu(...)
---		UIDropDownMenu_Initialize(dropdown, function()
---			for i=1,arg.n-1 do
---				UIDropDownMenu_AddButton{
---					text = arg[i],
---					value = i,
---					func = function()
---						return arg[arg.n](this.value)
---					end,
---				}
---			end
---		end, 'MENU')
---		dropdown:SetPoint('BOTTOMLEFT', GetCursorPosition())
---		ToggleDropDownMenu(nil, nil, dropdown, nil, 0, 0)
---	end
-
---	function private.initialize_menu()
---		dropdown = CreateFrame('Frame', 'aux_frame'..aux.id(), UIParent, 'UIDropDownMenuTemplate')
---		dropdown:SetWidth(1)
---		dropdown:SetHeight(1)
---		dropdown:SetAlpha(0)
---	end
-
 	function private.initialize_menu()
-		dropdown = CreateFrame('Frame', 'aux_frame'..aux.id(), UIParent, 'UIMenuTemplate')
+		menu = CreateFrame('Frame', m.name(), UIParent, 'UIMenuTemplate')
+		local orig = menu:GetScript('OnShow')
+		menu:SetScript('OnShow', function()
+
+		end)
 	end
 end
 
@@ -259,7 +244,7 @@ function public.tab_group(parent, orientation)
     function self:create_tab(text)
         local id = getn(self.tabs) + 1
 
-        local tab = CreateFrame('Button', 'aux_tab_group'..self.id..'_tab'..id, self.frame)
+        local tab = CreateFrame('Button', m.name(), self.frame)
         tab.id = id
         tab.group = self
         tab:SetHeight(24)
@@ -320,11 +305,11 @@ function public.tab_group(parent, orientation)
 
     function self:set_tab(id)
         self.selected = id
-        self.update_tabs()
+        self:update_tabs()
         aux.call(self.on_select, id)
     end
 
-    function self.update_tabs()
+    function self:update_tabs()
         for _, tab in self.tabs do
             if tab.group.selected == tab.id then
                 tab.text:SetTextColor(unpack(m.color.label.enabled))
@@ -450,7 +435,7 @@ function public.item(parent)
     local item = CreateFrame('Frame', nil, parent)
     item:SetWidth(260)
     item:SetHeight(40)
-    local btn = CreateFrame('CheckButton', 'aux_frame'..aux.id(), item, 'ActionButtonTemplate')
+    local btn = CreateFrame('CheckButton', m.name(), item, 'ActionButtonTemplate')
     item.button = btn
     btn:SetPoint('LEFT', 2, .5)
     btn:SetHighlightTexture(nil)
@@ -501,7 +486,7 @@ end
 
 
 function public.dropdown(parent)
-    local dropdown = CreateFrame('Frame', 'aux_frame'..aux.id(), parent, 'UIDropDownMenuTemplate')
+    local dropdown = CreateFrame('Frame', m.name(), parent, 'UIDropDownMenuTemplate')
 	m.set_content_style(dropdown, 0, 0, 2, 2)
 
     getglobal(dropdown:GetName()..'Left'):Hide()

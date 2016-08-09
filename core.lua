@@ -65,8 +65,8 @@ end
 
 function public.VARIABLES_LOADED()
 	do
-		local frame = CreateFrame('Frame', 'AuxFrame', UIParent)
-		tinsert(UISpecialFrames, 'AuxFrame')
+		local frame = CreateFrame('Frame', aux.gui.name(), UIParent)
+		tinsert(UISpecialFrames, 'aux_frame1')
 		m.gui.set_window_style(frame)
 		frame:SetWidth(768)
 		frame:SetHeight(447)
@@ -396,14 +396,6 @@ function public.index(t, ...)
 end
 
 public.huge = 2^100000
-
-do
-	local x = 0
-	function public.id()
-		x = x + 1
-		return x
-	end
-end
 
 function public.log(...)
 	local msg = '[aux]'

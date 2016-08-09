@@ -1005,9 +1005,8 @@ local methods = {
 
 function public.CreateAuctionResultsTable(parent, config)
 
-    local rtName = 'aux_frame'..aux.id()
     RT_COUNT = RT_COUNT + 1
-    local rt = CreateFrame('Frame', rtName, parent)
+    local rt = CreateFrame('Frame', nil, parent)
     rt.config = config
     local numRows = 16
     rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / numRows
@@ -1030,14 +1029,14 @@ function public.CreateAuctionResultsTable(parent, config)
         end
     end)
 
-    local contentFrame = CreateFrame('Frame', rtName..'Content', rt)
+    local contentFrame = CreateFrame('Frame', nil, rt)
     contentFrame:SetPoint('TOPLEFT', 0, 0)
     contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
 --    contentFrame:SetScript('OnSizeChanged', rt.OnContentSizeChanged)
     rt.contentFrame = contentFrame
 
     -- frame to hold the header columns and the rows
-    local scrollFrame = CreateFrame('ScrollFrame', rtName..'ScrollFrame', rt, 'FauxScrollFrameTemplate')
+    local scrollFrame = CreateFrame('ScrollFrame', aux.gui.name(), rt, 'FauxScrollFrameTemplate')
     scrollFrame:SetScript('OnVerticalScroll', function()
         if not rt.scrollDisabled then
             FauxScrollFrame_OnVerticalScroll(rt.ROW_HEIGHT, function() rt:UpdateRows() end)
@@ -1063,7 +1062,7 @@ function public.CreateAuctionResultsTable(parent, config)
     -- create the header cells
     rt.headCells = {}
     for i, column_config in rt.config do
-        local cell = CreateFrame('Button', rtName..'HeadCol'..i, rt.contentFrame)
+        local cell = CreateFrame('Button', nil, rt.contentFrame)
         cell:SetHeight(HEAD_HEIGHT)
         if i == 1 then
             cell:SetPoint('TOPLEFT', 0, 0)
@@ -1106,7 +1105,7 @@ function public.CreateAuctionResultsTable(parent, config)
     -- create the rows
     rt.rows = {}
     for i=1, numRows do
-        local row = CreateFrame('Frame', rtName..'Row'..i, rt.contentFrame)
+        local row = CreateFrame('Frame', nil, rt.contentFrame)
         row:SetHeight(rt.ROW_HEIGHT)
         if i == 1 then
             row:SetPoint('TOPLEFT', 0, -(HEAD_HEIGHT + HEAD_SPACE))

@@ -6,11 +6,11 @@ private.threads = {}
 public.thread_id = nil
 
 function m.LOAD()
-	m.event_frame:SetScript('OnUpdate', m.on_update)
-	m.event_frame:SetScript('OnEvent', m.on_event)
+	m.event_frame:SetScript('OnUpdate', m.UPDATE)
+	m.event_frame:SetScript('OnEvent', m.EVENT)
 end
 
-function private.on_event()
+function private.EVENT()
 	for _, listener in m.listeners do
 		if event == listener.event and not listener.killed then
 			listener.cb(listener.kill)
@@ -18,7 +18,7 @@ function private.on_event()
 	end
 end
 
-function private.on_update()
+function private.UPDATE()
 	for _, listener in m.listeners do
 		if not aux.util.any(m.listeners, function(l) return not l.killed and l.event == listener.event end) then
 			m.event_frame:UnregisterEvent(listener.event)
@@ -42,6 +42,14 @@ function private.on_update()
 	end
 end
 
+do
+	local id = 0
+	function private.id()
+		id = id + 1
+		return id
+	end
+end
+
 function public.kill_listener(listener_id)
 	for _, listener in {m.listeners[listener_id]} do
 		listener.killed = true
@@ -55,7 +63,7 @@ function public.kill_thread(thread_id)
 end
 
 function public.event_listener(event, cb)
-	local listener_id = aux.id()
+	local listener_id = m.id()
 	m.listeners[listener_id] = { event=event, cb=cb, kill=function(...) if arg.n == 0 or arg[1] then m.kill_listener(listener_id) end end }
 	m.event_frame:RegisterEvent(event)
 	return listener_id
@@ -69,7 +77,7 @@ function public.on_next_event(event, callback)
 end
 
 function public.thread(k, ...)
-	local thread_id = aux.id()
+	local thread_id = m.id()
 	m.threads[thread_id] = { k = aux._(k, unpack(arg)) }
 	return thread_id
 end
