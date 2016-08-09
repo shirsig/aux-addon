@@ -8,20 +8,11 @@ function public.pack(table, ...)
 end
 
 function public.unpack(array, ...)
-	local table, index = {}, {}
+	local table = {}
 	for i=1,arg.n do
 		table[arg[i]] = array[i]
-		tinsert(index, arg[i])
 	end
-	return table, index
-end
-
-function public.pick(indices, ...)
-	local t = {}
-	for _, index in indices do
-		tinsert(t, arg[index])
-	end
-	return unpack(t)
+	return table
 end
 
 function public.select(i, ...)

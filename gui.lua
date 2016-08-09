@@ -21,24 +21,15 @@ public.config = {
     huge_font_size = 23,
 }
 
-do
-	local self = aux_module()
-	function private.color2(r, g, b, a)
-		return aux.index_function(function(_, key)
-
-		end)
-	end
-end
-
 function private.color_accessor(callback)
-	return aux.index_function(function(_, key)
-		local t = m.config.color
-		return aux.index_function(function(self, key)
-			t = t[key]
-			if getn(t) == 0 then
-				return self
+	return aux.index_function({callback=callback}, function(self, key)
+		self.private.table = m.config.color
+		return aux.index_function(self.private, function(self, key)
+			self.private.table = self.private.table[key]
+			if getn(self.private.table) == 0 then
+				return self.public
 			else
-				return callback(aux.util.copy(t))
+				return callback(aux.util.copy(self.private.table))
 			end
 		end)[key]
 	end)

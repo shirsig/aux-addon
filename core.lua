@@ -5,33 +5,36 @@ public.current_owner_page = nil
 public.last_owner_page_requested = nil
 
 do
+	local data = {}
 	local mt = {
 		__newindex = function(self, key, value)
-			self._getter()[key] = value
+			data[self].getter({public=self, private=data[self].state})[key] = value
 		end,
 		__index = function(self, key)
-			return self._getter()[key]
+			return data[self].getter({public=self, private=data[self].state})[key]
 		end,
 		__call = function(self)
-			return self._getter()
+			return data[self].getter({public=self, private=data[self].state})
 		end,
 	}
-	function public.dynamic_table(getter)
-		return setmetatable({_getter=getter}, mt)
+	function public.dynamic_table(state, getter)
+		local self = {}
+		data[self] = {getter=getter, state=state}
+		return setmetatable(self, mt)
 	end
 end
 
 do
+	local data = {}
 	local mt = {
 		__index = function(self, key)
-			return self:_cb(key)
-		end,
-		__call = function(self)
-			return self:_cb()
+			return data[self].handler({public=self, private=data[self].state}, key)
 		end,
 	}
-	function public.index_function(cb)
-		return setmetatable({_cb = cb}, mt)
+	function public.index_function(state, handler)
+		local self = {}
+		data[self] = {handler=handler, state=state}
+		return setmetatable(self, mt)
 	end
 end
 
@@ -49,7 +52,7 @@ function public.tab(index, title, name)
 end
 do
 	local active_tab_index
-	private.active_tab = m.dynamic_table(function()
+	private.active_tab = m.dynamic_table(nil, function()
 		return m.tabs[active_tab_index]
 	end)
 	function private.on_tab_click(index)

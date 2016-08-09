@@ -8,14 +8,14 @@ do
 	local COPPER_PER_SILVER = 100
 	local COPPER_PER_GOLD = 10000
 
-	function public.to_GSC(money)
+	function public.gsc(money)
 		local gold = floor(money / COPPER_PER_GOLD)
 		local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
 		local copper = mod(money, COPPER_PER_SILVER)
 		return gold, silver, copper
 	end
 
-	function public.from_GSC(gold, silver, copper)
+	function public.copper(gold, silver, copper)
 		return gold * COPPER_PER_GOLD + silver * COPPER_PER_SILVER + copper
 	end
 end
@@ -25,43 +25,43 @@ function public.format(money, exact, color)
 
 	local TEXT_NONE = '0'
 
-	local GSC_GOLD = 'ffd100'
-	local GSC_SILVER = 'e6e6e6'
-	local GSC_COPPER = 'c8602c'
-	local GSC_START = '|cff%s%d'..FONT_COLOR_CODE_CLOSE
-	local GSC_PART = color..'.|cff%s%02d'..FONT_COLOR_CODE_CLOSE
-	local GSC_NONE = '|cffa0a0a0'..TEXT_NONE..FONT_COLOR_CODE_CLOSE
+	local GOLD = 'ffd100'
+	local SILVER = 'e6e6e6'
+	local COPPER = 'c8602c'
+	local START = '|cff%s%d'..FONT_COLOR_CODE_CLOSE
+	local PART = color..'.|cff%s%02d'..FONT_COLOR_CODE_CLOSE
+	local NONE = '|cffa0a0a0'..TEXT_NONE..FONT_COLOR_CODE_CLOSE
 
 	if not exact and money >= 10000 then
 		-- Round to nearest silver
 		money = floor(money / 100 + 0.5) * 100
 	end
-	local g, s, c = aux.money.to_GSC(money)
+	local g, s, c = aux.money.gsc(money)
 
-	local gsc = ''
+	local str = ''
 
-	local fmt = GSC_START
+	local fmt = START
 	if g > 0 then
-		gsc = gsc..format(fmt, GSC_GOLD, g)
-		fmt = GSC_PART
+		str = str..format(fmt, GOLD, g)
+		fmt = PART
 	end
 	if s > 0 or c > 0 then
-		gsc = gsc..format(fmt, GSC_SILVER, s)
-		fmt = GSC_PART
+		str = str..format(fmt, SILVER, s)
+		fmt = PART
 	end
 	if c > 0 then
-		gsc = gsc..format(fmt, GSC_COPPER, c)
+		str = str..format(fmt, COPPER, c)
 	end
-	if gsc == '' then
-		gsc = GSC_NONE
+	if str == '' then
+		str = NONE
 	end
-	return gsc
+	return str
 end
 
 function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	local is_negative = money < 0
 	money = abs(money)
-	local gold, silver, copper = m.to_GSC(money)
+	local gold, silver, copper = m.gsc(money)
 
 	-- rounding
 	if decimal_points then
@@ -129,7 +129,7 @@ function public.from_string(value)
 	value = gsub(value, '%d*%.?%d+c', '', 1)
 	if strfind(value, '%S') then return end
 	
-	return m.from_GSC(gold or 0, silver or 0, copper or 0)
+	return m.copper(gold or 0, silver or 0, copper or 0)
 end
 
 function public.format_number(num, pad, decimal_padding, color)

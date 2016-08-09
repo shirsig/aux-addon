@@ -37,13 +37,13 @@ do
 		aux.call(on_complete)
 	end
 
-	private.state = aux.dynamic_table(function()
-		local _, state = next(aux.util.filter(scan_states, function(state) return state.id == aux.control.thread_id end))
+	private.state = aux.dynamic_table(scan_states, function(self)
+		local _, state = next(aux.util.filter(self.private, function(state) return state.id == aux.control.thread_id end))
 		return state
 	end)
 end
 
-private.query = aux.dynamic_table(function()
+private.query = aux.dynamic_table(nil, function()
     return m.state.params.queries[m.state.query_index]
 end)
 

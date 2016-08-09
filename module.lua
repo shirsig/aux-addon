@@ -1,12 +1,12 @@
-local __ = {}
+local state = {}
 
 local public_interface_mt = {
 	__newindex = function()
 		error('Unsupported operation.', 2)
 	end,
 	__index = function(self, key)
-		if __[self].public[key] then
-			return __[self].attributes[key]
+		if state[self].public[key] then
+			return state[self].data[key]
 		else
 			error('Read of undeclared "'..key..'".', 2)
 		end
@@ -14,26 +14,26 @@ local public_interface_mt = {
 }
 local private_interface_mt = {
 	__newindex = function(self, key, value)
-		if not __[self].declared[key] then
+		if not state[self].declared[key] then
 			error('Write of undeclared "'..key..'".', 2)
 		end
-		__[self].attributes[key] = value
+		state[self].data[key] = value
 	end,
 	__index = function(self, key)
-		if not __[self].declared[key] then
+		if not state[self].declared[key] then
 			error('Read of undeclared "'..key..'".', 2)
 		end
-		return __[self].attributes[key]
+		return state[self].data[key]
 	end,
 }
 local public_declarator_mt = {
 	__newindex = function(self, key, value)
-		if __[self].declared[key] then
+		if state[self].declared[key] then
 			error('Multiple declarations of "'..key..'".', 2)
 		end
-		__[self].attributes[key] = value
-		__[self].public[key] = true
-		__[self].declared[key] = true
+		state[self].data[key] = value
+		state[self].public[key] = true
+		state[self].declared[key] = true
 	end,
 	__index = function()
 		error('Unsupported operation.', 2)
@@ -41,11 +41,11 @@ local public_declarator_mt = {
 }
 local private_declarator_mt = {
 	__newindex = function(self, key, value)
-		if __[self].declared[key] then
+		if state[self].declared[key] then
 			error('Multiple declarations of "'..key..'".', 2)
 		end
-		__[self].attributes[key] = value
-		__[self].declared[key] = true
+		state[self].data[key] = value
+		state[self].declared[key] = true
 	end,
 	__index = function()
 		error('Unsupported operation.', 2)
@@ -53,10 +53,10 @@ local private_declarator_mt = {
 }
 
 function aux_module()
-	local data = {attributes={}, public={}, declared={}}
+	local new_state = {data={}, public={}, declared={}}
     local module = {setmetatable({}, public_interface_mt), setmetatable({}, private_interface_mt), setmetatable({}, public_declarator_mt), setmetatable({}, private_declarator_mt)}
 	for _, component in module do
-		__[component] = data
+		state[component] = new_state
 	end
     return module
 end
