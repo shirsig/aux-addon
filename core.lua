@@ -65,8 +65,8 @@ end
 
 function public.VARIABLES_LOADED()
 	do
-		local frame = CreateFrame('Frame', nil, UIParent)
-		tinsert(UISpecialFrames, frame)
+		local frame = CreateFrame('Frame', 'AuxFrame', UIParent)
+		tinsert(UISpecialFrames, 'AuxFrame')
 		m.gui.set_window_style(frame)
 		frame:SetWidth(768)
 		frame:SetHeight(447)
