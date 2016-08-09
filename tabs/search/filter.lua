@@ -155,7 +155,7 @@ function public.formatted_post_filter(components)
 				if aux.filter.filters[component[2]].input_type == 'money' then
 					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, nil, true)
 				end
-				component_text = component_text..': '..(m.filter_builder_state.selected == i and '|cffffaa77' or aux.auction_listing.colors.ORANGE)..parameter..FONT_COLOR_CODE_CLOSE or component_text
+				component_text = component_text..': '..aux.auction_listing.colors.ORANGE..parameter..FONT_COLOR_CODE_CLOSE or component_text
 			end
 			while getn(stack) > 0 and stack[getn(stack)] do
 				local top = tremove(stack)
@@ -166,7 +166,7 @@ function public.formatted_post_filter(components)
 			end
 		end
 		if m.filter_builder_state.selected == i then
-			component_text = LIGHTYELLOW_FONT_COLOR_CODE..component_text..FONT_COLOR_CODE_CLOSE
+			component_text = aux.auction_listing.colors.GREEN..component_text..FONT_COLOR_CODE_CLOSE
 		else
 			component_text = aux.auction_listing.colors.YELLOW..component_text..FONT_COLOR_CODE_CLOSE
 		end
