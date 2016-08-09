@@ -35,6 +35,9 @@ tables\item_listing.lua
 
 
 tabs\search\core.lua
+tabs\search\results.lua
+tabs\search\saved.lua
+tabs\search\filter.lua
 tabs\search\frames.lua
 
 tabs\post\core.lua

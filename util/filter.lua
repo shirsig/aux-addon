@@ -531,6 +531,10 @@ function public.query_string(components)
     return prettified.get()
 end
 
+function private.data_link(id, str)
+	return '|H'..id..'|h'..str..'|h'
+end
+
 function public.indented_post_query_string(components)
     local no_line_break
     local stack = {}
@@ -546,15 +550,16 @@ function public.indented_post_query_string(components)
             end
         end
         no_line_break = component[1] == 'operator' and component[2] == 'not'
-        if component[1] == 'operator' and component[2] then
-            str = str..aux.auction_listing.COLORS.YELLOW..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE
-            tinsert(stack, component[3] or '*')
+        local component_text
+        if component[1] == 'operator' then
+            component_text = aux.auction_listing.COLORS.YELLOW..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE
+            tinsert(stack, component[3])
         elseif component[1] == 'filter' then
-            str = str..aux.auction_listing.COLORS.YELLOW..component[2]..FONT_COLOR_CODE_CLOSE
+            component_text = aux.auction_listing.COLORS.YELLOW..component[2]..FONT_COLOR_CODE_CLOSE
             if component[3] then
                 str = str..': '..aux.auction_listing.COLORS.ORANGE..component[3]..FONT_COLOR_CODE_CLOSE
             end
-            while getn(stack) > 0 and stack[getn(stack)] ~= '*' do
+            while getn(stack) > 0 and stack[getn(stack)] do
                 local top = tremove(stack)
                 if tonumber(top) and top > 1 then
                     tinsert(stack, top - 1)
@@ -562,6 +567,7 @@ function public.indented_post_query_string(components)
                 end
             end
         end
+        str = str..m.data_link(i, component_text)
     end
 
     return '<html><body><p>'..str..'</p></body></html>'

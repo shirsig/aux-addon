@@ -101,7 +101,6 @@ function m.LOAD()
 		if strfind(dropdown:GetName() or '', 'aux_frame') then
 			DropDownList1Backdrop:SetBackdrop({})
 			DropDownList1Backdrop.border:Show()
-			DropDownList1Backdrop.backdrop:SetAllPoints()
 			DropDownList1Backdrop.backdrop:Show()
 			DropDownList1:SetWidth(dropdown:GetWidth() * 0.9)
 			DropDownList1:SetHeight(DropDownList1:GetHeight() - 10)
