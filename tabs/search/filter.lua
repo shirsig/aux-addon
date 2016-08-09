@@ -151,8 +151,11 @@ function public.formatted_post_filter(components)
 			component_text = component_text..(tonumber(component[3]) or '')
 			tinsert(stack, component[3])
 		elseif component[1] == 'filter' then
-			if component[3] then
-				component_text = component[3] and component_text..': '..aux.auction_listing.colors.ORANGE..component[3]..FONT_COLOR_CODE_CLOSE or component_text
+			for _, parameter in {component[3]} do
+				if aux.filter.filters[component[2]].input_type == 'money' then
+					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, nil, true)
+				end
+				component_text = component_text..': '..aux.auction_listing.colors.ORANGE..parameter..FONT_COLOR_CODE_CLOSE or component_text
 			end
 			while getn(stack) > 0 and stack[getn(stack)] do
 				local top = tremove(stack)
@@ -192,8 +195,8 @@ function private.data_link_click()
 end
 
 function private.remove_component(index)
-	if m.filter_builder_state.selected == index then
-		m.filter_builder_state.selected = max(index - 1, min(1, getn(m.post_filter)))
+	if m.filter_builder_state.selected >= index then
+		m.filter_builder_state.selected = max(m.filter_builder_state.selected - 1, min(1, getn(m.post_filter)))
 	end
 	m.filter_builder_state[m.post_filter[index]] = nil
 	tremove(m.post_filter, index)
