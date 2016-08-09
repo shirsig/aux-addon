@@ -5,7 +5,6 @@
 
 module.lua
 init.lua
-core.xml
 core.lua
 control.lua
 gui.lua

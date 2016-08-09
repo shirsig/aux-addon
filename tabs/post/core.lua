@@ -9,6 +9,10 @@ private.scan_id = 0
 private.selected_item = nil
 private.refresh = nil
 
+function m.LOAD()
+	m.create_frames()
+end
+
 function m.OPEN()
     m.frame:Show()
 

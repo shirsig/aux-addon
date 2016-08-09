@@ -133,6 +133,7 @@ do
 end
 
 function m.LOAD()
+	m.create_frames()
 	m.update_tab(m.SAVED)
 	m.update_auto_buy_filter()
 	m.new_search('')

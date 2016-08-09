@@ -2,6 +2,8 @@ local module = aux_module()
 aux = tremove(module, 1)
 local m, public, private = unpack(module)
 
+public.version = '3.9.0'
+
 local function initialize_module(private_declarator)
 	private_declarator.LOAD = nil
 end
@@ -34,6 +36,7 @@ event_frame:SetScript('OnEvent', function()
 					module[1].LOAD()
 				end
 			end
+			m.log('v'..m.version..' loaded.')
 		end
 	end
 end)

@@ -2,6 +2,10 @@ local m, public, private = aux.tab(3, 'Auctions', 'auctions_tab')
 
 private.auction_records = nil
 
+function m.LOAD()
+	m.create_frames()
+end
+
 function m.OPEN()
     m.frame:Show()
     m.scan_auctions()

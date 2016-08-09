@@ -1,7 +1,5 @@
 local m, public, private = aux.module'aux'
 
-public.version = '3.9.0'
-
 public.bids_loaded = false
 public.current_owner_page = nil
 public.last_owner_page_requested = nil
@@ -56,23 +54,50 @@ do
 	end)
 	function private.on_tab_click(index)
 		if active_tab_index then
-			aux.call(m.active_tab.module[1].CLOSE)
+			m.call(m.active_tab.module[1].CLOSE)
 		end
 		active_tab_index = index
 		if active_tab_index then
-			aux.call(m.active_tab.module[1].OPEN)
+			m.call(m.active_tab.module[1].OPEN)
 		end
 	end
 end
 
 function public.VARIABLES_LOADED()
-	m.log('v'..m.version..' loaded.')
-
-	aux.gui.set_window_style(AuxFrame)
-	tinsert(UISpecialFrames, 'AuxFrame')
+	do
+		local frame = CreateFrame('Frame', nil, UIParent)
+		tinsert(UISpecialFrames, frame)
+		m.gui.set_window_style(frame)
+		frame:SetWidth(768)
+		frame:SetHeight(447)
+		frame:SetPoint('LEFT', 100, 0)
+		frame:SetToplevel(true)
+		frame:SetMovable(true)
+		frame:EnableMouse(true)
+		frame:SetClampedToScreen(true)
+		frame:RegisterForDrag('LeftButton')
+		frame:SetScript('OnDragStart', function()
+			this:StartMoving()
+		end)
+		frame:SetScript('OnDragStop', function()
+			this:StopMovingOrSizing()
+		end)
+		frame:SetScript('OnShow', function()
+			PlaySound('AuctionWindowOpen')
+		end)
+		frame:SetScript('OnHide', function()
+			PlaySound('AuctionWindowClose')
+			CloseAuctionHouse()
+		end)
+		frame.content = CreateFrame('Frame', nil, frame)
+		frame.content:SetPoint('TOPLEFT', 4, -80)
+		frame.content:SetPoint('BOTTOMRIGHT', -4, 35)
+		frame:Hide()
+		public.frame = frame
+	end
 
 	do
-		local tab_group = m.gui.tab_group(AuxFrame, 'DOWN')
+		local tab_group = m.gui.tab_group(m.frame, 'DOWN')
 		for _, tab in m.tabs do
 			tab_group:create_tab(tab.title)
 		end
@@ -81,17 +106,17 @@ function public.VARIABLES_LOADED()
 	end
 
 	do
-		local btn = m.gui.button(AuxFrame, 16)
+		local btn = m.gui.button(m.frame, 16)
 		btn:SetPoint('BOTTOMRIGHT', -6, 6)
 		btn:SetWidth(65)
 		btn:SetHeight(24)
 		btn:SetText('Close')
-		btn:SetScript('OnClick', m._(HideUIPanel, AuxFrame))
+		btn:SetScript('OnClick', m._(HideUIPanel, m.frame))
 		public.close_button = btn
 	end
 
 	do
-		local btn = m.gui.button(AuxFrame, 16)
+		local btn = m.gui.button(m.frame, 16)
 		btn:SetPoint('RIGHT', m.close_button, 'LEFT' , -5, 0)
 		btn:SetWidth(65)
 		btn:SetHeight(24)
@@ -110,7 +135,7 @@ function private.AUCTION_HOUSE_SHOW()
 	if AuctionFrame:IsVisible() then
 		AuctionFrame:Hide()
 	end
-	AuxFrame:Show()
+	m.frame:Show()
 	m.tab_group:set_tab(1)
 end
 
@@ -121,7 +146,7 @@ function private.AUCTION_HOUSE_CLOSED()
 	m.stack.stop()
 	m.scan.abort()
 	m.tab_group:set_tab()
-	AuxFrame:Hide()
+	m.frame:Hide()
 end
 
 function private.AUCTION_BIDDER_LIST_UPDATE()
@@ -301,7 +326,7 @@ do
 
 			m.control.event_listener('CHAT_MSG_SYSTEM', function(kill)
 				if arg1 == ERR_AUCTION_BID_PLACED then
-					aux.call(on_success)
+					m.call(on_success)
 					locked = false
 					kill()
 				end
@@ -400,7 +425,7 @@ end
 
 function public.is_player(name, current)
     local realm = GetCVar('realmName')
-    return not current and aux.index(aux_characters, realm, name) or UnitName('player') == name
+    return not current and m.index(aux_characters, realm, name) or UnitName('player') == name
 end
 
 function public.modified()
