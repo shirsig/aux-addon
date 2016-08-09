@@ -1,9 +1,10 @@
 local m, public, private = aux.module'util'
 
-function public.pack(table, ...)
-	local array = {}
-	for i=1,arg.n do
-		tinsert(array, table[arg[i]])
+function public.either(p, a, b)
+	if p then
+		return a
+	else
+		return b
 	end
 end
 
@@ -115,6 +116,14 @@ function public.all(xs, p)
 	return holds
 end
 
+function public.replicate(count, value)
+	local array = {}
+	for i=1,count do
+		tinsert(array, value)
+	end
+	return unpack(array)
+end
+
 function public.filter(xs, p)
 	local ys = {}
 	for k, x in xs do
@@ -166,7 +175,6 @@ function public.split(str, separator)
 	local parts = {}
 	while true do
 		local start_index, _ = strfind(str, separator, 1, true)
-
 		if start_index then
 			local part = strsub(str, 1, start_index - 1)
 			tinsert(parts, part)
@@ -218,8 +226,8 @@ function public.bag_type(bag)
 	if bag == 0 then
 		return 1
 	end
-	if GetInventoryItemLink('player', ContainerIDToInventoryID(bag)) then
-		local item_id = aux.info.parse_hyperlink(GetInventoryItemLink('player', ContainerIDToInventoryID(bag)))
+	for _, link in {GetInventoryItemLink('player', ContainerIDToInventoryID(bag))} do
+		local item_id = aux.info.parse_hyperlink(link)
 		local item_info = aux.info.item(item_id)
 		return aux.info.item_subclass_index(3, item_info.subclass)
 	end

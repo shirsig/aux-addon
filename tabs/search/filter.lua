@@ -85,7 +85,9 @@ function private.set_form(components)
 		end
 	end
 
-	m.post_components = components.post
+	for _, component in components.post do
+		m.add_component(component)
+	end
 	m.update_filter_display()
 end
 
@@ -103,7 +105,8 @@ function private.clear_form()
 	UIDropDownMenu_ClearAll(m.slot_dropdown)
 	UIDropDownMenu_ClearAll(m.quality_dropdown)
 	m.filter_input:ClearFocus()
-	m.post_components = {}
+	m.post_filter = {}
+	m.filter_builder_state = {selected=0}
 	m.update_filter_display()
 end
 
@@ -119,7 +122,7 @@ end
 function private.export_query_string()
 	local components, error = aux.filter.parse_query_string(m.get_form())
 	if components then
-		m.search_box:SetText(aux.filter.query_string({blizzard=components.blizzard, post=m.post_components}))
+		m.search_box:SetText(aux.filter.query_string({blizzard=components.blizzard, post=m.post_filter}))
 		m.filter_input:ClearFocus()
 		m.update_filter_display()
 	else
@@ -127,29 +130,101 @@ function private.export_query_string()
 	end
 end
 
-private.post_components = {}
+function public.formatted_post_filter(components)
+	local no_line_break
+	local stack = {}
+	local str = ''
 
-function private.add_post_component()
-	local name = UIDropDownMenu_GetSelectedValue(m.filter_dropdown)
-	if name then
-		local filter = name
-		if not aux.filter.filters[name] and filter == 'and' or filter == 'or' then
+	for i, component in components do
+		if no_line_break then
+			str = str..' '
+		elseif i > 1 then
+			str = str..'</p><p>'
+			for _=1,getn(stack) do
+				str = str..aux.gui.inline_color.content.backdrop..'----'..FONT_COLOR_CODE_CLOSE
+			end
+		end
+		no_line_break = component[1] == 'operator' and component[2] == 'not'
+
+		local OPERATOR_COLOR, FILTER_COLOR, PARAMETER_COLOR
+		if m.filter_builder_state.selected == i then
+			OPERATOR_COLOR, FILTER_COLOR, PARAMETER_COLOR = aux.auction_listing.colors.GREEN, aux.auction_listing.colors.GREEN, aux.auction_listing.colors.ORANGE
+		else
+			OPERATOR_COLOR, FILTER_COLOR, PARAMETER_COLOR = aux.auction_listing.colors.YELLOW, aux.auction_listing.colors.YELLOW, aux.auction_listing.colors.ORANGE
+		end
+		local component_text
+		if component[1] == 'operator' then
+			component_text = OPERATOR_COLOR..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE
+			tinsert(stack, component[3])
+		elseif component[1] == 'filter' then
+			component_text = FILTER_COLOR..component[2]..FONT_COLOR_CODE_CLOSE
+			if component[3] then
+				component_text = component_text..': '..PARAMETER_COLOR..component[3]..FONT_COLOR_CODE_CLOSE
+			end
+			while getn(stack) > 0 and stack[getn(stack)] do
+				local top = tremove(stack)
+				if tonumber(top) and top > 1 then
+					tinsert(stack, top - 1)
+					break
+				end
+			end
+		end
+		str = str..m.data_link(i, component_text)
+	end
+
+	return '<html><body><p>'..str..'</p></body></html>'
+end
+
+function private.data_link(id, str)
+	return '|H'..id..'|h'..str..'|h'
+end
+
+private.post_filter = {}
+private.filter_builder_state = {selected = 0}
+
+function private.data_link_click()
+	local button = arg3
+	local index = tonumber(arg1)
+	if button == 'LeftButton' then
+		m.filter_builder_state.selected = index
+	elseif button == 'RightButton' then
+		m.remove_component(index)
+	end
+	m.update_filter_display()
+end
+
+function private.remove_component(index)
+	if m.filter_builder_state.selected == index then
+		m.filter_builder_state.selected = max(index - 1, min(1, getn(m.post_filter)))
+	end
+	m.filter_builder_state[m.post_filter[index]] = nil
+	tremove(m.post_filter, index)
+end
+
+function private.add_component(component)
+	m.filter_builder_state.selected = m.filter_builder_state.selected + 1
+	tinsert(m.post_filter, m.filter_builder_state.selected, component)
+end
+
+function private.add_dropdown_component()
+	for _, str in {UIDropDownMenu_GetSelectedValue(m.filter_dropdown)} do
+		if not aux.filter.filters[str] and str == 'and' or str == 'or' then
 			local arity = m.filter_input:GetText()
 			arity = tonumber(arity) and aux.util.round(tonumber(arity))
 			if arity and arity < 2 then
 				aux.log('Invalid operator suffix')
 				return
 			end
-			filter = filter..(arity or '')
+			str = str..(arity or '')
 		end
-		if aux.filter.filters[name] and aux.filter.filters[name].input_type ~= '' then
-			filter = filter..'/'..m.filter_input:GetText()
+		if aux.index(aux.filter.filters[str], 'input_type') ~= '' then
+			str = str..'/'..m.filter_input:GetText()
 		end
 
-		local components, error, suggestions = aux.filter.parse_query_string(filter)
+		local components, error, suggestions = aux.filter.parse_query_string(str)
 
 		if components then
-			tinsert(m.post_components, components.post[1])
+			m.add_component(components.post[1])
 			m.update_filter_display()
 			m.filter_input:SetText('')
 			m.filter_input:ClearFocus()
@@ -159,16 +234,11 @@ function private.add_post_component()
 	end
 end
 
-function private.remove_post_filter()
-	tremove(m.post_components)
-	m.update_filter_display()
-end
-
 do
 	local text
 
 	function private.update_filter_display()
-		text = aux.filter.indented_post_query_string(m.post_components)
+		text = m.formatted_post_filter(m.post_filter)
 		m.filter_display:SetWidth(m.filter_display_size())
 		m.set_filter_display_offset()
 		m.filter_display:SetText(text)

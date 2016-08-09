@@ -4,7 +4,7 @@ local RT_COUNT = 1
 local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
 
-public.COLORS = {
+public.colors = {
 	BLUE = '|cff2992ff',
 	GREEN = '|cff16ff16',
 	YELLOW = '|cffffff00',
@@ -14,17 +14,17 @@ public.COLORS = {
 }
 
 local AUCTION_PCT_COLORS = {
-    {color=m.COLORS.BLUE, value=50},
-    {color=m.COLORS.GREEN, value=80},
-    {color=m.COLORS.YELLOW, value=110},
-    {color=m.COLORS.ORANGE, value=135},
-    {color=m.COLORS.RED, value=aux.huge},
+    {color=m.colors.BLUE, value=50},
+    {color=m.colors.GREEN, value=80},
+    {color=m.colors.YELLOW, value=110},
+    {color=m.colors.ORANGE, value=135},
+    {color=m.colors.RED, value=aux.huge},
 }
 local TIME_LEFT_STRINGS = {
-	m.COLORS.RED..'30m'..FONT_COLOR_CODE_CLOSE, -- Short
-	m.COLORS.ORANGE..'2h'..FONT_COLOR_CODE_CLOSE, -- Medium
-	m.COLORS.YELLOW..'8h'..FONT_COLOR_CODE_CLOSE, -- Long
-	m.COLORS.BLUE..'24h'..FONT_COLOR_CODE_CLOSE, -- Very Long
+	m.colors.RED..'30m'..FONT_COLOR_CODE_CLOSE, -- Short
+	m.colors.ORANGE..'2h'..FONT_COLOR_CODE_CLOSE, -- Medium
+	m.colors.YELLOW..'8h'..FONT_COLOR_CODE_CLOSE, -- Long
+	m.colors.BLUE..'24h'..FONT_COLOR_CODE_CLOSE, -- Very Long
 }
 
 function private.item_column_init(rt, cell)
@@ -84,7 +84,7 @@ public.search_config = {
         align = 'CENTER',
         set = function(cell, record)
             local display_level = max(record.level, 1)
-            display_level = UnitLevel('player') < record.level and m.COLORS.RED..display_level..FONT_COLOR_CODE_CLOSE or display_level
+            display_level = UnitLevel('player') < record.level and m.colors.RED..display_level..FONT_COLOR_CODE_CLOSE or display_level
             cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
@@ -98,7 +98,7 @@ public.search_config = {
         set = function(cell, record, count, own, expandable)
             local numAuctionsText = expandable and aux.gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
             if own > 0 then
-                numAuctionsText = numAuctionsText..(' '..m.COLORS.YELLOW..'('..own..')'..FONT_COLOR_CODE_CLOSE)
+                numAuctionsText = numAuctionsText..(' '..m.colors.YELLOW..'('..own..')'..FONT_COLOR_CODE_CLOSE)
             end
             cell:SetText(numAuctionsText)
         end,
@@ -142,7 +142,7 @@ public.search_config = {
         width = 0.13,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(aux.is_player(record.owner) and (m.COLORS.YELLOW..record.owner..FONT_COLOR_CODE_CLOSE) or (record.owner or '---'))
+            cell:SetText(aux.is_player(record.owner) and (m.colors.YELLOW..record.owner..FONT_COLOR_CODE_CLOSE) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -254,7 +254,7 @@ public.auctions_config = {
         align = 'CENTER',
         set = function(cell, record)
             local display_level = max(record.level, 1)
-            display_level = UnitLevel('player') < record.level and m.COLORS.RED..display_level..FONT_COLOR_CODE_CLOSE or display_level
+            display_level = UnitLevel('player') < record.level and m.colors.RED..display_level..FONT_COLOR_CODE_CLOSE or display_level
             cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
@@ -357,7 +357,7 @@ public.auctions_config = {
         width = 0.21,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(record.high_bidder or m.COLORS.RED..'No Bids'..FONT_COLOR_CODE_CLOSE)
+            cell:SetText(record.high_bidder or m.colors.RED..'No Bids'..FONT_COLOR_CODE_CLOSE)
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.high_bidder and not record_b.high_bidder then
@@ -443,7 +443,7 @@ public.bids_config = {
         width = 0.13,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(aux.is_player(record.owner) and (m.COLORS.YELLOW..record.owner..FONT_COLOR_CODE_CLOSE) or (record.owner or '---'))
+            cell:SetText(aux.is_player(record.owner) and (m.colors.YELLOW..record.owner..FONT_COLOR_CODE_CLOSE) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -512,9 +512,9 @@ public.bids_config = {
         set = function(cell, record)
             local status
             if record.high_bidder then
-                status = m.COLORS.YELLOW..'High Bidder'..FONT_COLOR_CODE_CLOSE
+                status = m.colors.YELLOW..'High Bidder'..FONT_COLOR_CODE_CLOSE
             else
-                status = m.COLORS.RED..'Outbid'..FONT_COLOR_CODE_CLOSE
+                status = m.colors.RED..'Outbid'..FONT_COLOR_CODE_CLOSE
             end
             cell:SetText(status)
         end,
@@ -548,7 +548,7 @@ function public.percentage_historical(pct, bid)
     if pct > 10000 then
         pct = '>10000'
     end
-    return (bid and m.COLORS.GRAY or m.percentage_color(pct))..pct..'%'..FONT_COLOR_CODE_CLOSE
+    return (bid and m.colors.GRAY or m.percentage_color(pct))..pct..'%'..FONT_COLOR_CODE_CLOSE
 end
 
 function public.time_left(code)
