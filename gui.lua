@@ -45,32 +45,54 @@ public.inline_color = aux.index_function(function(self, key)
 	return format('|c%02X%02X%02X%02X', unpack(color))
 end)
 
+--/run aux.gui.menu('kek', 'kuk', 'kok', function() end)
 do
 	local dropdown
 
 	function public.menu(...)
-		UIDropDownMenu_Initialize(dropdown, function()
-			for i=1,arg.n-1 do
-				UIDropDownMenu_AddButton{
-					text = arg[i],
-					value = i,
-					func = function()
-						return arg[arg.n](this.value)
-					end,
-				}
-			end
-		end, 'MENU')
+		local mythis = this
+		this = dropdown
+		UIMenu_Initialize()
+		for i=1,arg.n-1 do
+			UIMenu_AddButton(
+				arg[i],
+				i,
+				function()
+					return arg[arg.n](this.value)
+				end
+			)
+		end
 		dropdown:SetPoint('BOTTOMLEFT', GetCursorPosition())
-		ToggleDropDownMenu(nil, nil, dropdown, nil, 0, 0)
+		dropdown:Show()
+		this = mythis
 	end
+
+--	function public.menu(...)
+--		UIDropDownMenu_Initialize(dropdown, function()
+--			for i=1,arg.n-1 do
+--				UIDropDownMenu_AddButton{
+--					text = arg[i],
+--					value = i,
+--					func = function()
+--						return arg[arg.n](this.value)
+--					end,
+--				}
+--			end
+--		end, 'MENU')
+--		dropdown:SetPoint('BOTTOMLEFT', GetCursorPosition())
+--		ToggleDropDownMenu(nil, nil, dropdown, nil, 0, 0)
+--	end
+
+--	function private.initialize_menu()
+--		dropdown = CreateFrame('Frame', 'aux_frame'..aux.id(), UIParent, 'UIDropDownMenuTemplate')
+--		dropdown:SetWidth(1)
+--		dropdown:SetHeight(1)
+--		dropdown:SetAlpha(0)
+--	end
 
 	function private.initialize_menu()
-		dropdown = CreateFrame('Frame', 'aux_frame'..aux.id(), UIParent, 'UIDropDownMenuTemplate')
-		dropdown:SetWidth(1)
-		dropdown:SetHeight(1)
-		dropdown:SetAlpha(0)
+		dropdown = CreateFrame('Frame', 'aux_frame'..aux.id(), UIParent, 'UIMenuTemplate')
 	end
-
 end
 
 function m.LOAD()

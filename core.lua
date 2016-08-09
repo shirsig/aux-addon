@@ -279,7 +279,7 @@ function private.AuctionFrameAuctions_OnEvent(...)
 end
 
 function private.SetItemRef(...)
-	if arg[3] ~= 'RightButton' or not m.index(m.active_tab.module[1], 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
+	if arg[3] ~= 'RightButton' or not m.index(m.active_tab(), 'module', 1, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return m.orig.SetItemRef(unpack(arg))
 	end
 	for _, item_info in {m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))} do
