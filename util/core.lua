@@ -1,15 +1,42 @@
 local m, public, private = aux.module'util'
 
-function public.bound(lower_bound, upper_bound, number)
-	return max(lower_bound, min(upper_bound, number))
+function public.pack(table, ...)
+	local array = {}
+	for i=1,arg.n do
+		tinsert(array, table[arg[i]])
+	end
+end
+
+function public.unpack(array, ...)
+	local table, index = {}, {}
+	for i=1,arg.n do
+		table[arg[i]] = array[i]
+		tinsert(index, arg[i])
+	end
+	return table, index
+end
+
+function public.pick(indices, ...)
+	local t = {}
+	for _, index in indices do
+		tinsert(t, arg[index])
+	end
+	return unpack(t)
+end
+
+function public.select(i, ...)
+	for _=1,i-1 do
+		tremove(arg, 1)
+	end
+	return unpack(arg)
 end
 
 function public.size(t)
-	local x = 0
+	local size = 0
 	for _ in t do
-		x = x + 1
+		size = size + 1
 	end
-	return x
+	return size
 end
 
 function public.key(value, t)
@@ -36,13 +63,6 @@ function public.values(t)
 	return vs
 end
 
-function public.select(i, ...)
-	for _=1,i-1 do
-		tremove(arg, 1)
-	end
-	return unpack(arg)
-end
-
 function public.eq(t1, t2)
 	if not t1 or not t2 then
 		return false
@@ -61,6 +81,23 @@ function public.eq(t1, t2)
 	end
 
 	return true
+end
+
+function public.wipe(t)
+	while getn(t) > 0 do
+		tremove(t)
+	end
+	for k, _ in t do
+		t[k] = nil
+	end
+end
+
+function public.copy(t)
+	local copy = {}
+	for k, v in t do
+		copy[k] = v
+	end
+	return copy
 end
 
 function public.any(xs, p)
@@ -112,32 +149,6 @@ do
 		end,
 	}
 
-	--	local methods = {}
-	--
-	--	function methods:add(key)
-	--		self[key] = true
-	--	end
-	--
-	--	function methods:remove(key)
-	--		self[key] = nil
-	--	end
-	--
-	--	function methods:size()
-	--		local size = 0
-	--		for _,_ in self do
-	--			size = size + 1
-	--		end
-	--		return size
-	--	end
-	--
-	--	function methods:elements()
-	--		local elements = {}
-	--		for element, _ in self do
-	--			tinsert(elements, element)
-	--		end
-	--		return elements
-	--	end
-
 	function public.set(...)
 		local self = {}
 		for i=1,arg.n do
@@ -145,6 +156,10 @@ do
 		end
 		return setmetatable(self, mt)
 	end
+end
+
+function public.trim(str)
+	return gsub(str, '^%s*(.-)%s*$', '%1')
 end
 
 function public.join(parts, separator)
@@ -181,29 +196,12 @@ function public.tokenize(str)
 	return tokens
 end
 
-function public.wipe(t)
-	while getn(t) > 0 do
-		tremove(t)
-	end
-	for k, _ in t do
-		t[k] = nil
-	end
-end
-
-function public.copy(t)
-	local copy = {}
-	for k, v in t do
-		copy[k] = v
-	end
-	return copy
+function public.bound(lower_bound, upper_bound, number)
+	return max(lower_bound, min(upper_bound, number))
 end
 
 function public.round(x)
 	return floor(x + 0.5)
-end
-
-function public.trim(str)
-	return gsub(str, '^%s*(.-)%s*$', '%1')
 end
 
 function public.inventory()
@@ -250,42 +248,4 @@ function public.signal()
 	function()
 		return params
 	end
-end
-
-function public.format_money(money, exact, color)
-	color = color or FONT_COLOR_CODE_CLOSE
-
-	local TEXT_NONE = '0'
-
-	local GSC_GOLD = 'ffd100'
-	local GSC_SILVER = 'e6e6e6'
-	local GSC_COPPER = 'c8602c'
-	local GSC_START = '|cff%s%d|r'
-	local GSC_PART = color..'.|cff%s%02d|r'
-	local GSC_NONE = '|cffa0a0a0'..TEXT_NONE..FONT_COLOR_CODE_CLOSE
-
-	if not exact and money >= 10000 then
-		-- Round to nearest silver
-		money = floor(money / 100 + 0.5) * 100
-	end
-	local g, s, c = aux.money.to_GSC(money)
-
-	local gsc = ''
-
-	local fmt = GSC_START
-	if g > 0 then
-		gsc = gsc..format(fmt, GSC_GOLD, g)
-		fmt = GSC_PART
-	end
-	if s > 0 or c > 0 then
-		gsc = gsc..format(fmt, GSC_SILVER, s)
-		fmt = GSC_PART
-	end
-	if c > 0 then
-		gsc = gsc..format(fmt, GSC_COPPER, c)
-	end
-	if gsc == '' then
-		gsc = GSC_NONE
-	end
-	return gsc
 end

@@ -10,6 +10,7 @@ public.COLORS = {
 	YELLOW = '|cffffff00',
 	ORANGE = '|cffff9218',
 	RED = '|cffff0000',
+	GRAY = '|cffbbbbbb',
 }
 
 local AUCTION_PCT_COLORS = {
@@ -535,25 +536,19 @@ function private.record_percentage(record)
     end
 end
 
-function public.percentage_historical(pct, based_on_bid)
-    local pctColor = '|cffffffff'
+function private.percentage_color(pct)
+	for i=1,getn(AUCTION_PCT_COLORS) do
+		if pct < AUCTION_PCT_COLORS[i].value then
+			return AUCTION_PCT_COLORS[i].color
+		end
+	end
+end
 
-    if based_on_bid then
-        pctColor = '|cffbbbbbb'
-    else
-        for i=1, getn(AUCTION_PCT_COLORS) do
-            if pct < AUCTION_PCT_COLORS[i].value then
-                pctColor = AUCTION_PCT_COLORS[i].color
-                break
-            end
-        end
-    end
-
+function public.percentage_historical(pct, bid)
     if pct > 10000 then
         pct = '>10000'
     end
-
-    return format('%s%s%%|r', pctColor, pct)
+    return (bid and m.COLORS.GRAY or m.percentage_color(pct))..pct..'%'..FONT_COLOR_CODE_CLOSE
 end
 
 function public.time_left(code)

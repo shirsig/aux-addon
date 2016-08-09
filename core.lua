@@ -7,17 +7,17 @@ public.last_owner_page_requested = nil
 do
 	local mt = {
 		__newindex = function(self, key, value)
-			self._f()[key] = value
+			self._getter()[key] = value
 		end,
 		__index = function(self, key)
-			return self._f()[key]
+			return self._getter()[key]
 		end,
 		__call = function(self)
-			return self._f()
+			return self._getter()
 		end,
 	}
-	function public.dynamic_table(f)
-		return setmetatable({_f=f}, mt)
+	function public.dynamic_table(getter)
+		return setmetatable({_getter=getter}, mt)
 	end
 end
 
@@ -177,7 +177,7 @@ end
 do
 	local function cost_label(cost)
 		local label = LIGHTYELLOW_FONT_COLOR_CODE..'(Total Cost: '..FONT_COLOR_CODE_CLOSE
-		label = label..(cost and m.util.format_money(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
+		label = label..(cost and m.money.format(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
 		label = label..LIGHTYELLOW_FONT_COLOR_CODE..')'..FONT_COLOR_CODE_CLOSE
 		return label
 	end

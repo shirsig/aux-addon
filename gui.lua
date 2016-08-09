@@ -21,28 +21,37 @@ public.config = {
     huge_font_size = 23,
 }
 
-public.color = aux.index_function(function(_, key)
-	local t = m.config.color
-	return aux.index_function(function(self, key)
-		t = t[key]
-		if getn(t) == 0 then
-			return self
-		end
-		local color = aux.util.copy(t)
-		for i=1,3 do
-			color[i] = color[i]/255
-		end
-		return color
-	end)[key]
+do
+	local self = aux_module()
+	function private.color2(r, g, b, a)
+		return aux.index_function(function(_, key)
+
+		end)
+	end
+end
+
+function private.color_accessor(callback)
+	return aux.index_function(function(_, key)
+		local t = m.config.color
+		return aux.index_function(function(self, key)
+			t = t[key]
+			if getn(t) == 0 then
+				return self
+			else
+				return callback(aux.util.copy(t))
+			end
+		end)[key]
+	end)
+end
+
+public.color = m.color_accessor(function(color)
+	for i=1,3 do
+		color[i] = color[i]/255
+	end
+	return color
 end)
 
-public.inline_color = aux.index_function(function(self, key)
-	self._t = (rawget(self, '_t') or m.config.color)[key]
-	if getn(self._t) == 0 then
-		return self
-	end
-	local color = aux.util.copy(self._t)
-	self._t = nil
+public.inline_color = m.color_accessor(function(color)
 	tinsert(color, 1, tremove(color))
 	return format('|c%02X%02X%02X%02X', unpack(color))
 end)
@@ -69,11 +78,11 @@ do
 		local orig = menu:GetScript('OnShow')
 		menu:SetScript('OnShow', function()
 			UIMenu_Initialize()
-			for _, element in ipairs(structure) do
+			for i=1,getn(structure) do
 				UIMenu_AddButton(
-					element[1],
-					element[2],
-					type(element[3]) == 'string' and structure[element[3]] or element[3]
+					structure[i][1],
+					structure[i],
+					type(structure[i]) == 'string' and structure[element[3]] or element[3]
 				)
 			end
 			return orig()

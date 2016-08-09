@@ -83,7 +83,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
                 local color = {r=0.1, g=0.6, b=0.6}
 
                 local disenchant_value = aux.disenchant.value(item_info.slot, item_info.quality, item_info.level)
-                tooltip:AddLine('Disenchant Value: '..(disenchant_value and aux.util.format_money(disenchant_value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+                tooltip:AddLine('Disenchant Value: '..(disenchant_value and aux.money.format(disenchant_value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
             end
         end
     end
@@ -93,7 +93,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
         local _, price, limited = aux.cache.merchant_info(item_id)
         if price then
-            tooltip:AddLine('Vendor Buy '..(limited and '(limited): ' or ': ')..aux.util.format_money(price * quantity), color.r, color.g, color.b)
+            tooltip:AddLine('Vendor Buy '..(limited and '(limited): ' or ': ')..aux.money.format(price * quantity), color.r, color.g, color.b)
         end
     end
     if aux_tooltip_vendor_sell then
@@ -101,7 +101,7 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
 
         local price = aux.cache.merchant_info(item_id)
         if price ~= 0 then
-            tooltip:AddLine('Vendor Sell: '..(price and aux.util.format_money(price * quantity) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Vendor Sell: '..(price and aux.money.format(price * quantity) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
     end
 
@@ -113,11 +113,11 @@ function private.extend_tooltip(tooltip, hyperlink, quantity)
     local value = aux.history.value(item_key)
     if auctionable then
         if aux_tooltip_value then
-            tooltip:AddLine('Value: '..(value and aux.util.format_money(value * quantity) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Value: '..(value and aux.money.format(value * quantity) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
         if aux_tooltip_daily  then
             local market_value = aux.history.market_value(item_key)
-            tooltip:AddLine('Today: '..(market_value and aux.util.format_money(market_value * quantity)..' ('..aux.auction_listing.percentage_historical(aux.util.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Today: '..(market_value and aux.money.format(market_value * quantity)..' ('..aux.auction_listing.percentage_historical(aux.util.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
     end
 

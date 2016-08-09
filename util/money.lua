@@ -20,6 +20,44 @@ do
 	end
 end
 
+function public.format(money, exact, color)
+	color = color or FONT_COLOR_CODE_CLOSE
+
+	local TEXT_NONE = '0'
+
+	local GSC_GOLD = 'ffd100'
+	local GSC_SILVER = 'e6e6e6'
+	local GSC_COPPER = 'c8602c'
+	local GSC_START = '|cff%s%d'..FONT_COLOR_CODE_CLOSE
+	local GSC_PART = color..'.|cff%s%02d'..FONT_COLOR_CODE_CLOSE
+	local GSC_NONE = '|cffa0a0a0'..TEXT_NONE..FONT_COLOR_CODE_CLOSE
+
+	if not exact and money >= 10000 then
+		-- Round to nearest silver
+		money = floor(money / 100 + 0.5) * 100
+	end
+	local g, s, c = aux.money.to_GSC(money)
+
+	local gsc = ''
+
+	local fmt = GSC_START
+	if g > 0 then
+		gsc = gsc..format(fmt, GSC_GOLD, g)
+		fmt = GSC_PART
+	end
+	if s > 0 or c > 0 then
+		gsc = gsc..format(fmt, GSC_SILVER, s)
+		fmt = GSC_PART
+	end
+	if c > 0 then
+		gsc = gsc..format(fmt, GSC_COPPER, c)
+	end
+	if gsc == '' then
+		gsc = GSC_NONE
+	end
+	return gsc
+end
+
 function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	local is_negative = money < 0
 	money = abs(money)
