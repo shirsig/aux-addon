@@ -510,7 +510,7 @@ function private.create_frames()
 	        if arg1 == 'LeftButton' then
 	            m.add_dropdown_component()
 	        elseif arg1 == 'RightButton' then
-	            m.remove_post_component()
+	            m.remove_component()
 	        end
 	    end)
 	    private.filter_button = btn

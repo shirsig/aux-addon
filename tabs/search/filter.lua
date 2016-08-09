@@ -146,20 +146,13 @@ function public.formatted_post_filter(components)
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
 
-		local OPERATOR_COLOR, FILTER_COLOR, PARAMETER_COLOR
-		if m.filter_builder_state.selected == i then
-			OPERATOR_COLOR, FILTER_COLOR, PARAMETER_COLOR = aux.auction_listing.colors.GREEN, aux.auction_listing.colors.GREEN, aux.auction_listing.colors.ORANGE
-		else
-			OPERATOR_COLOR, FILTER_COLOR, PARAMETER_COLOR = aux.auction_listing.colors.YELLOW, aux.auction_listing.colors.YELLOW, aux.auction_listing.colors.ORANGE
-		end
-		local component_text
-		if component[1] == 'operator' then
-			component_text = OPERATOR_COLOR..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE
+		local component_text = component[2]
+		if component[1] == 'operator' and component[2] ~= 'not' then
+			component_text = component_text..(tonumber(component[3]) or '')
 			tinsert(stack, component[3])
 		elseif component[1] == 'filter' then
-			component_text = FILTER_COLOR..component[2]..FONT_COLOR_CODE_CLOSE
 			if component[3] then
-				component_text = component_text..': '..PARAMETER_COLOR..component[3]..FONT_COLOR_CODE_CLOSE
+				component_text = component[3] and component_text..': '..aux.auction_listing.colors.ORANGE..component[3]..FONT_COLOR_CODE_CLOSE or component_text
 			end
 			while getn(stack) > 0 and stack[getn(stack)] do
 				local top = tremove(stack)
@@ -168,6 +161,11 @@ function public.formatted_post_filter(components)
 					break
 				end
 			end
+		end
+		if m.filter_builder_state.selected == i then
+			component_text = LIGHTYELLOW_FONT_COLOR_CODE..component_text..FONT_COLOR_CODE_CLOSE
+		else
+			component_text = aux.auction_listing.colors.YELLOW..component_text..FONT_COLOR_CODE_CLOSE
 		end
 		str = str..m.data_link(i, component_text)
 	end
@@ -217,8 +215,10 @@ function private.add_dropdown_component()
 			end
 			str = str..(arity or '')
 		end
-		if aux.index(aux.filter.filters[str], 'input_type') or '' ~= '' then
-			str = str..'/'..m.filter_input:GetText()
+		for _, filter in {aux.filter.filters[str]} do
+			if filter.input_type ~= '' then
+				str = str..'/'..m.filter_input:GetText()
+			end
 		end
 
 		local components, error, suggestions = aux.filter.parse_query_string(str)
