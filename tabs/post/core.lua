@@ -70,7 +70,7 @@ end
 
 function private.get_unit_start_price()
     local money_text = m.unit_start_price:GetText()
-    return aux.money.from_string(money_text) or (tonumber(money_text) and tonumber(money_text) * 10000) or 0
+    return aux.money.from_string(money_text) or 0
 end
 
 function private.set_unit_start_price(amount)
@@ -79,7 +79,7 @@ end
 
 function private.get_unit_buyout_price()
     local money_text = m.unit_buyout_price:GetText()
-    return aux.money.from_string(money_text) or (tonumber(money_text) and tonumber(money_text) * 10000) or 0
+    return aux.money.from_string(money_text) or 0
 end
 
 function private.set_unit_buyout_price(amount)

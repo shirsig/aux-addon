@@ -1,8 +1,8 @@
 local m, public, private = aux.module'money'
 
-local GOLD_TEXT = '|cffffd70ag|r'
-local SILVER_TEXT = '|cffc7c7cfs|r'
-local COPPER_TEXT = '|cffeda55fc|r'
+private.GOLD_TEXT = '|cffffd70ag|r'
+private.SILVER_TEXT = '|cffc7c7cfs|r'
+private.COPPER_TEXT = '|cffeda55fc|r'
 
 do
 	local COPPER_PER_SILVER = 100
@@ -21,7 +21,6 @@ do
 end
 
 function public.to_string(money, pad, trim, decimal_points, color, no_color)
-
 	local is_negative = money < 0
 	money = abs(money)
 	local gold, silver, copper = m.to_GSC(money)
@@ -35,7 +34,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	if no_color then
 		gold_text, silver_text, copper_text = 'g', 's', 'c'
 	else
-		gold_text, silver_text, copper_text = GOLD_TEXT, SILVER_TEXT, COPPER_TEXT
+		gold_text, silver_text, copper_text = m.GOLD_TEXT, m.SILVER_TEXT, m.COPPER_TEXT
 	end
 	
 	local text
@@ -73,10 +72,12 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 end
 
 function public.from_string(value)
-	value = strlower(value)
+	for _, number in {tonumber(value)} do
+		return number * COPPER_PER_GOLD
+	end
 
 	-- remove any colors
-	value = gsub(gsub(value, '\124c([0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])', ''), '\124r', '')
+	value = gsub(gsub(strlower(value), '|c%x%x%x%x%x%x%x%x', ''), '|r', '')
 
 	-- extract gold/silver/copper values
 	local gold = tonumber(({strfind(value, '(%d*%.?%d+)g')})[3])
@@ -94,10 +95,8 @@ function public.from_string(value)
 end
 
 function public.format_number(num, pad, decimal_padding, color)
-
 	local padding = pad and 2 + (decimal_padding and decimal_padding + 1 or 0) or 0
 	num = format('%0'..padding..'.0'..(decimal_padding or 0)..'f', num)
-	
 	if color then
 		return color..num..FONT_COLOR_CODE_CLOSE
 	else

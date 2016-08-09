@@ -1,22 +1,28 @@
-local module = aux_module()
-aux = tremove(module, 1)
-local m, public, private = unpack(module)
+local addon = aux_module()
+aux = tremove(addon, 1)
+local m, public, private = unpack(addon)
 
 public.version = '3.9.0'
 
-local function initialize_module(private_declarator)
-	private_declarator.LOAD = nil
-end
-initialize_module(public)
-private.modules = {aux=module}
-function public.module(name)
-	if m.modules[name] then
-		return unpack(m.modules[name])
+private.modules = {}
+function public.module(path)
+	if path == 'aux' then
+		return unpack(addon)
+	elseif m.modules[path] then
+		return unpack(m.modules[path])
 	else
-		local module = aux_module()
-		initialize_module(module[4])
-		m.modules[name] = module
-		public[name] = tremove(module, 1)
+		local module, prefix
+		for name in string.gfind(path, '[%a_][%w_]*') do
+			local qualified_name = prefix and prefix..'.'..name or name
+			module = m.modules[qualified_name]
+			if not module then
+				module = aux_module()
+				module[4].LOAD = nil
+				(prefix and m.modules[prefix] or addon)[2][name] = tremove(module, 1)
+				m.modules[qualified_name] = module
+			end
+			prefix = qualified_name
+		end
 		return unpack(module)
 	end
 end

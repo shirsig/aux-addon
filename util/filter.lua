@@ -1,5 +1,10 @@
 local m, public, private = aux.module'filter'
 
+private.OPERATOR_COLOR = ''
+private.FILTER_COLOR = ''
+private.PARAMETER_COLOR = ''
+
+
 function private.default_filter(str)
     return {
         input_type = '',
