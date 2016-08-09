@@ -534,7 +534,7 @@ do
     scroll_frame:EnableMouseWheel(true)
     scroll_frame:SetScript('OnMouseWheel', function()
 	    local child = this:GetScrollChild()
-	    child:SetScale(max(.3, min(1, child:GetScale() + arg1/20)))
+	    child:SetFont('p', [[Fonts\ARIALN.TTF]], max(10, min(26, aux.util.select(2, child:GetFont()) + arg1*2)))
 	    m.update_filter_display()
     end)
     scroll_frame:RegisterForDrag('LeftButton')
@@ -565,7 +565,6 @@ do
     scroll_child:SetScript('OnHyperlinkClick', function()
     end)
     scroll_child.measure = scroll_child:CreateFontString()
-    scroll_child.measure:SetFont([[Fonts\ARIALN.TTF]], 26)
     private.filter_display = scroll_child
 end
 

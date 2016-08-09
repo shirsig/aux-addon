@@ -922,6 +922,7 @@ do
 	function private.filter_display_width()
 		local widest_line = 0
 		for line in string.gfind(text, '<p>(.-)</p>') do
+			m.filter_display.measure:SetFont(m.filter_display:GetFont())
 			m.filter_display.measure:SetText(line)
 			widest_line = max(widest_line, m.filter_display.measure:GetStringWidth())
 		end
