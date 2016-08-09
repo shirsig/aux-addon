@@ -928,7 +928,7 @@ do
 			width = max(width, m.filter_display.measure:GetStringWidth())
 		end
 
-		return width, lines*font_size
+		return width, lines * (font_size + .5)
 	end
 end
 
@@ -936,10 +936,10 @@ function private.set_filter_display_offset(x_offset, y_offset)
 	local scroll_frame = m.filter_display:GetParent()
 	x_offset, y_offset = x_offset or scroll_frame:GetHorizontalScroll(), y_offset or scroll_frame:GetVerticalScroll()
 	local width, height = m.filter_display_size()
-	local x_lower_bound = min(0, scroll_frame:GetWidth() - width - 2)
+	local x_lower_bound = min(0, scroll_frame:GetWidth() - width - 10)
 	local x_upper_bound = 0
 	local y_lower_bound = 0
-	local y_upper_bound = max(0, height - scroll_frame:GetHeight() + 2)
+	local y_upper_bound = max(0, height - scroll_frame:GetHeight())
 	scroll_frame:SetHorizontalScroll(aux.util.bound(x_lower_bound, x_upper_bound, x_offset))
 	scroll_frame:SetVerticalScroll(aux.util.bound(y_lower_bound, y_upper_bound, y_offset))
 end
