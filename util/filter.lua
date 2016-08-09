@@ -547,12 +547,12 @@ function public.indented_post_query_string(components)
         end
         no_line_break = component[1] == 'operator' and component[2] == 'not'
         if component[1] == 'operator' and component[2] then
-            str = str..'|cffffff00'..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE
+            str = str..aux.auction_listing.COLORS.YELLOW..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE
             tinsert(stack, component[3] or '*')
         elseif component[1] == 'filter' then
-            str = str..'|cffffff00'..component[2]..FONT_COLOR_CODE_CLOSE
+            str = str..aux.auction_listing.COLORS.YELLOW..component[2]..FONT_COLOR_CODE_CLOSE
             if component[3] then
-                str = str..': '..'|cffff9218'..component[3]..FONT_COLOR_CODE_CLOSE
+                str = str..': '..aux.auction_listing.COLORS.ORANGE..component[3]..FONT_COLOR_CODE_CLOSE
             end
             while getn(stack) > 0 and stack[getn(stack)] ~= '*' do
                 local top = tremove(stack)
@@ -582,7 +582,7 @@ function private.prettified_query_string(components)
 
     if blizzard_filters.name and not blizzard_filters.exact then
         if m.unquote(blizzard_filters.name) == '' then
-            prettified.prepend(RED_FONT_COLOR_CODE..'No Filter'..FONT_COLOR_CODE_CLOSE)
+            prettified.prepend(aux.auction_listing.COLORS.RED..'No Filter'..FONT_COLOR_CODE_CLOSE)
         else
             prettified.prepend(aux.gui.inline_color.label.enabled..m.unquote(blizzard_filters.name)..FONT_COLOR_CODE_CLOSE)
         end
@@ -590,13 +590,13 @@ function private.prettified_query_string(components)
 
     for _, component in components.post do
         if component[1] == 'operator' then
-			prettified.append('|cffffff00'..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE)
+			prettified.append(aux.auction_listing.COLORS.YELLOW..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE)
         elseif component[1] == 'filter' then
             if component[2] ~= 'tooltip' then
-                prettified.append('|cffffff00'..component[2]..FONT_COLOR_CODE_CLOSE)
+                prettified.append(aux.auction_listing.COLORS.YELLOW..component[2]..FONT_COLOR_CODE_CLOSE)
             end
             if component[3] then
-                prettified.append('|cffff9218'..component[3]..FONT_COLOR_CODE_CLOSE)
+                prettified.append(aux.auction_listing.COLORS.ORANGE..component[3]..FONT_COLOR_CODE_CLOSE)
             end
         end
     end

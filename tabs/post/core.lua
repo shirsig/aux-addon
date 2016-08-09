@@ -122,27 +122,27 @@ function private.update_auction_listing()
 
             local bid_color
             if blizzard_bid_undercut < unit_start_price and stack_blizzard_bid_undercut < unit_start_price then
-                bid_color = '|cffff0000'
+                bid_color = aux.auction_listing.COLORS.RED
             elseif blizzard_bid_undercut < unit_start_price then
-                bid_color = '|cffff9218'
+                bid_color = aux.auction_listing.COLORS.ORANGE
             elseif stack_blizzard_bid_undercut < unit_start_price then
-                bid_color = '|cffffff00'
+                bid_color = aux.auction_listing.COLORS.YELLOW
             end
 
             local buyout_color
             if buyout_price_undercut < unit_buyout_price and stack_buyout_price_undercut < unit_buyout_price then
-                buyout_color = '|cffff0000'
+                buyout_color = aux.auction_listing.COLORS.RED
             elseif buyout_price_undercut < unit_buyout_price then
-                buyout_color = '|cffff9218'
+                buyout_color = aux.auction_listing.COLORS.ORANGE
             elseif stack_buyout_price_undercut < unit_buyout_price then
-                buyout_color = '|cffffff00'
+                buyout_color = aux.auction_listing.COLORS.YELLOW
             end
 
             tinsert(auction_rows, {
                 cols = {
-                    { value=auction_record.own and GREEN_FONT_COLOR_CODE..auction_record.count..FONT_COLOR_CODE_CLOSE or auction_record.count },
+                    { value=auction_record.own and aux.auction_listing.COLORS.GREEN..auction_record.count..FONT_COLOR_CODE_CLOSE or auction_record.count },
                     { value=aux.auction_listing.time_left(auction_record.duration) },
-                    { value=auction_record.stack_size == stack_size and GREEN_FONT_COLOR_CODE..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size },
+                    { value=auction_record.stack_size == stack_size and aux.auction_listing.COLORS.GREEN..auction_record.stack_size..FONT_COLOR_CODE_CLOSE or auction_record.stack_size },
                     { value=aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
                     { value=historical_value and aux.auction_listing.percentage_historical(aux.util.round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---' },
                     { value=auction_record.unit_buyout_price > 0 and aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---' },

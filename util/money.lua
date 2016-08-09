@@ -77,7 +77,7 @@ function public.from_string(value)
 	end
 
 	-- remove any colors
-	value = gsub(gsub(strlower(value), '|c%x%x%x%x%x%x%x%x', ''), '|r', '')
+	value = gsub(gsub(strlower(value), '|c%x%x%x%x%x%x%x%x', ''), FONT_COLOR_CODE_CLOSE, '')
 
 	-- extract gold/silver/copper values
 	local gold = tonumber(({strfind(value, '(%d*%.?%d+)g')})[3])
