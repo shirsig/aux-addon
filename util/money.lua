@@ -58,6 +58,11 @@ function public.format(money, exact, color)
 	return str
 end
 
+--function public.to_string(params) -- TODOSS
+--	local gold, silver, copper = m.gsc(params.copper or 0 + )
+--	local settings = aux.util.set(unpack(arg))
+--end
+
 function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	local is_negative = money < 0
 	money = abs(money)
