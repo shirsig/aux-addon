@@ -1,5 +1,9 @@
 local m, public, private = aux.module'util'
 
+function public.bound(lower_bound, upper_bound, number)
+	return max(lower_bound, min(upper_bound, number))
+end
+
 function public.size(t)
 	local x = 0
 	for _ in t do
@@ -33,7 +37,10 @@ function public.values(t)
 end
 
 function public.select(i, ...)
-	return arg[i]
+	for _=1,i-1 do
+		tremove(arg, 1)
+	end
+	return unpack(arg)
 end
 
 function public.eq(t1, t2)

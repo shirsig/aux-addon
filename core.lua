@@ -111,7 +111,7 @@ function public.VARIABLES_LOADED()
 		btn:SetWidth(65)
 		btn:SetHeight(24)
 		btn:SetText('Close')
-		btn:SetScript('OnClick', m._(m.frame.hide, m.frame))
+		btn:SetScript('OnClick', m._(m.frame.Hide, m.frame))
 		public.close_button = btn
 	end
 

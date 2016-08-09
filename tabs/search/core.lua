@@ -521,7 +521,7 @@ end
 
 function private.blizzard_level(str)
     if tonumber(str) then
-        return aux.util.round(max(1, min(60, tonumber(str))))
+        return aux.util.round(aux.util.bound(1, 60, tonumber(str)))
     end
 end
 
@@ -911,19 +911,37 @@ do
 
 	function private.update_filter_display()
 		text = aux.filter.indented_post_query_string(m.post_components)
-		m.filter_display:SetWidth(m.filter_display_width())
+		m.filter_display:SetWidth(m.filter_display_size())
+		m.set_filter_display_offset()
 		m.filter_display:SetText(text)
 	end
 
-	function private.filter_display_width()
-		local widest_line = 0
+	function private.filter_display_size()
+		local font, font_size = m.filter_display:GetFont()
+		m.filter_display.measure:SetFont(font, font_size)
+		local lines = 0
+		local width = 0
+
 		for line in string.gfind(text, '<p>(.-)</p>') do
-			m.filter_display.measure:SetFont(m.filter_display:GetFont())
+			lines = lines + 1
 			m.filter_display.measure:SetText(line)
-			widest_line = max(widest_line, m.filter_display.measure:GetStringWidth())
+			width = max(width, m.filter_display.measure:GetStringWidth())
 		end
-		return widest_line
+
+		return width, lines*font_size
 	end
+end
+
+function private.set_filter_display_offset(x_offset, y_offset)
+	local scroll_frame = m.filter_display:GetParent()
+	x_offset, y_offset = x_offset or scroll_frame:GetHorizontalScroll(), y_offset or scroll_frame:GetVerticalScroll()
+	local width, height = m.filter_display_size()
+	local x_lower_bound = min(0, scroll_frame:GetWidth() - width - 2)
+	local x_upper_bound = 0
+	local y_lower_bound = 0
+	local y_upper_bound = max(0, height - scroll_frame:GetHeight() + 2)
+	scroll_frame:SetHorizontalScroll(aux.util.bound(x_lower_bound, x_upper_bound, x_offset))
+	scroll_frame:SetVerticalScroll(aux.util.bound(y_lower_bound, y_upper_bound, y_offset))
 end
 
 function private.new_recent_search(filter_string, prettified)

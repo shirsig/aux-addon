@@ -535,7 +535,7 @@ function private.create_frames()
 	    scroll_frame:EnableMouseWheel(true)
 	    scroll_frame:SetScript('OnMouseWheel', function()
 		    local child = this:GetScrollChild()
-		    child:SetFont('p', [[Fonts\ARIALN.TTF]], max(10, min(26, aux.util.select(2, child:GetFont()) + arg1*2)))
+		    child:SetFont('p', [[Fonts\ARIALN.TTF]], aux.util.bound(10, 26, aux.util.select(2, child:GetFont()) + arg1*2))
 		    m.update_filter_display()
 	    end)
 	    scroll_frame:RegisterForDrag('LeftButton')
@@ -548,8 +548,8 @@ function private.create_frames()
 			    local new_x_offset = this.x_offset + x - this.x
 			    local new_y_offset = this.y_offset + y - this.y
 
-			    this:SetHorizontalScroll(min(0, max((this:GetWidth() - m.filter_display_width())*m.filter_display:GetScale() - 2, new_x_offset - this.x_extra)))
-			    this:SetVerticalScroll(max(0, new_y_offset - this.y_extra))
+			    m.set_filter_display_offset(new_x_offset - this.x_extra, new_y_offset - this.y_extra)
+
 			    this.x_extra = max(this.x_extra, new_x_offset)
 			    this.y_extra = min(this.y_extra, new_y_offset)
 		    end)
