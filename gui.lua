@@ -21,17 +21,19 @@ public.config = {
     huge_font_size = 23,
 }
 
-public.color = aux.index_function(function(self, key)
-	self._t = (rawget(self, '_t') or m.config.color)[key]
-	if getn(self._t) == 0 then
-		return self
-	end
-	local color = aux.util.copy(self._t)
-	self._t = nil
-	for i=1,3 do
-		color[i] = color[i]/255
-	end
-	return color
+public.color = aux.index_function(function(_, key)
+	local t = m.config.color
+	return aux.index_function(function(self, key)
+		t = t[key]
+		if getn(t) == 0 then
+			return self
+		end
+		local color = aux.util.copy(t)
+		for i=1,3 do
+			color[i] = color[i]/255
+		end
+		return color
+	end)[key]
 end)
 
 public.inline_color = aux.index_function(function(self, key)
@@ -54,19 +56,10 @@ do
 end
 
 do
-	local menu
+	local menu, structure
 
-	function public.menu(...)
-		UIMenu_Initialize()
-		for i=1,arg.n-1 do
-			UIMenu_AddButton(
-				arg[i],
-				i,
-				function()
-					return arg[arg.n](this.value)
-				end
-			)
-		end
+	function public.menu(menu_structure)
+		structure = menu_structure
 		menu:SetPoint('BOTTOMLEFT', GetCursorPosition())
 		menu:Show()
 	end
@@ -75,7 +68,15 @@ do
 		menu = CreateFrame('Frame', m.name(), UIParent, 'UIMenuTemplate')
 		local orig = menu:GetScript('OnShow')
 		menu:SetScript('OnShow', function()
-
+			UIMenu_Initialize()
+			for _, element in ipairs(structure) do
+				UIMenu_AddButton(
+					element[1],
+					element[2],
+					type(element[3]) == 'string' and structure[element[3]] or element[3]
+				)
+			end
+			return orig()
 		end)
 	end
 end
@@ -236,7 +237,6 @@ function public.tab_group(parent, orientation)
     frame:SetWidth(100)
 
     local self = {
-        id = aux.id(),
         frame = parent,
         tabs = {},
     }
