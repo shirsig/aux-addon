@@ -510,28 +510,27 @@ function private.suggestions(components)
 end
 
 function public.query_string(components)
-    local prettified = m.query_builder()
+    local query_builder = m.query_builder()
 
-    local blizzard_filters = {}
     for _, filter in components.blizzard do
-        prettified.append((filter[2] or filter[1]))
+        query_builder.append((filter[2] or filter[1]))
     end
 
     for _, component in components.post do
         if component[1] == 'operator' then
-            prettified.append(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or ''))
+            query_builder.append(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or ''))
         elseif component[1] == 'filter' then
-            prettified.append(component[2])
+            query_builder.append(component[2])
             for _, parameter in {component[3]} do
 	            if aux.filter.filters[component[2]].input_type == 'money' then
 		            parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, nil, true)
 	            end
-                prettified.append(parameter)
+                query_builder.append(parameter)
             end
         end
     end
 
-    return prettified.get()
+    return query_builder.get()
 end
 
 function private.prettified_query_string(components)
@@ -662,23 +661,23 @@ function private.validator(components)
     end
 end
 
-function public.query_builder(str)
-    local filter = str or ''
+function public.query_builder()
+    local filter
     return {
         appended = function(part)
-            return m.query_builder(filter == '' and part or filter..'/'..part)
+            return m.query_builder(not filter and part or filter..'/'..part)
         end,
         prepended = function(part)
-            return m.query_builder(filter == '' and part or part..'/'..filter)
+            return m.query_builder(not filter and part or part..'/'..filter)
         end,
         append = function(part)
-            filter = filter == '' and part or filter..'/'..part
+            filter = not filter and part or filter..'/'..part
         end,
         prepend = function(part)
-            filter = filter == '' and part or part..'/'..filter
+            filter = not filter and part or part..'/'..filter
         end,
         get = function()
-            return filter
+            return filter or ''
         end
     }
 end

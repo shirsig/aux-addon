@@ -273,7 +273,7 @@ function private.create_frames()
 	    btn:SetPoint('TOPLEFT', m.saved_searches_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
-	    btn:SetText('New Filter')
+	    btn:SetText('Filter Builder')
 	    btn:SetScript('OnClick', function() m.update_tab(m.FILTER) end)
 	    private.new_filter_button = btn
 	end
@@ -381,6 +381,14 @@ function private.create_frames()
 	do
 	    local checkbox = aux.gui.checkbox(m.frame.filter)
 	    checkbox:SetPoint('TOPLEFT', m.name_input, 'TOPRIGHT', 16, 0)
+	    checkbox:SetScript('OnClick', function()
+		    UIDropDownMenu_ClearAll(m.class_dropdown)
+		    UIDropDownMenu_Initialize(m.class_dropdown, m.initialize_class_dropdown)
+	        UIDropDownMenu_ClearAll(m.subclass_dropdown)
+	        UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown)
+	        UIDropDownMenu_ClearAll(m.slot_dropdown)
+	        UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
+	    end)
 	    local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Exact')
@@ -434,6 +442,7 @@ function private.create_frames()
 	end
 	do
 	    local dropdown = aux.gui.dropdown(m.frame.filter)
+	    private.class_dropdown = dropdown
 	    dropdown:SetPoint('TOPLEFT', m.min_level_input, 'BOTTOMLEFT', 0, -24)
 	    dropdown:SetWidth(300)
 	    local label = aux.gui.label(dropdown, aux.gui.config.small_font_size)
@@ -443,7 +452,6 @@ function private.create_frames()
 	    dropdown:SetScript('OnShow', function()
 	        UIDropDownMenu_Initialize(this, m.initialize_class_dropdown)
 	    end)
-	    private.class_dropdown = dropdown
 	end
 	do
 	    local dropdown = aux.gui.dropdown(m.frame.filter)

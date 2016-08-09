@@ -1,6 +1,6 @@
 local m, public, private = aux.module'search_tab'
 
-function private.get_form()
+function private.get_form_query()
 	local query_string = ''
 
 	local function add(part)
@@ -12,7 +12,7 @@ function private.get_form()
 	add(name)
 
 	if m.exact_checkbox:GetChecked() then
-		add('exact')
+		add((name == '' and '/' or '')..'exact')
 	end
 
 	local min_level = m.blizzard_level(m.min_level_input:GetText())
@@ -65,7 +65,9 @@ function private.set_form(components)
 			end
 			m.name_input:SetText(aux.filter.unquote(filter[2]))
 		elseif filter[1] == 'exact' then
-			m.exact_checkbox:SetChecked(true)
+			if not m.exact_checkbox:GetChecked() then
+				m.exact_checkbox:Click()
+			end
 		elseif filter[1] == 'min_level' then
 			m.min_level_input:SetText(tonumber(filter[2]))
 		elseif filter[1] == 'max_level' then
@@ -94,7 +96,9 @@ end
 function private.clear_form()
 	m.name_input:SetText('')
 	m.name_input:ClearFocus()
-	m.exact_checkbox:SetChecked(nil)
+	if m.exact_checkbox:GetChecked() then
+		m.exact_checkbox:Click()
+	end
 	m.min_level_input:SetText('')
 	m.min_level_input:ClearFocus()
 	m.max_level_input:SetText('')
@@ -120,7 +124,7 @@ function private.import_query_string()
 end
 
 function private.export_query_string()
-	local components, error = aux.filter.parse_query_string(m.get_form())
+	local components, error = aux.filter.parse_query_string(m.get_form_query())
 	if components then
 		m.search_box:SetText(aux.filter.query_string({blizzard=components.blizzard, post=m.post_filter}))
 		m.filter_input:ClearFocus()
@@ -312,18 +316,24 @@ function private.initialize_class_dropdown()
 		end
 	end
 
-	UIDropDownMenu_AddButton{
-		text = ALL,
-		value = 0,
-		func = on_click,
-	}
+	if not m.exact_checkbox:GetChecked() then
+		m.class_dropdown.button:Enable()
 
-	for i, class in { GetAuctionItemClasses() } do
 		UIDropDownMenu_AddButton{
-			text = class,
-			value = i,
+			text = ALL,
+			value = 0,
 			func = on_click,
 		}
+
+		for i, class in { GetAuctionItemClasses() } do
+			UIDropDownMenu_AddButton{
+				text = class,
+				value = i,
+				func = on_click,
+			}
+		end
+	else
+		m.class_dropdown.button:Disable()
 	end
 end
 
@@ -340,7 +350,7 @@ function private.initialize_subclass_dropdown()
 
 	local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
 
-	if class_index and GetAuctionItemSubClasses(class_index) then
+	if class_index and GetAuctionItemSubClasses(class_index) and not m.exact_checkbox:GetChecked() then
 		m.subclass_dropdown.button:Enable()
 
 		UIDropDownMenu_AddButton{
@@ -370,7 +380,7 @@ function private.initialize_slot_dropdown()
 	local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
 	local subclass_index = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
 
-	if class_index and subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
+	if class_index and subclass_index and GetAuctionInvTypes(class_index, subclass_index) and not m.exact_checkbox:GetChecked() then
 		m.slot_dropdown.button:Enable()
 
 		UIDropDownMenu_AddButton{
