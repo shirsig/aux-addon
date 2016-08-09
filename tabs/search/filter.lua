@@ -81,50 +81,36 @@ function private.update_form(key, value)
 end
 
 function private.get_form_query()
-	local query_string = ''
+	local query_string
 
 	local function add(part)
-		query_string = query_string == '' and part or query_string..'/'..part
-	end
-
-	local name = m.name_input:GetText()
-	name = name == '' and name or aux.filter.quote(name)
-	add(name)
-
-	if m.exact_checkbox:GetChecked() then
-		add((name == '' and '/' or '')..'exact')
-	end
-
-	local min_level = m.blizzard_level(m.min_level_input:GetText())
-	if min_level then
-		add(min_level)
-	end
-
-	local max_level = m.blizzard_level(m.max_level_input:GetText())
-	if max_level then
-		add(max_level)
-	end
-
-	if m.usable_checkbox:GetChecked() then
-		add('usable')
-	end
-
-	local class = UIDropDownMenu_GetSelectedValue(m.class_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.class_dropdown)
-	if class then
-		local classes = { GetAuctionItemClasses() }
-		add(strlower(classes[class]))
-		local subclass = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
-		if subclass then
-			local subclasses = {GetAuctionItemSubClasses(class)}
-			add(strlower(subclasses[subclass]))
-			local slot = UIDropDownMenu_GetSelectedValue(m.slot_dropdown) ~= 0 and UIDropDownMenu_GetSelectedValue(m.slot_dropdown)
-			if slot then
-				add(strlower(getglobal(slot)))
-			end
+		if part then
+			query_string = query_string and query_string..'/'..part or part
 		end
 	end
 
-	local quality = UIDropDownMenu_GetSelectedValue(m.quality_dropdown)
+	local name = m.blizzard_query.name
+	if aux.index(aux.filter.parse_query_string(name), 'blizzard', 1, 1) ~= 'name' then
+		name = aux.filter.quote(name)
+	end
+	add(name)
+
+	add(m.blizzard_query.exact and 'exact')
+	add(m.blizzard_query.min_level)
+	add(m.blizzard_query.max_level)
+	add(m.blizzard_query.usable and 'usable')
+
+	for _, class in {m.blizzard_query.class ~= 0 and m.blizzard_query.class} do
+		local classes = {GetAuctionItemClasses()}
+		add(strlower(classes[class]))
+		for _, subclass in {m.blizzard_query.subclass ~= 0 and m.blizzard_query.subclass} do
+			local subclasses = {GetAuctionItemSubClasses(class)}
+			add(strlower(subclasses[subclass]))
+			add(m.blizzard_query.slot ~= 0 and m.blizzard_query.slot and strlower(getglobal(m.blizzard_query.slot)))
+		end
+	end
+
+	local quality = m.blizzard_query.quality
 	if quality and quality >= 0 then
 		add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
 	end

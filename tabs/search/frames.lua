@@ -365,6 +365,9 @@ function private.create_frames()
 	            this:complete_item()
 	        end
 	    end)
+	    editbox:SetScript('OnTextChanged', function()
+		    m.blizzard_filter.name = this:GetText()
+	    end)
 	    editbox:SetScript('OnTabPressed', function()
 		    if m.blizzard_query.exact then
 			    return
