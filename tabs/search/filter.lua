@@ -217,7 +217,7 @@ function private.add_dropdown_component()
 			end
 			str = str..(arity or '')
 		end
-		if aux.index(aux.filter.filters[str], 'input_type') ~= '' then
+		if aux.index(aux.filter.filters[str], 'input_type') or '' ~= '' then
 			str = str..'/'..m.filter_input:GetText()
 		end
 
