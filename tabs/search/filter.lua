@@ -395,13 +395,13 @@ end
 function private.initialize_class_dropdown()
 	local function on_click()
 		if this.value ~= m.blizzard_query.class then
+			UIDropDownMenu_SetSelectedValue(m.class_dropdown, this.value)
 			UIDropDownMenu_ClearAll(m.subclass_dropdown)
 			UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown)
 			UIDropDownMenu_ClearAll(m.slot_dropdown)
 			UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
+			m.update_form()
 		end
-		UIDropDownMenu_SetSelectedValue(m.class_dropdown, this.value)
-		m.update_form()
 	end
 
 	UIDropDownMenu_AddButton{
@@ -422,12 +422,11 @@ end
 function private.initialize_subclass_dropdown()
 	local function on_click()
 		if this.value ~= m.blizzard_query.subclass then
-			m.blizzard_query.subclass = value
+			UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, this.value)
 			UIDropDownMenu_ClearAll(m.slot_dropdown)
 			UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
+			m.update_form()
 		end
-		UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, this.value)
-		m.update_form()
 	end
 
 	local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
