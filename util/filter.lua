@@ -232,7 +232,7 @@ function private.blizzard_filter_parser()
     local filters = {}
     return function(str, first)
         local filter
-        if tonumber(str) then
+        if strfind(str, '^%d+$') then
             if tonumber(str) < 1 or tonumber(str) > 60 then
                 return nil, 'Erroneous level range modifier'
             end

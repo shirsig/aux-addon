@@ -1,82 +1,108 @@
 local m, public, private = aux.module'search_tab'
 
-function private.valid_level_input(str)
-	local number = tonumber(str)
-	local bounded = number and aux.util.bound(1, 60, number)
-	if number ~= bounded or strfind(str, '^0') then
-		return false, bounded
-	else
-		return true
-	end
+function private.valid_level(str)
+	local level = tonumber(str)
+	return level and aux.util.bound(1, 60, level)
 end
 
-private.blizzard_query = {}
+function private.valid_min_level()
+	local min_level, max_level = m.blizzard_query.min_level, m.blizzard_query.max_level
+	min_level = min_level or max_level and 1
+	return min_level and max_level and min(min_level, max_level) or min_level
+end
 
-private.blizzard_filter = setmetatable({}, {
+function private.valid_max_level()
+	local min_level, max_level = m.blizzard_query.min_level, m.blizzard_query.max_level
+	return min_level and max_level and max(min_level, max_level) or max_level
+end
+
+private.blizzard_query = setmetatable({}, {
 	__newindex = function(_, key, value)
-		m.update_form(key, value)
-		m.blizzard_query[key] = value
+		if key == 'name' then
+			m.name_input:SetText(value)
+		elseif key == 'exact' then
+			m.exact_checkbox:SetChecked(value)
+		elseif key == 'min_level' then
+			m.min_level_input:SetText(value)
+		elseif key == 'max_level' then
+			m.max_level_input:SetText(value)
+		elseif key == 'usable' then
+			m.usable_checkbox:SetChecked(value)
+		elseif key == 'class' then
+			UIDropDownMenu_Initialize(m.class_dropdown, m.initialize_class_dropdown)
+			UIDropDownMenu_SetSelectedValue(m.class_dropdown, value)
+		elseif key == 'subclass' then
+			UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown)
+			UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, value)
+		elseif key == 'slot' then
+			UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
+			UIDropDownMenu_SetSelectedValue(m.slot_dropdown, value)
+		elseif key == 'quality' then
+			UIDropDownMenu_Initialize(m.quality_dropdown, m.initialize_quality_dropdown)
+			UIDropDownMenu_SetSelectedValue(m.quality_dropdown, value)
+		end
+	end,
+	__index = function(_, key)
+		if key == 'name' then
+			return m.name_input:GetText()
+		elseif key == 'exact' then
+			return m.exact_checkbox:GetChecked()
+		elseif key == 'min_level' then
+			return tonumber(m.min_level_input:GetText())
+		elseif key == 'max_level' then
+			return tonumber(m.max_level_input:GetText())
+		elseif key == 'usable' then
+			return m.usable_checkbox:GetChecked()
+		elseif key == 'class' then
+			return UIDropDownMenu_GetSelectedValue(m.class_dropdown)
+		elseif key == 'subclass' then
+			return UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
+		elseif key == 'slot' then
+			return UIDropDownMenu_GetSelectedValue(m.slot_dropdown)
+		elseif key == 'quality' then
+			return UIDropDownMenu_GetSelectedValue(m.quality_dropdown)
+		end
 	end,
 })
 
-function private.update_form(key, value)
+function private.update_form()
+	if m.blizzard_query.class and GetAuctionItemSubClasses(m.blizzard_query.class) then
+		m.subclass_dropdown.button:Enable()
+	else
+		m.subclass_dropdown.button:Disable()
+	end
 
-	if key == 'class' and value ~= m.blizzard_query.class then
-		m.blizzard_query.class = value
-		UIDropDownMenu_ClearAll(m.subclass_dropdown)
-		UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown)
-		m.blizzard_query.subclass = nil
-		if value and GetAuctionItemSubClasses(value) then
-			m.subclass_dropdown.button:Enable()
-		else
-			m.subclass_dropdown.button:Disable()
-		end
-		UIDropDownMenu_ClearAll(m.slot_dropdown)
-		UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
-		m.blizzard_query.slot = nil
+	if m.blizzard_query.subclass and GetAuctionInvTypes(m.blizzard_query.class, m.blizzard_query.subclass) then
+		m.slot_dropdown.button:Enable()
+	else
 		m.slot_dropdown.button:Disable()
-	elseif key == 'subclass' and value ~= m.blizzard_query.subclass then
-		m.blizzard_query.subclass = value
-		UIDropDownMenu_ClearAll(m.slot_dropdown)
-		UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
-		m.blizzard_query.slot = nil
-		if value and GetAuctionInvTypes(m.blizzard_query.class, value) then
-			m.slot_dropdown.button:Enable()
-		else
-			m.slot_dropdown.button:Disable()
+	end
+
+	if m.blizzard_query.exact then
+		for _, key in {'class', 'subclass', 'slot', 'quality'} do
+			m[key..'_dropdown'].button:Disable()
 		end
 	else
-		m.blizzard_query[key] = value
+		m.class_dropdown.button:Enable()
+		m.quality_dropdown.button:Enable()
 	end
-
-	if key == 'exact' then
-		if value then
-			for _, key in {'class', 'subclass', 'slot', 'quality'} do
-				m[key..'_dropdown'].button:Disable()
-			end
+	for _, key in {'min_level', 'max_level'} do
+		if m.blizzard_query.exact then
+			m[key..'_input']:Disable()
 		else
-			m.class_dropdown.button:Enable()
-		end
-		for _, key in {'min_level', 'max_level'} do
-			if value then
-				m[key..'_input']:Disable()
-			else
-				m[key..'_input']:Enable()
-			end
-		end
-		if value then
-			m.usable_checkbox:Disable()
-		else
-			m.usable_checkbox:Enable()
+			m[key..'_input']:Enable()
 		end
 	end
+	if m.blizzard_query.exact then
+		m.usable_checkbox:Disable()
+	else
+		m.usable_checkbox:Enable()
+	end
 
-	if aux.util.set('min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality')[key] then
-		if value then
-			m.exact_checkbox:Disable()
-		elseif not aux.util.any({'min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'}, function(key) return m.blizzard_query[key] end) then
-			m.exact_checkbox:Enable()
-		end
+	if aux.util.any({'min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'}, function(key) return m.blizzard_query[key] end) then
+		m.exact_checkbox:Disable()
+	else
+		m.exact_checkbox:Enable()
 	end
 end
 
@@ -93,10 +119,10 @@ function private.get_form_query()
 	if aux.index(aux.filter.parse_query_string(name), 'blizzard', 1, 1) ~= 'name' then
 		name = aux.filter.quote(name)
 	end
-	add(name)
+	add((name ~= '' or m.blizzard_query.exact) and name)
 
 	add(m.blizzard_query.exact and 'exact')
-	add(m.blizzard_query.min_level)
+	add(m.blizzard_query.min_level or m.blizzard_query.max_level and 1)
 	add(m.blizzard_query.max_level)
 	add(m.blizzard_query.usable and 'usable')
 
@@ -129,27 +155,25 @@ function private.set_form(components)
 			if name and strsub(name, 1, 1) == '"' and strsub(name, -1, -1) == '"' then
 				name = strsub(name, 2, -2)
 			end
-			m.name_input:SetText(aux.filter.unquote(filter[2]))
+			m.blizzard_query.name = aux.filter.unquote(filter[2])
 		elseif filter[1] == 'exact' then
-			if not m.exact_checkbox:GetChecked() then
-				m.exact_checkbox:Click()
-			end
+			m.blizzard_query.exact = true
 		elseif filter[1] == 'min_level' then
 			m.min_level_input:SetText(tonumber(filter[2]))
 		elseif filter[1] == 'max_level' then
 			m.max_level_input:SetText(tonumber(filter[2]))
 		elseif filter[1] == 'usable' then
-			m.usable_checkbox:SetChecked(true)
+			m.blizzard_query.usable = true
 		elseif filter[1] == 'class' then
 			class_index = aux.info.item_class_index(filter[2])
-			UIDropDownMenu_SetSelectedValue(m.class_dropdown, class_index)
+			m.blizzard_query.class = class_index
 		elseif filter[1] == 'subclass' then
 			subclass_index = aux.info.item_subclass_index(class_index, filter[2])
-			UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, subclass_index)
+			m.blizzard_query.subclass = subclass_index
 		elseif filter[1] == 'slot' then
-			UIDropDownMenu_SetSelectedValue(m.slot_dropdown, ({GetAuctionInvTypes(class_index, subclass_index)})[aux.info.item_slot_index(class_index, subclass_index, filter[2])])
+			m.blizzard_query.slot = ({GetAuctionInvTypes(class_index, subclass_index)})[aux.info.item_slot_index(class_index, subclass_index, filter[2])]
 		elseif filter[1] == 'quality' then
-			UIDropDownMenu_SetSelectedValue(m.quality_dropdown, aux.info.item_quality_index(filter[2]))
+			m.blizzard_query.quality = aux.info.item_quality_index(filter[2])
 		end
 	end
 
@@ -160,16 +184,14 @@ function private.set_form(components)
 end
 
 function private.clear_form()
-	m.name_input:SetText('')
+	m.blizzard_query.name = ''
 	m.name_input:ClearFocus()
-	if m.exact_checkbox:GetChecked() then
-		m.exact_checkbox:Click()
-	end
-	m.min_level_input:SetText('')
+	m.blizzard_query.exact = false
+	m.blizzard_query.min_level = ''
 	m.min_level_input:ClearFocus()
-	m.max_level_input:SetText('')
+	m.blizzard_query.max_level = ''
 	m.max_level_input:ClearFocus()
-	m.usable_checkbox:SetChecked(nil)
+	m.blizzard_query.usable = false
 	UIDropDownMenu_ClearAll(m.class_dropdown)
 	UIDropDownMenu_ClearAll(m.subclass_dropdown)
 	UIDropDownMenu_ClearAll(m.slot_dropdown)
@@ -372,35 +394,40 @@ end
 
 function private.initialize_class_dropdown()
 	local function on_click()
+		if this.value ~= m.blizzard_query.class then
+			UIDropDownMenu_ClearAll(m.subclass_dropdown)
+			UIDropDownMenu_Initialize(m.subclass_dropdown, m.initialize_subclass_dropdown)
+			UIDropDownMenu_ClearAll(m.slot_dropdown)
+			UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
+		end
 		UIDropDownMenu_SetSelectedValue(m.class_dropdown, this.value)
-		m.blizzard_filter.class = this.value
+		m.update_form()
 	end
 
-	if not m.exact_checkbox:GetChecked() then
-		m.class_dropdown.button:Enable()
+	UIDropDownMenu_AddButton{
+		text = ALL,
+		value = 0,
+		func = on_click,
+	}
 
+	for i, class in { GetAuctionItemClasses() } do
 		UIDropDownMenu_AddButton{
-			text = ALL,
-			value = 0,
+			text = class,
+			value = i,
 			func = on_click,
 		}
-
-		for i, class in { GetAuctionItemClasses() } do
-			UIDropDownMenu_AddButton{
-				text = class,
-				value = i,
-				func = on_click,
-			}
-		end
-	else
-		m.class_dropdown.button:Disable()
 	end
 end
 
 function private.initialize_subclass_dropdown()
 	local function on_click()
+		if this.value ~= m.blizzard_query.subclass then
+			m.blizzard_query.subclass = value
+			UIDropDownMenu_ClearAll(m.slot_dropdown)
+			UIDropDownMenu_Initialize(m.slot_dropdown, m.initialize_slot_dropdown)
+		end
 		UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, this.value)
-		m.blizzard_filter.subclass = this.value
+		m.update_form()
 	end
 
 	local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
@@ -425,7 +452,7 @@ end
 function private.initialize_slot_dropdown()
 	local function on_click()
 		UIDropDownMenu_SetSelectedValue(m.slot_dropdown, this.value)
-		m.blizzard_filter.slot = this.value
+		m.update_form()
 	end
 
 	local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
@@ -452,7 +479,7 @@ end
 function private.initialize_quality_dropdown()
 	local function on_click()
 		UIDropDownMenu_SetSelectedValue(m.quality_dropdown, this.value)
-		m.blizzard_filter.quality = this.value
+		m.update_form()
 	end
 
 	UIDropDownMenu_AddButton{

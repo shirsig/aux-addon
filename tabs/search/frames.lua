@@ -361,12 +361,9 @@ function private.create_frames()
 	    editbox:SetPoint('TOPLEFT', 14, -25)
 	    editbox:SetWidth(260)
 	    editbox:SetScript('OnChar', function()
-	        if m.exact_checkbox:GetChecked() then
+	        if m.blizzard_query.exact then
 	            this:complete_item()
 	        end
-	    end)
-	    editbox:SetScript('OnTextChanged', function()
-		    m.blizzard_filter.name = this:GetText()
 	    end)
 	    editbox:SetScript('OnTabPressed', function()
 		    if m.blizzard_query.exact then
@@ -388,7 +385,7 @@ function private.create_frames()
 	    local checkbox = aux.gui.checkbox(m.frame.filter)
 	    checkbox:SetPoint('TOPLEFT', m.name_input, 'TOPRIGHT', 16, 0)
 	    checkbox:SetScript('OnClick', function()
-		    m.blizzard_filter.exact = this:GetChecked()
+		    m.update_form()
 	    end)
 	    local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
@@ -409,12 +406,15 @@ function private.create_frames()
 	    end)
 	    editbox:SetScript('OnEnterPressed', aux._(editbox.ClearFocus, editbox))
 	    editbox:SetScript('OnTextChanged', function()
-		    local valid, number = m.valid_level_input(this:GetText())
-		    if valid then
-			    m.blizzard_filter.min_level = number
-		    else
-		        this:SetText(number)
+		    local valid_level = m.valid_level(this:GetText())
+		    if tostring(valid_level) ~= this:GetText() then
+			    this:SetText(valid_level or '')
 		    end
+		    local valid_max_level = m.valid_max_level()
+		    if tostring(valid_max_level) ~= m.max_level_input:GetText() then
+			    m.max_level_input:SetText(valid_max_level or '')
+		    end
+		    m.update_form()
 	    end)
 	    local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -435,11 +435,13 @@ function private.create_frames()
 	    end)
 	    editbox:SetScript('OnEnterPressed', aux._(editbox.ClearFocus, editbox))
 	    editbox:SetScript('OnTextChanged', function()
-		    local valid, number = m.valid_level_input(this:GetText())
-		    if valid then
-			    m.blizzard_filter.max_level = number
-		    else
-			    this:SetText(number)
+		    local valid_level = m.valid_level(this:GetText())
+		    if tostring(valid_level) ~= this:GetText() then
+			    this:SetText(valid_level or '')
+		    end
+		    local valid_min_level = m.valid_min_level()
+		    if tostring(valid_min_level) ~= m.min_level_input:GetText() then
+			    m.min_level_input:SetText(valid_min_level or '')
 		    end
 	    end)
 	    local label = aux.gui.label(editbox, aux.gui.config.medium_font_size)
@@ -451,7 +453,7 @@ function private.create_frames()
 	    local checkbox = aux.gui.checkbox(m.frame.filter)
 	    checkbox:SetPoint('TOPLEFT', m.max_level_input, 'TOPRIGHT', 16, 0)
 	    checkbox:SetScript('OnClick', function()
-		    m.blizzard_filter.usable = this:GetChecked()
+		    m.update_form()
 	    end)
 	    local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
