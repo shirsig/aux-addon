@@ -546,12 +546,8 @@ function private.prettified_query_string(components)
         end
     end
 
-    if blizzard_filters.name and not blizzard_filters.exact then
-        if m.unquote(blizzard_filters.name) == '' then
-            prettified.prepend(aux.auction_listing.colors.RED..'No Filter'..FONT_COLOR_CODE_CLOSE)
-        else
-            prettified.prepend(aux.gui.inline_color.label.enabled..m.unquote(blizzard_filters.name)..FONT_COLOR_CODE_CLOSE)
-        end
+    if blizzard_filters.name and not blizzard_filters.exact and blizzard_filters.name ~= '' then
+        prettified.prepend(aux.gui.inline_color.label.enabled..m.unquote(blizzard_filters.name)..FONT_COLOR_CODE_CLOSE)
     end
 
     for _, component in components.post do
@@ -569,8 +565,11 @@ function private.prettified_query_string(components)
             end
         end
     end
-
-    return prettified.get()
+    if prettified.get() == '' then
+        return aux.auction_listing.colors.RED..'No Filter'..FONT_COLOR_CODE_CLOSE
+    else
+        return prettified.get()
+    end
 end
 
 function public.quote(name)
