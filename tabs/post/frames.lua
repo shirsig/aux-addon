@@ -212,7 +212,7 @@ function private.create_frames()
 	    local frame = CreateFrame('Frame', nil, m.frame.parameters)
 	    private.start_price_frame = frame
 	    aux.gui.set_content_style(frame)
-	    frame:SetPoint('TOPRIGHT', -71, -50)
+	    frame:SetPoint('TOPRIGHT', -71, -58)
 	    frame:SetWidth(180)
 	    frame:SetHeight(22)
 	    local editbox = aux.gui.editbox(frame)
