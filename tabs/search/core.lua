@@ -116,14 +116,7 @@ end
 
 function private.blizzard_page_index(str)
     if tonumber(str) then
-        return aux.util.round(max(0, tonumber(str) - 1))
+        return max(0, tonumber(str) - 1)
     end
 end
-
-function private.blizzard_level(str)
-    if tonumber(str) then
-        return aux.util.round(aux.util.bound(1, 60, tonumber(str)))
-    end
-end
-
 

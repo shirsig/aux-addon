@@ -398,7 +398,7 @@ function public.index(t, ...)
 	return t
 end
 
-public.huge = 2^100000
+public.huge = 1.8*10^308
 
 function public.log(...)
 	local msg = '[aux]'

@@ -1,4 +1,4 @@
-local addon = aux_module()
+local addon = {aux_module()}
 aux = tremove(addon, 1)
 local m, public, private = unpack(addon)
 
@@ -16,7 +16,7 @@ function public.module(path)
 			local qualified_name = prefix and prefix..'.'..name or name
 			module = m.modules[qualified_name]
 			if not module then
-				module = aux_module()
+				module = {aux_module()}
 				module[4].LOAD = nil
 				(prefix and m.modules[prefix] or addon)[2][name] = tremove(module, 1)
 				m.modules[qualified_name] = module

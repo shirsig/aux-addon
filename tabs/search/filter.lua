@@ -54,13 +54,17 @@ private.blizzard_query = setmetatable({}, {
 		elseif key == 'usable' then
 			return m.usable_checkbox:GetChecked()
 		elseif key == 'class' then
-			return UIDropDownMenu_GetSelectedValue(m.class_dropdown)
+			local class_index = UIDropDownMenu_GetSelectedValue(m.class_dropdown)
+			return (class_index or 0) > 0 and class_index or nil
 		elseif key == 'subclass' then
-			return UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
+			local subclass_index = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
+			return (subclass_index or 0) > 0 and subclass_index or nil
 		elseif key == 'slot' then
-			return UIDropDownMenu_GetSelectedValue(m.slot_dropdown)
+			local slot_index = UIDropDownMenu_GetSelectedValue(m.slot_dropdown)
+			return (slot_index or 0) > 0 and slot_index or nil
 		elseif key == 'quality' then
-			return UIDropDownMenu_GetSelectedValue(m.quality_dropdown)
+			local quality_code = UIDropDownMenu_GetSelectedValue(m.quality_dropdown)
+			return (quality_code or -1) >= 0 and quality_code or nil
 		end
 	end,
 })
@@ -126,13 +130,13 @@ function private.get_form_query()
 	add(m.blizzard_query.max_level)
 	add(m.blizzard_query.usable and 'usable')
 
-	for _, class in {m.blizzard_query.class ~= 0 and m.blizzard_query.class} do
+	for _, class in {m.blizzard_query.class} do
 		local classes = {GetAuctionItemClasses()}
 		add(strlower(classes[class]))
-		for _, subclass in {m.blizzard_query.subclass ~= 0 and m.blizzard_query.subclass} do
+		for _, subclass in {m.blizzard_query.subclass} do
 			local subclasses = {GetAuctionItemSubClasses(class)}
 			add(strlower(subclasses[subclass]))
-			add(m.blizzard_query.slot ~= 0 and m.blizzard_query.slot and strlower(getglobal(m.blizzard_query.slot)))
+			add(m.blizzard_query.slot and strlower(getglobal(m.blizzard_query.slot)))
 		end
 	end
 
@@ -141,7 +145,7 @@ function private.get_form_query()
 		add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
 	end
 
-	return query_string
+	return query_string or ''
 end
 
 function private.set_form(components)

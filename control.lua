@@ -64,7 +64,7 @@ end
 
 function public.event_listener(event, cb)
 	local listener_id = m.id()
-	m.listeners[listener_id] = { event=event, cb=cb, kill=function(...) if arg.n == 0 or arg[1] then m.kill_listener(listener_id) end end }
+	m.listeners[listener_id] = {event=event, cb=cb, kill=function(...) if arg.n == 0 or arg[1] then m.kill_listener(listener_id) end end}
 	m.event_frame:RegisterEvent(event)
 	return listener_id
 end
@@ -78,7 +78,7 @@ end
 
 function public.thread(k, ...)
 	local thread_id = m.id()
-	m.threads[thread_id] = { k = aux._(k, unpack(arg)) }
+	m.threads[thread_id] = {k = aux._(k, unpack(arg))}
 	return thread_id
 end
 

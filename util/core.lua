@@ -1,11 +1,7 @@
 local m, public, private = aux.module'util'
 
-function public.either(p, a, b)
-	if p then
-		return a
-	else
-		return b
-	end
+function public.present(value)
+	return value ~= nil and {[value]=true} or {}
 end
 
 function public.unpack(array, ...)
