@@ -335,7 +335,7 @@ function private.parse_parameter(input_type, str)
 end
 
 function public.parse_query_string(str)
-    local components = { blizzard = {}, post = {} }
+    local components = {blizzard = {}, post = {}}
     local blizzard_filter_parser = m.blizzard_filter_parser()
     local parts = aux.util.map(aux.util.split(str, '/'), function(part) return strlower(aux.util.trim(part)) end)
 

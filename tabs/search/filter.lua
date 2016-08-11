@@ -220,7 +220,6 @@ function private.export_query_string()
 	if components then
 		m.search_box:SetText(aux.filter.query_string({blizzard=components.blizzard, post=m.post_filter}))
 		m.filter_input:ClearFocus()
-		m.update_filter_display()
 	else
 		aux.log(error)
 	end
@@ -349,13 +348,11 @@ do
 		m.filter_display.measure:SetFont(font, font_size)
 		local lines = 0
 		local width = 0
-
 		for line in string.gfind(text, '<p>(.-)</p>') do
 			lines = lines + 1
 			m.filter_display.measure:SetText(line)
 			width = max(width, m.filter_display.measure:GetStringWidth())
 		end
-
 		return width, lines * (font_size + .5)
 	end
 end
