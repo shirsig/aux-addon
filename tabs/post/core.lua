@@ -396,7 +396,7 @@ function private.set_item(item)
 
     m.selected_item = item
 
---    UIDropDownMenu_Initialize(m.duration_dropdown, m.initialize_duration_dropdown) -- TODO, wtf, why is this needed
+    UIDropDownMenu_Initialize(m.duration_dropdown, m.initialize_duration_dropdown) -- TODO, wtf, why is this needed
     UIDropDownMenu_SetSelectedValue(m.duration_dropdown, settings.duration)
 
     m.hide_checkbox:SetChecked(settings.hidden)

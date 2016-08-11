@@ -113,7 +113,7 @@ function private.create_frames()
 	end
 	do
 	    local item = aux.gui.item(m.frame.parameters)
-	    item:SetPoint('TOPLEFT', 6, -6)
+	    item:SetPoint('TOPLEFT', 10, -6)
 	    item.button:SetScript('OnEnter', function()
 	        if m.selected_item then
 	            aux.info.set_tooltip(m.selected_item.itemstring, this, 'ANCHOR_RIGHT')
