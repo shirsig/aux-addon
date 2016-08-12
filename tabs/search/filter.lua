@@ -110,7 +110,7 @@ function private.update_form()
 	end
 end
 
-function private.get_form_query()
+function private.get_filter_builder_query()
 	local query_string
 
 	local function add(part)
@@ -145,7 +145,9 @@ function private.get_form_query()
 		add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
 	end
 
-	return query_string or ''
+	add(aux.filter.query_string({blizzard={}, post=m.post_filter}))
+
+	return query_string
 end
 
 function private.set_form(components)
@@ -216,13 +218,8 @@ function private.import_query_string()
 end
 
 function private.export_query_string()
-	local components, error = aux.filter.parse_query_string(m.get_form_query())
-	if components then
-		m.search_box:SetText(aux.filter.query_string({blizzard=components.blizzard, post=m.post_filter}))
-		m.filter_input:ClearFocus()
-	else
-		aux.log(error)
-	end
+	m.search_box:SetText(m.get_filter_builder_query())
+	m.filter_input:ClearFocus()
 end
 
 function public.formatted_post_filter(components)
