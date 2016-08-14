@@ -88,7 +88,7 @@ function m.LOAD()
 	DropDownList1.border:SetPoint('TOPLEFT', DropDownList1Backdrop, 'TOPLEFT', -1.5, 1.5)
 	DropDownList1.border:SetPoint('BOTTOMRIGHT', DropDownList1Backdrop, 'BOTTOMRIGHT', 1.5, -1.5)
 	DropDownList1.border:SetBlendMode('ADD')
-	DropDownList1.backdrop = DropDownList1:CreateTexture()
+	DropDownList1.backdrop = DropDownList1:CreateTexture(nil, 'OVERLAY')
 	DropDownList1.backdrop:SetTexture(unpack(m.color.content.backdrop))
 	DropDownList1.backdrop:SetAllPoints(DropDownList1Backdrop)
 
