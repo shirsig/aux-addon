@@ -340,16 +340,13 @@ function public.editbox(parent)
     editbox:SetScript('OnEditFocusLost', aux._(editbox.HighlightText, aux.this, 0, 0))
     editbox:SetScript('OnEscapePressed', aux._(editbox.ClearFocus, aux.this))
     do
-        local last_time, last_x, last_y
-        editbox:SetScript('OnMouseUp', function()
+        local last_click
+        editbox:SetScript('OnMouseDown', function()
             local x, y = GetCursorPosition()
-            if last_time and GetTime() - last_time < .5 and x == last_x and y == last_y then
-	            last_time = nil
-                this:HighlightText()
-            else
-                last_time = GetTime()
-                last_x, last_y = x, y
+            if last_click and GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
+                aux.control.thread(function() editbox:HighlightText() end)
             end
+            last_click = {t=GetTime(), x=x, y=y}
         end)
     end
 
