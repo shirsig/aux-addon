@@ -5,17 +5,6 @@ function private.valid_level(str)
 	return level and aux.util.bound(1, 60, level)
 end
 
-function private.valid_min_level()
-	local min_level, max_level = m.blizzard_query.min_level, m.blizzard_query.max_level
-	min_level = min_level or max_level and 1
-	return min_level and max_level and min(min_level, max_level) or min_level
-end
-
-function private.valid_max_level()
-	local min_level, max_level = m.blizzard_query.min_level, m.blizzard_query.max_level
-	return min_level and max_level and max(min_level, max_level) or max_level
-end
-
 private.blizzard_query = setmetatable({}, {
 	__newindex = function(_, key, value)
 		if key == 'name' then

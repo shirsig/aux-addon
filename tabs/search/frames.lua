@@ -120,7 +120,7 @@ function private.create_frames()
 			    this:SetText(valid_input)
 		    end
 		    if (tonumber(m.first_page_input:GetText()) or 1) > (tonumber(this:GetText()) or aux.huge) then
-			    m.first_page_input:SetText(tonumber(this:GetText()))
+			    this:SetText(tonumber(this:GetText()))
 		    end
 	        if m.blizzard_page_index(this:GetText()) and not m.real_time_button:GetChecked() then
 	            this:SetBackdropColor(unpack(aux.gui.color.state.enabled))
@@ -426,10 +426,6 @@ function private.create_frames()
 		    if tostring(valid_level) ~= this:GetText() then
 			    this:SetText(valid_level or '')
 		    end
-		    local valid_max_level = m.valid_max_level()
-		    if tostring(valid_max_level) ~= m.max_level_input:GetText() then
-			    m.max_level_input:SetText(valid_max_level or '')
-		    end
 		    m.update_form()
 	    end)
 	    local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
@@ -454,10 +450,6 @@ function private.create_frames()
 		    local valid_level = m.valid_level(this:GetText())
 		    if tostring(valid_level) ~= this:GetText() then
 			    this:SetText(valid_level or '')
-		    end
-		    local valid_min_level = m.valid_min_level()
-		    if tostring(valid_min_level) ~= m.min_level_input:GetText() then
-			    m.min_level_input:SetText(valid_min_level or '')
 		    end
 		    m.update_form()
 	    end)
