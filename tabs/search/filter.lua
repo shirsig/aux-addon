@@ -145,9 +145,10 @@ function private.get_filter_builder_query()
 		add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
 	end
 
-	add(aux.filter.query_string({blizzard={}, post=m.post_filter}))
+	local post_filter_string = aux.filter.query_string({blizzard={}, post=m.post_filter})
+	add(post_filter_string ~= '' and post_filter_string)
 
-	return query_string
+	return query_string or ''
 end
 
 function private.set_form(components)
