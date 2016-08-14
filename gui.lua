@@ -83,22 +83,22 @@ function m.LOAD()
 
 	local backdrop = DropDownList1Backdrop:GetBackdrop()
 
-	DropDownList1Backdrop.border = DropDownList1Backdrop:CreateTexture()
-	DropDownList1Backdrop.border:SetTexture(1,1,1,0.02)
-	DropDownList1Backdrop.border:SetPoint('TOPLEFT', -1.5, 1.5)
-	DropDownList1Backdrop.border:SetPoint('BOTTOMRIGHT', 1.5, -1.5)
-	DropDownList1Backdrop.border:SetBlendMode('ADD')
-	DropDownList1Backdrop.backdrop = DropDownList1Backdrop:CreateTexture()
-	DropDownList1Backdrop.backdrop:SetTexture(unpack(m.color.content.backdrop))
-	DropDownList1Backdrop.backdrop:SetAllPoints()
+	DropDownList1.border = DropDownList1:CreateTexture()
+	DropDownList1.border:SetTexture(1,1,1,0.02)
+	DropDownList1.border:SetPoint('TOPLEFT', DropDownList1Backdrop, 'TOPLEFT', -1.5, 1.5)
+	DropDownList1.border:SetPoint('BOTTOMRIGHT', DropDownList1Backdrop, 'BOTTOMRIGHT', 1.5, -1.5)
+	DropDownList1.border:SetBlendMode('ADD')
+	DropDownList1.backdrop = DropDownList1:CreateTexture()
+	DropDownList1.backdrop:SetTexture(unpack(m.color.content.backdrop))
+	DropDownList1.backdrop:SetAllPoints(DropDownList1Backdrop)
 
 	aux.hook('ToggleDropDownMenu', function(...)
 		local ret = {aux.orig.ToggleDropDownMenu(unpack(arg))}
 		local dropdown = getglobal(arg[4] or '') or this:GetParent()
 		if strfind(dropdown:GetName() or '', 'aux_frame') then
 			DropDownList1Backdrop:SetBackdrop({})
-			DropDownList1Backdrop.border:Show()
-			DropDownList1Backdrop.backdrop:Show()
+			DropDownList1.border:Show()
+			DropDownList1.backdrop:Show()
 			DropDownList1:SetWidth(dropdown:GetWidth() * 0.9)
 			DropDownList1:SetHeight(DropDownList1:GetHeight() - 10)
 			DropDownList1:ClearAllPoints()
@@ -124,8 +124,8 @@ function m.LOAD()
 			end
 		else
 			DropDownList1Backdrop:SetBackdrop(backdrop)
-			DropDownList1Backdrop.border:Hide()
-			DropDownList1Backdrop.backdrop:Hide()
+			DropDownList1.border:Hide()
+			DropDownList1.backdrop:Hide()
 			for i=1,UIDROPDOWNMENU_MAXBUTTONS do
 				local button = getglobal('DropDownList1Button'..i)
 				local text = button:GetFontString()
