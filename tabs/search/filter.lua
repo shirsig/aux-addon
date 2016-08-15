@@ -321,7 +321,7 @@ function private.add_dropdown_component()
 end
 
 do
-	local text
+	local text = ''
 
 	function private.update_filter_display()
 		text = m.formatted_post_filter(m.post_filter)
