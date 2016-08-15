@@ -72,7 +72,7 @@ function public.write_list(schema, list)
     local parts = aux.util.map(list, function(element)
         return m.write(element_type, element)
     end)
-    return aux.util.join(parts, separator)
+    return table.concat(parts, separator)
 end
 
 function public.read_record(schema, str)
@@ -93,7 +93,7 @@ function public.write_record(schema, record)
         local key, type = next(schema[i])
         tinsert(parts, m.write(type, record[key]))
     end
-    return aux.util.join(parts, separator)
+    return table.concat(parts, separator)
 end
 
 function public.serialize(data, separator, compactor)

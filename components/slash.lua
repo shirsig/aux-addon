@@ -77,7 +77,7 @@ function SlashCmdList.AUX(command)
 			tinsert(chars, name)
 		end
 		if getn(chars) > 0 then
-			aux.log('Your characters: "'..aux.util.join(chars, ', ')..'".')
+			aux.log('Your characters: "'..table.concat(chars, ', ')..'".')
 		else
 			aux.log('You don\'t have any additional characters. To add your characters type "/aux chars add NAME1 NAME2 NAME3...".')
 		end

@@ -158,15 +158,6 @@ function public.trim(str)
 	return gsub(str, '^%s*(.-)%s*$', '%1')
 end
 
-function public.join(parts, separator)
-	local str = parts[1] or ''
-	for i=2,getn(parts) do
-		if not parts[i] then break end
-		str = str..separator..parts[i]
-	end
-	return str
-end
-
 function public.split(str, separator)
 	local parts = {}
 	while true do

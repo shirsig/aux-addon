@@ -8,13 +8,13 @@ do
 	local data = {}
 	local mt = {
 		__newindex = function(self, key, value)
-			data[self].getter({public=self, private=data[self].state})[key] = value
+			data[self].getter{public=self, private=data[self].state}[key] = value
 		end,
 		__index = function(self, key)
-			return data[self].getter({public=self, private=data[self].state})[key]
+			return data[self].getter{public=self, private=data[self].state}[key]
 		end,
 		__call = function(self)
-			return data[self].getter({public=self, private=data[self].state})
+			return data[self].getter{public=self, private=data[self].state}
 		end,
 	}
 	function public.dynamic_table(state, getter)

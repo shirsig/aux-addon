@@ -336,7 +336,7 @@ function private.create_frames()
 	        if filters then
 	            tinsert(aux_favorite_searches, 1, {
 	                filter_string = m.search_box:GetText(),
-	                prettified = aux.util.join(aux.util.map(filters, function(filter) return filter.prettified end), ';'),
+	                prettified = table.concat(aux.util.map(filters, function(filter) return filter.prettified end), ';'),
 	            })
 	        end
 	        m.update_search_listings()

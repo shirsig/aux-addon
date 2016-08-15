@@ -335,7 +335,7 @@ function public.execute(resume, real_time)
 			else
 				m.new_search(filter_string)
 			end
-			m.new_recent_search(filter_string, aux.util.join(aux.util.map(queries, function(filter) return filter.prettified end), ';'))
+			m.new_recent_search(filter_string, table.concat(aux.util.map(queries, function(filter) return filter.prettified end), ';'))
 		else
 			m.current_search().records = {}
 			m.current_search().table:SetDatabase(m.current_search().records)

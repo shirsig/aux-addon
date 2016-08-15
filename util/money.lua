@@ -92,7 +92,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 		if copper > 0 or gold == 0 and silver == 0 then
 			tinsert(parts, m.format_number(copper, pad, decimal_points, color)..copper_text)
 		end
-		text = aux.util.join(parts, ' ')
+		text = table.concat(parts, ' ')
 	else
 		if gold > 0 then
 			text = m.format_number(gold, false, nil, color)..gold_text..' '..m.format_number(silver, pad, nil, color)..silver_text..' '..m.format_number(copper, pad, decimal_points, color)..copper_text
