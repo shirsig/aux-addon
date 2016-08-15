@@ -8,7 +8,14 @@ public.config = {
 		window = {backdrop = {24, 24, 24, .93}, border = {30, 30, 30, 1}},
 		panel = {backdrop = {24, 24, 24, 1}, border = {255, 255, 255, .03}},
 		content = {backdrop = {42, 42, 42, 1}, border = {0, 0, 0, 0}},
-		state = {enabled = {70, 180, 70}, disabled = {190, 70, 70}},
+		state = {enabled = {70, 180, 70, 1}, disabled = {190, 70, 70, 1}},
+
+		blue = {41, 146, 255, 1},
+		green = {22, 255, 22, 1},
+		yellow = {255, 255, 0, 1},
+		orange = {255, 146, 24, 1},
+		red = {255, 0, 0, 1},
+		gray = {187, 187, 187, 1},
 	},
     edge_size = 1.5,
     font = [[Fonts\ARIALN.TTF]],
@@ -34,10 +41,22 @@ function private.color_accessor(callback)
 	end)
 end
 
-public.color = m.color_accessor(function(color)
-	local r, g, b, a = unpack(color)
-	return {r/255, g/255, b/255, a}
-end)
+do
+	local mt = {
+		__call = function(self, text)
+			local r, g, b, a = unpack(self)
+			if text then
+				return format('|c%02X%02X%02X%02X', a*255, r*255, g*255, b)..text..FONT_COLOR_CODE_CLOSE
+			else
+				return r, g, b, a
+			end
+		end
+	}
+	public.color = m.color_accessor(function(color)
+		local r, g, b, a = unpack(color)
+		return setmetatable({r/255, g/255, b/255, a}, mt)
+	end)
+end
 
 public.inline_color = m.color_accessor(function(color)
 	local r, g, b, a = unpack(color)

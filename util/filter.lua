@@ -555,16 +555,17 @@ function private.prettified_query_string(components)
 			prettified.append(aux.auction_listing.colors.YELLOW..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE)
         elseif component[1] == 'filter' then
             if component[2] ~= 'tooltip' then
-                prettified.append(aux.auction_listing.colors.YELLOW..component[2]..FONT_COLOR_CODE_CLOSE)
+                prettified.append(aux.gui.color.yellow(component[2]))
             end
             for parameter in aux.util.present(component[3]) do
 	            if component[2] == 'item' then
-		            prettified.append(aux.info.display_name(aux.cache.item_id(parameter)) or aux.auction_listing.colors.ORANGE..'['..parameter..']'..FONT_COLOR_CODE_CLOSE)
+		            prettified.append(aux.info.display_name(aux.cache.item_id(parameter)) or aux.gui.color.orange('['..parameter..']'))
 	            else
 		            if m.filters[component[2]].input_type == 'money' then
-			            parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, nil, true)
+			            prettified.append(aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, aux.auction_listing.colors.ORANGE))
+		            else
+	                    prettified.append(aux.gui.color.orange(parameter))
 		            end
-	                prettified.append(aux.auction_listing.colors.ORANGE..parameter..FONT_COLOR_CODE_CLOSE)
 	            end
             end
         end

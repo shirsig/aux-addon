@@ -102,7 +102,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 			text = m.format_number(copper, false, decimal_points, color)..copper_text
 		end
 	end
-	
+
 	if is_negative then
 		if color then
 			text = color..'-'..FONT_COLOR_CODE_CLOSE..text
@@ -115,7 +115,8 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 end
 
 function public.from_string(value)
-	for _, number in {tonumber(value)} do
+	local number = tonumber(value)
+	if number and number >= 0 then
 		return number * COPPER_PER_GOLD
 	end
 
