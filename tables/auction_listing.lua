@@ -545,10 +545,7 @@ function private.percentage_color(pct)
 end
 
 function public.percentage_historical(pct, bid)
-    if pct > 10000 then
-        pct = '>10000'
-    end
-    return (bid and m.colors.GRAY or m.percentage_color(pct))..pct..'%'..FONT_COLOR_CODE_CLOSE
+    return (bid and m.colors.GRAY or m.percentage_color(pct))..(pct > 10000 and '>10000' or pct)..'%'..FONT_COLOR_CODE_CLOSE
 end
 
 function public.time_left(code)
