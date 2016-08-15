@@ -135,9 +135,7 @@ function public.VARIABLES_LOADED()
 end
 
 function private.AUCTION_HOUSE_SHOW()
-	if AuctionFrame:IsVisible() then
-		AuctionFrame:Hide()
-	end
+	AuctionFrame:Hide()
 	m.frame:Show()
 	m.tab_group:set_tab(1)
 end
