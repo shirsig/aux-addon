@@ -157,6 +157,11 @@ do
 	end
 end
 
+function public.set_size(frame, width, height)
+	frame:SetWidth(width)
+	frame:SetHeight(height or width)
+end
+
 function public.set_frame_style(frame, backdrop_color, border_color, left, right, top, bottom)
 	frame:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size, tile=true, insets={left=left, right=right, top=top, bottom=bottom}}
 	frame:SetBackdropColor(unpack(backdrop_color))
@@ -507,7 +512,8 @@ function public.dropdown(parent)
 
     local button = getglobal(dropdown:GetName()..'Button')
     button:ClearAllPoints()
-    button:SetPoint('RIGHT', dropdown, 1, 0)
+    button:SetScale(0.9)
+    button:SetPoint('RIGHT', dropdown, 0, 0)
     dropdown.button = button
 
     local text = getglobal(dropdown:GetName()..'Text')
