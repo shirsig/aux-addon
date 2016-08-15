@@ -85,9 +85,6 @@ function private.create_frames()
 		    if this:GetText() ~= valid_input then
 			    this:SetText(valid_input)
 		    end
-		    if (tonumber(m.last_page_input:GetText()) or aux.huge) < (tonumber(this:GetText()) or 1) then
-			    m.last_page_input:SetText(tonumber(this:GetText()))
-		    end
 	        if m.blizzard_page_index(this:GetText()) and not m.real_time_button:GetChecked() then
 	            this:SetBackdropColor(unpack(aux.gui.color.state.enabled))
 	        else
@@ -118,9 +115,6 @@ function private.create_frames()
 		    local valid_input = page and tostring(max(1, page)) or ''
 		    if this:GetText() ~= valid_input then
 			    this:SetText(valid_input)
-		    end
-		    if (tonumber(m.first_page_input:GetText()) or 1) > (tonumber(this:GetText()) or aux.huge) then
-			    this:SetText(tonumber(this:GetText()))
 		    end
 	        if m.blizzard_page_index(this:GetText()) and not m.real_time_button:GetChecked() then
 	            this:SetBackdropColor(unpack(aux.gui.color.state.enabled))

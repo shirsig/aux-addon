@@ -238,7 +238,7 @@ function private.blizzard_filter_parser()
             end
             if not filters.min_level then
                 filter = {'min_level', str}
-            elseif not filters.max_level and tonumber(str) >= tonumber(filters.min_level) then
+            elseif not filters.max_level then
                 filter = {'max_level', str}
             else
                 return nil, 'Erroneous level range modifier'

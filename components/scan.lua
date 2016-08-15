@@ -81,7 +81,7 @@ end
 
 function private.scan()
 	m.state.query_index = m.state.query_index and m.state.query_index + 1 or 1
-	if m.query() then
+	if m.query() and (aux.index(m.query.blizzard_query, 'first_page') or 0) <= (aux.index(m.query.blizzard_query, 'last_page') or aux.huge) then
 		if m.query.blizzard_query then
 			m.state.page = m.query.blizzard_query.first_page or 0
 		else
