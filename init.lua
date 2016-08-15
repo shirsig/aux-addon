@@ -2,7 +2,7 @@ local addon = {aux_module()}
 aux = tremove(addon, 1)
 local m, public, private = unpack(addon)
 
-public.version = '3.9.0'
+public.version = '4.0.0'
 
 private.modules = {}
 function public.module(path)

@@ -352,6 +352,7 @@ function private.initialize_filter_dropdown()
 			func = function()
 				m.filter_input:SetText(this.value)
 				if aux.filter.filters[this.value] and aux.filter.filters[this.value].input_type ~= '' then
+					m.filter_parameter_input:Show()
 					m.filter_parameter_input:SetFocus()
 				else
 					m.add_post_filter()
