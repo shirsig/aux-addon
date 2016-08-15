@@ -368,7 +368,7 @@ function public.editbox(parent)
     editbox:SetAutoFocus(false)
     editbox:SetTextInsets(1, 2, 3, 3)
     editbox:SetMaxLetters(256)
-    editbox:SetHeight(22)
+    editbox:SetHeight(24)
     editbox:SetFont(m.config.font, m.config.medium_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
     m.set_content_style(editbox)
@@ -379,6 +379,8 @@ function public.editbox(parent)
         local last_click
         editbox:SetScript('OnMouseDown', function()
             local x, y = GetCursorPosition()
+            -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
+            -- editbox:Insert'<ksejfkj>' TODO use insert with special tags to determine cursor position
             if last_click and GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
                 aux.control.thread(function() editbox:HighlightText() end)
             end
@@ -523,7 +525,7 @@ end
 
 function public.dropdown(parent)
     local dropdown = CreateFrame('Frame', m.name(), parent, 'UIDropDownMenuTemplate')
-	m.set_content_style(dropdown, 0, 0, 5, 5)
+	m.set_content_style(dropdown, 0, 0, 4, 4)
 
     getglobal(dropdown:GetName()..'Left'):Hide()
     getglobal(dropdown:GetName()..'Middle'):Hide()

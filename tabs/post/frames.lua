@@ -180,10 +180,10 @@ function private.create_frames()
 	end
 	do
 	    local dropdown = aux.gui.dropdown(m.frame.parameters)
-	    dropdown:SetPoint('TOPLEFT', m.stack_count_slider, 'BOTTOMLEFT', 0, -21)
+	    dropdown:SetPoint('TOPLEFT', m.stack_count_slider, 'BOTTOMLEFT', 0, -19)
 	    dropdown:SetWidth(90)
 	    local label = aux.gui.label(dropdown, aux.gui.config.small_font_size)
-	    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -4)
+	    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
 	    label:SetText('Duration')
 	    UIDropDownMenu_Initialize(dropdown, m.initialize_duration_dropdown)
 	    dropdown:SetScript('OnShow', function()
