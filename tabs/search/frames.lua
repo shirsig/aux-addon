@@ -500,7 +500,6 @@ function private.create_frames()
 	    dropdown:SetScript('OnShow', function()
 	        UIDropDownMenu_Initialize(this, m.initialize_slot_dropdown)
 	    end)
-
 	end
 	do
 	    local dropdown = aux.gui.dropdown(m.frame.filter)
@@ -531,31 +530,49 @@ function private.create_frames()
 	    private.filter_dropdown = dropdown
 	end
 	do
-	    local btn = aux.gui.button(m.frame.filter, 16)
-	    btn:SetWidth(150)
-	    btn:SetHeight(25)
-	    btn:SetPoint('CENTER', m.filter_dropdown, 'CENTER', 0, 0)
-	    btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-	    btn:SetScript('OnClick', function()
-	        if arg1 == 'LeftButton' then
-	            m.add_dropdown_component()
-	        elseif arg1 == 'RightButton' then
-	            m.remove_component()
-	        end
-	    end)
-	    private.filter_button = btn
+		local input = aux.gui.editbox(m.frame.filter)
+		input:SetPoint('CENTER', m.filter_dropdown, 'CENTER', 0, 0)
+		input:SetWidth(150)
+		input:SetScript('OnTabPressed', function()
+			m.filter_parameter_input:SetFocus()
+		end)
+		input.complete = aux.completion.complete(function() return {'and', 'or', 'not', unpack(aux.util.keys(aux.filter.filters))} end)
+		input:SetScript('OnChar', function()
+			this:complete()
+		end)
+		input:SetScript('OnTextChanged', function()
+			local filter = this:GetText()
+			if aux.filter.filters[filter] and aux.filter.filters[filter].input_type ~= '' then
+				local _, _, suggestions = aux.filter.parse_query_string(filter..'/')
+				m.filter_parameter_input:SetNumeric(aux.filter.filters[filter].input_type == 'number')
+				m.filter_parameter_input.complete = aux.completion.complete(function() return suggestions or {} end)
+				m.filter_parameter_input:Show()
+			else
+				m.filter_parameter_input:Hide()
+			end
+		end)
+		input:SetScript('OnEnterPressed', function()
+			if m.filter_parameter_input:IsVisible() then
+				m.filter_parameter_input:SetFocus()
+			else
+				m.add_post_filter()
+			end
+		end)
+		private.filter_input = input
 	end
 	do
 	    local input = aux.gui.editbox(m.frame.filter)
 	    input:SetPoint('LEFT', m.filter_dropdown, 'RIGHT', 10, 0)
 	    input:SetWidth(150)
-	    input:SetHeight(25)
+	    input:SetScript('OnTabPressed', function()
+		    m.filter_parameter_input:SetFocus()
+	    end)
 	    input:SetScript('OnChar', function()
 	        this:complete()
 	    end)
-	    input:SetScript('OnEnterPressed', m.add_dropdown_component)
+	    input:SetScript('OnEnterPressed', m.add_post_filter)
 	    input:Hide()
-	    private.filter_input = input
+	    private.filter_parameter_input = input
 	end
 	do
 	    local scroll_frame = CreateFrame('ScrollFrame', nil, m.frame.filter)
@@ -672,7 +689,7 @@ function private.create_frames()
 	}
 
 	private.recent_searches_listing = aux.listing.CreateScrollingTable(m.frame.saved.recent)
-	m.recent_searches_listing:SetColInfo({{name='Recent Searches', width=1}})
+	m.recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}
 	m.recent_searches_listing:EnableSorting(false)
 	m.recent_searches_listing:DisableSelection(true)
 	m.recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
@@ -680,7 +697,7 @@ function private.create_frames()
 	m.recent_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
 
 	private.favorite_searches_listing = aux.listing.CreateScrollingTable(m.frame.saved.favorite)
-	m.favorite_searches_listing:SetColInfo({{name='Favorite Searches', width=1}})
+	m.favorite_searches_listing:SetColInfo{{name='Favorite Searches', width=1}}
 	m.favorite_searches_listing:EnableSorting(false)
 	m.favorite_searches_listing:DisableSelection(true)
 	m.favorite_searches_listing:SetHandler('OnClick', handlers.OnClick)

@@ -1,7 +1,13 @@
 local m, public, private = aux.module'util'
 
-function public.present(value)
-	return value ~= nil and {[value]=true} or {}
+function public.present(...)
+	local called
+	return function()
+		if not called then
+			called = true
+			return unpack(arg)
+		end
+	end
 end
 
 function public.unpack(array, ...)

@@ -192,7 +192,7 @@ function private.clear_form()
 	UIDropDownMenu_ClearAll(m.subclass_dropdown)
 	UIDropDownMenu_ClearAll(m.slot_dropdown)
 	UIDropDownMenu_ClearAll(m.quality_dropdown)
-	m.filter_input:ClearFocus()
+	m.filter_parameter_input:ClearFocus()
 	m.post_filter = {}
 	m.filter_builder_state = {selected=0}
 	m.update_filter_display()
@@ -209,7 +209,7 @@ end
 
 function private.export_query_string()
 	m.search_box:SetText(m.get_filter_builder_query())
-	m.filter_input:ClearFocus()
+	m.filter_parameter_input:ClearFocus()
 end
 
 function public.formatted_post_filter(components)
@@ -223,21 +223,22 @@ function public.formatted_post_filter(components)
 		elseif i > 1 then
 			str = str..'</p><p>'
 			for _=1,getn(stack) do
-				str = str..aux.gui.inline_color.content.backdrop..'----'..FONT_COLOR_CODE_CLOSE
+				str = str..aux.gui.color.content.backdrop('----')
 			end
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
 
-		local component_text = component[2]
+		local filter_color = (m.filter_builder_state.selected == i and aux.gui.color.green or aux.gui.color.yellow)
+		local component_text = filter_color(component[2])
 		if component[1] == 'operator' and component[2] ~= 'not' then
-			component_text = component_text..(tonumber(component[3]) or '')
+			component_text = component_text..filter_color(tonumber(component[3]) or '')
 			tinsert(stack, component[3])
 		elseif component[1] == 'filter' then
-			for _, parameter in {component[3]} do
+			for parameter in aux.util.present(component[3]) do
 				if aux.filter.filters[component[2]].input_type == 'money' then
 					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, nil, true)
 				end
-				component_text = component_text..': '..aux.auction_listing.colors.ORANGE..parameter..FONT_COLOR_CODE_CLOSE or component_text
+				component_text = component_text..filter_color(': ')..aux.gui.color.orange(parameter)
 			end
 			while getn(stack) > 0 and stack[getn(stack)] do
 				local top = tremove(stack)
@@ -246,11 +247,6 @@ function public.formatted_post_filter(components)
 					break
 				end
 			end
-		end
-		if m.filter_builder_state.selected == i then
-			component_text = aux.auction_listing.colors.GREEN..component_text..FONT_COLOR_CODE_CLOSE
-		else
-			component_text = aux.auction_listing.colors.YELLOW..component_text..FONT_COLOR_CODE_CLOSE
 		end
 		str = str..m.data_link(i, component_text)
 	end
@@ -290,31 +286,23 @@ function private.add_component(component)
 	tinsert(m.post_filter, m.filter_builder_state.selected, component)
 end
 
-function private.add_dropdown_component()
-	for _, str in {UIDropDownMenu_GetSelectedValue(m.filter_dropdown)} do
-		if not aux.filter.filters[str] and str == 'and' or str == 'or' then
-			local arity = m.filter_input:GetText()
-			arity = tonumber(arity) and aux.util.round(tonumber(arity))
-			if arity and arity < 2 then
-				aux.log('Invalid operator suffix')
-				return
-			end
-			str = str..(arity or '')
-		end
-		for _, filter in {aux.filter.filters[str]} do
+function private.add_post_filter()
+	for str in aux.util.present(m.filter_input:GetText()) do
+		for filter in aux.util.present(aux.filter.filters[str]) do
 			if filter.input_type ~= '' then
-				str = str..'/'..m.filter_input:GetText()
+				str = str..'/'..m.filter_parameter_input:GetText()
 			end
 		end
 
 		local components, error, suggestions = aux.filter.parse_query_string(str)
 
-		if components then
+		if components and getn(components.blizzard) == 0 and getn(components.post) == 1 then
 			m.add_component(components.post[1])
 			m.update_filter_display()
-			m.filter_input:SetText('')
-			m.filter_input:ClearFocus()
-		else
+			m.filter_parameter_input:SetText('')
+			m.filter_input:HighlightText()
+			m.filter_input:SetFocus()
+		elseif error then
 			aux.log(error)
 		end
 	end
@@ -357,25 +345,18 @@ function private.set_filter_display_offset(x_offset, y_offset)
 end
 
 function private.initialize_filter_dropdown()
-	local function on_click()
-		UIDropDownMenu_SetSelectedValue(m.filter_dropdown, this.value)
-		m.filter_button:SetText(this.value)
-		if (not aux.filter.filters[this.value] or aux.filter.filters[this.value].input_type == '') and this.value ~= 'and' and this.value ~= 'or' then
-			m.filter_input:Hide()
-		else
-			local _, _, suggestions = aux.filter.parse_query_string(UIDropDownMenu_GetSelectedValue(m.filter_dropdown)..'/')
-			m.filter_input:SetNumeric(not aux.filter.filters[this.value] or aux.filter.filters[this.value].input_type == 'number')
-			m.filter_input.complete = aux.completion.complete(function() return suggestions or {} end)
-			m.filter_input:Show()
-			m.filter_input:SetFocus()
-		end
-	end
-
-	for _, filter in {'and', 'or', 'not', 'min-unit-buy', 'max-unit-bid', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard'} do
+	for _, filter in {'and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard'} do
 		UIDropDownMenu_AddButton{
 			text = filter,
 			value = filter,
-			func = on_click,
+			func = function()
+				m.filter_input:SetText(this.value)
+				if aux.filter.filters[this.value] and aux.filter.filters[this.value].input_type ~= '' then
+					m.filter_parameter_input:SetFocus()
+				else
+					m.add_post_filter()
+				end
+			end,
 		}
 	end
 end
