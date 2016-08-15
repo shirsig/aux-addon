@@ -80,68 +80,81 @@ end
 
 function m.LOAD()
 	m.initialize_menu()
+	m.initialize_dropdown()
+end
 
-	local backdrop = DropDownList1Backdrop:GetBackdrop()
+do
+	local blizzard_backdrop, aux_background, aux_border
 
-	DropDownList1.border = DropDownList1:CreateTexture()
-	DropDownList1.border:SetTexture(1,1,1,0.02)
-	DropDownList1.border:SetPoint('TOPLEFT', DropDownList1Backdrop, 'TOPLEFT', -1.5, 1.5)
-	DropDownList1.border:SetPoint('BOTTOMRIGHT', DropDownList1Backdrop, 'BOTTOMRIGHT', 1.5, -1.5)
-	DropDownList1.border:SetBlendMode('ADD')
-	DropDownList1.backdrop = DropDownList1:CreateTexture(nil, 'OVERLAY')
-	DropDownList1.backdrop:SetTexture(unpack(m.color.content.backdrop))
-	DropDownList1.backdrop:SetAllPoints(DropDownList1Backdrop)
-
-	aux.hook('ToggleDropDownMenu', function(...)
-		local ret = {aux.orig.ToggleDropDownMenu(unpack(arg))}
-		local dropdown = getglobal(arg[4] or '') or this:GetParent()
-		if strfind(dropdown:GetName() or '', 'aux_frame') then
-			DropDownList1Backdrop:SetBackdrop({})
-			DropDownList1.border:Show()
-			DropDownList1.backdrop:Show()
-			DropDownList1:SetWidth(dropdown:GetWidth() * 0.9)
-			DropDownList1:SetHeight(DropDownList1:GetHeight() - 10)
-			DropDownList1:ClearAllPoints()
-			DropDownList1:SetPoint('TOPLEFT', dropdown, 'BOTTOMLEFT', -2, -2)
-			for i=1,UIDROPDOWNMENU_MAXBUTTONS do
-				local button = getglobal('DropDownList1Button'..i)
-				button:SetPoint('TOPLEFT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
-				button:SetPoint('TOPRIGHT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
-				local text = button:GetFontString()
-				text:SetFont(m.config.font, m.config.small_font_size2)
-				text:SetPoint('TOPLEFT', 18, 0)
-				text:SetPoint('BOTTOMRIGHT', -8, 0)
-				local highlight = getglobal('DropDownList1Button'..i..'Highlight')
-				highlight:ClearAllPoints()
-				highlight:SetDrawLayer('OVERLAY')
-				highlight:SetHeight(14)
-				highlight:SetPoint('LEFT', 5, 0)
-				highlight:SetPoint('RIGHT', -3, 0)
-				local check = getglobal('DropDownList1Button'..i..'Check')
-				check:SetWidth(16)
-				check:SetHeight(16)
-				check:SetPoint('LEFT', 3, -1)
+	function private.initialize_dropdown()
+		aux_border = DropDownList1:CreateTexture()
+		aux_border:SetTexture(1, 1, 1, .02)
+		aux_border:SetPoint('TOPLEFT', DropDownList1Backdrop, 'TOPLEFT', -2, 2)
+		aux_border:SetPoint('BOTTOMRIGHT', DropDownList1Backdrop, 'BOTTOMRIGHT', 1.5, -1.5)
+		aux_border:SetBlendMode('ADD')
+		aux_background = DropDownList1:CreateTexture(nil, 'OVERLAY')
+		aux_background:SetTexture(unpack(m.color.content.backdrop))
+		aux_background:SetAllPoints(DropDownList1Backdrop)
+		blizzard_backdrop = DropDownList1Backdrop:GetBackdrop()
+		aux.hook('ToggleDropDownMenu', function(...)
+			local ret = {aux.orig.ToggleDropDownMenu(unpack(arg))}
+			local dropdown = getglobal(arg[4] or '') or this:GetParent()
+			if strfind(dropdown:GetName() or '', 'aux_frame') then
+				m.set_aux_dropdown_style(dropdown)
+			else
+				m.set_blizzard_dropdown_style()
 			end
-		else
-			DropDownList1Backdrop:SetBackdrop(backdrop)
-			DropDownList1.border:Hide()
-			DropDownList1.backdrop:Hide()
-			for i=1,UIDROPDOWNMENU_MAXBUTTONS do
-				local button = getglobal('DropDownList1Button'..i)
-				local text = button:GetFontString()
-				text:SetFont([[Fonts\FRIZQT__.ttf]], 10)
-				text:SetShadowOffset(1, -1)
-				local highlight = getglobal('DropDownList1Button'..i..'Highlight')
-				highlight:SetAllPoints()
-				highlight:SetDrawLayer('BACKGROUND')
-				local check = getglobal('DropDownList1Button'..i..'Check')
-				check:SetWidth(24)
-				check:SetHeight(24)
-				check:SetPoint('LEFT', 0, 0)
-			end
+			return unpack(ret)
+		end)
+	end
+
+	function private.set_aux_dropdown_style(dropdown)
+		DropDownList1Backdrop:SetBackdrop({})
+		aux_border:Show()
+		aux_background:Show()
+		DropDownList1:SetWidth(dropdown:GetWidth() * 0.9)
+		DropDownList1:SetHeight(DropDownList1:GetHeight() - 10)
+		DropDownList1:ClearAllPoints()
+		DropDownList1:SetPoint('TOPLEFT', dropdown, 'BOTTOMLEFT', -2, -2)
+		for i=1,UIDROPDOWNMENU_MAXBUTTONS do
+			local button = getglobal('DropDownList1Button'..i)
+			button:SetPoint('TOPLEFT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
+			button:SetPoint('TOPRIGHT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
+			local text = button:GetFontString()
+			text:SetFont(m.config.font, m.config.small_font_size2)
+			text:SetPoint('TOPLEFT', 18, 0)
+			text:SetPoint('BOTTOMRIGHT', -8, 0)
+			local highlight = getglobal('DropDownList1Button'..i..'Highlight')
+			highlight:ClearAllPoints()
+			highlight:SetDrawLayer('OVERLAY')
+			highlight:SetHeight(14)
+			highlight:SetPoint('LEFT', 5, 0)
+			highlight:SetPoint('RIGHT', -3, 0)
+			local check = getglobal('DropDownList1Button'..i..'Check')
+			check:SetWidth(16)
+			check:SetHeight(16)
+			check:SetPoint('LEFT', 3, -1)
 		end
-		return unpack(ret)
-	end)
+	end
+
+	function private.set_blizzard_dropdown_style()
+		DropDownList1Backdrop:SetBackdrop(blizzard_backdrop)
+		aux_border:Hide()
+		aux_background:Hide()
+		for i=1,UIDROPDOWNMENU_MAXBUTTONS do
+			local button = getglobal('DropDownList1Button'..i)
+			local text = button:GetFontString()
+			text:SetFont([[Fonts\FRIZQT__.ttf]], 10)
+			text:SetShadowOffset(1, -1)
+			local highlight = getglobal('DropDownList1Button'..i..'Highlight')
+			highlight:SetAllPoints()
+			highlight:SetDrawLayer('BACKGROUND')
+			local check = getglobal('DropDownList1Button'..i..'Check')
+			check:SetWidth(24)
+			check:SetHeight(24)
+			check:SetPoint('LEFT', 0, 0)
+		end
+	end
 end
 
 function public.set_frame_style(frame, backdrop_color, border_color, left, right, top, bottom)
@@ -327,7 +340,6 @@ function public.tab_group(parent, orientation)
 end
 
 function public.editbox(parent)
-
     local editbox = CreateFrame('EditBox', nil, parent)
     editbox:SetAutoFocus(false)
     editbox:SetTextInsets(1, 2, 3, 3)
@@ -349,18 +361,15 @@ function public.editbox(parent)
             last_click = {t=GetTime(), x=x, y=y}
         end)
     end
-
     function editbox:Enable()
 	    editbox:EnableMouse(true)
 	    editbox:SetTextColor(unpack(m.color.text.enabled))
     end
-
     function editbox:Disable()
 	    editbox:EnableMouse(false)
 	    editbox:SetTextColor(unpack(m.color.text.disabled))
 	    editbox:ClearFocus()
     end
-
     return editbox
 end
 
@@ -488,10 +497,9 @@ function public.vertical_line(parent, x_offset, top_offset, bottom_offset, inver
     return texture
 end
 
-
 function public.dropdown(parent)
     local dropdown = CreateFrame('Frame', m.name(), parent, 'UIDropDownMenuTemplate')
-	m.set_content_style(dropdown, 0, 0, 2, 2)
+	m.set_content_style(dropdown, 0, 0, 5, 5)
 
     getglobal(dropdown:GetName()..'Left'):Hide()
     getglobal(dropdown:GetName()..'Middle'):Hide()
@@ -499,7 +507,7 @@ function public.dropdown(parent)
 
     local button = getglobal(dropdown:GetName()..'Button')
     button:ClearAllPoints()
-    button:SetPoint('RIGHT', dropdown, -1, 0)
+    button:SetPoint('RIGHT', dropdown, 1, 0)
     dropdown.button = button
 
     local text = getglobal(dropdown:GetName()..'Text')
@@ -538,7 +546,7 @@ function public.slider(parent)
 
     local editbox = m.editbox(slider)
     editbox:SetPoint('LEFT', slider, 'RIGHT', 5, 0)
-    editbox:SetWidth(50)
+    editbox:SetWidth(45)
     editbox:SetHeight(18)
     editbox:SetJustifyH('CENTER')
     editbox:SetFont(m.config.font, 17)
