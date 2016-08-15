@@ -571,7 +571,7 @@ function private.prettified_query_string(components)
         end
     end
     if prettified.get() == '' then
-        return aux.auction_listing.colors.RED..'No Filter'..FONT_COLOR_CODE_CLOSE
+        return aux.gui.color.blizzard'<>'
     else
         return prettified.get()
     end
