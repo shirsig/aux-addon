@@ -223,12 +223,12 @@ function public.formatted_post_filter(components)
 		elseif i > 1 then
 			str = str..'</p><p>'
 			for _=1,getn(stack) do
-				str = str..aux.gui.color.content.backdrop('----')
+				str = str..aux.gui.color.content.background('----')
 			end
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
 
-		local filter_color = (m.filter_builder_state.selected == i and aux.gui.color.green or aux.gui.color.yellow)
+		local filter_color = (m.filter_builder_state.selected == i and aux.gui.color.orange or aux.gui.color.aux)
 		local component_text = filter_color(component[2])
 		if component[1] == 'operator' and component[2] ~= 'not' then
 			component_text = component_text..filter_color(tonumber(component[3]) or '')
@@ -236,11 +236,9 @@ function public.formatted_post_filter(components)
 		elseif component[1] == 'filter' then
 			for parameter in aux.util.present(component[3]) do
 				if component[2] == 'item' then
-					parameter = aux.info.display_name(aux.cache.item_id(parameter)) or aux.gui.color.orange('['..parameter..']')
+					parameter = aux.info.display_name(aux.cache.item_id(parameter)) or '['..parameter..']'
 				elseif aux.filter.filters[component[2]].input_type == 'money' then
-					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, aux.auction_listing.colors.ORANGE)
-				else
-					parameter = aux.gui.color.orange(parameter)
+					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true)
 				end
 				component_text = component_text..filter_color(': ')..parameter
 			end
@@ -355,11 +353,13 @@ function private.initialize_filter_dropdown()
 			value = filter,
 			func = function()
 				m.filter_input:SetText(this.value)
-				if aux.filter.filters[this.value] and aux.filter.filters[this.value].input_type ~= '' then
+				if aux.index(aux.filter.filters[this.value], 'input_type') == '' or this.value == 'not' then
+					m.add_post_filter()
+				elseif aux.filter.filters[this.value] then
 					m.filter_parameter_input:Show()
 					m.filter_parameter_input:SetFocus()
 				else
-					m.add_post_filter()
+					m.filter_input:SetFocus()
 				end
 			end,
 		}

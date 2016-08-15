@@ -5,9 +5,9 @@ public.config = {
 		text = {enabled = {255, 254, 250, 1}, disabled = {147, 151, 139, 1}},
 		label = {enabled = {216, 225, 211, 1}, disabled = {150, 148, 140, 1}},
 		link = {153, 255, 255, 1},
-		window = {backdrop = {24, 24, 24, .93}, border = {30, 30, 30, 1}},
-		panel = {backdrop = {24, 24, 24, 1}, border = {255, 255, 255, .03}},
-		content = {backdrop = {42, 42, 42, 1}, border = {0, 0, 0, 0}},
+		window = {background = {24, 24, 24, .93}, border = {30, 30, 30, 1}},
+		panel = {background = {24, 24, 24, 1}, border = {255, 255, 255, .03}},
+		content = {background = {42, 42, 42, 1}, border = {0, 0, 0, 0}},
 		state = {enabled = {70, 180, 70, 1}, disabled = {190, 70, 70, 1}},
 
 		blue = {41, 146, 255, 1},
@@ -16,6 +16,9 @@ public.config = {
 		orange = {255, 146, 24, 1},
 		red = {255, 0, 0, 1},
 		gray = {187, 187, 187, 1},
+
+		blizzard = {0, 180, 255, 1},
+		aux = {255, 255, 154, 1},
 	},
     edge_size = 1.5,
     font = [[Fonts\ARIALN.TTF]],
@@ -46,7 +49,7 @@ do
 		__call = function(self, text)
 			local r, g, b, a = unpack(self)
 			if text then
-				return format('|c%02X%02X%02X%02X', a*255, r*255, g*255, b)..text..FONT_COLOR_CODE_CLOSE
+				return format('|c%02X%02X%02X%02X', a, r*255, g*255, b*255)..text..FONT_COLOR_CODE_CLOSE
 			else
 				return r, g, b, a
 			end
@@ -112,7 +115,7 @@ do
 		aux_border:SetPoint('BOTTOMRIGHT', DropDownList1Backdrop, 'BOTTOMRIGHT', 1.5, -1.5)
 		aux_border:SetBlendMode('ADD')
 		aux_background = DropDownList1:CreateTexture(nil, 'OVERLAY')
-		aux_background:SetTexture(unpack(m.color.content.backdrop))
+		aux_background:SetTexture(unpack(m.color.content.background))
 		aux_background:SetAllPoints(DropDownList1Backdrop)
 		blizzard_backdrop = DropDownList1Backdrop:GetBackdrop()
 		aux.hook('ToggleDropDownMenu', function(...)
@@ -128,7 +131,7 @@ do
 	end
 
 	function private.set_aux_dropdown_style(dropdown)
-		DropDownList1Backdrop:SetBackdrop({})
+		DropDownList1Backdrop:SetBackdrop{}
 		aux_border:Show()
 		aux_background:Show()
 		DropDownList1:SetWidth(dropdown:GetWidth() * 0.9)
@@ -188,15 +191,15 @@ function public.set_frame_style(frame, backdrop_color, border_color, left, right
 end
 
 function public.set_window_style(frame, left, right, top, bottom)
-    m.set_frame_style(frame, m.color.window.backdrop, m.color.window.border, left, right, top, bottom)
+    m.set_frame_style(frame, m.color.window.background, m.color.window.border, left, right, top, bottom)
 end
 
 function public.set_panel_style(frame, left, right, top, bottom)
-    m.set_frame_style(frame, m.color.panel.backdrop, m.color.panel.border, left, right, top, bottom)
+    m.set_frame_style(frame, m.color.panel.background, m.color.panel.border, left, right, top, bottom)
 end
 
 function public.set_content_style(frame, left, right, top, bottom)
-    m.set_frame_style(frame, m.color.content.backdrop, m.color.content.border, left, right, top, bottom)
+    m.set_frame_style(frame, m.color.content.background, m.color.content.border, left, right, top, bottom)
 end
 
 function public.panel(parent)
@@ -292,7 +295,7 @@ function public.tab_group(parent, orientation)
             dock:SetPoint('TOPLEFT', 1, 1)
             dock:SetPoint('TOPRIGHT', -1, 1)
         end
-        dock:SetTexture(unpack(m.color.panel.backdrop))
+        dock:SetTexture(unpack(m.color.panel.background))
         tab.dock = dock
         local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
         highlight:SetAllPoints()
@@ -347,13 +350,13 @@ function public.tab_group(parent, orientation)
             if tab.group.selected == tab.id then
                 tab.text:SetTextColor(unpack(m.color.label.enabled))
                 tab:Disable()
-                tab:SetBackdropColor(unpack(m.color.panel.backdrop))
+                tab:SetBackdropColor(unpack(m.color.panel.background))
                 tab.dock:Show()
                 tab:SetHeight(29)
             else
                 tab.text:SetTextColor(unpack(m.color.text.enabled))
                 tab:Enable()
-                tab:SetBackdropColor(unpack(m.color.content.backdrop))
+                tab:SetBackdropColor(unpack(m.color.content.background))
                 tab.dock:Hide()
                 tab:SetHeight(24)
             end
@@ -503,9 +506,9 @@ function public.horizontal_line(parent, y_offset, inverted_color)
     texture:SetPoint('TOPRIGHT', parent, 'TOPRIGHT', -2, y_offset)
     texture:SetHeight(2)
     if inverted_color then
-        texture:SetTexture(unpack(m.color.panel.backdrop))
+        texture:SetTexture(unpack(m.color.panel.background))
     else
-        texture:SetTexture(unpack(m.color.content.backdrop))
+        texture:SetTexture(unpack(m.color.content.background))
     end
     return texture
 end
@@ -516,9 +519,9 @@ function public.vertical_line(parent, x_offset, top_offset, bottom_offset, inver
     texture:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', x_offset, bottom_offset or 2)
     texture:SetWidth(2)
     if inverted_color then
-        texture:SetTexture(unpack(m.color.panel.backdrop))
+        texture:SetTexture(unpack(m.color.panel.background))
     else
-        texture:SetTexture(unpack(m.color.content.backdrop))
+        texture:SetTexture(unpack(m.color.content.background))
     end
     return texture
 end
@@ -558,7 +561,7 @@ function public.slider(parent)
     m.set_panel_style(slider)
     local thumb_texture = slider:CreateTexture(nil, 'ARTWORK')
     thumb_texture:SetPoint('CENTER', 0, 0)
-    thumb_texture:SetTexture(unpack(m.color.content.backdrop))
+    thumb_texture:SetTexture(unpack(m.color.content.background))
     thumb_texture:SetHeight(18)
     thumb_texture:SetWidth(8)
     slider:SetThumbTexture(thumb_texture)

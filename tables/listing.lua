@@ -432,7 +432,7 @@ function public.CreateScrollingTable(parent)
     st.scrollBar = scrollBar
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
-    thumbTex:SetTexture(unpack(aux.gui.color.content.backdrop))
+    thumbTex:SetTexture(unpack(aux.gui.color.content.background))
     thumbTex:SetHeight(50)
     thumbTex:SetWidth(12)
     getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()

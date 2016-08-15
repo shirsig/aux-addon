@@ -540,31 +540,31 @@ function private.prettified_query_string(components)
     for _, filter in components.blizzard do
         blizzard_filters[filter[1]] = filter[2] or true
         if filter[1] == 'exact' then
-            prettified.prepend(aux.info.display_name(aux.cache.item_id(m.unquote(blizzard_filters.name))) or aux.gui.inline_color.label.enabled..'['..m.unquote(blizzard_filters.name)..']'..FONT_COLOR_CODE_CLOSE)
+            prettified.prepend(aux.info.display_name(aux.cache.item_id(m.unquote(blizzard_filters.name))) or aux.gui.color.blizzard('['..m.unquote(blizzard_filters.name)..']'))
         elseif filter[1] ~= 'name' then
-            prettified.append(aux.gui.inline_color.label.enabled..(filter[2] or filter[1])..FONT_COLOR_CODE_CLOSE)
+            prettified.append(aux.gui.color.blizzard(filter[2] or filter[1]))
         end
     end
 
     if blizzard_filters.name and not blizzard_filters.exact and blizzard_filters.name ~= '' then
-        prettified.prepend(aux.gui.inline_color.label.enabled..m.unquote(blizzard_filters.name)..FONT_COLOR_CODE_CLOSE)
+        prettified.prepend(aux.gui.color.blizzard(m.unquote(blizzard_filters.name)))
     end
 
     for _, component in components.post do
         if component[1] == 'operator' then
-			prettified.append(aux.auction_listing.colors.YELLOW..component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')..FONT_COLOR_CODE_CLOSE)
+			prettified.append(aux.gui.color.aux(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')))
         elseif component[1] == 'filter' then
             if component[2] ~= 'tooltip' then
-                prettified.append(aux.gui.color.yellow(component[2]))
+                prettified.append(aux.gui.color.aux(component[2]))
             end
             for parameter in aux.util.present(component[3]) do
 	            if component[2] == 'item' then
-		            prettified.append(aux.info.display_name(aux.cache.item_id(parameter)) or aux.gui.color.orange('['..parameter..']'))
+		            prettified.append(aux.info.display_name(aux.cache.item_id(parameter)) or aux.gui.color.label.enabled('['..parameter..']'))
 	            else
 		            if m.filters[component[2]].input_type == 'money' then
-			            prettified.append(aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, aux.auction_listing.colors.ORANGE))
+			            prettified.append(aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, aux.gui.inline_color.label.enabled))
 		            else
-	                    prettified.append(aux.gui.color.orange(parameter))
+			            prettified.append(aux.gui.color.label.enabled(parameter))
 		            end
 	            end
             end
