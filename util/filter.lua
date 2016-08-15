@@ -540,7 +540,7 @@ function private.prettified_query_string(components)
     for _, filter in components.blizzard do
         blizzard_filters[filter[1]] = filter[2] or true
         if filter[1] == 'exact' then
-            prettified.prepend(aux.info.display_name(aux.cache.item_id(m.unquote(blizzard_filters.name))) or aux.gui.inline_color.label.enabled..'['..m.unquote(blizzard_filters.name)..']|r')
+            prettified.prepend(aux.info.display_name(aux.cache.item_id(m.unquote(blizzard_filters.name))) or aux.gui.inline_color.label.enabled..'['..m.unquote(blizzard_filters.name)..']'..FONT_COLOR_CODE_CLOSE)
         elseif filter[1] ~= 'name' then
             prettified.append(aux.gui.inline_color.label.enabled..(filter[2] or filter[1])..FONT_COLOR_CODE_CLOSE)
         end
@@ -557,11 +557,15 @@ function private.prettified_query_string(components)
             if component[2] ~= 'tooltip' then
                 prettified.append(aux.auction_listing.colors.YELLOW..component[2]..FONT_COLOR_CODE_CLOSE)
             end
-            for _, parameter in {component[3]} do
-	            if m.filters[component[2]].input_type == 'money' then
-		            parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, nil, true)
+            for parameter in aux.util.present(component[3]) do
+	            if component[2] == 'item' then
+		            prettified.append(aux.info.display_name(aux.cache.item_id(parameter)) or aux.auction_listing.colors.ORANGE..'['..parameter..']'..FONT_COLOR_CODE_CLOSE)
+	            else
+		            if m.filters[component[2]].input_type == 'money' then
+			            parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, nil, true)
+		            end
+	                prettified.append(aux.auction_listing.colors.ORANGE..parameter..FONT_COLOR_CODE_CLOSE)
 	            end
-                prettified.append(aux.auction_listing.colors.ORANGE..parameter..FONT_COLOR_CODE_CLOSE)
             end
         end
     end
