@@ -235,10 +235,14 @@ function public.formatted_post_filter(components)
 			tinsert(stack, component[3])
 		elseif component[1] == 'filter' then
 			for parameter in aux.util.present(component[3]) do
-				if aux.filter.filters[component[2]].input_type == 'money' then
-					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, nil, true)
+				if component[2] == 'item' then
+					parameter = aux.info.display_name(aux.cache.item_id(parameter)) or aux.gui.color.orange('['..parameter..']')
+				elseif aux.filter.filters[component[2]].input_type == 'money' then
+					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, aux.auction_listing.colors.ORANGE)
+				else
+					parameter = aux.gui.color.orange(parameter)
 				end
-				component_text = component_text..filter_color(': ')..aux.gui.color.orange(parameter)
+				component_text = component_text..filter_color(': ')..parameter
 			end
 			while getn(stack) > 0 and stack[getn(stack)] do
 				local top = tremove(stack)
