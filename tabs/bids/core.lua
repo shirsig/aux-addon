@@ -1,5 +1,5 @@
 aux.module 'bids_tab'
-aux.tab(4, 'Bids', 'bids_tab')
+aux.tab(4, 'Bids')
 
 private.auction_records = nil
 

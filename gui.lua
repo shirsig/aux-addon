@@ -369,9 +369,9 @@ function public.editbox(parent)
     editbox:SetFont(m.config.font, m.config.medium_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
     m.set_content_style(editbox)
-    editbox:SetScript('OnEditFocusGained', aux._(editbox.HighlightText, aux.this))
-    editbox:SetScript('OnEditFocusLost', aux._(editbox.HighlightText, aux.this, 0, 0))
-    editbox:SetScript('OnEscapePressed', aux._(editbox.ClearFocus, aux.this))
+    editbox:SetScript('OnEditFocusGained', aux._(editbox.HighlightText, aux._this))
+    editbox:SetScript('OnEditFocusLost', aux._(editbox.HighlightText, aux._this, 0, 0))
+    editbox:SetScript('OnEscapePressed', aux._(editbox.ClearFocus, aux._this))
     do
         local last_click
         editbox:SetScript('OnMouseDown', function()

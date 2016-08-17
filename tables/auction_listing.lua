@@ -4,27 +4,19 @@ local RT_COUNT = 1
 local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
 
-public.colors = {
-	BLUE = '|cff2992ff',
-	GREEN = '|cff16ff16',
-	YELLOW = '|cffffff00',
-	ORANGE = '|cffff9218',
-	RED = '|cffff0000',
-	GRAY = '|cffbbbbbb',
+local AUCTION_PCT_COLORS = {
+    {color=aux.gui.inline_color.blue, value=50},
+    {color=aux.gui.inline_color.green, value=80},
+    {color=aux.gui.inline_color.yellow, value=110},
+    {color=aux.gui.inline_color.orange, value=135},
+    {color=aux.gui.inline_color.red, value=aux.huge},
 }
 
-local AUCTION_PCT_COLORS = {
-    {color=m.colors.BLUE, value=50},
-    {color=m.colors.GREEN, value=80},
-    {color=m.colors.YELLOW, value=110},
-    {color=m.colors.ORANGE, value=135},
-    {color=m.colors.RED, value=aux.huge},
-}
 local TIME_LEFT_STRINGS = {
-	m.colors.RED..'30m'..FONT_COLOR_CODE_CLOSE, -- Short
-	m.colors.ORANGE..'2h'..FONT_COLOR_CODE_CLOSE, -- Medium
-	m.colors.YELLOW..'8h'..FONT_COLOR_CODE_CLOSE, -- Long
-	m.colors.BLUE..'24h'..FONT_COLOR_CODE_CLOSE, -- Very Long
+	aux.gui.color.red '30m', -- Short
+	aux.gui.color.orange '2h', -- Medium
+	aux.gui.color.yellow '8h', -- Long
+	aux.gui.color.blue '24h', -- Very Long
 }
 
 function private.item_column_init(rt, cell)
@@ -84,7 +76,7 @@ public.search_config = {
         align = 'CENTER',
         set = function(cell, record)
             local display_level = max(record.level, 1)
-            display_level = UnitLevel('player') < record.level and m.colors.RED..display_level..FONT_COLOR_CODE_CLOSE or display_level
+            display_level = UnitLevel('player') < record.level and aux.gui.color.red(display_level) or display_level
             cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
@@ -96,9 +88,9 @@ public.search_config = {
         width = 0.06,
         align = 'CENTER',
         set = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and aux.gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
+            local numAuctionsText = expandable and aux.gui.color.link(count) or count
             if own > 0 then
-                numAuctionsText = numAuctionsText..(' '..m.colors.YELLOW..'('..own..')'..FONT_COLOR_CODE_CLOSE)
+                numAuctionsText = numAuctionsText..(' '..aux.gui.color.yellow('('..own..')'))
             end
             cell:SetText(numAuctionsText)
         end,
@@ -142,7 +134,7 @@ public.search_config = {
         width = 0.13,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(aux.is_player(record.owner) and (m.colors.YELLOW..record.owner..FONT_COLOR_CODE_CLOSE) or (record.owner or '---'))
+            cell:SetText(aux.is_player(record.owner) and (aux.gui.color.yellow(record.owner)) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -254,7 +246,7 @@ public.auctions_config = {
         align = 'CENTER',
         set = function(cell, record)
             local display_level = max(record.level, 1)
-            display_level = UnitLevel('player') < record.level and m.colors.RED..display_level..FONT_COLOR_CODE_CLOSE or display_level
+            display_level = UnitLevel('player') < record.level and aux.gui.color.red(display_level) or display_level
             cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
@@ -357,7 +349,7 @@ public.auctions_config = {
         width = 0.21,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(record.high_bidder or m.colors.RED..'No Bids'..FONT_COLOR_CODE_CLOSE)
+            cell:SetText(record.high_bidder or aux.gui.color.red 'No Bids')
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.high_bidder and not record_b.high_bidder then
@@ -443,7 +435,7 @@ public.bids_config = {
         width = 0.13,
         align = 'CENTER',
         set = function(cell, record)
-            cell:SetText(aux.is_player(record.owner) and (m.colors.YELLOW..record.owner..FONT_COLOR_CODE_CLOSE) or (record.owner or '---'))
+            cell:SetText(aux.is_player(record.owner) and (aux.gui.color.yellow(record.owner)) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -512,9 +504,9 @@ public.bids_config = {
         set = function(cell, record)
             local status
             if record.high_bidder then
-                status = m.colors.YELLOW..'High Bidder'..FONT_COLOR_CODE_CLOSE
+                status = aux.gui.color.yellow 'High Bidder'
             else
-                status = m.colors.RED..'Outbid'..FONT_COLOR_CODE_CLOSE
+                status = aux.gui.color.red 'Outbid'
             end
             cell:SetText(status)
         end,
@@ -545,7 +537,7 @@ function private.percentage_color(pct)
 end
 
 function public.percentage_historical(pct, bid)
-    return (bid and m.colors.GRAY or m.percentage_color(pct))..(pct > 10000 and '>10000' or pct)..'%'..FONT_COLOR_CODE_CLOSE
+    return (bid and aux.gui.inline_color.gray or m.percentage_color(pct))..(pct > 10000 and '>10000' or pct)..'%'..FONT_COLOR_CODE_CLOSE
 end
 
 function public.time_left(code)
@@ -554,16 +546,13 @@ end
 
 local methods = {
 
-    OnContentSizeChanged = function()
-        local width = arg1
-        local rt = this:GetParent()
-        for _, cell in rt.headCells do
+    OnContentSizeChanged = function(self, width)
+        for _, cell in self.headCells do
             cell:SetWidth(cell.info.width * width)
         end
-
-        for _, row in rt.rows do
+        for _, row in self.rows do
             for i, cell in row.cells do
-                cell:SetWidth(rt.headCells[i].info.width * width)
+                cell:SetWidth(self.headCells[i].info.width * width)
             end
         end
     end,
@@ -739,17 +728,17 @@ local methods = {
         -- update sorting highlights
         for _, cell in self.headCells do
             local tex = cell:GetNormalTexture()
-            tex:SetTexture([[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]])
-            tex:SetTexCoord(0.017, 1, 0.083, 0.909)
+            tex:SetTexture [[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]]
+            tex:SetTexCoord(.017, 1, .083, .909)
             tex:SetAlpha(0.5)
         end
 
         if getn(self.sorts) > 0 then
             local last_sort = self.sorts[1]
             if last_sort.descending then
-                self.headCells[last_sort.index]:GetNormalTexture():SetTexture(0.8, 0.6, 1, 0.8)
+                self.headCells[last_sort.index]:GetNormalTexture():SetTexture(.8, .6, 1, .8)
             else
-                self.headCells[last_sort.index]:GetNormalTexture():SetTexture(0.6, 0.8, 1, 0.8)
+                self.headCells[last_sort.index]:GetNormalTexture():SetTexture(.6, .8, 1, .8)
             end
         end
 
@@ -1069,8 +1058,8 @@ function public.CreateAuctionResultsTable(parent, config)
         cell:SetScript('OnClick', rt.OnHeadColumnClick)
 
         local text = cell:CreateFontString()
-        text:SetJustifyH('CENTER')
-        text:SetJustifyV('CENTER')
+        text:SetJustifyH 'CENTER'
+        text:SetJustifyV 'CENTER'
         text:SetFont(aux.gui.config.font, 12)
         text:SetTextColor(unpack(aux.gui.color.label.enabled))
         cell:SetFontString(text)
@@ -1079,16 +1068,16 @@ function public.CreateAuctionResultsTable(parent, config)
 
         local tex = cell:CreateTexture()
         tex:SetAllPoints()
-        tex:SetTexture([[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]])
-        tex:SetTexCoord(0.017, 1, 0.083, 0.909)
-        tex:SetAlpha(0.5)
+        tex:SetTexture [[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]]
+        tex:SetTexCoord(.017, 1, .083, .909)
+        tex:SetAlpha(.5)
         cell:SetNormalTexture(tex)
 
         local tex = cell:CreateTexture()
         tex:SetAllPoints()
-        tex:SetTexture([[Interface\Buttons\UI-Listbox-Highlight]])
-        tex:SetTexCoord(0.025, 0.957, 0.087, 0.931)
-        tex:SetAlpha(0.2)
+        tex:SetTexture [[Interface\Buttons\UI-Listbox-Highlight]]
+        tex:SetTexCoord(.025, .957, .087, .931)
+        tex:SetAlpha(.2)
         cell:SetHighlightTexture(tex)
 
         tinsert(rt.headCells, cell)
@@ -1119,7 +1108,7 @@ function public.CreateAuctionResultsTable(parent, config)
             local text = cell:CreateFontString()
             text:SetFont(aux.gui.config.font, min(14, rt.ROW_HEIGHT))
             text:SetJustifyH(rt.config[j].align or 'LEFT')
-            text:SetJustifyV('CENTER')
+            text:SetJustifyV 'CENTER'
             text:SetPoint('TOPLEFT', 1, -1)
             text:SetPoint('BOTTOMRIGHT', -1, 1)
             cell:SetFontString(text)
@@ -1142,7 +1131,7 @@ function public.CreateAuctionResultsTable(parent, config)
             if mod(j,2) == 1 then
                 local tex = cell:CreateTexture()
                 tex:SetAllPoints()
-                tex:SetTexture(0.3, 0.3, 0.3, 0.2)
+                tex:SetTexture(.3, .3, .3, .2)
                 cell:SetNormalTexture(tex)
             end
 
@@ -1157,15 +1146,14 @@ function public.CreateAuctionResultsTable(parent, config)
         if mod(i,2) == 0 then
             local tex = row:CreateTexture()
             tex:SetAllPoints()
-            tex:SetTexture(0.3, 0.3, 0.3, 0.3)
+            tex:SetTexture(.3, .3, .3, .3)
         end
 
         tinsert(rt.rows, row)
     end
 
     rt:SetAllPoints()
-    this = contentFrame -- TODO change, maybe use for resize without scrollbar?
-    arg1 = contentFrame:GetWidth()
-    rt:OnContentSizeChanged()
+    --TODO change, maybe use for resize without scrollbar?
+    rt:OnContentSizeChanged(contentFrame:GetWidth())
     return rt
 end

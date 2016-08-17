@@ -17,6 +17,9 @@ local interface_mt = {
 		return state[self].data[key]
 	end,
 	__newindex = function(self, key, value)
+		if type(value) == 'string' then
+			aux.log('kek', debugstack(1, 0, 5))
+		end
 		if state[self].type == PUBLIC then
 			error('Unsupported operation.', 2)
 		elseif not state[self].access[PRIVATE][key] then

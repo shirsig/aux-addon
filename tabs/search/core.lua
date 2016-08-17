@@ -1,5 +1,5 @@
 aux.module 'search_tab'
-aux.tab(1, 'Search', 'search_tab')
+aux.tab(1, 'Search')
 
 StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
     text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',
@@ -54,12 +54,11 @@ function m.LOAD()
 	m.create_frames()
 	m.update_tab(m.SAVED)
 	m.update_auto_buy_filter()
-	m.new_search('')
+	m.new_search ''
 	m.current_search().placeholder = true
 end
 
 function m.OPEN()
-	aux.log('kek2')
     m.frame:Show()
     m.update_search_listings()
 end

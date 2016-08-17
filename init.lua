@@ -25,7 +25,7 @@ function public.module(path)
 	setfenv(2, env)
 end
 
-local event_frame = CreateFrame('Frame')
+local event_frame = CreateFrame 'Frame'
 for _, event in {'VARIABLES_LOADED', 'ADDON_LOADED', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE'} do
 	event_frame:RegisterEvent(event)
 end
@@ -39,8 +39,8 @@ event_frame:SetScript('OnEvent', function()
 		m[event]()
 		if event == 'VARIABLES_LOADED' then
 			for _, env in m.module_envs do
-				if env.LOAD then
-					env.LOAD()
+				if env.m.LOAD then
+					env.m.LOAD()
 				end
 			end
 			m.log('v'..m.version..' loaded.')

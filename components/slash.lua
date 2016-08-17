@@ -4,24 +4,24 @@ function SlashCmdList.AUX(command)
 	local arguments = aux.util.tokenize(command)
     if arguments[1] == 'clear' and arguments[2] == 'history' then
         aux.persistence.load_dataset().history = nil
-        aux.log('History cleared.')
+        aux.log 'History cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'post' then
         aux.persistence.load_dataset().post = nil
-        aux.log('Post settings cleared.')
+        aux.log 'Post settings cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'datasets' then
         aux_datasets = {}
-        aux.log('Datasets cleared.')
+        aux.log 'Datasets cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'merchant' and arguments[3] == 'buy' then
         aux_merchant_buy = {}
-        aux.log('Merchant buy prices cleared.')
+        aux.log 'Merchant buy prices cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'merchant' and arguments[3] == 'sell' then
         aux_merchant_sell = {}
-        aux.log('Merchant sell prices cleared.')
+        aux.log 'Merchant sell prices cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'item' and arguments[3] == 'cache' then
         aux_items = {}
         aux_item_ids = {}
         aux_auctionable_items = {}
-        aux.log('Item cache cleared.')
+        aux.log 'Item cache cleared.'
     elseif arguments[1] == 'populate' and arguments[2] == 'wdb' then
         aux.cache.populate_wdb()
     elseif arguments[1] == 'tooltip' and arguments[2] == 'value' then
@@ -49,7 +49,7 @@ function SlashCmdList.AUX(command)
         aux_ignore_owner = not aux_ignore_owner
         aux.log('Ignoring of owner '..(aux_ignore_owner and 'enabled' or 'disabled')..'.')
     elseif arguments[1] == 'chars' and arguments[2] == 'add' then
-		local realm = GetCVar('realmName')
+		local realm = GetCVar 'realmName'
 		aux_characters[realm] = aux_characters[realm] or {}
 		for i=3,getn(arguments) do
 			local name = string.gsub(strlower(arguments[i]), '^%l', strupper)
@@ -59,7 +59,7 @@ function SlashCmdList.AUX(command)
 			end
 		end
 	elseif arguments[1] == 'chars' and arguments[2] == 'remove' then
-		local realm = GetCVar('realmName')
+		local realm = GetCVar 'realmName'
 		if not aux_characters[realm] then
 			return
 		end
@@ -71,7 +71,7 @@ function SlashCmdList.AUX(command)
 			end
 		end
 	elseif arguments[1] == 'chars' then
-		local realm = GetCVar('realmName')
+		local realm = GetCVar 'realmName'
 		local chars = {}
 		for name, _ in aux_characters[realm] or {} do
 			tinsert(chars, name)
@@ -79,7 +79,7 @@ function SlashCmdList.AUX(command)
 		if getn(chars) > 0 then
 			aux.log('Your characters: "'..table.concat(chars, ', ')..'".')
 		else
-			aux.log('You don\'t have any additional characters. To add your characters type "/aux chars add NAME1 NAME2 NAME3...".')
+			aux.log 'You don\'t have any additional characters. To add your characters type "/aux chars add NAME1 NAME2 NAME3...".'
 		end
 	else
 		aux.log('Unknown command: "'..command..'"')

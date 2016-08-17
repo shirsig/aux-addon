@@ -286,9 +286,9 @@ function public.parse_query_string(str)
     local i = 1
     while parts[i] do
         if aux.temp(m.operator(parts[i])) then
-            tinsert(post_filter, __.operator)
-        elseif __(m.filters[parts[i]]) then
-            local input_type = __.filter.input_type
+            tinsert(post_filter, __)
+        elseif aux.temp(m.filters[parts[i]]) then
+            local input_type = __.input_type
             if input_type ~= '' then
                 if not parts[i + 1] or not m.parse_parameter(input_type, parts[i + 1]) then
                     if parts[i] == 'item' then
@@ -511,8 +511,8 @@ function private.blizzard_query(components)
     local query = {name=filters.name and filters.name[2]}
 
     local item_info, class_index, subclass_index, slot_index
-    if filters.exact and aux.temp(aux.cache.item_id(filters.name[2])) and __(aux.info.item(__.item_id)) then
-	    item_info = __.item_info
+    if filters.exact and aux.temp(aux.cache.item_id(filters.name[2])) and aux.temp(aux.info.item(__)) then
+	    item_info = __
         class_index = aux.info.item_class_index(item_info.class)
         subclass_index = aux.info.item_subclass_index(class_index or 0, item_info.subclass)
         slot_index = aux.info.item_slot_index(class_index or 0, subclass_index or 0, item_info.slot)

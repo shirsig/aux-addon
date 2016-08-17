@@ -50,11 +50,16 @@ do
 		end,
 	}
 	function public.temp(object)
-		local env = getfenv(2)
-		env.__ = object
-		return env.__(object)
+		getfenv(2).__ = object
+		return object
 	end
 end
+
+--	function public.temp(object)
+--		local env = getfenv(2)
+--		env.__ = object
+--		return object
+--	end
 
 function public.L(body_string)
 	return loadstring 'function()'
@@ -68,7 +73,7 @@ function public.tab(index, name)
 		return tab == m.active_tab()
 	end
 	for _, handler in {'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do
-		module_env.private[handler] = 5
+		module_env.private[handler] = nil
 	end
 	m.tabs[index] = tab
 end
@@ -79,11 +84,11 @@ do
 	end)
 	function private.on_tab_click(index)
 		if active_tab_index then
-			m.call(m.active_tab.env.CLOSE)
+			m.call(m.active_tab.env.m.CLOSE)
 		end
 		active_tab_index = index
 		if active_tab_index then
-			m.call(m.active_tab.env.OPEN)
+			m.call(m.active_tab.env.m.OPEN)
 		end
 	end
 end
@@ -122,10 +127,10 @@ function public.VARIABLES_LOADED()
 	end
 	do
 		local tabs = m.gui.tabs(m.frame, 'DOWN')
+		tabs._on_select = m.on_tab_click
 		for _, tab in m.tabs do
 			tabs:create_tab(tab.name)
 		end
-		tabs._on_select = m.on_tab_click
 		function public.set_tab(id)
 			tabs:select(id)
 		end
@@ -305,7 +310,7 @@ function private.SetItemRef(...)
 		return m.orig.SetItemRef(unpack(arg))
 	end
 	for item_info in aux.util.present(m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))) do
-		return m.active_tab.env.CLICK_LINK(item_info)
+		return m.active_tab.env.m.CLICK_LINK(item_info)
 	end
 end
 
@@ -314,7 +319,7 @@ function private.UseContainerItem(...)
         return m.orig.UseContainerItem(unpack(arg))
     end
     for _, item_info in {m.info.container_item(arg[1], arg[2])} do
-        return m.active_tab.env.USE_ITEM(item_info)
+        return m.active_tab.env.m.USE_ITEM(item_info)
     end
 end
 
@@ -373,7 +378,7 @@ do
 	end
 end
 
-public.this = {}
+public._this = {}
 do
 	local formal_parameters = {}
 	for i=1,9 do
@@ -384,7 +389,7 @@ do
 	local function call(f, arg1, arg2)
 		local params = {}
 		for i=1,arg1.n do
-			if arg1[i] == m.this then
+			if arg1[i] == m._this then
 				tinsert(params, this)
 			elseif formal_parameters[arg1[i]] then
 				tinsert(params, arg2[formal_parameters[arg1[i]]])
@@ -410,9 +415,7 @@ end
 
 function public.index(t, ...)
 	for i=1,arg.n do
-		if t then
-			t = t[arg[i]]
-		end
+		t = t and t[arg[i]]
 	end
 	return t
 end
@@ -428,8 +431,8 @@ function public.log(...)
 end
 
 function public.is_player(name, current)
-    local realm = GetCVar('realmName')
-    return not current and m.index(aux_characters, realm, name) or UnitName('player') == name
+    local realm = GetCVar 'realmName'
+    return not current and m.index(aux_characters, realm, name) or UnitName 'player' == name
 end
 
 function public.modified()
@@ -437,7 +440,7 @@ function public.modified()
 end
 
 function public.neutral_faction()
-	return not UnitFactionGroup('npc')
+	return not UnitFactionGroup 'npc'
 end
 
 function public.min_bid_increment(current_bid)
