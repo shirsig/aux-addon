@@ -1,4 +1,4 @@
-local m, public, private = aux.module'disenchant'
+aux.module 'disenchant'
 
 private.UNCOMMON = 2
 private.RARE = 3

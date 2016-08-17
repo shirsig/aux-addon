@@ -1,4 +1,4 @@
-local m, public, private = aux.module'control'
+aux.module 'control'
 
 private.event_frame = CreateFrame('Frame')
 private.listeners = {}

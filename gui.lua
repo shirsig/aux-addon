@@ -1,4 +1,4 @@
-local m, public, private = aux.module'gui'
+aux.module 'gui'
 
 public.config = {
 	color = {
@@ -265,105 +265,99 @@ function public.resize_tab(tab, width, padding)
     tab:SetWidth(width + padding + 10)
 end
 
+do
+	local mt = {__index={}}
+	function mt.__index:create_tab(text)
+		local id = getn(self._tabs) + 1
 
-function public.tab_group(parent, orientation)
+		local tab = CreateFrame('Button', m.name(), self._frame)
+		tab.id = id
+		tab.group = self
+		tab:SetHeight(24)
+		tab:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size}
+		tab:SetBackdropBorderColor(m.color.panel.border())
+		local dock = tab:CreateTexture(nil, 'OVERLAY')
+		dock:SetHeight(3)
+		if self._orientation == 'UP' then
+			dock:SetPoint('BOTTOMLEFT', 1, -1)
+			dock:SetPoint('BOTTOMRIGHT', -1, -1)
+		elseif self._orientation == 'DOWN' then
+			dock:SetPoint('TOPLEFT', 1, 1)
+			dock:SetPoint('TOPRIGHT', -1, 1)
+		end
+		dock:SetTexture(m.color.panel.background())
+		tab.dock = dock
+		local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
+		highlight:SetAllPoints()
+		highlight:SetTexture(1, 1, 1, .2)
+		highlight:SetBlendMode 'BLEND'
+		tab.highlight = highlight
 
-    local frame = CreateFrame('Frame', nil, parent)
-    frame:SetHeight(100)
-    frame:SetWidth(100)
+		tab.text = tab:CreateFontString()
+		tab.text:SetPoint('LEFT', 3, -1)
+		tab.text:SetPoint('RIGHT', -3, -1)
+		tab.text:SetJustifyH 'CENTER'
+		tab.text:SetJustifyV 'CENTER'
+		tab.text:SetFont(m.config.font, m.config.large_font_size2)
+		tab:SetFontString(tab.text)
 
-    local self = {
-        frame = parent,
-        tabs = {},
-    }
+		tab:SetText(text)
 
-    function self:create_tab(text)
-        local id = getn(self.tabs) + 1
+		tab:SetScript('OnClick', function()
+			if this.id ~= this.group.selected then
+				PlaySound 'igCharacterInfoTab'
+				this.group:select(this.id)
+			end
+		end)
 
-        local tab = CreateFrame('Button', m.name(), self.frame)
-        tab.id = id
-        tab.group = self
-        tab:SetHeight(24)
-        tab:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=m.config.edge_size}
-        tab:SetBackdropBorderColor(unpack(m.color.panel.border))
-        local dock = tab:CreateTexture(nil, 'OVERLAY')
-        dock:SetHeight(3)
-        if orientation == 'UP' then
-            dock:SetPoint('BOTTOMLEFT', 1, -1)
-            dock:SetPoint('BOTTOMRIGHT', -1, -1)
-        elseif orientation == 'DOWN' then
-            dock:SetPoint('TOPLEFT', 1, 1)
-            dock:SetPoint('TOPRIGHT', -1, 1)
-        end
-        dock:SetTexture(unpack(m.color.panel.background))
-        tab.dock = dock
-        local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
-        highlight:SetAllPoints()
-        highlight:SetTexture(1, 1, 1, .2)
-        highlight:SetBlendMode('BLEND')
-        tab.highlight = highlight
+		if getn(self._tabs) == 0 then
+			if self._orientation == 'UP' then
+				tab:SetPoint('BOTTOMLEFT', self._frame, 'TOPLEFT', 4, -1)
+			elseif self._orientation == 'DOWN' then
+				tab:SetPoint('TOPLEFT', self._frame, 'BOTTOMLEFT', 4, 1)
+			end
+		else
+			if self._orientation == 'UP' then
+				tab:SetPoint('BOTTOMLEFT', self._tabs[getn(self._tabs)], 'BOTTOMRIGHT', 4, 0)
+			elseif self._orientation == 'DOWN' then
+				tab:SetPoint('TOPLEFT', self._tabs[getn(self._tabs)], 'TOPRIGHT', 4, 0)
+			end
+		end
 
-        tab.text = tab:CreateFontString()
-        tab.text:SetPoint('LEFT', 3, -1)
-        tab.text:SetPoint('RIGHT', -3, -1)
-        tab.text:SetJustifyH('CENTER')
-        tab.text:SetJustifyV('CENTER')
-        tab.text:SetFont(m.config.font, m.config.large_font_size2)
-        tab:SetFontString(tab.text)
+		m.resize_tab(tab, tab:GetFontString():GetStringWidth(), 4)
 
-        tab:SetText(text)
-
-        tab:SetScript('OnClick', function()
-            if this.id ~= this.group.selected then
-	            PlaySound('igCharacterInfoTab')
-                this.group:set_tab(this.id)
-            end
-        end)
-
-        if getn(self.tabs) == 0 then
-            if orientation == 'UP' then
-                tab:SetPoint('BOTTOMLEFT', self.frame, 'TOPLEFT', 4, -1)
-            elseif orientation == 'DOWN' then
-                tab:SetPoint('TOPLEFT', self.frame, 'BOTTOMLEFT', 4, 1)
-            end
-        else
-            if orientation == 'UP' then
-                tab:SetPoint('BOTTOMLEFT', self.tabs[getn(self.tabs)], 'BOTTOMRIGHT', 4, 0)
-            elseif orientation == 'DOWN' then
-                tab:SetPoint('TOPLEFT', self.tabs[getn(self.tabs)], 'TOPRIGHT', 4, 0)
-            end
-        end
-
-        m.resize_tab(tab, tab:GetFontString():GetStringWidth(), 4)
-
-        tinsert(self.tabs, tab)
-    end
-
-    function self:set_tab(id)
-        self.selected = id
-        self:update_tabs()
-        aux.call(self.on_select, id)
-    end
-
-    function self:update_tabs()
-        for _, tab in self.tabs do
-            if tab.group.selected == tab.id then
-                tab.text:SetTextColor(unpack(m.color.label.enabled))
-                tab:Disable()
-                tab:SetBackdropColor(unpack(m.color.panel.background))
-                tab.dock:Show()
-                tab:SetHeight(29)
-            else
-                tab.text:SetTextColor(unpack(m.color.text.enabled))
-                tab:Enable()
-                tab:SetBackdropColor(unpack(m.color.content.background))
-                tab.dock:Hide()
-                tab:SetHeight(24)
-            end
-        end
-    end
-
-    return self
+		tinsert(self._tabs, tab)
+	end
+	function mt.__index:select(id)
+		self._selected = id
+		self:update()
+		aux.call(self._on_select, id)
+	end
+	function mt.__index:update()
+		for _, tab in self._tabs do
+			if tab.group.selected == tab.id then
+				tab.text:SetTextColor(m.color.label.enabled())
+				tab:Disable()
+				tab:SetBackdropColor(m.color.panel.background())
+				tab.dock:Show()
+				tab:SetHeight(29)
+			else
+				tab.text:SetTextColor(m.color.text.enabled())
+				tab:Enable()
+				tab:SetBackdropColor(m.color.content.background())
+				tab.dock:Hide()
+				tab:SetHeight(24)
+			end
+		end
+	end
+	function public.tabs(parent, orientation)
+		local self = {
+			_frame = parent,
+			_orientation = orientation,
+			_tabs = {},
+		}
+	    return setmetatable(self, mt)
+	end
 end
 
 function public.editbox(parent)
@@ -384,6 +378,7 @@ function public.editbox(parent)
             local x, y = GetCursorPosition()
             -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
             -- editbox:Insert'<ksejfkj>' TODO use insert with special tags to determine cursor position
+            -- or use an overlay with itemlinks
             if last_click and GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
                 aux.control.thread(function() editbox:HighlightText() end)
             end
@@ -412,10 +407,10 @@ function public.status_bar(parent)
     do
         -- minor status bar (gray one)
         local status_bar = CreateFrame('STATUSBAR', nil, self, 'TextStatusBar')
-        status_bar:SetOrientation('HORIZONTAL')
+        status_bar:SetOrientation 'HORIZONTAL'
         status_bar:SetMinMaxValues(0, 100)
         status_bar:SetAllPoints()
-        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
+        status_bar:SetStatusBarTexture [[Interface\Buttons\WHITE8X8]]
         status_bar:SetStatusBarColor(.42, .42, .42, .7)
         status_bar:SetFrameLevel(level + 2)
         status_bar:SetScript('OnUpdate', function()
@@ -431,10 +426,10 @@ function public.status_bar(parent)
     do
         -- major status bar (main blue one)
         local status_bar = CreateFrame('STATUSBAR', nil, self, 'TextStatusBar')
-        status_bar:SetOrientation('HORIZONTAL')
+        status_bar:SetOrientation 'HORIZONTAL'
         status_bar:SetMinMaxValues(0, 100)
         status_bar:SetAllPoints()
-        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
+        status_bar:SetStatusBarTexture [[Interface\Buttons\WHITE8X8]]
         status_bar:SetStatusBarColor(.19, .22, .33, .9)
         status_bar:SetFrameLevel(level + 3)
         status_bar:SetScript('OnUpdate', function()

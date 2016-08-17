@@ -1,4 +1,4 @@
-local m, public, private = aux.module'stack'
+aux.module 'stack'
 
 private.state = nil
 

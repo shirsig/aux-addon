@@ -1,4 +1,4 @@
-local m, public, private = aux.module'auction_listing'
+aux.module 'auction_listing'
 
 local RT_COUNT = 1
 local HEAD_HEIGHT = 27
@@ -654,7 +654,7 @@ local methods = {
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(this.row.data.record.hyperlink)
         elseif not aux.modified() and button == 'RightButton' then -- TODO not when alt (how?)
-            aux.tab_group:set_tab(1)
+            aux.set_tab(1)
             aux.search_tab.set_filter(strlower(aux.info.item(this.row.data.record.item_id).name)..'/exact')
             aux.search_tab.execute(nil, false)
         else

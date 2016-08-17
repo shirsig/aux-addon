@@ -1,4 +1,4 @@
-local m, public, private = aux.module'listing'
+aux.module 'listing'
 
 local ST_COUNT = 0
 

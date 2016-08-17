@@ -1,4 +1,4 @@
-local m, public, private = aux.module'search_tab'
+aux.module 'search_tab'
 
 function private.valid_level(str)
 	local level = tonumber(str)
@@ -109,7 +109,7 @@ function private.get_filter_builder_query()
 	end
 
 	local name = m.blizzard_query.name
-	if aux.index(aux.filter.parse_query_string(name), 'blizzard', 1, 1) ~= 'name' then
+	if not aux.index(aux.filter.parse_query_string(name), 'blizzard', 'name') then
 		name = aux.filter.quote(name)
 	end
 	add((name ~= '' or m.blizzard_query.exact) and name)
@@ -134,7 +134,7 @@ function private.get_filter_builder_query()
 		add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
 	end
 
-	local post_filter_string = aux.filter.query_string({blizzard={}, post=m.post_filter})
+	local post_filter_string = aux.filter.query_string{blizzard={}, post=m.post_filter}
 	add(post_filter_string ~= '' and post_filter_string)
 
 	return query_string or ''
@@ -142,37 +142,9 @@ end
 
 function private.set_form(components)
 	m.clear_form()
-
-	local class_index, subclass_index
-
-	for _, filter in components.blizzard do
-		if filter[1] == 'name' then
-			local name = filter[2]
-			if name and strsub(name, 1, 1) == '"' and strsub(name, -1, -1) == '"' then
-				name = strsub(name, 2, -2)
-			end
-			m.blizzard_query.name = aux.filter.unquote(filter[2])
-		elseif filter[1] == 'exact' then
-			m.blizzard_query.exact = true
-		elseif filter[1] == 'min_level' then
-			m.min_level_input:SetText(tonumber(filter[2]))
-		elseif filter[1] == 'max_level' then
-			m.max_level_input:SetText(tonumber(filter[2]))
-		elseif filter[1] == 'usable' then
-			m.blizzard_query.usable = true
-		elseif filter[1] == 'class' then
-			class_index = aux.info.item_class_index(filter[2])
-			m.blizzard_query.class = class_index
-		elseif filter[1] == 'subclass' then
-			subclass_index = aux.info.item_subclass_index(class_index, filter[2])
-			m.blizzard_query.subclass = subclass_index
-		elseif filter[1] == 'slot' then
-			m.blizzard_query.slot = ({GetAuctionInvTypes(class_index, subclass_index)})[aux.info.item_slot_index(class_index, subclass_index, filter[2])]
-		elseif filter[1] == 'quality' then
-			m.blizzard_query.quality = aux.info.item_quality_index(filter[2])
-		end
+	for key, filter in components.blizzard do
+		m.blizzard_query[key] = filter[2]
 	end
-
 	for _, component in components.post do
 		m.add_component(component)
 	end
@@ -199,7 +171,7 @@ function private.clear_form()
 end
 
 function private.import_query_string()
-	local components, error = aux.filter.parse_query_string(({strfind(m.search_box:GetText(), '^([^;]*)')})[3])
+	local components, error = aux.filter.parse_query_string(aux.util.select(3, strfind(m.search_box:GetText(), '^([^;]*)')))
 	if components then
 		m.set_form(components)
 	else

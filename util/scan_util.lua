@@ -1,4 +1,4 @@
-local m, public, private = aux.module'scan_util'
+aux.module 'scan_util'
 
 function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
 

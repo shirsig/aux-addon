@@ -1,4 +1,4 @@
-local m, public, private = aux.module'info'
+aux.module 'info'
 
 CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
 AuxTooltip:SetScript('OnTooltipAddMoney', function()
@@ -377,25 +377,25 @@ function public.item(item_id, suffix_id)
 end
 
 function public.item_class_index(item_class)
-    for i, class in { GetAuctionItemClasses() } do
+    for i, class in {GetAuctionItemClasses()} do
         if strupper(class) == strupper(item_class) then
-            return i
+            return i, class
         end
     end
 end
 
 function public.item_subclass_index(class_index, item_subclass)
-    for i, subclass in { GetAuctionItemSubClasses(class_index) } do
+    for i, subclass in {GetAuctionItemSubClasses(class_index)} do
         if strupper(subclass) == strupper(item_subclass) then
-            return i
+            return i, subclass
         end
     end
 end
 
 function public.item_slot_index(class_index, subclass_index, slot_name)
-    for i, slot in { GetAuctionInvTypes(class_index, subclass_index) } do
+    for i, slot in {GetAuctionInvTypes(class_index, subclass_index)} do
         if strupper(getglobal(slot)) == strupper(slot_name) then
-            return i
+            return i, getglobal(slot)
         end
     end
 end
@@ -404,7 +404,7 @@ function public.item_quality_index(item_quality)
     for i=0,4 do
         local quality = getglobal('ITEM_QUALITY'..i..'_DESC')
         if strupper(item_quality) == strupper(quality) then
-            return i
+            return i, quality
         end
     end
 end

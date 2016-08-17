@@ -1,4 +1,4 @@
-local m, public, private = aux.module'persistence'
+aux.module 'persistence'
 
 aux_datasets = {}
 

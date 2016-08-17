@@ -1,4 +1,4 @@
-local m, public, private = aux.module'post_tab'
+aux.module 'post_tab'
 
 function private.create_frames()
 	private.frame = CreateFrame('Frame', nil, aux.frame)
@@ -46,7 +46,7 @@ function private.create_frames()
 	        if arg1 == 'LeftButton' then
 	            m.set_item(this.item_record)
 	        elseif arg1 == 'RightButton' then
-	            aux.tab_group:set_tab(1)
+	            aux.set_tab(1)
 	            aux.search_tab.set_filter(strlower(aux.info.item(this.item_record.item_id).name)..'/exact')
 	            aux.search_tab.execute(nil, false)
 	        end

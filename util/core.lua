@@ -1,4 +1,4 @@
-local m, public, private = aux.module'util'
+aux.module 'util'
 
 function public.present(...)
 	local called
@@ -19,10 +19,11 @@ function public.unpack(array, ...)
 end
 
 function public.select(i, ...)
-	for _=1,i-1 do
-		tremove(arg, 1)
+	while i > 1 do
+		i = i - 1
+		tremove(arg, i)
 	end
-	return unpack(arg)
+	return tremove(arg, 1), unpack(arg)
 end
 
 function public.size(t)
@@ -219,7 +220,7 @@ function public.bag_type(bag)
 	if bag == 0 then
 		return 1
 	end
-	for _, link in {GetInventoryItemLink('player', ContainerIDToInventoryID(bag))} do
+	for link in aux.util.present(GetInventoryItemLink('player', ContainerIDToInventoryID(bag))) do
 		local item_id = aux.info.parse_hyperlink(link)
 		local item_info = aux.info.item(item_id)
 		return aux.info.item_subclass_index(3, item_info.subclass)

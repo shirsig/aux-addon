@@ -1,9 +1,4 @@
-local m, public, private = aux.module'filter'
-
-private.OPERATOR_COLOR = ''
-private.FILTER_COLOR = ''
-private.PARAMETER_COLOR = ''
-
+aux.module 'filter'
 
 function private.default_filter(str)
     return {
@@ -11,7 +6,7 @@ function private.default_filter(str)
         validator = function()
             return function(auction_record)
                 return aux.util.any(auction_record.tooltip, function(entry)
-                    return strfind(strupper(entry.left_text or ''), strupper(str or ''), 1, true) or strfind(strupper(entry.right_text or ''), strupper(str or ''), 1, true)
+                    return strfind(strlower(entry.left_text or ''), str, 1, true) or strfind(strlower(entry.right_text or ''), str, 1, true)
                 end)
             end
         end,
@@ -208,144 +203,92 @@ public.filters = {
 }
 
 function private.operator(str)
-    if str == 'not' then
-        return 'not', 1
+    local operator = str == 'not' and {'operator', 'not', 1}
+    for _, name in {'and', 'or'} do
+	    for arity in aux.util.present(aux.util.select(3, strfind(str, '^'..name..'(%d*)$'))) do
+		    arity = tonumber(arity)
+		    operator = not (arity and arity < 2) and {'operator', name, arity}
+	    end
     end
-
-    local _, _, and_op, and_arity = strfind(str, '^(and)(%d*)$')
-    local _, _, or_op, or_arity = strfind(str, '^(or)(%d*)$')
-
-    local op = and_op or or_op
-    local arity = and_arity or or_arity
-
-    if op then
-        if arity == '' then
-            return op
-        elseif tonumber(arity) and tonumber(arity) >= 2 then
-            return op, tonumber(arity)
-        end
-    end
+    return operator or nil
 end
 
-function private.blizzard_filter_parser()
-    local class_index, subclass_index
-    local filters = {}
-    return function(str, first)
-        local filter
-        if strfind(str, '^%d+$') then
-            if tonumber(str) < 1 or tonumber(str) > 60 then
-                return nil, 'Erroneous level range modifier'
-            end
-            if not filters.min_level then
-                filter = {'min_level', str}
-            elseif not filters.max_level then
-                filter = {'max_level', str}
-            else
-                return nil, 'Erroneous level range modifier'
-            end
-        elseif aux.info.item_class_index(str) and not (filters.class and not filters.subclass and str == strlower(({ GetAuctionItemClasses() })[10])) then
-            class_index = aux.info.item_class_index(str)
-            if not filters.class then
-                filter = {'class', str}
-            else
-                return nil, 'Erroneous item class modifier'
-            end
-        elseif class_index and aux.info.item_subclass_index(class_index, str) then
-            subclass_index = aux.info.item_subclass_index(class_index, str)
-            if not filters.subclass then
-                filter = {'subclass', str}
-            else
-                return nil, 'Erroneous item subclass modifier'
-            end
-        elseif subclass_index and aux.info.item_slot_index(class_index, subclass_index, str) then
-            if not filters.slot then
-                filter = {'slot', str}
-            else
-                return nil, 'Erroneous item slot modifier'
-            end
-        elseif aux.info.item_quality_index(str) then
-            if not filters.quality then
-                filter = {'quality', str}
-            else
-                return nil, 'Erroneous quality modifier'
-            end
-        elseif str == 'usable' then
-            if not filters.usable then
-                filter = {'usable'}
-            else
-                return nil, 'Erroneous usable only modifier'
-            end
-        elseif str == 'exact' then
-            if filters.name and not filters.exact then
-                filter = {'exact'}
-            else
-                return nil, 'Erroneous exact only modifier'
-            end
-        elseif first then
-            if strlen(str) <= 63 then
-                filter = {'name', str }
-            else
-                return nil, 'The name must not be longer than 63 characters'
-            end
-        end
+do
+	local mt = {
+		__call = function(self, str, i)
+			if not str then
+				self.max_level = self.max_level or self.min_level
+				return self
+			end
+			if self.exact then
+				return
+			end
+			for number in aux.util.present(tonumber(aux.util.select(3, strfind(str, '^(%d+)$')))) do
+				if number >= 1 and number <= 60 then
+					for _, filter in {'min_level', 'max_level'} do
+						if not self[filter] then
+							self[filter] = {str, number}
+							return true
+						end
+					end
+				end
+			end
+			for _, parser in {
+				{'class', aux.info.item_class_index},
+				{'subclass', aux._(aux.info.item_subclass_index, aux.index(self.class, 2) or 0, aux.arg1)},
+				{'slot', aux._(aux.info.item_slot_index, aux.index(self.class, 2) or 0, aux.index(self.subclass, 2) or 0, aux.arg1)},
+				{'quality', aux.info.item_quality_index},
+			} do
+				if not self[parser[1]] then
+					tinsert(parser, str)
+					for index, label in aux.util.present(parser[2](aux.util.select(3, unpack(parser)))) do
+						self[parser[1]] = {label, index}
+						return true
+					end
+				end
+			end
+			if not self[str] and (str == 'usable' or str == 'exact' and self.name and aux.util.size(self) == 1) then
+				self[str] = {str, 1}
+			elseif i == 1 and strlen(str) <= 63 then
+				self.name = {str, m.unquote(str)}
+--				return nil, 'The name filter must not be longer than 63 characters'
+			else
+				return
+			end
+			return true
+		end,
+	}
 
-        if filter then
-            filters[filter[1]] = filter[2] or true
-        end
-
-        if filters.exact and
-            (
-                filters.min_level
-                    or filters.max_level
-                    or filters.class
-                    or filters.subclass
-                    or filters.slot
-                    or filters.quality
-                    or filters.usable
-            )
-        then
-            return false, 'Erroneous exact only modifier'
-        end
-
-        return filter
-    end
+	function private.blizzard_filter_parser()
+	    return setmetatable({}, mt)
+	end
 end
 
 function private.parse_parameter(input_type, str)
     if input_type == 'money' then
         local money = aux.money.from_string(str)
-        if money and money > 0 then
-            return money
-        end
+        return money and money > 0 and money or nil
     elseif input_type == 'number' then
         local number = tonumber(str)
-        if number then
-            return number
-        end
+        return number and number > 0 and mod(number, 1) == 0 and number or nil
     elseif input_type == 'string' then
-        if str ~= '' then
-            return str
-        end
+        return str ~= '' and str or nil
     elseif type(input_type) == 'table' then
-        local choice = aux.util.key(str, input_type)
-        if choice then
-            return choice
-        end
+        return aux.util.key(str, input_type)
     end
 end
 
 function public.parse_query_string(str)
-    local components = {blizzard = {}, post = {}}
+    local post_filter = {}
     local blizzard_filter_parser = m.blizzard_filter_parser()
     local parts = aux.util.map(aux.util.split(str, '/'), function(part) return strlower(aux.util.trim(part)) end)
 
     local i = 1
     while parts[i] do
-        local op, arity = m.operator(parts[i])
-        if op then
-            tinsert(components.post, {'operator', op, arity})
-        elseif m.filters[parts[i]] then
-            local input_type = m.filters[parts[i]].input_type
+        if aux.temp(m.operator(parts[i])) then
+            tinsert(post_filter, __.operator)
+        elseif __(m.filters[parts[i]]) then
+            local input_type = __.filter.input_type
             if input_type ~= '' then
                 if not parts[i + 1] or not m.parse_parameter(input_type, parts[i + 1]) then
                     if parts[i] == 'item' then
@@ -356,27 +299,22 @@ function public.parse_query_string(str)
                         return nil, 'Invalid input for '..parts[i]..'. Expecting: '..input_type
                     end
                 end
-                tinsert(components.post, {'filter', parts[i], parts[i + 1]})
+                tinsert(post_filter, {'filter', parts[i], parts[i + 1]})
                 i = i + 1
             else
-                tinsert(components.post, {'filter', parts[i]})
+                tinsert(post_filter, {'filter', parts[i]})
             end
-        else
-            local component, error = blizzard_filter_parser(parts[i], i == 1)
-            if component then
-                tinsert(components.blizzard, component)
-            elseif error then
-                return nil, error
-            elseif parts[i] ~= '' then
-                tinsert(components.post, {'filter', 'tooltip', parts[i]})
-            else
-                return nil, 'Empty modifier'
-            end
+        elseif not blizzard_filter_parser(parts[i], i) then
+	        if parts[i] ~= '' then
+		        tinsert(post_filter, {'filter', 'tooltip', parts[i]})
+	        else
+	            return nil, 'Empty modifier'
+	        end
         end
         i = i + 1
     end
 
-    return components
+    return {blizzard=blizzard_filter_parser(), post=post_filter}
 end
 
 function public.query(query_string)
@@ -435,23 +373,9 @@ function public.queries(query_string)
 end
 
 function private.suggestions(components)
-
-    local blizzard_filters = {}
-    for _, filter in components.blizzard do
-        blizzard_filters[filter[1]] = filter[2] or true
-    end
-
     local suggestions = {}
 
-    if blizzard_filters.name
-            and not blizzard_filters.min_level
-            and not blizzard_filters.max_level
-            and not blizzard_filters.class
-            and not blizzard_filters.subclass
-            and not blizzard_filters.slot
-            and not blizzard_filters.quality
-            and not blizzard_filters.usable
-    then
+    if components.blizzard.name and aux.util.size(components.blizzard) == 1 then
         tinsert(suggestions, 'exact')
     end
 
@@ -461,46 +385,44 @@ function private.suggestions(components)
     tinsert(suggestions, 'tt')
 
     for filter, _ in m.filters do
-        tinsert(suggestions, strlower(filter))
+        tinsert(suggestions, filter)
     end
 
     -- classes
-    if not blizzard_filters.class then
-        for _, class in { GetAuctionItemClasses() } do
+    if not components.blizzard.class then
+        for _, class in {GetAuctionItemClasses()} do
             tinsert(suggestions, class)
         end
     end
 
     -- subclasses
-    local class_index = blizzard_filters.class and aux.info.item_class_index(blizzard_filters.class)
-    if class_index and not blizzard_filters.subclass then
-        for _, subclass in { GetAuctionItemSubClasses(class_index) } do
+    if not components.blizzard.subclass then
+        for _, subclass in {GetAuctionItemSubClasses(aux.index(components.blizzard.class, 2) or 0)} do
             tinsert(suggestions, subclass)
         end
     end
 
     -- slots
-    local subclass_index = class_index and blizzard_filters.subclass and aux.info.item_subclass_index(class_index, blizzard_filters.subclass)
-    if subclass_index and not blizzard_filters.slot then
-        for _, invtype in { GetAuctionInvTypes(class_index, aux.info.item_subclass_index(class_index, blizzard_filters.subclass)) } do
+    if not components.blizzard.slot then
+        for _, invtype in {GetAuctionInvTypes(aux.index(components.blizzard.class, 2) or 0, aux.index(components.blizzard.subclass, 2) or 0)} do
             tinsert(suggestions, getglobal(invtype))
         end
     end
 
     -- usable
-    if not blizzard_filters.usable then
+    if not components.blizzard.usable then
         tinsert(suggestions, 'usable')
     end
 
     -- rarities
-    if not blizzard_filters.quality then
+    if not components.blizzard.quality then
         for i=0,4 do
             tinsert(suggestions, getglobal('ITEM_QUALITY'..i..'_DESC'))
         end
     end
 
     -- item names
-    if getn(components.blizzard) + getn(components.post) == 1 and blizzard_filters.name == '' then
+    if aux.util.size(components.blizzard) + getn(components.post) == 1 and components.blizzard.name == '' then
         for _, name in aux_auctionable_items do
             tinsert(suggestions, name..'/exact')
         end
@@ -536,18 +458,16 @@ end
 function private.prettified_query_string(components)
     local prettified = m.query_builder()
 
-    local blizzard_filters = {}
-    for _, filter in components.blizzard do
-        blizzard_filters[filter[1]] = filter[2] or true
-        if filter[1] == 'exact' then
-            prettified.prepend(aux.info.display_name(aux.cache.item_id(m.unquote(blizzard_filters.name))) or aux.gui.color.blizzard('['..m.unquote(blizzard_filters.name)..']'))
-        elseif filter[1] ~= 'name' then
-            prettified.append(aux.gui.color.blizzard(filter[2] or filter[1]))
+    for key, filter in components.blizzard do
+        if key == 'exact' then
+            prettified.prepend(aux.info.display_name(aux.cache.item_id(components.blizzard.name[2])) or aux.gui.color.blizzard('['..components.blizzard.name[2]..']'))
+        elseif key ~= 'name' then
+            prettified.append(aux.gui.color.blizzard(filter[1]))
         end
     end
 
-    if blizzard_filters.name and not blizzard_filters.exact and blizzard_filters.name ~= '' then
-        prettified.prepend(aux.gui.color.blizzard(m.unquote(blizzard_filters.name)))
+    if components.blizzard.name and not components.blizzard.exact and components.blizzard.name[2] ~= '' then
+        prettified.prepend(aux.gui.color.blizzard(components.blizzard.name[2]))
     end
 
     for _, component in components.post do
@@ -582,47 +502,35 @@ function public.quote(name)
 end
 
 function public.unquote(name)
-    if name and strsub(name, 1, 1) == '<' and strsub(name, -1, -1) == '>' then
-        name = strsub(name, 2, -2)
-    end
-    return name
+    return aux.util.select(3, strfind(name, '^<(.*)>$')) or name
 end
 
 function private.blizzard_query(components)
-    local filters = {}
-    for _, filter in components.blizzard do
-        filters[filter[1]] = filter[2] or true
-    end
+    local filters = components.blizzard
 
-    local query = { name = filters.name and m.unquote(filters.name) }
+    local query = {name=filters.name and filters.name[2]}
 
     local item_info, class_index, subclass_index, slot_index
-    if filters.exact then
-        local item_id = aux.cache.item_id(filters.name)
-        item_info = aux.info.item(item_id)
-        class_index = item_info and aux.info.item_class_index(item_info.class)
-        subclass_index = class_index and item_info.subclass and aux.info.item_subclass_index(class_index, item_info.subclass)
-        slot_index = subclass_index and item_info.slot and aux.info.item_slot_index(class_index, subclass_index, item_info.slot)
+    if filters.exact and aux.temp(aux.cache.item_id(filters.name[2])) and __(aux.info.item(__.item_id)) then
+	    item_info = __.item_info
+        class_index = aux.info.item_class_index(item_info.class)
+        subclass_index = aux.info.item_subclass_index(class_index or 0, item_info.subclass)
+        slot_index = aux.info.item_slot_index(class_index or 0, subclass_index or 0, item_info.slot)
     end
 
     if item_info then
         query.min_level = item_info.level
         query.max_level = item_info.level
+        query.usable = item_info.usable
         query.class = class_index
         query.subclass = subclass_index
-        query.slot = item_info.class
-        query.usable = item_info.usable
+        query.slot = slot_index
         query.quality = item_info.quality
     else
-        query.min_level = tonumber(filters.min_level)
-        query.max_level = tonumber(filters.max_level)
-        query.class = filters.class and filters.class and aux.info.item_class_index(filters.class)
-        query.subclass = query.class and filters.subclass and aux.info.item_subclass_index(query.class, filters.subclass)
-        query.slot = query.subclass and filters.slot and aux.info.item_slot_index(query.class, query.subclass, filters.slot)
-        query.usable = filters.usable and 1
-        query.quality = filters.quality and aux.info.item_quality_index(filters.quality)
+	    for _, key in {'min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality'} do
+            query[key] = aux.index(filters[key], 2)
+	    end
     end
-
     return query
 end
 
@@ -636,10 +544,8 @@ function private.validator(components)
     end
 
     return function(record)
-        for _, filter in components.blizzard do
-            if filter[1] == 'exact' and strlower(aux.info.item(record.item_id).name) ~= components.blizzard[1][2] then
-                return false
-            end
+        if components.blizzard.exact and strlower(aux.info.item(record.item_id).name) ~= components.blizzard.name[2] then
+            return false
         end
         local stack = {}
         for i=getn(components.post),1,-1 do

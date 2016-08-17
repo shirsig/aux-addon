@@ -1,33 +1,34 @@
-local addon = {aux_module()}
-aux = tremove(addon, 1)
-local m, public, private = unpack(addon)
+setglobal('aux', aux_module())
 
 public.version = '4.0.0'
 
-private.modules = {}
+private.module_envs = {}
 function public.module(path)
-	if path == 'aux' then
-		return unpack(addon)
-	elseif m.modules[path] then
-		return unpack(m.modules[path])
+	local env
+	if path == '' then
+		env = getfenv()
+	elseif m.module_envs[path] then
+		env = m.module_envs[path]
 	else
-		local module, prefix
+		local prefix
 		for name in string.gfind(path, '[%a_][%w_]*') do
 			local qualified_name = prefix and prefix..'.'..name or name
-			module = m.modules[qualified_name]
-			if not module then
-				module = {aux_module()}
-				module[4].LOAD = nil
-				(prefix and m.modules[prefix] or addon)[2][name] = tremove(module, 1)
-				m.modules[qualified_name] = module
+			env = m.module_envs[qualified_name]
+			if not env then
+				(prefix and m.module_envs[prefix].public or public)[name], env = (function() return aux_module(), getfenv() end)()
+				env.private.LOAD = nil
+				m.module_envs[qualified_name] = env
 			end
 			prefix = qualified_name
 		end
-		return unpack(module)
 	end
+	setfenv(2, env)
 end
 
 local event_frame = CreateFrame('Frame')
+for _, event in {'VARIABLES_LOADED', 'ADDON_LOADED', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE'} do
+	event_frame:RegisterEvent(event)
+end
 private.ADDON_LOADED = {}
 event_frame:SetScript('OnEvent', function()
 	if event == 'ADDON_LOADED' then
@@ -37,15 +38,12 @@ event_frame:SetScript('OnEvent', function()
 	else
 		m[event]()
 		if event == 'VARIABLES_LOADED' then
-			for _, module in m.modules do
-				if module[1].LOAD then
-					module[1].LOAD()
+			for _, env in m.module_envs do
+				if env.LOAD then
+					env.LOAD()
 				end
 			end
 			m.log('v'..m.version..' loaded.')
 		end
 	end
 end)
-for _, event in {'VARIABLES_LOADED', 'ADDON_LOADED', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE'} do
-	event_frame:RegisterEvent(event)
-end

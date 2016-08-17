@@ -1,5 +1,14 @@
 local PUBLIC, PRIVATE = 1, 2
 local state = {}
+local function_mt = {
+	__call = function(self, ...)
+		local f = state[self]
+		local temp = getfenv(f).__
+		getfenv(f).__ = {}
+		f(unpack(arg))
+		getfenv(f).__ = temp
+	end,
+}
 local interface_mt = {
 	__index = function(self, key)
 		if not state[self].access[state[self].type][key] then
@@ -30,11 +39,17 @@ local declarator_mt = {
 	end,
 }
 function aux_module()
-	local data, access = {}, {{}, {}}
+	local data, access = {}, {{}, {__=true}}
 	local public_state, private_state = {type=PUBLIC, data=data, access=access}, {type=PRIVATE, data=data, access=access}
-    local public_interface, private_interface = setmetatable({}, interface_mt), setmetatable({}, interface_mt)
+    local interface, private_interface = setmetatable({}, interface_mt), setmetatable({}, interface_mt)
 	local public_declarator, private_declarator = setmetatable({}, declarator_mt), setmetatable({}, declarator_mt)
-	state[public_interface], state[private_interface] = public_state, private_state
+	state[interface], state[private_interface] = public_state, private_state
 	state[public_declarator], state[private_declarator] = public_state, private_state
-    return public_interface, private_interface, public_declarator, private_declarator
+
+	local env = setmetatable({m=private_interface, public=public_declarator, private=private_declarator}, {__index=getfenv(0)})
+--	public_state.env = env
+--	private_state.env = env
+
+	setfenv(2, env)
+	return interface
 end

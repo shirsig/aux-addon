@@ -1,4 +1,4 @@
-local m, public, private = aux.module'search_tab'
+aux.module 'search_tab'
 
 private.FILTER_SPACING = 28.5
 

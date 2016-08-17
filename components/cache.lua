@@ -1,4 +1,4 @@
-local m, public, private = aux.module'cache'
+aux.module 'cache'
 
 private.MIN_ITEM_ID = 1
 private.MAX_ITEM_ID = 30000

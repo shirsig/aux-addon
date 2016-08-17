@@ -1,4 +1,5 @@
-local m, public, private = aux.tab(1, 'Search', 'search_tab')
+aux.module 'search_tab'
+aux.tab(1, 'Search', 'search_tab')
 
 StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
     text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',
@@ -58,6 +59,7 @@ function m.LOAD()
 end
 
 function m.OPEN()
+	aux.log('kek2')
     m.frame:Show()
     m.update_search_listings()
 end

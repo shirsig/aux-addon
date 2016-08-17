@@ -1,4 +1,4 @@
-local m, public, private = aux.module'item_listing'
+aux.module 'item_listing'
 
 local ROW_HEIGHT = 39
 

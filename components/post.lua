@@ -1,4 +1,4 @@
-local m, public, private = aux.module'post'
+aux.module 'post'
 
 private.state = nil
 

@@ -1,23 +1,21 @@
-local m, public, private = aux.module'money'
+aux.module 'money'
 
 private.GOLD_TEXT = '|cffffd70ag|r'
 private.SILVER_TEXT = '|cffc7c7cfs|r'
 private.COPPER_TEXT = '|cffeda55fc|r'
 
-do
-	local COPPER_PER_SILVER = 100
-	local COPPER_PER_GOLD = 10000
+private.COPPER_PER_SILVER = 100
+private.COPPER_PER_GOLD = 10000
 
-	function public.gsc(money)
-		local gold = floor(money / COPPER_PER_GOLD)
-		local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
-		local copper = mod(money, COPPER_PER_SILVER)
-		return gold, silver, copper
-	end
+function public.gsc(money)
+	local gold = floor(money / m.COPPER_PER_GOLD)
+	local silver = floor(mod(money, m.COPPER_PER_GOLD) / m.COPPER_PER_SILVER)
+	local copper = mod(money, m.COPPER_PER_SILVER)
+	return gold, silver, copper
+end
 
-	function public.copper(gold, silver, copper)
-		return gold * COPPER_PER_GOLD + silver * COPPER_PER_SILVER + copper
-	end
+function public.copper(gold, silver, copper)
+	return gold * m.COPPER_PER_GOLD + silver * m.COPPER_PER_SILVER + copper
 end
 
 function public.format(money, exact, color)
@@ -115,18 +113,17 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 end
 
 function public.from_string(value)
-	local number = tonumber(value)
-	if number and number >= 0 then
-		return number * COPPER_PER_GOLD
+	if aux.temp(tonumber(value)) and __.number >= 0 then
+		return __.number * m.COPPER_PER_GOLD
 	end
 
 	-- remove any colors
 	value = gsub(gsub(strlower(value), '|c%x%x%x%x%x%x%x%x', ''), FONT_COLOR_CODE_CLOSE, '')
 
 	-- extract gold/silver/copper values
-	local gold = tonumber(({strfind(value, '(%d*%.?%d+)g')})[3])
-	local silver = tonumber(({strfind(value, '(%d*%.?%d+)s')})[3])
-	local copper = tonumber(({strfind(value, '(%d*%.?%d+)c')})[3])
+	local gold = tonumber(aux.util.select(3, strfind(value, '(%d*%.?%d+)g')))
+	local silver = tonumber(aux.util.select(3, strfind(value, '(%d*%.?%d+)s')))
+	local copper = tonumber(aux.util.select(3, strfind(value, '(%d*%.?%d+)c')))
 	if not gold and not silver and not copper then return end
 
 	-- test that there are no extra characters (other than spaces)

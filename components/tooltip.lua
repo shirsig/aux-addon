@@ -1,4 +1,4 @@
-local m, public, private = aux.module'tooltip'
+aux.module 'tooltip'
 
 aux_tooltip_value = true
 

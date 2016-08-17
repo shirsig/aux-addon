@@ -1,4 +1,4 @@
-local m, public, private = aux.module'completion'
+aux.module 'completion'
 
 function public:complete_filter()
 	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution

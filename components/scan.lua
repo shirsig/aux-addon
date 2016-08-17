@@ -1,4 +1,4 @@
-local m, public, private = aux.module'scan'
+aux.module 'scan'
 
 private.PAGE_SIZE = 50
 

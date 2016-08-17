@@ -1,4 +1,5 @@
-local m, public, private = aux.tab(4, 'Bids', 'bids_tab')
+aux.module 'bids_tab'
+aux.tab(4, 'Bids', 'bids_tab')
 
 private.auction_records = nil
 

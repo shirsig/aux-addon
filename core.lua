@@ -1,4 +1,4 @@
-local m, public, private = aux.module'aux'
+aux.module ''
 
 public.bids_loaded = false
 public.current_owner_page = nil
@@ -38,17 +38,39 @@ do
 	end
 end
 
+do
+	local temp
+	local mt = {
+		__call = function(self, object)
+			self._temp = object
+			return object
+		end,
+		__index = function(self)
+			return self._temp
+		end,
+	}
+	function public.temp(object)
+		local env = getfenv(2)
+		env.__ = object
+		return env.__(object)
+	end
+end
+
+function public.L(body_string)
+	return loadstring 'function()'
+end
+
 private.tabs = {}
-function public.tab(index, title, name)
-	local tab = {title=title, name=name, module={m.module(name)}}
-	tab.module[2].ACTIVE = function()
+function public.tab(index, name)
+	local module_env = getfenv(2)
+	local tab = {name=name, env=module_env}
+	module_env.public.ACTIVE = function()
 		return tab == m.active_tab()
 	end
 	for _, handler in {'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do
-		tab.module[3][handler] = nil
+		module_env.private[handler] = 5
 	end
 	m.tabs[index] = tab
-	return unpack(tab.module)
 end
 do
 	local active_tab_index
@@ -57,11 +79,11 @@ do
 	end)
 	function private.on_tab_click(index)
 		if active_tab_index then
-			m.call(m.active_tab.module[1].CLOSE)
+			m.call(m.active_tab.env.CLOSE)
 		end
 		active_tab_index = index
 		if active_tab_index then
-			m.call(m.active_tab.module[1].OPEN)
+			m.call(m.active_tab.env.OPEN)
 		end
 	end
 end
@@ -78,7 +100,7 @@ function public.VARIABLES_LOADED()
 		frame:SetMovable(true)
 		frame:EnableMouse(true)
 		frame:SetClampedToScreen(true)
-		frame:RegisterForDrag('LeftButton')
+		frame:RegisterForDrag 'LeftButton'
 		frame:SetScript('OnDragStart', function()
 			this:StartMoving()
 		end)
@@ -86,10 +108,10 @@ function public.VARIABLES_LOADED()
 			this:StopMovingOrSizing()
 		end)
 		frame:SetScript('OnShow', function()
-			PlaySound('AuctionWindowOpen')
+			PlaySound 'AuctionWindowOpen'
 		end)
 		frame:SetScript('OnHide', function()
-			PlaySound('AuctionWindowClose')
+			PlaySound 'AuctionWindowClose'
 			CloseAuctionHouse()
 		end)
 		frame.content = CreateFrame('Frame', nil, frame)
@@ -98,32 +120,31 @@ function public.VARIABLES_LOADED()
 		frame:Hide()
 		public.frame = frame
 	end
-
 	do
-		local tab_group = m.gui.tab_group(m.frame, 'DOWN')
+		local tabs = m.gui.tabs(m.frame, 'DOWN')
 		for _, tab in m.tabs do
-			tab_group:create_tab(tab.title)
+			tabs:create_tab(tab.name)
 		end
-		tab_group.on_select = m.on_tab_click
-		public.tab_group = tab_group
+		tabs._on_select = m.on_tab_click
+		function public.set_tab(id)
+			tabs:select(id)
+		end
 	end
-
 	do
 		local btn = m.gui.button(m.frame, 16)
 		btn:SetPoint('BOTTOMRIGHT', -6, 6)
 		btn:SetWidth(65)
 		btn:SetHeight(24)
-		btn:SetText('Close')
+		btn:SetText 'Close'
 		btn:SetScript('OnClick', m._(m.frame.Hide, m.frame))
 		public.close_button = btn
 	end
-
 	do
 		local btn = m.gui.button(m.frame, 16)
 		btn:SetPoint('RIGHT', m.close_button, 'LEFT' , -5, 0)
 		btn:SetWidth(65)
 		btn:SetHeight(24)
-		btn:SetText('Default UI')
+		btn:SetText 'Default UI'
 		btn:SetScript('OnClick',function()
 			if AuctionFrame:IsVisible() then
 				HideUIPanel(AuctionFrame)
@@ -137,7 +158,7 @@ end
 function private.AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
 	m.frame:Show()
-	m.tab_group:set_tab(1)
+	m.set_tab(1)
 end
 
 function private.AUCTION_HOUSE_CLOSED()
@@ -146,7 +167,7 @@ function private.AUCTION_HOUSE_CLOSED()
 	m.post.stop()
 	m.stack.stop()
 	m.scan.abort()
-	m.tab_group:set_tab()
+	m.set_tab()
 	m.frame:Hide()
 end
 
@@ -198,7 +219,7 @@ do
 					break
 				end
 				local item_id, suffix_id = m.info.parse_hyperlink(link)
-				local count = ({GetCraftReagentInfo(id, i)})[3]
+				local count = aux.util.select(3, GetCraftReagentInfo(id, i))
 				local _, price, limited = m.cache.merchant_info(item_id)
 				local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
 				if not value then
@@ -230,7 +251,7 @@ do
 					break
 				end
 				local item_id, suffix_id = m.info.parse_hyperlink(link)
-				local count = ({GetTradeSkillReagentInfo(id, i)})[3]
+				local count = aux.util.select(3, GetTradeSkillReagentInfo(id, i))
 				local _, price, limited = m.cache.merchant_info(item_id)
 				local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
 				if not value then
@@ -280,20 +301,20 @@ function private.AuctionFrameAuctions_OnEvent(...)
 end
 
 function private.SetItemRef(...)
-	if arg[3] ~= 'RightButton' or not m.index(m.active_tab(), 'module', 1, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
+	if arg[3] ~= 'RightButton' or not m.index(m.active_tab(), 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return m.orig.SetItemRef(unpack(arg))
 	end
-	for _, item_info in {m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))} do
-		return m.active_tab.module[1].CLICK_LINK(item_info)
+	for item_info in aux.util.present(m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))) do
+		return m.active_tab.env.CLICK_LINK(item_info)
 	end
 end
 
 function private.UseContainerItem(...)
-    if m.modified() or not m.index(m.active_tab(), 'module', 1, 'USE_ITEM') then
+    if m.modified() or not m.index(m.active_tab(), 'env', 'USE_ITEM') then
         return m.orig.UseContainerItem(unpack(arg))
     end
     for _, item_info in {m.info.container_item(arg[1], arg[2])} do
-        return m.active_tab.module[1].USE_ITEM(item_info)
+        return m.active_tab.env.USE_ITEM(item_info)
     end
 end
 

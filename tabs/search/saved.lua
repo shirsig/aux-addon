@@ -1,4 +1,4 @@
-local m, public, private = aux.module'search_tab'
+aux.module 'search_tab'
 
 aux_favorite_searches = {}
 aux_recent_searches = {}

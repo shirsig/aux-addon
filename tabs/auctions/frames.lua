@@ -1,4 +1,4 @@
-local m, public, private = aux.module'auctions_tab'
+aux.module 'auctions_tab'
 
 function private.create_frames()
 	private.frame = CreateFrame('Frame', nil, aux.frame)
