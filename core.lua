@@ -25,16 +25,14 @@ do
 end
 
 do
-	local data = {}
-	local mt = {
-		__index = function(self, key)
-			return data[self].handler({public=self, private=data[self].state}, key)
-		end,
-	}
+	local data = setmetatable({}, {__mode='kv'})
+	local __index = function(self, key)
+		return data[self].handler({public=self, private=data[self].state}, key)
+	end
 	function public.index_function(state, handler)
 		local self = {}
 		data[self] = {handler=handler, state=state}
-		return setmetatable(self, mt)
+		return setmetatable(self, {__metatable=false, __index=__index, state=data})
 	end
 end
 

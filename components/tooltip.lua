@@ -23,7 +23,7 @@ function m.LOAD()
         )
     end
     local orig = SetItemRef
-    SetItemRef = function(...)
+    setglobal('SetItemRef', function(...)
         local result = orig(unpack(arg))
         local name, _, quality = GetItemInfo(arg[1])
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
@@ -32,7 +32,7 @@ function m.LOAD()
             m.extend_tooltip(ItemRefTooltip, link, 1)
         end
         return result
-    end
+    end)
     local orig = GameTooltip:GetScript('OnTooltipAddMoney')
     GameTooltip:SetScript('OnTooltipAddMoney', function(...)
         if m.hooked_setter then

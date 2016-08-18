@@ -1,58 +1,78 @@
-local PUBLIC, PRIVATE = 1, 2
-local state = {}
-local function_mt = {
-	__call = function(self, ...)
-		local f = state[self]
-		local temp = getfenv(f).__
-		getfenv(f).__ = {}
-		f(unpack(arg))
-		getfenv(f).__ = temp
+local DECLARED, MUTABLE, PUBLIC = 1, 2, 4
+local DECLARED_KEY, MUTABLE_KEY, PUBLIC_KEY = 'declared', 'mutable', 'public'
+local MODIFIER_VALUE = {[DECLARED_KEY]=DECLARED, [MUTABLE_KEY]=MUTABLE, [PUBLIC_KEY]=PUBLIC}
+
+local band, bor, bnot = bit.band, bit.bor, bit.bnot
+local _G = getfenv(0)
+
+local _state, _data, _metadata  = {}, {}, setmetatable({}, {__index=function() return 0 end})
+
+--local function_mt = {
+--	__call = function(self, ...)
+--		local f = state[self]
+--		getfenv(f).__ = {}
+--		f(unpack(arg))
+--		getfenv(f).__ = temp
+--	end,
+--}
+--local method_mt = {
+--	__call = function(self, ...)
+--		local f = self[1]
+--		local temp = getfenv(f)
+--		setfenv(f, state[self])
+--		f(...)
+--		setfenv(f, temp)
+--	end,
+--}
+local environment_mt = {
+	__metatable = false,
+	__index = function(self, key)
+		if _metadata[self][key] == 0 then return _G[key] or error('No key "'..key..'".', 2) end
+		return _data[self][key]
+	end,
+	__newindex = function(self, key, value)
+		local m = _metadata[self][key]
+		if band(bor(DECLARED, MUTABLE), m) == DECLARED then error('"'..key..'" is immutable.', 2) end
+		_data[self][key] = value
+		_metadata[self][key] = bor(1, m)
 	end,
 }
 local interface_mt = {
+	__metatable = false,
 	__index = function(self, key)
-		if not state[self].access[state[self].type][key] then
-			error('Read of undeclared "'..key..'".', 2)
-		end
-		return state[self].data[key]
+		if band(PUBLIC_V, _metadata[self][key]) == 0 then error('No key "'..key..'".', 2) end
+		return _data[self][key]
 	end,
-	__newindex = function(self, key, value)
-		if type(value) == 'string' then
-			aux.log('kek', debugstack(1, 0, 5))
-		end
-		if state[self].type == PUBLIC then
-			error('Unsupported operation.', 2)
-		elseif not state[self].access[PRIVATE][key] then
-			error('Write of undeclared "'..key..'".', 2)
-		end
-		state[self].data[key] = value
-	end,
+	__newindex = function() error('Unsupported operation.', 2) end,
 }
-local declarator_mt = {
-	__index = function()
-		error('Unsupported operation.', 2)
+local modifier_mt = {
+	__metatable = false,
+	__call = function(self, key)
+		_state[self] = MODIFIER_VALUE[key]
+	end,
+	__index = function(self, key)
+		local value = MODIFIER_VALUE[key]
+		if not value then error('Unsupported operation.', 2) end
+		_state[self] = bor(_state[self], value)
+		return self
 	end,
 	__newindex = function(self, key, value)
-		if state[self].access[PRIVATE][key] then
-			error('Multiple declarations of "'..key..'".', 2)
-		end
-		state[self].data[key] = value
-		state[self].access[PRIVATE][key] = true
-		state[self].access[state[self].type][key] = true
+		if _metadata[self][key] then error('Duplicate key "'..key..'".', 2) end
+		_data[self][key] = value
+		_metadata[self][key] = bor(_state[self], DECLARED)
 	end,
 }
 function aux_module()
-	local data, access = {}, {{}, {__=true}}
-	local public_state, private_state = {type=PUBLIC, data=data, access=access}, {type=PRIVATE, data=data, access=access}
-    local interface, private_interface = setmetatable({}, interface_mt), setmetatable({}, interface_mt)
-	local public_declarator, private_declarator = setmetatable({}, declarator_mt), setmetatable({}, declarator_mt)
-	state[interface], state[private_interface] = public_state, private_state
-	state[public_declarator], state[private_declarator] = public_state, private_state
+	local modifier, environment, interface = setmetatable({}, modifier_mt), setmetatable({}, environment_mt), setmetatable({}, interface_mt)
+	local data, metadata = {mutable=modifier, public=modifier}, {mutable=1, public=1}
 
-	local env = setmetatable({m=private_interface, public=public_declarator, private=private_declarator}, {__index=getfenv(0)})
---	public_state.env = env
---	private_state.env = env
+	_data[modifier], _data[environment], _data[interface] = data, data, data
+	_metadata[modifier], _metadata[environment], _metadata[interface] = metadata, metadata, metadata
+	_state[modifier] = 1
 
-	setfenv(2, env)
+	environment.mutable.__()
+	environment.m = environment -- TODO for compatibility, remove later
+
+	setfenv(2, environment)
 	return interface
 end
