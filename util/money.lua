@@ -34,7 +34,7 @@ function public.format(money, exact, color)
 		-- Round to nearest silver
 		money = floor(money / 100 + 0.5) * 100
 	end
-	local g, s, c = aux.money.gsc(money)
+	local g, s, c = m.gsc(money)
 
 	local str = ''
 

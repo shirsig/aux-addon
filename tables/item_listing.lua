@@ -37,7 +37,7 @@ function public.render(item_listing)
 end
 
 function public.create(parent, on_click, selected)
-	local name = 'aux_item_list'
+	local name = '_G.aux_item_list'
 
 	local id = 1
 	while getglobal(name..id) do

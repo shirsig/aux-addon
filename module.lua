@@ -1,4 +1,4 @@
-local band, bor, bnot = bit.band, bit.bor, bit.bnot
+local band, bor, bnot, lshift = bit.band, bit.bor, bit.bnot, bit.lshift
 local _G = getfenv(0)
 
 local FIELD, ACCESSOR, MUTABLE, PUBLIC = 1, 2, 4, 8
@@ -32,8 +32,8 @@ local environment_mt = {
 		local properties = _metadata[self][key]
 		if properties == 0 then
 			_metadata[self][key] = FIELD
-		elseif band(MUTABLE, properties) == 0 then
-			error('"'..key..'" is immutable.', 2)
+--		elseif band(MUTABLE, properties) == 0 then
+--			error('"'..key..'" is immutable.', 2)
 		end
 		_data[self][key] = value
 	end,
@@ -42,9 +42,9 @@ local interface_mt = {
 	__metatable = false,
 	__index = function(self, key)
 		local value, properties = _data[self][key], _metadata[self][key]
-		if band(FIELD, properties) ~= 0 then
+		if band(FIELD+PUBLIC, properties) == FIELD+PUBLIC then
 			return value
-		elseif band(ACCESSOR, properties) ~= 0 then
+		elseif band(ACCESSOR+PUBLIC, properties) == ACCESSOR+PUBLIC then
 			return value(key)
 		else
 			error('No key "'..key..'".', 2)
@@ -67,14 +67,14 @@ local modifier_mt = {
 	__newindex = function(self, key, value)
 		if _metadata[self][key] ~= 0 then error('Duplicate key "'..key..'".', 2) end
 		_data[self][key] = value
-		_metadata[self][key] = _state[self]
+		_metadata[self][key] = bor(band(FIELD, bnot(lshift(_state[self], 1))), _state[self])
 		_state[self] = 0
 	end,
 }
-function aux_module()
+function _G.aux_module()
 	local modifier, environment, interface = setmetatable({}, modifier_mt), setmetatable({}, environment_mt), setmetatable({}, interface_mt)
-	local data = {[ACCESSOR_KEY]=modifier, [MUTABLE_KEY]=modifier, [PUBLIC_KEY]=modifier}
-	local metadata = setmetatable({[ACCESSOR_KEY]=ACCESSOR, [MUTABLE_KEY]=ACCESSOR, [PUBLIC_KEY]=ACCESSOR}, metadata_mt)
+	local data = {_G=_G, [ACCESSOR_KEY]=modifier, [MUTABLE_KEY]=modifier, [PUBLIC_KEY]=modifier}
+	local metadata = setmetatable({_G=FIELD, [ACCESSOR_KEY]=ACCESSOR, [MUTABLE_KEY]=ACCESSOR, [PUBLIC_KEY]=ACCESSOR}, metadata_mt)
 
 	_data[modifier], _data[environment], _data[interface] = data, data, data
 	_metadata[modifier], _metadata[environment], _metadata[interface] = metadata, metadata, metadata

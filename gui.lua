@@ -70,7 +70,7 @@ do
 	local id = 0
 	function public.name()
 		id = id + 1
-		return 'aux_frame'..id
+		return '_G.aux_frame'..id
 	end
 end
 
@@ -121,7 +121,7 @@ do
 		aux.hook('ToggleDropDownMenu', function(...)
 			local ret = {aux.orig.ToggleDropDownMenu(unpack(arg))}
 			local dropdown = getglobal(arg[4] or '') or this:GetParent()
-			if strfind(dropdown:GetName() or '', 'aux_frame') then
+			if strfind(dropdown:GetName() or '', '_G.aux_frame') then
 				m.set_aux_dropdown_style(dropdown)
 			else
 				m.set_blizzard_dropdown_style()

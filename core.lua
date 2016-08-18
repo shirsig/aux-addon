@@ -25,14 +25,14 @@ do
 end
 
 do
-	local data = setmetatable({}, {__mode='kv'})
+	local _state = setmetatable({}, {__mode='kv'})
 	local __index = function(self, key)
-		return data[self].handler({public=self, private=data[self].state}, key)
+		return _state[self].handler({public=self, private=_state[self].state}, key)
 	end
 	function public.index_function(state, handler)
-		local self = {}
-		data[self] = {handler=handler, state=state}
-		return setmetatable(self, {__metatable=false, __index=__index, state=data})
+		local state, self = {handler=handler, state=state}, {}
+		_state[self] = state
+		return setmetatable(self, {__metatable=false, __index=__index, state=state})
 	end
 end
 
@@ -94,7 +94,7 @@ end
 function public.VARIABLES_LOADED()
 	do
 		local frame = CreateFrame('Frame', aux.gui.name(), UIParent)
-		tinsert(UISpecialFrames, 'aux_frame1')
+		tinsert(UISpecialFrames, '_G.aux_frame1')
 		m.gui.set_window_style(frame)
 		frame:SetWidth(768)
 		frame:SetHeight(447)
@@ -430,7 +430,7 @@ end
 
 function public.is_player(name, current)
     local realm = GetCVar 'realmName'
-    return not current and m.index(aux_characters, realm, name) or UnitName 'player' == name
+    return not current and m.index(_G.aux_characters, realm, name) or UnitName 'player' == name
 end
 
 function public.modified()

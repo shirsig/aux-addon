@@ -20,7 +20,7 @@ StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
 }
 do
     local function action()
-        aux_auto_buy_filter = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
+        _G.aux_auto_buy_filter = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
         m.update_auto_buy_filter()
     end
 

@@ -169,7 +169,7 @@ function private.create_frames()
 	    btn:SetScript('OnClick', function()
 	        if this:GetChecked() then
 	            this:SetChecked(false)
-	            aux_auto_buy_filter = nil
+	            _G.aux_auto_buy_filter = nil
 	            this.prettified = nil
 	            m.auto_buy_validator = nil
 	        else
@@ -334,7 +334,7 @@ function private.create_frames()
 	    btn:SetScript('OnClick', function()
 	        local filters = aux.filter.queries(m.search_box:GetText())
 	        if filters then
-	            tinsert(aux_favorite_searches, 1, {
+	            tinsert(_G.aux_favorite_searches, 1, {
 	                filter_string = m.search_box:GetText(),
 	                prettified = table.concat(aux.util.map(filters, function(filter) return filter.prettified end), ';'),
 	            })
@@ -369,7 +369,7 @@ function private.create_frames()
 	end
 	do
 	    local editbox = aux.gui.editbox(m.frame.filter)
-	    editbox.complete_item = aux.completion.complete(function() return aux_auctionable_items end)
+	    editbox.complete_item = aux.completion.complete(function() return _G.aux_auctionable_items end)
 	    editbox:SetPoint('TOPLEFT', 14, -m.FILTER_SPACING)
 	    editbox:SetWidth(260)
 	    editbox:SetScript('OnChar', function()
@@ -653,16 +653,16 @@ function private.create_frames()
 	            m.add_filter(data.search.filter_string)
 	        elseif button == 'LeftButton' and IsControlKeyDown() then
 	            if st == m.favorite_searches_listing and data.index > 1 then
-	                local temp = aux_favorite_searches[data.index - 1]
-	                aux_favorite_searches[data.index - 1] = data.search
-	                aux_favorite_searches[data.index] = temp
+	                local temp = _G.aux_favorite_searches[data.index - 1]
+	                _G.aux_favorite_searches[data.index - 1] = data.search
+	                _G.aux_favorite_searches[data.index] = temp
 	                m.update_search_listings()
 	            end
 	        elseif button == 'RightButton' and IsControlKeyDown() then
-	            if st == m.favorite_searches_listing and data.index < getn(aux_favorite_searches) then
-	                local temp = aux_favorite_searches[data.index + 1]
-	                aux_favorite_searches[data.index + 1] = data.search
-	                aux_favorite_searches[data.index] = temp
+	            if st == m.favorite_searches_listing and data.index < getn(_G.aux_favorite_searches) then
+	                local temp = _G.aux_favorite_searches[data.index + 1]
+	                _G.aux_favorite_searches[data.index + 1] = data.search
+	                _G.aux_favorite_searches[data.index] = temp
 	                m.update_search_listings()
 	            end
 	        elseif button == 'LeftButton' then
@@ -670,9 +670,9 @@ function private.create_frames()
 	            m.execute()
 	        elseif button == 'RightButton' then
 	            if st == m.recent_searches_listing then
-	                tinsert(aux_favorite_searches, 1, data.search)
+	                tinsert(_G.aux_favorite_searches, 1, data.search)
 	            elseif st == m.favorite_searches_listing then
-	                tremove(aux_favorite_searches, data.index)
+	                tremove(_G.aux_favorite_searches, data.index)
 	            end
 	            m.update_search_listings()
 	        end
