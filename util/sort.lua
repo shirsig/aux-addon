@@ -1,4 +1,4 @@
-aux.module 'sort'
+aux.module 'sorting'
 
 public.LT = {}
 public.EQ = {}
@@ -24,7 +24,6 @@ function public.multi_lt(xs, ys)
         elseif not ys[i] then
             return false
         end
-
         i = i + 1
     end
 end

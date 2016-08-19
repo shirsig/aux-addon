@@ -38,9 +38,9 @@ do
 end
 
 function public.container_item(bag, slot)
-    for _, hyperlink in {GetContainerItemLink(bag, slot)} do
+    for link in aux.util.present(GetContainerItemLink(bag, slot)) do
 
-        local item_id, suffix_id, unique_id, enchant_id = m.parse_hyperlink(hyperlink)
+        local item_id, suffix_id, unique_id, enchant_id = m.parse_link(link)
         local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
 
         local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
@@ -55,7 +55,7 @@ function public.container_item(bag, slot)
             unique_id = unique_id,
             enchant_id = enchant_id,
 
-            hyperlink = hyperlink,
+            link = link,
             itemstring = item_info.itemstring,
             item_key = item_id..':'..suffix_id,
 
@@ -83,9 +83,7 @@ function public.container_item(bag, slot)
 end
 
 function public.auction_sell_item()
-	local name, texture, count, quality, usable, vendor_price = GetAuctionSellItemInfo()
-
-	if name then
+	for name, texture, count, quality, usable, vendor_price in GetAuctionSellItemInfo do
         return {
 			name = name,
 			texture = texture,
@@ -100,9 +98,9 @@ end
 function public.auction(index, query_type)
     query_type = query_type or 'list'
 
-	for _, hyperlink in {GetAuctionItemLink(query_type, index)} do
+	for link in aux.util.present(GetAuctionItemLink(query_type, index)) do
 
-        local item_id, suffix_id, unique_id, enchant_id = m.parse_hyperlink(hyperlink)
+        local item_id, suffix_id, unique_id, enchant_id = m.parse_link(link)
         local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
 
         local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(query_type, index)
@@ -121,7 +119,7 @@ function public.auction(index, query_type)
             unique_id = unique_id,
             enchant_id = enchant_id,
 
-            hyperlink = hyperlink,
+            link = link,
             itemstring = item_info.itemstring,
             item_key = item_id..':'..suffix_id,
             search_signature = table.concat({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), _G.aux_ignore_owner and (aux.is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
@@ -179,7 +177,6 @@ end
 
 function public.set_shopping_tooltip(slot)
     local index1, index2 = m.inventory_index(slot)
-
     local tooltips = {}
     if index1 then
         local tooltip = m.tooltip(function(tt) tt:SetInventoryItem('player', index1) end)
@@ -196,7 +193,6 @@ function public.set_shopping_tooltip(slot)
 
     if tooltips[1] then
         tinsert(tooltips[1], 1, { left_text = 'Currently Equipped', left_color = { 0.5, 0.5, 0.5 } })
-
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
         m.load_tooltip(ShoppingTooltip1, tooltips[1])
         ShoppingTooltip1:Show()
@@ -205,7 +201,6 @@ function public.set_shopping_tooltip(slot)
 
     if tooltips[2] then
         tinsert(tooltips[2], 1, { left_text = 'Currently Equipped', left_color = { 0.5, 0.5, 0.5 } })
-
         ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
         m.load_tooltip(ShoppingTooltip2, tooltips[2])
         ShoppingTooltip2:Show()
@@ -231,7 +226,6 @@ function public.tooltip_find(pattern, tooltip)
             count = count + 1
         end
     end
-
     return count
 end
 
@@ -251,7 +245,7 @@ function public.load_tooltip(frame, tooltip)
 end
 
 function public.display_name(item_id, no_brackets, no_color)
-    for _, item_info in {aux.info.item(item_id)} do
+    for item_info in aux.util.present(aux.info.item(item_id)) do
         local name = item_info.name
         if not no_brackets then
             name = '['..name..']'
@@ -346,13 +340,13 @@ function public.durability(tooltip)
     end
 end
 
-function public.item_key(hyperlink)
-    local item_id, suffix_id = m.parse_hyperlink(hyperlink)
+function public.item_key(link)
+    local item_id, suffix_id = m.parse_link(link)
     return item_id..':'..suffix_id
 end
 
-function public.parse_hyperlink(hyperlink)
-    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(hyperlink, '|c%x%x%x%x%x%x%x%x|Hitem:(%d*):(%d*):(%d*):(%d*)[:0-9]*|h%[(.-)%]|h|r')
+function public.parse_link(link)
+    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(link, '|c%x%x%x%x%x%x%x%x|Hitem:(%d*):(%d*):(%d*):(%d*)[:0-9]*|h%[(.-)%]|h|r')
     return tonumber(item_id) or 0, tonumber(suffix_id) or 0, tonumber(unique_id) or 0, tonumber(enchant_id) or 0, name
 end
 
@@ -362,18 +356,20 @@ end
 
 function public.item(item_id, suffix_id)
     local itemstring = 'item:'..(item_id or 0)..':0:'..(suffix_id or 0)..':0'
-    local name, itemstring, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
-    return name and {
-        name = name,
-        itemstring = itemstring,
-        quality = quality,
-        level = level,
-        class = class,
-        subclass = subclass,
-        slot = slot,
-        max_stack = max_stack,
-        texture = texture,
-    } or aux.cache.item_info(item_id)
+    for name, itemstring, quality, level, class, subclass, max_stack, slot, texture in aux.util.present(GetItemInfo(itemstring)) do
+	    return {
+	        name = name,
+	        itemstring = itemstring,
+	        quality = quality,
+	        level = level,
+	        class = class,
+	        subclass = subclass,
+	        slot = slot,
+	        max_stack = max_stack,
+	        texture = texture,
+	    }
+    end
+    return aux.cache.item_info(item_id)
 end
 
 function public.item_class_index(item_class)

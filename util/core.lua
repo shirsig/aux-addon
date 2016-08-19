@@ -10,7 +10,7 @@ function public.present(...)
 	end
 end
 
-function public.unpack(array, ...)
+function public.expand(array, ...)
 	local table = {}
 	for i=1,arg.n do
 		table[arg[i]] = array[i]
@@ -221,7 +221,7 @@ function public.bag_type(bag)
 		return 1
 	end
 	for link in aux.util.present(GetInventoryItemLink('player', ContainerIDToInventoryID(bag))) do
-		local item_id = aux.info.parse_hyperlink(link)
+		local item_id = aux.info.parse_link(link)
 		local item_info = aux.info.item(item_id)
 		return aux.info.item_subclass_index(3, item_info.subclass)
 	end

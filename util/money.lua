@@ -18,7 +18,7 @@ function public.copper(gold, silver, copper)
 	return gold * m.COPPER_PER_GOLD + silver * m.COPPER_PER_SILVER + copper
 end
 
-function public.format(money, exact, color)
+function public.to_string2(money, exact, color)
 	color = color or FONT_COLOR_CODE_CLOSE
 
 	local TEXT_NONE = '0'

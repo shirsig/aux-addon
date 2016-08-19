@@ -36,28 +36,10 @@ do
 	end
 end
 
-do
-	local temp
-	local mt = {
-		__call = function(self, object)
-			self._temp = object
-			return object
-		end,
-		__index = function(self)
-			return self._temp
-		end,
-	}
-	function public.temp(object)
-		getfenv(2).__ = object
-		return object
-	end
+function public.temp(object)
+	getfenv(2).__ = object
+	return object
 end
-
---	function public.temp(object)
---		local env = getfenv(2)
---		env.__ = object
---		return object
---	end
 
 function public.L(body_string)
 	return loadstring 'function()'
@@ -139,7 +121,7 @@ function public.VARIABLES_LOADED()
 		btn:SetWidth(65)
 		btn:SetHeight(24)
 		btn:SetText 'Close'
-		btn:SetScript('OnClick', m._(m.frame.Hide, m.frame))
+		btn:SetScript('OnClick', m.C(m.frame.Hide, m.frame))
 		public.close_button = btn
 	end
 	do
@@ -202,7 +184,7 @@ end
 do
 	local function cost_label(cost)
 		local label = LIGHTYELLOW_FONT_COLOR_CODE..'(Total Cost: '..FONT_COLOR_CODE_CLOSE
-		label = label..(cost and m.money.format(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
+		label = label..(cost and m.money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
 		label = label..LIGHTYELLOW_FONT_COLOR_CODE..')'..FONT_COLOR_CODE_CLOSE
 		return label
 	end
@@ -221,7 +203,7 @@ do
 					total_cost = nil
 					break
 				end
-				local item_id, suffix_id = m.info.parse_hyperlink(link)
+				local item_id, suffix_id = m.info.parse_link(link)
 				local count = aux.util.select(3, GetCraftReagentInfo(id, i))
 				local _, price, limited = m.cache.merchant_info(item_id)
 				local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
@@ -253,7 +235,7 @@ do
 					total_cost = nil
 					break
 				end
-				local item_id, suffix_id = m.info.parse_hyperlink(link)
+				local item_id, suffix_id = m.info.parse_link(link)
 				local count = aux.util.select(3, GetTradeSkillReagentInfo(id, i))
 				local _, price, limited = m.cache.merchant_info(item_id)
 				local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
@@ -279,14 +261,12 @@ function public.hook(name, handler, object)
 		m.orig[object] = m.orig[object] or {}
 		orig = m.orig[object]
 	else
-		object = object or getfenv(0)
+		object = _G
 		orig = m.orig
 	end
-
 	if orig[name] then
 		error('"'..name..'" is already hooked.')
 	end
-
 	orig[name] = object[name]
 	object[name] = handler
 end
@@ -316,7 +296,7 @@ function private.UseContainerItem(...)
     if m.modified() or not m.index(m.active_tab(), 'env', 'USE_ITEM') then
         return m.orig.UseContainerItem(unpack(arg))
     end
-    for _, item_info in {m.info.container_item(arg[1], arg[2])} do
+    for item_info in aux.util.present(m.info.container_item(arg[1], arg[2])) do
         return m.active_tab.env.m.USE_ITEM(item_info)
     end
 end
@@ -380,7 +360,7 @@ public._this = {}
 do
 	local formal_parameters = {}
 	for i=1,9 do
-		local key = 'arg'..i
+		local key = '_'..i
 		public[key] = {}
 		formal_parameters[m[key]] = i
 	end
@@ -397,7 +377,7 @@ do
 		end
 		return f(unpack(params))
 	end
-	function public._(f, ...)
+	function public.C(f, ...)
 		local arg1 = arg
 		return function(...)
 			return call(f, arg1, arg)

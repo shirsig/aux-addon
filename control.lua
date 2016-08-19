@@ -78,7 +78,7 @@ end
 
 function public.thread(k, ...)
 	local thread_id = m.id()
-	m.threads[thread_id] = {k = aux._(k, unpack(arg))}
+	m.threads[thread_id] = {k = aux.C(k, unpack(arg))}
 	return thread_id
 end
 
@@ -86,7 +86,7 @@ function public.wait(k, ...)
 	if type(k) == 'number' then
 		m.when(function() k = k - 1 return k <= 1 end, unpack(arg))
 	else
-		m.threads[m.thread_id].k = aux._(k, unpack(arg))
+		m.threads[m.thread_id].k = aux.C(k, unpack(arg))
 	end
 end
 
@@ -94,6 +94,6 @@ function public.when(p, k, ...)
 	if p() then
 		return k(unpack(arg))
 	else
-		return m.wait(m.when, p, aux._(k, unpack(arg)))
+		return m.wait(m.when, p, aux.C(k, unpack(arg)))
 	end
 end

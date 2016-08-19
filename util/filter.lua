@@ -235,8 +235,8 @@ do
 			end
 			for _, parser in {
 				{'class', aux.info.item_class_index},
-				{'subclass', aux._(aux.info.item_subclass_index, aux.index(self.class, 2) or 0, aux.arg1)},
-				{'slot', aux._(aux.info.item_slot_index, aux.index(self.class, 2) or 0, aux.index(self.subclass, 2) or 0, aux.arg1)},
+				{'subclass', aux.C(aux.info.item_subclass_index, aux.index(self.class, 2) or 0, aux._1)},
+				{'slot', aux.C(aux.info.item_slot_index, aux.index(self.class, 2) or 0, aux.index(self.subclass, 2) or 0, aux._1)},
 				{'quality', aux.info.item_quality_index},
 			} do
 				if not self[parser[1]] then

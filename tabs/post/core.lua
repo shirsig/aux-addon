@@ -153,7 +153,7 @@ function private.update_auction_listing()
             })
         end
         sort(auction_rows, function(a, b)
-            return aux.sort.multi_lt(
+            return aux.sorting.multi_lt(
                 {
                     a.record.unit_buyout_price == 0 and aux.huge or a.record.unit_buyout_price,
                     a.record.unit_blizzard_bid,

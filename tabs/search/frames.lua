@@ -388,7 +388,7 @@ function private.create_frames()
 	        end
 	    end)
 	    editbox:SetScript('OnTextChanged',  m.update_form)
-	    editbox:SetScript('OnEnterPressed', aux._(editbox.ClearFocus, editbox))
+	    editbox:SetScript('OnEnterPressed', aux.C(editbox.ClearFocus, editbox))
 	    local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Name')
@@ -415,7 +415,7 @@ function private.create_frames()
 	            m.max_level_input:SetFocus()
 	        end
 	    end)
-	    editbox:SetScript('OnEnterPressed', aux._(editbox.ClearFocus, editbox))
+	    editbox:SetScript('OnEnterPressed', aux.C(editbox.ClearFocus, editbox))
 	    editbox:SetScript('OnTextChanged', function()
 		    local valid_level = m.valid_level(this:GetText())
 		    if tostring(valid_level) ~= this:GetText() then
@@ -440,7 +440,7 @@ function private.create_frames()
 	            m.name_input:SetFocus()
 	        end
 	    end)
-	    editbox:SetScript('OnEnterPressed', aux._(editbox.ClearFocus, editbox))
+	    editbox:SetScript('OnEnterPressed', aux.C(editbox.ClearFocus, editbox))
 	    editbox:SetScript('OnTextChanged', function()
 		    local valid_level = m.valid_level(this:GetText())
 		    if tostring(valid_level) ~= this:GetText() then

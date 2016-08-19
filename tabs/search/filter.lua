@@ -49,8 +49,8 @@ private.blizzard_query = setmetatable({}, {
 			local subclass_index = UIDropDownMenu_GetSelectedValue(m.subclass_dropdown)
 			return (subclass_index or 0) > 0 and subclass_index or nil
 		elseif key == 'slot' then
-			local slot_index = UIDropDownMenu_GetSelectedValue(m.slot_dropdown)
-			return (slot_index or 0) > 0 and slot_index or nil
+			local slot_token = UIDropDownMenu_GetSelectedValue(m.slot_dropdown)
+			return slot_token ~= '' and slot_token or nil
 		elseif key == 'quality' then
 			local quality_code = UIDropDownMenu_GetSelectedValue(m.quality_dropdown)
 			return (quality_code or -1) >= 0 and quality_code or nil
@@ -406,14 +406,13 @@ function private.initialize_slot_dropdown()
 	if subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
 		UIDropDownMenu_AddButton{
 			text = ALL,
-			value = 0,
+			value = '',
 			func = on_click,
 		}
 
 		for _, slot in {GetAuctionInvTypes(class_index, subclass_index)} do
-			local slot_name = getglobal(slot)
 			UIDropDownMenu_AddButton{
-				text = slot_name,
+				text = getglobal(slot),
 				value = slot,
 				func = on_click,
 			}

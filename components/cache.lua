@@ -114,7 +114,7 @@ function private.merchant_buy_scan()
 		local _, _, price, count, stock = GetMerchantItemInfo(i)
 		local link = GetMerchantItemLink(i)
 		if link then
-			local item_id = aux.info.parse_hyperlink(link)
+			local item_id = aux.info.parse_link(link)
 			local new_unit_price, new_limited = price / count, stock >= 0
 			if _G.aux_merchant_buy[item_id] then
 				local buy_info = aux.persistence.read(m.merchant_buy_schema, _G.aux_merchant_buy[item_id])

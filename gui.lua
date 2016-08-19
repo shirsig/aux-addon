@@ -335,7 +335,7 @@ do
 	end
 	function mt.__index:update()
 		for _, tab in self._tabs do
-			if tab.group.selected == tab.id then
+			if tab.group._selected == tab.id then
 				tab.text:SetTextColor(m.color.label.enabled())
 				tab:Disable()
 				tab:SetBackdropColor(m.color.panel.background())
@@ -369,9 +369,9 @@ function public.editbox(parent)
     editbox:SetFont(m.config.font, m.config.medium_font_size)
     editbox:SetShadowColor(0, 0, 0, 0)
     m.set_content_style(editbox)
-    editbox:SetScript('OnEditFocusGained', aux._(editbox.HighlightText, aux._this))
-    editbox:SetScript('OnEditFocusLost', aux._(editbox.HighlightText, aux._this, 0, 0))
-    editbox:SetScript('OnEscapePressed', aux._(editbox.ClearFocus, aux._this))
+    editbox:SetScript('OnEditFocusGained', aux.C(editbox.HighlightText, aux._this))
+    editbox:SetScript('OnEditFocusLost', aux.C(editbox.HighlightText, aux._this, 0, 0))
+    editbox:SetScript('OnEscapePressed', aux.C(editbox.ClearFocus, aux._this))
     do
         local last_click
         editbox:SetScript('OnMouseDown', function()
@@ -394,6 +394,11 @@ function public.editbox(parent)
 	    editbox:SetTextColor(unpack(m.color.text.disabled))
 	    editbox:ClearFocus()
     end
+    local overlay = aux.gui.label(editbox, m.config.medium_font_size)
+    overlay:SetPoint('LEFT', 1, 0)
+    overlay:SetPoint('RIGHT', -2, 0)
+    overlay:SetJustifyH('RIGHT')
+    overlay:SetTextColor(unpack(aux.gui.color.text.enabled))
     return editbox
 end
 

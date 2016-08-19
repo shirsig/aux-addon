@@ -66,10 +66,10 @@ public.search_config = {
                 cell.icon:SetAlpha(1)
                 cell:GetFontString():SetAlpha(1)
             end
-            cell:SetText(gsub(record.hyperlink, '[%[%]]', ''))
+            cell:SetText(gsub(record.link, '[%[%]]', ''))
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.name, record_b.name, desc)
+            return aux.sorting.compare(record_a.name, record_b.name, desc)
         end,
     },
     {
@@ -82,7 +82,7 @@ public.search_config = {
             cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.level, record_b.level, desc)
+            return aux.sorting.compare(record_a.level, record_b.level, desc)
         end,
     },
     {
@@ -97,7 +97,7 @@ public.search_config = {
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.EQ
+            return aux.sorting.EQ
 --            if sortKey == 'numAuctions' then
 --                if a.children then
 --                    aVal = a.totalAuctions
@@ -117,7 +117,7 @@ public.search_config = {
             cell:SetText(record.aux_quantity)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            return aux.sorting.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
         end,
     },
     {
@@ -128,7 +128,7 @@ public.search_config = {
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.duration, record_b.duration, desc)
+            return aux.sorting.compare(record_a.duration, record_b.duration, desc)
         end,
     },
     {
@@ -140,13 +140,13 @@ public.search_config = {
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
-                return aux.sort.EQ
+                return aux.sorting.EQ
             elseif not record_a.owner then
-                return aux.sort.GT
+                return aux.sorting.GT
             elseif not record_b.owner then
-                return aux.sort.LT
+                return aux.sorting.LT
             else
-                return aux.sort.compare(record_a.owner, record_b.owner, desc)
+                return aux.sorting.compare(record_a.owner, record_b.owner, desc)
             end
         end,
     },
@@ -183,7 +183,7 @@ public.search_config = {
             else
                 price_b = _G.aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end
-            return aux.sort.compare(price_a, price_b, desc)
+            return aux.sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -201,7 +201,7 @@ public.search_config = {
             price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
             price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
 
-            return aux.sort.compare(price_a, price_b, desc)
+            return aux.sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -215,7 +215,7 @@ public.search_config = {
         cmp = function(record_a, record_b, desc)
             local pct_a = m.record_percentage(record_a) or (desc and -aux.huge or aux.huge)
             local pct_b = m.record_percentage(record_b) or (desc and -aux.huge or aux.huge)
-            return aux.sort.compare(pct_a, pct_b, desc)
+            return aux.sorting.compare(pct_a, pct_b, desc)
         end,
     },
 }
@@ -236,10 +236,10 @@ public.auctions_config = {
                 cell.icon:SetAlpha(1)
                 cell:GetFontString():SetAlpha(1)
             end
-            cell:SetText(gsub(record.hyperlink, '[%[%]]', ''))
+            cell:SetText(gsub(record.link, '[%[%]]', ''))
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.name, record_b.name, desc)
+            return aux.sorting.compare(record_a.name, record_b.name, desc)
         end,
     },
     {
@@ -252,7 +252,7 @@ public.auctions_config = {
             cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.level, record_b.level, desc)
+            return aux.sorting.compare(record_a.level, record_b.level, desc)
         end,
     },
     {
@@ -264,7 +264,7 @@ public.auctions_config = {
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.EQ
+            return aux.sorting.EQ
             --            if sortKey == 'numAuctions' then
             --                if a.children then
             --                    aVal = a.totalAuctions
@@ -284,7 +284,7 @@ public.auctions_config = {
             cell:SetText(record.aux_quantity)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            return aux.sorting.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
         end,
     },
     {
@@ -295,7 +295,7 @@ public.auctions_config = {
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.duration, record_b.duration, desc)
+            return aux.sorting.compare(record_a.duration, record_b.duration, desc)
         end,
     },
     {
@@ -325,7 +325,7 @@ public.auctions_config = {
             else
                 price_b = _G.aux_price_per_unit and record_b.start_price / record_b.aux_quantity or record_b.start_price
             end
-            return aux.sort.compare(price_a, price_b, desc)
+            return aux.sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -343,7 +343,7 @@ public.auctions_config = {
             price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
             price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
 
-            return aux.sort.compare(price_a, price_b, desc)
+            return aux.sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -355,13 +355,13 @@ public.auctions_config = {
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.high_bidder and not record_b.high_bidder then
-                return aux.sort.EQ
+                return aux.sorting.EQ
             elseif not record_a.high_bidder then
-                return aux.sort.GT
+                return aux.sorting.GT
             elseif not record_b.high_bidder then
-                return aux.sort.LT
+                return aux.sorting.LT
             else
-                return aux.sort.compare(record_a.high_bidder, record_b.high_bidder, desc)
+                return aux.sorting.compare(record_a.high_bidder, record_b.high_bidder, desc)
             end
         end,
     },
@@ -383,10 +383,10 @@ public.bids_config = {
                 cell.icon:SetAlpha(1)
                 cell:GetFontString():SetAlpha(1)
             end
-            cell:SetText(gsub(record.hyperlink, '[%[%]]', ''))
+            cell:SetText(gsub(record.link, '[%[%]]', ''))
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.name, record_b.name, desc)
+            return aux.sorting.compare(record_a.name, record_b.name, desc)
         end,
     },
     {
@@ -398,7 +398,7 @@ public.bids_config = {
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.EQ
+            return aux.sorting.EQ
             --            if sortKey == 'numAuctions' then
             --                if a.children then
             --                    aVal = a.totalAuctions
@@ -418,7 +418,7 @@ public.bids_config = {
             cell:SetText(record.aux_quantity)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            return aux.sorting.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
         end,
     },
     {
@@ -429,7 +429,7 @@ public.bids_config = {
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.duration, record_b.duration, desc)
+            return aux.sorting.compare(record_a.duration, record_b.duration, desc)
         end,
     },
     {
@@ -441,13 +441,13 @@ public.bids_config = {
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
-                return aux.sort.EQ
+                return aux.sorting.EQ
             elseif not record_a.owner then
-                return aux.sort.GT
+                return aux.sorting.GT
             elseif not record_b.owner then
-                return aux.sort.LT
+                return aux.sorting.LT
             else
-                return aux.sort.compare(record_a.owner, record_b.owner, desc)
+                return aux.sorting.compare(record_a.owner, record_b.owner, desc)
             end
         end,
     },
@@ -478,7 +478,7 @@ public.bids_config = {
             else
                 price_b = _G.aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end
-            return aux.sort.compare(price_a, price_b, desc)
+            return aux.sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -496,7 +496,7 @@ public.bids_config = {
             price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
             price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
 
-            return aux.sort.compare(price_a, price_b, desc)
+            return aux.sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -513,7 +513,7 @@ public.bids_config = {
             cell:SetText(status)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sort.compare(record_a.high_bidder and 1 or 0, record_b.high_bidder and 1 or 0, desc)
+            return aux.sorting.compare(record_a.high_bidder and 1 or 0, record_b.high_bidder and 1 or 0, desc)
         end,
     },
 }
@@ -641,9 +641,9 @@ local methods = {
         local button = arg1
         if this.rt.disabled then return end
         if IsControlKeyDown() then
-            DressUpItemLink(this.row.data.record.hyperlink)
+            DressUpItemLink(this.row.data.record.link)
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
-            ChatFrameEditBox:Insert(this.row.data.record.hyperlink)
+            ChatFrameEditBox:Insert(this.row.data.record.link)
         elseif not aux.modified() and button == 'RightButton' then -- TODO not when alt (how?)
             aux.set_tab(1)
             aux.search_tab.set_filter(strlower(aux.info.item(this.row.data.record.item_id).name)..'/exact')
@@ -684,7 +684,7 @@ local methods = {
         self.isSorted = nil
         self:SetSelectedRecord(nil, true)
 
-        sort(self.records, function(a, b) return aux.sort.multi_lt({a.search_signature, tostring(a)}, {b.search_signature, tostring(b)}) end)
+        sort(self.records, function(a, b) return aux.sorting.multi_lt({a.search_signature, tostring(a)}, {b.search_signature, tostring(b)}) end)
 
         local records = self.records
         if getn(records) == 0 then return end
@@ -765,11 +765,11 @@ local methods = {
                 end
 
                 for _, sort in self.sorts do
-                    local ordering = self.config[sort.index].cmp and self.config[sort.index].cmp(record_a, record_b, sort.descending) or aux.sort.EQ
+                    local ordering = self.config[sort.index].cmp and self.config[sort.index].cmp(record_a, record_b, sort.descending) or aux.sorting.EQ
 
-                    if ordering == aux.sort.LT then
+                    if ordering == aux.sorting.LT then
                         return true
-                    elseif ordering == aux.sort.GT then
+                    elseif ordering == aux.sorting.GT then
                         return false
                     end
                 end
