@@ -1,4 +1,4 @@
-setglobal('aux', aux_module())
+setglobal('aux', aux_module('core'))
 
 public.version = '4.0.0'
 
@@ -15,7 +15,8 @@ function public.module(path)
 			local qualified_name = prefix and prefix..'.'..name or name
 			env = module_envs[qualified_name]
 			if not env then
-				(prefix and module_envs[prefix].public or public)[name], env = (function() return aux_module(), getfenv() end)()
+				(prefix and module_envs[prefix].public or public)[name], env = (function() return aux_module(qualified_name), getfenv() end)()
+				env.import 'util'
 				env.LOAD = nil
 				module_envs[qualified_name] = env
 			end

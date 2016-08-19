@@ -54,7 +54,7 @@ public.search_config = {
     {
         title = 'Item',
         width = 0.35,
-        init = m.item_column_init,
+        init = item_column_init,
         set = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
@@ -209,12 +209,12 @@ public.search_config = {
         width = 0.08,
         align = 'CENTER',
         set = function(cell, record)
-            local pct, bidPct = m.record_percentage(record)
-            cell:SetText((pct or bidPct) and m.percentage_historical(pct or bidPct, not pct) or '---')
+            local pct, bidPct = record_percentage(record)
+            cell:SetText((pct or bidPct) and percentage_historical(pct or bidPct, not pct) or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            local pct_a = m.record_percentage(record_a) or (desc and -aux.huge or aux.huge)
-            local pct_b = m.record_percentage(record_b) or (desc and -aux.huge or aux.huge)
+            local pct_a = record_percentage(record_a) or (desc and -aux.huge or aux.huge)
+            local pct_b = record_percentage(record_b) or (desc and -aux.huge or aux.huge)
             return aux.sorting.compare(pct_a, pct_b, desc)
         end,
     },
@@ -224,7 +224,7 @@ public.auctions_config = {
     {
         title = 'Item',
         width = 0.35,
-        init = m.item_column_init,
+        init = item_column_init,
         set = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
@@ -371,7 +371,7 @@ public.bids_config = {
     {
         title = 'Item',
         width = 0.35,
-        init = m.item_column_init,
+        init = item_column_init,
         set = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
@@ -539,7 +539,7 @@ function percentage_color(pct)
 end
 
 function public.percentage_historical(pct, bid)
-    return (bid and aux.gui.inline_color.gray or m.percentage_color(pct))..(pct > 10000 and '>10000' or pct)..'%'..FONT_COLOR_CODE_CLOSE
+    return (bid and aux.gui.inline_color.gray or percentage_color(pct))..(pct > 10000 and '>10000' or pct)..'%'..FONT_COLOR_CODE_CLOSE
 end
 
 function public.time_left(code)

@@ -25,8 +25,8 @@ function UPDATE()
 		end
 	end
 
-	m.listeners = aux.util.filter(m.listeners, function(l) return not l.killed end)
-	m.threads = aux.util.filter(m.threads, function(th) return not th.killed end)
+	m.listeners = filter(m.listeners, function(l) return not l.killed end)
+	m.threads = filter(m.threads, function(th) return not th.killed end)
 
 	for thread_id, thread in m.threads do
 		if not thread.killed then
