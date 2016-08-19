@@ -1,10 +1,10 @@
 aux.module 'cache'
 
-private.MIN_ITEM_ID = 1
-private.MAX_ITEM_ID = 30000
+MIN_ITEM_ID = 1
+MAX_ITEM_ID = 30000
 
-private.items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
-private.merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'} }
+items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
+merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'} }
 
 _G.aux_items = {}
 _G.aux_item_ids = {}
@@ -35,29 +35,29 @@ end
 do
 	local sell_scan_countdown, incomplete_buy_data
 
-	function private.on_merchant_show()
+	function on_merchant_show()
 		m.merchant_sell_scan()
 		incomplete_buy_data = not m.merchant_buy_scan()
 	end
 
-	function private.on_merchant_closed()
+	function on_merchant_closed()
 		sell_scan_countdown = nil
 		incomplete_buy_data = false
 	end
 
-	function private.on_merchant_update()
+	function on_merchant_update()
 		if incomplete_buy_data then
 			incomplete_buy_data = not m.merchant_buy_scan()
 		end
 	end
 
-	function private.on_bag_update()
+	function on_bag_update()
 		if MerchantFrame:IsVisible() then
 			sell_scan_countdown = 10
 		end
 	end
 
-	function private.merchant_on_update()
+	function merchant_on_update()
 		if sell_scan_countdown == 0 then
 			sell_scan_countdown = nil
 			m.merchant_sell_scan()
@@ -67,7 +67,7 @@ do
 	end
 end
 
-function private.merchant_loaded()
+function merchant_loaded()
 	for i=1,GetMerchantNumItems() do
 		if not GetMerchantItemLink(i) then
 			return false
@@ -107,7 +107,7 @@ function public.item_id(item_name)
 	return _G.aux_item_ids[strlower(item_name)]
 end
 
-function private.merchant_buy_scan()
+function merchant_buy_scan()
 
 	local incomplete_data
 	for i=1,GetMerchantNumItems() do
@@ -146,7 +146,7 @@ function private.merchant_buy_scan()
 	return not incomplete_data
 end
 
-function private.merchant_sell_scan()
+function merchant_sell_scan()
 	for slot in aux.util.inventory() do
 		local item_info = aux.info.container_item(unpack(slot))
 		if item_info then
@@ -155,7 +155,7 @@ function private.merchant_sell_scan()
 	end
 end
 
-function private.scan_wdb(item_id)
+function scan_wdb(item_id)
 	item_id = item_id or m.MIN_ITEM_ID
 
 	local processed = 0

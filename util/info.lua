@@ -287,7 +287,7 @@ function public.tooltip(setter)
     return tooltip, AuxTooltip.money
 end
 
-function private.item_charges(tooltip)
+function item_charges(tooltip)
 	for _, line in tooltip do
         local pattern = '^'..gsub(gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)')..'$'
 

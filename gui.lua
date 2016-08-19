@@ -1,7 +1,7 @@
 aux.module 'gui'
 
 public.config = {
-	color = {
+	colors = {
 		text = {enabled = {255, 254, 250, 1}, disabled = {147, 151, 139, 1}},
 		label = {enabled = {216, 225, 211, 1}, disabled = {150, 148, 140, 1}},
 		link = {153, 255, 255, 1},
@@ -31,17 +31,22 @@ public.config = {
     huge_font_size = 23,
 }
 
-function private.color_accessor(callback)
-	return aux.index_function({callback=callback, table=m.config.color}, function(self, key)
+do
+	local function index_handler(self, key)
 		self.private.table = self.private.table[key]
 		if getn(self.private.table) == 0 then
 			return self.public
 		else
 			local color = aux.util.copy(self.private.table)
-			self.private.table = m.config.color
-			return callback(color)
+			self.private.table = config.colors
+			return self.private.callback(color)
 		end
-	end)
+	end
+	function color_accessor(callback)
+		return function()
+			return aux.index_function({callback=callback, table=config.colors}, index_handler)
+		end
+	end
 end
 
 do
@@ -55,13 +60,13 @@ do
 			end
 		end
 	}
-	public.color = m.color_accessor(function(color)
+	public.accessor.color = m.color_accessor(function(color)
 		local r, g, b, a = unpack(color)
 		return setmetatable({r/255, g/255, b/255, a}, mt)
 	end)
 end
 
-public.inline_color = m.color_accessor(function(color)
+public.accessor.inline_color = m.color_accessor(function(color)
 	local r, g, b, a = unpack(color)
 	return format('|c%02X%02X%02X%02X', a, r, g, b)
 end)
@@ -70,7 +75,7 @@ do
 	local id = 0
 	function public.name()
 		id = id + 1
-		return '_G.aux_frame'..id
+		return 'aux_frame'..id
 	end
 end
 
@@ -83,7 +88,7 @@ do
 		menu:Show()
 	end
 
-	function private.initialize_menu()
+	function initialize_menu()
 		menu = CreateFrame('Frame', m.name(), UIParent, 'UIMenuTemplate')
 		local orig = menu:GetScript('OnShow')
 		menu:SetScript('OnShow', function()
@@ -108,7 +113,7 @@ end
 do
 	local blizzard_backdrop, aux_background, aux_border
 
-	function private.initialize_dropdown()
+	function initialize_dropdown()
 		aux_border = DropDownList1:CreateTexture()
 		aux_border:SetTexture(1, 1, 1, .02)
 		aux_border:SetPoint('TOPLEFT', DropDownList1Backdrop, 'TOPLEFT', -2, 2)
@@ -130,7 +135,7 @@ do
 		end)
 	end
 
-	function private.set_aux_dropdown_style(dropdown)
+	function set_aux_dropdown_style(dropdown)
 		DropDownList1Backdrop:SetBackdrop{}
 		aux_border:Show()
 		aux_background:Show()
@@ -159,7 +164,7 @@ do
 		end
 	end
 
-	function private.set_blizzard_dropdown_style()
+	function set_blizzard_dropdown_style()
 		DropDownList1Backdrop:SetBackdrop(blizzard_backdrop)
 		aux_border:Hide()
 		aux_background:Hide()

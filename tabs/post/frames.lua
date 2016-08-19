@@ -1,7 +1,7 @@
 aux.module 'post_tab'
 
-function private.create_frames()
-	private.frame = CreateFrame('Frame', nil, aux.frame)
+function create_frames()
+	frame = CreateFrame('Frame', nil, aux.frame)
 	m.frame:SetAllPoints()
 	m.frame:SetScript('OnUpdate', m.on_update)
 	m.frame:Hide()
@@ -35,12 +35,12 @@ function private.create_frames()
 	    local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
 	    label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
 	    label:SetText('Show hidden items')
-	    private.show_hidden_checkbox = checkbox
+	    show_hidden_checkbox = checkbox
 	end
 
 	aux.gui.horizontal_line(m.frame.inventory, -48)
 
-	private.item_listing = aux.item_listing.create(
+	item_listing = aux.item_listing.create(
 	    m.frame.inventory,
 	    function()
 	        if arg1 == 'LeftButton' then
@@ -56,7 +56,7 @@ function private.create_frames()
 	    end
 	)
 
-	private.auction_listing = aux.listing.CreateScrollingTable(m.frame.auctions)
+	auction_listing = aux.listing.CreateScrollingTable(m.frame.auctions)
 	m.auction_listing:SetColInfo({
 	    { name='Auctions', width=.12, align='CENTER' },
 	    { name='Left', width=.1, align='CENTER' },
@@ -87,7 +87,7 @@ function private.create_frames()
 	    status_bar:SetPoint('TOPLEFT', aux.frame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 100)
 	    status_bar:set_text('')
-	    private.status_bar = status_bar
+	    status_bar = status_bar
 	end
 	do
 	    local btn = aux.gui.button(m.frame.parameters, 16)
@@ -96,7 +96,7 @@ function private.create_frames()
 	    btn:SetHeight(24)
 	    btn:SetText('Post')
 	    btn:SetScript('OnClick', m.post_auctions)
-	    private.post_button = btn
+	    post_button = btn
 	end
 	do
 	    local btn = aux.gui.button(m.frame.parameters, 16)
@@ -109,7 +109,7 @@ function private.create_frames()
 	        m.refresh_entries()
 	        m.refresh = true
 	    end)
-	    private.refresh_button = btn
+	    refresh_button = btn
 	end
 	do
 	    local item = aux.gui.item(m.frame.parameters)
@@ -122,7 +122,7 @@ function private.create_frames()
 	    item.button:SetScript('OnLeave', function()
 	        GameTooltip:Hide()
 	    end)
-	    private.item = item
+	    item = item
 	end
 	do
 	    local slider = aux.gui.slider(m.frame.parameters)
@@ -153,7 +153,7 @@ function private.create_frames()
 	    slider.editbox:SetNumeric(true)
 	    slider.editbox:SetMaxLetters(3)
 	    slider.label:SetText('Stack Size')
-	    private.stack_size_slider = slider
+	    stack_size_slider = slider
 	end
 	do
 	    local slider = aux.gui.slider(m.frame.parameters)
@@ -176,7 +176,7 @@ function private.create_frames()
 	    end)
 	    slider.editbox:SetNumeric(true)
 	    slider.label:SetText('Stack Count')
-	    private.stack_count_slider = slider
+	    stack_count_slider = slider
 	end
 	do
 	    local dropdown = aux.gui.dropdown(m.frame.parameters)
@@ -189,12 +189,12 @@ function private.create_frames()
 	    dropdown:SetScript('OnShow', function()
 	        UIDropDownMenu_Initialize(this, m.initialize_duration_dropdown)
 	    end)
-	    private.duration_dropdown = dropdown
+	    duration_dropdown = dropdown
 	end
 	do
 	    local label = aux.gui.label(m.frame.parameters, aux.gui.config.medium_font_size)
 	    label:SetPoint('LEFT', m.duration_dropdown, 'RIGHT', 25, 0)
-	    private.deposit = label
+	    deposit = label
 	end
 	do
 	    local checkbox = aux.gui.checkbox(m.frame.parameters)
@@ -208,11 +208,11 @@ function private.create_frames()
 	    local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
 	    label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
 	    label:SetText('Hide this item')
-	    private.hide_checkbox = checkbox
+	    hide_checkbox = checkbox
 	end
 	do
 	    local frame = CreateFrame('Frame', nil, m.frame.parameters)
-	    private.start_price_frame = frame
+	    start_price_frame = frame
 	    aux.gui.set_content_style(frame)
 	    frame:SetPoint('TOPRIGHT', m.frame.parameters, 'TOPRIGHT', -71, -60)
 	    frame:SetWidth(180)
@@ -260,13 +260,13 @@ function private.create_frames()
 	        label:SetPoint('LEFT', frame, 'RIGHT', 8, 0)
 	        label:SetWidth(50)
 	        label:SetJustifyH('CENTER')
-	        private.start_price_percentage = label
+	        start_price_percentage = label
 	    end
-	    private.unit_start_price = editbox
+	    unit_start_price = editbox
 	end
 	do
 	    local frame = CreateFrame('Frame', nil, m.frame.parameters)
-	    private.buyout_price_frame = frame
+	    buyout_price_frame = frame
 	    aux.gui.set_content_style(frame)
 	    frame:SetPoint('TOPRIGHT', m.unit_start_price, 'BOTTOMRIGHT', 0, -19)
 	    frame:SetWidth(180)
@@ -315,9 +315,9 @@ function private.create_frames()
 	        label:SetPoint('LEFT', frame, 'RIGHT', 8, 0)
 	        label:SetWidth(50)
 	        label:SetJustifyH('CENTER')
-	        private.buyout_price_percentage = label
+	        buyout_price_percentage = label
 	    end
-	    private.unit_buyout_price = editbox
+	    unit_buyout_price = editbox
 	end
 	do
 	    local btn = aux.gui.button(m.frame.parameters, 14)
@@ -335,6 +335,6 @@ function private.create_frames()
 	    local label = aux.gui.label(btn, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
 	    label:SetText('Historical Value')
-	    private.historical_value_button = btn
+	    historical_value_button = btn
 	end
 end

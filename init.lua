@@ -2,7 +2,7 @@ setglobal('aux', aux_module())
 
 public.version = '4.0.0'
 
-private.module_envs = {}
+module_envs = {}
 function public.module(path)
 	local env
 	if path == '' then
@@ -16,7 +16,7 @@ function public.module(path)
 			env = m.module_envs[qualified_name]
 			if not env then
 				(prefix and m.module_envs[prefix].public or public)[name], env = (function() return aux_module(), getfenv() end)()
-				env.private.LOAD = nil
+				env.LOAD = nil
 				m.module_envs[qualified_name] = env
 			end
 			prefix = qualified_name
@@ -29,7 +29,7 @@ local event_frame = CreateFrame 'Frame'
 for _, event in {'VARIABLES_LOADED', 'ADDON_LOADED', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE'} do
 	event_frame:RegisterEvent(event)
 end
-private.ADDON_LOADED = {}
+ADDON_LOADED = {}
 event_frame:SetScript('OnEvent', function()
 	if event == 'ADDON_LOADED' then
 		if m.ADDON_LOADED[arg1] then

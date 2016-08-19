@@ -1,6 +1,6 @@
 aux.module 'filter'
 
-function private.default_filter(str)
+function default_filter(str)
     return {
         input_type = '',
         validator = function()
@@ -202,7 +202,7 @@ public.filters = {
     },
 }
 
-function private.operator(str)
+function operator(str)
     local operator = str == 'not' and {'operator', 'not', 1}
     for _, name in {'and', 'or'} do
 	    for arity in aux.util.present(aux.util.select(3, strfind(str, '^'..name..'(%d*)$'))) do
@@ -259,12 +259,12 @@ do
 		end,
 	}
 
-	function private.blizzard_filter_parser()
+	function blizzard_filter_parser()
 	    return setmetatable({}, mt)
 	end
 end
 
-function private.parse_parameter(input_type, str)
+function parse_parameter(input_type, str)
     if input_type == 'money' then
         local money = aux.money.from_string(str)
         return money and money > 0 and money or nil
@@ -372,7 +372,7 @@ function public.queries(query_string)
     return queries
 end
 
-function private.suggestions(components)
+function suggestions(components)
     local suggestions = {}
 
     if components.blizzard.name and aux.util.size(components.blizzard) == 1 then
@@ -455,7 +455,7 @@ function public.query_string(components)
     return query_builder.get()
 end
 
-function private.prettified_query_string(components)
+function prettified_query_string(components)
     local prettified = m.query_builder()
 
     for key, filter in components.blizzard do
@@ -505,7 +505,7 @@ function public.unquote(name)
     return aux.util.select(3, strfind(name, '^<(.*)>$')) or name
 end
 
-function private.blizzard_query(components)
+function blizzard_query(components)
     local filters = components.blizzard
 
     local query = {name=filters.name and filters.name[2]}
@@ -534,7 +534,7 @@ function private.blizzard_query(components)
     return query
 end
 
-function private.validator(components)
+function validator(components)
 
     local validators = {}
     for i, component in components.post do

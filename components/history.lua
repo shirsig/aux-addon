@@ -1,25 +1,25 @@
 aux.module 'history'
 
 local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}}}
-private.value_cache = {}
+value_cache = {}
 
-function private.next_push()
+function next_push()
 	local date = date('*t')
 	date.hour, date.min, date.sec = 24, 0, 0
 	return time(date)
 end
 
-function private.new_record()
+function new_record()
 	return { next_push = m.next_push(), data_points = {} }
 end
 
-function private.load_data()
+function load_data()
 	local dataset = aux.persistence.load_dataset()
 	dataset.history = dataset.history or {}
 	return dataset.history
 end
 
-function private.read_record(item_key)
+function read_record(item_key)
 	local data = m.load_data()
 
 	local record
@@ -37,7 +37,7 @@ function private.read_record(item_key)
 	return record
 end
 
-function private.write_record(item_key, record)
+function write_record(item_key, record)
 	m.value_cache[item_key] = nil
 	local data = m.load_data()
 	data[item_key] = aux.persistence.write(history_schema, record)
@@ -96,11 +96,11 @@ function public.market_value(item_key)
 	return m.calculate_market_value(item_record)
 end
 
-function private.calculate_market_value(item_record)
+function calculate_market_value(item_record)
 	return item_record.daily_min_buyout and min(ceil(item_record.daily_min_buyout * 1.15), item_record.daily_max_price)
 end
 
-function private.weighted_median(list)
+function weighted_median(list)
 	local sorted_list = {}
 	for _, e in list do
 		tinsert(sorted_list, e)
@@ -116,7 +116,7 @@ function private.weighted_median(list)
 	end
 end
 
-function private.push_record(item_record)
+function push_record(item_record)
 
 	local market_value = m.calculate_market_value(item_record)
 	if market_value then

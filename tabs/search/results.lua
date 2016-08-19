@@ -2,18 +2,18 @@ aux.module 'search_tab'
 
 _G.aux_auto_buy_filter = ''
 
-private.search_scan_id = 0
-private.auto_buy_validator = nil
+search_scan_id = 0
+auto_buy_validator = nil
 
 do
 	local searches = {}
 	local search_index = 1
 
-	function private.current_search()
+	function current_search()
 		return searches[search_index]
 	end
 
-	function private.update_search(index)
+	function update_search(index)
 		searches[search_index].status_bar:Hide()
 		searches[search_index].table:Hide()
 		searches[search_index].table:SetSelectedRecord()
@@ -40,7 +40,7 @@ do
 		m.update_continuation()
 	end
 
-	function private.new_search(filter_string)
+	function new_search(filter_string)
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
@@ -68,26 +68,26 @@ do
 		m.update_search(getn(searches))
 	end
 
-	function private.previous_search()
+	function previous_search()
 		m.search_box:ClearFocus()
 		m.update_search(search_index - 1)
 		m.update_tab(m.RESULTS)
 	end
 
-	function private.next_search()
+	function next_search()
 		m.search_box:ClearFocus()
 		m.update_search(search_index + 1)
 		m.update_tab(m.RESULTS)
 	end
 end
 
-function private.close_settings()
+function close_settings()
 	if m.settings_button.open then
 		m.settings_button:Click()
 	end
 end
 
-function private.update_continuation()
+function update_continuation()
 	if m.current_search().continuation then
 		m.resume_button:Show()
 		m.search_box:SetPoint('RIGHT', m.resume_button, 'LEFT', -4, 0)
@@ -97,7 +97,7 @@ function private.update_continuation()
 	end
 end
 
-function private.discard_continuation()
+function discard_continuation()
 	aux.scan.abort(m.search_scan_id)
 	m.current_search().continuation = nil
 	m.update_continuation()
@@ -113,7 +113,7 @@ function private:update_start_stop()
 	end
 end
 
-function private.update_auto_buy_filter()
+function update_auto_buy_filter()
 	if _G.aux_auto_buy_filter ~= '' then
 		local queries = aux.filter.queries(_G.aux_auto_buy_filter)
 		if queries then
@@ -132,7 +132,7 @@ function private.update_auto_buy_filter()
 	_G.aux_auto_buy_filter = ''
 end
 
-function private.start_real_time_scan(query, search, continuation)
+function start_real_time_scan(query, search, continuation)
 
 	local ignore_page
 	if not search then
@@ -209,7 +209,7 @@ function private.start_real_time_scan(query, search, continuation)
 	}
 end
 
-function private.start_search(queries, continuation)
+function start_search(queries, continuation)
 	local current_query, current_page, total_queries, start_query, start_page
 
 	local search = m.current_search()
@@ -365,7 +365,7 @@ function public.execute(resume, real_time)
 	end
 end
 
-function private.test(record)
+function test(record)
 	return function(index)
 		local auction_info = aux.info.auction(index)
 		return auction_info and auction_info.search_signature == record.search_signature
@@ -378,7 +378,7 @@ do
 	local state = IDLE
 	local found_index
 
-	function private.find_auction(record)
+	function find_auction(record)
 		local search = m.current_search()
 
 		if not search.table:ContainsRecord(record) or aux.is_player(record.owner) then
@@ -429,7 +429,7 @@ do
 		)
 	end
 
-	function private.on_update()
+	function on_update()
 		if state == IDLE or state == SEARCHING then
 			m.buyout_button:Disable()
 			m.bid_button:Disable()

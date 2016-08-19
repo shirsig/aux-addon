@@ -4,11 +4,11 @@ aux.tab(2, 'Post')
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
-private.existing_auctions = {}
-private.inventory_records = nil
-private.scan_id = 0
-private.selected_item = nil
-private.refresh = nil
+existing_auctions = {}
+inventory_records = nil
+scan_id = 0
+selected_item = nil
+refresh = nil
 
 function m.LOAD()
 	m.create_frames()
@@ -36,7 +36,7 @@ function m.USE_ITEM(item_info)
 	m.select_item(item_info.item_key)
 end
 
-function private.default_settings()
+function default_settings()
     return {
         duration = DURATION_8,
         stack_size = 1,
@@ -46,7 +46,7 @@ function private.default_settings()
     }
 end
 
-function private.read_settings(item_key)
+function read_settings(item_key)
     item_key = item_key or m.selected_item.key
     local dataset = aux.persistence.load_dataset()
     dataset.post = dataset.post or {}
@@ -60,7 +60,7 @@ function private.read_settings(item_key)
     return settings
 end
 
-function private.write_settings(settings, item_key)
+function write_settings(settings, item_key)
     item_key = item_key or m.selected_item.key
 
     local dataset = aux.persistence.load_dataset()
@@ -69,25 +69,25 @@ function private.write_settings(settings, item_key)
     dataset.post[item_key] = aux.persistence.write(settings_schema, settings)
 end
 
-function private.get_unit_start_price()
+function get_unit_start_price()
     local money_text = m.unit_start_price:GetText()
     return aux.money.from_string(money_text) or 0
 end
 
-function private.set_unit_start_price(amount)
+function set_unit_start_price(amount)
     m.unit_start_price:SetText(aux.money.to_string(amount, true, nil, 3))
 end
 
-function private.get_unit_buyout_price()
+function get_unit_buyout_price()
     local money_text = m.unit_buyout_price:GetText()
     return aux.money.from_string(money_text) or 0
 end
 
-function private.set_unit_buyout_price(amount)
+function set_unit_buyout_price(amount)
     m.unit_buyout_price:SetText(aux.money.to_string(amount, true, nil, 3))
 end
 
-function private.update_inventory_listing()
+function update_inventory_listing()
     if not m.ACTIVE() then
         return
     end
@@ -98,7 +98,7 @@ function private.update_inventory_listing()
     end)))
 end
 
-function private.update_auction_listing()
+function update_auction_listing()
     if not m.ACTIVE() then
         return
     end
@@ -183,7 +183,7 @@ function public.select_item(item_key)
     end
 end
 
-function private.price_update()
+function price_update()
     if m.selected_item then
         local settings = m.read_settings()
 
@@ -201,7 +201,7 @@ function private.price_update()
     end
 end
 
-function private.post_auctions()
+function post_auctions()
 	if m.selected_item then
         local unit_start_price = m.get_unit_start_price()
         local unit_buyout_price = m.get_unit_buyout_price()
@@ -247,7 +247,7 @@ function private.post_auctions()
 	end
 end
 
-function private.validate_parameters()
+function validate_parameters()
 
     if not m.selected_item then
         m.post_button:Disable()
@@ -272,7 +272,7 @@ function private.validate_parameters()
     m.post_button:Enable()
 end
 
-function private.update_item_configuration()
+function update_item_configuration()
 
 	if not m.selected_item then
         m.refresh_button:Disable()
@@ -327,7 +327,7 @@ function private.update_item_configuration()
 	end
 end
 
-function private.undercut(record, stack_size, stack)
+function undercut(record, stack_size, stack)
     local start_price = aux.util.round(record.unit_blizzard_bid * (stack and record.stack_size or stack_size))
     local buyout_price = aux.util.round(record.unit_buyout_price * (stack and record.stack_size or stack_size))
 
@@ -339,7 +339,7 @@ function private.undercut(record, stack_size, stack)
     return start_price / stack_size, buyout_price / stack_size
 end
 
-function private.quantity_update(max_count)
+function quantity_update(max_count)
     if m.selected_item then
         local max_stack_count = m.selected_item.max_charges and m.selected_item.availability[m.stack_size_slider:GetValue()] or floor(m.selected_item.availability[0] / m.stack_size_slider:GetValue())
         m.stack_count_slider:SetMinMaxValues(1, max_stack_count)
@@ -350,7 +350,7 @@ function private.quantity_update(max_count)
     m.refresh = true
 end
 
-function private.unit_vendor_price(item_key)
+function unit_vendor_price(item_key)
 
     for slot in aux.util.inventory() do
 
@@ -374,7 +374,7 @@ function private.unit_vendor_price(item_key)
     end
 end
 
-function private.update_historical_value_button()
+function update_historical_value_button()
     if m.selected_item then
         local historical_value = aux.history.value(m.selected_item.key)
         m.historical_value_button.amount = historical_value
@@ -382,7 +382,7 @@ function private.update_historical_value_button()
     end
 end
 
-function private.set_item(item)
+function set_item(item)
     local settings = m.read_settings(item.key)
 
     item.unit_vendor_price = m.unit_vendor_price(item.key)
@@ -417,7 +417,7 @@ function private.set_item(item)
     m.refresh = true
 end
 
-function private.update_inventory_records()
+function update_inventory_records()
     m.inventory_records = {}
     m.refresh = true
 
@@ -470,7 +470,7 @@ function private.update_inventory_records()
     m.refresh = true
 end
 
-function private.refresh_entries()
+function refresh_entries()
 	if m.selected_item then
 		local item_id, suffix_id = m.selected_item.item_id, m.selected_item.suffix_id
         local item_key = item_id..':'..suffix_id
@@ -518,7 +518,7 @@ function private.refresh_entries()
 	end
 end
 
-function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
+function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
     m.existing_auctions[key] = m.existing_auctions[key] or {}
     local entry
     for _, existing_entry in m.existing_auctions[key] do
@@ -544,7 +544,7 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
     return entry
 end
 
-function private.on_update()
+function on_update()
     if m.refresh then
         m.refresh = false
         m.price_update()
@@ -557,7 +557,7 @@ function private.on_update()
     m.validate_parameters()
 end
 
-function private.initialize_duration_dropdown()
+function initialize_duration_dropdown()
 
     local function on_click()
         UIDropDownMenu_SetSelectedValue(m.duration_dropdown, this.value)

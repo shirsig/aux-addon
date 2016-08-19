@@ -2,9 +2,9 @@ aux.module 'tooltip'
 
 _G.aux_tooltip_value = true
 
-private.game_tooltip_hooks = {}
-private.hooked_setter = nil
-private.game_tooltip_money = nil
+game_tooltip_hooks = {}
+hooked_setter = nil
+game_tooltip_money = nil
 
 function m.LOAD()
     for func, hook in m.game_tooltip_hooks do
@@ -43,7 +43,7 @@ function m.LOAD()
     end)
 end
 
-function private.extend_tooltip(tooltip, link, quantity)
+function extend_tooltip(tooltip, link, quantity)
     local item_id, suffix_id = aux.info.parse_link(link)
     quantity = IsShiftKeyDown() and quantity or 1
 

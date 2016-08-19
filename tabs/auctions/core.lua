@@ -1,7 +1,7 @@
 aux.module 'auctions_tab'
 aux.tab(3, 'Auctions')
 
-private.auction_records = nil
+auction_records = nil
 
 function m.LOAD()
 	m.create_frames()
@@ -16,7 +16,7 @@ function m.CLOSE()
     m.frame:Hide()
 end
 
-function private.update_listing()
+function update_listing()
     if not m:ACTIVE() then
         return
     end
@@ -53,7 +53,7 @@ function public.scan_auctions()
     }
 end
 
-function private.test(record)
+function test(record)
     return function(index)
         local auction_info = aux.info.auction(index, 'owner')
         return auction_info and auction_info.search_signature == record.search_signature
@@ -66,7 +66,7 @@ do
     local state = IDLE
     local found_index
 
-    function private.find_auction(record)
+    function find_auction(record)
         if not m.listing:ContainsRecord(record) then
             return
         end
@@ -97,7 +97,7 @@ do
         )
     end
 
-    function private.on_update()
+    function on_update()
         if state == IDLE or state == SEARCHING then
             m.cancel_button:Disable()
         end

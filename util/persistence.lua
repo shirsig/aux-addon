@@ -10,7 +10,7 @@ do
         realm = GetCVar('realmName')
     end
 
-    function private.get_dataset_key()
+    function get_dataset_key()
         return realm..'|'..faction
     end
 end

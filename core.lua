@@ -45,7 +45,7 @@ function public.L(body_string)
 	return loadstring 'function()'
 end
 
-private.tabs = {}
+tabs = {}
 function public.tab(index, name)
 	local module_env = getfenv(2)
 	local tab = {name=name, env=module_env}
@@ -53,16 +53,16 @@ function public.tab(index, name)
 		return tab == m.active_tab()
 	end
 	for _, handler in {'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do
-		module_env.private[handler] = nil
+		module_env.mutable[handler] = nil
 	end
 	m.tabs[index] = tab
 end
 do
 	local active_tab_index
-	private.active_tab = m.dynamic_table(nil, function()
+	active_tab = m.dynamic_table(nil, function()
 		return m.tabs[active_tab_index]
 	end)
-	function private.on_tab_click(index)
+	function on_tab_click(index)
 		if active_tab_index then
 			m.call(m.active_tab.env.m.CLOSE)
 		end
@@ -140,13 +140,13 @@ function public.VARIABLES_LOADED()
 	end
 end
 
-function private.AUCTION_HOUSE_SHOW()
+function AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
 	m.frame:Show()
 	m.set_tab(1)
 end
 
-function private.AUCTION_HOUSE_CLOSED()
+function AUCTION_HOUSE_CLOSED()
 	m.bids_loaded = false
 	m.current_owner_page = nil
 	m.post.stop()
@@ -156,11 +156,11 @@ function private.AUCTION_HOUSE_CLOSED()
 	m.frame:Hide()
 end
 
-function private.AUCTION_BIDDER_LIST_UPDATE()
+function AUCTION_BIDDER_LIST_UPDATE()
 	m.bids_loaded = true
 end
 
-function private.AUCTION_OWNED_LIST_UPDATE()
+function AUCTION_OWNED_LIST_UPDATE()
 	m.current_owner_page = m.last_owner_page_requested or 0
 end
 
@@ -271,19 +271,19 @@ function public.hook(name, handler, object)
 	object[name] = handler
 end
 
-function private.GetOwnerAuctionItems(...)
+function GetOwnerAuctionItems(...)
     local page = arg[1]
     m.last_owner_page_requested = page
     return m.orig.GetOwnerAuctionItems(unpack(arg))
 end
 
-function private.AuctionFrameAuctions_OnEvent(...)
+function AuctionFrameAuctions_OnEvent(...)
     if AuctionFrameAuctions:IsVisible() then
         return m.orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end
 end
 
-function private.SetItemRef(...)
+function SetItemRef(...)
 	if arg[3] ~= 'RightButton' or not m.index(m.active_tab(), 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return m.orig.SetItemRef(unpack(arg))
 	end
@@ -292,7 +292,7 @@ function private.SetItemRef(...)
 	end
 end
 
-function private.UseContainerItem(...)
+function UseContainerItem(...)
     if m.modified() or not m.index(m.active_tab(), 'env', 'USE_ITEM') then
         return m.orig.UseContainerItem(unpack(arg))
     end

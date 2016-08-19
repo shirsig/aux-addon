@@ -21,7 +21,7 @@ local TIME_LEFT_STRINGS = {
 	aux.gui.color.blue '24h', -- Very Long
 }
 
-function private.item_column_init(rt, cell)
+function item_column_init(rt, cell)
     local spacer = CreateFrame('Frame', nil, cell)
     spacer:SetPoint('TOPLEFT', 0, 0)
     spacer:SetHeight(rt.ROW_HEIGHT)
@@ -518,7 +518,7 @@ public.bids_config = {
     },
 }
 
-function private.record_percentage(record)
+function record_percentage(record)
     if not record then return end
 
     local historical_value = aux.history.value(record.item_key) or 0
@@ -530,7 +530,7 @@ function private.record_percentage(record)
     end
 end
 
-function private.percentage_color(pct)
+function percentage_color(pct)
 	for i=1,getn(AUCTION_PCT_COLORS) do
 		if pct < AUCTION_PCT_COLORS[i].value then
 			return AUCTION_PCT_COLORS[i].color

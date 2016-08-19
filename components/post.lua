@@ -1,8 +1,8 @@
 aux.module 'post'
 
-private.state = nil
+state = nil
 
-function private.process()
+function process()
 	if m.state.posted < m.state.count then
 
 		local stacking_complete
@@ -23,7 +23,7 @@ function private.process()
 	return m.stop()
 end
 
-function private.post_auction(slot, k)
+function post_auction(slot, k)
 	local item_info = aux.info.container_item(unpack(slot))
 	if item_info.item_key == m.state.item_key and aux.info.auctionable(item_info.tooltip) and item_info.aux_quantity == m.state.stack_size then
 

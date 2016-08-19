@@ -33,7 +33,7 @@ local interface_mt = {
 		if mask(ACCESSOR+PUBLIC, properties) == PUBLIC then
 			return value
 		elseif mask(PUBLIC, properties) == PUBLIC then
-			return value()
+			return value(key)
 		else
 			error('No key "'..key..'".', 2)
 		end

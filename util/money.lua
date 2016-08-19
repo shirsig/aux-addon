@@ -1,11 +1,11 @@
 aux.module 'money'
 
-private.GOLD_TEXT = '|cffffd70ag|r'
-private.SILVER_TEXT = '|cffc7c7cfs|r'
-private.COPPER_TEXT = '|cffeda55fc|r'
+GOLD_TEXT = '|cffffd70ag|r'
+SILVER_TEXT = '|cffc7c7cfs|r'
+COPPER_TEXT = '|cffeda55fc|r'
 
-private.COPPER_PER_SILVER = 100
-private.COPPER_PER_GOLD = 10000
+COPPER_PER_SILVER = 100
+COPPER_PER_GOLD = 10000
 
 function public.gsc(money)
 	local gold = floor(money / m.COPPER_PER_GOLD)

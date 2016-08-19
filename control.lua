@@ -1,8 +1,8 @@
 aux.module 'control'
 
-private.event_frame = CreateFrame('Frame')
-private.listeners = {}
-private.threads = {}
+event_frame = CreateFrame('Frame')
+listeners = {}
+threads = {}
 public.thread_id = nil
 
 function m.LOAD()
@@ -10,7 +10,7 @@ function m.LOAD()
 	m.event_frame:SetScript('OnEvent', m.EVENT)
 end
 
-function private.EVENT()
+function EVENT()
 	for _, listener in m.listeners do
 		if event == listener.event and not listener.killed then
 			listener.cb(listener.kill)
@@ -18,7 +18,7 @@ function private.EVENT()
 	end
 end
 
-function private.UPDATE()
+function UPDATE()
 	for _, listener in m.listeners do
 		if not aux.util.any(m.listeners, function(l) return not l.killed and l.event == listener.event end) then
 			m.event_frame:UnregisterEvent(listener.event)
@@ -44,7 +44,7 @@ end
 
 do
 	local id = 0
-	function private.id()
+	function id()
 		id = id + 1
 		return id
 	end

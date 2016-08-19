@@ -48,7 +48,7 @@ do
     }
 end
 
-private.RESULTS, private.SAVED, private.FILTER = 1, 2, 3
+RESULTS, SAVED, FILTER = 1, 2, 3
 
 function m.LOAD()
 	m.create_frames()
@@ -79,7 +79,7 @@ function m.USE_ITEM(item_info)
 	m.execute(nil, false)
 end
 
-function private.update_tab(tab)
+function update_tab(tab)
 
     m.search_results_button:UnlockHighlight()
     m.saved_searches_button:UnlockHighlight()
@@ -115,7 +115,7 @@ function public.add_filter(filter_string)
     m.search_box:SetText(old_filter_string..filter_string)
 end
 
-function private.blizzard_page_index(str)
+function blizzard_page_index(str)
     if tonumber(str) then
         return max(0, tonumber(str) - 1)
     end

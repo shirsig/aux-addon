@@ -1,7 +1,7 @@
 aux.module 'bids_tab'
 
-function private.create_frames()
-	private.frame = CreateFrame('Frame', nil, aux.frame)
+function create_frames()
+	frame = CreateFrame('Frame', nil, aux.frame)
 	m.frame:SetAllPoints()
 	m.frame:SetScript('OnUpdate', m.on_update)
 	m.frame:Hide()
@@ -11,7 +11,7 @@ function private.create_frames()
 	m.frame.listing:SetPoint('BOTTOMLEFT', aux.frame.content, 'BOTTOMLEFT', 0, 0)
 	m.frame.listing:SetPoint('BOTTOMRIGHT', aux.frame.content, 'BOTTOMRIGHT', 0, 0)
 
-	private.listing = aux.auction_listing.CreateAuctionResultsTable(m.frame.listing, aux.auction_listing.bids_config)
+	listing = aux.auction_listing.CreateAuctionResultsTable(m.frame.listing, aux.auction_listing.bids_config)
 	m.listing:SetSort(1,2,3,4,5,6,7,8)
 	m.listing:Reset()
 	m.listing:SetHandler('OnCellClick', function(cell, button)
@@ -35,7 +35,7 @@ function private.create_frames()
 	    status_bar:SetPoint('TOPLEFT', aux.frame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 0)
 	    status_bar:set_text('')
-	    private.status_bar = status_bar
+	    status_bar = status_bar
 	end
 	do
 	    local btn = aux.gui.button(m.frame, 16)
@@ -44,7 +44,7 @@ function private.create_frames()
 	    btn:SetHeight(24)
 	    btn:SetText('Bid')
 	    btn:Disable()
-	    private.bid_button = btn
+	    bid_button = btn
 	end
 	do
 	    local btn = aux.gui.button(m.frame, 16)
@@ -53,7 +53,7 @@ function private.create_frames()
 	    btn:SetHeight(24)
 	    btn:SetText('Buyout')
 	    btn:Disable()
-	    private.buyout_button = btn
+	    buyout_button = btn
 	end
 	do
 	    local btn = aux.gui.button(m.frame, 16)

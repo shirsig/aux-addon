@@ -1,11 +1,11 @@
 aux.module 'search_tab'
 
-function private.valid_level(str)
+function valid_level(str)
 	local level = tonumber(str)
 	return level and aux.util.bound(1, 60, level)
 end
 
-private.blizzard_query = setmetatable({}, {
+blizzard_query = setmetatable({}, {
 	__newindex = function(_, key, value)
 		if key == 'name' then
 			m.name_input:SetText(value)
@@ -58,7 +58,7 @@ private.blizzard_query = setmetatable({}, {
 	end,
 })
 
-function private.update_form()
+function update_form()
 	if m.blizzard_query.class and GetAuctionItemSubClasses(m.blizzard_query.class) then
 		m.subclass_dropdown.button:Enable()
 	else
@@ -99,7 +99,7 @@ function private.update_form()
 	end
 end
 
-function private.get_filter_builder_query()
+function get_filter_builder_query()
 	local query_string
 
 	local function add(part)
@@ -140,7 +140,7 @@ function private.get_filter_builder_query()
 	return query_string or ''
 end
 
-function private.set_form(components)
+function set_form(components)
 	m.clear_form()
 	for key, filter in components.blizzard do
 		m.blizzard_query[key] = filter[2]
@@ -151,7 +151,7 @@ function private.set_form(components)
 	m.update_filter_display()
 end
 
-function private.clear_form()
+function clear_form()
 	m.blizzard_query.name = ''
 	m.name_input:ClearFocus()
 	m.blizzard_query.exact = false
@@ -170,7 +170,7 @@ function private.clear_form()
 	m.update_filter_display()
 end
 
-function private.import_query_string()
+function import_query_string()
 	local components, error = aux.filter.parse_query_string(aux.util.select(3, strfind(m.search_box:GetText(), '^([^;]*)')))
 	if components then
 		m.set_form(components)
@@ -179,7 +179,7 @@ function private.import_query_string()
 	end
 end
 
-function private.export_query_string()
+function export_query_string()
 	m.search_box:SetText(m.get_filter_builder_query())
 	m.filter_parameter_input:ClearFocus()
 end
@@ -228,14 +228,14 @@ function public.formatted_post_filter(components)
 	return '<html><body><p>'..str..'</p></body></html>'
 end
 
-function private.data_link(id, str)
+function data_link(id, str)
 	return '|H'..id..'|h'..str..'|h'
 end
 
-private.post_filter = {}
-private.filter_builder_state = {selected = 0}
+post_filter = {}
+filter_builder_state = {selected = 0}
 
-function private.data_link_click()
+function data_link_click()
 	local button = arg3
 	local index = tonumber(arg1)
 	if button == 'LeftButton' then
@@ -246,7 +246,7 @@ function private.data_link_click()
 	m.update_filter_display()
 end
 
-function private.remove_component(index)
+function remove_component(index)
 	index = index or m.filter_builder_state.selected
 	if m.filter_builder_state.selected >= index then
 		m.filter_builder_state.selected = max(m.filter_builder_state.selected - 1, min(1, getn(m.post_filter)))
@@ -255,12 +255,12 @@ function private.remove_component(index)
 	tremove(m.post_filter, index)
 end
 
-function private.add_component(component)
+function add_component(component)
 	m.filter_builder_state.selected = m.filter_builder_state.selected + 1
 	tinsert(m.post_filter, m.filter_builder_state.selected, component)
 end
 
-function private.add_post_filter()
+function add_post_filter()
 	for str in aux.util.present(m.filter_input:GetText()) do
 		for filter in aux.util.present(aux.filter.filters[str]) do
 			if filter.input_type ~= '' then
@@ -285,14 +285,14 @@ end
 do
 	local text = ''
 
-	function private.update_filter_display()
+	function update_filter_display()
 		text = m.formatted_post_filter(m.post_filter)
 		m.filter_display:SetWidth(m.filter_display_size())
 		m.set_filter_display_offset()
 		m.filter_display:SetText(text)
 	end
 
-	function private.filter_display_size()
+	function filter_display_size()
 		local font, font_size = m.filter_display:GetFont()
 		m.filter_display.measure:SetFont(font, font_size)
 		local lines = 0
@@ -306,7 +306,7 @@ do
 	end
 end
 
-function private.set_filter_display_offset(x_offset, y_offset)
+function set_filter_display_offset(x_offset, y_offset)
 	local scroll_frame = m.filter_display:GetParent()
 	x_offset, y_offset = x_offset or scroll_frame:GetHorizontalScroll(), y_offset or scroll_frame:GetVerticalScroll()
 	local width, height = m.filter_display_size()
@@ -318,7 +318,7 @@ function private.set_filter_display_offset(x_offset, y_offset)
 	scroll_frame:SetVerticalScroll(aux.util.bound(y_lower_bound, y_upper_bound, y_offset))
 end
 
-function private.initialize_filter_dropdown()
+function initialize_filter_dropdown()
 	for _, filter in {'and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard'} do
 		UIDropDownMenu_AddButton{
 			text = filter,
@@ -338,7 +338,7 @@ function private.initialize_filter_dropdown()
 	end
 end
 
-function private.initialize_class_dropdown()
+function initialize_class_dropdown()
 	local function on_click()
 		if this.value ~= m.blizzard_query.class then
 			UIDropDownMenu_SetSelectedValue(m.class_dropdown, this.value)
@@ -365,7 +365,7 @@ function private.initialize_class_dropdown()
 	end
 end
 
-function private.initialize_subclass_dropdown()
+function initialize_subclass_dropdown()
 	local function on_click()
 		if this.value ~= m.blizzard_query.subclass then
 			UIDropDownMenu_SetSelectedValue(m.subclass_dropdown, this.value)
@@ -394,7 +394,7 @@ function private.initialize_subclass_dropdown()
 	end
 end
 
-function private.initialize_slot_dropdown()
+function initialize_slot_dropdown()
 	local function on_click()
 		UIDropDownMenu_SetSelectedValue(m.slot_dropdown, this.value)
 		m.update_form()
@@ -420,7 +420,7 @@ function private.initialize_slot_dropdown()
 	end
 end
 
-function private.initialize_quality_dropdown()
+function initialize_quality_dropdown()
 	local function on_click()
 		UIDropDownMenu_SetSelectedValue(m.quality_dropdown, this.value)
 		m.update_form()

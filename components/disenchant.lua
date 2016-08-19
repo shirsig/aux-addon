@@ -1,8 +1,8 @@
 aux.module 'disenchant'
 
-private.UNCOMMON = 2
-private.RARE = 3
-private.EPIC = 4
+UNCOMMON = 2
+RARE = 3
+EPIC = 4
 
 do
 	local data = {
@@ -41,7 +41,7 @@ do
 end
 
 function m.LOAD()
-	private.armor = aux.util.set(
+	armor = aux.util.set(
 		'INVTYPE_HEAD',
 		'INVTYPE_NECK',
 		'INVTYPE_SHOULDER',
@@ -59,7 +59,7 @@ function m.LOAD()
 		'INVTYPE_HOLDABLE'
 	)
 
-	private.weapon = aux.util.set(
+	weapon = aux.util.set(
 		'INVTYPE_2HWEAPON' ,
 		'INVTYPE_WEAPONMAINHAND',
 		'INVTYPE_WEAPON',

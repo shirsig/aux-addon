@@ -1,6 +1,6 @@
 aux.module 'scan'
 
-private.PAGE_SIZE = 50
+PAGE_SIZE = 50
 
 do
 	local scan_states = {}
@@ -31,23 +31,23 @@ do
 		end
 	end
 
-	function private.complete()
+	function complete()
 		local on_complete = m.state.params.on_complete
 		scan_states[m.state.params.type] = nil
 		aux.call(on_complete)
 	end
 
-	private.state = aux.dynamic_table(scan_states, function(self)
+	state = aux.dynamic_table(scan_states, function(self)
 		local _, state = next(aux.util.filter(self.private, function(state) return state.id == aux.control.thread_id end))
 		return state
 	end)
 end
 
-private.query = aux.dynamic_table(nil, function()
+query = aux.dynamic_table(nil, function()
     return m.state.params.queries[m.state.query_index]
 end)
 
-function private.wait_for_callback(...)
+function wait_for_callback(...)
 	local send_signal, signal_received = aux.util.signal()
 	local suspended
 	local ret
@@ -69,17 +69,17 @@ function private.wait_for_callback(...)
 	return aux.control.when(signal_received, function() return k(unpack(signal_received())) end)
 end
 
-function private.total_pages(total_auctions)
+function total_pages(total_auctions)
     return ceil(total_auctions / m.PAGE_SIZE)
 end
 
-function private.last_page(total_auctions)
+function last_page(total_auctions)
     local last_page = max(m.total_pages(total_auctions) - 1, 0)
     local last_page_limit = m.query.blizzard_query and m.query.blizzard_query.last_page or last_page
     return min(last_page_limit, last_page)
 end
 
-function private.scan()
+function scan()
 	m.state.query_index = m.state.query_index and m.state.query_index + 1 or 1
 	if m.query() and (aux.index(m.query.blizzard_query, 'first_page') or 0) <= (aux.index(m.query.blizzard_query, 'last_page') or aux.huge) then
 		if m.query.blizzard_query then
@@ -93,7 +93,7 @@ function private.scan()
 	end
 end
 
-function private.process_query()
+function process_query()
 	if m.query.blizzard_query then
 		return m.submit_query()
 	else
@@ -101,7 +101,7 @@ function private.process_query()
 	end
 end
 
-function private.submit_query()
+function submit_query()
 	aux.control.when(function() return m.state.params.type ~= 'list' or CanSendAuctionQuery() end, function()
 		aux.call(m.state.params.on_submit_query)
 		m.state.last_query_time = GetTime()
@@ -127,7 +127,7 @@ function private.submit_query()
 	end)
 end
 
-function private.scan_page(i)
+function scan_page(i)
 	i = i or 1
 	local recurse = function(retry)
 		if i >= m.PAGE_SIZE then
@@ -172,7 +172,7 @@ function private.scan_page(i)
 	return recurse()
 end
 
-function private.wait_for_results()
+function wait_for_results()
 	local timeout = aux.util.later(m.state.last_query_time, 10)
 	local send_signal, signal_received = aux.util.signal()
 	aux.control.when(signal_received, function()
@@ -201,7 +201,7 @@ function private.wait_for_results()
     end
 end
 
-function private.wait_for_owner_results(send_signal)
+function wait_for_owner_results(send_signal)
     if m.state.page == aux.current_owner_page then
         return send_signal()
     else
@@ -209,7 +209,7 @@ function private.wait_for_owner_results(send_signal)
     end
 end
 
-function private.wait_for_list_results(send_signal, signal_received)
+function wait_for_list_results(send_signal, signal_received)
     local updated, last_update
     aux.control.event_listener('AUCTION_ITEM_LIST_UPDATE', function(kill)
 	    kill(signal_received())
@@ -225,7 +225,7 @@ function private.wait_for_list_results(send_signal, signal_received)
     end, send_signal)
 end
 
-function private.owner_data_complete(type)
+function owner_data_complete(type)
     for i=1,m.PAGE_SIZE do
         local auction_info = aux.info.auction(i, type)
         if auction_info and not auction_info.owner then

@@ -3,7 +3,7 @@ aux.module 'search_tab'
 _G.aux_favorite_searches = {}
 _G.aux_recent_searches = {}
 
-function private.update_search_listings()
+function update_search_listings()
 	local favorite_search_rows = {}
 	for i, favorite_search in _G.aux_favorite_searches do
 		local name = strsub(favorite_search.prettified, 1, 250)
@@ -27,7 +27,7 @@ function private.update_search_listings()
 	m.recent_searches_listing:SetData(recent_search_rows)
 end
 
-function private.new_recent_search(filter_string, prettified)
+function new_recent_search(filter_string, prettified)
 	tinsert(_G.aux_recent_searches, 1, {
 		filter_string = filter_string,
 		prettified = prettified,
