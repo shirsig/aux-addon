@@ -40,13 +40,13 @@ end
 function public.container_item(bag, slot)
     for link in aux.util.present(GetContainerItemLink(bag, slot)) do
 
-        local item_id, suffix_id, unique_id, enchant_id = m.parse_link(link)
+        local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
 
         local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
         local tooltip, tooltip_money = m.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
-        local max_charges = m.max_item_charges(item_id)
-        local charges = max_charges and m.item_charges(tooltip)
+        local max_charges = max_item_charges(item_id)
+        local charges = max_charges and item_charges(tooltip)
         local aux_quantity = charges or count
 
         return {
@@ -99,8 +99,7 @@ function public.auction(index, query_type)
     query_type = query_type or 'list'
 
 	for link in aux.util.present(GetAuctionItemLink(query_type, index)) do
-
-        local item_id, suffix_id, unique_id, enchant_id = m.parse_link(link)
+        local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
 
         local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(query_type, index)
@@ -122,8 +121,8 @@ function public.auction(index, query_type)
             link = link,
             itemstring = item_info.itemstring,
             item_key = item_id..':'..suffix_id,
-            search_signature = table.concat({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), _G.aux_ignore_owner and (aux.is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
-            sniping_signature = table.concat({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, _G.aux_ignore_owner and (aux.is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
+            search_signature = table.concat({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), g.aux_ignore_owner and (aux.is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+            sniping_signature = table.concat({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, g.aux_ignore_owner and (aux.is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
 
             name = name,
             texture = texture,
@@ -167,7 +166,7 @@ function public.bid_update(auction_record)
     auction_record.unit_blizzard_bid = auction_record.blizzard_bid / auction_record.aux_quantity
     auction_record.unit_bid_price = auction_record.bid_price / auction_record.aux_quantity
     auction_record.high_bidder = 1
-    auction_record.search_signature = table.concat({auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, _G.aux_ignore_owner and (aux.is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
+    auction_record.search_signature = table.concat({auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, g.aux_ignore_owner and (aux.is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
 end
 
 function public.set_tooltip(itemstring, owner, anchor)
@@ -176,7 +175,7 @@ function public.set_tooltip(itemstring, owner, anchor)
 end
 
 function public.set_shopping_tooltip(slot)
-    local index1, index2 = m.inventory_index(slot)
+    local index1, index2 = inventory_index(slot)
     local tooltips = {}
     if index1 then
         local tooltip = m.tooltip(function(tt) tt:SetInventoryItem('player', index1) end)
@@ -192,7 +191,7 @@ function public.set_shopping_tooltip(slot)
     end
 
     if tooltips[1] then
-        tinsert(tooltips[1], 1, { left_text = 'Currently Equipped', left_color = { 0.5, 0.5, 0.5 } })
+        tinsert(tooltips[1], 1, {left_text='Currently Equipped', left_color={ 0.5, 0.5, 0.5 }})
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
         m.load_tooltip(ShoppingTooltip1, tooltips[1])
         ShoppingTooltip1:Show()
@@ -200,7 +199,7 @@ function public.set_shopping_tooltip(slot)
     end
 
     if tooltips[2] then
-        tinsert(tooltips[2], 1, { left_text = 'Currently Equipped', left_color = { 0.5, 0.5, 0.5 } })
+        tinsert(tooltips[2], 1, {left_text='Currently Equipped', left_color={ 0.5, 0.5, 0.5 }})
         ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
         m.load_tooltip(ShoppingTooltip2, tooltips[2])
         ShoppingTooltip2:Show()

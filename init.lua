@@ -5,19 +5,19 @@ public.version = '4.0.0'
 module_envs = {}
 function public.module(path)
 	local env
-	if path == '' then
+	if path == 'core' then
 		env = getfenv()
-	elseif m.module_envs[path] then
-		env = m.module_envs[path]
+	elseif module_envs[path] then
+		env = module_envs[path]
 	else
 		local prefix
 		for name in string.gfind(path, '[%a_][%w_]*') do
 			local qualified_name = prefix and prefix..'.'..name or name
-			env = m.module_envs[qualified_name]
+			env = module_envs[qualified_name]
 			if not env then
-				(prefix and m.module_envs[prefix].public or public)[name], env = (function() return aux_module(), getfenv() end)()
+				(prefix and module_envs[prefix].public or public)[name], env = (function() return aux_module(), getfenv() end)()
 				env.LOAD = nil
-				m.module_envs[qualified_name] = env
+				module_envs[qualified_name] = env
 			end
 			prefix = qualified_name
 		end
@@ -32,18 +32,18 @@ end
 ADDON_LOADED = {}
 event_frame:SetScript('OnEvent', function()
 	if event == 'ADDON_LOADED' then
-		if m.ADDON_LOADED[arg1] then
-			m.ADDON_LOADED[arg1]()
+		if ADDON_LOADED[arg1] then
+			ADDON_LOADED[arg1]()
 		end
 	else
 		m[event]()
 		if event == 'VARIABLES_LOADED' then
-			for _, env in m.module_envs do
+			for _, env in module_envs do
 				if env.m.LOAD then
 					env.m.LOAD()
 				end
 			end
-			m.log('v'..m.version..' loaded.')
+			log('v'..version..' loaded.')
 		end
 	end
 end)

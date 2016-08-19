@@ -1,4 +1,4 @@
-aux.module ''
+aux.module 'core'
 
 public.bids_loaded = false
 public.current_owner_page = nil
@@ -258,7 +258,7 @@ function public.hook(name, handler, object)
 		m.orig[object] = m.orig[object] or {}
 		orig = m.orig[object]
 	else
-		object = _G
+		object = g
 		orig = m.orig
 	end
 	if orig[name] then
@@ -407,7 +407,7 @@ end
 
 function public.is_player(name, current)
     local realm = GetCVar 'realmName'
-    return not current and m.index(_G.aux_characters, realm, name) or UnitName 'player' == name
+    return not current and m.index(g.aux_characters, realm, name) or UnitName 'player' == name
 end
 
 function public.modified()

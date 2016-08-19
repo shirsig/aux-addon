@@ -1,9 +1,16 @@
-local mask, _G = bit.band, getfenv(0)
+local setfenv, rawget, rawset, setmetatable, mask, g = setfenv, rawget, rawset, setmetatable, bit.band, getfenv(0)
 local DECLARED, ACCESSOR, MUTABLE, PUBLIC = 1, 2, 4, 8
 local ACCESSOR_KEY, MUTABLE_KEY, PUBLIC_KEY = 'accessor', 'mutable', 'public'
 local PROPERTY = {[ACCESSOR_KEY]=ACCESSOR, [MUTABLE_KEY]=MUTABLE, [PUBLIC_KEY]=PUBLIC}
 local _data, _metadata, _modifier_properties = {}, {}, {}
-local metadata_mt = {__index=function() return 0 end}
+
+local metadata_mt = {
+	__index=function() return 0 end,
+	__newindex=function(self, key, value)
+		if rawget(self, key) then error('Duplicate key "'..key..'".', 2) end
+		rawset(self, key, value)
+	end,
+}
 local env_mt = {
 	__metatable = false,
 	__index = function(self, key)
@@ -13,7 +20,7 @@ local env_mt = {
 		elseif mask(ACCESSOR, properties) == ACCESSOR then
 			return value(key)
 		else
-			return _G[key] or error('No key "'..key..'".', 2)
+			return g[key] or error('No key "'..key..'".', 2)
 		end
 	end,
 	__newindex = function(self, key, value)
@@ -42,7 +49,6 @@ local interface_mt = {
 }
 local modifier_mt = {
 	__metatable = false,
-	__call = function() end,
 	__index = function(self, key)
 		local property = PROPERTY[key]
 		if not property then error('Unsupported modifier "'..key..'".', 2) end
@@ -51,17 +57,16 @@ local modifier_mt = {
 		return self
 	end,
 	__newindex = function(self, key, value)
-		if _metadata[self][key] ~= 0 then error('Duplicate key "'..key..'".', 2) end
 		_data[self][key] = value
 		_metadata[self][key] = _modifier_properties[self]
 	end,
 }
-function _G.aux_module()
+function g.aux_module()
 	local data, metadata, modifier, env, interface
 	modifier = setmetatable({}, modifier_mt) env = setmetatable({}, env_mt) interface = setmetatable({}, interface_mt)
 	local function modifier_accessor(key) _modifier_properties[modifier] = DECLARED+PROPERTY[key] return modifier end
-	data = {_G=_G, m=env, [ACCESSOR_KEY]=modifier_accessor, [MUTABLE_KEY]=modifier_accessor, [PUBLIC_KEY]=modifier_accessor}
-	metadata = setmetatable({_G=DECLARED, m=DECLARED, [ACCESSOR_KEY]=ACCESSOR, [MUTABLE_KEY]=ACCESSOR, [PUBLIC_KEY]=ACCESSOR}, metadata_mt)
+	data = {g=g, m=env, [ACCESSOR_KEY]=modifier_accessor, [MUTABLE_KEY]=modifier_accessor, [PUBLIC_KEY]=modifier_accessor}
+	metadata = setmetatable({g=DECLARED, m=DECLARED, [ACCESSOR_KEY]=ACCESSOR, [MUTABLE_KEY]=ACCESSOR, [PUBLIC_KEY]=ACCESSOR}, metadata_mt)
 
 	_data[modifier], _data[env], _data[interface] = data, data, data
 	_metadata[modifier], _metadata[env], _metadata[interface] = metadata, metadata, metadata

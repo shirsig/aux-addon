@@ -373,11 +373,25 @@ function public.editbox(parent)
     editbox:SetHeight(24)
     editbox:SetFont(config.font, config.medium_font_size)
     editbox:SetTextColor(0, 0, 0, 0)
---    editbox:SetShadowColor(0, 0, 0, 0)
     set_content_style(editbox)
-    editbox:SetScript('OnEditFocusGained', aux.C(editbox.HighlightText, aux._this))
-    editbox:SetScript('OnEditFocusLost', aux.C(editbox.HighlightText, aux._this, 0, 0))
     editbox:SetScript('OnEscapePressed', aux.C(editbox.ClearFocus, aux._this))
+    editbox:SetScript('OnEditFocusGained', function()
+	    this.last_change = GetTime()
+	    this:HighlightText()
+	    this:SetScript('OnUpdate', function()
+			this.cursor:SetAlpha(mod(floor((GetTime()-this.last_change) * 2 + 1), 2))
+	    end)
+    end)
+    editbox:SetScript('OnEditFocusLost', function()
+	    this.cursor:SetAlpha(0)
+	    this:HighlightText(0, 0)
+	    this:SetScript('OnUpdate', nil)
+    end)
+    editbox:SetScript('OnTextChanged', function()
+	    this.last_change = GetTime()
+	    this.text:SetText(aux.call(this.formatter, this:GetText()) or this:GetText())
+	    this.cursor:SetPoint('LEFT', this.text, 'LEFT', max(0, this.text:GetStringWidth() - 2), 1)
+    end)
     do
         local last_click
         editbox:SetScript('OnMouseDown', function()
@@ -391,10 +405,6 @@ function public.editbox(parent)
             last_click = {t=GetTime(), x=x, y=y}
         end)
     end
-    editbox:SetScript('OnTextChanged', function()
-	    this.overlay:SetJustifyH(this:GetJustifyH())
-        this.overlay:SetText(aux.call(this.formatter, this:GetText()) or this:GetText())
-    end)
     function editbox:Enable()
 	    editbox:EnableMouse(true)
 	    editbox:SetTextColor(color.text.enabled())
@@ -404,14 +414,18 @@ function public.editbox(parent)
 	    editbox:SetTextColor(color.text.disabled())
 	    editbox:ClearFocus()
     end
-    local overlay = aux.gui.label(editbox, config.medium_font_size)
-    overlay:SetPoint('LEFT', 1, 0)
-    overlay:SetPoint('RIGHT', -2, 0)
-    overlay:SetTextColor(aux.gui.color.text.enabled())
-    editbox.overlay = overlay
-    local cursor = CreateFrame 'Frame'
-    cursor:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]]}
-    cursor:SetBackdropColor(aux.gui.color.text.enabled())
+    local text = aux.gui.label(editbox, config.medium_font_size)
+    text:SetPoint('LEFT', 1, 0)
+    text:SetPoint('RIGHT', -2, 0)
+    text:SetJustifyH 'LEFT'
+    text:SetTextColor(color.text.enabled())
+    editbox.text = text
+    local cursor = aux.gui.label(editbox, config.large_font_size)
+    cursor:SetJustifyH 'LEFT'
+    cursor:SetText '|'
+    cursor:SetTextColor(color.text.enabled())
+    cursor:SetAlpha(0)
+    editbox.cursor = cursor
     return editbox
 end
 
@@ -566,7 +580,7 @@ end
 function public.slider(parent)
 
     local slider = CreateFrame('Slider', nil, parent)
-    slider:SetOrientation('HORIZONTAL')
+    slider:SetOrientation 'HORIZONTAL'
     slider:SetHeight(6)
     slider:SetHitRectInsets(0, 0, -12, -12)
     slider:SetValue(0)
@@ -582,7 +596,7 @@ function public.slider(parent)
     local label = slider:CreateFontString(nil, 'OVERLAY')
     label:SetPoint('BOTTOMLEFT', slider, 'TOPLEFT', -3, 8)
     label:SetPoint('BOTTOMRIGHT', slider, 'TOPRIGHT', 6, 8)
-    label:SetJustifyH('LEFT')
+    label:SetJustifyH 'LEFT'
     label:SetHeight(13)
     label:SetFont(config.font, config.small_font_size)
     label:SetTextColor(color.label.enabled())
@@ -591,7 +605,7 @@ function public.slider(parent)
     editbox:SetPoint('LEFT', slider, 'RIGHT', 5, 0)
     editbox:SetWidth(45)
     editbox:SetHeight(18)
-    editbox:SetJustifyH('CENTER')
+    editbox:SetJustifyH 'CENTER'
     editbox:SetFont(config.font, 17)
 
     slider.label = label
