@@ -2,7 +2,7 @@ aux.module 'search_tab'
 
 function valid_level(str)
 	local level = tonumber(str)
-	return level and aux.util.bound(1, 60, level)
+	return level and bound(1, 60, level)
 end
 
 blizzard_query = setmetatable({}, {
@@ -92,7 +92,7 @@ function update_form()
 		m.usable_checkbox:Enable()
 	end
 
-	if aux.util.any({'min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'}, function(key) return m.blizzard_query[key] end) then
+	if any({'min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'}, function(key) return m.blizzard_query[key] end) then
 		m.exact_checkbox:Disable()
 	else
 		m.exact_checkbox:Enable()
@@ -171,7 +171,7 @@ function clear_form()
 end
 
 function import_query_string()
-	local components, error = aux.filter.parse_query_string(aux.util.select(3, strfind(m.search_box:GetText(), '^([^;]*)')))
+	local components, error = aux.filter.parse_query_string(select(3, strfind(m.search_box:GetText(), '^([^;]*)')))
 	if components then
 		m.set_form(components)
 	else
@@ -206,7 +206,7 @@ function public.formatted_post_filter(components)
 			component_text = component_text..filter_color(tonumber(component[3]) or '')
 			tinsert(stack, component[3])
 		elseif component[1] == 'filter' then
-			for parameter in aux.util.present(component[3]) do
+			for parameter in present(component[3]) do
 				if component[2] == 'item' then
 					parameter = aux.info.display_name(aux.cache.item_id(parameter)) or '['..parameter..']'
 				elseif aux.filter.filters[component[2]].input_type == 'money' then
@@ -261,8 +261,8 @@ function add_component(component)
 end
 
 function add_post_filter()
-	for str in aux.util.present(m.filter_input:GetText()) do
-		for filter in aux.util.present(aux.filter.filters[str]) do
+	for str in present(m.filter_input:GetText()) do
+		for filter in present(aux.filter.filters[str]) do
 			if filter.input_type ~= '' then
 				str = str..'/'..m.filter_parameter_input:GetText()
 			end
@@ -314,8 +314,8 @@ function set_filter_display_offset(x_offset, y_offset)
 	local x_upper_bound = 0
 	local y_lower_bound = 0
 	local y_upper_bound = max(0, height - scroll_frame:GetHeight())
-	scroll_frame:SetHorizontalScroll(aux.util.bound(x_lower_bound, x_upper_bound, x_offset))
-	scroll_frame:SetVerticalScroll(aux.util.bound(y_lower_bound, y_upper_bound, y_offset))
+	scroll_frame:SetHorizontalScroll(bound(x_lower_bound, x_upper_bound, x_offset))
+	scroll_frame:SetVerticalScroll(bound(y_lower_bound, y_upper_bound, y_offset))
 end
 
 function initialize_filter_dropdown()

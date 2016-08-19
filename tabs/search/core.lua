@@ -106,7 +106,7 @@ end
 
 function public.add_filter(filter_string)
     local old_filter_string = m.search_box:GetText()
-    old_filter_string = aux.util.trim(old_filter_string)
+    old_filter_string = trim(old_filter_string)
 
     if old_filter_string ~= '' then
         old_filter_string = old_filter_string..';'

@@ -220,7 +220,7 @@ function public.bag_type(bag)
 	if bag == 0 then
 		return 1
 	end
-	for link in aux.util.present(GetInventoryItemLink('player', ContainerIDToInventoryID(bag))) do
+	for link in present(GetInventoryItemLink('player', ContainerIDToInventoryID(bag))) do
 		local item_id = aux.info.parse_link(link)
 		local item_info = aux.info.item(item_id)
 		return aux.info.item_subclass_index(3, item_info.subclass)

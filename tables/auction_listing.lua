@@ -524,9 +524,9 @@ function record_percentage(record)
     local historical_value = aux.history.value(record.item_key) or 0
     if historical_value > 0 then
         if record.unit_buyout_price > 0 then
-            return aux.util.round(100 * record.unit_buyout_price / historical_value, 1)
+            return round(100 * record.unit_buyout_price / historical_value, 1)
         end
-        return nil, aux.util.round(100 * record.unit_bid_price / historical_value, 1)
+        return nil, round(100 * record.unit_bid_price / historical_value, 1)
     end
 end
 
@@ -679,7 +679,7 @@ local methods = {
     -- ============================================================================
 
     UpdateRowInfo = function(self)
-        aux.util.wipe(self.rowInfo)
+        wipe(self.rowInfo)
         self.rowInfo.numDisplayRows = 0
         self.isSorted = nil
         self:SetSelectedRecord(nil, true)
@@ -847,7 +847,7 @@ local methods = {
     -- ============================================================================
 
     Reset = function(rt)
-        aux.util.wipe(rt.expanded)
+        wipe(rt.expanded)
         rt:UpdateRowInfo()
         rt:UpdateRows()
         rt:SetSelectedRecord()
@@ -892,7 +892,7 @@ local methods = {
     end,
 
     RemoveAuctionRecord = function(self, record)
-        local index = aux.util.key(record, self.records)
+        local index = key(record, self.records)
         if index then
             tremove(self.records, index)
         end
@@ -902,7 +902,7 @@ local methods = {
     RemoveSelectedRecord = function(self, count)
         count = count or 1
         for i=1, count do
-            local index = aux.util.key(self.selected, self.records)
+            local index = key(self.selected, self.records)
             if index then
                 tremove(self.records, index)
             end
@@ -919,7 +919,7 @@ local methods = {
     end,
 
     ContainsRecord = function(rt, record)
-        if aux.util.key(record, rt.records) then
+        if key(record, rt.records) then
             return true
         end
     end,

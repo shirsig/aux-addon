@@ -201,7 +201,7 @@ do
 					break
 				end
 				local item_id, suffix_id = m.info.parse_link(link)
-				local count = aux.util.select(3, GetCraftReagentInfo(id, i))
+				local count = select(3, GetCraftReagentInfo(id, i))
 				local _, price, limited = m.cache.merchant_info(item_id)
 				local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
 				if not value then
@@ -233,7 +233,7 @@ do
 					break
 				end
 				local item_id, suffix_id = m.info.parse_link(link)
-				local count = aux.util.select(3, GetTradeSkillReagentInfo(id, i))
+				local count = select(3, GetTradeSkillReagentInfo(id, i))
 				local _, price, limited = m.cache.merchant_info(item_id)
 				local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
 				if not value then
@@ -284,7 +284,7 @@ function SetItemRef(...)
 	if arg[3] ~= 'RightButton' or not m.index(active_tab, 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return m.orig.SetItemRef(unpack(arg))
 	end
-	for item_info in aux.util.present(m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))) do
+	for item_info in present(m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))) do
 		return m.active_tab.env.CLICK_LINK(item_info)
 	end
 end
@@ -293,7 +293,7 @@ function UseContainerItem(...)
     if m.modified() or not m.index(active_tab, 'env', 'USE_ITEM') then
         return m.orig.UseContainerItem(unpack(arg))
     end
-    for item_info in aux.util.present(m.info.container_item(arg[1], arg[2])) do
+    for item_info in present(m.info.container_item(arg[1], arg[2])) do
         return m.active_tab.env.USE_ITEM(item_info)
     end
 end

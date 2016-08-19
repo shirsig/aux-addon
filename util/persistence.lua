@@ -60,8 +60,8 @@ function public.read_list(schema, str)
 
     local separator = schema[2]
     local element_type = schema[3]
-    local parts = aux.util.split(str, separator)
-    return aux.util.map(parts, function(part)
+    local parts = split(str, separator)
+    return map(parts, function(part)
         return m.read(element_type, part)
     end)
 end
@@ -69,7 +69,7 @@ end
 function public.write_list(schema, list)
     local separator = schema[2]
     local element_type = schema[3]
-    local parts = aux.util.map(list, function(element)
+    local parts = map(list, function(element)
         return m.write(element_type, element)
     end)
     return table.concat(parts, separator)
@@ -78,7 +78,7 @@ end
 function public.read_record(schema, str)
     local separator = schema[2]
     local record = {}
-    local parts = aux.util.split(str, separator)
+    local parts = split(str, separator)
     for i=3,getn(schema) do
         local key, type = next(schema[i])
         record[key] = m.read(type, parts[i - 2])

@@ -336,7 +336,7 @@ function create_frames()
 	        if filters then
 	            tinsert(g.aux_favorite_searches, 1, {
 	                filter_string = search_box:GetText(),
-	                prettified = table.concat(aux.util.map(filters, function(filter) return filter.prettified end), ';'),
+	                prettified = table.concat(map(filters, function(filter) return filter.prettified end), ';'),
 	            })
 	        end
 	        update_search_listings()
@@ -536,7 +536,7 @@ function create_frames()
 		input:SetScript('OnTabPressed', function()
 			filter_parameter_input:SetFocus()
 		end)
-		input.complete = aux.completion.complete(function() return {'and', 'or', 'not', unpack(aux.util.keys(aux.filter.filters))} end)
+		input.complete = aux.completion.complete(function() return {'and', 'or', 'not', unpack(keys(aux.filter.filters))} end)
 		input:SetScript('OnChar', function()
 			this:complete()
 		end)
@@ -583,7 +583,7 @@ function create_frames()
 	    scroll_frame:EnableMouseWheel(true)
 	    scroll_frame:SetScript('OnMouseWheel', function()
 		    local child = this:GetScrollChild()
-		    child:SetFont('p', [[Fonts\ARIALN.TTF]], aux.util.bound(11, 23, aux.util.select(2, child:GetFont()) + arg1*2))
+		    child:SetFont('p', [[Fonts\ARIALN.TTF]], bound(11, 23, select(2, child:GetFont()) + arg1*2))
 		    update_filter_display()
 	    end)
 	    scroll_frame:RegisterForDrag('LeftButton')

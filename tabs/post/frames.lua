@@ -69,7 +69,7 @@ function create_frames()
 	auction_listing:EnableSorting(false)
 	auction_listing:DisableSelection(true)
 	auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
-	    local column_index = aux.util.key(column, column.row.cols)
+	    local column_index = key(column, column.row.cols)
 	    local unit_start_price, unit_buyout_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
 	    if column_index == 3 then
 	        stack_size_slider:SetValue(row_data.record.stack_size)

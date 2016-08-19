@@ -119,7 +119,7 @@ function update_auto_buy_filter()
 		if queries then
 			if getn(queries) > 1 then
 				aux.log('Error: The automatic buyout filter may contain only one query')
-			elseif aux.util.size(queries[1].blizzard_query) > 0 then
+			elseif size(queries[1].blizzard_query) > 0 then
 				aux.log('Error: The automatic buyout filter does not support Blizzard filters')
 			else
 				m.auto_buy_validator = queries[1].validator
@@ -163,7 +163,7 @@ function start_real_time_scan(query, search, continuation)
 				if search.auto_buy then
 					ctrl.suspend()
 					aux.place_bid('list', auction_record.index, auction_record.buyout_price, aux.C(ctrl.resume, true))
-					aux.control.thread(aux.control.when, aux.util.later(GetTime(), 10), aux.C(ctrl.resume, false))
+					aux.control.thread(aux.control.when, later(GetTime(), 10), aux.C(ctrl.resume, false))
 				else
 					tinsert(new_records, auction_record)
 				end
@@ -259,7 +259,7 @@ function start_search(queries, continuation)
 			if search.auto_buy then
 				ctrl.suspend()
 				aux.place_bid('list', auction_record.index, auction_record.buyout_price, aux.C(ctrl.resume, true))
-				aux.control.thread(aux.control.when, aux.util.later(GetTime(), 10), aux.C(ctrl.resume, false))
+				aux.control.thread(aux.control.when, later(GetTime(), 10), aux.C(ctrl.resume, false))
 			elseif getn(search.records) < 1000 then
 				tinsert(search.records, auction_record)
 				if getn(search.records) == 1000 then
@@ -335,7 +335,7 @@ function public.execute(resume, real_time)
 			else
 				m.new_search(filter_string)
 			end
-			m.new_recent_search(filter_string, table.concat(aux.util.map(queries, function(filter) return filter.prettified end), ';'))
+			m.new_recent_search(filter_string, table.concat(map(queries, function(filter) return filter.prettified end), ';'))
 		else
 			m.current_search().records = {}
 			m.current_search().table:SetDatabase(m.current_search().records)

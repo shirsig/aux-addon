@@ -92,7 +92,7 @@ function update_inventory_listing()
         return
     end
 
-    aux.item_listing.populate(m.item_listing, aux.util.values(aux.util.filter(m.inventory_records, function(record)
+    aux.item_listing.populate(m.item_listing, values(filter(m.inventory_records, function(record)
         local settings = m.read_settings(record.key)
         return record.aux_quantity > 0 and (not settings.hidden or m.show_hidden_checkbox:GetChecked())
     end)))
@@ -145,9 +145,9 @@ function update_auction_listing()
                     {value=aux.auction_listing.time_left(auction_record.duration)},
                     {value=auction_record.stack_size == stack_size and aux.gui.color.yellow(auction_record.stack_size) or auction_record.stack_size},
                     {value=aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
-                    {value=historical_value and aux.auction_listing.percentage_historical(aux.util.round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'},
+                    {value=historical_value and aux.auction_listing.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'},
                     {value=auction_record.unit_buyout_price > 0 and aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'},
-                    {value=auction_record.unit_buyout_price > 0 and historical_value and aux.auction_listing.percentage_historical(aux.util.round(auction_record.unit_buyout_price / historical_value * 100)) or '---'},
+                    {value=auction_record.unit_buyout_price > 0 and historical_value and aux.auction_listing.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---'},
                 },
                 record = auction_record,
             })
@@ -175,7 +175,7 @@ function update_auction_listing()
 end
 
 function public.select_item(item_key)
-    for _, inventory_record in aux.util.filter(m.inventory_records, function(record) return record.aux_quantity > 0 end) do
+    for _, inventory_record in filter(m.inventory_records, function(record) return record.aux_quantity > 0 end) do
         if inventory_record.key == item_key then
             m.set_item(inventory_record)
             break
@@ -190,12 +190,12 @@ function price_update()
         local start_price_input = m.get_unit_start_price()
         settings.start_price = start_price_input
         local historical_value = aux.history.value(m.selected_item.key)
-        m.start_price_percentage:SetText(historical_value and aux.auction_listing.percentage_historical(aux.util.round(start_price_input / historical_value * 100)) or '---')
+        m.start_price_percentage:SetText(historical_value and aux.auction_listing.percentage_historical(round(start_price_input / historical_value * 100)) or '---')
 
         local buyout_price_input = m.get_unit_buyout_price()
         settings.buyout_price = buyout_price_input
         local historical_value = aux.history.value(m.selected_item.key)
-        m.buyout_price_percentage:SetText(historical_value and aux.auction_listing.percentage_historical(aux.util.round(buyout_price_input / historical_value * 100)) or '---')
+        m.buyout_price_percentage:SetText(historical_value and aux.auction_listing.percentage_historical(round(buyout_price_input / historical_value * 100)) or '---')
 
         m.write_settings(settings)
     end
@@ -328,8 +328,8 @@ function update_item_configuration()
 end
 
 function undercut(record, stack_size, stack)
-    local start_price = aux.util.round(record.unit_blizzard_bid * (stack and record.stack_size or stack_size))
-    local buyout_price = aux.util.round(record.unit_buyout_price * (stack and record.stack_size or stack_size))
+    local start_price = round(record.unit_blizzard_bid * (stack and record.stack_size or stack_size))
+    local buyout_price = round(record.unit_buyout_price * (stack and record.stack_size or stack_size))
 
     if not record.own then
         start_price = max(0, start_price - 1)
@@ -352,7 +352,7 @@ end
 
 function unit_vendor_price(item_key)
 
-    for slot in aux.util.inventory() do
+    for slot in inventory() do
 
         local item_info = aux.info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
@@ -423,7 +423,7 @@ function update_inventory_records()
 
     local auction_candidate_map = {}
 
-    for slot in aux.util.inventory() do
+    for slot in inventory() do
 
         local item_info = aux.info.container_item(unpack(slot))
         if item_info then

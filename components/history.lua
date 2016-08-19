@@ -72,7 +72,7 @@ function public.value(item_key)
 			local weighted_values = {}
 			local total_weight = 0
 			for _, data_point in item_record.data_points do
-				local weight = 0.99^aux.util.round((item_record.data_points[1].time - data_point.time) / (60*60*24))
+				local weight = 0.99^round((item_record.data_points[1].time - data_point.time) / (60*60*24))
 				total_weight = total_weight + weight
 				tinsert(weighted_values, {value = data_point.market_value, weight = weight})
 			end

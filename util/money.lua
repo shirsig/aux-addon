@@ -58,7 +58,7 @@ end
 
 --function public.to_string(params) -- TODO
 --	local gold, silver, copper = to_gsc(params.copper or 0 + )
---	local settings = aux.util.set(unpack(arg))
+--	local settings = set(unpack(arg))
 --end
 
 function public.to_string(money, pad, trim, decimal_points, color, no_color)
@@ -121,9 +121,9 @@ function public.from_string(value)
 	value = gsub(gsub(strlower(value), '|c%x%x%x%x%x%x%x%x', ''), FONT_COLOR_CODE_CLOSE, '')
 
 	-- extract gold/silver/copper values
-	local gold = tonumber(aux.util.select(3, strfind(value, '(%d*%.?%d+)g')))
-	local silver = tonumber(aux.util.select(3, strfind(value, '(%d*%.?%d+)s')))
-	local copper = tonumber(aux.util.select(3, strfind(value, '(%d*%.?%d+)c')))
+	local gold = tonumber(select(3, strfind(value, '(%d*%.?%d+)g')))
+	local silver = tonumber(select(3, strfind(value, '(%d*%.?%d+)s')))
+	local copper = tonumber(select(3, strfind(value, '(%d*%.?%d+)c')))
 	if not gold and not silver and not copper then return end
 
 	-- test that there are no extra characters (other than spaces)

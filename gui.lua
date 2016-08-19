@@ -37,7 +37,7 @@ do
 		if getn(self.private.table) == 0 then
 			return self.public
 		else
-			local color = aux.util.copy(self.private.table)
+			local color = copy(self.private.table)
 			self.private.table = config.colors
 			return self.private.callback(color)
 		end

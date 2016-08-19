@@ -5,7 +5,7 @@ function default_filter(str)
         input_type = '',
         validator = function()
             return function(auction_record)
-                return aux.util.any(auction_record.tooltip, function(entry)
+                return any(auction_record.tooltip, function(entry)
                     return strfind(strlower(entry.left_text or ''), str, 1, true) or strfind(strlower(entry.right_text or ''), str, 1, true)
                 end)
             end
@@ -205,7 +205,7 @@ public.filters = {
 function operator(str)
     local operator = str == 'not' and {'operator', 'not', 1}
     for _, name in {'and', 'or'} do
-	    for arity in aux.util.present(aux.util.select(3, strfind(str, '^'..name..'(%d*)$'))) do
+	    for arity in present(select(3, strfind(str, '^'..name..'(%d*)$'))) do
 		    arity = tonumber(arity)
 		    operator = not (arity and arity < 2) and {'operator', name, arity}
 	    end
@@ -223,7 +223,7 @@ do
 			if self.exact then
 				return
 			end
-			for number in aux.util.present(tonumber(aux.util.select(3, strfind(str, '^(%d+)$')))) do
+			for number in present(tonumber(select(3, strfind(str, '^(%d+)$')))) do
 				if number >= 1 and number <= 60 then
 					for _, filter in {'min_level', 'max_level'} do
 						if not self[filter] then
@@ -241,13 +241,13 @@ do
 			} do
 				if not self[parser[1]] then
 					tinsert(parser, str)
-					for index, label in aux.util.present(parser[2](aux.util.select(3, unpack(parser)))) do
+					for index, label in present(parser[2](select(3, unpack(parser)))) do
 						self[parser[1]] = {label, index}
 						return true
 					end
 				end
 			end
-			if not self[str] and (str == 'usable' or str == 'exact' and self.name and aux.util.size(self) == 1) then
+			if not self[str] and (str == 'usable' or str == 'exact' and self.name and size(self) == 1) then
 				self[str] = {str, 1}
 			elseif i == 1 and strlen(str) <= 63 then
 				self.name = {str, m.unquote(str)}
@@ -274,14 +274,14 @@ function parse_parameter(input_type, str)
     elseif input_type == 'string' then
         return str ~= '' and str or nil
     elseif type(input_type) == 'table' then
-        return aux.util.key(str, input_type)
+        return key(str, input_type)
     end
 end
 
 function public.parse_query_string(str)
     local post_filter = {}
     local blizzard_filter_parser = m.blizzard_filter_parser()
-    local parts = aux.util.map(aux.util.split(str, '/'), function(part) return strlower(aux.util.trim(part)) end)
+    local parts = map(split(str, '/'), function(part) return strlower(trim(part)) end)
 
     local i = 1
     while parts[i] do
@@ -353,11 +353,11 @@ function public.query(query_string)
 end
 
 function public.queries(query_string)
-    local parts = aux.util.split(query_string, ';')
+    local parts = split(query_string, ';')
 
     local queries = {}
     for _, str in parts do
-        str = aux.util.trim(str)
+        str = trim(str)
 
         local query, _, error = m.query(str)
 
@@ -375,7 +375,7 @@ end
 function suggestions(components)
     local suggestions = {}
 
-    if components.blizzard.name and aux.util.size(components.blizzard) == 1 then
+    if components.blizzard.name and size(components.blizzard) == 1 then
         tinsert(suggestions, 'exact')
     end
 
@@ -422,7 +422,7 @@ function suggestions(components)
     end
 
     -- item names
-    if aux.util.size(components.blizzard) + getn(components.post) == 1 and components.blizzard.name == '' then
+    if size(components.blizzard) + getn(components.post) == 1 and components.blizzard.name == '' then
         for _, name in g.aux_auctionable_items do
             tinsert(suggestions, name..'/exact')
         end
@@ -477,7 +477,7 @@ function prettified_query_string(components)
             if component[2] ~= 'tooltip' then
                 prettified.append(aux.gui.color.aux(component[2]))
             end
-            for parameter in aux.util.present(component[3]) do
+            for parameter in present(component[3]) do
 	            if component[2] == 'item' then
 		            prettified.append(aux.info.display_name(aux.cache.item_id(parameter)) or aux.gui.color.label.enabled('['..parameter..']'))
 	            else
@@ -502,7 +502,7 @@ function public.quote(name)
 end
 
 function public.unquote(name)
-    return aux.util.select(3, strfind(name, '^<(.*)>$')) or name
+    return select(3, strfind(name, '^<(.*)>$')) or name
 end
 
 function blizzard_query(components)
@@ -559,15 +559,15 @@ function validator(components)
                 if name == 'not' then
                     tinsert(stack, not args[1])
                 elseif name == 'and' then
-                    tinsert(stack, aux.util.all(args))
+                    tinsert(stack, all(args))
                 elseif name == 'or' then
-                    tinsert(stack, aux.util.any(args))
+                    tinsert(stack, any(args))
                 end
             elseif type == 'filter' then
                 tinsert(stack, validators[i](record) and true or false)
             end
         end
-        return aux.util.all(stack)
+        return all(stack)
     end
 end
 

@@ -38,7 +38,7 @@ do
 end
 
 function public.container_item(bag, slot)
-    for link in aux.util.present(GetContainerItemLink(bag, slot)) do
+    for link in present(GetContainerItemLink(bag, slot)) do
 
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
@@ -98,7 +98,7 @@ end
 function public.auction(index, query_type)
     query_type = query_type or 'list'
 
-	for link in aux.util.present(GetAuctionItemLink(query_type, index)) do
+	for link in present(GetAuctionItemLink(query_type, index)) do
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
 
@@ -208,7 +208,7 @@ function public.set_shopping_tooltip(slot)
 end
 
 function public.tooltip_match(entry, tooltip)
-    return aux.util.any(tooltip, function(line)
+    return any(tooltip, function(line)
         local left_match = line.left_text and strupper(line.left_text) == strupper(entry)
         local right_match = line.right_text and strupper(line.right_text) == strupper(entry)
         return left_match or right_match
@@ -244,7 +244,7 @@ function public.load_tooltip(frame, tooltip)
 end
 
 function public.display_name(item_id, no_brackets, no_color)
-    for item_info in aux.util.present(aux.info.item(item_id)) do
+    for item_info in present(aux.info.item(item_id)) do
         local name = item_info.name
         if not no_brackets then
             name = '['..name..']'
@@ -355,7 +355,7 @@ end
 
 function public.item(item_id, suffix_id)
     local itemstring = 'item:'..(item_id or 0)..':0:'..(suffix_id or 0)..':0'
-    for name, itemstring, quality, level, class, subclass, max_stack, slot, texture in aux.util.present(GetItemInfo(itemstring)) do
+    for name, itemstring, quality, level, class, subclass, max_stack, slot, texture in present(GetItemInfo(itemstring)) do
 	    return {
 	        name = name,
 	        itemstring = itemstring,

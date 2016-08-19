@@ -38,7 +38,7 @@ do
 	end
 
 	function accessor.state()
-		local _, state = next(aux.util.filter(scan_states, function(state) return state.id == aux.control.thread_id end))
+		local _, state = next(filter(scan_states, function(state) return state.id == aux.control.thread_id end))
 		return state
 	end
 end
@@ -48,7 +48,7 @@ function accessor.query()
 end
 
 function wait_for_callback(...)
-	local send_signal, signal_received = aux.util.signal()
+	local send_signal, signal_received = signal()
 	local suspended
 	local ret
 
@@ -154,10 +154,10 @@ function scan_page(i)
 		aux.history.process_auction(auction_info)
 
 		if aux.call(state.params.auto_buy_validator, auction_info) then
-			local send_signal, signal_received = aux.util.signal()
+			local send_signal, signal_received = signal()
 			aux.control.when(signal_received, recurse)
 			aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, aux.C(send_signal, true))
-			return aux.control.thread(aux.control.when, aux.util.later(GetTime(), 10), aux.C(send_signal, false))
+			return aux.control.thread(aux.control.when, later(GetTime(), 10), aux.C(send_signal, false))
 		elseif not query.validator or query.validator(auction_info) then
 			return wait_for_callback(state.params.on_auction, auction_info, function(removed)
 				if removed then
@@ -173,8 +173,8 @@ function scan_page(i)
 end
 
 function wait_for_results()
-	local timeout = aux.util.later(state.last_query_time, 10)
-	local send_signal, signal_received = aux.util.signal()
+	local timeout = later(state.last_query_time, 10)
+	local send_signal, signal_received = signal()
 	aux.control.when(signal_received, function()
         if timeout() then
             return submit_query()

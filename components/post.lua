@@ -7,7 +7,7 @@ function process()
 
 		local stacking_complete
 
-		local send_signal, signal_received = aux.util.signal()
+		local send_signal, signal_received = signal()
 		aux.control.when(signal_received, function()
 			local slot = signal_received()[1]
 			if slot then
@@ -34,9 +34,9 @@ function post_auction(slot, k)
 		ClickAuctionSellItemButton()
 		ClearCursor()
 
-		StartAuction(max(1, aux.util.round(m.state.unit_start_price * item_info.aux_quantity)), aux.util.round(m.state.unit_buyout_price * item_info.aux_quantity), m.state.duration)
+		StartAuction(max(1, round(m.state.unit_start_price * item_info.aux_quantity)), round(m.state.unit_buyout_price * item_info.aux_quantity), m.state.duration)
 
-		local send_signal, signal_received = aux.util.signal()
+		local send_signal, signal_received = signal()
 		aux.control.when(signal_received, function()
 			m.state.posted = m.state.posted + 1
 			return k()

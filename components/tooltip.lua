@@ -117,7 +117,7 @@ function extend_tooltip(tooltip, link, quantity)
         end
         if g.aux_tooltip_daily  then
             local market_value = aux.history.market_value(item_key)
-            tooltip:AddLine('Today: '..(market_value and aux.money.to_string2(market_value * quantity)..' ('..aux.auction_listing.percentage_historical(aux.util.round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Today: '..(market_value and aux.money.to_string2(market_value * quantity)..' ('..aux.auction_listing.percentage_historical(round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
     end
 
@@ -241,7 +241,7 @@ end
 function m.game_tooltip_hooks:SetAuctionSellItem()
     local name, _, quantity, _, _, _ = GetAuctionSellItemInfo()
     if name then
-        for slot in aux.util.inventory() do
+        for slot in inventory() do
             local link = GetContainerItemLink(unpack(slot))
             if link and ({aux.info.parse_link(link)})[5] == name then
                 m.extend_tooltip(GameTooltip, link, quantity)

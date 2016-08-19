@@ -20,7 +20,7 @@ end
 
 function UPDATE()
 	for _, listener in m.listeners do
-		if not aux.util.any(m.listeners, function(l) return not l.killed and l.event == listener.event end) then
+		if not any(m.listeners, function(l) return not l.killed and l.event == listener.event end) then
 			m.event_frame:UnregisterEvent(listener.event)
 		end
 	end
