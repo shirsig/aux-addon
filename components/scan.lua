@@ -27,14 +27,14 @@ do
 			end
 		end
 		for _, state in aborted do
-			aux.call(state.params.on_abort)
+			call(state.params.on_abort)
 		end
 	end
 
 	function complete()
 		local on_complete = state.params.on_complete
 		scan_states[state.params.type] = nil
-		aux.call(on_complete)
+		call(on_complete)
 	end
 
 	function accessor.state()
@@ -81,7 +81,7 @@ end
 
 function scan()
 	state.query_index = state.query_index and state.query_index + 1 or 1
-	if query and (aux.index(query.blizzard_query, 'first_page') or 0) <= (aux.index(query.blizzard_query, 'last_page') or aux.huge) then
+	if query and (index(query.blizzard_query, 'first_page') or 0) <= (index(query.blizzard_query, 'last_page') or huge) then
 		if query.blizzard_query then
 			state.page = query.blizzard_query.first_page or 0
 		else
@@ -103,7 +103,7 @@ end
 
 function submit_query()
 	aux.control.when(function() return state.params.type ~= 'list' or CanSendAuctionQuery() end, function()
-		aux.call(state.params.on_submit_query)
+		call(state.params.on_submit_query)
 		state.last_query_time = GetTime()
 		if state.params.type == 'bidder' then
 			GetBidderAuctionItems(state.page)
@@ -153,7 +153,7 @@ function scan_page(i)
 
 		aux.history.process_auction(auction_info)
 
-		if aux.call(state.params.auto_buy_validator, auction_info) then
+		if call(state.params.auto_buy_validator, auction_info) then
 			local send_signal, signal_received = signal()
 			aux.control.when(signal_received, recurse)
 			aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, aux.C(send_signal, true))

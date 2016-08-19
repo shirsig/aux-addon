@@ -235,8 +235,8 @@ do
 			end
 			for _, parser in {
 				{'class', aux.info.item_class_index},
-				{'subclass', aux.C(aux.info.item_subclass_index, aux.index(self.class, 2) or 0, aux._1)},
-				{'slot', aux.C(aux.info.item_slot_index, aux.index(self.class, 2) or 0, aux.index(self.subclass, 2) or 0, aux._1)},
+				{'subclass', aux.C(aux.info.item_subclass_index, index(self.class, 2) or 0, aux._1)},
+				{'slot', aux.C(aux.info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0, aux._1)},
 				{'quality', aux.info.item_quality_index},
 			} do
 				if not self[parser[1]] then
@@ -285,9 +285,9 @@ function public.parse_query_string(str)
 
     local i = 1
     while parts[i] do
-        if aux.temp(m.operator(parts[i])) then
+        if temp(m.operator(parts[i])) then
             tinsert(post_filter, __)
-        elseif aux.temp(m.filters[parts[i]]) then
+        elseif temp(m.filters[parts[i]]) then
             local input_type = __.input_type
             if input_type ~= '' then
                 if not parts[i + 1] or not m.parse_parameter(input_type, parts[i + 1]) then
@@ -362,7 +362,7 @@ function public.queries(query_string)
         local query, _, error = m.query(str)
 
         if not query then
-            aux.log('Invalid filter:', error)
+            log('Invalid filter:', error)
             return
         else
             tinsert(queries, query)
@@ -397,14 +397,14 @@ function suggestions(components)
 
     -- subclasses
     if not components.blizzard.subclass then
-        for _, subclass in {GetAuctionItemSubClasses(aux.index(components.blizzard.class, 2) or 0)} do
+        for _, subclass in {GetAuctionItemSubClasses(index(components.blizzard.class, 2) or 0)} do
             tinsert(suggestions, subclass)
         end
     end
 
     -- slots
     if not components.blizzard.slot then
-        for _, invtype in {GetAuctionInvTypes(aux.index(components.blizzard.class, 2) or 0, aux.index(components.blizzard.subclass, 2) or 0)} do
+        for _, invtype in {GetAuctionInvTypes(index(components.blizzard.class, 2) or 0, index(components.blizzard.subclass, 2) or 0)} do
             tinsert(suggestions, getglobal(invtype))
         end
     end
@@ -511,7 +511,7 @@ function blizzard_query(components)
     local query = {name=filters.name and filters.name[2]}
 
     local item_info, class_index, subclass_index, slot_index
-    if filters.exact and aux.temp(aux.cache.item_id(filters.name[2])) and aux.temp(aux.info.item(__)) then
+    if filters.exact and temp(aux.cache.item_id(filters.name[2])) and temp(aux.info.item(__)) then
 	    item_info = __
         class_index = aux.info.item_class_index(item_info.class)
         subclass_index = aux.info.item_subclass_index(class_index or 0, item_info.subclass)
@@ -528,7 +528,7 @@ function blizzard_query(components)
         query.quality = item_info.quality
     else
 	    for _, key in {'min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality'} do
-            query[key] = aux.index(filters[key], 2)
+            query[key] = index(filters[key], 2)
 	    end
     end
     return query

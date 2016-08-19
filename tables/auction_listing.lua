@@ -11,7 +11,7 @@ local AUCTION_PCT_COLORS = {
     {color=aux.gui.inline_color.green, value=80},
     {color=aux.gui.inline_color.yellow, value=110},
     {color=aux.gui.inline_color.orange, value=135},
-    {color=aux.gui.inline_color.red, value=aux.huge},
+    {color=aux.gui.inline_color.red, value=huge},
 }
 
 local TIME_LEFT_STRINGS = {
@@ -198,8 +198,8 @@ public.search_config = {
         cmp = function(record_a, record_b, desc)
             local price_a = g.aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = g.aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
-            price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
-            price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
+            price_a = price_a > 0 and price_a or (desc and -huge or huge)
+            price_b = price_b > 0 and price_b or (desc and -huge or huge)
 
             return aux.sorting.compare(price_a, price_b, desc)
         end,
@@ -213,8 +213,8 @@ public.search_config = {
             cell:SetText((pct or bidPct) and percentage_historical(pct or bidPct, not pct) or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            local pct_a = record_percentage(record_a) or (desc and -aux.huge or aux.huge)
-            local pct_b = record_percentage(record_b) or (desc and -aux.huge or aux.huge)
+            local pct_a = record_percentage(record_a) or (desc and -huge or huge)
+            local pct_b = record_percentage(record_b) or (desc and -huge or huge)
             return aux.sorting.compare(pct_a, pct_b, desc)
         end,
     },
@@ -340,8 +340,8 @@ public.auctions_config = {
         cmp = function(record_a, record_b, desc)
             local price_a = g.aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = g.aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
-            price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
-            price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
+            price_a = price_a > 0 and price_a or (desc and -huge or huge)
+            price_b = price_b > 0 and price_b or (desc and -huge or huge)
 
             return aux.sorting.compare(price_a, price_b, desc)
         end,
@@ -493,8 +493,8 @@ public.bids_config = {
         cmp = function(record_a, record_b, desc)
             local price_a = g.aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = g.aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
-            price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
-            price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
+            price_a = price_a > 0 and price_a or (desc and -huge or huge)
+            price_b = price_b > 0 and price_b or (desc and -huge or huge)
 
             return aux.sorting.compare(price_a, price_b, desc)
         end,
@@ -644,7 +644,7 @@ local methods = {
             DressUpItemLink(this.row.data.record.link)
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(this.row.data.record.link)
-        elseif not aux.modified() and button == 'RightButton' then -- TODO not when alt (how?)
+        elseif not modified and button == 'RightButton' then -- TODO not when alt (how?)
             aux.set_tab(1)
             aux.search_tab.set_filter(strlower(aux.info.item(this.row.data.record.item_id).name)..'/exact')
             aux.search_tab.execute(nil, false)

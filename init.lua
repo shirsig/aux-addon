@@ -1,4 +1,5 @@
 setglobal('aux', aux_module('core'))
+import 'util'
 
 public.version = '4.0.0'
 
@@ -40,8 +41,8 @@ event_frame:SetScript('OnEvent', function()
 		m[event]()
 		if event == 'VARIABLES_LOADED' then
 			for _, env in module_envs do
-				if env.m.LOAD then
-					env.m.LOAD()
+				if env.LOAD then
+					env.LOAD()
 				end
 			end
 			log('v'..version..' loaded.')

@@ -109,7 +109,7 @@ function get_filter_builder_query()
 	end
 
 	local name = m.blizzard_query.name
-	if not aux.index(aux.filter.parse_query_string(name), 'blizzard', 'name') then
+	if not index(aux.filter.parse_query_string(name), 'blizzard', 'name') then
 		name = aux.filter.quote(name)
 	end
 	add((name ~= '' or m.blizzard_query.exact) and name)
@@ -175,7 +175,7 @@ function import_query_string()
 	if components then
 		m.set_form(components)
 	else
-		aux.log(error)
+		log(error)
 	end
 end
 
@@ -277,7 +277,7 @@ function add_post_filter()
 			m.filter_input:HighlightText()
 			m.filter_input:SetFocus()
 		elseif error then
-			aux.log(error)
+			log(error)
 		end
 	end
 end
@@ -325,7 +325,7 @@ function initialize_filter_dropdown()
 			value = filter,
 			func = function()
 				m.filter_input:SetText(this.value)
-				if aux.index(aux.filter.filters[this.value], 'input_type') == '' or this.value == 'not' then
+				if index(aux.filter.filters[this.value], 'input_type') == '' or this.value == 'not' then
 					m.add_post_filter()
 				elseif aux.filter.filters[this.value] then
 					m.filter_parameter_input:Show()

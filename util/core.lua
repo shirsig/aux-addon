@@ -1,5 +1,53 @@
 aux.module 'util'
 
+function public.call(f, ...)
+	if f then
+		return f(unpack(arg))
+	end
+end
+
+function public.index(t, ...)
+	for i=1,arg.n do
+		t = t and t[arg[i]]
+	end
+	return t
+end
+
+public.huge = 1.8*10^308
+
+function public.log(...)
+	local msg = '[aux]'
+	for i=1,arg.n do
+		msg = msg..' '..tostring(arg[i])
+	end
+	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
+end
+
+function public.accessor.modified()
+	return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown()
+end
+
+do
+	local _state = setmetatable({}, {__mode='kv'})
+	local __index = function(self, key)
+		return _state[self].handler({public=self, private=_state[self].state}, key)
+	end
+	function public.index_function(state, handler)
+		local state, self = {handler=handler, state=state}, {}
+		_state[self] = state
+		return setmetatable(self, {__metatable=false, __index=__index, state=state})
+	end
+end
+
+function public.temp(object)
+	getfenv(2).__ = object
+	return object
+end
+
+function public.L(body_string)
+	return loadstring 'function()'
+end
+
 function public.present(...)
 	local called
 	return function()
@@ -211,7 +259,7 @@ function public.accessor.inventory()
 		end
 
 		if bag <= 4 then
-			return {bag, slot}, m.bag_type(bag)
+			return {bag, slot}, bag_type(bag)
 		end
 	end
 end

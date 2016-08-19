@@ -195,12 +195,12 @@ function public.populate_wdb(item_id)
 	item_id = item_id or MIN_ITEM_ID
 
 	if item_id > MAX_ITEM_ID then
-		aux.log('Cache populated.')
+		log('Cache populated.')
 		return
 	end
 
 	if not GetItemInfo('item:'..item_id) then
-		aux.log('Fetching item '..item_id..'.')
+		log('Fetching item '..item_id..'.')
 		AuxTooltip:SetHyperlink('item:'..item_id)
 	end
 

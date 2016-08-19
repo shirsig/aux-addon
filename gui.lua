@@ -44,7 +44,7 @@ do
 	end
 	function color_accessor(callback)
 		return function()
-			return aux.index_function({callback=callback, table=config.colors}, index_handler)
+			return index_function({callback=callback, table=config.colors}, index_handler)
 		end
 	end
 end
@@ -336,7 +336,7 @@ do
 	function mt.__index:select(id)
 		self._selected = id
 		self:update()
-		aux.call(self._on_select, id)
+		call(self._on_select, id)
 	end
 	function mt.__index:update()
 		for _, tab in self._tabs do
@@ -389,7 +389,7 @@ function public.editbox(parent)
     end)
     editbox:SetScript('OnTextChanged', function()
 	    this.last_change = GetTime()
-	    this.text:SetText(aux.call(this.formatter, this:GetText()) or this:GetText())
+	    this.text:SetText(call(this.formatter, this:GetText()) or this:GetText())
 	    this.cursor:SetPoint('LEFT', this.text, 'LEFT', max(0, this.text:GetStringWidth() - 2), 1)
     end)
     do

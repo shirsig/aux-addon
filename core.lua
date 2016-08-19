@@ -4,44 +4,6 @@ public.bids_loaded = false
 public.current_owner_page = nil
 public.last_owner_page_requested = nil
 
-do
-	local data = {}
-	local mt = {
-		__newindex = function(self, key, value)
-			data[self].getter{public=self, private=data[self].state}[key] = value
-		end,
-		__index = function(self, key)
-			return data[self].getter{public=self, private=data[self].state}[key]
-		end,
-	}
-	function public.dynamic_table(state, getter)
-		local self = {}
-		data[self] = {getter=getter, state=state}
-		return setmetatable(self, mt)
-	end
-end
-
-do
-	local _state = setmetatable({}, {__mode='kv'})
-	local __index = function(self, key)
-		return _state[self].handler({public=self, private=_state[self].state}, key)
-	end
-	function public.index_function(state, handler)
-		local state, self = {handler=handler, state=state}, {}
-		_state[self] = state
-		return setmetatable(self, {__metatable=false, __index=__index, state=state})
-	end
-end
-
-function public.temp(object)
-	getfenv(2).__ = object
-	return object
-end
-
-function public.L(body_string)
-	return loadstring 'function()'
-end
-
 tabs = {}
 function public.tab(index, name)
 	local module_env = getfenv(2)
@@ -61,16 +23,16 @@ do
 	end
 	function on_tab_click(index)
 		if active_tab_index then
-			m.call(active_tab.env.CLOSE)
+			call(active_tab.env.CLOSE)
 		end
 		active_tab_index = index
 		if active_tab_index then
-			m.call(active_tab.env.OPEN)
+			call(active_tab.env.OPEN)
 		end
 	end
 end
 
-function public.VARIABLES_LOADED()
+function VARIABLES_LOADED()
 	do
 		local frame = CreateFrame('Frame', aux.gui.name, UIParent)
 		tinsert(UISpecialFrames, 'aux_frame1')
@@ -103,8 +65,8 @@ function public.VARIABLES_LOADED()
 		public.frame = frame
 	end
 	do
-		local tabs = m.gui.tabs(m.frame, 'DOWN')
-		tabs._on_select = m.on_tab_click
+		local tabs = gui.tabs(frame, 'DOWN')
+		tabs._on_select = on_tab_click
 		for _, tab in m.tabs do
 			tabs:create_tab(tab.name)
 		end
@@ -113,17 +75,17 @@ function public.VARIABLES_LOADED()
 		end
 	end
 	do
-		local btn = m.gui.button(m.frame, 16)
+		local btn = gui.button(frame, 16)
 		btn:SetPoint('BOTTOMRIGHT', -6, 6)
 		btn:SetWidth(65)
 		btn:SetHeight(24)
 		btn:SetText 'Close'
-		btn:SetScript('OnClick', m.C(m.frame.Hide, m.frame))
+		btn:SetScript('OnClick', C(frame.Hide, frame))
 		public.close_button = btn
 	end
 	do
-		local btn = m.gui.button(m.frame, 16)
-		btn:SetPoint('RIGHT', m.close_button, 'LEFT' , -5, 0)
+		local btn = gui.button(frame, 16)
+		btn:SetPoint('RIGHT', close_button, 'LEFT' , -5, 0)
 		btn:SetWidth(65)
 		btn:SetHeight(24)
 		btn:SetText 'Default UI'
@@ -139,43 +101,43 @@ end
 
 function AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
-	m.frame:Show()
-	m.set_tab(1)
+	frame:Show()
+	set_tab(1)
 end
 
 function AUCTION_HOUSE_CLOSED()
-	m.bids_loaded = false
-	m.current_owner_page = nil
-	m.post.stop()
-	m.stack.stop()
-	m.scan.abort()
-	m.set_tab()
-	m.frame:Hide()
+	bids_loaded = false
+	current_owner_page = nil
+	post.stop()
+	stack.stop()
+	scan.abort()
+	set_tab()
+	frame:Hide()
 end
 
 function AUCTION_BIDDER_LIST_UPDATE()
-	m.bids_loaded = true
+	bids_loaded = true
 end
 
 function AUCTION_OWNED_LIST_UPDATE()
-	m.current_owner_page = m.last_owner_page_requested or 0
+	current_owner_page = last_owner_page_requested or 0
 end
 
-function m.ADDON_LOADED.Blizzard_AuctionUI()
+function ADDON_LOADED.Blizzard_AuctionUI()
 	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
 	AuctionFrame:SetScript('OnHide', nil)
 
-	m.hook('ShowUIPanel', function(...)
+	hook('ShowUIPanel', function(...)
 		if arg[1] == AuctionFrame then
 			return AuctionFrame:Show()
 		end
-		return m.orig.ShowUIPanel(unpack(arg))
+		return orig.ShowUIPanel(unpack(arg))
 	end)
 
-	m.hook('GetOwnerAuctionItems', m.GetOwnerAuctionItems)
-	m.hook('SetItemRef', m.SetItemRef)
-	m.hook('UseContainerItem', m.UseContainerItem)
-	m.hook('AuctionFrameAuctions_OnEvent', m.AuctionFrameAuctions_OnEvent)
+	hook('GetOwnerAuctionItems', GetOwnerAuctionItems)
+	hook('SetItemRef', SetItemRef)
+	hook('UseContainerItem', UseContainerItem)
+	hook('AuctionFrameAuctions_OnEvent', AuctionFrameAuctions_OnEvent)
 end
 
 do
@@ -186,9 +148,9 @@ do
 		return label
 	end
 
-	function m.ADDON_LOADED.Blizzard_CraftUI()
-		m.hook('CraftFrame_SetSelection', function(...)
-			local results = {m.orig.CraftFrame_SetSelection(unpack(arg)) }
+	function ADDON_LOADED.Blizzard_CraftUI()
+		hook('CraftFrame_SetSelection', function(...)
+			local results = {orig.CraftFrame_SetSelection(unpack(arg))}
 
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
@@ -200,10 +162,10 @@ do
 					total_cost = nil
 					break
 				end
-				local item_id, suffix_id = m.info.parse_link(link)
+				local item_id, suffix_id = info.parse_link(link)
 				local count = select(3, GetCraftReagentInfo(id, i))
-				local _, price, limited = m.cache.merchant_info(item_id)
-				local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
+				local _, price, limited = cache.merchant_info(item_id)
+				local value = price and not limited and price or history.value(item_id..':'..suffix_id)
 				if not value then
 					total_cost = nil
 					break
@@ -218,9 +180,9 @@ do
 		end)
 	end
 
-	function m.ADDON_LOADED.Blizzard_TradeSkillUI()
-		m.hook('TradeSkillFrame_SetSelection', function(...)
-			local results = {m.orig.TradeSkillFrame_SetSelection(unpack(arg)) }
+	function ADDON_LOADED.Blizzard_TradeSkillUI()
+		hook('TradeSkillFrame_SetSelection', function(...)
+			local results = {orig.TradeSkillFrame_SetSelection(unpack(arg))}
 
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
@@ -232,10 +194,10 @@ do
 					total_cost = nil
 					break
 				end
-				local item_id, suffix_id = m.info.parse_link(link)
+				local item_id, suffix_id = info.parse_link(link)
 				local count = select(3, GetTradeSkillReagentInfo(id, i))
-				local _, price, limited = m.cache.merchant_info(item_id)
-				local value = price and not limited and price or m.history.value(item_id..':'..suffix_id)
+				local _, price, limited = cache.merchant_info(item_id)
+				local value = price and not limited and price or history.value(item_id..':'..suffix_id)
 				if not value then
 					total_cost = nil
 					break
@@ -270,55 +232,50 @@ end
 
 function GetOwnerAuctionItems(...)
     local page = arg[1]
-    m.last_owner_page_requested = page
-    return m.orig.GetOwnerAuctionItems(unpack(arg))
+    last_owner_page_requested = page
+    return orig.GetOwnerAuctionItems(unpack(arg))
 end
 
 function AuctionFrameAuctions_OnEvent(...)
     if AuctionFrameAuctions:IsVisible() then
-        return m.orig.AuctionFrameAuctions_OnEvent(unpack(arg))
+        return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end
 end
 
 function SetItemRef(...)
-	if arg[3] ~= 'RightButton' or not m.index(active_tab, 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
-		return m.orig.SetItemRef(unpack(arg))
+	if arg[3] ~= 'RightButton' or not index(active_tab, 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
+		return orig.SetItemRef(unpack(arg))
 	end
-	for item_info in present(m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))) do
-		return m.active_tab.env.CLICK_LINK(item_info)
+	for item_info in present(info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))) do
+		return active_tab.env.CLICK_LINK(item_info)
 	end
 end
 
 function UseContainerItem(...)
-    if m.modified() or not m.index(active_tab, 'env', 'USE_ITEM') then
-        return m.orig.UseContainerItem(unpack(arg))
+    if modified or not index(active_tab, 'env', 'USE_ITEM') then
+        return orig.UseContainerItem(unpack(arg))
     end
-    for item_info in present(m.info.container_item(arg[1], arg[2])) do
-        return m.active_tab.env.USE_ITEM(item_info)
+    for item_info in present(info.container_item(arg[1], arg[2])) do
+        return active_tab.env.USE_ITEM(item_info)
     end
 end
 
 do
 	local locked
-
 	function public.bid_in_progress()
 		return locked
 	end
-
 	function public.place_bid(type, index, amount, on_success)
-
 		if locked then
 			return
 		end
-
 		local money = GetMoney()
 		PlaceAuctionBid(type, index, amount)
 		if money >= amount then
 			locked = true
-
-			m.control.event_listener('CHAT_MSG_SYSTEM', function(kill)
+			control.event_listener('CHAT_MSG_SYSTEM', function(kill)
 				if arg1 == ERR_AUCTION_BID_PLACED then
-					m.call(on_success)
+					call(on_success)
 					locked = false
 					kill()
 				end
@@ -329,23 +286,18 @@ end
 
 do
 	local locked
-
 	function public.cancel_in_progress()
 		return locked
 	end
-
 	function public.cancel_auction(index, on_success)
-
 		if locked then
 			return
 		end
-
 		locked = true
-
 		CancelAuction(index)
-		m.control.event_listener('CHAT_MSG_SYSTEM', function(kill)
+		control.event_listener('CHAT_MSG_SYSTEM', function(kill)
 			if arg1 == ERR_AUCTION_REMOVED then
-				aux.call(on_success)
+				call(on_success)
 				locked = false
 				kill()
 			end
@@ -364,7 +316,7 @@ do
 	local function call(f, arg1, arg2)
 		local params = {}
 		for i=1,arg1.n do
-			if arg1[i] == m._this then
+			if arg1[i] == _this then
 				tinsert(params, this)
 			elseif formal_parameters[arg1[i]] then
 				tinsert(params, arg2[formal_parameters[arg1[i]]])
@@ -382,36 +334,9 @@ do
 	end
 end
 
-function public.call(f, ...)
-	if f then
-		return f(unpack(arg))
-	end
-end
-
-function public.index(t, ...)
-	for i=1,arg.n do
-		t = t and t[arg[i]]
-	end
-	return t
-end
-
-public.huge = 1.8*10^308
-
-function public.log(...)
-	local msg = '[aux]'
-	for i=1,arg.n do
-		msg = msg..' '..tostring(arg[i])
-	end
-	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
-end
-
 function public.is_player(name, current)
     local realm = GetCVar 'realmName'
-    return not current and m.index(g.aux_characters, realm, name) or UnitName 'player' == name
-end
-
-function public.modified()
-    return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown()
+    return not current and index(g.aux_characters, realm, name) or UnitName 'player' == name
 end
 
 function public.neutral_faction()

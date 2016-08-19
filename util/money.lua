@@ -113,7 +113,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 end
 
 function public.from_string(value)
-	if aux.temp(tonumber(value)) and __ >= 0 then
+	if temp(tonumber(value)) and __ >= 0 then
 		return __ * COPPER_PER_GOLD
 	end
 

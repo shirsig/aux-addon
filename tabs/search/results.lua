@@ -118,9 +118,9 @@ function update_auto_buy_filter()
 		local queries = aux.filter.queries(g.aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
-				aux.log('Error: The automatic buyout filter may contain only one query')
+				log('Error: The automatic buyout filter may contain only one query')
 			elseif size(queries[1].blizzard_query) > 0 then
-				aux.log('Error: The automatic buyout filter does not support Blizzard filters')
+				log('Error: The automatic buyout filter does not support Blizzard filters')
 			else
 				m.auto_buy_validator = queries[1].validator
 				m.auto_buy_filter_button.prettified = queries[1].prettified
@@ -315,10 +315,10 @@ function public.execute(resume, real_time)
 		return
 	elseif real_time then
 		if getn(queries) > 1 then
-			aux.log('Invalid filter: The real time mode does not support multiple queries')
+			log('Invalid filter: The real time mode does not support multiple queries')
 			return
 		elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-			aux.log('Invalid filter: The real time mode does not support page range filters')
+			log('Invalid filter: The real time mode does not support page range filters')
 			return
 		end
 	end
