@@ -23,7 +23,7 @@ function locked(slot)
 end
 
 function find_item_slot(partial)
-	for slot in inventory() do
+	for slot in inventory do
 		if m.matching_item(slot, partial) and not eq(slot, m.state.target_slot) then
 			return slot
 		end
@@ -36,7 +36,7 @@ function matching_item(slot, partial)
 end
 
 function find_empty_slot()
-	for slot, type in inventory() do
+	for slot, type in inventory do
 		if type == 1 and not GetContainerItemInfo(unpack(slot)) then
 			return slot
 		end
@@ -44,7 +44,7 @@ function find_empty_slot()
 end
 
 function find_charge_item_slot()
-	for slot in inventory() do
+	for slot in inventory do
 		if m.matching_item(slot) and m.charges(slot) == m.state.target_size then
 			return slot
 		end

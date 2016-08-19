@@ -28,7 +28,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
             })
         end
 
-        local item_query = m.item_query(auction_record.item_id, 1, 1)
+        local item_query = item_query(auction_record.item_id, 1, 1)
         if not eq(auction_record.blizzard_query, item_query.blizzard_query) then
             tinsert(queries, item_query)
         end

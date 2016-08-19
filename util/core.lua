@@ -197,7 +197,7 @@ function public.round(x)
 	return floor(x + 0.5)
 end
 
-function public.inventory()
+function public.accessor.inventory()
 	local bag, slot = 0, 0
 
 	return function()

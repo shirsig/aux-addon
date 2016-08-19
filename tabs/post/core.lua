@@ -352,7 +352,7 @@ end
 
 function unit_vendor_price(item_key)
 
-    for slot in inventory() do
+    for slot in inventory do
 
         local item_info = aux.info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
@@ -423,7 +423,7 @@ function update_inventory_records()
 
     local auction_candidate_map = {}
 
-    for slot in inventory() do
+    for slot in inventory do
 
         local item_info = aux.info.container_item(unpack(slot))
         if item_info then
