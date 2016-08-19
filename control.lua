@@ -44,7 +44,7 @@ end
 
 do
 	local id = 0
-	function id()
+	function m.id()
 		id = id + 1
 		return id
 	end

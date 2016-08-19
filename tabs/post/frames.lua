@@ -2,32 +2,32 @@ aux.module 'post_tab'
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, aux.frame)
-	m.frame:SetAllPoints()
-	m.frame:SetScript('OnUpdate', m.on_update)
-	m.frame:Hide()
+	frame:SetAllPoints()
+	frame:SetScript('OnUpdate', on_update)
+	frame:Hide()
 
-	m.frame.content = CreateFrame('Frame', nil, m.frame)
-	m.frame.content:SetPoint('TOP', aux.frame, 'TOP', 0, -8)
-	m.frame.content:SetPoint('BOTTOMLEFT', aux.frame.content, 'BOTTOMLEFT', 0, 0)
-	m.frame.content:SetPoint('BOTTOMRIGHT', aux.frame.content, 'BOTTOMRIGHT', 0, 0)
+	frame.content = CreateFrame('Frame', nil, frame)
+	frame.content:SetPoint('TOP', aux.frame, 'TOP', 0, -8)
+	frame.content:SetPoint('BOTTOMLEFT', aux.frame.content, 'BOTTOMLEFT', 0, 0)
+	frame.content:SetPoint('BOTTOMRIGHT', aux.frame.content, 'BOTTOMRIGHT', 0, 0)
 
-	m.frame.inventory = aux.gui.panel(m.frame.content)
-	m.frame.inventory:SetWidth(212)
-	m.frame.inventory:SetPoint('TOPLEFT', 0, 0)
-	m.frame.inventory:SetPoint('BOTTOMLEFT', 0, 0)
+	frame.inventory = aux.gui.panel(frame.content)
+	frame.inventory:SetWidth(212)
+	frame.inventory:SetPoint('TOPLEFT', 0, 0)
+	frame.inventory:SetPoint('BOTTOMLEFT', 0, 0)
 
-	m.frame.parameters = aux.gui.panel(m.frame.content)
-	m.frame.parameters:SetHeight(173)
-	m.frame.parameters:SetPoint('TOPLEFT', m.frame.inventory, 'TOPRIGHT', 2.5, 0)
-	m.frame.parameters:SetPoint('TOPRIGHT', 0, 0)
+	frame.parameters = aux.gui.panel(frame.content)
+	frame.parameters:SetHeight(173)
+	frame.parameters:SetPoint('TOPLEFT', frame.inventory, 'TOPRIGHT', 2.5, 0)
+	frame.parameters:SetPoint('TOPRIGHT', 0, 0)
 
-	m.frame.auctions = aux.gui.panel(m.frame.content)
-	m.frame.auctions:SetHeight(228)
-	m.frame.auctions:SetPoint('BOTTOMLEFT', m.frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
-	m.frame.auctions:SetPoint('BOTTOMRIGHT', 0, 0)
+	frame.auctions = aux.gui.panel(frame.content)
+	frame.auctions:SetHeight(228)
+	frame.auctions:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
+	frame.auctions:SetPoint('BOTTOMRIGHT', 0, 0)
 
 	do
-	    local checkbox = aux.gui.checkbox(m.frame.inventory)
+	    local checkbox = aux.gui.checkbox(frame.inventory)
 	    checkbox:SetPoint('TOPLEFT', 49, -16)
 	    checkbox:SetScript('OnClick', function()
 	        m.refresh = true
@@ -38,13 +38,13 @@ function create_frames()
 	    show_hidden_checkbox = checkbox
 	end
 
-	aux.gui.horizontal_line(m.frame.inventory, -48)
+	aux.gui.horizontal_line(frame.inventory, -48)
 
 	item_listing = aux.item_listing.create(
-	    m.frame.inventory,
+	    frame.inventory,
 	    function()
 	        if arg1 == 'LeftButton' then
-	            m.set_item(this.item_record)
+	            set_item(this.item_record)
 	        elseif arg1 == 'RightButton' then
 	            aux.set_tab(1)
 	            aux.search_tab.set_filter(strlower(aux.info.item(this.item_record.item_id).name)..'/exact')
@@ -52,12 +52,12 @@ function create_frames()
 	        end
 	    end,
 	    function(item_record)
-	        return item_record == m.selected_item
+	        return item_record == selected_item
 	    end
 	)
 
-	auction_listing = aux.listing.CreateScrollingTable(m.frame.auctions)
-	m.auction_listing:SetColInfo({
+	auction_listing = aux.listing.CreateScrollingTable(frame.auctions)
+	auction_listing:SetColInfo({
 	    { name='Auctions', width=.12, align='CENTER' },
 	    { name='Left', width=.1, align='CENTER' },
 	    { name='Qty', width=.08, align='CENTER' },
@@ -66,53 +66,52 @@ function create_frames()
 	    { name='Buy/ea', width=.22, align='RIGHT' },
 	    { name='Buy Pct', width=.13, align='CENTER' }
 	})
-	m.auction_listing:EnableSorting(false)
-	m.auction_listing:DisableSelection(true)
-	m.auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
+	auction_listing:EnableSorting(false)
+	auction_listing:DisableSelection(true)
+	auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
 	    local column_index = aux.util.key(column, column.row.cols)
-	    local unit_start_price, unit_buyout_price = m.undercut(row_data.record, m.stack_size_slider:GetValue(), button == 'RightButton')
+	    local unit_start_price, unit_buyout_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
 	    if column_index == 3 then
-	        m.stack_size_slider:SetValue(row_data.record.stack_size)
+	        stack_size_slider:SetValue(row_data.record.stack_size)
 	    elseif column_index == 4 then
-	        m.set_unit_start_price(unit_start_price)
+	        set_unit_start_price(unit_start_price)
 	    elseif column_index == 6 then
-	        m.set_unit_buyout_price(unit_buyout_price)
+	        set_unit_buyout_price(unit_buyout_price)
 	    end
 	end)
 
 	do
-	    local status_bar = aux.gui.status_bar(m.frame)
+	    status_bar = aux.gui.status_bar(frame)
 	    status_bar:SetWidth(265)
 	    status_bar:SetHeight(25)
 	    status_bar:SetPoint('TOPLEFT', aux.frame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 100)
 	    status_bar:set_text('')
-	    status_bar = status_bar
 	end
 	do
-	    local btn = aux.gui.button(m.frame.parameters, 16)
-	    btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
+	    local btn = aux.gui.button(frame.parameters, 16)
+	    btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
 	    btn:SetText('Post')
-	    btn:SetScript('OnClick', m.post_auctions)
+	    btn:SetScript('OnClick', post_auctions)
 	    post_button = btn
 	end
 	do
-	    local btn = aux.gui.button(m.frame.parameters, 16)
-	    btn:SetPoint('TOPLEFT', m.post_button, 'TOPRIGHT', 5, 0)
+	    local btn = aux.gui.button(frame.parameters, 16)
+	    btn:SetPoint('TOPLEFT', post_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
 	    btn:SetText('Refresh')
 	    btn:SetScript('OnClick', function()
-	        aux.scan.abort(m.scan_id)
+	        aux.scan.abort(scan_id)
 	        m.refresh_entries()
 	        m.refresh = true
 	    end)
 	    refresh_button = btn
 	end
 	do
-	    local item = aux.gui.item(m.frame.parameters)
+	    item = aux.gui.item(m.frame.parameters)
 	    item:SetPoint('TOPLEFT', 10, -6)
 	    item.button:SetScript('OnEnter', function()
 	        if m.selected_item then
@@ -122,7 +121,6 @@ function create_frames()
 	    item.button:SetScript('OnLeave', function()
 	        GameTooltip:Hide()
 	    end)
-	    item = item
 	end
 	do
 	    local slider = aux.gui.slider(m.frame.parameters)
@@ -130,12 +128,12 @@ function create_frames()
 	    slider:SetPoint('TOPLEFT', 13, -74)
 	    slider:SetWidth(190)
 	    slider:SetScript('OnValueChanged', function()
-	        m.quantity_update(true)
+	        quantity_update(true)
 	    end)
 	    slider.editbox:SetScript('OnTextChanged', function()
 	        slider:SetValue(this:GetNumber())
-	        m.quantity_update(true)
-	        if m.selected_item then
+	        quantity_update(true)
+	        if selected_item then
 	            local settings = m.read_settings()
 	            settings.stack_size = this:GetNumber()
 	            m.write_settings(settings)

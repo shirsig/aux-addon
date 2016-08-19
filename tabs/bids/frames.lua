@@ -29,13 +29,12 @@ function create_frames()
 	end)
 
 	do
-	    local status_bar = aux.gui.status_bar(m.frame)
+	    status_bar = aux.gui.status_bar(m.frame)
 	    status_bar:SetWidth(265)
 	    status_bar:SetHeight(25)
 	    status_bar:SetPoint('TOPLEFT', aux.frame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 0)
 	    status_bar:set_text('')
-	    status_bar = status_bar
 	end
 	do
 	    local btn = aux.gui.button(m.frame, 16)

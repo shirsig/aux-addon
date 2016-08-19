@@ -103,7 +103,7 @@ function discard_continuation()
 	m.update_continuation()
 end
 
-function private:update_start_stop()
+function update_start_stop()
 	if m.current_search().active then
 		m.stop_button:Show()
 		m.start_button:Hide()

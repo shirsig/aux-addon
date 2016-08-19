@@ -60,15 +60,13 @@ function _G.aux_module()
 	local data, metadata, modifier, env, interface
 	modifier = setmetatable({}, modifier_mt) env = setmetatable({}, env_mt) interface = setmetatable({}, interface_mt)
 	local function modifier_accessor(key) _modifier_properties[modifier] = DECLARED+PROPERTY[key] return modifier end
-	data = {_G=_G, [ACCESSOR_KEY]=modifier_accessor, [MUTABLE_KEY]=modifier_accessor, [PUBLIC_KEY]=modifier_accessor}
-	metadata = setmetatable({_G=DECLARED, [ACCESSOR_KEY]=ACCESSOR, [MUTABLE_KEY]=ACCESSOR, [PUBLIC_KEY]=ACCESSOR}, metadata_mt)
+	data = {_G=_G, m=env, [ACCESSOR_KEY]=modifier_accessor, [MUTABLE_KEY]=modifier_accessor, [PUBLIC_KEY]=modifier_accessor}
+	metadata = setmetatable({_G=DECLARED, m=DECLARED, [ACCESSOR_KEY]=ACCESSOR, [MUTABLE_KEY]=ACCESSOR, [PUBLIC_KEY]=ACCESSOR}, metadata_mt)
 
 	_data[modifier], _data[env], _data[interface] = data, data, data
 	_metadata[modifier], _metadata[env], _metadata[interface] = metadata, metadata, metadata
 
 	env.mutable.__ = nil
-	env.m = env -- TODO for compatibility, remove later
-	env.private = env -- TODO for compatibility, remove later
 
 	setfenv(2, env)
 	return interface

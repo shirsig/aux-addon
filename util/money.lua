@@ -7,15 +7,15 @@ COPPER_TEXT = '|cffeda55fc|r'
 COPPER_PER_SILVER = 100
 COPPER_PER_GOLD = 10000
 
-function public.gsc(money)
-	local gold = floor(money / m.COPPER_PER_GOLD)
-	local silver = floor(mod(money, m.COPPER_PER_GOLD) / m.COPPER_PER_SILVER)
-	local copper = mod(money, m.COPPER_PER_SILVER)
+function public.to_gsc(money)
+	local gold = floor(money / COPPER_PER_GOLD)
+	local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
+	local copper = mod(money, COPPER_PER_SILVER)
 	return gold, silver, copper
 end
 
-function public.copper(gold, silver, copper)
-	return gold * m.COPPER_PER_GOLD + silver * m.COPPER_PER_SILVER + copper
+function public.from_gsc(gold, silver, copper)
+	return gold * COPPER_PER_GOLD + silver * COPPER_PER_SILVER + copper
 end
 
 function public.to_string2(money, exact, color)
@@ -34,7 +34,7 @@ function public.to_string2(money, exact, color)
 		-- Round to nearest silver
 		money = floor(money / 100 + 0.5) * 100
 	end
-	local g, s, c = m.gsc(money)
+	local g, s, c = to_gsc(money)
 
 	local str = ''
 
@@ -56,15 +56,15 @@ function public.to_string2(money, exact, color)
 	return str
 end
 
---function public.to_string(params) -- TODOSS
---	local gold, silver, copper = m.gsc(params.copper or 0 + )
+--function public.to_string(params) -- TODO
+--	local gold, silver, copper = to_gsc(params.copper or 0 + )
 --	local settings = aux.util.set(unpack(arg))
 --end
 
 function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	local is_negative = money < 0
 	money = abs(money)
-	local gold, silver, copper = m.gsc(money)
+	local gold, silver, copper = to_gsc(money)
 
 	-- rounding
 	if decimal_points then
@@ -75,29 +75,29 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	if no_color then
 		gold_text, silver_text, copper_text = 'g', 's', 'c'
 	else
-		gold_text, silver_text, copper_text = m.GOLD_TEXT, m.SILVER_TEXT, m.COPPER_TEXT
+		gold_text, silver_text, copper_text = GOLD_TEXT, SILVER_TEXT, COPPER_TEXT
 	end
 	
 	local text
 	if trim then
 		local parts = {}
 		if gold > 0 then
-			tinsert(parts, m.format_number(gold, false, nil, color)..gold_text)
+			tinsert(parts, format_number(gold, false, nil, color)..gold_text)
 		end
 		if silver > 0 then
-			tinsert(parts, m.format_number(silver, pad, nil, color)..silver_text)
+			tinsert(parts, format_number(silver, pad, nil, color)..silver_text)
 		end
 		if copper > 0 or gold == 0 and silver == 0 then
-			tinsert(parts, m.format_number(copper, pad, decimal_points, color)..copper_text)
+			tinsert(parts, format_number(copper, pad, decimal_points, color)..copper_text)
 		end
 		text = table.concat(parts, ' ')
 	else
 		if gold > 0 then
-			text = m.format_number(gold, false, nil, color)..gold_text..' '..m.format_number(silver, pad, nil, color)..silver_text..' '..m.format_number(copper, pad, decimal_points, color)..copper_text
+			text = format_number(gold, false, nil, color)..gold_text..' '..format_number(silver, pad, nil, color)..silver_text..' '..format_number(copper, pad, decimal_points, color)..copper_text
 		elseif silver > 0 then
-			text = m.format_number(silver, false, nil, color)..silver_text..' '..m.format_number(copper, pad, decimal_points, color)..copper_text
+			text = format_number(silver, false, nil, color)..silver_text..' '..format_number(copper, pad, decimal_points, color)..copper_text
 		else
-			text = m.format_number(copper, false, decimal_points, color)..copper_text
+			text = format_number(copper, false, decimal_points, color)..copper_text
 		end
 	end
 
@@ -114,7 +114,7 @@ end
 
 function public.from_string(value)
 	if aux.temp(tonumber(value)) and __ >= 0 then
-		return __ * m.COPPER_PER_GOLD
+		return __ * COPPER_PER_GOLD
 	end
 
 	-- remove any colors
@@ -131,8 +131,8 @@ function public.from_string(value)
 	value = gsub(value, '%d*%.?%d+s', '', 1)
 	value = gsub(value, '%d*%.?%d+c', '', 1)
 	if strfind(value, '%S') then return end
-	
-	return m.copper(gold or 0, silver or 0, copper or 0)
+
+	return from_gsc(gold or 0, silver or 0, copper or 0)
 end
 
 function public.format_number(num, pad, decimal_padding, color)
