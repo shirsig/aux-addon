@@ -209,27 +209,27 @@ function create_frames()
 	    hide_checkbox = checkbox
 	end
 	do
-	    local frame = CreateFrame('Frame', nil, m.frame.parameters)
+	    local frame = CreateFrame('Frame', nil, frame.parameters)
 	    start_price_frame = frame
 	    aux.gui.set_content_style(frame)
-	    frame:SetPoint('TOPRIGHT', m.frame.parameters, 'TOPRIGHT', -71, -60)
+	    frame:SetPoint('TOPRIGHT', frame.parameters, 'TOPRIGHT', -71, -60)
 	    frame:SetWidth(180)
 	    frame:SetHeight(22)
 	    local editbox = aux.gui.editbox(frame)
 	    editbox:SetAllPoints()
-	    editbox:SetJustifyH('RIGHT')
+	    editbox:SetJustifyH 'RIGHT'
 	    editbox:SetFont(aux.gui.config.font, 17)
 	    editbox:SetScript('OnTextChanged', function()
-	        this.pretty:SetText(aux.money.to_string(m.get_unit_start_price(), true, nil, 3))
-	        m.refresh = true
+	        this.pretty:SetText(aux.money.to_string(get_unit_start_price(), true, nil, 3))
+	        refresh = true
 	    end)
 	    editbox:SetScript('OnTabPressed', function()
-	        if IsShiftKeyDown() and m.stack_count_slider.editbox:IsVisible() then
-	            m.stack_count_slider.editbox:SetFocus()
+	        if IsShiftKeyDown() and stack_count_slider.editbox:IsVisible() then
+	            stack_count_slider.editbox:SetFocus()
 	        elseif IsShiftKeyDown() then
-	            m.stack_size_slider.editbox:SetFocus()
+	            stack_size_slider.editbox:SetFocus()
 	        else
-	            m.unit_buyout_price:SetFocus()
+	            unit_buyout_price:SetFocus()
 	        end
 	    end)
 	    editbox:SetScript('OnEditFocusGained', function()
@@ -238,7 +238,7 @@ function create_frames()
 	        this:SetAlpha(1)
 	    end)
 	    editbox:SetScript('OnEditFocusLost', function()
-	        this:SetText(aux.money.to_string(m.get_unit_start_price(), true, nil, 3, nil, true))
+	        this:SetText(aux.money.to_string(get_unit_start_price(), true, nil, 3, nil, true))
 	        this.pretty:Show()
 	        this:SetAlpha(0)
 	    end)
@@ -263,25 +263,25 @@ function create_frames()
 	    unit_start_price = editbox
 	end
 	do
-	    local frame = CreateFrame('Frame', nil, m.frame.parameters)
+	    local frame = CreateFrame('Frame', nil, frame.parameters)
 	    buyout_price_frame = frame
 	    aux.gui.set_content_style(frame)
-	    frame:SetPoint('TOPRIGHT', m.unit_start_price, 'BOTTOMRIGHT', 0, -19)
+	    frame:SetPoint('TOPRIGHT', unit_start_price, 'BOTTOMRIGHT', 0, -19)
 	    frame:SetWidth(180)
 	    frame:SetHeight(22)
 	    local editbox = aux.gui.editbox(frame)
 	    editbox:SetAllPoints()
-	    editbox:SetJustifyH('RIGHT')
+	    editbox:SetJustifyH 'RIGHT'
 	    editbox:SetFont(aux.gui.config.font, 17)
 	    editbox:SetScript('OnTextChanged', function()
-	        this.pretty:SetText(aux.money.to_string(m.get_unit_buyout_price(), true, nil, 3))
-	        m.refresh = true
+	        this.pretty:SetText(aux.money.to_string(get_unit_buyout_price(), true, nil, 3))
+	        refresh = true
 	    end)
 	    editbox:SetScript('OnTabPressed', function()
 	        if IsShiftKeyDown() then
-	            m.unit_start_price:SetFocus()
+	            unit_start_price:SetFocus()
 	        else
-	            m.stack_size_slider.editbox:SetFocus()
+	            stack_size_slider.editbox:SetFocus()
 	        end
 	    end)
 	    editbox:SetScript('OnEnterPressed', function()
@@ -293,7 +293,7 @@ function create_frames()
 	        this:SetAlpha(1)
 	    end)
 	    editbox:SetScript('OnEditFocusLost', function()
-	        this:SetText(aux.money.to_string(m.get_unit_buyout_price(), true, nil, 3, nil, true))
+	        this:SetText(aux.money.to_string(get_unit_buyout_price(), true, nil, 3, nil, true))
 	        this.pretty:Show()
 	        this:SetAlpha(0)
 	    end)
@@ -306,33 +306,32 @@ function create_frames()
 	    do
 	        local label = aux.gui.label(frame, aux.gui.config.small_font_size)
 	        label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
-	        label:SetText('Unit Buyout Price')
+	        label:SetText 'Unit Buyout Price'
 	    end
 	    do
 	        local label = aux.gui.label(frame, 14)
 	        label:SetPoint('LEFT', frame, 'RIGHT', 8, 0)
 	        label:SetWidth(50)
-	        label:SetJustifyH('CENTER')
+	        label:SetJustifyH 'CENTER'
 	        buyout_price_percentage = label
 	    end
 	    unit_buyout_price = editbox
 	end
 	do
-	    local btn = aux.gui.button(m.frame.parameters, 14)
+	    local btn = aux.gui.button(frame.parameters, 14)
 	    btn:SetPoint('TOPRIGHT', -10, -146)
-	    btn:SetWidth(150)
-	    btn:SetHeight(20)
+	    aux.gui.set_size(btn, 150, 20)
 	    btn:GetFontString():SetJustifyH('RIGHT')
 	    btn:GetFontString():SetPoint('RIGHT', -2, 0)
 	    btn:SetScript('OnClick', function()
 	        if this.amount then
-	            m.set_unit_start_price(this.amount)
-	            m.set_unit_buyout_price(this.amount)
+	            set_unit_start_price(this.amount)
+	            set_unit_buyout_price(this.amount)
 	        end
 	    end)
 	    local label = aux.gui.label(btn, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
-	    label:SetText('Historical Value')
+	    label:SetText 'Historical Value'
 	    historical_value_button = btn
 	end
 end

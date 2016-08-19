@@ -353,41 +353,41 @@ function create_frames()
 	        m.execute()
 	    end)
 
-	    local btn2 = aux.gui.button(m.frame.filter, 16)
+	    local btn2 = aux.gui.button(frame.filter, 16)
 	    btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
 	    btn2:SetWidth(80)
 	    btn2:SetHeight(24)
 	    btn2:SetText('Export')
-	    btn2:SetScript('OnClick', m.export_query_string)
+	    btn2:SetScript('OnClick', export_query_string)
 
-	    local btn3 = aux.gui.button(m.frame.filter, 16)
+	    local btn3 = aux.gui.button(frame.filter, 16)
 	    btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
 	    btn3:SetWidth(80)
 	    btn3:SetHeight(24)
 	    btn3:SetText('Import')
-	    btn3:SetScript('OnClick', m.import_query_string)
+	    btn3:SetScript('OnClick', import_query_string)
 	end
 	do
-	    local editbox = aux.gui.editbox(m.frame.filter)
+	    local editbox = aux.gui.editbox(frame.filter)
 	    editbox.complete_item = aux.completion.complete(function() return _G.aux_auctionable_items end)
-	    editbox:SetPoint('TOPLEFT', 14, -m.FILTER_SPACING)
+	    editbox:SetPoint('TOPLEFT', 14, -FILTER_SPACING)
 	    editbox:SetWidth(260)
 	    editbox:SetScript('OnChar', function()
-	        if m.blizzard_query.exact then
+	        if blizzard_query.exact then
 	            this:complete_item()
 	        end
 	    end)
 	    editbox:SetScript('OnTabPressed', function()
-		    if m.blizzard_query.exact then
+		    if blizzard_query.exact then
 			    return
 		    end
 	        if IsShiftKeyDown() then
-	            m.max_level_input:SetFocus()
+	            max_level_input:SetFocus()
 	        else
-	            m.min_level_input:SetFocus()
+	            min_level_input:SetFocus()
 	        end
 	    end)
-	    editbox:SetScript('OnTextChanged',  m.update_form)
+	    editbox:SetScript('OnTextChanged',  update_form)
 	    editbox:SetScript('OnEnterPressed', aux.C(editbox.ClearFocus, editbox))
 	    local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
@@ -395,9 +395,9 @@ function create_frames()
 	    name_input = editbox
 	end
 	do
-	    local checkbox = aux.gui.checkbox(m.frame.filter)
-	    checkbox:SetPoint('TOPLEFT', m.name_input, 'TOPRIGHT', 16, 0)
-	    checkbox:SetScript('OnClick', m.update_form)
+	    local checkbox = aux.gui.checkbox(frame.filter)
+	    checkbox:SetPoint('TOPLEFT', name_input, 'TOPRIGHT', 16, 0)
+	    checkbox:SetScript('OnClick', update_form)
 	    local label = aux.gui.label(checkbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Exact')

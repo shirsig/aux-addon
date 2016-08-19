@@ -13,9 +13,6 @@ do
 		__index = function(self, key)
 			return data[self].getter{public=self, private=data[self].state}[key]
 		end,
-		__call = function(self)
-			return data[self].getter{public=self, private=data[self].state}
-		end,
 	}
 	function public.dynamic_table(state, getter)
 		local self = {}
@@ -50,34 +47,34 @@ function public.tab(index, name)
 	local module_env = getfenv(2)
 	local tab = {name=name, env=module_env}
 	module_env.public.ACTIVE = function()
-		return tab == m.active_tab()
+		return tab == active_tab
 	end
 	for _, handler in {'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do
 		module_env.mutable[handler] = nil
 	end
-	m.tabs[index] = tab
+	tabs[index] = tab
 end
 do
 	local active_tab_index
-	active_tab = m.dynamic_table(nil, function()
-		return m.tabs[active_tab_index]
-	end)
+	function accessor.active_tab()
+		return tabs[active_tab_index]
+	end
 	function on_tab_click(index)
 		if active_tab_index then
-			m.call(m.active_tab.env.m.CLOSE)
+			m.call(active_tab.env.CLOSE)
 		end
 		active_tab_index = index
 		if active_tab_index then
-			m.call(m.active_tab.env.m.OPEN)
+			m.call(active_tab.env.OPEN)
 		end
 	end
 end
 
 function public.VARIABLES_LOADED()
 	do
-		local frame = CreateFrame('Frame', aux.gui.name(), UIParent)
-		tinsert(UISpecialFrames, '_G.aux_frame1')
-		m.gui.set_window_style(frame)
+		local frame = CreateFrame('Frame', aux.gui.name, UIParent)
+		tinsert(UISpecialFrames, 'aux_frame1')
+		gui.set_window_style(frame)
 		frame:SetWidth(768)
 		frame:SetHeight(447)
 		frame:SetPoint('LEFT', 100, 0)
@@ -284,20 +281,20 @@ function AuctionFrameAuctions_OnEvent(...)
 end
 
 function SetItemRef(...)
-	if arg[3] ~= 'RightButton' or not m.index(m.active_tab(), 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
+	if arg[3] ~= 'RightButton' or not m.index(active_tab, 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return m.orig.SetItemRef(unpack(arg))
 	end
 	for item_info in aux.util.present(m.info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))) do
-		return m.active_tab.env.m.CLICK_LINK(item_info)
+		return m.active_tab.env.CLICK_LINK(item_info)
 	end
 end
 
 function UseContainerItem(...)
-    if m.modified() or not m.index(m.active_tab(), 'env', 'USE_ITEM') then
+    if m.modified() or not m.index(active_tab, 'env', 'USE_ITEM') then
         return m.orig.UseContainerItem(unpack(arg))
     end
     for item_info in aux.util.present(m.info.container_item(arg[1], arg[2])) do
-        return m.active_tab.env.m.USE_ITEM(item_info)
+        return m.active_tab.env.USE_ITEM(item_info)
     end
 end
 
