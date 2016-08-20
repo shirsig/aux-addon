@@ -1,6 +1,6 @@
 aux.module 'util'
 
-local temp, getn = g.aux.temp, g.getn
+local temp, recycle, getn = temp, recycle, g.getn
 
 function public.copy(t)
 	local copy = {}
@@ -205,9 +205,10 @@ end
 
 do
 	local mt = {__call = function(self, key) return self[key] end}
-	function public.hashset(...) -- TODO rename/remove?
+	function public.set(t)
 		local self = {}
-		for i=1,arg.n do self[arg[i]] = true end
+		for i=1,getn(t) do self[t[i]] = true end
+		recycle(t)
 		return setmetatable(self, mt)
 	end
 end

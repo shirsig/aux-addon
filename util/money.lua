@@ -58,7 +58,7 @@ end
 
 --function public.to_string(params) -- TODO
 --	local gold, silver, copper = to_gsc(params.copper or 0 + )
---	local settings = hashset(unpack(arg))
+--	local settings = set(unpack(arg))
 --end
 
 function public.to_string(money, pad, trim, decimal_points, color, no_color)

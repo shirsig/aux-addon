@@ -8,33 +8,23 @@ tabs = {}
 function public.tab(index, name)
 	local module_env = getfenv(2)
 	local tab = {name=name, env=module_env}
-	module_env.public.ACTIVE = function()
-		return tab == active_tab
-	end
-	for _, handler in {'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do
-		module_env.mutable[handler] = nil
-	end
+	module_env.public.ACTIVE = function() return tab == active_tab end
+	for handler in temp-set{'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do module_env.mutable[handler] = nil end
 	tabs[index] = tab
 end
 do
 	local active_tab_index
-	function accessor.active_tab()
-		return tabs[active_tab_index]
-	end
+	function accessor.active_tab() return tabs[active_tab_index] end
 	function on_tab_click(index)
-		if active_tab_index then
-			call(active_tab.env.CLOSE)
-		end
+		call(active_tab_index and active_tab.env.CLOSE)
 		active_tab_index = index
-		if active_tab_index then
-			call(active_tab.env.OPEN)
-		end
+		call(active_tab_index and active_tab.env.OPEN)
 	end
 end
 
-function VARIABLES_LOADED()
+function LOAD()
 	do
-		local frame = CreateFrame('Frame', aux.gui.name, UIParent)
+		local frame = CreateFrame('Frame', gui.name, UIParent)
 		tinsert(UISpecialFrames, 'aux_frame1')
 		gui.set_window_style(frame)
 		frame:SetWidth(768)
@@ -45,19 +35,10 @@ function VARIABLES_LOADED()
 		frame:EnableMouse(true)
 		frame:SetClampedToScreen(true)
 		frame:RegisterForDrag 'LeftButton'
-		frame:SetScript('OnDragStart', function()
-			this:StartMoving()
-		end)
-		frame:SetScript('OnDragStop', function()
-			this:StopMovingOrSizing()
-		end)
-		frame:SetScript('OnShow', function()
-			PlaySound 'AuctionWindowOpen'
-		end)
-		frame:SetScript('OnHide', function()
-			PlaySound 'AuctionWindowClose'
-			CloseAuctionHouse()
-		end)
+		frame:SetScript('OnDragStart', function() this:StartMoving() end)
+		frame:SetScript('OnDragStop', function() this:StopMovingOrSizing() end)
+		frame:SetScript('OnShow', function() PlaySound 'AuctionWindowOpen' end)
+		frame:SetScript('OnHide', function() PlaySound 'AuctionWindowClose' CloseAuctionHouse() end)
 		frame.content = CreateFrame('Frame', nil, frame)
 		frame.content:SetPoint('TOPLEFT', 4, -80)
 		frame.content:SetPoint('BOTTOMRIGHT', -4, 35)
@@ -67,12 +48,8 @@ function VARIABLES_LOADED()
 	do
 		local tabs = gui.tabs(frame, 'DOWN')
 		tabs._on_select = on_tab_click
-		for _, tab in m.tabs do
-			tabs:create_tab(tab.name)
-		end
-		function public.set_tab(id)
-			tabs:select(id)
-		end
+		for _, tab in m.tabs do tabs:create_tab(tab.name) end
+		function public.set_tab(id) tabs:select(id) end
 	end
 	do
 		local btn = gui.button(frame, 16)
@@ -90,11 +67,7 @@ function VARIABLES_LOADED()
 		btn:SetHeight(24)
 		btn:SetText 'Default UI'
 		btn:SetScript('OnClick',function()
-			if AuctionFrame:IsVisible() then
-				HideUIPanel(AuctionFrame)
-			else
-				ShowUIPanel(AuctionFrame)
-			end
+			if AuctionFrame:IsVisible() then HideUIPanel(AuctionFrame) else ShowUIPanel(AuctionFrame) end
 		end)
 	end
 end
@@ -124,16 +97,12 @@ function AUCTION_OWNED_LIST_UPDATE()
 end
 
 function ADDON_LOADED.Blizzard_AuctionUI()
-	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
+	AuctionFrame:UnregisterEvent 'AUCTION_HOUSE_SHOW'
 	AuctionFrame:SetScript('OnHide', nil)
-
 	hook('ShowUIPanel', function(...)
-		if arg[1] == AuctionFrame then
-			return AuctionFrame:Show()
-		end
+		if arg[1] == AuctionFrame then return AuctionFrame:Show() end
 		return orig.ShowUIPanel(unpack(arg))
 	end)
-
 	hook('GetOwnerAuctionItems', GetOwnerAuctionItems)
 	hook('SetItemRef', SetItemRef)
 	hook('UseContainerItem', UseContainerItem)
@@ -147,14 +116,11 @@ do
 		label = label..LIGHTYELLOW_FONT_COLOR_CODE..')'..FONT_COLOR_CODE_CLOSE
 		return label
 	end
-
 	function ADDON_LOADED.Blizzard_CraftUI()
 		hook('CraftFrame_SetSelection', function(...)
 			local results = {orig.CraftFrame_SetSelection(unpack(arg))}
-
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
-
 			local total_cost = 0
 			for i=1,reagent_count do
 				local link = GetCraftReagentItemLink(id, i)
@@ -173,20 +139,15 @@ do
 					total_cost = total_cost + value * count
 				end
 			end
-
 			CraftReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
-
 			return unpack(results)
 		end)
 	end
-
 	function ADDON_LOADED.Blizzard_TradeSkillUI()
 		hook('TradeSkillFrame_SetSelection', function(...)
 			local results = {orig.TradeSkillFrame_SetSelection(unpack(arg))}
-
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
-
 			local total_cost = 0
 			for i=1,reagent_count do
 				local link = GetTradeSkillReagentItemLink(id, i)
@@ -205,9 +166,7 @@ do
 					total_cost = total_cost + value * count
 				end
 			end
-
 			TradeSkillReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
-
 			return unpack(results)
 		end)
 	end
@@ -223,9 +182,7 @@ function public.hook(name, handler, object)
 		object = g
 		orig = m.orig
 	end
-	if orig[name] then
-		error('"'..name..'" is already hooked.')
-	end
+	assert(not orig[name], '"'..name..'" is already hooked.')
 	orig[name] = object[name]
 	object[name] = handler
 end
@@ -246,7 +203,7 @@ function SetItemRef(...)
 	if arg[3] ~= 'RightButton' or not index(active_tab, 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
-	for item_info in present(info.item(tonumber(({strfind(arg[1], '^item:(%d+)')})[3]))) do
+	for item_info in present(info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
 		return active_tab.env.CLICK_LINK(item_info)
 	end
 end
@@ -262,9 +219,7 @@ end
 
 do
 	local locked
-	function public.bid_in_progress()
-		return locked
-	end
+	function public.bid_in_progress() return locked end
 	function public.place_bid(type, index, amount, on_success)
 		if locked then
 			return
@@ -286,9 +241,7 @@ end
 
 do
 	local locked
-	function public.cancel_in_progress()
-		return locked
-	end
+	function public.cancel_in_progress() return locked end
 	function public.cancel_auction(index, on_success)
 		if locked then
 			return

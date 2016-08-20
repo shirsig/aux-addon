@@ -41,7 +41,7 @@ do
 end
 
 function m.LOAD()
-	armor = hashset(
+	armor = set(
 		'INVTYPE_HEAD',
 		'INVTYPE_NECK',
 		'INVTYPE_SHOULDER',
@@ -59,7 +59,7 @@ function m.LOAD()
 		'INVTYPE_HOLDABLE'
 	)
 
-	weapon = hashset(
+	weapon = set(
 		'INVTYPE_2HWEAPON' ,
 		'INVTYPE_WEAPONMAINHAND',
 		'INVTYPE_WEAPON',
