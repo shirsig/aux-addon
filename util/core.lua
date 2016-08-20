@@ -205,7 +205,7 @@ end
 
 do
 	local mt = {__call = function(self, key) return self[key] end}
-	function public.hashset(...)
+	function public.hashset(...) -- TODO rename/remove?
 		local self = {}
 		for i=1,arg.n do self[arg[i]] = true end
 		return setmetatable(self, mt)

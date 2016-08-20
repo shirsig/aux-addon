@@ -11,9 +11,7 @@ local DEFAULT_COL_INFO = {{width=1}}
 
 local function GetTableIndex(tbl, value)
     for i, v in tbl do
-        if value == v then
-            return i
-        end
+        if value == v then return i end
     end
 end
 
@@ -106,7 +104,6 @@ local methods = {
             st.updateSort = nil
         end
 
-        -- set row data
         for i=1, st.sizes.numRows do
             st.rows[i].data = nil
             if i > getn(st.rowData) then
@@ -337,7 +334,7 @@ local methods = {
         local col = CreateFrame('Button', nil, row)
         local text = col:CreateFontString()
         text:SetFont(aux.gui.config.font, ST_ROW_TEXT_SIZE)
-        text:SetJustifyV('CENTER')
+        text:SetJustifyV 'CENTER'
         text:SetPoint('TOPLEFT', 1, -1)
         text:SetPoint('BOTTOMRIGHT', -1, 1)
         col.text = text

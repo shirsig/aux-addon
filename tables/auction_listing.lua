@@ -55,7 +55,7 @@ public.search_config = {
         title = 'Item',
         width = 0.35,
         init = item_column_init,
-        set = function(cell, record, _, _, _, indented)
+        fill = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
                 cell.spacer:SetWidth(10)
@@ -76,7 +76,7 @@ public.search_config = {
         title = 'Lvl',
         width = 0.035,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             local display_level = max(record.level, 1)
             display_level = UnitLevel('player') < record.level and aux.gui.color.red(display_level) or display_level
             cell:SetText(display_level)
@@ -89,7 +89,7 @@ public.search_config = {
         title = 'Auctions',
         width = 0.06,
         align = 'CENTER',
-        set = function(cell, record, count, own, expandable)
+        fill = function(cell, record, count, own, expandable)
             local numAuctionsText = expandable and aux.gui.color.link(count) or count
             if own > 0 then
                 numAuctionsText = numAuctionsText..(' '..aux.gui.color.yellow('('..own..')'))
@@ -113,7 +113,7 @@ public.search_config = {
         title = 'Stack Size',
         width = 0.055,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             cell:SetText(record.aux_quantity)
         end,
         cmp = function(record_a, record_b, desc)
@@ -124,7 +124,7 @@ public.search_config = {
         title = 'Time Left',
         width = 0.04,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
         end,
         cmp = function(record_a, record_b, desc)
@@ -135,7 +135,7 @@ public.search_config = {
         title = 'Seller',
         width = 0.13,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             cell:SetText(aux.is_player(record.owner) and (aux.gui.color.yellow(record.owner)) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
@@ -155,7 +155,7 @@ public.search_config = {
         width = 0.125,
         align = 'RIGHT',
         isPrice = true,
-        set = function(cell, record)
+        fill = function(cell, record)
             local color
             if record.high_bidder then
                 color = AUCTION_PCT_COLORS[2].color
@@ -191,7 +191,7 @@ public.search_config = {
         width = 0.125,
         align = 'RIGHT',
         isPrice = true,
-        set = function(cell, record)
+        fill = function(cell, record)
             local price = g.aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
             cell:SetText(price > 0 and aux.money.to_string(price, true, false) or '---')
         end,
@@ -208,7 +208,7 @@ public.search_config = {
         title = '% Hist. Value',
         width = 0.08,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             local pct, bidPct = record_percentage(record)
             cell:SetText((pct or bidPct) and percentage_historical(pct or bidPct, not pct) or '---')
         end,
@@ -225,7 +225,7 @@ public.auctions_config = {
         title = 'Item',
         width = 0.35,
         init = item_column_init,
-        set = function(cell, record, _, _, _, indented)
+        fill = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
                 cell.spacer:SetWidth(10)
@@ -246,7 +246,7 @@ public.auctions_config = {
         title = 'Lvl',
         width = 0.035,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             local display_level = max(record.level, 1)
             display_level = UnitLevel('player') < record.level and aux.gui.color.red(display_level) or display_level
             cell:SetText(display_level)
@@ -259,7 +259,7 @@ public.auctions_config = {
         title = 'Auctions',
         width = 0.06,
         align = 'CENTER',
-        set = function(cell, record, count, own, expandable)
+        fill = function(cell, record, count, own, expandable)
             local numAuctionsText = expandable and aux.gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
             cell:SetText(numAuctionsText)
         end,
@@ -280,7 +280,7 @@ public.auctions_config = {
         title = 'Stack Size',
         width = 0.055,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             cell:SetText(record.aux_quantity)
         end,
         cmp = function(record_a, record_b, desc)
@@ -291,7 +291,7 @@ public.auctions_config = {
         title = 'Time Left',
         width = 0.04,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
         end,
         cmp = function(record_a, record_b, desc)
@@ -303,7 +303,7 @@ public.auctions_config = {
         width = 0.125,
         align = 'RIGHT',
         isPrice = true,
-        set = function(cell, record)
+        fill = function(cell, record)
             local price
             if record.high_bidder then
                 price = g.aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
@@ -333,7 +333,7 @@ public.auctions_config = {
         width = 0.125,
         align = 'RIGHT',
         isPrice = true,
-        set = function(cell, record)
+        fill = function(cell, record)
             local price = g.aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
             cell:SetText(price > 0 and aux.money.to_string(price, true, false) or '---')
         end,
@@ -350,7 +350,7 @@ public.auctions_config = {
         title = 'High Bidder',
         width = 0.21,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             cell:SetText(record.high_bidder or aux.gui.color.red 'No Bids')
         end,
         cmp = function(record_a, record_b, desc)
@@ -372,7 +372,7 @@ public.bids_config = {
         title = 'Item',
         width = 0.35,
         init = item_column_init,
-        set = function(cell, record, _, _, _, indented)
+        fill = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
                 cell.spacer:SetWidth(10)
@@ -393,7 +393,7 @@ public.bids_config = {
         title = 'Auctions',
         width = 0.06,
         align = 'CENTER',
-        set = function(cell, record, count, own, expandable)
+        fill = function(cell, record, count, own, expandable)
             local numAuctionsText = expandable and aux.gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
             cell:SetText(numAuctionsText)
         end,
@@ -414,7 +414,7 @@ public.bids_config = {
         title = 'Stack Size',
         width = 0.055,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             cell:SetText(record.aux_quantity)
         end,
         cmp = function(record_a, record_b, desc)
@@ -425,7 +425,7 @@ public.bids_config = {
         title = 'Time Left',
         width = 0.04,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
         end,
         cmp = function(record_a, record_b, desc)
@@ -436,7 +436,7 @@ public.bids_config = {
         title = 'Seller',
         width = 0.13,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             cell:SetText(aux.is_player(record.owner) and (aux.gui.color.yellow(record.owner)) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
@@ -456,7 +456,7 @@ public.bids_config = {
         width = 0.125,
         align = 'RIGHT',
         isPrice = true,
-        set = function(cell, record)
+        fill = function(cell, record)
             local price
             if record.high_bidder then
                 price = g.aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
@@ -486,7 +486,7 @@ public.bids_config = {
         width = 0.125,
         align = 'RIGHT',
         isPrice = true,
-        set = function(cell, record)
+        fill = function(cell, record)
             local price = g.aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
             cell:SetText(price > 0 and aux.money.to_string(price, true, false) or '---')
         end,
@@ -503,7 +503,7 @@ public.bids_config = {
         title = 'Status',
         width = 0.115,
         align = 'CENTER',
-        set = function(cell, record)
+        fill = function(cell, record)
             local status
             if record.high_bidder then
                 status = aux.gui.color.yellow 'High Bidder'
@@ -814,7 +814,7 @@ local methods = {
         row.data = {record=record, expandable=expandable, indented=indented, numAuctions=numAuctions, expandKey=expandKey}
 
         for i, column_config in self.config do
-            column_config.set(row.cells[i], record, displayNumAuctions, numPlayerAuctions, expandable, indented)
+            column_config.fill(row.cells[i], record, displayNumAuctions, numPlayerAuctions, expandable, indented)
         end
     end,
 

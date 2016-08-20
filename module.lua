@@ -1,4 +1,4 @@
-local tinsert, setfenv, rawget, rawset, setmetatable, mask, add, g = tinsert, setfenv, rawget, rawset, setmetatable, bit.band, bit.bor, getfenv(0)
+local tinsert, setfenv, rawget, setmetatable, mask, add, g = tinsert, setfenv, rawget, setmetatable, bit.band, bit.bor, getfenv(0)
 local DECLARED, ACCESSOR, MUTABLE, PUBLIC = 1, 2, 4, 8
 local ACCESSOR_KEY, MUTABLE_KEY, PUBLIC_KEY = 'accessor', 'mutable', 'public'
 local PROPERTY = {[ACCESSOR_KEY]=ACCESSOR, [MUTABLE_KEY]=MUTABLE, [PUBLIC_KEY]=PUBLIC}
@@ -24,9 +24,11 @@ local env_mt = {
 		end
 	end,
 	__newindex = function(self, key, value)
-		local properties = _metadata[self][key]
-		if mask(DECLARED+MUTABLE, _metadata[self][key]) == DECLARED then error('Field "%s" is immutable.', key) end
-		_metadata[self][key] = add(DECLARED, properties)
+		if not rawget(_metadata[self], key) then
+			_metadata[self][key] = DECLARED
+		elseif mask(MUTABLE, _metadata[self][key]) == 0 then
+			error('Field "%s" is immutable.', key)
+		end
 		_data[self][key] = value
 	end,
 }
