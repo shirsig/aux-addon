@@ -93,7 +93,7 @@ do
                             aux.place_bid('bidder', index, record.bid_price, record.bid_price < record.buyout_price and function()
                                 aux.info.bid_update(record)
                                 m.listing:SetDatabase()
-                            end or aux.C(m.listing.RemoveAuctionRecord, m.listing, record))
+                            end or L(m.listing.RemoveAuctionRecord, m.listing, record))
                         end
                     end)
                     m.bid_button:Enable()
@@ -102,7 +102,7 @@ do
                 if record.buyout_price > 0 then
                     m.buyout_button:SetScript('OnClick', function()
                         if m.test(record)(index) and m.listing:ContainsRecord(record) then
-                            aux.place_bid('bidder', index, record.buyout_price, aux.C(m.listing.RemoveAuctionRecord, m.listing, record))
+                            aux.place_bid('bidder', index, record.buyout_price, L(m.listing.RemoveAuctionRecord, m.listing, record))
                         end
                     end)
                     m.buyout_button:Enable()

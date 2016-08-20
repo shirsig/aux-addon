@@ -58,7 +58,7 @@ end
 
 --function public.to_string(params) -- TODO
 --	local gold, silver, copper = to_gsc(params.copper or 0 + )
---	local settings = set(unpack(arg))
+--	local settings = hashset(unpack(arg))
 --end
 
 function public.to_string(money, pad, trim, decimal_points, color, no_color)
@@ -90,7 +90,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 		if copper > 0 or gold == 0 and silver == 0 then
 			tinsert(parts, format_number(copper, pad, decimal_points, color)..copper_text)
 		end
-		text = table.concat(parts, ' ')
+		text = join(parts, ' ')
 	else
 		if gold > 0 then
 			text = format_number(gold, false, nil, color)..gold_text..' '..format_number(silver, pad, nil, color)..silver_text..' '..format_number(copper, pad, decimal_points, color)..copper_text
@@ -113,7 +113,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 end
 
 function public.from_string(value)
-	if temp(tonumber(value)) and __ >= 0 then
+	if xx(tonumber(value)) and __ >= 0 then
 		return __ * COPPER_PER_GOLD
 	end
 

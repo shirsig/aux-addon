@@ -73,7 +73,7 @@ function SlashCmdList.AUX(command)
 	elseif arguments[1] == 'chars' then
 		local realm = GetCVar 'realmName'
 		local chars = {}
-		for name, _ in g.aux_characters[realm] or {} do
+		for name in g.aux_characters[realm] or {} do
 			tinsert(chars, name)
 		end
 		if getn(chars) > 0 then

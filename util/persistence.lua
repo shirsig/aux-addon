@@ -5,18 +5,18 @@ g.aux_datasets = {}
 do
     local realm, faction
 
-    function m.LOAD()
-        aux.control.thread(aux.control.when, function() faction = UnitFactionGroup('player') return faction end, function() end)
-        realm = GetCVar('realmName')
+    function LOAD()
+        aux.control.thread(aux.control.when, function() faction = UnitFactionGroup 'player' return faction end, function() end)
+        realm = GetCVar 'realmName'
     end
 
-    function get_dataset_key()
+    function accessor.dataset_key()
         return realm..'|'..faction
     end
 end
 
 function public.load_dataset()
-    local dataset_key = m.get_dataset_key()
+    local dataset_key = dataset_key
     g.aux_datasets[dataset_key] = g.aux_datasets[dataset_key] or {}
     return g.aux_datasets[dataset_key]
 end
@@ -29,11 +29,11 @@ function public.read(schema, str)
     elseif schema == 'number' then
         return tonumber(str)
     elseif type(schema) == 'table' and schema[1] == 'list' then
-        return m.read_list(schema, str)
+        return read_list(schema, str)
     elseif type(schema) == 'table' and schema[1] == 'record' then
-        return m.read_record(schema, str)
+        return read_record(schema, str)
     else
-        error('Unknown schema.')
+        error 'Invalid schema.'
     end
 end
 
@@ -45,24 +45,22 @@ function public.write(schema, obj)
     elseif schema == 'number' then
         return obj and tostring(obj) or ''
     elseif type(schema) == 'table' and schema[1] == 'list' then
-        return m.write_list(schema, obj)
+        return write_list(schema, obj)
     elseif type(schema) == 'table' and schema[1] == 'record' then
-        return m.write_record(schema, obj)
+        return write_record(schema, obj)
     else
-        error('Unknown schema.')
+        error 'Invalid schema.'
     end
 end
 
 function public.read_list(schema, str)
-    if str == '' then
-        return {}
-    end
+    if str == '' then return {} end
 
     local separator = schema[2]
     local element_type = schema[3]
     local parts = split(str, separator)
     return map(parts, function(part)
-        return m.read(element_type, part)
+        return read(element_type, part)
     end)
 end
 
@@ -70,9 +68,9 @@ function public.write_list(schema, list)
     local separator = schema[2]
     local element_type = schema[3]
     local parts = map(list, function(element)
-        return m.write(element_type, element)
+        return write(element_type, element)
     end)
-    return table.concat(parts, separator)
+    return join(parts, separator)
 end
 
 function public.read_record(schema, str)
@@ -81,7 +79,7 @@ function public.read_record(schema, str)
     local parts = split(str, separator)
     for i=3,getn(schema) do
         local key, type = next(schema[i])
-        record[key] = m.read(type, parts[i - 2])
+        record[key] = read(type, parts[i - 2])
     end
     return record
 end
@@ -91,57 +89,7 @@ function public.write_record(schema, record)
     local parts = {}
     for i=3,getn(schema) do
         local key, type = next(schema[i])
-        tinsert(parts, m.write(type, record[key]))
+        tinsert(parts, write(type, record[key]))
     end
-    return table.concat(parts, separator)
-end
-
-function public.serialize(data, separator, compactor)
-
-    local data_string = ''
-    local i = 1
-    while i <= getn(data) do
-        local element, count = data[i], 1
-        while compactor and data[i + 1] == element do
-            count = count + 1
-            i = i + 1
-        end
-        local part = count > 1 and element..compactor..count or element
-        data_string = data_string..(i == 1 and '' or separator)..part
-        i = i + 1
-    end
-
-    return data_string
-end
-
-function public.deserialize(data_string, separator, compactor)
-    if not data_string or data_string == '' then
-        return {}
-    end
-
-    local data = {}
-    while true do
-        local start_index, _ = strfind(data_string, separator, 1, true)
-
-        local part
-        if start_index then
-            part = strsub(data_string, 1, start_index - 1)
-            data_string = strsub(data_string, start_index + 1)
-        else
-            part = strsub(data_string, 1)
-        end
-
-        if compactor and strfind(part, compactor, 1, true) then
-            local compactor_index, _ = strfind(part, compactor, 1, true)
-            for i=1, tonumber(strsub(part, compactor_index + 1)) do
-               tinsert(data, strsub(part, 1, compactor_index - 1))
-            end
-        else
-            tinsert(data, part)
-        end
-
-        if not start_index then
-            return data
-        end
-    end
+    return join(parts, separator)
 end

@@ -27,7 +27,7 @@ public.filters = {
     ['tooltip'] = {
         input_type = 'string',
         validator = function(str)
-            return m.default_filter(str).validator()
+            return default_filter(str).validator()
         end,
     },
 
@@ -235,8 +235,8 @@ do
 			end
 			for _, parser in {
 				{'class', aux.info.item_class_index},
-				{'subclass', aux.C(aux.info.item_subclass_index, index(self.class, 2) or 0, aux._1)},
-				{'slot', aux.C(aux.info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0, aux._1)},
+				{'subclass', L(aux.info.item_subclass_index, index(self.class, 2) or 0, _1)},
+				{'slot', L(aux.info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0, _1)},
 				{'quality', aux.info.item_quality_index},
 			} do
 				if not self[parser[1]] then
@@ -250,7 +250,7 @@ do
 			if not self[str] and (str == 'usable' or str == 'exact' and self.name and size(self) == 1) then
 				self[str] = {str, 1}
 			elseif i == 1 and strlen(str) <= 63 then
-				self.name = {str, m.unquote(str)}
+				self.name = {str, unquote(str)}
 --				return nil, 'The name filter must not be longer than 63 characters'
 			else
 				return
@@ -280,17 +280,17 @@ end
 
 function public.parse_query_string(str)
     local post_filter = {}
-    local blizzard_filter_parser = m.blizzard_filter_parser()
+    local blizzard_filter_parser = blizzard_filter_parser()
     local parts = map(split(str, '/'), function(part) return strlower(trim(part)) end)
 
     local i = 1
     while parts[i] do
-        if temp(m.operator(parts[i])) then
+        if x(operator(parts[i])) then
             tinsert(post_filter, __)
-        elseif temp(m.filters[parts[i]]) then
+        elseif x(filters[parts[i]]) then
             local input_type = __.input_type
             if input_type ~= '' then
-                if not parts[i + 1] or not m.parse_parameter(input_type, parts[i + 1]) then
+                if not parts[i + 1] or not parse_parameter(input_type, parts[i + 1]) then
                     if parts[i] == 'item' then
                         return nil, 'Invalid item name', g.aux_auctionable_items
                     elseif type(input_type) == 'table' then
@@ -318,7 +318,7 @@ function public.parse_query_string(str)
 end
 
 function public.query(query_string)
-    local components, error, suggestions = m.parse_query_string(query_string)
+    local components, error, suggestions = parse_query_string(query_string)
 
     if not components then
         return nil, suggestions or {}, error
@@ -336,8 +336,8 @@ function public.query(query_string)
 
     if polish_notation_counter > 0 then
         local suggestions = {}
-        for filter, _ in m.filters do
-            tinsert(suggestions, strlower(filter))
+        for key in filters do
+            tinsert(suggestions, strlower(key))
         end
         tinsert(suggestions, 'and')
         tinsert(suggestions, 'or')
@@ -346,9 +346,9 @@ function public.query(query_string)
     end
 
     return {
-        blizzard_query = m.blizzard_query(components),
-        validator = m.validator(components),
-        prettified = m.prettified_query_string(components),
+        blizzard_query = blizzard_query(components),
+        validator = validator(components),
+        prettified = prettified_query_string(components),
     }, m.suggestions(components)
 end
 
@@ -359,7 +359,7 @@ function public.queries(query_string)
     for _, str in parts do
         str = trim(str)
 
-        local query, _, error = m.query(str)
+        local query, _, error = query(str)
 
         if not query then
             log('Invalid filter:', error)
@@ -384,8 +384,8 @@ function suggestions(components)
     tinsert(suggestions, 'not')
     tinsert(suggestions, 'tt')
 
-    for filter, _ in m.filters do
-        tinsert(suggestions, filter)
+    for key in filters do
+        tinsert(suggestions, key)
     end
 
     -- classes
@@ -432,7 +432,7 @@ function suggestions(components)
 end
 
 function public.query_string(components)
-    local query_builder = m.query_builder()
+    local query_builder = query_builder()
 
     for _, filter in components.blizzard do
         query_builder.append((filter[2] or filter[1]))
@@ -456,7 +456,7 @@ function public.query_string(components)
 end
 
 function prettified_query_string(components)
-    local prettified = m.query_builder()
+    local prettified = query_builder()
 
     for key, filter in components.blizzard do
         if key == 'exact' then
@@ -481,7 +481,7 @@ function prettified_query_string(components)
 	            if component[2] == 'item' then
 		            prettified.append(aux.info.display_name(aux.cache.item_id(parameter)) or aux.gui.color.label.enabled('['..parameter..']'))
 	            else
-		            if m.filters[component[2]].input_type == 'money' then
+		            if filters[component[2]].input_type == 'money' then
 			            prettified.append(aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, aux.gui.inline_color.label.enabled))
 		            else
 			            prettified.append(aux.gui.color.label.enabled(parameter))
@@ -511,7 +511,7 @@ function blizzard_query(components)
     local query = {name=filters.name and filters.name[2]}
 
     local item_info, class_index, subclass_index, slot_index
-    if filters.exact and temp(aux.cache.item_id(filters.name[2])) and temp(aux.info.item(__)) then
+    if filters.exact and x(aux.cache.item_id(filters.name[2])) and x(aux.info.item(__)) then
 	    item_info = __
         class_index = aux.info.item_class_index(item_info.class)
         subclass_index = aux.info.item_subclass_index(class_index or 0, item_info.subclass)
@@ -539,7 +539,7 @@ function validator(components)
     local validators = {}
     for i, component in components.post do
         if component[1] == 'filter' then
-            validators[i] = m.filters[component[2]].validator(m.parse_parameter(m.filters[component[2]].input_type, component[3]))
+            validators[i] = filters[component[2]].validator(parse_parameter(filters[component[2]].input_type, component[3]))
         end
     end
 
@@ -575,10 +575,10 @@ function public.query_builder()
     local filter
     return {
         appended = function(part)
-            return m.query_builder(not filter and part or filter..'/'..part)
+            return query_builder(not filter and part or filter..'/'..part)
         end,
         prepended = function(part)
-            return m.query_builder(not filter and part or part..'/'..filter)
+            return query_builder(not filter and part or part..'/'..filter)
         end,
         append = function(part)
             filter = not filter and part or filter..'/'..part

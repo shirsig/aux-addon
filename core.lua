@@ -80,7 +80,7 @@ function VARIABLES_LOADED()
 		btn:SetWidth(65)
 		btn:SetHeight(24)
 		btn:SetText 'Close'
-		btn:SetScript('OnClick', C(frame.Hide, frame))
+		btn:SetScript('OnClick', L(frame.Hide, frame))
 		public.close_button = btn
 	end
 	do
@@ -302,35 +302,6 @@ do
 				kill()
 			end
 		end)
-	end
-end
-
-public._this = {}
-do
-	local formal_parameters = {}
-	for i=1,9 do
-		local key = '_'..i
-		public[key] = {}
-		formal_parameters[m[key]] = i
-	end
-	local function call(f, arg1, arg2)
-		local params = {}
-		for i=1,arg1.n do
-			if arg1[i] == _this then
-				tinsert(params, this)
-			elseif formal_parameters[arg1[i]] then
-				tinsert(params, arg2[formal_parameters[arg1[i]]])
-			else
-				tinsert(params, arg1[i])
-			end
-		end
-		return f(unpack(params))
-	end
-	function public.C(f, ...)
-		local arg1 = arg
-		return function(...)
-			return call(f, arg1, arg)
-		end
 	end
 end
 

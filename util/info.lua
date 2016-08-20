@@ -121,8 +121,8 @@ function public.auction(index, query_type)
             link = link,
             itemstring = item_info.itemstring,
             item_key = item_id..':'..suffix_id,
-            search_signature = table.concat({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), g.aux_ignore_owner and (aux.is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
-            sniping_signature = table.concat({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, g.aux_ignore_owner and (aux.is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
+            search_signature = join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), g.aux_ignore_owner and (aux.is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+            sniping_signature = join({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, g.aux_ignore_owner and (aux.is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
 
             name = name,
             texture = texture,

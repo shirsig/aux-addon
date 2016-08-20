@@ -1,43 +1,98 @@
 aux.module 'util'
 
-function public.call(f, ...)
-	if f then
-		return f(unpack(arg))
+local temp, getn = g.aux.temp, g.getn
+
+function public.copy(t)
+	local copy = {}
+	for k, v in t do copy[k] = v end
+	setn(getn(t))
+	return copy
+end
+
+do
+	local value, charges
+	local function setter(n)
+		return function(v)
+			assert(charges == 0)
+			value, charges = v, n
+			return v
+		end
+	end
+	for i=1,9 do public[join(replicate(i, 'x'))] = setter(i) end
+	function public.accessor.__()
+		assert(charges > 0)
+		charges = charges - 1
+		return value
 	end
 end
 
-function public.index(t, ...)
-	for i=1,arg.n do
-		t = t and t[arg[i]]
+do
+	local state
+	local function f()
+		local tmp = state
+		state = nil
+		return tmp
 	end
+	function public.present(v)
+		state = v
+		return f
+	end
+end
+
+do
+	local formal_parameters = {}
+	for i=1,9 do
+		local key = '_'..i
+		public[key] = {}
+		formal_parameters[m[key]] = i
+	end
+	local function helper(f, arg1, arg2)
+		local params = {}
+		for i=1,arg1.n do
+			if formal_parameters[arg1[i]] then
+				tinsert(params, arg2[formal_parameters[arg1[i]]])
+			else
+				tinsert(params, arg1[i])
+			end
+		end
+		return f(unpack(params))
+	end
+	function public.L(f, ...)
+		if type(f) == 'function' then
+			local arg1 = arg
+			return function(...) return helper(f, arg1, arg) end
+		else
+			return loadstring 'function(_1,_2,_3,_4,_5,_6,_7,_8,_9)'
+		end
+	end
+end
+
+function public.call(f, ...)
+	if f then return f(unpack(arg)) end
+end
+
+function public.index(t, ...)
+	for i=1,arg.n do t = t and t[arg[i]] end
 	return t
 end
 
 public.huge = 1.8*10^308
 
-function public.log(...)
-	local msg = '[aux]'
-	for i=1,arg.n do
-		msg = msg..' '..tostring(arg[i])
-	end
-	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
-end
-
 function public.accessor.modified()
 	return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown()
 end
 
-do
-	local _state = setmetatable({}, {__mode='kv'})
-	local __index = function(self, key)
-		return _state[self].handler({public=self, private=_state[self].state}, key)
-	end
-	function public.index_function(state, handler)
-		local state, self = {handler=handler, state=state}, {}
-		_state[self] = state
-		return setmetatable(self, {__metatable=false, __index=__index, state=state})
-	end
-end
+--do TODO
+--	local _state = setmetatable({}, {__mode='kv'})
+--	local __index = function(self, key)
+--		return _state[self].handler({public=self, private=_state[self].state}, key)
+--	end
+--	function public.class(state, handler)
+--		local state, self = {handler=handler, state=state}, {}
+--		_state[self] = state
+--		return setmetatable(self, {__metatable=false, __index=__index, state=state})
+--	end
+--end
 
 do
 	local _state = setmetatable({}, {__mode='kv'})
@@ -48,33 +103,12 @@ do
 		local state, self = {handler=handler, state=state}, {}
 		_state[self] = state
 		return setmetatable(self, {__metatable=false, __index=__index, state=state})
-	end
-end
-
-function public.temp(object)
-	getfenv(2).__ = object
-	return object
-end
-
-function public.L(body_string)
-	return loadstring 'function()'
-end
-
-function public.present(...)
-	local called
-	return function()
-		if not called then
-			called = true
-			return unpack(arg)
-		end
 	end
 end
 
 function public.expand(array, ...)
 	local table = {}
-	for i=1,arg.n do
-		table[arg[i]] = array[i]
-	end
+	for i=1,arg.n do table[arg[i]] = array[i] end
 	return table
 end
 
@@ -88,103 +122,69 @@ end
 
 function public.size(t)
 	local size = 0
-	for _ in t do
-		size = size + 1
-	end
+	for _ in t do size = size + 1 end
 	return size
 end
 
 function public.key(value, t)
 	for k, v in t do
-		if v == value then
-			return k
-		end
+		if v == value then return k end
 	end
 end
 
 function public.keys(t)
 	local ks = {}
-	for k in t do
-		tinsert(ks, k)
-	end
+	for k in t do tinsert(ks, k) end
 	return ks
 end
 
 function public.values(t)
 	local vs = {}
-	for _, v in t do
-		tinsert(vs, v)
-	end
+	for _, v in t do tinsert(vs, v) end
 	return vs
 end
 
 function public.eq(t1, t2)
-	if not t1 or not t2 then
-		return false
-	end
-
+	if not t1 or not t2 then return false end
 	for key, value in t1 do
 		if t2[key] ~= value then
 			return false
 		end
 	end
-
 	for key, value in t2 do
 		if t1[key] ~= value then
 			return false
 		end
 	end
-
 	return true
 end
 
-function public.wipe(t)
-	while getn(t) > 0 do
-		tremove(t)
-	end
-	for k, _ in t do
-		t[k] = nil
-	end
-end
-
-function public.copy(t)
-	local copy = {}
-	for k, v in t do
-		copy[k] = v
-	end
-	return copy
-end
-
 function public.any(xs, p)
-	local holds = false
 	for _, x in xs do
 		if p then
-			holds = holds or p(x)
-		else
-			holds = holds or x
+			if p(x) then return true end
+		elseif x then
+			return true
 		end
 	end
-	return holds
+	return false
 end
 
 function public.all(xs, p)
-	local holds = true
 	for _, x in xs do
 		if p then
-			holds = holds and p(x)
-		else
-			holds = holds and x
+			if not p(x) then
+				return false
+			end
+		elseif not x then
+			return false
 		end
 	end
-	return holds
+	return true
 end
 
 function public.replicate(count, value)
-	local array = {}
-	for i=1,count do
-		tinsert(array, value)
-	end
-	return unpack(array)
+	return value, replicate(count - 1, value)
 end
 
 function public.filter(xs, p)
@@ -199,24 +199,15 @@ end
 
 function public.map(xs, f)
 	local ys = {}
-	for k, x in xs do
-		ys[k] = f(x, k)
-	end
+	for k, x in xs do ys[k] = f(x, k) end
 	return ys
 end
 
 do
-	local mt = {
-		__call = function(self, key)
-			return self[key]
-		end,
-	}
-
-	function public.set(...)
+	local mt = {__call = function(self, key) return self[key] end}
+	function public.hashset(...)
 		local self = {}
-		for i=1,arg.n do
-			self[arg[i]] = true
-		end
+		for i=1,arg.n do self[arg[i]] = true end
 		return setmetatable(self, mt)
 	end
 end
@@ -241,11 +232,11 @@ function public.split(str, separator)
 	end
 end
 
+public.join = g.table.concat
+
 function public.tokenize(str)
 	local tokens = {}
-	for token in string.gfind(str, '%S+') do
-		tinsert(tokens, token)
-	end
+	for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
 	return tokens
 end
 
@@ -253,26 +244,18 @@ function public.bound(lower_bound, upper_bound, number)
 	return max(lower_bound, min(upper_bound, number))
 end
 
-function public.round(x)
-	return floor(x + 0.5)
-end
+function public.round(x) return floor(x + 0.5) end
 
 function public.accessor.inventory()
 	local bag, slot = 0, 0
-
 	return function()
 		if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then
-			repeat
-				bag = bag + 1
-			until GetBagName(bag) or bag > 4
+			repeat bag = bag + 1 until GetBagName(bag) or bag > 4
 			slot = 1
 		else
 			slot = slot + 1
 		end
-
-		if bag <= 4 then
-			return {bag, slot}, bag_type(bag)
-		end
+		if bag <= 4 then return {bag, slot}, bag_type(bag) end
 	end
 end
 
@@ -288,17 +271,10 @@ function public.bag_type(bag)
 end
 
 function public.later(t0, t)
-	return function()
-		return GetTime() - t0 > t
-	end
+	return function() return GetTime() - t0 > t end
 end
 
 function public.signal()
 	local params
-	return function(...)
-		params = arg
-	end,
-	function()
-		return params
-	end
+	return function(...) params = arg end, function() return params end
 end

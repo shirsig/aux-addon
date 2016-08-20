@@ -9,7 +9,7 @@ do
 		for _, old_state in {scan_states[params.type]} do
 			abort(old_state.id)
 		end
-		local thread_id = aux.control.thread(aux.C(wait_for_callback, params.on_scan_start, scan))
+		local thread_id = aux.control.thread(L(wait_for_callback, params.on_scan_start, scan))
 		scan_states[params.type] = {
 			id = thread_id,
 			params = params,
@@ -156,8 +156,8 @@ function scan_page(i)
 		if call(state.params.auto_buy_validator, auction_info) then
 			local send_signal, signal_received = signal()
 			aux.control.when(signal_received, recurse)
-			aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, aux.C(send_signal, true))
-			return aux.control.thread(aux.control.when, later(GetTime(), 10), aux.C(send_signal, false))
+			aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, L(send_signal, true))
+			return aux.control.thread(aux.control.when, later(GetTime(), 10), L(send_signal, false))
 		elseif not query.validator or query.validator(auction_info) then
 			return wait_for_callback(state.params.on_auction, auction_info, function(removed)
 				if removed then
