@@ -1,6 +1,7 @@
 local setmetatable, unpack, mask, add, g = setmetatable, unpack, bit.band, bit.bor, getfenv(0)
 local PRIVATE, PUBLIC, MUTABLE, ACCESSOR, MUTATOR = 1, 2, 4, 8, 16
 local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, accessor=ACCESSOR, mutator=MUTATOR}
+local MASK = {private=MUTABLE+ACCESSOR+MUTATOR, public=MUTABLE+ACCESSOR+MUTATOR, mutable=PRIVATE+PUBLIC, accessor=PRIVATE+PUBLIC+MUTATOR, mutator=PRIVATE+PUBLIC+ACCESSOR}
 local _10, _01, tf, ft = {[true]=1, [false]=0}, {[true]=0, [false]=1}, {true, false}, {false, true}
 local importer_mt, declarator_mt, env_mt, interface_mt, lock_mt
 local define_property, declarator_accessor, private_accessor, public_accessor, mutable_accessor, accessor_accessor, mutator_accessor, index, error
@@ -17,21 +18,19 @@ end
 private_accessor, public_accessor, mutable_accessor, accessor_accessor, mutator_accessor = declarator_accessor(0), declarator_accessor(PUBLIC), declarator_accessor(MUTABLE), declarator_accessor(ACCESSOR), declarator_accessor(MUTATOR)
 function define_property(self, key, t)
 	local accessor, mutator = t.get, t.set
-	_declarator_state[self] = add(_01[not accessor]*ACCESSOR, _01[not mutator]*MUTATOR, _declarator_state[self])
+	_declarator_state[self] = _01[not accessor]*ACCESSOR + _01[not mutator]*MUTATOR + mask(PRIVATE+PUBLIC, _declarator_state[self])
 	_accessors[self][key], _mutators[self][key] = accessor, mutator
 end
 declarator_mt = {__metatable=false}
 function declarator_mt.__index(self, key)
 	local modifier = MODIFIER[key]
 	if not modifier then return function(t) define_property(self, key, t) end end
-	_declarator_state[self] = add(modifier, _declarator_state[self])
+	_declarator_state[self] = modifier + mask(MASK[key], _declarator_state[self])
 	return self
 end
 function declarator_mt.__newindex(self, key, value)
 	if _metadata[self][key] then error('Field "%s" already exists.', key) end
-	local modifiers = _declarator_state[self]
-	if mask(MUTABLE, modifiers) * mask(ACCESSOR+MUTABLE) ~= 0 then error('Invalid modifiers.') end
-	_metadata[self][key], _data[self][key], _accessors[self][key], _mutators[self][key] = modifiers, value, value, value
+	_metadata[self][key], _data[self][key], _accessors[self][key], _mutators[self][key] = _declarator_state[self], value, value, value
 end
 function index(access, default)
 	return function(self, key)
@@ -39,7 +38,7 @@ function index(access, default)
 		if mask(access+ACCESSOR+MUTATOR, modifiers) == access then
 			return _data[self][key]
 		elseif mask(access+ACCESSOR, modifiers) == access+ACCESSOR then
-			return _accessors[self]()
+			return _accessors[self][key]()
 		else
 			return default[key] or error('No field "%s".', key)
 		end

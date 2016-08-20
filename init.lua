@@ -7,7 +7,7 @@ end
 
 public.version = '5.0.0'
 
-local temp, recycle
+local t, temp, recycle
 do
 	local table_pool, locked = {}, {}
 	local function wipe(t) -- like with a cloth or something
@@ -17,19 +17,23 @@ do
 	end
 	function recycle(t)
 		locked[t] = nil
-		tinsert(table_pool, t)
+		tinsert(table_pool, wipe(t))
 		log(getn(table_pool))
 	end
 	public.recycle = recycle
 	temp = setmetatable({}, {
 		__call = function()
-			local t = tremove(table_pool)
-			t = t and wipe(t) or {}
+			local t = tremove(table_pool) or {}
 			locked[t] = true
+			return t
 		end,
 		__sub = function(_, t) locked[t] = true return t end,
 	})
 	public.temp = temp
+	function t()
+		return tremove(table_pool) or {}
+	end
+	public.accessor.t = t
 end
 
 do
@@ -47,7 +51,7 @@ do
 end
 
 local event_frame = CreateFrame 'Frame'
-for event in temp-set{'VARIABLES_LOADED', 'ADDON_LOADED', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE'} do
+for _, event in {'VARIABLES_LOADED', 'ADDON_LOADED', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE'} do
 	event_frame:RegisterEvent(event)
 end
 
