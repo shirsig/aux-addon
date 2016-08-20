@@ -6,31 +6,6 @@ function valid_level(str)
 end
 
 blizzard_query = setmetatable({}, {
-	__newindex = function(_, key, value)
-		if key == 'name' then
-			name_input:SetText(value)
-		elseif key == 'exact' then
-			exact_checkbox:SetChecked(value)
-		elseif key == 'min_level' then
-			min_level_input:SetText(value)
-		elseif key == 'max_level' then
-			max_level_input:SetText(value)
-		elseif key == 'usable' then
-			usable_checkbox:SetChecked(value)
-		elseif key == 'class' then
-			UIDropDownMenu_Initialize(class_dropdown, initialize_class_dropdown)
-			UIDropDownMenu_SetSelectedValue(class_dropdown, value)
-		elseif key == 'subclass' then
-			UIDropDownMenu_Initialize(subclass_dropdown, initialize_subclass_dropdown)
-			UIDropDownMenu_SetSelectedValue(subclass_dropdown, value)
-		elseif key == 'slot' then
-			UIDropDownMenu_Initialize(slot_dropdown, initialize_slot_dropdown)
-			UIDropDownMenu_SetSelectedValue(slot_dropdown, value)
-		elseif key == 'quality' then
-			UIDropDownMenu_Initialize(quality_dropdown, initialize_quality_dropdown)
-			UIDropDownMenu_SetSelectedValue(quality_dropdown, value)
-		end
-	end,
 	__index = function(_, key)
 		if key == 'name' then
 			return name_input:GetText()
@@ -54,6 +29,31 @@ blizzard_query = setmetatable({}, {
 		elseif key == 'quality' then
 			local quality_code = UIDropDownMenu_GetSelectedValue(quality_dropdown)
 			return (quality_code or -1) >= 0 and quality_code or nil
+		end
+	end,
+	__newindex = function(_, key, value)
+		if key == 'name' then
+			name_input:SetText(value)
+		elseif key == 'exact' then
+			exact_checkbox:SetChecked(value)
+		elseif key == 'min_level' then
+			min_level_input:SetText(value)
+		elseif key == 'max_level' then
+			max_level_input:SetText(value)
+		elseif key == 'usable' then
+			usable_checkbox:SetChecked(value)
+		elseif key == 'class' then
+			UIDropDownMenu_Initialize(class_dropdown, initialize_class_dropdown)
+			UIDropDownMenu_SetSelectedValue(class_dropdown, value)
+		elseif key == 'subclass' then
+			UIDropDownMenu_Initialize(subclass_dropdown, initialize_subclass_dropdown)
+			UIDropDownMenu_SetSelectedValue(subclass_dropdown, value)
+		elseif key == 'slot' then
+			UIDropDownMenu_Initialize(slot_dropdown, initialize_slot_dropdown)
+			UIDropDownMenu_SetSelectedValue(slot_dropdown, value)
+		elseif key == 'quality' then
+			UIDropDownMenu_Initialize(quality_dropdown, initialize_quality_dropdown)
+			UIDropDownMenu_SetSelectedValue(quality_dropdown, value)
 		end
 	end,
 })
