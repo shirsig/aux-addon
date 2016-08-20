@@ -54,8 +54,8 @@ end
 ADDON_LOADED = {}
 do
 	local variables_loaded_hooks, player_login_hooks = {}, {}
-	function public.accessor.LOAD(f) tinsert(variables_loaded_hooks, f) end
-	function public.accessor.LOAD2(f) tinsert(player_login_hooks, f) end
+	function public.mutator.LOAD(f) tinsert(variables_loaded_hooks, f) end
+	function public.mutator.LOAD2(f) tinsert(player_login_hooks, f) end
 	event_frame:SetScript('OnEvent', function()
 		if event == 'ADDON_LOADED' then
 			if ADDON_LOADED[arg1] then ADDON_LOADED[arg1]() end
