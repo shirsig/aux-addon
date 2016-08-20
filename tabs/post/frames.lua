@@ -130,7 +130,7 @@ function create_frames()
 	    slider:SetScript('OnValueChanged', function()
 	        quantity_update(true)
 	    end)
-	    slider.editbox:SetScript('OnTextChanged', function()
+	    slider.editbox.change = function()
 	        slider:SetValue(this:GetNumber())
 	        quantity_update(true)
 	        if selected_item then
@@ -138,7 +138,7 @@ function create_frames()
 	            settings.stack_size = this:GetNumber()
 	            write_settings(settings)
 	        end
-	    end)
+	    end
 	    slider.editbox:SetScript('OnTabPressed', function()
 	        if IsShiftKeyDown() then
 	            unit_buyout_price:SetFocus()
@@ -150,7 +150,7 @@ function create_frames()
 	    end)
 	    slider.editbox:SetNumeric(true)
 	    slider.editbox:SetMaxLetters(3)
-	    slider.label:SetText('Stack Size')
+	    slider.label:SetText 'Stack Size'
 	    stack_size_slider = slider
 	end
 	do
@@ -161,10 +161,10 @@ function create_frames()
 	    slider:SetScript('OnValueChanged', function()
 	        quantity_update()
 	    end)
-	    slider.editbox:SetScript('OnTextChanged', function()
+	    slider.editbox.change = function()
 	        slider:SetValue(this:GetNumber())
 	        quantity_update()
-	    end)
+	    end
 	    slider.editbox:SetScript('OnTabPressed', function()
 	        if IsShiftKeyDown() then
 	            stack_size_slider.editbox:SetFocus()
@@ -173,7 +173,7 @@ function create_frames()
 	        end
 	    end)
 	    slider.editbox:SetNumeric(true)
-	    slider.label:SetText('Stack Count')
+	    slider.label:SetText 'Stack Count'
 	    stack_count_slider = slider
 	end
 	do
@@ -208,6 +208,10 @@ function create_frames()
 	    label:SetText 'Hide this item'
 	    hide_checkbox = checkbox
 	end
+	local function money_input()
+
+
+	end
 	do
 	    local frame = CreateFrame('Frame', nil, frame.parameters)
 	    start_price_frame = frame
@@ -217,12 +221,8 @@ function create_frames()
 	    frame:SetHeight(22)
 	    local editbox = aux.gui.editbox(frame)
 	    editbox:SetAllPoints()
-	    editbox:SetJustifyH 'RIGHT'
-	    editbox:SetFont(aux.gui.config.font, 17)
-	    editbox:SetScript('OnTextChanged', function()
-	        this.pretty:SetText(aux.money.to_string(get_unit_start_price(), true, nil, 3))
-	        refresh = true
-	    end)
+	    editbox:SetAlignment 'RIGHT'
+	    editbox:SetFontSize(17)
 	    editbox:SetScript('OnTabPressed', function()
 	        if IsShiftKeyDown() and stack_count_slider.editbox:IsVisible() then
 	            stack_count_slider.editbox:SetFocus()
@@ -232,22 +232,26 @@ function create_frames()
 	            unit_buyout_price:SetFocus()
 	        end
 	    end)
-	    editbox:SetScript('OnEditFocusGained', function()
-	        this:HighlightText()
+	    editbox.change = function()
+		    this.pretty:SetText(aux.money.to_string(get_unit_start_price(), true, nil, 3))
+		    refresh = true
+	    end
+	    editbox.enter = function() this:ClearFocus() end
+	    editbox.focus_gain = function()
 	        this.pretty:Hide()
 	        this:SetAlpha(1)
-	    end)
-	    editbox:SetScript('OnEditFocusLost', function()
+	    end
+	    editbox.focus_loss = function()
 	        this:SetText(aux.money.to_string(get_unit_start_price(), true, nil, 3, nil, true))
 	        this.pretty:Show()
 	        this:SetAlpha(0)
-	    end)
+	    end
 	    editbox:SetAlpha(0)
 	    editbox.pretty = aux.gui.label(frame, 17)
 	    editbox.pretty:SetPoint('LEFT', 1, 0)
 	    editbox.pretty:SetPoint('RIGHT', -2, 0)
 	    editbox.pretty:SetJustifyH 'RIGHT'
-	    editbox.pretty:SetTextColor(unpack(aux.gui.color.text.enabled))
+	    editbox.pretty:SetTextColor(aux.gui.color.text.enabled())
 	    do
 	        local label = aux.gui.label(frame, aux.gui.config.small_font_size)
 	        label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
@@ -271,12 +275,8 @@ function create_frames()
 	    frame:SetHeight(22)
 	    local editbox = aux.gui.editbox(frame)
 	    editbox:SetAllPoints()
-	    editbox:SetJustifyH 'RIGHT'
-	    editbox:SetFont(aux.gui.config.font, 17)
-	    editbox:SetScript('OnTextChanged', function()
-	        this.pretty:SetText(aux.money.to_string(get_unit_buyout_price(), true, nil, 3))
-	        refresh = true
-	    end)
+	    editbox:SetAlignment 'RIGHT'
+	    editbox:SetFontSize(17)
 	    editbox:SetScript('OnTabPressed', function()
 	        if IsShiftKeyDown() then
 	            unit_start_price:SetFocus()
@@ -284,19 +284,20 @@ function create_frames()
 	            stack_size_slider.editbox:SetFocus()
 	        end
 	    end)
-	    editbox:SetScript('OnEnterPressed', function()
-	        this:ClearFocus()
-	    end)
-	    editbox:SetScript('OnEditFocusGained', function()
-	        this:HighlightText()
+	    editbox.change = function()
+		    this.pretty:SetText(aux.money.to_string(get_unit_buyout_price(), true, nil, 3))
+		    refresh = true
+	    end
+	    editbox.enter = function() this:ClearFocus() end
+	    editbox.focus_gain = function()
 	        this.pretty:Hide()
 	        this:SetAlpha(1)
-	    end)
-	    editbox:SetScript('OnEditFocusLost', function()
+	    end
+	    editbox.focus_loss = function()
 	        this:SetText(aux.money.to_string(get_unit_buyout_price(), true, nil, 3, nil, true))
 	        this.pretty:Show()
 	        this:SetAlpha(0)
-	    end)
+	    end
 	    editbox:SetAlpha(0)
 	    editbox.pretty = aux.gui.label(frame, 17)
 	    editbox.pretty:SetPoint('LEFT', 1, 0)

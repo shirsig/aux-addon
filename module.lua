@@ -2,7 +2,7 @@ local tinsert, setfenv, rawget, rawset, setmetatable, mask, g = tinsert, setfenv
 local DECLARED, ACCESSOR, MUTABLE, PUBLIC = 1, 2, 4, 8
 local ACCESSOR_KEY, MUTABLE_KEY, PUBLIC_KEY = 'accessor', 'mutable', 'public'
 local PROPERTY = {[ACCESSOR_KEY]=ACCESSOR, [MUTABLE_KEY]=MUTABLE, [PUBLIC_KEY]=PUBLIC}
-local _data, _metadata, _modifier_properties, _imports, _interfaces = {}, {}, {}, {}, {}
+local _data, _metadata, _modifier_properties, _imports, _envs, _interfaces = {}, {}, {}, {}, {}, {}
 local metadata_mt = {
 	__index=function() return 0 end,
 	__newindex=function(self, key, value)
@@ -83,7 +83,7 @@ function g.aux_module(name)
 	metadata = setmetatable({g=DECLARED, m=DECLARED, import=DECLARED, [ACCESSOR_KEY]=ACCESSOR, [MUTABLE_KEY]=ACCESSOR, [PUBLIC_KEY]=ACCESSOR}, metadata_mt)
 	imports = {}
 
-	_interfaces[name] = interface
+	_envs[name], _interfaces[name] = env, interface
 	_data[modifier], _data[env], _data[interface] = data, data, data
 	_metadata[modifier], _metadata[env], _metadata[interface] = metadata, metadata, metadata
 	_imports[importer], _imports[env] = imports, imports

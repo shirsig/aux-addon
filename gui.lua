@@ -153,7 +153,7 @@ do
 			text:SetPoint('BOTTOMRIGHT', -8, 0)
 			local highlight = getglobal('DropDownList1Button'..i..'Highlight')
 			highlight:ClearAllPoints()
-			highlight:SetDrawLayer('OVERLAY')
+			highlight:SetDrawLayer 'OVERLAY'
 			highlight:SetHeight(14)
 			highlight:SetPoint('LEFT', 5, 0)
 			highlight:SetPoint('RIGHT', -3, 0)
@@ -175,7 +175,7 @@ do
 			text:SetShadowOffset(1, -1)
 			local highlight = getglobal('DropDownList1Button'..i..'Highlight')
 			highlight:SetAllPoints()
-			highlight:SetDrawLayer('BACKGROUND')
+			highlight:SetDrawLayer 'BACKGROUND'
 			local check = getglobal('DropDownList1Button'..i..'Check')
 			check:SetWidth(24)
 			check:SetHeight(24)
@@ -239,14 +239,14 @@ function public.button(parent, text_height)
     local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
     highlight:SetAllPoints()
     highlight:SetTexture(1, 1, 1, .2)
-    highlight:SetBlendMode('BLEND')
+    highlight:SetBlendMode 'BLEND'
     button.highlight = highlight
     do
         local label = button:CreateFontString()
         label:SetFont(config.font, text_height)
         label:SetPoint('CENTER', 0, 0)
-        label:SetJustifyH('CENTER')
-        label:SetJustifyV('CENTER')
+        label:SetJustifyH 'CENTER'
+        label:SetJustifyV 'CENTER'
         label:SetHeight(text_height)
         label:SetTextColor(color.text.enabled())
         button:SetFontString(label)
@@ -368,30 +368,48 @@ end
 function public.editbox(parent)
     local editbox = CreateFrame('EditBox', nil, parent)
     editbox:SetAutoFocus(false)
-    editbox:SetTextInsets(1, 2, 3, 3)
-    editbox:SetMaxLetters(256)
+    editbox:SetTextInsets(1.5, 1.5, 3, 3)
+    editbox:SetMaxLetters(nil)
     editbox:SetHeight(24)
-    editbox:SetFont(config.font, config.medium_font_size)
     editbox:SetTextColor(0, 0, 0, 0)
     set_content_style(editbox)
-    editbox:SetScript('OnEscapePressed', aux.C(editbox.ClearFocus, aux._this))
+    local function colorize() this.display:SetText(call(this.colorizer, this:GetText()) or this:GetText()) end
+    local function format() this.display:SetText(call(this.formatter or this.colorizer, this:GetText()) or this:GetText()) end
+    editbox:SetScript('OnEscapePressed', function()
+        this:ClearFocus()
+	    call(this.escape)
+    end)
+    editbox:SetScript('OnEnterPressed', function() call(this.enter) end)
     editbox:SetScript('OnEditFocusGained', function()
-	    this.last_change = GetTime()
+	    colorize()
+	    this.focused = true
 	    this:HighlightText()
 	    this:SetScript('OnUpdate', function()
-			this.cursor:SetAlpha(mod(floor((GetTime()-this.last_change) * 2 + 1), 2))
+			this.cursor:SetAlpha(mod(floor((GetTime()-this.cursor.last_change) * 2 + 1), 2))
 	    end)
+	    call(this.focus_gain)
     end)
     editbox:SetScript('OnEditFocusLost', function()
+	    format()
+	    this.focused = false
 	    this.cursor:SetAlpha(0)
 	    this:HighlightText(0, 0)
 	    this:SetScript('OnUpdate', nil)
+	    call(this.focus_loss)
     end)
     editbox:SetScript('OnTextChanged', function()
-	    this.last_change = GetTime()
-	    this.text:SetText(call(this.formatter, this:GetText()) or this:GetText())
-	    this.cursor:SetPoint('LEFT', this.text, 'LEFT', max(0, this.text:GetStringWidth() - 2), 1)
+	    if this.focused then
+	        colorize()
+	    else
+		    format()
+	    end
+	    call(this.change)
     end)
+    editbox:SetScript('OnCursorChanged', function()
+	    this.cursor.last_change = GetTime()
+	    this.cursor:SetPoint(this:GetJustifyH(), this, this:GetJustifyH(), call(arg1 > 0 and max or min, 0, arg1 - 1.5), 1.5)
+    end)
+    editbox:SetScript('OnChar', function() call(this.char) end)
     do
         local last_click
         editbox:SetScript('OnMouseDown', function()
@@ -414,18 +432,26 @@ function public.editbox(parent)
 	    editbox:SetTextColor(color.text.disabled())
 	    editbox:ClearFocus()
     end
-    local text = aux.gui.label(editbox, config.medium_font_size)
-    text:SetPoint('LEFT', 1, 0)
-    text:SetPoint('RIGHT', -2, 0)
-    text:SetJustifyH 'LEFT'
-    text:SetTextColor(color.text.enabled())
-    editbox.text = text
+    function editbox:SetAlignment(alignment)
+	    self:SetJustifyH(alignment)
+	    self.display:SetJustifyH(alignment)
+    end
+    function editbox:SetFontSize(size)
+	    self:SetFont(config.font, size)
+	    self.display:SetFont(config.font, size)
+    end
+    local display = aux.gui.label(editbox)
+    display:SetPoint('LEFT', 1.5, 0)
+    display:SetPoint('RIGHT', -1.5, 0)
+    display:SetTextColor(color.text.enabled())
+    editbox.display = display
     local cursor = aux.gui.label(editbox, config.large_font_size)
-    cursor:SetJustifyH 'LEFT'
     cursor:SetText '|'
     cursor:SetTextColor(color.text.enabled())
     cursor:SetAlpha(0)
     editbox.cursor = cursor
+    editbox:SetAlignment 'LEFT'
+    editbox:SetFontSize(config.medium_font_size)
     return editbox
 end
 
@@ -512,7 +538,7 @@ function public.item(parent)
     item.texture = getglobal(btn:GetName()..'Icon')
     item.texture:SetTexCoord(.06, .94, .06, .94)
     item.name = aux.gui.label(btn, 15)
-    item.name:SetJustifyH('LEFT')
+    item.name:SetJustifyH 'LEFT'
     item.name:SetPoint('LEFT', btn, 'RIGHT', 10, 0)
     item.name:SetPoint('RIGHT', item, 'RIGHT', -10, .5)
     item.count = getglobal(btn:GetName()..'Count')
@@ -591,6 +617,7 @@ function public.slider(parent)
     thumb_texture:SetTexture(color.content.background())
     thumb_texture:SetHeight(18)
     thumb_texture:SetWidth(8)
+    set_size(thumb_texture, 8, 18)
     slider:SetThumbTexture(thumb_texture)
 
     local label = slider:CreateFontString(nil, 'OVERLAY')
@@ -603,10 +630,9 @@ function public.slider(parent)
 
     local editbox = editbox(slider)
     editbox:SetPoint('LEFT', slider, 'RIGHT', 5, 0)
-    editbox:SetWidth(45)
-    editbox:SetHeight(18)
-    editbox:SetJustifyH 'CENTER'
-    editbox:SetFont(config.font, 17)
+    set_size(editbox, 45, 18)
+    editbox:SetAlignment 'CENTER'
+    editbox:SetFontSize(17)
 
     slider.label = label
     slider.editbox = editbox

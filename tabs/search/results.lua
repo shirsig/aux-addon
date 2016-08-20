@@ -9,7 +9,7 @@ do
 	local searches = {}
 	local search_index = 1
 
-	function current_search()
+	function accessor.current_search()
 		return searches[search_index]
 	end
 
@@ -23,21 +23,21 @@ do
 		searches[search_index].status_bar:Show()
 		searches[search_index].table:Show()
 
-		m.search_box:SetText(searches[search_index].filter_string)
+		search_box:SetText(searches[search_index].filter_string)
 		if search_index == 1 then
-			m.previous_button:Disable()
+			previous_button:Disable()
 		else
-			m.previous_button:Enable()
+			previous_button:Enable()
 		end
 		if search_index == getn(searches) then
-			m.next_button:Hide()
-			m.search_box:SetPoint('LEFT', m.previous_button, 'RIGHT', 4, 0)
+			next_button:Hide()
+			search_box:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
 		else
-			m.next_button:Show()
-			m.search_box:SetPoint('LEFT', m.next_button, 'RIGHT', 4, 0)
+			next_button:Show()
+			search_box:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
 		end
-		m.update_start_stop()
-		m.update_continuation()
+		update_start_stop()
+		update_continuation()
 	end
 
 	function new_search(filter_string)
@@ -51,65 +51,65 @@ do
 		tinsert(searches, search)
 		if getn(searches) > 5 then
 			tremove(searches, 1)
-			tinsert(m.status_bars, tremove(m.status_bars, 1))
-			tinsert(m.tables, tremove(m.tables, 1))
+			tinsert(status_bars, tremove(status_bars, 1))
+			tinsert(tables, tremove(tables, 1))
 			search_index = 4
 		end
 
-		search.status_bar = m.status_bars[getn(searches)]
+		search.status_bar = status_bars[getn(searches)]
 		search.status_bar:update_status(100, 100)
 		search.status_bar:set_text('')
 
-		search.table = m.tables[getn(searches)]
+		search.table = tables[getn(searches)]
 		search.table:SetSort(1,2,3,4,5,6,7,8,9)
 		search.table:Reset()
 		search.table:SetDatabase(search.records)
 
-		m.update_search(getn(searches))
+		update_search(getn(searches))
 	end
 
 	function previous_search()
-		m.search_box:ClearFocus()
-		m.update_search(search_index - 1)
-		m.update_tab(m.RESULTS)
+		search_box:ClearFocus()
+		update_search(search_index - 1)
+		set_tab(RESULTS)
 	end
 
 	function next_search()
-		m.search_box:ClearFocus()
-		m.update_search(search_index + 1)
-		m.update_tab(m.RESULTS)
+		search_box:ClearFocus()
+		update_search(search_index + 1)
+		set_tab(RESULTS)
 	end
 end
 
 function close_settings()
-	if m.settings_button.open then
-		m.settings_button:Click()
+	if settings_button.open then
+		settings_button:Click()
 	end
 end
 
 function update_continuation()
-	if m.current_search().continuation then
-		m.resume_button:Show()
-		m.search_box:SetPoint('RIGHT', m.resume_button, 'LEFT', -4, 0)
+	if current_search.continuation then
+		resume_button:Show()
+		search_box:SetPoint('RIGHT', resume_button, 'LEFT', -4, 0)
 	else
-		m.resume_button:Hide()
-		m.search_box:SetPoint('RIGHT', m.start_button, 'LEFT', -4, 0)
+		resume_button:Hide()
+		search_box:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
 	end
 end
 
 function discard_continuation()
-	aux.scan.abort(m.search_scan_id)
-	m.current_search().continuation = nil
-	m.update_continuation()
+	aux.scan.abort(search_scan_id)
+	current_search.continuation = nil
+	update_continuation()
 end
 
 function update_start_stop()
-	if m.current_search().active then
-		m.stop_button:Show()
-		m.start_button:Hide()
+	if current_search.active then
+		stop_button:Show()
+		start_button:Hide()
 	else
-		m.start_button:Show()
-		m.stop_button:Hide()
+		start_button:Show()
+		stop_button:Hide()
 	end
 end
 
@@ -122,9 +122,9 @@ function update_auto_buy_filter()
 			elseif size(queries[1].blizzard_query) > 0 then
 				log('Error: The automatic buyout filter does not support Blizzard filters')
 			else
-				m.auto_buy_validator = queries[1].validator
-				m.auto_buy_filter_button.prettified = queries[1].prettified
-				m.auto_buy_filter_button:SetChecked(true)
+				auto_buy_validator = queries[1].validator
+				auto_buy_filter_button.prettified = queries[1].prettified
+				auto_buy_filter_button:SetChecked(true)
 				return
 			end
 		end
@@ -136,7 +136,7 @@ function start_real_time_scan(query, search, continuation)
 
 	local ignore_page
 	if not search then
-		search = m.current_search()
+		search = current_search
 		query.blizzard_query.first_page = tonumber(continuation) or 0
 		query.blizzard_query.last_page = tonumber(continuation) or 0
 		ignore_page = not tonumber(continuation)
@@ -144,7 +144,7 @@ function start_real_time_scan(query, search, continuation)
 
 	local next_page
 	local new_records = {}
-	m.search_scan_id = aux.scan.start{
+	search_scan_id = aux.scan.start{
 		type = 'list',
 		queries = {query},
 		auto_buy_validator = search.auto_buy_validator,
@@ -191,7 +191,7 @@ function start_real_time_scan(query, search, continuation)
 
 			query.blizzard_query.first_page = next_page
 			query.blizzard_query.last_page = next_page
-			m.start_real_time_scan(query, search)
+			start_real_time_scan(query, search)
 		end,
 		on_abort = function()
 			search.status_bar:update_status(100, 100)
@@ -199,12 +199,12 @@ function start_real_time_scan(query, search, continuation)
 
 			search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
 
-			if m.current_search() == search then
-				m.update_continuation()
+			if current_search == search then
+				update_continuation()
 			end
 
 			search.active = false
-			m.update_start_stop()
+			update_start_stop()
 		end,
 	}
 end
@@ -212,7 +212,7 @@ end
 function start_search(queries, continuation)
 	local current_query, current_page, total_queries, start_query, start_page
 
-	local search = m.current_search()
+	local search = current_search
 
 	total_queries = getn(queries)
 
@@ -228,7 +228,7 @@ function start_search(queries, continuation)
 	end
 
 
-	m.search_scan_id = aux.scan.start{
+	search_scan_id = aux.scan.start{
 		type = 'list',
 		queries = queries,
 		auto_buy_validator = search.auto_buy_validator,
@@ -271,12 +271,12 @@ function start_search(queries, continuation)
 			search.status_bar:update_status(100, 100)
 			search.status_bar:set_text('Scan complete')
 
-			if m.current_search() == search and m.frame.results:IsVisible() and getn(search.records) == 0 then
-				m.update_tab(m.SAVED)
+			if current_search == search and frame.results:IsVisible() and getn(search.records) == 0 then
+				set_tab(SAVED)
 			end
 
 			search.active = false
-			m.update_start_stop()
+			update_start_stop()
 		end,
 		on_abort = function()
 			search.status_bar:update_status(100, 100)
@@ -287,12 +287,12 @@ function start_search(queries, continuation)
 			else
 				search.continuation = {start_query, start_page}
 			end
-			if m.current_search() == search then
-				m.update_continuation()
+			if current_search == search then
+				update_continuation()
 			end
 
 			search.active = false
-			m.update_start_stop()
+			update_start_stop()
 		end,
 	}
 end
@@ -300,15 +300,15 @@ end
 function public.execute(resume, real_time)
 
 	if resume then
-		real_time = m.current_search().real_time
+		real_time = current_search.real_time
 	elseif real_time == nil then
-		real_time = m.real_time_button:GetChecked()
+		real_time = real_time_button:GetChecked()
 	end
 
 	if resume then
-		m.search_box:SetText(m.current_search().filter_string)
+		search_box:SetText(current_search.filter_string)
 	end
-	local filter_string = m.search_box:GetText()
+	local filter_string = search_box:GetText()
 
 	local queries = aux.filter.queries(filter_string)
 	if not queries then
@@ -323,45 +323,45 @@ function public.execute(resume, real_time)
 		end
 	end
 
-	m.search_box:ClearFocus()
+	search_box:ClearFocus()
 
 	if resume then
-		m.current_search().table:SetSelectedRecord()
+		current_search.table:SetSelectedRecord()
 	else
-		if filter_string ~= m.current_search().filter_string or m.current_search().placeholder then
-			if m.current_search().placeholder then
-				m.current_search().filter_string = filter_string
-				m.current_search().placeholder = false
+		if filter_string ~= current_search.filter_string or current_search.placeholder then
+			if current_search.placeholder then
+				current_search.filter_string = filter_string
+				current_search.placeholder = false
 			else
-				m.new_search(filter_string)
+				new_search(filter_string)
 			end
-			m.new_recent_search(filter_string, table.concat(map(queries, function(filter) return filter.prettified end), ';'))
+			new_recent_search(filter_string, table.concat(map(queries, function(filter) return filter.prettified end), ';'))
 		else
-			m.current_search().records = {}
-			m.current_search().table:SetDatabase(m.current_search().records)
-			if m.current_search().real_time ~= real_time then
-				m.current_search().table:Reset()
+			current_search.records = {}
+			current_search.table:SetDatabase(current_search.records)
+			if current_search.real_time ~= real_time then
+				current_search.table:Reset()
 			end
 		end
-		m.current_search().real_time = m.real_time_button:GetChecked()
-		m.current_search().auto_buy = m.auto_buy_button:GetChecked()
-		m.current_search().auto_buy_validator = m.auto_buy_validator
+		current_search.real_time = real_time_button:GetChecked()
+		current_search.auto_buy = auto_buy_button:GetChecked()
+		current_search.auto_buy_validator = auto_buy_validator
 	end
 
-	local continuation = resume and m.current_search().continuation
-	m.discard_continuation()
-	m.current_search().active = true
-	m.update_start_stop()
+	local continuation = resume and current_search.continuation
+	discard_continuation()
+	current_search.active = true
+	update_start_stop()
 
-	m.update_tab(m.RESULTS)
+	set_tab(RESULTS)
 	if real_time then
-		m.start_real_time_scan(queries[1], nil, continuation)
+		start_real_time_scan(queries[1], nil, continuation)
 	else
 		for _, query in queries do
-			query.blizzard_query.first_page = m.blizzard_page_index(m.first_page_input:GetText())
-			query.blizzard_query.last_page = m.blizzard_page_index(m.last_page_input:GetText())
+			query.blizzard_query.first_page = blizzard_page_index(first_page_input:GetText())
+			query.blizzard_query.last_page = blizzard_page_index(last_page_input:GetText())
 		end
-		m.start_search(queries, continuation)
+		start_search(queries, continuation)
 	end
 end
 
@@ -379,7 +379,7 @@ do
 	local found_index
 
 	function find_auction(record)
-		local search = m.current_search()
+		local search = current_search
 
 		if not search.table:ContainsRecord(record) or aux.is_player(record.owner) then
 			return
@@ -389,7 +389,7 @@ do
 		state = SEARCHING
 		scan_id = aux.scan_util.find(
 			record,
-			m.current_search().status_bar,
+			current_search.status_bar,
 			function()
 				state = IDLE
 			end,
@@ -406,24 +406,24 @@ do
 				found_index = index
 
 				if not record.high_bidder then
-					m.bid_button:SetScript('OnClick', function()
-						if m.test(record)(index) and search.table:ContainsRecord(record) then
+					bid_button:SetScript('OnClick', function()
+						if test(record)(index) and search.table:ContainsRecord(record) then
 							aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
 								aux.info.bid_update(record)
 								search.table:SetDatabase()
 							end or aux.C(search.table.RemoveAuctionRecord, search.table, record))
 						end
 					end)
-					m.bid_button:Enable()
+					bid_button:Enable()
 				end
 
 				if record.buyout_price > 0 then
-					m.buyout_button:SetScript('OnClick', function()
-						if m.test(record)(index) and search.table:ContainsRecord(record) then
+					buyout_button:SetScript('OnClick', function()
+						if test(record)(index) and search.table:ContainsRecord(record) then
 							aux.place_bid('list', index, record.buyout_price, aux.C(search.table.RemoveAuctionRecord, search.table, record))
 						end
 					end)
-					m.buyout_button:Enable()
+					buyout_button:Enable()
 				end
 			end
 		)
@@ -431,22 +431,22 @@ do
 
 	function on_update()
 		if state == IDLE or state == SEARCHING then
-			m.buyout_button:Disable()
-			m.bid_button:Disable()
+			buyout_button:Disable()
+			bid_button:Disable()
 		end
 
 		if state == SEARCHING then
 			return
 		end
 
-		local selection = m.current_search().table:GetSelection()
+		local selection = current_search.table:GetSelection()
 		if not selection then
 			state = IDLE
 		elseif selection and state == IDLE then
-			m.find_auction(selection.record)
-		elseif state == FOUND and not m.test(selection.record)(found_index) then
-			m.buyout_button:Disable()
-			m.bid_button:Disable()
+			find_auction(selection.record)
+		elseif state == FOUND and not test(selection.record)(found_index) then
+			buyout_button:Disable()
+			bid_button:Disable()
 			if not aux.bid_in_progress() then
 				state = IDLE
 			end

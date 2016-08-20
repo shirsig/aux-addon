@@ -69,66 +69,46 @@ function create_frames()
 	    controls = panel
 	end
 	do
-	    local editbox = aux.gui.editbox(settings)
-	    editbox:SetPoint('LEFT', 75, 0)
-	    editbox:SetWidth(50)
-	    editbox:SetNumeric(true)
-	    editbox:SetMaxLetters(nil)
-	    editbox:SetScript('OnTabPressed', function()
-	        last_page_input:SetFocus()
-	    end)
-	    editbox:SetScript('OnEnterPressed', function()
-	        this:ClearFocus()
-	        execute()
-	    end)
-	    editbox:SetScript('OnTextChanged', function()
-		    local page = tonumber(this:GetText())
-		    local valid_input = page and tostring(max(1, page)) or ''
-		    if this:GetText() ~= valid_input then
-			    this:SetText(valid_input)
-		    end
-	        if blizzard_page_index(this:GetText()) and not real_time_button:GetChecked() then
-	            this:SetBackdropColor(unpack(aux.gui.color.state.enabled))
-	        else
-	            this:SetBackdropColor(unpack(aux.gui.color.state.disabled))
-	        end
-	    end)
-	    local label = aux.gui.label(editbox, 16)
-	    label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
-	    label:SetText('Pages')
-	    label:SetTextColor(unpack(aux.gui.color.text.enabled))
-	    first_page_input = editbox
-	end
-	do
-	    local editbox = aux.gui.editbox(settings)
-	    editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 10, 0)
-	    editbox:SetWidth(50)
-	    editbox:SetNumeric(true)
-	    editbox:SetMaxLetters(nil)
-	    editbox:SetScript('OnTabPressed', function()
-	        first_page_input:SetFocus()
-	    end)
-	    editbox:SetScript('OnEnterPressed', function()
-	        this:ClearFocus()
-	        execute()
-	    end)
-	    editbox:SetScript('OnTextChanged', function()
-		    local page = tonumber(this:GetText())
-		    local valid_input = page and tostring(max(1, page)) or ''
-		    if this:GetText() ~= valid_input then
-			    this:SetText(valid_input)
-		    end
-	        if blizzard_page_index(this:GetText()) and not real_time_button:GetChecked() then
-	            this:SetBackdropColor(unpack(aux.gui.color.state.enabled))
-	        else
-	            this:SetBackdropColor(unpack(aux.gui.color.state.disabled))
-	        end
-	    end)
-	    local label = aux.gui.label(editbox, aux.gui.config.medium_font_size)
-	    label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
-	    label:SetText('-')
-	    label:SetTextColor(unpack(aux.gui.color.text.enabled))
-	    last_page_input = editbox
+		local function change()
+			local page = tonumber(this:GetText())
+			local valid_input = page and tostring(max(1, page)) or ''
+			if this:GetText() ~= valid_input then
+				this:SetText(valid_input)
+			end
+			if blizzard_page_index(this:GetText()) and not real_time_button:GetChecked() then
+				this:SetBackdropColor(aux.gui.color.state.enabled())
+			else
+				this:SetBackdropColor(aux.gui.color.state.disabled())
+			end
+		end
+		do
+		    local editbox = aux.gui.editbox(settings)
+		    editbox:SetPoint('LEFT', 75, 0)
+		    editbox:SetWidth(50)
+		    editbox:SetNumeric(true)
+		    editbox:SetScript('OnTabPressed', function() last_page_input:SetFocus() end)
+		    editbox.enter = execute
+		    editbox.change = change
+		    local label = aux.gui.label(editbox, 16)
+		    label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
+		    label:SetText('Pages')
+		    label:SetTextColor(aux.gui.color.text.enabled())
+		    first_page_input = editbox
+	    end
+		do
+		    local editbox = aux.gui.editbox(settings)
+		    editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 10, 0)
+		    editbox:SetWidth(50)
+		    editbox:SetNumeric(true)
+		    editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
+		    editbox.enter = execute
+		    editbox.change = change
+		    local label = aux.gui.label(editbox, aux.gui.config.medium_font_size)
+		    label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
+		    label:SetText('-')
+		    label:SetTextColor(aux.gui.color.text.enabled())
+		    last_page_input = editbox
+		end
 	end
 	do
 	    local btn = aux.gui.checkbutton(settings)
@@ -138,9 +118,9 @@ function create_frames()
 	    btn:SetText('Real Time Mode')
 	    btn:SetScript('OnClick', function()
 	        this:SetChecked(not this:GetChecked())
-	        this = first_page_input
+	        g.this = first_page_input
 	        first_page_input:GetScript('OnTextChanged')()
-	        this = last_page_input
+	        g.this = last_page_input
 	        last_page_input:GetScript('OnTextChanged')()
 	    end)
 	    public.real_time_button = btn
@@ -215,7 +195,7 @@ function create_frames()
 	    btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 	    btn:SetScript('OnClick', function()
 	        if arg1 == 'RightButton' then
-	            set_filter(current_search().filter_string)
+	            set_filter(current_search.filter_string)
 	        end
 	        execute()
 	    end)
@@ -245,18 +225,17 @@ function create_frames()
 	end
 	do
 	    local editbox = aux.gui.editbox(controls)
-	    editbox:SetMaxLetters(nil)
 	    editbox:EnableMouse(1)
 	    editbox.complete = aux.completion.complete_filter
 	    editbox:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
 	    editbox:SetHeight(25)
-	    editbox:SetScript('OnChar', function()
+	    editbox.char = function()
 	        this:complete()
-	    end)
+	    end
 	    editbox:SetScript('OnTabPressed', function()
 	        this:HighlightText(0, 0)
 	    end)
-	    editbox:SetScript('OnEnterPressed', execute)
+	    editbox.enter = execute
 	    search_box = editbox
 	end
 	do
@@ -267,8 +246,8 @@ function create_frames()
 	    btn:SetPoint('BOTTOMLEFT', aux.frame.content, 'TOPLEFT', 10, 8)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
-	    btn:SetText('Search Results')
-	    btn:SetScript('OnClick', function() update_tab(RESULTS) end)
+	    btn:SetText 'Search Results'
+	    btn:SetScript('OnClick', function() set_tab(RESULTS) end)
 	    search_results_button = btn
 	end
 	do
@@ -276,8 +255,8 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', search_results_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
-	    btn:SetText('Saved Searches')
-	    btn:SetScript('OnClick', function() update_tab(SAVED) end)
+	    btn:SetText 'Saved Searches'
+	    btn:SetScript('OnClick', function() set_tab(SAVED) end)
 	    saved_searches_button = btn
 	end
 	do
@@ -285,8 +264,8 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', saved_searches_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
-	    btn:SetText('Filter Builder')
-	    btn:SetScript('OnClick', function() update_tab(FILTER) end)
+	    btn:SetText 'Filter Builder'
+	    btn:SetScript('OnClick', function() set_tab(FILTER) end)
 	    new_filter_button = btn
 	end
 	do
@@ -301,7 +280,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText('Bid')
+	    btn:SetText 'Bid'
 	    btn:Disable()
 	    bid_button = btn
 	end
@@ -310,7 +289,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText('Buyout')
+	    btn:SetText 'Buyout'
 	    btn:Disable()
 	    buyout_button = btn
 	end
@@ -319,10 +298,10 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', buyout_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText('Clear')
+	    btn:SetText 'Clear'
 	    btn:SetScript('OnClick', function()
-	        while tremove(current_search().records) do end
-	        current_search().table:SetDatabase()
+	        while tremove(current_search.records) do end
+	        current_search.table:SetDatabase()
 	    end)
 	end
 	do
@@ -330,7 +309,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText('Favorite')
+	    btn:SetText 'Favorite'
 	    btn:SetScript('OnClick', function()
 	        local filters = aux.filter.queries(search_box:GetText())
 	        if filters then
@@ -345,9 +324,8 @@ function create_frames()
 	do
 	    local btn1 = aux.gui.button(frame.filter, 16)
 	    btn1:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-	    btn1:SetWidth(80)
-	    btn1:SetHeight(24)
-	    btn1:SetText('Search')
+	    aux.gui.set_size(btn1, 80, 24)
+	    btn1:SetText 'Search'
 	    btn1:SetScript('OnClick', function()
 	        export_query_string()
 	        execute()
@@ -355,16 +333,14 @@ function create_frames()
 
 	    local btn2 = aux.gui.button(frame.filter, 16)
 	    btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
-	    btn2:SetWidth(80)
-	    btn2:SetHeight(24)
-	    btn2:SetText('Export')
+	    aux.gui.set_size(btn2, 80, 24)
+	    btn2:SetText 'Export'
 	    btn2:SetScript('OnClick', export_query_string)
 
 	    local btn3 = aux.gui.button(frame.filter, 16)
 	    btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
-	    btn3:SetWidth(80)
-	    btn3:SetHeight(24)
-	    btn3:SetText('Import')
+	    aux.gui.set_size(btn3, 80, 24)
+	    btn3:SetText 'Import'
 	    btn3:SetScript('OnClick', import_query_string)
 	end
 	do
@@ -372,11 +348,11 @@ function create_frames()
 	    editbox.complete_item = aux.completion.complete(function() return g.aux_auctionable_items end)
 	    editbox:SetPoint('TOPLEFT', 14, -FILTER_SPACING)
 	    editbox:SetWidth(260)
-	    editbox:SetScript('OnChar', function()
+	    editbox.char = function()
 	        if blizzard_query.exact then
 	            this:complete_item()
 	        end
-	    end)
+	    end
 	    editbox:SetScript('OnTabPressed', function()
 		    if blizzard_query.exact then
 			    return
@@ -387,11 +363,11 @@ function create_frames()
 	            min_level_input:SetFocus()
 	        end
 	    end)
-	    editbox:SetScript('OnTextChanged',  update_form)
-	    editbox:SetScript('OnEnterPressed', aux.C(editbox.ClearFocus, editbox))
+	    editbox.change = update_form
+	    editbox.enter = aux.C(editbox.ClearFocus, editbox)
 	    local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-	    label:SetText('Name')
+	    label:SetText 'Name'
 	    name_input = editbox
 	end
 	do
@@ -415,17 +391,17 @@ function create_frames()
 	            max_level_input:SetFocus()
 	        end
 	    end)
-	    editbox:SetScript('OnEnterPressed', aux.C(editbox.ClearFocus, editbox))
-	    editbox:SetScript('OnTextChanged', function()
+	    editbox.enter = aux.C(editbox.ClearFocus, editbox)
+	    editbox.change = function()
 		    local valid_level = valid_level(this:GetText())
 		    if tostring(valid_level) ~= this:GetText() then
 			    this:SetText(valid_level or '')
 		    end
 		    update_form()
-	    end)
+	    end
 	    local label = aux.gui.label(editbox, aux.gui.config.small_font_size)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-	    label:SetText('Level Range')
+	    label:SetText 'Level Range'
 	    min_level_input = editbox
 	end
 	do
@@ -440,14 +416,14 @@ function create_frames()
 	            name_input:SetFocus()
 	        end
 	    end)
-	    editbox:SetScript('OnEnterPressed', aux.C(editbox.ClearFocus, editbox))
-	    editbox:SetScript('OnTextChanged', function()
+	    editbox.enter = aux.C(editbox.ClearFocus, editbox)
+	    editbox.change = function()
 		    local valid_level = valid_level(this:GetText())
 		    if tostring(valid_level) ~= this:GetText() then
 			    this:SetText(valid_level or '')
 		    end
 		    update_form()
-	    end)
+	    end
 	    local label = aux.gui.label(editbox, aux.gui.config.medium_font_size)
 	    label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
 	    label:SetText('-')
@@ -533,14 +509,10 @@ function create_frames()
 		local input = aux.gui.editbox(frame.filter)
 		input:SetPoint('CENTER', filter_dropdown, 'CENTER', 0, 0)
 		input:SetWidth(150)
-		input:SetScript('OnTabPressed', function()
-			filter_parameter_input:SetFocus()
-		end)
+		input:SetScript('OnTabPressed', function() filter_parameter_input:SetFocus() end)
 		input.complete = aux.completion.complete(function() return {'and', 'or', 'not', unpack(keys(aux.filter.filters))} end)
-		input:SetScript('OnChar', function()
-			this:complete()
-		end)
-		input:SetScript('OnTextChanged', function()
+		input.char = function() this:complete() end
+		input.change = function()
 			local filter = this:GetText()
 			if aux.filter.filters[filter] and aux.filter.filters[filter].input_type ~= '' then
 				local _, _, suggestions = aux.filter.parse_query_string(filter..'/')
@@ -550,14 +522,14 @@ function create_frames()
 			else
 				filter_parameter_input:Hide()
 			end
-		end)
-		input:SetScript('OnEnterPressed', function()
+		end
+		input.enter = function()
 			if filter_parameter_input:IsVisible() then
 				filter_parameter_input:SetFocus()
 			else
 				add_post_filter()
 			end
-		end)
+		end
 		filter_input = input
 	end
 	do
@@ -567,10 +539,8 @@ function create_frames()
 	    input:SetScript('OnTabPressed', function()
 		    filter_input:SetFocus()
 	    end)
-	    input:SetScript('OnChar', function()
-	        this:complete()
-	    end)
-	    input:SetScript('OnEnterPressed', add_post_filter)
+	    input.char = function() this:complete() end
+	    input.enter = add_post_filter
 	    input:Hide()
 	    filter_parameter_input = input
 	end
@@ -628,7 +598,7 @@ function create_frames()
 
 	    local table = aux.auction_listing.CreateAuctionResultsTable(frame.results, aux.auction_listing.search_config)
 	    table:SetHandler('OnCellClick', function(cell, button)
-	        if IsAltKeyDown() and current_search().table:GetSelection().record == cell.row.data.record then
+	        if IsAltKeyDown() and current_search.table:GetSelection().record == cell.row.data.record then
 	            if button == 'LeftButton' and buyout_button:IsEnabled() then
 	                buyout_button:Click()
 	            elseif button == 'RightButton' and bid_button:IsEnabled() then
