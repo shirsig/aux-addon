@@ -7,8 +7,7 @@ do
 	local table_pool, auto_recycle = {}, {}
 	local function wipe(t) -- like with a cloth or something
 		for k in t do t[k] = nil end
-		setn(t, 0)
-		return t
+		setn(t, 0); return t
 	end
 	function public.recycle(t)
 		auto_recycle[t] = nil
@@ -19,8 +18,7 @@ do
 	function public.t.get() return tremove(table_pool) or {} end
 	CreateFrame('Frame'):SetScript('OnUpdate', function()
 		for t in auto_recycle do recycle(t) end
-		recycle(auto_recycle)
-		auto_recycle = t
+		recycle(auto_recycle); auto_recycle = t
 	end)
 end
 
@@ -30,8 +28,7 @@ do
 	function public.module(name)
 		local env = module_env(name)
 		if not modules[name] then env.import(temp-{['']='modules', ['']='core', ['']='util'}) end
-		setfenv(2, env)
-		modules[name] = true
+		setfenv(2, env); modules[name] = true
 	end
 end
 

@@ -2,7 +2,7 @@ local type, setmetatable, setfenv, unpack, mask, _g = type, setmetatable, setfen
 local PRIVATE, PUBLIC, MUTABLE, PROPERTY = 0, 1, 2, 4
 local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, property=PROPERTY}
 local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+PROPERTY, public=MUTABLE+PROPERTY, mutable=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
-local error, declaration_error, immutable_error, collision_error, void_error, import, define_property, lock_mt, env_mt, interface_mt, declarator_mt, property_mt
+local error, declaration_error, immutable_error, collision_error, void_error, import, property_setter, lock_mt, env_mt, interface_mt, declarator_mt
 lock_mt = {}
 local _state, _modules = {}, setmetatable({}, lock_mt)
 function error(message, level, ...) _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), (level or 1) + 1) end
@@ -11,26 +11,12 @@ function immutable_error(key, level) error('Field "%s" is immutable.', level + 1
 function collision_error(key, level) error('Field "%s" already exists.', level + 1, key) end
 function void_error(key, level) error('No field "%s".', level + 1, key) end
 function import(imports, t) for k, v in t do imports[type(k) == 'number' and v or k] = v end end
-declarator_mt = {__metatable=false}
-property_mt = {
-	__index = function(self, key)
-		local state = _state[self]; local modifiers = state.metadata[key]
-		if modifiers and mask(PROPERTY, modifiers) ~= 0 or declaration_error(2) then
-			state.property = key; return self
-		end
-	end,
-	__newindex = function(self, key, value)
-		local state, function_value = _state[self], type(value) == 'function'
-		local property, getters, setters = state.property, state.getters, state.setters
-		if key == 'get' then
-			if getters[property] then declaration_error(2) end
-			getters[property] = function_value and value or error('Getter must be a function.', 2)
-		elseif key == 'set' or declaration_error(2) then
-			if setters[property] then declaration_error(2) end
-			setters[property] = function_value and value or error('Setter must be a function.', 2)
-		end
-	end
-}
+declarator_mt = {__metatable=false }
+function property_setter(data, property, value)
+	local state = _state[self]; local property = state.property
+	if not property or data[property] then declaration_error(2) end
+	data[property] = type(value) == 'function' and value or declaration_error(2)
+end
 function declarator_mt.__call() end
 function declarator_mt.__index(self, key)
 	local state, modifier = _state[self], MODIFIER[key]
@@ -38,7 +24,7 @@ function declarator_mt.__index(self, key)
 		state.modifiers = modifier + mask(MODIFIER_MASK[key], state.modifiers)
 		return self
 	elseif not state.metadata[key] or collision_error(key, 2) then
-		state.property, state.metadata[key] = key, PROPERTY + mask(PROPERTY_MASK, state.modifiers)
+		state.property, state.metadata[key], state.modifiers = key, PROPERTY + mask(PROPERTY_MASK, state.modifiers), PRIVATE
 		return state.property_initializer
 	end
 end
