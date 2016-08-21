@@ -25,19 +25,9 @@ do
 end
 
 do
-	local envs = t
-	envs['/core'], envs['/modules'] = getfenv(), aux_module '/modules'
-	function public.module(path)
-		local env, parts, parent, name
-		parts, parent, name = gfind(path, '[%a_][%w_]*'), envs.modules, ''
-		for part in parts do
-			name = name..'/'..part
-			if not envs[name] then
-				envs[name], parent.public[part] = aux_module(name)
-				envs[name].import(temp-{'modules', 'core', 'util'})
-			end
-			parent = envs[name]
-		end
+	function public.module(name)
+		local env, interface = aux_module(name)
+		env.import(temp-{'modules', 'core', 'util'})
 		setfenv(2, parent)
 	end
 	g.aux = module 'core'
