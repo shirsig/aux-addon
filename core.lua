@@ -77,7 +77,7 @@ do
 	end
 end
 
-public.orig = setmetatable({}, {__index=function(self, key) return self[_g][key] end})
+public.orig = setmetatable({_g={}}, {__index=function(self, key) return self[_g][key] end})
 function public.hook(name, handler, object)
 	handler = handler or getfenv(2)[name]
 	object = object or _g
