@@ -66,9 +66,9 @@ do
 	end
 	interface_mt = {__metatable=false, __index=index(PUBLIC, {})}
 	function interface_mt.__newindex(self, key, value)
-		local state = _state[self]; local setter, metadata = state.setters[key], state.metadata or void_error(key, 2)
-		if mask(PUBLIC+PROPERTY, metadata) == PUBLIC+PROPERTY and setter then
-			return setter(value)
+		local state = _state[self]; local metadata = state.metadata or void_error(key, 2)
+		if mask(PUBLIC+SETTER, metadata) == PUBLIC+SETTER then
+			return state.setters[key](value)
 		elseif mask(PUBLIC, metadata) == PUBLIC or immutable_error(key, 2) then
 			state.data[key] = value
 		end
@@ -78,11 +78,14 @@ function _g.aux_module(name)
 	if not _modules[name] then
 		local state, getters, setters, imports, env, interface, declarator
 		imports, env, interface, declarator = {}, setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt)
-		getters = {private=function() state.modifiers = PRIVATE return declarator end, public=function() state.modifiers = PUBLIC return declarator end, mutable=function() state.modifiers = MUTABLE return declarator end}
+		getters = {
+			private=function() state.modifiers = PRIVATE return declarator end, public=function() state.modifiers = PUBLIC return declarator end,
+			mutable=function() state.modifiers = MUTABLE return declarator end,
+			getter=function() state.modifiers = PROPERTY+GETTER return declarator end, setter=function() state.modifiers = PROPERTY+SETTER return declarator end}
 		setters = {getter=function(value) set_property(getters, state.property, value) end, setter=function(value) set_property(setters, state.property, value) end}
 		state = {
 			name=name, env=env, interface=interface, imports={}, declarator_state=PRIVATE,
-			metadata = setmetatable({_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY+GETTER, mutable=PROPERTY+GETTER, getter=PROPERTY+GETTER+SETTER, setter=PROPERTY+GETTER+SETTER}, lock_mt),
+			metadata = setmetatable({_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+GETTER, public=PROPERTY+GETTER, mutable=PROPERTY+GETTER, getter=PROPERTY+GETTER+SETTER, setter=PROPERTY+GETTER+SETTER}, lock_mt),
 			data = {_g=_g, _m=env, _i=interface, import=function(t) import(imports, t) end},
 			getters=getters, setters=setters,
 		}
