@@ -29,7 +29,7 @@ function LOAD()
 	do
 		local tabs = gui.tabs(frame, 'DOWN')
 		tabs._on_select = on_tab_click
-		for _, tab in m.tabs do tabs:create_tab(tab.name) end
+		for _, tab in _m.tabs do tabs:create_tab(tab.name) end
 		function public.set_tab(id) tabs:select(id) end
 	end
 	do
@@ -188,7 +188,7 @@ end
 do
 	local function cost_label(cost)
 		local label = LIGHTYELLOW_FONT_COLOR_CODE..'(Total Cost: '..FONT_COLOR_CODE_CLOSE
-		label = label..(cost and m.money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
+		label = label..(cost and money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
 		label = label..LIGHTYELLOW_FONT_COLOR_CODE..')'..FONT_COLOR_CODE_CLOSE
 		return label
 	end

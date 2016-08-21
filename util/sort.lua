@@ -6,11 +6,11 @@ public.GT = {}
 
 function public.compare(a, b, desc)
     if a < b then
-        return desc and m.GT or m.LT
+        return desc and GT or LT
     elseif a > b then
-        return desc and m.LT or m.GT
+        return desc and LT or GT
     else
-        return m.EQ
+        return EQ
     end
 end
 

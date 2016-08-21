@@ -47,7 +47,7 @@ do
 		if event == 'ADDON_LOADED' then
 			if ADDON_LOADED[arg1] then ADDON_LOADED[arg1]() end
 		else
-			m[event]()
+			_m[event]()
 			if event == 'VARIABLES_LOADED' then
 				for _, f in variables_loaded_hooks do f() end
 			end

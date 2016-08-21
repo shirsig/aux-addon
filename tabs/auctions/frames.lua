@@ -34,7 +34,7 @@ function create_frames()
 	end
 	do
 	    local btn = gui.button(frame, 16)
-	    btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
+	    btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
 	    btn:SetText('Cancel')
@@ -42,13 +42,13 @@ function create_frames()
 	    cancel_button = btn
 	end
 	do
-	    local btn = gui.button(m.frame, 16)
-	    btn:SetPoint('TOPLEFT', m.cancel_button, 'TOPRIGHT', 5, 0)
+	    local btn = gui.button(frame, 16)
+	    btn:SetPoint('TOPLEFT', cancel_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
 	    btn:SetText('Refresh')
 	    btn:SetScript('OnClick', function()
-	        m.scan_auctions()
+	        scan_auctions()
 	    end)
 	end
 end

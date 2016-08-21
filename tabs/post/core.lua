@@ -314,7 +314,7 @@ function update_item_configuration()
             stack_count = stack_count_slider:GetValue()
             local deposit = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
 
-            m.deposit:SetText('Deposit: '..money.to_string(deposit, nil, nil, nil, gui.inline_color.text.enabled))
+            _m.deposit:SetText('Deposit: '..money.to_string(deposit, nil, nil, nil, gui.inline_color.text.enabled))
         end
 
         refresh_button:Enable()

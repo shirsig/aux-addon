@@ -50,7 +50,7 @@ do
 	for i=1,9 do
 		local key = '_'..i
 		public[key] = {}
-		formal_parameters[m[key]] = i
+		formal_parameters[_m[key]] = i
 	end
 	local function helper(f, arg1, arg2)
 		local params = {}

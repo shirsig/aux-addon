@@ -41,10 +41,10 @@ function public.container_item(bag, slot)
     for link in present(GetContainerItemLink(bag, slot)) do
 
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
-        local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
+        local item_info = item(item_id, suffix_id, unique_id, enchant_id)
 
         local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
-        local tooltip, tooltip_money = m.tooltip(function(tt) tt:SetBagItem(bag, slot) end)
+        local tooltip, tooltip_money = tooltip(function(tt) tt:SetBagItem(bag, slot) end)
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
         local aux_quantity = charges or count
@@ -100,14 +100,14 @@ function public.auction(index, query_type)
 
 	for link in present(GetAuctionItemLink(query_type, index)) do
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
-        local item_info = m.item(item_id, suffix_id, unique_id, enchant_id)
+        local item_info = item(item_id, suffix_id, unique_id, enchant_id)
 
         local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(query_type, index)
 
     	local duration = GetAuctionItemTimeLeft(query_type, index)
-        local tooltip, tooltip_money = m.tooltip(function(tt) tt:SetAuctionItem(query_type, index) end)
-        local max_charges = m.max_item_charges(item_id)
-        local charges = max_charges and m.item_charges(tooltip)
+        local tooltip, tooltip_money = tooltip(function(tt) tt:SetAuctionItem(query_type, index) end)
+        local max_charges = max_item_charges(item_id)
+        local charges = max_charges and item_charges(tooltip)
         local aux_quantity = charges or count
         local blizzard_bid = high_bid > 0 and high_bid or start_price
         local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
@@ -178,13 +178,13 @@ function public.set_shopping_tooltip(slot)
     local index1, index2 = inventory_index(slot)
     local tooltips = {}
     if index1 then
-        local tooltip = m.tooltip(function(tt) tt:SetInventoryItem('player', index1) end)
+        local tooltip = tooltip(function(tt) tt:SetInventoryItem('player', index1) end)
         if getn(tooltip) > 0 then
             tinsert(tooltips, tooltip)
         end
     end
     if index2 then
-        local tooltip = m.tooltip(function(tt) tt:SetInventoryItem('player', index2) end)
+        local tooltip = tooltip(function(tt) tt:SetInventoryItem('player', index2) end)
         if getn(tooltip) > 0 then
             tinsert(tooltips, tooltip)
         end
@@ -193,7 +193,7 @@ function public.set_shopping_tooltip(slot)
     if tooltips[1] then
         tinsert(tooltips[1], 1, {left_text='Currently Equipped', left_color={ 0.5, 0.5, 0.5 }})
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
-        m.load_tooltip(ShoppingTooltip1, tooltips[1])
+        load_tooltip(ShoppingTooltip1, tooltips[1])
         ShoppingTooltip1:Show()
         ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
     end
@@ -201,7 +201,7 @@ function public.set_shopping_tooltip(slot)
     if tooltips[2] then
         tinsert(tooltips[2], 1, {left_text='Currently Equipped', left_color={ 0.5, 0.5, 0.5 }})
         ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
-        m.load_tooltip(ShoppingTooltip2, tooltips[2])
+        load_tooltip(ShoppingTooltip2, tooltips[2])
         ShoppingTooltip2:Show()
         ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
     end
@@ -257,13 +257,13 @@ function public.display_name(item_id, no_brackets, no_color)
 end
 
 function public.auctionable(tooltip, quality, lootable)
-    local durability, max_durability = m.durability(tooltip)
+    local durability, max_durability = durability(tooltip)
     return not lootable
             and (not quality or quality < 6)
-            and not m.tooltip_match(ITEM_BIND_ON_PICKUP, tooltip)
-            and not m.tooltip_match(ITEM_BIND_QUEST, tooltip)
-            and not m.tooltip_match(ITEM_SOULBOUND, tooltip)
-            and (not m.tooltip_match(ITEM_CONJURED, tooltip) or m.tooltip_find(ITEM_MIN_LEVEL, tooltip) > 1)
+            and not tooltip_match(ITEM_BIND_ON_PICKUP, tooltip)
+            and not tooltip_match(ITEM_BIND_QUEST, tooltip)
+            and not tooltip_match(ITEM_SOULBOUND, tooltip)
+            and (not tooltip_match(ITEM_CONJURED, tooltip) or tooltip_find(ITEM_MIN_LEVEL, tooltip) > 1)
             and not (durability and durability < max_durability)
 end
 
@@ -340,7 +340,7 @@ function public.durability(tooltip)
 end
 
 function public.item_key(link)
-    local item_id, suffix_id = m.parse_link(link)
+    local item_id, suffix_id = parse_link(link)
     return item_id..':'..suffix_id
 end
 
