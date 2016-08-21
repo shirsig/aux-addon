@@ -22,7 +22,9 @@ function declarator_mt.__index(self, key)
 	if modifier then
 		state.modifiers = modifier + mask(MODIFIER_MASK[key], state.modifiers)
 		return self
-	elseif not state.metadata[key] or error('Field "%s" already exists.', 2, key) then
+	elseif state.metadata[key] then
+		error('Field "%s" already exists.', 2, key)
+	else
 		state.modifiers = PROPERTY + mask(PROPERTY_MASK, state.modifiers)
 		return function(t) define_property(self, key, t) end
 	end
@@ -35,33 +37,33 @@ end
 do
 	local function index(access, default)
 		return function(self, key)
-			local state = _state[self]; local modifiers = state.metadata[key]
+			local state = _state[self]; local modifiers = state.metadata[key] or error('No field "%s".', 2, key)
 			if mask(access+PROPERTY, modifiers) == access then
 				return state.data[key]
 			else
 				local getter = state.getters[key]
-				if getter then return getter() else return default[key] or error('No field "%s".', 2, key) end
+				if getter then return getter() else return default[key] end
 			end
 		end
 	end
 	env_mt = {__metatable=false, __index=index(PRIVATE, _g)}
 	function env_mt.__newindex(self, key, value)
-		local state = _state[self]
-		if not state.metadata[key] then
-			state.metadata[key] = PRIVATE
-		else
+		local state = _state[self]; local modifiers = state.metadata[key]
+		if modifiers then
 			local setter = state.setters[key]
 			if setter then return setter(value) end
-			if mask(MUTABLE, state.metadata[key]) == 0 then error('Field "%s" is immutable.', 2, key) end
+			if mask(MUTABLE, modifiers) == 0 then error('Field "%s" is immutable.', 2, key) end
+		else
+			state.metadata[key] = PRIVATE
 		end
 		state.data[key] = value
 	end
 	interface_mt = {__metatable=false, __index=index(PUBLIC, {})}
 	function interface_mt.__newindex(self, key, value)
-		local state = _state[self]; local setter = state.setters[key]
-		if mask(PUBLIC+PROPERTY, state.metadata[key]) == PUBLIC+PROPERTY and setter then
+		local state = _state[self]; local setter, metadata = state.setters[key], state.metadata or error('No field "%s".', 2, key)
+		if mask(PUBLIC+PROPERTY, metadata) == PUBLIC+PROPERTY and setter then
 			return setter(value)
-		elseif mask(PUBLIC, state.metadata[key]) == PUBLIC or error('Field "%s" is immutable.', 2, key) then
+		elseif mask(PUBLIC, metadata) == PUBLIC or error('Field "%s" is immutable.', 2, key) then
 			state.data[key] = value
 		end
 	end
