@@ -13,8 +13,7 @@ function import(imports, t) for k, v in t do imports[type(k) == 'number' and v o
 --end
 declarator_mt = {__metatable=false}
 function declarator_mt.__call(self, t)
-	local state = _state[self]
-	local key = state.property
+	local state = _state[self]; local key = state.property
 	if not key then return end
 	for k, v in t do
 		if k == 'get' then
@@ -36,12 +35,11 @@ function declarator_mt.__index(self, key)
 	end
 end
 function declarator_mt.__newindex(self, key, value)
-	local state, modifiers
-	local state = _state[self]
+	local state, modifiers; local state = _state[self]
 	modifiers, state.modifiers = state.modifiers, PRIVATE
 	if modifiers then error('Field "%s" already exists.', key) end
 	state.metadata[key] = modifiers
-	if mask(GETTER+SETTER, modifiers) == 0 then
+	if mask(PROPERTY, modifiers) == 0 then
 		state.data[self][key] = value
 	elseif type(value) == 'function' or error('Getters/setters must be functions.') then
 		state.getters[key], state.setters[key] = value, value
@@ -50,14 +48,12 @@ end
 do
 	local function index(access, default)
 		return function(self, key)
-			local state = _state[self]
-			local modifiers = state.modifiers
-			if mask(access+GETTER+SETTER, modifiers) == access then
+			local state = _state[self]; local modifiers = state.modifiers
+			if mask(access+PROPERTY, modifiers) == access then
 				return state.data[key]
-			elseif mask(access+GETTER, modifiers) == access+GETTER then
-				return state.getters[key]()
 			else
-				return default[key] or error('No field "%s".', key)
+				local getter = state.getters[key]
+				if getter then return getter() else return default[key] or error('No field "%s".', key) end
 			end
 		end
 	end
@@ -66,17 +62,17 @@ do
 		local state = _state[self]
 		if not state.metadata[key] then
 			state.metadata[key] = PRIVATE
-		elseif mask(SETTER, state.metadata[key]) ~= 0 then
-			return state.setters[key](value)
-		elseif mask(MUTABLE, state.metadata[key]) == 0 then
-			error('Field "%s" is immutable.', key)
+		else
+			local setter = state.setters[key]
+			if setter then return setter(value) end
+			if mask(MUTABLE, state.metadata[key]) == 0 then error('Field "%s" is immutable.', key) end
 		end
 		state.data[key] = value
 	end
 	interface_mt = {__metatable=false, __index=index(PUBLIC, {})}
 	function interface_mt.__newindex(self, key, value)
 		local state = _state[self]
-		if mask(PUBLIC+SETTER, state.metadata[key]) == PUBLIC+SETTER then
+		if mask(PUBLIC+PROPERTY, state.metadata[key]) == PUBLIC+PROPERTY then
 			return state.setters[key][key](value)
 		elseif mask(PUBLIC+MUTABLE, state.metadata[key]) == PUBLIC+MUTABLE or error('Field "%s" is immutable.', key) then
 			state.data[key] = value
