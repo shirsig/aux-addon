@@ -1,17 +1,17 @@
 aux.module 'auctions_tab'
 
 function create_frames()
-	frame = CreateFrame('Frame', nil, aux.frame)
+	frame = CreateFrame('Frame', nil, frame)
 	frame:SetAllPoints()
 	frame:SetScript('OnUpdate', on_update)
 	frame:Hide()
 
-	frame.listing = aux.gui.panel(frame)
-	frame.listing:SetPoint('TOP', aux.frame, 'TOP', 0, -8)
-	frame.listing:SetPoint('BOTTOMLEFT', aux.frame.content, 'BOTTOMLEFT', 0, 0)
-	frame.listing:SetPoint('BOTTOMRIGHT', aux.frame.content, 'BOTTOMRIGHT', 0, 0)
+	frame.listing = gui.panel(frame)
+	frame.listing:SetPoint('TOP', frame, 'TOP', 0, -8)
+	frame.listing:SetPoint('BOTTOMLEFT', frame.content, 'BOTTOMLEFT', 0, 0)
+	frame.listing:SetPoint('BOTTOMRIGHT', frame.content, 'BOTTOMRIGHT', 0, 0)
 
-	listing = aux.auction_listing.CreateAuctionResultsTable(frame.listing, aux.auction_listing.auctions_config)
+	listing = auction_listing.CreateAuctionResultsTable(frame.listing, auction_listing.auctions_config)
 	listing:SetSort(1,2,3,4,5,6,7,8)
 	listing:Reset()
 	listing:SetHandler('OnCellClick', function(cell, button)
@@ -25,15 +25,15 @@ function create_frames()
 	end)
 
 	do
-	    status_bar = aux.gui.status_bar(frame)
+	    status_bar = gui.status_bar(frame)
 	    status_bar:SetWidth(265)
 	    status_bar:SetHeight(25)
-	    status_bar:SetPoint('TOPLEFT', aux.frame.content, 'BOTTOMLEFT', 0, -6)
+	    status_bar:SetPoint('TOPLEFT', frame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 100)
 	    status_bar:set_text('')
 	end
 	do
-	    local btn = aux.gui.button(frame, 16)
+	    local btn = gui.button(frame, 16)
 	    btn:SetPoint('TOPLEFT', m.status_bar, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
@@ -42,7 +42,7 @@ function create_frames()
 	    cancel_button = btn
 	end
 	do
-	    local btn = aux.gui.button(m.frame, 16)
+	    local btn = gui.button(m.frame, 16)
 	    btn:SetPoint('TOPLEFT', m.cancel_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)

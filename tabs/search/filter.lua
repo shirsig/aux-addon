@@ -109,8 +109,8 @@ function get_filter_builder_query()
 	end
 
 	local name = blizzard_query.name
-	if not index(aux.filter.parse_query_string(name), 'blizzard', 'name') then
-		name = aux.filter.quote(name)
+	if not index(filter.parse_query_string(name), 'blizzard', 'name') then
+		name = filter.quote(name)
 	end
 	add((name ~= '' or blizzard_query.exact) and name)
 
@@ -134,7 +134,7 @@ function get_filter_builder_query()
 		add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
 	end
 
-	local post_filter_string = aux.filter.query_string{blizzard={}, post=post_filter}
+	local post_filter_string = filter.query_string{blizzard={}, post=post_filter}
 	add(post_filter_string ~= '' and post_filter_string)
 
 	return query_string or ''
@@ -171,7 +171,7 @@ function clear_form()
 end
 
 function import_query_string()
-	local components, error = aux.filter.parse_query_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
+	local components, error = filter.parse_query_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
 	if components then
 		set_form(components)
 	else
@@ -195,12 +195,12 @@ function public.formatted_post_filter(components)
 		elseif i > 1 then
 			str = str..'</p><p>'
 			for _=1,getn(stack) do
-				str = str..aux.gui.color.content.background('----')
+				str = str..gui.color.content.background('----')
 			end
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
 
-		local filter_color = (filter_builder_state.selected == i and aux.gui.color.orange or aux.gui.color.aux)
+		local filter_color = (filter_builder_state.selected == i and gui.color.orange or gui.color.aux)
 		local component_text = filter_color(component[2])
 		if component[1] == 'operator' and component[2] ~= 'not' then
 			component_text = component_text..filter_color(tonumber(component[3]) or '')
@@ -208,9 +208,9 @@ function public.formatted_post_filter(components)
 		elseif component[1] == 'filter' then
 			for parameter in present(component[3]) do
 				if component[2] == 'item' then
-					parameter = aux.info.display_name(aux.cache.item_id(parameter)) or '['..parameter..']'
-				elseif aux.filter.filters[component[2]].input_type == 'money' then
-					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true)
+					parameter = info.display_name(cache.item_id(parameter)) or '['..parameter..']'
+				elseif filter.filters[component[2]].input_type == 'money' then
+					parameter = money.to_string(money.from_string(parameter), nil, true)
 				end
 				component_text = component_text..filter_color(': ')..parameter
 			end
@@ -262,13 +262,13 @@ end
 
 function add_post_filter()
 	for str in present(filter_input:GetText()) do
-		for filter in present(aux.filter.filters[str]) do
+		for filter in present(filter.filters[str]) do
 			if filter.input_type ~= '' then
 				str = str..'/'..filter_parameter_input:GetText()
 			end
 		end
 
-		local components, error, suggestions = aux.filter.parse_query_string(str)
+		local components, error, suggestions = filter.parse_query_string(str)
 
 		if components and getn(components.blizzard) == 0 and getn(components.post) == 1 then
 			add_component(components.post[1])
@@ -325,9 +325,9 @@ function initialize_filter_dropdown()
 			value = filter,
 			func = function()
 				filter_input:SetText(this.value)
-				if index(aux.filter.filters[this.value], 'input_type') == '' or this.value == 'not' then
+				if index(filter.filters[this.value], 'input_type') == '' or this.value == 'not' then
 					add_post_filter()
-				elseif aux.filter.filters[this.value] then
+				elseif filter.filters[this.value] then
 					filter_parameter_input:Show()
 					filter_parameter_input:SetFocus()
 				else

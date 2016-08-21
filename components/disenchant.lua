@@ -73,7 +73,7 @@ end
 function public.value(slot, quality, level)
     local expectation
     for _, event in m.distribution(slot, quality, level) do
-        local value = aux.history.value(event.item_id..':'..0)
+        local value = history.value(event.item_id..':'..0)
         if not value then
             return
         else

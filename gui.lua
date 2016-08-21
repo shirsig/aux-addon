@@ -123,8 +123,8 @@ do
 		aux_background:SetTexture(color.content.background())
 		aux_background:SetAllPoints(DropDownList1Backdrop)
 		blizzard_backdrop = DropDownList1Backdrop:GetBackdrop()
-		aux.hook('ToggleDropDownMenu', function(...)
-			local ret = {aux.orig.ToggleDropDownMenu(unpack(arg))}
+		hook('ToggleDropDownMenu', function(...)
+			local ret = {orig.ToggleDropDownMenu(unpack(arg))}
 			local dropdown = getglobal(arg[4] or '') or this:GetParent()
 			if strfind(dropdown:GetName() or '', '^aux_frame%d+$') then
 				set_aux_dropdown_style(dropdown)
@@ -418,7 +418,7 @@ function public.editbox(parent)
             -- editbox:Insert'<ksejfkj>' TODO use insert with special tags to determine cursor position
             -- or use an overlay with itemlinks
             if last_click and GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
-                aux.control.thread(function() editbox:HighlightText() end)
+                control.thread(function() editbox:HighlightText() end)
             end
             last_click = {t=GetTime(), x=x, y=y}
         end)
@@ -440,12 +440,12 @@ function public.editbox(parent)
 	    self:SetFont(config.font, size)
 	    self.display:SetFont(config.font, size)
     end
-    local display = aux.gui.label(editbox)
+    local display = gui.label(editbox)
     display:SetPoint('LEFT', 1.5, 0)
     display:SetPoint('RIGHT', -1.5, 0)
     display:SetTextColor(color.text.enabled())
     editbox.display = display
-    local cursor = aux.gui.label(editbox, config.large_font_size)
+    local cursor = gui.label(editbox, config.large_font_size)
     cursor:SetText '|'
     cursor:SetTextColor(color.text.enabled())
     cursor:SetAlpha(0)
@@ -537,7 +537,7 @@ function public.item(parent)
     btn:RegisterForClicks()
     item.texture = getglobal(btn:GetName()..'Icon')
     item.texture:SetTexCoord(.06, .94, .06, .94)
-    item.name = aux.gui.label(btn, 15)
+    item.name = gui.label(btn, 15)
     item.name:SetJustifyH 'LEFT'
     item.name:SetPoint('LEFT', btn, 'RIGHT', 10, 0)
     item.name:SetPoint('RIGHT', item, 'RIGHT', -10, .5)

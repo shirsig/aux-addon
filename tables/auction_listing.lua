@@ -6,20 +6,22 @@ local RT_COUNT = 1
 local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
 
-local AUCTION_PCT_COLORS = {
-    {color=aux.gui.inline_color.blue, value=50},
-    {color=aux.gui.inline_color.green, value=80},
-    {color=aux.gui.inline_color.yellow, value=110},
-    {color=aux.gui.inline_color.orange, value=135},
-    {color=aux.gui.inline_color.red, value=huge},
-}
+function LOAD()
+	AUCTION_PCT_COLORS = {
+	    {color=gui.inline_color.blue, value=50},
+	    {color=gui.inline_color.green, value=80},
+	    {color=gui.inline_color.yellow, value=110},
+	    {color=gui.inline_color.orange, value=135},
+	    {color=gui.inline_color.red, value=huge},
+	}
 
-local TIME_LEFT_STRINGS = {
-	aux.gui.color.red '30m', -- Short
-	aux.gui.color.orange '2h', -- Medium
-	aux.gui.color.yellow '8h', -- Long
-	aux.gui.color.blue '24h', -- Very Long
-}
+	TIME_LEFT_STRINGS = {
+		gui.color.red '30m', -- Short
+		gui.color.orange '2h', -- Medium
+		gui.color.yellow '8h', -- Long
+		gui.color.blue '24h', -- Very Long
+	}
+end
 
 function item_column_init(rt, cell)
     local spacer = CreateFrame('Frame', nil, cell)
@@ -69,7 +71,7 @@ public.search_config = {
             cell:SetText(gsub(record.link, '[%[%]]', ''))
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.name, record_b.name, desc)
+            return sorting.compare(record_a.name, record_b.name, desc)
         end,
     },
     {
@@ -78,11 +80,11 @@ public.search_config = {
         align = 'CENTER',
         fill = function(cell, record)
             local display_level = max(record.level, 1)
-            display_level = UnitLevel('player') < record.level and aux.gui.color.red(display_level) or display_level
+            display_level = UnitLevel('player') < record.level and gui.color.red(display_level) or display_level
             cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.level, record_b.level, desc)
+            return sorting.compare(record_a.level, record_b.level, desc)
         end,
     },
     {
@@ -90,14 +92,14 @@ public.search_config = {
         width = 0.06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and aux.gui.color.link(count) or count
+            local numAuctionsText = expandable and gui.color.link(count) or count
             if own > 0 then
-                numAuctionsText = numAuctionsText..(' '..aux.gui.color.yellow('('..own..')'))
+                numAuctionsText = numAuctionsText..(' '..gui.color.yellow('('..own..')'))
             end
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.EQ
+            return sorting.EQ
 --            if sortKey == 'numAuctions' then
 --                if a.children then
 --                    aVal = a.totalAuctions
@@ -117,7 +119,7 @@ public.search_config = {
             cell:SetText(record.aux_quantity)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            return sorting.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
         end,
     },
     {
@@ -128,7 +130,7 @@ public.search_config = {
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.duration, record_b.duration, desc)
+            return sorting.compare(record_a.duration, record_b.duration, desc)
         end,
     },
     {
@@ -136,17 +138,17 @@ public.search_config = {
         width = 0.13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell:SetText(aux.is_player(record.owner) and (aux.gui.color.yellow(record.owner)) or (record.owner or '---'))
+            cell:SetText(is_player(record.owner) and (gui.color.yellow(record.owner)) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
-                return aux.sorting.EQ
+                return sorting.EQ
             elseif not record_a.owner then
-                return aux.sorting.GT
+                return sorting.GT
             elseif not record_b.owner then
-                return aux.sorting.LT
+                return sorting.LT
             else
-                return aux.sorting.compare(record_a.owner, record_b.owner, desc)
+                return sorting.compare(record_a.owner, record_b.owner, desc)
             end
         end,
     },
@@ -168,7 +170,7 @@ public.search_config = {
             else
                 price = g.aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
             end
-            cell:SetText(aux.money.to_string(price, true, false, nil, color))
+            cell:SetText(money.to_string(price, true, false, nil, color))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a
@@ -183,7 +185,7 @@ public.search_config = {
             else
                 price_b = g.aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end
-            return aux.sorting.compare(price_a, price_b, desc)
+            return sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -193,7 +195,7 @@ public.search_config = {
         isPrice = true,
         fill = function(cell, record)
             local price = g.aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
-            cell:SetText(price > 0 and aux.money.to_string(price, true, false) or '---')
+            cell:SetText(price > 0 and money.to_string(price, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = g.aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
@@ -201,7 +203,7 @@ public.search_config = {
             price_a = price_a > 0 and price_a or (desc and -huge or huge)
             price_b = price_b > 0 and price_b or (desc and -huge or huge)
 
-            return aux.sorting.compare(price_a, price_b, desc)
+            return sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -215,7 +217,7 @@ public.search_config = {
         cmp = function(record_a, record_b, desc)
             local pct_a = record_percentage(record_a) or (desc and -huge or huge)
             local pct_b = record_percentage(record_b) or (desc and -huge or huge)
-            return aux.sorting.compare(pct_a, pct_b, desc)
+            return sorting.compare(pct_a, pct_b, desc)
         end,
     },
 }
@@ -239,7 +241,7 @@ public.auctions_config = {
             cell:SetText(gsub(record.link, '[%[%]]', ''))
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.name, record_b.name, desc)
+            return sorting.compare(record_a.name, record_b.name, desc)
         end,
     },
     {
@@ -248,11 +250,11 @@ public.auctions_config = {
         align = 'CENTER',
         fill = function(cell, record)
             local display_level = max(record.level, 1)
-            display_level = UnitLevel('player') < record.level and aux.gui.color.red(display_level) or display_level
+            display_level = UnitLevel('player') < record.level and gui.color.red(display_level) or display_level
             cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.level, record_b.level, desc)
+            return sorting.compare(record_a.level, record_b.level, desc)
         end,
     },
     {
@@ -260,11 +262,11 @@ public.auctions_config = {
         width = 0.06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and aux.gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
+            local numAuctionsText = expandable and gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.EQ
+            return sorting.EQ
             --            if sortKey == 'numAuctions' then
             --                if a.children then
             --                    aVal = a.totalAuctions
@@ -284,7 +286,7 @@ public.auctions_config = {
             cell:SetText(record.aux_quantity)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            return sorting.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
         end,
     },
     {
@@ -295,7 +297,7 @@ public.auctions_config = {
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.duration, record_b.duration, desc)
+            return sorting.compare(record_a.duration, record_b.duration, desc)
         end,
     },
     {
@@ -310,7 +312,7 @@ public.auctions_config = {
             else
                 price = g.aux_price_per_unit and ceil(record.start_price / record.aux_quantity) or record.start_price
             end
-            cell:SetText(aux.money.to_string(price, true, false))
+            cell:SetText(money.to_string(price, true, false))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a
@@ -325,7 +327,7 @@ public.auctions_config = {
             else
                 price_b = g.aux_price_per_unit and record_b.start_price / record_b.aux_quantity or record_b.start_price
             end
-            return aux.sorting.compare(price_a, price_b, desc)
+            return sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -335,7 +337,7 @@ public.auctions_config = {
         isPrice = true,
         fill = function(cell, record)
             local price = g.aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
-            cell:SetText(price > 0 and aux.money.to_string(price, true, false) or '---')
+            cell:SetText(price > 0 and money.to_string(price, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = g.aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
@@ -343,7 +345,7 @@ public.auctions_config = {
             price_a = price_a > 0 and price_a or (desc and -huge or huge)
             price_b = price_b > 0 and price_b or (desc and -huge or huge)
 
-            return aux.sorting.compare(price_a, price_b, desc)
+            return sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -351,17 +353,17 @@ public.auctions_config = {
         width = 0.21,
         align = 'CENTER',
         fill = function(cell, record)
-            cell:SetText(record.high_bidder or aux.gui.color.red 'No Bids')
+            cell:SetText(record.high_bidder or gui.color.red 'No Bids')
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.high_bidder and not record_b.high_bidder then
-                return aux.sorting.EQ
+                return sorting.EQ
             elseif not record_a.high_bidder then
-                return aux.sorting.GT
+                return sorting.GT
             elseif not record_b.high_bidder then
-                return aux.sorting.LT
+                return sorting.LT
             else
-                return aux.sorting.compare(record_a.high_bidder, record_b.high_bidder, desc)
+                return sorting.compare(record_a.high_bidder, record_b.high_bidder, desc)
             end
         end,
     },
@@ -386,7 +388,7 @@ public.bids_config = {
             cell:SetText(gsub(record.link, '[%[%]]', ''))
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.name, record_b.name, desc)
+            return sorting.compare(record_a.name, record_b.name, desc)
         end,
     },
     {
@@ -394,11 +396,11 @@ public.bids_config = {
         width = 0.06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and aux.gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
+            local numAuctionsText = expandable and gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.EQ
+            return sorting.EQ
             --            if sortKey == 'numAuctions' then
             --                if a.children then
             --                    aVal = a.totalAuctions
@@ -418,7 +420,7 @@ public.bids_config = {
             cell:SetText(record.aux_quantity)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            return sorting.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
         end,
     },
     {
@@ -429,7 +431,7 @@ public.bids_config = {
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.duration, record_b.duration, desc)
+            return sorting.compare(record_a.duration, record_b.duration, desc)
         end,
     },
     {
@@ -437,17 +439,17 @@ public.bids_config = {
         width = 0.13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell:SetText(aux.is_player(record.owner) and (aux.gui.color.yellow(record.owner)) or (record.owner or '---'))
+            cell:SetText(is_player(record.owner) and (gui.color.yellow(record.owner)) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
-                return aux.sorting.EQ
+                return sorting.EQ
             elseif not record_a.owner then
-                return aux.sorting.GT
+                return sorting.GT
             elseif not record_b.owner then
-                return aux.sorting.LT
+                return sorting.LT
             else
-                return aux.sorting.compare(record_a.owner, record_b.owner, desc)
+                return sorting.compare(record_a.owner, record_b.owner, desc)
             end
         end,
     },
@@ -463,7 +465,7 @@ public.bids_config = {
             else
                 price = g.aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
             end
-            cell:SetText(aux.money.to_string(price))
+            cell:SetText(money.to_string(price))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a
@@ -478,7 +480,7 @@ public.bids_config = {
             else
                 price_b = g.aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end
-            return aux.sorting.compare(price_a, price_b, desc)
+            return sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -488,7 +490,7 @@ public.bids_config = {
         isPrice = true,
         fill = function(cell, record)
             local price = g.aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
-            cell:SetText(price > 0 and aux.money.to_string(price, true, false) or '---')
+            cell:SetText(price > 0 and money.to_string(price, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = g.aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
@@ -496,7 +498,7 @@ public.bids_config = {
             price_a = price_a > 0 and price_a or (desc and -huge or huge)
             price_b = price_b > 0 and price_b or (desc and -huge or huge)
 
-            return aux.sorting.compare(price_a, price_b, desc)
+            return sorting.compare(price_a, price_b, desc)
         end,
     },
     {
@@ -506,14 +508,14 @@ public.bids_config = {
         fill = function(cell, record)
             local status
             if record.high_bidder then
-                status = aux.gui.color.yellow 'High Bidder'
+                status = gui.color.yellow 'High Bidder'
             else
-                status = aux.gui.color.red 'Outbid'
+                status = gui.color.red 'Outbid'
             end
             cell:SetText(status)
         end,
         cmp = function(record_a, record_b, desc)
-            return aux.sorting.compare(record_a.high_bidder and 1 or 0, record_b.high_bidder and 1 or 0, desc)
+            return sorting.compare(record_a.high_bidder and 1 or 0, record_b.high_bidder and 1 or 0, desc)
         end,
     },
 }
@@ -521,7 +523,7 @@ public.bids_config = {
 function record_percentage(record)
     if not record then return end
 
-    local historical_value = aux.history.value(record.item_key) or 0
+    local historical_value = history.value(record.item_key) or 0
     if historical_value > 0 then
         if record.unit_buyout_price > 0 then
             return round(100 * record.unit_buyout_price / historical_value, 1)
@@ -539,7 +541,7 @@ function percentage_color(pct)
 end
 
 function public.percentage_historical(pct, bid)
-    return (bid and aux.gui.inline_color.gray or percentage_color(pct))..(pct > 10000 and '>10000' or pct)..'%'..FONT_COLOR_CODE_CLOSE
+    return (bid and gui.inline_color.gray or percentage_color(pct))..(pct > 10000 and '>10000' or pct)..'%'..FONT_COLOR_CODE_CLOSE
 end
 
 function public.time_left(code)
@@ -586,8 +588,8 @@ local methods = {
         local rt = this:GetParent().row.rt
         local rowData = this:GetParent().row.data
         if rowData and rowData.record then
-            aux.info.set_tooltip(rowData.record.itemstring, this, 'ANCHOR_RIGHT')
-            aux.info.set_shopping_tooltip(rowData.record.slot)
+            info.set_tooltip(rowData.record.itemstring, this, 'ANCHOR_RIGHT')
+            info.set_shopping_tooltip(rowData.record.slot)
             rt.isShowingItemTooltip = true
         end
     end,
@@ -645,9 +647,9 @@ local methods = {
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(this.row.data.record.link)
         elseif not modified and button == 'RightButton' then -- TODO not when alt (how?)
-            aux.set_tab(1)
-            aux.search_tab.set_filter(strlower(aux.info.item(this.row.data.record.item_id).name)..'/exact')
-            aux.search_tab.execute(nil, false)
+            set_tab(1)
+            search_tab.set_filter(strlower(info.item(this.row.data.record.item_id).name)..'/exact')
+            search_tab.execute(nil, false)
         else
             local selection = this.rt:GetSelection()
             if not selection or selection.record ~= this.row.data.record then
@@ -684,7 +686,7 @@ local methods = {
         self.isSorted = nil
         self:SetSelectedRecord(nil, true)
 
-        sort(self.records, function(a, b) return aux.sorting.multi_lt({a.search_signature, tostring(a)}, {b.search_signature, tostring(b)}) end)
+        sort(self.records, function(a, b) return sorting.multi_lt({a.search_signature, tostring(a)}, {b.search_signature, tostring(b)}) end)
 
         local records = self.records
         if getn(records) == 0 then return end
@@ -714,7 +716,7 @@ local methods = {
             local totalAuctions, totalPlayerAuctions = 0, 0
             for _, childInfo in info.children do
                 totalAuctions = totalAuctions + childInfo.numAuctions
-                if aux.is_player(childInfo.record.owner) then
+                if is_player(childInfo.record.owner) then
                     totalPlayerAuctions = totalPlayerAuctions + childInfo.numAuctions
                 end
             end
@@ -765,11 +767,11 @@ local methods = {
                 end
 
                 for _, sort in self.sorts do
-                    local ordering = self.config[sort.index].cmp and self.config[sort.index].cmp(record_a, record_b, sort.descending) or aux.sorting.EQ
+                    local ordering = self.config[sort.index].cmp and self.config[sort.index].cmp(record_a, record_b, sort.descending) or sorting.EQ
 
-                    if ordering == aux.sorting.LT then
+                    if ordering == sorting.LT then
                         return true
-                    elseif ordering == aux.sorting.GT then
+                    elseif ordering == sorting.GT then
                         return false
                     end
                 end
@@ -1019,7 +1021,7 @@ function public.CreateAuctionResultsTable(parent, config)
     rt.contentFrame = contentFrame
 
     -- frame to hold the header columns and the rows
-    local scrollFrame = CreateFrame('ScrollFrame', aux.gui.name, rt, 'FauxScrollFrameTemplate')
+    local scrollFrame = CreateFrame('ScrollFrame', gui.name, rt, 'FauxScrollFrameTemplate')
     scrollFrame:SetScript('OnVerticalScroll', function()
         if not rt.scrollDisabled then
             FauxScrollFrame_OnVerticalScroll(rt.ROW_HEIGHT, function() rt:UpdateRows() end)
@@ -1036,7 +1038,7 @@ function public.CreateAuctionResultsTable(parent, config)
     scrollBar:SetWidth(10)
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
-    thumbTex:SetTexture(unpack(aux.gui.color.content.background))
+    thumbTex:SetTexture(unpack(gui.color.content.background))
     thumbTex:SetHeight(150)
     thumbTex:SetWidth(scrollBar:GetWidth())
     getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
@@ -1062,8 +1064,8 @@ function public.CreateAuctionResultsTable(parent, config)
         local text = cell:CreateFontString()
         text:SetJustifyH 'CENTER'
         text:SetJustifyV 'CENTER'
-        text:SetFont(aux.gui.config.font, 12)
-        text:SetTextColor(unpack(aux.gui.color.label.enabled))
+        text:SetFont(gui.config.font, 12)
+        text:SetTextColor(unpack(gui.color.label.enabled))
         cell:SetFontString(text)
         if not column_config.isPrice then cell:SetText(column_config.title or '') end -- TODO
         text:SetAllPoints()
@@ -1108,7 +1110,7 @@ function public.CreateAuctionResultsTable(parent, config)
         for j=1, getn(rt.config) do
             local cell = CreateFrame('Button', nil, row)
             local text = cell:CreateFontString()
-            text:SetFont(aux.gui.config.font, min(14, rt.ROW_HEIGHT))
+            text:SetFont(gui.config.font, min(14, rt.ROW_HEIGHT))
             text:SetJustifyH(rt.config[j].align or 'LEFT')
             text:SetJustifyV 'CENTER'
             text:SetPoint('TOPLEFT', 1, -1)

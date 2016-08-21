@@ -1,5 +1,5 @@
 aux.module 'search_tab'
-aux.tab(1, 'Search')
+g.aux.tab(1, 'Search')
 
 StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
     text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',

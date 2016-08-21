@@ -3,7 +3,7 @@ aux.module 'scan_util'
 function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
     local function test(index)
-        local auction_info = aux.info.auction(index, auction_record.query_type)
+        local auction_info = info.auction(index, auction_record.query_type)
         return auction_info and auction_info.search_signature == auction_record.search_signature
     end
 
@@ -36,7 +36,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
 
 
     local found
-    return aux.scan.start{
+    return scan.start{
         type = auction_record.query_type,
         queries = queries,
         on_scan_start = function()
@@ -72,10 +72,10 @@ end
 
 function public.item_query(item_id, first_page, last_page)
 
-    local item_info = aux.info.item(item_id)
+    local item_info = info.item(item_id)
 
     if item_info then
-        local query = aux.filter.query(item_info.name..'/exact')
+        local query = filter.query(item_info.name..'/exact')
         query.blizzard_query.first_page = first_page
         query.blizzard_query.last_page = last_page
         return {

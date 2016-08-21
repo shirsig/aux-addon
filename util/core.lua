@@ -1,12 +1,18 @@
 aux.module 'util'
 
-local temp, recycle, getn = temp, recycle, g.getn
+local temp, recycle, getn = g.temp, g.recycle, g.getn
 
 function public.copy(t)
 	local copy = {}
 	for k, v in t do copy[k] = v end
 	setn(getn(t))
 	return copy
+end
+
+public.join = g.table.concat
+
+function public.replicate(count, value)
+	if count > 0 then return value, replicate(count - 1, value) end
 end
 
 do
@@ -18,7 +24,7 @@ do
 			return v
 		end
 	end
-	for i=1,9 do public[join(replicate(i, 'x'))] = setter(i) end
+	for i=1,9 do public[join{replicate(i, 'x')}] = setter(i) end
 	function public.accessor.__()
 		assert(charges > 0)
 		charges = charges - 1
@@ -183,10 +189,6 @@ function public.all(xs, p)
 	return true
 end
 
-function public.replicate(count, value)
-	return value, replicate(count - 1, value)
-end
-
 function public.filter(xs, p)
 	local ys = {}
 	for k, x in xs do
@@ -233,8 +235,6 @@ function public.split(str, separator)
 	end
 end
 
-public.join = g.table.concat
-
 function public.tokenize(str)
 	local tokens = {}
 	for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
@@ -265,9 +265,9 @@ function public.bag_type(bag)
 		return 1
 	end
 	for link in present(GetInventoryItemLink('player', ContainerIDToInventoryID(bag))) do
-		local item_id = aux.info.parse_link(link)
-		local item_info = aux.info.item(item_id)
-		return aux.info.item_subclass_index(3, item_info.subclass)
+		local item_id = info.parse_link(link)
+		local item_info = info.item(item_id)
+		return info.item_subclass_index(3, item_info.subclass)
 	end
 end
 

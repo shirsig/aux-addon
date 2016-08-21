@@ -1,49 +1,43 @@
 local aux_module, getn, setn, tinsert, tremove, setfenv, gfind = aux_module, getn, table.setn, tinsert, tremove, setfenv, string.gfind
 do
-	local env, interface = aux_module 'core'
+	local env, interface = aux_module '/core'
 	setfenv(1, env)
 	g.aux = interface
 end
 
 public.version = '5.0.0'
 
-local t, temp, recycle
 do
-	local table_pool, locked = {}, {}
+	local recycle_frame = CreateFrame 'Frame'
+	local table_pool, auto_recycle = {}, {}
 	local function wipe(t) -- like with a cloth or something
 		for k in t do t[k] = nil end
 		setn(t, 0)
 		return t
 	end
-	function recycle(t)
-		locked[t] = nil
+	function public.recycle(t)
+		auto_recycle[t] = nil
 		tinsert(table_pool, wipe(t))
 		log(getn(table_pool))
 	end
-	public.recycle = recycle
-	temp = setmetatable({}, {
-		__call = function()
-			local t = tremove(table_pool) or {}
-			locked[t] = true
-			return t
-		end,
-		__sub = function(_, t) locked[t] = true return t end,
-	})
-	public.temp = temp
-	function t()
-		return tremove(table_pool) or {}
-	end
-	public.accessor.t = t
+	public.accessor.temp = setmetatable({}, {__sub = function(_, t) auto_recycle[t] = true return t end})
+	function public.accessor.t() return tremove(table_pool) or {} end
 end
 
 do
+	local module_envs = t
 	function public.module(path)
 		local env, parts, parent, name
-		parts, parent, name = gfind(path, '[%a_][%w_]*'), aux_module 'modules', ''
+		parts, parent, name = gfind(path, '[%a_][%w_]*'), aux_module '/modules', ''
 		for part in parts do
 			name = name..'/'..part
-			env, parent.public[part] = aux_module(name)
-			env.import('modules', 'core', 'util')
+			if not module_envs[name] then
+				env, parent.public[part] = aux_module(name)
+				env.import(temp-{'modules', 'core', 'util'})
+				module_envs[name] = env
+			else
+				env = module_envs[name]
+			end
 			parent = env
 		end
 		setfenv(2, env)
@@ -51,13 +45,13 @@ do
 end
 
 local event_frame = CreateFrame 'Frame'
-for _, event in {'VARIABLES_LOADED', 'ADDON_LOADED', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE'} do
+for _, event in temp-{'VARIABLES_LOADED', 'ADDON_LOADED', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE'} do
 	event_frame:RegisterEvent(event)
 end
 
 ADDON_LOADED = {}
 do
-	local variables_loaded_hooks, player_login_hooks = {}, {}
+	local variables_loaded_hooks, player_login_hooks = t, t
 	function public.mutator.LOAD(f) tinsert(variables_loaded_hooks, f) end
 	function public.mutator.LOAD2(f) tinsert(player_login_hooks, f) end
 	event_frame:SetScript('OnEvent', function()
@@ -74,10 +68,4 @@ do
 			end
 		end
 	end)
-end
-
-function public.log(...)
-	local msg = '[aux]'
-	for i=1,arg.n do msg = msg..' '..tostring(arg[i]) end
-	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
 end

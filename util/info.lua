@@ -121,8 +121,8 @@ function public.auction(index, query_type)
             link = link,
             itemstring = item_info.itemstring,
             item_key = item_id..':'..suffix_id,
-            search_signature = join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), g.aux_ignore_owner and (aux.is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
-            sniping_signature = join({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, g.aux_ignore_owner and (aux.is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
+            search_signature = join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), g.aux_ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+            sniping_signature = join({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, g.aux_ignore_owner and (is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
 
             name = name,
             texture = texture,
@@ -161,12 +161,12 @@ end
 function public.bid_update(auction_record)
     auction_record.high_bid = auction_record.bid_price
     auction_record.blizzard_bid = auction_record.bid_price
-    auction_record.min_increment = aux.min_bid_increment(auction_record.bid_price)
+    auction_record.min_increment = min_bid_increment(auction_record.bid_price)
     auction_record.bid_price = auction_record.bid_price + auction_record.min_increment
     auction_record.unit_blizzard_bid = auction_record.blizzard_bid / auction_record.aux_quantity
     auction_record.unit_bid_price = auction_record.bid_price / auction_record.aux_quantity
     auction_record.high_bidder = 1
-    auction_record.search_signature = table.concat({auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, g.aux_ignore_owner and (aux.is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
+    auction_record.search_signature = table.concat({auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, g.aux_ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
 end
 
 function public.set_tooltip(itemstring, owner, anchor)
@@ -244,7 +244,7 @@ function public.load_tooltip(frame, tooltip)
 end
 
 function public.display_name(item_id, no_brackets, no_color)
-    for item_info in present(aux.info.item(item_id)) do
+    for item_info in present(info.item(item_id)) do
         local name = item_info.name
         if not no_brackets then
             name = '['..name..']'
@@ -368,7 +368,7 @@ function public.item(item_id, suffix_id)
 	        texture = texture,
 	    }
     end
-    return aux.cache.item_info(item_id)
+    return cache.item_info(item_id)
 end
 
 function public.item_class_index(item_class)

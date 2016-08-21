@@ -2,25 +2,6 @@ aux.module 'core'
 
 public.bids_loaded = false
 public.current_owner_page = nil
-public.last_owner_page_requested = nil
-
-tabs = {}
-function public.tab(index, name)
-	local module_env = getfenv(2)
-	local tab = {name=name, env=module_env}
-	module_env.public.ACTIVE = function() return tab == active_tab end
-	for handler in temp-set{'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do module_env.mutable[handler] = nil end
-	tabs[index] = tab
-end
-do
-	local active_tab_index
-	function accessor.active_tab() return tabs[active_tab_index] end
-	function on_tab_click(index)
-		call(active_tab_index and active_tab.env.CLOSE)
-		active_tab_index = index
-		call(active_tab_index and active_tab.env.OPEN)
-	end
-end
 
 function LOAD()
 	do
@@ -72,6 +53,99 @@ function LOAD()
 	end
 end
 
+function public.log(...)
+	local msg = '[aux]'
+	for i=1,arg.n do msg = msg..' '..tostring(arg[i]) end
+	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
+end
+
+tabs = {}
+function public.tab(index, name)
+	local module_env = getfenv(2)
+	local tab = {name=name, env=module_env}
+	module_env.public.accessor.ACTIVE = function() return tab == active_tab end
+	for _, handler in temp-{'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do module_env.mutable[handler] = nil end
+	tabs[index] = tab
+end
+do
+	local active_tab_index
+	function accessor.active_tab() return tabs[active_tab_index] end
+	function on_tab_click(index)
+		call(active_tab_index and active_tab.env.CLOSE)
+		active_tab_index = index
+		call(active_tab_index and active_tab.env.OPEN)
+	end
+end
+
+public.orig = {}
+function public.hook(name, handler, object)
+	local orig
+	if object then
+		m.orig[object] = m.orig[object] or {}
+		orig = m.orig[object]
+	else
+		object = g
+		orig = m.orig
+	end
+	assert(not orig[name], '"'..name..'" is already hooked.')
+	orig[name] = object[name]
+	object[name] = handler
+end
+
+do
+	local locked
+	function public.accessor.bid_in_progress() return locked end
+	function public.place_bid(type, index, amount, on_success)
+		if locked then
+			return
+		end
+		local money = GetMoney()
+		PlaceAuctionBid(type, index, amount)
+		if money >= amount then
+			locked = true
+			control.event_listener('CHAT_MSG_SYSTEM', function(kill)
+				if arg1 == ERR_AUCTION_BID_PLACED then
+					call(on_success)
+					locked = false
+					kill()
+				end
+			end)
+		end
+	end
+end
+
+do
+	local locked
+	function public.accessor.cancel_in_progress() return locked end
+	function public.cancel_auction(index, on_success)
+		if locked then
+			return
+		end
+		locked = true
+		CancelAuction(index)
+		control.event_listener('CHAT_MSG_SYSTEM', function(kill)
+			if arg1 == ERR_AUCTION_REMOVED then
+				call(on_success)
+				locked = false
+				kill()
+			end
+		end)
+	end
+end
+
+function public.is_player(name, current)
+	local realm = GetCVar 'realmName'
+	return not current and index(g.aux_characters, realm, name) or UnitName 'player' == name
+end
+
+function public.neutral_faction()
+	return not UnitFactionGroup 'npc'
+end
+
+function public.min_bid_increment(current_bid)
+	return max(1, floor(current_bid / 100) * 5)
+end
+
 function AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
 	frame:Show()
@@ -92,8 +166,16 @@ function AUCTION_BIDDER_LIST_UPDATE()
 	bids_loaded = true
 end
 
-function AUCTION_OWNED_LIST_UPDATE()
-	current_owner_page = last_owner_page_requested or 0
+do
+	local last_owner_page_requested
+	function GetOwnerAuctionItems(...)
+		local page = arg[1]
+		last_owner_page_requested = page
+		return orig.GetOwnerAuctionItems(unpack(arg))
+	end
+	function AUCTION_OWNED_LIST_UPDATE()
+		current_owner_page = last_owner_page_requested or 0
+	end
 end
 
 function ADDON_LOADED.Blizzard_AuctionUI()
@@ -172,27 +254,6 @@ do
 	end
 end
 
-public.orig = {}
-function public.hook(name, handler, object)
-	local orig
-	if object then
-		m.orig[object] = m.orig[object] or {}
-		orig = m.orig[object]
-	else
-		object = g
-		orig = m.orig
-	end
-	assert(not orig[name], '"'..name..'" is already hooked.')
-	orig[name] = object[name]
-	object[name] = handler
-end
-
-function GetOwnerAuctionItems(...)
-    local page = arg[1]
-    last_owner_page_requested = page
-    return orig.GetOwnerAuctionItems(unpack(arg))
-end
-
 function AuctionFrameAuctions_OnEvent(...)
     if AuctionFrameAuctions:IsVisible() then
         return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
@@ -215,58 +276,4 @@ function UseContainerItem(...)
     for item_info in present(info.container_item(arg[1], arg[2])) do
         return active_tab.env.USE_ITEM(item_info)
     end
-end
-
-do
-	local locked
-	function public.bid_in_progress() return locked end
-	function public.place_bid(type, index, amount, on_success)
-		if locked then
-			return
-		end
-		local money = GetMoney()
-		PlaceAuctionBid(type, index, amount)
-		if money >= amount then
-			locked = true
-			control.event_listener('CHAT_MSG_SYSTEM', function(kill)
-				if arg1 == ERR_AUCTION_BID_PLACED then
-					call(on_success)
-					locked = false
-					kill()
-				end
-			end)
-		end
-	end
-end
-
-do
-	local locked
-	function public.cancel_in_progress() return locked end
-	function public.cancel_auction(index, on_success)
-		if locked then
-			return
-		end
-		locked = true
-		CancelAuction(index)
-		control.event_listener('CHAT_MSG_SYSTEM', function(kill)
-			if arg1 == ERR_AUCTION_REMOVED then
-				call(on_success)
-				locked = false
-				kill()
-			end
-		end)
-	end
-end
-
-function public.is_player(name, current)
-    local realm = GetCVar 'realmName'
-    return not current and index(g.aux_characters, realm, name) or UnitName 'player' == name
-end
-
-function public.neutral_faction()
-	return not UnitFactionGroup 'npc'
-end
-
-function public.min_bid_increment(current_bid)
-	return max(1, floor(current_bid / 100) * 5)
 end

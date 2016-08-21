@@ -8,7 +8,7 @@ function public:complete_filter()
 	local filter_string = this:GetText()
 
 	local completed_filter_string = ({strfind(filter_string, '([^;]*)/[^/;]*$')})[3]
-	local _, suggestions = aux.filter.query(completed_filter_string or '')
+	local _, suggestions = filter.query(completed_filter_string or '')
 
 	local start_index, _, current_modifier = strfind(filter_string, '([^/;]*)$')
 	current_modifier = current_modifier or ''

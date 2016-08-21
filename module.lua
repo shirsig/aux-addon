@@ -1,16 +1,16 @@
-local setmetatable, unpack, mask, add, g = setmetatable, unpack, bit.band, bit.bor, getfenv(0)
+local setmetatable, unpack, mask, g = setmetatable, unpack, bit.band, getfenv(0)
 local PRIVATE, PUBLIC, MUTABLE, ACCESSOR, MUTATOR = 1, 2, 4, 8, 16
 local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, accessor=ACCESSOR, mutator=MUTATOR}
-local MASK = {private=MUTABLE+ACCESSOR+MUTATOR, public=MUTABLE+ACCESSOR+MUTATOR, mutable=PRIVATE+PUBLIC, accessor=PRIVATE+PUBLIC+MUTATOR, mutator=PRIVATE+PUBLIC+ACCESSOR}
+local MASK = {private=PUBLIC+MUTABLE+ACCESSOR+MUTATOR, public=PRIVATE+MUTABLE+ACCESSOR+MUTATOR, mutable=PRIVATE+PUBLIC, accessor=PRIVATE+PUBLIC+MUTATOR, mutator=PRIVATE+PUBLIC+ACCESSOR}
 local _10, _01, tf, ft = {[true]=1, [false]=0}, {[true]=0, [false]=1}, {true, false}, {false, true}
 local importer_mt, declarator_mt, env_mt, interface_mt, lock_mt
 local define_property, declarator_accessor, private_accessor, public_accessor, mutable_accessor, accessor_accessor, mutator_accessor, index, error
 local _modules, _metadata, _data, _accessors, _mutators, _imports, _declarators, _declarator_state = setmetatable({}, lock_mt), {}, {}, {}, {}, {}, {}, {}
 function error(message, ...) g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), 3) end
 importer_mt = {__metatable=false}
-function importer_mt.__call(self, ...)
+function importer_mt.__call(self, t)
 	local imports = _imports[self]
-	for i=1,arg.n do imports[arg[i]] = true end
+	for _, name in t do imports[name] = true end
 end
 function declarator_accessor(modifier)
 	return function(declarator) return function() _declarator_state[declarator] = PRIVATE+modifier return declarator end end
@@ -36,6 +36,7 @@ function index(access, default)
 	return function(self, key)
 		local modifiers = _metadata[self][key] or 0
 		if mask(access+ACCESSOR+MUTATOR, modifiers) == access then
+--			DEFAULT_CHAT_FRAME:AddMessage(access)
 			return _data[self][key]
 		elseif mask(access+ACCESSOR, modifiers) == access+ACCESSOR then
 			return _accessors[self][key]()
@@ -65,22 +66,21 @@ function interface_mt.__newindex(self, key, value)
 end
 lock_mt = {}
 function g.aux_module(name)
-	if not _modules[name] then
-		local metadata, data, accessors, mutators, imports, importer, declarator, env, interface
-		imports, importer, declarator, env, interface = {}, setmetatable({}, importer_mt), setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
-		metadata = setmetatable({g=PRIVATE, m=PRIVATE, import=PRIVATE, private=PRIVATE+ACCESSOR, public=PRIVATE+ACCESSOR, mutable=PRIVATE+ACCESSOR, accessor=PRIVATE+ACCESSOR, mutator=PRIVATE+ACCESSOR}, lock_mt)
-		data = {g=g, m=env, import=importer}
-		accessors = {private=private_accessor(declarator), public=public_accessor(declarator), mutable=mutable_accessor(declarator), accessor=accessor_accessor(declarator), mutator=mutator_accessor(declarator)}
-		mutators = {}
-		_metadata[name], _metadata[declarator], _metadata[env], _metadata[interface] = metadata, metadata, metadata, metadata
-		_data[name], _data[declarator], _data[env], _data[interface] = data, data, data, data
-		_accessors[name], _accessors[declarator], _accessors[env], _accessors[interface] = accessors, accessors, accessors, accessors
-		_mutators[name], _mutators[declarator], _mutators[env], _mutators[interface] = mutators, mutators, mutators, mutators
-		_imports[name], _imports[importer] = imports, imports
-		_declarators[name] = declarator
-		_modules[name] = {env, interface}
-	end
-	return unpack(_modules[name])
+	if _modules[name] then error('Module %s already exists.', name) end
+	local metadata, data, accessors, mutators, imports, importer, declarator, env, interface
+	imports, importer, declarator, env, interface = {}, setmetatable({}, importer_mt), setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
+	metadata = setmetatable({g=PRIVATE, m=PRIVATE, import=PRIVATE, private=PRIVATE+ACCESSOR, public=PRIVATE+ACCESSOR, mutable=PRIVATE+ACCESSOR, accessor=PRIVATE+ACCESSOR, mutator=PRIVATE+ACCESSOR}, lock_mt)
+	data = {g=g, m=env, import=importer}
+	accessors = {private=private_accessor(declarator), public=public_accessor(declarator), mutable=mutable_accessor(declarator), accessor=accessor_accessor(declarator), mutator=mutator_accessor(declarator)}
+	mutators = {}
+	_metadata[name], _metadata[declarator], _metadata[env], _metadata[interface] = metadata, metadata, metadata, metadata
+	_data[name], _data[declarator], _data[env], _data[interface] = data, data, data, data
+	_accessors[name], _accessors[declarator], _accessors[env], _accessors[interface] = accessors, accessors, accessors, accessors
+	_mutators[name], _mutators[declarator], _mutators[env], _mutators[interface] = mutators, mutators, mutators, mutators
+	_imports[name], _imports[importer] = imports, imports
+	_declarators[name] = declarator
+	_modules[name] = true
+	return env, interface
 end
 local frame = CreateFrame 'Frame'
 frame:RegisterEvent 'PLAYER_LOGIN'
@@ -95,11 +95,12 @@ frame:SetScript('OnEvent', function()
 			local data = _data[import_name]
 			for key, modifiers in _metadata[import_name] do
 				if mask(PUBLIC, modifiers) ~= 0 then
+					count = count + 1
 					_declarator_state[declarator] = modifiers
 					declarator[key] = data[key]
 				end
 			end
 		end
 	end
-	aux.log('imported: '..count..' in '..(GetTime()-t0))
+	log('imported: '..count..' in '..(GetTime()-t0))
 end)

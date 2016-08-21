@@ -3,22 +3,22 @@ aux.module 'stack'
 state = nil
 
 function stack_size(slot)
-    local container_item_info = aux.info.container_item(unpack(slot))
+    local container_item_info = info.container_item(unpack(slot))
     return container_item_info and container_item_info.count or 0
 end
 
 function charges(slot)
-    local container_item_info = aux.info.container_item(unpack(slot))
+    local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.charges
 end
 
 function max_stack(slot)
-	local container_item_info = aux.info.container_item(unpack(slot))
+	local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.max_stack
 end
 
 function locked(slot)
-	local container_item_info = aux.info.container_item(unpack(slot))
+	local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.locked
 end
 
@@ -31,8 +31,8 @@ function find_item_slot(partial)
 end
 
 function matching_item(slot, partial)
-	local item_info = aux.info.container_item(unpack(slot))
-	return item_info and item_info.item_key == m.state.item_key and aux.info.auctionable(item_info.tooltip) and (not partial or item_info.count < item_info.max_stack)
+	local item_info = info.container_item(unpack(slot))
+	return item_info and item_info.item_key == m.state.item_key and info.auctionable(item_info.tooltip) and (not partial or item_info.count < item_info.max_stack)
 end
 
 function find_empty_slot()
@@ -53,7 +53,7 @@ end
 
 function move_item(from_slot, to_slot, amount, k)
 	if m.locked(from_slot) or m.locked(to_slot) then
-		return aux.control.wait(k)
+		return control.wait(k)
 	end
 
 	amount = min(m.max_stack(from_slot) - m.stack_size(to_slot), m.stack_size(from_slot), amount)
@@ -63,7 +63,7 @@ function move_item(from_slot, to_slot, amount, k)
 	SplitContainerItem(from_slot[1], from_slot[2], amount)
 	PickupContainerItem(unpack(to_slot))
 
-	return aux.control.when(function() return m.stack_size(to_slot) == expected_size end, k)
+	return control.when(function() return m.stack_size(to_slot) == expected_size end, k)
 end
 
 function process()
@@ -105,7 +105,7 @@ end
 
 function public.stop()
 	if m.state then
-		aux.control.kill_thread(m.state.thread_id)
+		control.kill_thread(m.state.thread_id)
 		local callback, slot = m.state.callback, m.state.target_slot
 		if slot and not m.matching_item(slot) then
 			slot = nil
@@ -118,7 +118,7 @@ end
 function public.start(item_key, size, callback)
 	m.stop()
 
-	local thread_id = aux.control.thread(m.process)
+	local thread_id = control.thread(m.process)
 	m.state = {
 		thread_id = thread_id,
 		item_key = item_key,

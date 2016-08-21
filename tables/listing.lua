@@ -305,8 +305,8 @@ local methods = {
 
         local text = col:CreateFontString()
         text:SetJustifyV('CENTER')
-        text:SetFont(aux.gui.config.font, 16)
-        text:SetTextColor(unpack(aux.gui.color.text.enabled))
+        text:SetFont(gui.config.font, 16)
+        text:SetTextColor(unpack(gui.color.text.enabled))
         text:SetAllPoints()
         col.text = text
         col:SetFontString(text)
@@ -333,7 +333,7 @@ local methods = {
         local colNum = getn(row.cols) + 1
         local col = CreateFrame('Button', nil, row)
         local text = col:CreateFontString()
-        text:SetFont(aux.gui.config.font, ST_ROW_TEXT_SIZE)
+        text:SetFont(gui.config.font, ST_ROW_TEXT_SIZE)
         text:SetJustifyV 'CENTER'
         text:SetPoint('TOPLEFT', 1, -1)
         text:SetPoint('BOTTOMRIGHT', -1, 1)
@@ -389,9 +389,9 @@ local methods = {
         -- update the text size of the head cols
         for _, col in st.headCols do
             if st.sizes.headFontSize then
-                col.text:SetFont(aux.gui.config.font, st.sizes.headFontSize)
+                col.text:SetFont(gui.config.font, st.sizes.headFontSize)
             else
-                col.text:SetFont(aux.gui.config.font, aux.gui.config.medium_font_size)
+                col.text:SetFont(gui.config.font, gui.config.medium_font_size)
             end
         end
         st:Redraw()
@@ -429,14 +429,14 @@ function public.CreateScrollingTable(parent)
     st.scrollBar = scrollBar
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
-    thumbTex:SetTexture(unpack(aux.gui.color.content.background))
+    thumbTex:SetTexture(unpack(gui.color.content.background))
     thumbTex:SetHeight(50)
     thumbTex:SetWidth(12)
     getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
     getglobal(scrollBar:GetName()..'ScrollDownButton'):Hide()
 
     -- create head line at default position
-    st.headLine = aux.gui.horizontal_line(st, 0)
+    st.headLine = gui.horizontal_line(st, 0)
 
     -- add all the methods
     for name, func in methods do

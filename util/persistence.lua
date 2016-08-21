@@ -6,7 +6,7 @@ do
     local realm, faction
 
     function LOAD()
-        aux.control.thread(aux.control.when, function() faction = UnitFactionGroup 'player' return faction end, function() end)
+        control.thread(control.when, function() faction = UnitFactionGroup 'player' return faction end, function() end)
         realm = GetCVar 'realmName'
     end
 

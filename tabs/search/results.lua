@@ -98,7 +98,7 @@ function update_continuation()
 end
 
 function discard_continuation()
-	aux.scan.abort(search_scan_id)
+	scan.abort(search_scan_id)
 	current_search.continuation = nil
 	update_continuation()
 end
@@ -115,7 +115,7 @@ end
 
 function update_auto_buy_filter()
 	if g.aux_auto_buy_filter ~= '' then
-		local queries = aux.filter.queries(g.aux_auto_buy_filter)
+		local queries = filter.queries(g.aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
 				log('Error: The automatic buyout filter may contain only one query')
@@ -144,7 +144,7 @@ function start_real_time_scan(query, search, continuation)
 
 	local next_page
 	local new_records = {}
-	search_scan_id = aux.scan.start{
+	search_scan_id = scan.start{
 		type = 'list',
 		queries = {query},
 		auto_buy_validator = search.auto_buy_validator,
@@ -162,8 +162,8 @@ function start_real_time_scan(query, search, continuation)
 			if not ignore_page then
 				if search.auto_buy then
 					ctrl.suspend()
-					aux.place_bid('list', auction_record.index, auction_record.buyout_price, L(ctrl.resume, true))
-					aux.control.thread(aux.control.when, later(GetTime(), 10), L(ctrl.resume, false))
+					place_bid('list', auction_record.index, auction_record.buyout_price, L(ctrl.resume, true))
+					control.thread(control.when, later(GetTime(), 10), L(ctrl.resume, false))
 				else
 					tinsert(new_records, auction_record)
 				end
@@ -228,7 +228,7 @@ function start_search(queries, continuation)
 	end
 
 
-	search_scan_id = aux.scan.start{
+	search_scan_id = scan.start{
 		type = 'list',
 		queries = queries,
 		auto_buy_validator = search.auto_buy_validator,
@@ -258,8 +258,8 @@ function start_search(queries, continuation)
 		on_auction = function(auction_record, ctrl)
 			if search.auto_buy then
 				ctrl.suspend()
-				aux.place_bid('list', auction_record.index, auction_record.buyout_price, L(ctrl.resume, true))
-				aux.control.thread(aux.control.when, later(GetTime(), 10), L(ctrl.resume, false))
+				place_bid('list', auction_record.index, auction_record.buyout_price, L(ctrl.resume, true))
+				control.thread(control.when, later(GetTime(), 10), L(ctrl.resume, false))
 			elseif getn(search.records) < 1000 then
 				tinsert(search.records, auction_record)
 				if getn(search.records) == 1000 then
@@ -310,7 +310,7 @@ function public.execute(resume, real_time)
 	end
 	local filter_string = search_box:GetText()
 
-	local queries = aux.filter.queries(filter_string)
+	local queries = filter.queries(filter_string)
 	if not queries then
 		return
 	elseif real_time then
@@ -367,7 +367,7 @@ end
 
 function test(record)
 	return function(index)
-		local auction_info = aux.info.auction(index)
+		local auction_info = info.auction(index)
 		return auction_info and auction_info.search_signature == record.search_signature
 	end
 end
@@ -381,13 +381,13 @@ do
 	function find_auction(record)
 		local search = current_search
 
-		if not search.table:ContainsRecord(record) or aux.is_player(record.owner) then
+		if not search.table:ContainsRecord(record) or is_player(record.owner) then
 			return
 		end
 
-		aux.scan.abort(scan_id)
+		scan.abort(scan_id)
 		state = SEARCHING
-		scan_id = aux.scan_util.find(
+		scan_id = scan_util.find(
 			record,
 			current_search.status_bar,
 			function()
@@ -408,8 +408,8 @@ do
 				if not record.high_bidder then
 					bid_button:SetScript('OnClick', function()
 						if test(record)(index) and search.table:ContainsRecord(record) then
-							aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
-								aux.info.bid_update(record)
+							place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
+								info.bid_update(record)
 								search.table:SetDatabase()
 							end or L(search.table.RemoveAuctionRecord, search.table, record))
 						end
@@ -420,7 +420,7 @@ do
 				if record.buyout_price > 0 then
 					buyout_button:SetScript('OnClick', function()
 						if test(record)(index) and search.table:ContainsRecord(record) then
-							aux.place_bid('list', index, record.buyout_price, L(search.table.RemoveAuctionRecord, search.table, record))
+							place_bid('list', index, record.buyout_price, L(search.table.RemoveAuctionRecord, search.table, record))
 						end
 					end)
 					buyout_button:Enable()
@@ -447,7 +447,7 @@ do
 		elseif state == FOUND and not test(selection.record)(found_index) then
 			buyout_button:Disable()
 			bid_button:Disable()
-			if not aux.bid_in_progress() then
+			if not bid_in_progress() then
 				state = IDLE
 			end
 		end

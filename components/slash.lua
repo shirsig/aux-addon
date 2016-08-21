@@ -3,10 +3,10 @@ function SlashCmdList.AUX(command)
 	if not command then return end
 	local arguments = tokenize(command)
     if arguments[1] == 'clear' and arguments[2] == 'history' then
-        aux.persistence.load_dataset().history = nil
+        persistence.load_dataset().history = nil
         log 'History cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'post' then
-        aux.persistence.load_dataset().post = nil
+        persistence.load_dataset().post = nil
         log 'Post settings cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'datasets' then
         g.aux_datasets = {}
@@ -23,7 +23,7 @@ function SlashCmdList.AUX(command)
 	    g.aux_auctionable_items = {}
         log 'Item cache cleared.'
     elseif arguments[1] == 'populate' and arguments[2] == 'wdb' then
-        aux.cache.populate_wdb()
+        cache.populate_wdb()
     elseif arguments[1] == 'tooltip' and arguments[2] == 'value' then
 	    g.aux_tooltip_value = not g.aux_tooltip_value
         log('Historical value in tooltip '..(g.aux_tooltip_value and 'enabled' or 'disabled')..'.')

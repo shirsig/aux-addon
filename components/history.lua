@@ -14,7 +14,7 @@ function new_record()
 end
 
 function load_data()
-	local dataset = aux.persistence.load_dataset()
+	local dataset = persistence.load_dataset()
 	dataset.history = dataset.history or {}
 	return dataset.history
 end
@@ -24,7 +24,7 @@ function read_record(item_key)
 
 	local record
 	if data[item_key] then
-		record = aux.persistence.read(history_schema, data[item_key])
+		record = persistence.read(history_schema, data[item_key])
 	else
 		record = m.new_record()
 	end
@@ -40,7 +40,7 @@ end
 function write_record(item_key, record)
 	m.value_cache[item_key] = nil
 	local data = m.load_data()
-	data[item_key] = aux.persistence.write(history_schema, record)
+	data[item_key] = persistence.write(history_schema, record)
 end
 
 function public.process_auction(auction_record)
