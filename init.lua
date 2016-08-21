@@ -1,14 +1,9 @@
-local aux_module, getn, setn, tinsert, tremove, setfenv, gfind = aux_module, getn, table.setn, tinsert, tremove, setfenv, string.gfind
-do
-	local env, interface = aux_module '/core'
-	setfenv(1, env)
-	g.aux = interface
-end
+local aux_module, getn, setn, tinsert, tremove, getfenv, setfenv, gfind = aux_module, getn, table.setn, tinsert, tremove, getfenv, setfenv, string.gfind
+setfenv(1, aux_module '/core')
 
 public.version = '5.0.0'
 
 do
-	local recycle_frame = CreateFrame 'Frame'
 	local table_pool, auto_recycle = {}, {}
 	local function wipe(t) -- like with a cloth or something
 		for k in t do t[k] = nil end
@@ -20,28 +15,32 @@ do
 		tinsert(table_pool, wipe(t))
 		log(getn(table_pool))
 	end
-	public.accessor.temp = setmetatable({}, {__sub = function(_, t) auto_recycle[t] = true return t end})
+	public.temp = setmetatable({}, {__sub = function(_, t) auto_recycle[t] = true return t end})
 	function public.accessor.t() return tremove(table_pool) or {} end
+	CreateFrame('Frame'):SetScript('OnUpdate', function()
+		for t in auto_recycle do recycle(t) end
+		recycle(auto_recycle)
+		auto_recycle = t
+	end)
 end
 
 do
-	local module_envs = t
+	local envs = t
+	envs['/core'], envs['/modules'] = getfenv(), aux_module '/modules'
 	function public.module(path)
 		local env, parts, parent, name
-		parts, parent, name = gfind(path, '[%a_][%w_]*'), aux_module '/modules', ''
+		parts, parent, name = gfind(path, '[%a_][%w_]*'), envs.modules, ''
 		for part in parts do
 			name = name..'/'..part
-			if not module_envs[name] then
-				env, parent.public[part] = aux_module(name)
-				env.import(temp-{'modules', 'core', 'util'})
-				module_envs[name] = env
-			else
-				env = module_envs[name]
+			if not envs[name] then
+				envs[name], parent.public[part] = aux_module(name)
+				envs[name].import(temp-{'modules', 'core', 'util'})
 			end
-			parent = env
+			parent = envs[name]
 		end
-		setfenv(2, env)
+		setfenv(2, parent)
 	end
+	g.aux = module 'core'
 end
 
 local event_frame = CreateFrame 'Frame'

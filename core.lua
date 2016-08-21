@@ -77,19 +77,13 @@ do
 	end
 end
 
-public.orig = {}
+public.orig = setmetatable({}, {__index=function(self, key) return self[g][key] end})
 function public.hook(name, handler, object)
-	local orig
-	if object then
-		m.orig[object] = m.orig[object] or {}
-		orig = m.orig[object]
-	else
-		object = g
-		orig = m.orig
-	end
-	assert(not orig[name], '"'..name..'" is already hooked.')
-	orig[name] = object[name]
-	object[name] = handler
+	handler = handler or getfenv(2)[name]
+	object = object or g
+	orig[object] = orig[object] or {}
+	assert(not orig[object][name] '"'..name..'" is already hooked into.')
+	orig[object][name], object[name] = object[name], handler
 end
 
 do

@@ -63,12 +63,16 @@ do
 		end
 		return f(unpack(params))
 	end
-	function public.L(f, ...)
-		if type(f) == 'function' then
+	local a1b2 = {a=1, b=2}
+	function public.L(body, ...)
+		if type(body) == 'function' then
 			local arg1 = arg
-			return function(...) return helper(f, arg1, arg) end
+			return function(...) return helper(body, arg1, arg) end
 		else
-			return loadstring 'function(_1,_2,_3,_4,_5,_6,_7,_8,_9)'
+			body = gsub(body, '_([ab])', function(char) return '_'..a1b2[char] end)
+			local lambda = loadstring 'return function(_1,_2,_3,_4,_5,_6,_7,_8,_9)'..f..' end'
+			setfenv(lambda, getfenv(2))
+			return lambda
 		end
 	end
 end
@@ -105,7 +109,7 @@ do
 	local __index = function(self, key)
 		return _state[self].handler({public=self, private=_state[self].state}, key)
 	end
-	function public.index_function(state, handler)
+	function public.index_function(state, handler) -- TODO rename table-accessor, use predicate to stop
 		local state, self = {handler=handler, state=state}, {}
 		_state[self] = state
 		return setmetatable(self, {__metatable=false, __index=__index, state=state})
