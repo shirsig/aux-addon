@@ -9,9 +9,7 @@ do
 	local searches = {}
 	local search_index = 1
 
-	function accessor.current_search()
-		return searches[search_index]
-	end
+	private.current_search{get=function() return searches[search_index] end}
 
 	function update_search(index)
 		searches[search_index].status_bar:Hide()

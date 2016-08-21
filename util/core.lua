@@ -1,6 +1,6 @@
 aux.module 'util'
 
-local temp, recycle, getn = temp, recycle, _g.getn
+local temp, recycle, getn = _g.aux.temp, _g.aux.recycle, _g.getn
 
 function public.copy(t)
 	local copy = {}
@@ -25,11 +25,13 @@ do
 		end
 	end
 	for i=1,9 do public[join{replicate(i, 'x')}] = setter(i) end
-	function public.accessor.__()
-		assert(charges > 0)
-		charges = charges - 1
-		return value
-	end
+	public.__{
+		get = function()
+			assert(charges > 0)
+			charges = charges - 1
+			return value
+		end,
+	}
 end
 
 do
@@ -40,8 +42,7 @@ do
 		return tmp
 	end
 	function public.present(v)
-		state = v
-		return f
+		state = v; return f
 	end
 end
 
@@ -88,9 +89,7 @@ end
 
 public.huge = 1.8*10^308
 
-function public.accessor.modified()
-	return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown()
-end
+public.modified{get=function() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end}
 
 --do TODO
 --	local _state = setmetatable({}, {__mode='kv'})
@@ -123,10 +122,7 @@ function public.expand(array, ...)
 end
 
 function public.select(i, ...)
-	while i > 1 do
-		i = i - 1
-		tremove(arg, i)
-	end
+	while i > 1 do i = i - 1; tremove(arg, i) end
 	return tremove(arg, 1), unpack(arg)
 end
 
@@ -251,18 +247,20 @@ end
 
 function public.round(x) return floor(x + 0.5) end
 
-function public.accessor.inventory()
-	local bag, slot = 0, 0
-	return function()
-		if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then
-			repeat bag = bag + 1 until GetBagName(bag) or bag > 4
-			slot = 1
-		else
-			slot = slot + 1
+public.inventory{
+	get = function()
+		local bag, slot = 0, 0
+		return function()
+			if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then
+				repeat bag = bag + 1 until GetBagName(bag) or bag > 4
+				slot = 1
+			else
+				slot = slot + 1
+			end
+			if bag <= 4 then return {bag, slot}, bag_type(bag) end
 		end
-		if bag <= 4 then return {bag, slot}, bag_type(bag) end
-	end
-end
+	end,
+}
 
 function public.bag_type(bag)
 	if bag == 0 then

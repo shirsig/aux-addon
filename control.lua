@@ -44,10 +44,7 @@ end
 
 do
 	local id = 0
-	function accessor.id()
-		id = id + 1
-		return id
-	end
+	private.id{get=function() id = id + 1; return id end}
 end
 
 function public.kill_listener(listener_id)

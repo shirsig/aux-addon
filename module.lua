@@ -3,6 +3,7 @@ local PRIVATE, PUBLIC, MUTABLE, PROPERTY = 0, 1, 2, 4
 local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, property=PROPERTY}
 local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+PROPERTY, public=MUTABLE+PROPERTY, mutable=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
 local error, import, define_property, lock_mt, env_mt, interface_mt, declarator_mt
+lock_mt = {}
 local _state, _modules = {}, {}
 function error(message, level, ...) _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), (level or 1) + 1) end
 function import(imports, t) for k, v in t do imports[type(k) == 'number' and v or k] = v end end
@@ -37,12 +38,12 @@ end
 do
 	local function index(access, default)
 		return function(self, key)
-			local state = _state[self]; local modifiers = state.metadata[key] or error('No field "%s".', 2, key)
-			if mask(access+PROPERTY, modifiers) == access then
+			local state = _state[self]; local modifiers = state.metadata[key]
+			if modifiers and mask(access+PROPERTY, modifiers) == access then
 				return state.data[key]
 			else
 				local getter = state.getters[key]
-				if getter then return getter() else return default[key] end
+				if getter then return getter() else return default[key] or error('No field "%s".', 2, key) end
 			end
 		end
 	end
@@ -69,12 +70,12 @@ do
 	end
 end
 function _g.aux_module(name)
-	if not _state[name] then
+	if not _modules[name] then
 		local state, declarator, env, interface, imports
 		env, interface, declarator, imports = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), {}
 		state = {
 			name = name, env = env, interface = interface, declarator = declarator, imports = {}, declarator_state = PRIVATE,
-			metadata={_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, getter=PROPERTY, setter=PROPERTY, mutable=PROPERTY},
+			metadata = {_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, getter=PROPERTY, setter=PROPERTY, mutable=PROPERTY},
 			data = {_g=_g, _m=env, _i=interface, import=function(t) import(imports, t) end},
 			getters = {private=function() state.modifiers = PRIVATE return declarator end, public=function() state.modifiers = PUBLIC return declarator end, mutable=function() state.modifiers = MUTABLE return declarator end},
 			setters = {},
