@@ -60,20 +60,20 @@ do
 			end
 		end
 	}
-	public.color.get = color_accessor(function(color)
+	public.getter.color = color_accessor(function(color)
 		local r, g, b, a = unpack(color)
 		return setmetatable({r/255, g/255, b/255, a}, mt)
 	end)
 end
 
-public.inline_color.get = color_accessor(function(color)
+public.getter.inline_color = color_accessor(function(color)
 	local r, g, b, a = unpack(color)
 	return format('|c%02X%02X%02X%02X', a, r, g, b)
 end)
 
 do
 	local id = 0
-	function public.name.get() id = id + 1; return 'aux_frame'..id end
+	function public.getter.name() id = id + 1; return 'aux_frame'..id end
 end
 
 do

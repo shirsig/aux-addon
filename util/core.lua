@@ -25,7 +25,7 @@ do
 		end
 	end
 	for i=1,9 do public[join{replicate(i, 'x')}] = setter(i) end
-	function public.__.get()
+	function public.getter.__()
 		assert(charges > 0)
 		charges = charges - 1
 		return value
@@ -87,7 +87,7 @@ end
 
 public.huge = 1.8*10^308
 
-function public.modified.get() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end
+function public.getter.modified() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end
 
 --do TODO
 --	local _state = setmetatable({}, {__mode='kv'})
@@ -245,7 +245,7 @@ end
 
 function public.round(x) return floor(x + 0.5) end
 
-function public.inventory.get()
+function public.getter.inventory()
 	local bag, slot = 0, 0
 	return function()
 		if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then

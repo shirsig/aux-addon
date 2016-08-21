@@ -19,26 +19,24 @@ end
 declarator_mt = {__metatable=false}
 function declarator_mt.__call() end
 function declarator_mt.__index(self, key)
-	local state, modifier = _state[self], MODIFIER[key]
+	local state, modifier = _state[self], MODIFIER[key]; local modifiers = state.modifiers
 	if modifier then
-		if mask(MODIFIER_MASK[key], state.modifiers) ~= state.modifiers then declaration_error(2) end
-		state.modifiers = modifier + state.modifiers
-		return self
+		if mask(MODIFIER_MASK[key], modifiers) ~= modifiers then declaration_error(2) end
+		state.modifiers = modifiers + modifier; return self
 	elseif not state.metadata[key] or collision_error(key, 2) then
-		if mask(PROPERTY_MASK, state.modifiers) ~= state.modifiers then declaration_error(2) end
-		state.property, state.metadata[key], state.modifiers = key, PROPERTY + state.modifiers, PRIVATE
+		if mask(PROPERTY_MASK, modifiers) ~= modifiers then declaration_error(2) end
+		state.property, state.metadata[key], state.modifiers = key, modifiers + PROPERTY, PRIVATE
 	end
 end
 function declarator_mt.__newindex(self, key, value)
 	local state = _state[self]
-	if not state.metadata[key] or collision_error(key, 2) then
-		state.metadata[key] = state.modifiers
-		if mask(PROPERTY, state.modifiers) == 0 then
-			state.data[key] = value
-		elseif type(value) == 'function' or declaration_error(2) then
-			if mask(GETTER, state.modifiers) ~= 0 then state.getters[key] = value else state.setters[key] = value end
-			state.property = key
-		end
+	if state.metadata[key] then collision_error(key, 2) end
+	state.metadata[key] = state.modifiers
+	if mask(PROPERTY, state.modifiers) == 0 then
+		state.data[key] = value
+	elseif type(value) == 'function' or declaration_error(2) then
+		local data = mask(GETTER, state.modifiers) ~= 0 and state.getters or state.setters
+		state.property, data[key] = key, value
 	end
 	state.modifiers = PRIVATE
 end

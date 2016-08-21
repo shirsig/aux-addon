@@ -44,7 +44,7 @@ end
 
 do
 	local id = 0
-	function private.id.get() id = id + 1; return id end
+	function getter.id() id = id + 1; return id end
 end
 
 function public.kill_listener(listener_id)
