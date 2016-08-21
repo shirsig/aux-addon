@@ -1,4 +1,4 @@
-local aux_module, getn, setn, tinsert, tremove, getfenv, setfenv, gfind = aux_module, getn, table.setn, tinsert, tremove, getfenv, setfenv, string.gfind
+local aux_module, getn, setn, tinsert, tremove, setfenv = aux_module, getn, table.setn, tinsert, tremove, setfenv
 aux = aux_module 'core'
 public.version = '5.0.0'
 
@@ -25,9 +25,8 @@ end
 
 do
 	local modules = {}
-	local function module_env(name) aux_module(name) return m end
 	function public.module(name)
-		local env = module_env(name)
+		local env = aux_module(name).env
 		if not modules[name] then env.import(temp-{['']='modules', ['']='core', ['']='util'}) end
 		setfenv(2, env)
 		modules[name] = true
