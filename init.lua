@@ -16,7 +16,7 @@ do
 --		log(getn(table_pool))
 	end
 	public.temp = setmetatable({}, {__sub = function(_, t) auto_recycle[t] = true return t end})
-	public.t{get=function() return tremove(table_pool) or {} end}
+	function public.t.get() return tremove(table_pool) or {} end
 	CreateFrame('Frame'):SetScript('OnUpdate', function()
 		for t in auto_recycle do recycle(t) end
 		recycle(auto_recycle)
@@ -43,8 +43,8 @@ end
 ADDON_LOADED = {}
 do
 	local variables_loaded_hooks, player_login_hooks = t, t
-	public.LOAD{set=function(f) tinsert(variables_loaded_hooks, f) end}
-	public.LOAD2{set=function(f) tinsert(player_login_hooks, f) end}
+	function public.LOAD.set(f) tinsert(variables_loaded_hooks, f) end
+	function public.LOAD2.set(f) tinsert(player_login_hooks, f) end
 	event_frame:SetScript('OnEvent', function()
 		if event == 'ADDON_LOADED' then
 			if ADDON_LOADED[arg1] then ADDON_LOADED[arg1]() end

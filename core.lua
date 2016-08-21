@@ -63,13 +63,13 @@ tabs = {}
 function public.tab(index, name)
 	local module_env = getfenv(2)
 	local tab = {name=name, env=module_env}
-	module_env.public.ACTIVE{get=function() return tab == active_tab end}
+	function module_env.public.ACTIVE.get() return tab == active_tab end
 	for _, handler in temp-{'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do module_env.mutable[handler] = nil end
 	tabs[index] = tab
 end
 do
 	local active_tab_index
-	private.active_tab{get=function() return tabs[active_tab_index] end}
+	function private.active_tab.get() return tabs[active_tab_index] end
 	function on_tab_click(index)
 		call(active_tab_index and active_tab.env.CLOSE)
 		active_tab_index = index
@@ -88,11 +88,9 @@ end
 
 do
 	local locked
-	public.bid_in_progress{get=function() return locked end}
+	function public.bid_in_progress.get() return locked end
 	function public.place_bid(type, index, amount, on_success)
-		if locked then
-			return
-		end
+		if locked then return end
 		local money = GetMoney()
 		PlaceAuctionBid(type, index, amount)
 		if money >= amount then
@@ -110,11 +108,9 @@ end
 
 do
 	local locked
-	public.cancel_in_progress{get=function() return locked end}
+	function public.cancel_in_progress.get() return locked end
 	function public.cancel_auction(index, on_success)
-		if locked then
-			return
-		end
+		if locked then return end
 		locked = true
 		CancelAuction(index)
 		control.event_listener('CHAT_MSG_SYSTEM', function(kill)

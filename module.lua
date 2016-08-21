@@ -5,7 +5,7 @@ local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+PROPERTY, public=MUTABLE+P
 local error, declaration_error, immutable_error, collision_error, void_error, import, define_property, lock_mt, env_mt, interface_mt, declarator_mt, property_mt
 lock_mt = {}
 local _state, _modules = {}, setmetatable({}, lock_mt)
-function error(message, level, ...) _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), level + 1) end
+function error(message, level, ...) _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), (level or 1) + 1) end
 function declaration_error(level) error('Malformed declaration.', level + 1) end
 function immutable_error(key, level) error('Field "%s" is immutable.', level + 1, key) end
 function collision_error(key, level) error('Field "%s" already exists.', level + 1, key) end
@@ -86,9 +86,9 @@ function _g.aux_module(name)
 		local state, imports, env, interface, declarator, property
 		imports, env, interface, declarator, property = {}, setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, property_mt)
 		state = {
-			name = name, env = env, interface = interface, imports = {}, declarator_state = PRIVATE,
+			name=name, env=env, interface=interface, imports={}, declarator_state=PRIVATE,
 			metadata = setmetatable({_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, getter=PROPERTY, setter=PROPERTY, mutable=PROPERTY}, lock_mt),
-			data = {_g=_g, _m=env, _i=interface, import=function(t) import(imports, t) end},
+			data = {_g=_g, _m=env, _i=interface, property=property, import=function(t) import(imports, t) end},
 			getters = {private=function() state.modifiers = PRIVATE return declarator end, public=function() state.modifiers = PUBLIC return declarator end, mutable=function() state.modifiers = MUTABLE return declarator end},
 			setters = {},
 		}
