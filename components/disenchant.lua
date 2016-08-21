@@ -40,7 +40,7 @@ do
 	end
 end
 
-function m.LOAD()
+function LOAD()
 	armor = set(
 		'INVTYPE_HEAD',
 		'INVTYPE_NECK',
@@ -72,7 +72,7 @@ end
 
 function public.value(slot, quality, level)
     local expectation
-    for _, event in m.distribution(slot, quality, level) do
+    for _, event in distribution(slot, quality, level) do
         local value = history.value(event.item_id..':'..0)
         if not value then
             return
@@ -84,19 +84,19 @@ function public.value(slot, quality, level)
 end
 
 function public.distribution(slot, quality, level)
-    if not (m.armor(slot) or m.weapon(slot)) or level == 0 then
+    if not (armor(slot) or weapon(slot)) or level == 0 then
         return {}
     end
 
     local function p(probability_armor, probability_weapon)
-        if m.armor(slot) then
+        if armor(slot) then
             return probability_armor
-        elseif m.weapon(slot) then
+        elseif weapon(slot) then
             return probability_weapon
         end
     end
 
-    if quality == m.UNCOMMON then
+    if quality == UNCOMMON then
         if level <= 10 then
             return {
                 {item_id=10940, min_quantity=1, max_quantity=2, probability=p(0.8, 0.2)},
@@ -163,7 +163,7 @@ function public.distribution(slot, quality, level)
                 {item_id=14344, min_quantity=1, max_quantity=1, probability=p(0.05, 0.03)},
             }
         end
-    elseif quality == m.RARE then
+    elseif quality == RARE then
         if level <= 20 then
             return {{item_id=10978, min_quantity=1, max_quantity=1, probability=1}}
         elseif level <= 25 then
@@ -183,7 +183,7 @@ function public.distribution(slot, quality, level)
         elseif level <= 60 then
             return {{item_id=14344, min_quantity=1, max_quantity=1, probability=0.995}, {item_id=20725, min_quantity=1, max_quantity=1, probability=0.005}}
         end
-    elseif quality == m.EPIC then
+    elseif quality == EPIC then
         if level <= 40 then
             return {{item_id=11177, min_quantity=2, max_quantity=4, probability=1}}
         elseif level <= 45 then

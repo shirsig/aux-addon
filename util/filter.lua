@@ -292,7 +292,7 @@ function public.parse_query_string(str)
             if input_type ~= '' then
                 if not parts[i + 1] or not parse_parameter(input_type, parts[i + 1]) then
                     if parts[i] == 'item' then
-                        return nil, 'Invalid item name', g.aux_auctionable_items
+                        return nil, 'Invalid item name', _g.aux_auctionable_items
                     elseif type(input_type) == 'table' then
                         return nil, 'Invalid choice for '..parts[i], input_type
                     else
@@ -349,18 +349,15 @@ function public.query(query_string)
         blizzard_query = blizzard_query(components),
         validator = validator(components),
         prettified = prettified_query_string(components),
-    }, m.suggestions(components)
+    }, _m.suggestions(components)
 end
 
 function public.queries(query_string)
     local parts = split(query_string, ';')
-
     local queries = {}
     for _, str in parts do
         str = trim(str)
-
         local query, _, error = query(str)
-
         if not query then
             log('Invalid filter:', error)
             return
@@ -368,31 +365,21 @@ function public.queries(query_string)
             tinsert(queries, query)
         end
     end
-
     return queries
 end
 
 function suggestions(components)
     local suggestions = {}
 
-    if components.blizzard.name and size(components.blizzard) == 1 then
-        tinsert(suggestions, 'exact')
-    end
+    if components.blizzard.name and size(components.blizzard) == 1 then tinsert(suggestions, 'exact') end
 
-    tinsert(suggestions, 'and')
-    tinsert(suggestions, 'or')
-    tinsert(suggestions, 'not')
-    tinsert(suggestions, 'tt')
+    tinsert(suggestions, 'and'); tinsert(suggestions, 'or'); tinsert(suggestions, 'not'); tinsert(suggestions, 'tt')
 
-    for key in filters do
-        tinsert(suggestions, key)
-    end
+    for key in filters do tinsert(suggestions, key) end
 
     -- classes
     if not components.blizzard.class then
-        for _, class in {GetAuctionItemClasses()} do
-            tinsert(suggestions, class)
-        end
+        for _, class in {GetAuctionItemClasses()} do tinsert(suggestions, class) end
     end
 
     -- subclasses
@@ -410,20 +397,16 @@ function suggestions(components)
     end
 
     -- usable
-    if not components.blizzard.usable then
-        tinsert(suggestions, 'usable')
-    end
+    if not components.blizzard.usable then tinsert(suggestions, 'usable') end
 
     -- rarities
     if not components.blizzard.quality then
-        for i=0,4 do
-            tinsert(suggestions, getglobal('ITEM_QUALITY'..i..'_DESC'))
-        end
+        for i=0,4 do tinsert(suggestions, getglobal('ITEM_QUALITY'..i..'_DESC')) end
     end
 
     -- item names
     if size(components.blizzard) + getn(components.post) == 1 and components.blizzard.name == '' then
-        for _, name in g.aux_auctionable_items do
+        for _, name in _g.aux_auctionable_items do
             tinsert(suggestions, name..'/exact')
         end
     end

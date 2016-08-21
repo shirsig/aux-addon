@@ -37,21 +37,13 @@ function public.render(item_listing)
 end
 
 function public.create(parent, on_click, selected)
-	local name = 'g.aux_item_list'
-
-	local id = 1
-	while getglobal(name..id) do
-		id = id + 1
-	end
-	name = name..id
-
 	local content = CreateFrame('Frame', nil, parent)
 	content:SetPoint('TOPLEFT', 0, -51)
 	content:SetPoint('BOTTOMRIGHT', -15, 0)
 
-	local scroll_frame = CreateFrame('ScrollFrame', name..'ScrollFrame', parent, 'FauxScrollFrameTemplate')
+	local scroll_frame = CreateFrame('ScrollFrame', gui.name..'ScrollFrame', parent, 'FauxScrollFrameTemplate')
 	scroll_frame:SetScript('OnVerticalScroll', function(self, offset)
-		FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() m.render(this.item_listing) end)
+		FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() render(this.item_listing) end)
 	end)
 	scroll_frame:SetPoint('TOPLEFT', content, 'TOPLEFT', 0, 15)
 	scroll_frame:SetPoint('BOTTOMRIGHT', content, 'BOTTOMRIGHT', -4, -15)
@@ -60,7 +52,7 @@ function public.create(parent, on_click, selected)
 	scrollBar:SetWidth(12)
 	local thumbTex = scrollBar:GetThumbTexture()
 	thumbTex:SetPoint('CENTER', 0, 0)
-	thumbTex:SetTexture(unpack(gui.color.content.background))
+	thumbTex:SetTexture(gui.color.content.background())
 	thumbTex:SetHeight(50)
 	thumbTex:SetWidth(12)
 	getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
@@ -93,9 +85,7 @@ function public.create(parent, on_click, selected)
 			row.item.button:SetScript('OnEnter', function()
 				info.set_tooltip(row.item_record.itemstring, this, 'ANCHOR_RIGHT')
 			end)
-			row.item.button:SetScript('OnLeave', function()
-				GameTooltip:Hide()
-			end)
+			row.item.button:SetScript('OnLeave', function() GameTooltip:Hide() end)
 
 			local highlight = row:CreateTexture()
 			highlight:SetAllPoints(row)
@@ -120,5 +110,5 @@ end
 
 function public.populate(item_listing, item_records)
 	item_listing.item_records = item_records
-	m.render(item_listing)
+	render(item_listing)
 end

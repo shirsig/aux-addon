@@ -1,6 +1,6 @@
 aux.module 'util'
 
-local temp, recycle, getn = g.temp, g.recycle, g.getn
+local temp, recycle, getn = temp, recycle, _g.getn
 
 function public.copy(t)
 	local copy = {}
@@ -9,7 +9,7 @@ function public.copy(t)
 	return copy
 end
 
-public.join = g.table.concat
+public.join = _g.table.concat
 
 function public.replicate(count, value)
 	if count > 0 then return value, replicate(count - 1, value) end

@@ -1,6 +1,6 @@
 aux.module 'persistence'
 
-g.aux_datasets = {}
+_g.aux_datasets = {}
 
 do
     local realm, faction
@@ -17,8 +17,8 @@ end
 
 function public.load_dataset()
     local dataset_key = dataset_key
-    g.aux_datasets[dataset_key] = g.aux_datasets[dataset_key] or {}
-    return g.aux_datasets[dataset_key]
+    _g.aux_datasets[dataset_key] = _g.aux_datasets[dataset_key] or {}
+    return _g.aux_datasets[dataset_key]
 end
 
 function public.read(schema, str)

@@ -1,5 +1,5 @@
 aux.module 'search_tab'
-g.aux.tab(1, 'Search')
+aux.tab(1, 'Search')
 
 StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
     text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',
@@ -20,7 +20,7 @@ StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
 }
 do
     local function action()
-        g.aux_auto_buy_filter = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
+        _g.aux_auto_buy_filter = getglobal(this:GetParent():GetName()..'EditBox'):GetText()
         update_auto_buy_filter()
     end
 

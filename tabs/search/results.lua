@@ -1,6 +1,6 @@
 aux.module 'search_tab'
 
-g.aux_auto_buy_filter = ''
+_g.aux_auto_buy_filter = ''
 
 search_scan_id = 0
 auto_buy_validator = nil
@@ -114,8 +114,8 @@ function update_start_stop()
 end
 
 function update_auto_buy_filter()
-	if g.aux_auto_buy_filter ~= '' then
-		local queries = filter.queries(g.aux_auto_buy_filter)
+	if _g.aux_auto_buy_filter ~= '' then
+		local queries = filter.queries(_g.aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
 				log('Error: The automatic buyout filter may contain only one query')
@@ -129,7 +129,7 @@ function update_auto_buy_filter()
 			end
 		end
 	end
-	g.aux_auto_buy_filter = ''
+	_g.aux_auto_buy_filter = ''
 end
 
 function start_real_time_scan(query, search, continuation)

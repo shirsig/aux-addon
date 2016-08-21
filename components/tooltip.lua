@@ -1,6 +1,6 @@
 aux.module 'tooltip'
 
-g.aux_tooltip_value = true
+_g.aux_tooltip_value = true
 
 game_tooltip_hooks = {}
 hooked_setter = nil
@@ -47,7 +47,7 @@ function extend_tooltip(tooltip, link, quantity)
     local item_id, suffix_id = info.parse_link(link)
     quantity = IsShiftKeyDown() and quantity or 1
 
-    if g.aux_tooltip_disenchant_source then
+    if _g.aux_tooltip_disenchant_source then
         local color = {r=0.7, g=0.7, b=0.7}
 
         local type, range = disenchant.source(item_id)
@@ -69,7 +69,7 @@ function extend_tooltip(tooltip, link, quantity)
 
         if getn(distribution) > 0 then
 
-            if g.aux_tooltip_disenchant_distribution then
+            if _g.aux_tooltip_disenchant_distribution then
                 local color = {r=0.8, g=0.8, b=0.2}
 
                 tooltip:AddLine('Disenchants into:', color.r, color.g, color.b)
@@ -79,7 +79,7 @@ function extend_tooltip(tooltip, link, quantity)
                 end
             end
 
-            if g.aux_tooltip_disenchant_value then
+            if _g.aux_tooltip_disenchant_value then
                 local color = {r=0.1, g=0.6, b=0.6}
 
                 local disenchant_value = disenchant.value(item_info.slot, item_info.quality, item_info.level)
@@ -88,7 +88,7 @@ function extend_tooltip(tooltip, link, quantity)
         end
     end
 
-    if g.aux_tooltip_vendor_buy then
+    if _g.aux_tooltip_vendor_buy then
         local color = {r=0.8, g=0.5, b=0.1}
 
         local _, price, limited = cache.merchant_info(item_id)
@@ -96,7 +96,7 @@ function extend_tooltip(tooltip, link, quantity)
             tooltip:AddLine('Vendor Buy '..(limited and '(limited): ' or ': ')..money.to_string2(price * quantity), color.r, color.g, color.b)
         end
     end
-    if g.aux_tooltip_vendor_sell then
+    if _g.aux_tooltip_vendor_sell then
         local color = {r=0.8, g=0.5, b=0.1}
 
         local price = cache.merchant_info(item_id)
@@ -112,10 +112,10 @@ function extend_tooltip(tooltip, link, quantity)
 
     local value = history.value(item_key)
     if auctionable then
-        if g.aux_tooltip_value then
+        if _g.aux_tooltip_value then
             tooltip:AddLine('Value: '..(value and money.to_string2(value * quantity) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
-        if g.aux_tooltip_daily  then
+        if _g.aux_tooltip_daily  then
             local market_value = history.market_value(item_key)
             tooltip:AddLine('Today: '..(market_value and money.to_string2(market_value * quantity)..' ('..auction_listing.percentage_historical(round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end

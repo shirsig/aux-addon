@@ -24,7 +24,7 @@ end
 
 function find_item_slot(partial)
 	for slot in inventory do
-		if m.matching_item(slot, partial) and not eq(slot, m.state.target_slot) then
+		if matching_item(slot, partial) and not eq(slot, state.target_slot) then
 			return slot
 		end
 	end
@@ -32,7 +32,7 @@ end
 
 function matching_item(slot, partial)
 	local item_info = info.container_item(unpack(slot))
-	return item_info and item_info.item_key == m.state.item_key and info.auctionable(item_info.tooltip) and (not partial or item_info.count < item_info.max_stack)
+	return item_info and item_info.item_key == state.item_key and info.auctionable(item_info.tooltip) and (not partial or item_info.count < item_info.max_stack)
 end
 
 function find_empty_slot()
@@ -45,81 +45,81 @@ end
 
 function find_charge_item_slot()
 	for slot in inventory do
-		if m.matching_item(slot) and m.charges(slot) == m.state.target_size then
+		if matching_item(slot) and charges(slot) == state.target_size then
 			return slot
 		end
 	end
 end
 
 function move_item(from_slot, to_slot, amount, k)
-	if m.locked(from_slot) or m.locked(to_slot) then
+	if locked(from_slot) or locked(to_slot) then
 		return control.wait(k)
 	end
 
-	amount = min(m.max_stack(from_slot) - m.stack_size(to_slot), m.stack_size(from_slot), amount)
-	local expected_size = m.stack_size(to_slot) + amount
+	amount = min(max_stack(from_slot) - stack_size(to_slot), stack_size(from_slot), amount)
+	local expected_size = stack_size(to_slot) + amount
 
 	ClearCursor()
 	SplitContainerItem(from_slot[1], from_slot[2], amount)
 	PickupContainerItem(unpack(to_slot))
 
-	return control.when(function() return m.stack_size(to_slot) == expected_size end, k)
+	return control.when(function() return stack_size(to_slot) == expected_size end, k)
 end
 
 function process()
 
-	if not m.state.target_slot or not m.matching_item(m.state.target_slot) then
-		m.state.target_slot = m.find_item_slot()
-		if not m.state.target_slot then
-			return m.stop()
+	if not state.target_slot or not matching_item(state.target_slot) then
+		state.target_slot = find_item_slot()
+		if not state.target_slot then
+			return stop()
 		end
 	end
 
-	if m.charges(m.state.target_slot) then
-		m.state.target_slot = m.find_charge_item_slot()
-		return m.stop()
+	if charges(state.target_slot) then
+		state.target_slot = find_charge_item_slot()
+		return stop()
 	end
-	if m.stack_size(m.state.target_slot) > m.state.target_size then
-		local slot = m.find_item_slot(true) or m.find_empty_slot()
+	if stack_size(state.target_slot) > state.target_size then
+		local slot = find_item_slot(true) or find_empty_slot()
 		if slot then
-			return m.move_item(
-				m.state.target_slot,
+			return move_item(
+				state.target_slot,
 				slot,
-				m.stack_size(m.state.target_slot) - m.state.target_size,
-				m.process
+				stack_size(state.target_slot) - state.target_size,
+				process
 			)
 		end
-	elseif m.stack_size(m.state.target_slot) < m.state.target_size then
-		local slot = m.find_item_slot()
+	elseif stack_size(state.target_slot) < state.target_size then
+		local slot = find_item_slot()
 		if slot then
-			return m.move_item(
+			return move_item(
 				slot,
-				m.state.target_slot,
-				m.state.target_size - m.stack_size(m.state.target_slot),
-				m.process
+				state.target_slot,
+				state.target_size - stack_size(state.target_slot),
+				process
 			)
 		end
 	end
-	return m.stop()
+	return stop()
 end
 
 function public.stop()
-	if m.state then
-		control.kill_thread(m.state.thread_id)
-		local callback, slot = m.state.callback, m.state.target_slot
-		if slot and not m.matching_item(slot) then
+	if state then
+		control.kill_thread(state.thread_id)
+		local callback, slot = state.callback, state.target_slot
+		if slot and not matching_item(slot) then
 			slot = nil
 		end
-		m.state = nil
+		state = nil
 		call(callback, slot)
 	end
 end
 
 function public.start(item_key, size, callback)
-	m.stop()
+	stop()
 
-	local thread_id = control.thread(m.process)
-	m.state = {
+	local thread_id = control.thread(process)
+	state = {
 		thread_id = thread_id,
 		item_key = item_key,
 		target_size = size,

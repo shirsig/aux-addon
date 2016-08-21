@@ -77,10 +77,10 @@ do
 	end
 end
 
-public.orig = setmetatable({}, {__index=function(self, key) return self[g][key] end})
+public.orig = setmetatable({}, {__index=function(self, key) return self[_g][key] end})
 function public.hook(name, handler, object)
 	handler = handler or getfenv(2)[name]
-	object = object or g
+	object = object or _g
 	orig[object] = orig[object] or {}
 	assert(not orig[object][name] '"'..name..'" is already hooked into.')
 	orig[object][name], object[name] = object[name], handler
@@ -129,7 +129,7 @@ end
 
 function public.is_player(name, current)
 	local realm = GetCVar 'realmName'
-	return not current and index(g.aux_characters, realm, name) or UnitName 'player' == name
+	return not current and index(_g.aux_characters, realm, name) or UnitName 'player' == name
 end
 
 function public.neutral_faction()

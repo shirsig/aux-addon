@@ -1,10 +1,10 @@
-local type, setmetatable, setfenv, unpack, mask, g = type, setmetatable, setfenv, unpack, bit.band, getfenv(0)
+local type, setmetatable, setfenv, unpack, mask, _g = type, setmetatable, setfenv, unpack, bit.band, getfenv(0)
 local PRIVATE, PUBLIC, MUTABLE, PROPERTY = 0, 1, 2, 4
 local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, property=PROPERTY}
 local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+PROPERTY, public=MUTABLE+PROPERTY, mutable=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
 local error, import, define_property, lock_mt, env_mt, interface_mt, declarator_mt
 local _state, _modules = {}, {}
-function error(message, level, ...) g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), (level or 1) + 1) end
+function error(message, level, ...) _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), (level or 1) + 1) end
 function import(imports, t) for k, v in t do imports[type(k) == 'number' and v or k] = v end end
 declarator_mt = {__metatable=false}
 function define_property(self, key, t)
@@ -44,7 +44,7 @@ do
 			end
 		end
 	end
-	env_mt = {__metatable=false, __index=index(PRIVATE, g)}
+	env_mt = {__metatable=false, __index=index(PRIVATE, _g)}
 	function env_mt.__newindex(self, key, value)
 		local state = _state[self]
 		if not state.metadata[key] then
@@ -66,14 +66,14 @@ do
 		end
 	end
 end
-function g.aux_module(name)
+function _g.aux_module(name)
 	if not _state[name] then
 		local state, declarator, env, interface, imports
 		env, interface, declarator, imports = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), {}
 		state = {
 			name = name, env = env, interface = interface, declarator = declarator, imports = {}, declarator_state = PRIVATE,
 			metadata={_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, getter=PROPERTY, setter=PROPERTY, mutable=PROPERTY},
-			data = {_g=g, _m=env, _i=interface, import=function(t) import(imports, t) end},
+			data = {_g=_g, _m=env, _i=interface, import=function(t) import(imports, t) end},
 			getters = {private=function() state.modifiers = PRIVATE return declarator end, public=function() state.modifiers = PUBLIC return declarator end, mutable=function() state.modifiers = MUTABLE return declarator end},
 			setters = {},
 		}
@@ -107,5 +107,5 @@ frame:SetScript('OnEvent', function()
 			end
 		end
 	end
-	g.aux.log('imported: '..count..' in '..(GetTime()-t0))
+	_g.aux.log('imported: '..count..' in '..(GetTime()-t0))
 end)

@@ -1,5 +1,5 @@
 aux.module 'auctions_tab'
-g.aux.tab(3, 'Auctions')
+aux.tab(3, 'Auctions')
 
 auction_records = nil
 

@@ -10,7 +10,7 @@ function next_push()
 end
 
 function new_record()
-	return { next_push = m.next_push(), data_points = {} }
+	return { next_push = next_push(), data_points = {} }
 end
 
 function load_data()
@@ -20,31 +20,31 @@ function load_data()
 end
 
 function read_record(item_key)
-	local data = m.load_data()
+	local data = load_data()
 
 	local record
 	if data[item_key] then
 		record = persistence.read(history_schema, data[item_key])
 	else
-		record = m.new_record()
+		record = new_record()
 	end
 
 	if record.next_push <= time() then
-		m.push_record(record)
-		m.write_record(item_key, record)
+		push_record(record)
+		write_record(item_key, record)
 	end
 
 	return record
 end
 
 function write_record(item_key, record)
-	m.value_cache[item_key] = nil
-	local data = m.load_data()
+	value_cache[item_key] = nil
+	local data = load_data()
 	data[item_key] = persistence.write(history_schema, record)
 end
 
 function public.process_auction(auction_record)
-	local item_record = m.read_record(auction_record.item_key)
+	local item_record = read_record(auction_record.item_key)
 
 	local unit_bid_price = ceil(auction_record.bid_price / auction_record.aux_quantity)
 	local unit_buyout_price = ceil(auction_record.buyout_price / auction_record.aux_quantity)
@@ -55,17 +55,17 @@ function public.process_auction(auction_record)
 
 	item_record.daily_max_price = max(item_record.daily_max_price or 0, unit_buyout_price, unit_bid_price)
 
-	m.write_record(auction_record.item_key, item_record)
+	write_record(auction_record.item_key, item_record)
 end
 
 function public.price_data(item_key)
-	local item_record = m.read_record(item_key)
+	local item_record = read_record(item_key)
 	return item_record.daily_min_buyout, item_record.daily_max_price, item_record.data_points
 end
 
 function public.value(item_key)
-	if not m.value_cache[item_key] or m.value_cache[item_key].next_push <= time() then
-		local item_record = m.read_record(item_key)
+	if not value_cache[item_key] or value_cache[item_key].next_push <= time() then
+		local item_record = read_record(item_key)
 
 		local value
 		if getn(item_record.data_points) > 0 then
@@ -80,20 +80,20 @@ function public.value(item_key)
 				weighted_value.weight = weighted_value.weight / total_weight
 			end
 
-			value = m.weighted_median(weighted_values)
+			value = weighted_median(weighted_values)
 		else
-			value = m.calculate_market_value(item_record)
+			value = calculate_market_value(item_record)
 		end
 
-		m.value_cache[item_key] = {value=value, next_push=item_record.next_push}
+		value_cache[item_key] = {value=value, next_push=item_record.next_push}
 	end
 
-	return m.value_cache[item_key].value
+	return value_cache[item_key].value
 end
 
 function public.market_value(item_key)
-	local item_record = m.read_record(item_key)
-	return m.calculate_market_value(item_record)
+	local item_record = read_record(item_key)
+	return calculate_market_value(item_record)
 end
 
 function calculate_market_value(item_record)
@@ -118,7 +118,7 @@ end
 
 function push_record(item_record)
 
-	local market_value = m.calculate_market_value(item_record)
+	local market_value = calculate_market_value(item_record)
 	if market_value then
 		tinsert(item_record.data_points, 1, { market_value = market_value, time = item_record.next_push })
 		while getn(item_record.data_points) > 11 do
@@ -128,5 +128,5 @@ function push_record(item_record)
 
 	item_record.daily_min_buyout = nil
 	item_record.daily_max_price = nil
-	item_record.next_push = m.next_push()
+	item_record.next_push = next_push()
 end
