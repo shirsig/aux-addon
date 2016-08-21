@@ -1,13 +1,13 @@
 local type, setmetatable, unpack, mask, g = type, setmetatable, unpack, bit.band, getfenv(0)
-local PRIVATE, PUBLIC, MUTABLE, GETTER, SETTER = 0, 1, 2, 4, 8
-local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, getter=GETTER, setter=SETTER}
-local MASK = {private=MUTABLE+GETTER+SETTER, public=MUTABLE+GETTER+SETTER, mutable=PRIVATE+PUBLIC, getter=PRIVATE+PUBLIC+SETTER, setter=PRIVATE+PUBLIC+GETTER}
+local PRIVATE, PUBLIC, GETTER, SETTER, MUTABLE = 0, 1, 2, 4, 8
+local MODIFIER = {private=PRIVATE, public=PUBLIC, getter=GETTER, setter=SETTER, mutable=MUTABLE}
+local MASK = {private=MUTABLE+GETTER+SETTER, public=MUTABLE+GETTER+SETTER, getter=PRIVATE+PUBLIC+SETTER, setter=PRIVATE+PUBLIC+GETTER, mutable=PRIVATE+PUBLIC}
 local import, declarator_mt, env_mt, interface_mt, lock_mt
 local initialize_declarator, error
 local _modules, _metadata, _data, _getters, _setters, _imports, _declarators, _declarator_state = setmetatable({}, lock_mt), {}, {}, {}, {}, {}, {}, {}
 function error(message, ...) g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), 3) end
 function import(imports, t) for k, v in t do imports[type(k) == 'number' and v or k] = v end end
-declarator_mt = {__metatable=false }
+declarator_mt = {__metatable=false}
 do
 	local function define_property(self, key, t)
 		local getter, setter = t.get, t.set
@@ -71,12 +71,12 @@ function g.aux_module(name)
 	if not _modules[name] then
 		local metadata, data, getters, setters, imports, declarator, env, interface
 		imports, declarator, env, interface = {}, setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
-		metadata = setmetatable({g=PRIVATE, m=PRIVATE, import=PRIVATE, private=GETTER, public=GETTER, mutable=GETTER, getter=GETTER, setter=GETTER}, lock_mt)
+		metadata = setmetatable({g=PRIVATE, m=PRIVATE, import=PRIVATE, private=GETTER, public=GETTER, getter=GETTER, setter=GETTER, mutable=GETTER}, lock_mt)
 		data = {g=g, m=env, import=function(t) import(imports, t) end}
 		getters = {
 			private=function() _declarator_state[declarator] = PRIVATE return declarator end, public=function() _declarator_state[declarator] = PUBLIC return declarator end,
-			mutable=function() _declarator_state[declarator] = PUBLIC return declarator end,
-			getter=function() _declarator_state[declarator] = PUBLIC return declarator end, setter=function() _declarator_state[declarator] = PUBLIC return declarator end,
+			getter=function() _declarator_state[declarator] = GETTER return declarator end, setter=function() _declarator_state[declarator] = SETTER return declarator end,
+			mutable=function() _declarator_state[declarator] = MUTABLE return declarator end,
 		}
 		setters = {}
 		_metadata[name], _metadata[declarator], _metadata[env], _metadata[interface] = metadata, metadata, metadata, metadata
@@ -85,7 +85,9 @@ function g.aux_module(name)
 		_setters[name], _setters[declarator], _setters[env], _setters[interface] = setters, setters, setters, setters
 		_modules[name], _imports[name], _declarators[name] = {env, interface}, imports, declarator
 	end
-	return unpack(_modules[name])
+	local env, interface = unpack(_modules[name])
+	setfenv(2, env)
+	return interface
 end
 local frame = CreateFrame 'Frame'
 frame:RegisterEvent 'PLAYER_LOGIN'
@@ -97,7 +99,7 @@ frame:SetScript('OnEvent', function()
 		local declarator = _declarators[name]
 		for import, v in _imports[name] do
 			if not _modules[import] then error('Invalid import "%s" in module "%s".', import, name) end
-			if v == true then
+			if v == '' then
 				local data = _data[import]
 				for key, modifiers in _metadata[import] do
 					if mask(PUBLIC, modifiers) ~= 0 then
@@ -107,7 +109,7 @@ frame:SetScript('OnEvent', function()
 					end
 				end
 			else
-
+				declarator[v] = import
 			end
 		end
 	end

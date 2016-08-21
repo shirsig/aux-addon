@@ -1,6 +1,5 @@
 local aux_module, getn, setn, tinsert, tremove, getfenv, setfenv, gfind = aux_module, getn, table.setn, tinsert, tremove, getfenv, setfenv, string.gfind
-setfenv(1, aux_module '/core')
-
+aux = aux_module 'core'
 public.version = '5.0.0'
 
 do
@@ -25,12 +24,16 @@ do
 end
 
 do
+	local modules = {}
+	local function module_env(name) aux_module(name) return getfenv() end
 	function public.module(name)
-		local env, interface = aux_module(name)
-		env.import(temp-{'modules', 'core', 'util'})
-		setfenv(2, parent)
+		local env = module_env(name)
+		if not modules[name] then
+			env.import(temp-{modules='', core='', util=''})
+		end
+		setfenv(2, env)
+		modules[name] = true
 	end
-	g.aux = module 'core'
 end
 
 local event_frame = CreateFrame 'Frame'
