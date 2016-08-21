@@ -25,12 +25,10 @@ end
 
 do
 	local modules = {}
-	local function module_env(name) aux_module(name) return getfenv() end
+	local function module_env(name) aux_module(name) return m end
 	function public.module(name)
 		local env = module_env(name)
-		if not modules[name] then
-			env.import(temp-{modules='', core='', util=''})
-		end
+		if not modules[name] then env.import(temp-{['']='modules', ['']='core', ['']='util'}) end
 		setfenv(2, env)
 		modules[name] = true
 	end
