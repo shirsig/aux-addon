@@ -4,7 +4,7 @@ local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, property=PROP
 local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+PROPERTY, public=MUTABLE+PROPERTY, mutable=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
 local error, import, define_property, lock_mt, env_mt, interface_mt, declarator_mt
 lock_mt = {}
-local _state, _modules = {}, {}
+local _state, _modules = {}, setmetatable({}, lock_mt)
 function error(message, level, ...) _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), (level or 1) + 1) end
 function import(imports, t) for k, v in t do imports[type(k) == 'number' and v or k] = v end end
 declarator_mt = {__metatable=false}
@@ -75,7 +75,7 @@ function _g.aux_module(name)
 		env, interface, declarator, imports = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), {}
 		state = {
 			name = name, env = env, interface = interface, declarator = declarator, imports = {}, declarator_state = PRIVATE,
-			metadata = {_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, getter=PROPERTY, setter=PROPERTY, mutable=PROPERTY},
+			metadata = setmetatable({_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, getter=PROPERTY, setter=PROPERTY, mutable=PROPERTY}, lock_mt),
 			data = {_g=_g, _m=env, _i=interface, import=function(t) import(imports, t) end},
 			getters = {private=function() state.modifiers = PRIVATE return declarator end, public=function() state.modifiers = PUBLIC return declarator end, mutable=function() state.modifiers = MUTABLE return declarator end},
 			setters = {},
@@ -100,7 +100,7 @@ frame:SetScript('OnEvent', function()
 			local import_data, import_getters, import_setters = import.data, import.getters, import.setters
 			if alias == '' then
 				for key, modifiers in import.metadata do
-					if metadata[key] then error('Import of "%s" failed. Conflict with "%s"', 1, name, key) end
+					if metadata[key] then error('Import of "%s" failed. Conflict with field "%s"', 1, name, key) end
 					count = count + 1
 					metadata[key], data[key], getters[key], setters[key] = modifiers, import_data[key], import_getters[key], import_setters[key]
 				end
