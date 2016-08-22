@@ -1,4 +1,4 @@
-aux.module 'auctions_tab'
+module 'auctions_tab'
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, frame)

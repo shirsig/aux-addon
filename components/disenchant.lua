@@ -1,4 +1,4 @@
-aux.module 'disenchant'
+module 'disenchant'
 
 UNCOMMON = 2
 RARE = 3

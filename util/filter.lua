@@ -1,4 +1,4 @@
-aux.module 'filter'
+module 'filter'
 
 function default_filter(str)
     return {

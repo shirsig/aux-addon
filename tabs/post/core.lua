@@ -1,4 +1,4 @@
-aux.module 'post_tab'
+module 'post_tab'
 aux.tab(2, 'Post')
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440

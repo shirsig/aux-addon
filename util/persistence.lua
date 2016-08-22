@@ -1,4 +1,4 @@
-aux.module 'persistence'
+module 'persistence'
 
 _g.aux_datasets = {}
 
@@ -18,6 +18,18 @@ function public.load_dataset()
     _g.aux_datasets[dataset_key] = _g.aux_datasets[dataset_key] or {}
     return _g.aux_datasets[dataset_key]
 end
+
+--do TODO syntactic sugar
+--	local mt = {
+--		__unm = function(self, separator)
+--			self.separator = separator
+--		end,
+--		__call = function(self, field) end
+--	}
+--	function public.getter.record()
+--
+--	end
+--end
 
 function public.read(schema, str)
     if schema == 'string' then

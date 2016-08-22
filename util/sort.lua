@@ -1,4 +1,4 @@
-aux.module 'sorting'
+module 'sorting'
 
 public.LT = {}
 public.EQ = {}

@@ -1,4 +1,4 @@
-aux.module 'search_tab'
+module 'search_tab'
 
 _g.aux_auto_buy_filter = ''
 

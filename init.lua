@@ -1,35 +1,25 @@
-local aux_module, setn, tinsert, tremove, setfenv = aux_module, table.setn, tinsert, tremove, setfenv
-local aux = aux_module 'core'
-_g.aux = aux.interface
+ADDON = aux
+function INIT()
+	import{['']='modules', ['']='core', ['']='util'}
+end
+
+module 'core' --  .interface {x = 'core'} {y='core'} 'kek'
 public.version = '5.0.0'
 
 do
 	local table_pool, auto_recycle = {}, {}
-	local function wipe(t) -- like with a cloth or something
-		for k in t do t[k] = nil end
-		setn(t, 0); return t
+	function public.wipe(t) -- like with a cloth or something
+		for k in t do t[k] = nil end; setn(t, 0)
 	end
 	function public.recycle(t)
-		auto_recycle[t] = nil
-		tinsert(table_pool, wipe(t))
---		log(getn(table_pool))
+		auto_recycle[t] = nil; wipe(t); tinsert(table_pool, t)
 	end
 	public.temp = setmetatable({}, {__sub = function(_, t) auto_recycle[t] = true return t end})
 	function public.getter.t() return tremove(table_pool) or {} end
-	CreateFrame('Frame'):SetScript('OnUpdate', function()
-		for t in auto_recycle do recycle(t) end
-		recycle(auto_recycle); auto_recycle = t
+	CreateFrame 'Frame' :SetScript('OnUpdate', function()
+		for t in auto_recycle do recycle(t); log(getn(table_pool)) end
+		wipe(auto_recycle)
 	end)
-end
-
-do
-	local modules = {}
-	local function module_env(name) aux_module(name) return _m end
-	function public.module(name)
-		local env = module_env(name)
-		if not modules[name] then env.import(temp-{['']='modules', ['']='core', ['']='util'}) end
-		setfenv(2, env); modules[name] = true
-	end
 end
 
 local event_frame = CreateFrame 'Frame'
@@ -37,7 +27,7 @@ for _, event in temp-{'ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTI
 	event_frame:RegisterEvent(event)
 end
 
-ADDON_LOADED = {}
+ADDON_LOADED = t
 do
 	local variables_loaded_hooks, player_login_hooks = t, t
 	function public.setter.LOAD(f) tinsert(variables_loaded_hooks, f) end

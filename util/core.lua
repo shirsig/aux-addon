@@ -1,6 +1,4 @@
-aux.module 'util'
-
-local temp, recycle, getn = _g.aux.temp, _g.aux.recycle, _g.getn
+module 'util'
 
 function public.copy(t)
 	local copy = {}

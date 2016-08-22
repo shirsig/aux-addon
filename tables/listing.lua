@@ -1,4 +1,4 @@
-aux.module 'listing'
+module 'listing'
 
 local ST_COUNT = 0
 

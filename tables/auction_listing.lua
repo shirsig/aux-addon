@@ -1,4 +1,4 @@
-aux.module 'auction_listing'
+module 'auction_listing'
 
 _g.aux_price_per_unit = false
 

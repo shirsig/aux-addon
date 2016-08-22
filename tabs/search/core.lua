@@ -1,4 +1,4 @@
-aux.module 'search_tab'
+module 'search_tab'
 aux.tab(1, 'Search')
 
 StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {

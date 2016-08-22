@@ -1,4 +1,4 @@
-aux.module 'gui'
+module 'gui'
 
 public.config = {
 	colors = {

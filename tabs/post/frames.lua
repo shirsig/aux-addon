@@ -1,4 +1,4 @@
-aux.module 'post_tab'
+module 'post_tab'
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, frame)

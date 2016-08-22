@@ -1,4 +1,4 @@
-aux.module 'stack'
+module 'stack'
 
 state = nil
 

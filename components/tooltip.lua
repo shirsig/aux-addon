@@ -1,4 +1,5 @@
-aux.module 'tooltip'
+module 'tooltip'
+import 'gui' 'lol' 'kek'
 
 _g.aux_tooltip_value = true
 
@@ -206,15 +207,11 @@ end
 function game_tooltip_hooks:SetCraftItem(skill, slot)
     local link, quantity
     if slot then
-        link = GetCraftReagentItemLink(skill, slot)
-        quantity = ({GetCraftReagentInfo(skill, slot)})[3]
+        link, quantity = GetCraftReagentItemLink(skill, slot), select(3, GetCraftReagentInfo(skill, slot))
     else
-        link = GetCraftItemLink(skill)
-        quantity = 1
+        link, quantity = GetCraftItemLink(skill), 1
     end
-    if link then
-        extend_tooltip(GameTooltip, link, quantity)
-    end
+    if link then extend_tooltip(GameTooltip, link, quantity) end
 end
 
 function game_tooltip_hooks:SetCraftSpell(slot)

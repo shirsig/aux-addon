@@ -1,4 +1,4 @@
-aux.module 'search_tab'
+module 'search_tab'
 
 function valid_level(str)
 	local level = tonumber(str)

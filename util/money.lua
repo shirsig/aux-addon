@@ -1,4 +1,4 @@
-aux.module 'money'
+module 'money'
 
 GOLD_TEXT = '|cffffd70ag|r'
 SILVER_TEXT = '|cffc7c7cfs|r'

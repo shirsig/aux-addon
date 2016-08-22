@@ -1,4 +1,5 @@
-local type, setmetatable, setfenv, unpack, mask, _g = type, setmetatable, setfenv, unpack, bit.band, getfenv(0)
+local _g = getfenv(); setfenv(0, setmetatable({}, {__index = function(_, key) return key end}))
+local type, setmetatable, setfenv, unpack, mask = _g.type, _g.setmetatable, _g.setfenv, _g.unpack, _g.bit.band, _g.getfenv(0)
 local PRIVATE, PUBLIC, MUTABLE, PROPERTY, GETTER, SETTER = 0, 1, 2, 4, 8, 16
 local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, getter=GETTER+PROPERTY, setter=SETTER+PROPERTY}
 local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+GETTER+SETTER, public=MUTABLE+GETTER+SETTER, mutable=PRIVATE+PUBLIC, getter=PRIVATE+PUBLIC, setter=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
@@ -74,7 +75,8 @@ do
 		end
 	end
 end
-function _g.aux_module(name)
+function INIT() end
+function module(name)
 	if not _modules[name] then
 		local state, getters, setters, imports, env, interface, declarator
 		imports, env, interface, declarator = {}, setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt)
@@ -84,21 +86,22 @@ function _g.aux_module(name)
 			getter=function() state.modifiers = PROPERTY+GETTER return declarator end, setter=function() state.modifiers = PROPERTY+SETTER return declarator end}
 		setters = {getter=function(value) set_property(getters, state.property, value) end, setter=function(value) set_property(setters, state.property, value) end}
 		state = {
-			name=name, env=env, interface=interface, imports={}, declarator_state=PRIVATE,
+			name=name, env=env, interface=interface, imports={}, modifiers=PRIVATE,
 			metadata = setmetatable({_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+GETTER, public=PROPERTY+GETTER, mutable=PROPERTY+GETTER, getter=PROPERTY+GETTER+SETTER, setter=PROPERTY+GETTER+SETTER}, lock_mt),
 			data = {_g=_g, _m=env, _i=interface, import=function(t) import(imports, t) end},
 			getters=getters, setters=setters,
 		}
 		_modules[name], _state[env], _state[interface], _state[declarator] = state, state, state, state
+		setfenv(INIT, env); INIT()
 	end
 	local module = _modules[name]
 	setfenv(2, module.env)
 	return module
 end
 local frame = CreateFrame 'Frame'
-frame:RegisterEvent 'PLAYER_LOGIN'
+frame:RegisterEvent 'ADDON_LOADED'
 frame:SetScript('OnEvent', function()
-	lock_mt.__newindex = function() error 'Modules are frozen after the loading phase.' end
+	if arg1 ~= ADDON then return end
 	local count = 0
 	local t0 = GetTime()
 	for _, module in _modules do
@@ -119,5 +122,7 @@ frame:SetScript('OnEvent', function()
 			end
 		end
 	end
-	_g.aux.log('imported: '..count..' in '..(GetTime()-t0))
+	aux.log('imported: '..count..' in '..(GetTime()-t0))
+	lock_mt.__newindex = function() error 'Modules are frozen after the loading phase.' end
+	setfenv(0, _g)
 end)

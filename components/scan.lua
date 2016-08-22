@@ -1,4 +1,4 @@
-aux.module 'scan'
+module 'scan'
 
 PAGE_SIZE = 50
 

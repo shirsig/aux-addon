@@ -1,4 +1,4 @@
-aux.module 'item_listing'
+module 'item_listing'
 
 local ROW_HEIGHT = 39
 

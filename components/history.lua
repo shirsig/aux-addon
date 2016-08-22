@@ -1,4 +1,4 @@
-aux.module 'history'
+module 'history'
 
 local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}}}
 value_cache = {}

@@ -1,4 +1,4 @@
-aux.module 'bids_tab'
+module 'bids_tab'
 aux.tab(4, 'Bids')
 
 auction_records = nil

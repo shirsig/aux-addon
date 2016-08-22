@@ -1,4 +1,4 @@
-aux.module 'core'
+module 'core'
 
 public.bids_loaded = false
 public.current_owner_page = nil
