@@ -52,7 +52,7 @@ function SlashCmdList.AUX(command)
 		local realm = GetCVar 'realmName'
 		_g.aux_characters[realm] = _g.aux_characters[realm] or {}
 		for i=3,getn(arguments) do
-			local name = string.gsub(strlower(arguments[i]), '^%l', strupper)
+			local name = gsub(strlower(arguments[i]), '^%l', strupper)
 			if not _g.aux_characters[realm][name] then
 				_g.aux_characters[realm][name] = true
 				log('Character "'..name..'" added.')
@@ -64,7 +64,7 @@ function SlashCmdList.AUX(command)
 			return
 		end
 		for i=3,getn(arguments) do
-			local name = string.gsub(strlower(arguments[i]), '^%l', strupper)
+			local name = gsub(strlower(arguments[i]), '^%l', strupper)
 			if _g.aux_characters[realm][name] then
 				_g.aux_characters[realm][name] = nil
 				log('Character "'..name..'" removed.')
@@ -77,7 +77,7 @@ function SlashCmdList.AUX(command)
 			tinsert(chars, name)
 		end
 		if getn(chars) > 0 then
-			log('Your characters: "'..table.concat(chars, ', ')..'".')
+			log('Your characters: "'..join(chars, ', ')..'".')
 		else
 			log 'You don\'t have any additional characters. To add your characters type "/aux chars add NAME1 NAME2 NAME3...".'
 		end

@@ -166,7 +166,7 @@ function public.bid_update(auction_record)
     auction_record.unit_blizzard_bid = auction_record.blizzard_bid / auction_record.aux_quantity
     auction_record.unit_bid_price = auction_record.bid_price / auction_record.aux_quantity
     auction_record.high_bidder = 1
-    auction_record.search_signature = table.concat({auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, _g.aux_ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
+    auction_record.search_signature = join({auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, _g.aux_ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
 end
 
 function public.set_tooltip(itemstring, owner, anchor)

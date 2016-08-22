@@ -1,8 +1,8 @@
 module 'aux'
 
 event_frame = CreateFrame 'Frame'
-listeners = {}
-threads = {}
+listeners = t
+threads = t
 public.thread_id = nil
 
 function LOAD()

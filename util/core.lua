@@ -1,13 +1,6 @@
 module 'util'
 
-function public.copy(t)
-	local copy = {}
-	for k, v in t do copy[k] = v end
-	table.setn(t, getn(t))
-	return copy
-end
-
-public.join = _g.table.concat
+public.join = _g.join
 
 function public.replicate(count, value)
 	if count > 0 then return value, replicate(count - 1, value) end
@@ -112,9 +105,16 @@ do
 end
 
 function public.expand(array, ...)
-	local table = {}
-	for i=1,arg.n do table[arg[i]] = array[i] end
-	return table
+	local t = t
+	for i=1,arg.n do t[arg[i]] = array[i] end
+	return t
+end
+
+function public.copy(t)
+	local copy = _m.t
+	for k, v in t do copy[k] = v end
+	table.setn(t, getn(t))
+	return copy
 end
 
 function public.select(i, ...)
@@ -135,13 +135,13 @@ function public.key(value, t)
 end
 
 function public.keys(t)
-	local ks = {}
+	local ks = _m.t
 	for k in t do tinsert(ks, k) end
 	return ks
 end
 
 function public.values(t)
-	local vs = {}
+	local vs = _m.t
 	for _, v in t do tinsert(vs, v) end
 	return vs
 end
@@ -185,20 +185,20 @@ function public.all(xs, p)
 	return true
 end
 
-function public.filter(xs, p)
-	local ys = {}
-	for k, x in xs do
+function public.filter(t0, p)
+	local t = t
+	for k, x in t0 do
 		if p(x, k) then
-			ys[k] = x
+			t[k] = x
 		end
 	end
-	return ys
+	return t
 end
 
-function public.map(xs, f)
-	local ys = {}
-	for k, x in xs do ys[k] = f(x, k) end
-	return ys
+function public.map(t0, f)
+	local t = t
+	for k, x in t0 do t[k] = f(x, k) end
+	return t
 end
 
 function public.trim(str)

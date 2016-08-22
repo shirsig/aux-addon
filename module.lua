@@ -1,21 +1,23 @@
 local type, setmetatable, setfenv, unpack, mask, _g = type, setmetatable, setfenv, unpack, bit.band, getfenv(0)
 local PRIVATE, PUBLIC, MUTABLE, PROPERTY, ACCESSOR, MUTATOR = 0, 1, 2, 4, 8, 16
-local error, modifier_error, property_error, immutable_error, collision_error, set_property, env_mt, interface_mt, declarator_mt, importer_mt
+local error, import_error, modifier_error, property_error, immutable_error, collision_error, set_property, env_mt, interface_mt, declarator_mt, importer_mt
 local _state, _modules = {}, {}
 function error(message, ...) return function() _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 10, 0), 0) end end
-modifier_error = error 'Invalid modifiers.'
-property_error = error 'Accessor/Mutator must be function.'
-function immutable_error(key) return error('Field "%s" is immutable.', key) end
-function collision_error(key) return error('Field "%s" already exists.', key) end
+import_error, modifier_error, property_error = error 'Invalid modifiers.', error 'Invalid modifiers.', error 'Accessor/Mutator must be function.'
+immutable_error, collision_error = function(key) return error('Field "%s" is immutable.', key) end, function(key) return error('Field "%s" already exists.', key) end
 importer_mt = {__metatable=false}
-function importer_mt.__index(self, key) _state[self][self] = key; return self end
+function importer_mt.__index(self, key)
+	if type(key) ~= 'string' then import_error() end
+	_state[self][self] = key; return self
+end
 function importer_mt.__call(self, arg1, arg2)
 	local name, state, module, alias
 	name = arg2 or arg1
+	if type(name) ~= 'string' then import_error() end
 	state, module = _state[self], _modules[name]
 	alias, state[self] = state[self] or name, nil
 	if module then
-		if alias == '_' then
+		if alias == '' then
 			for key, modifiers in module.metadata do
 				if not state.metadata[key] and mask(PUBLIC, modifiers) ~= 0 then
 					state.metadata[key], state.data[key], state.accessors[key], state.mutators[key] = modifiers, module.data[key], module.accessors[key], module.mutators[key]
@@ -90,7 +92,6 @@ do
 		end
 	end
 end
-function INIT() end
 function module(name)
 	if not _modules[name] then
 		local state, accessors, mutators, env, interface, declarator, importer
@@ -106,7 +107,7 @@ function module(name)
 			data = {_g=_g, _m=env, _i=interface, import=importer}, accessors=accessors, mutators=mutators,
 		}
 		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
-		setfenv(INIT, env); INIT()
+		importer [''] (ADDON)
 	end
 	setfenv(2, _modules[name].env)
 end

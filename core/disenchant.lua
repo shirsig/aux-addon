@@ -1,8 +1,6 @@
 module 'disenchant'
 
-UNCOMMON = 2
-RARE = 3
-EPIC = 4
+UNCOMMON, RARE, EPIC = 2, 3, 4
 
 do
 	local data = {
@@ -41,7 +39,7 @@ do
 end
 
 function LOAD()
-	armor = set-from
+	ARMOR = set-from
 		'INVTYPE_HEAD'
 		'INVTYPE_NECK'
 		'INVTYPE_SHOULDER'
@@ -57,7 +55,7 @@ function LOAD()
 		'INVTYPE_TRINKET'
 		'INVTYPE_CLOAK'
 		'INVTYPE_HOLDABLE'
-	weapon = set-from
+	WEAPON = set-from
 		'INVTYPE_2HWEAPON'
 		'INVTYPE_WEAPONMAINHAND'
 		'INVTYPE_WEAPON'
@@ -81,14 +79,14 @@ function public.value(slot, quality, level)
 end
 
 function public.distribution(slot, quality, level)
-    if not (armor(slot) or weapon(slot)) or level == 0 then
-        return {}
+    if not (ARMOR[slot] or WEAPON[slot]) or level == 0 then
+        return tt
     end
 
     local function p(probability_armor, probability_weapon)
-        if armor(slot) then
+        if ARMOR[slot] then
             return probability_armor
-        elseif weapon(slot) then
+        elseif WEAPON[slot] then
             return probability_weapon
         end
     end
@@ -193,5 +191,5 @@ function public.distribution(slot, quality, level)
             return {{item_id=20725, min_quantity=1, max_quantity=2, probability=1}}
         end
     end
-    return {}
+    return tt
 end

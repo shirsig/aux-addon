@@ -315,7 +315,7 @@ function create_frames()
 	        if filters then
 	            tinsert(_g.aux_favorite_searches, 1, {
 	                filter_string = search_box:GetText(),
-	                prettified = table.concat(map(filters, function(filter) return filter.prettified end), ';'),
+	                prettified = join(map(filters, function(filter) return filter.prettified end), ';'),
 	            })
 	        end
 	        update_search_listings()
