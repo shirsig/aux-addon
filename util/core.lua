@@ -3,7 +3,7 @@ module 'util'
 function public.copy(t)
 	local copy = {}
 	for k, v in t do copy[k] = v end
-	setn(getn(t))
+	table.setn(t, getn(t))
 	return copy
 end
 

@@ -17,15 +17,16 @@ function importer_mt.__call(self, arg1, arg2)
 	name = arg2 or arg1
 	state, module = _state[self], _modules[name]
 	alias, state[self] = state[self] or name, nil
-	if not module then return end
-	if alias == '_' then
-		for key, modifiers in module.metadata do
-			if not state.metadata[key] and mask(PUBLIC, modifiers) ~= 0 then
-				state.metadata[key], state.data[key], state.getters[key], state.setters[key] = modifiers, module.data[key], module.getters[key], module.setters[key]
+	if module then
+		if alias == '_' then
+			for key, modifiers in module.metadata do
+				if not state.metadata[key] and mask(PUBLIC, modifiers) ~= 0 then
+					state.metadata[key], state.data[key], state.getters[key], state.setters[key] = modifiers, module.data[key], module.getters[key], module.setters[key]
+				end
 			end
+		elseif not state.metadata[alias] then
+			state.metadata[alias], state.data[alias] = PRIVATE, module.interface
 		end
-	elseif not state.metadata[alias] then
-		state.metadata[alias], state.data[alias] = PRIVATE, module.interface
 	end
 	return self
 end

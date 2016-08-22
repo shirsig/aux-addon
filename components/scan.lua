@@ -9,7 +9,7 @@ do
 		for _, old_state in {scan_states[params.type]} do
 			abort(old_state.id)
 		end
-		local thread_id = control.thread(L(wait_for_callback, params.on_scan_start, scan))
+		local thread_id = thread(L(wait_for_callback, params.on_scan_start, scan))
 		scan_states[params.type] = {
 			id = thread_id,
 			params = params,
@@ -21,7 +21,7 @@ do
 		local aborted = {}
 		for type, state in scan_states do
 			if not scan_id or state.id == scan_id then
-				control.kill_thread(state.id)
+				kill_thread(state.id)
 				scan_states[type] = nil
 				tinsert(aborted, state)
 			end
@@ -38,7 +38,7 @@ do
 	end
 
 	function getter.state()
-		local _, state = next(filter(scan_states, function(state) return state.id == control.thread_id end))
+		local _, state = next(filter(scan_states, function(state) return state.id == thread_id end))
 		return state
 	end
 end
@@ -64,7 +64,7 @@ function wait_for_callback(...)
 		send_signal()
 	end
 
-	return control.when(signal_received, function() return k(unpack(signal_received())) end)
+	return when(signal_received, function() return k(unpack(signal_received())) end)
 end
 
 function total_pages(total_auctions)
@@ -100,7 +100,7 @@ function process_query()
 end
 
 function submit_query()
-	control.when(function() return state.params.type ~= 'list' or CanSendAuctionQuery() end, function()
+	when(function() return state.params.type ~= 'list' or CanSendAuctionQuery() end, function()
 		call(state.params.on_submit_query)
 		state.last_query_time = GetTime()
 		if state.params.type == 'bidder' then
@@ -153,9 +153,9 @@ function scan_page(i)
 
 		if call(state.params.auto_buy_validator, auction_info) then
 			local send_signal, signal_received = signal()
-			control.when(signal_received, recurse)
+			when(signal_received, recurse)
 			place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, L(send_signal, true))
-			return control.thread(control.when, later(GetTime(), 10), L(send_signal, false))
+			return thread(when, later(GetTime(), 10), L(send_signal, false))
 		elseif not query.validator or query.validator(auction_info) then
 			return wait_for_callback(state.params.on_auction, auction_info, function(removed)
 				if removed then
@@ -173,7 +173,7 @@ end
 function wait_for_results()
 	local timeout = later(state.last_query_time, 10)
 	local send_signal, signal_received = signal()
-	control.when(signal_received, function()
+	when(signal_received, function()
         if timeout() then
             return submit_query()
         else
@@ -188,10 +188,10 @@ function wait_for_results()
         end
     end)
 
-    control.thread(control.when, timeout, send_signal)
+    thread(when, timeout, send_signal)
 
     if state.params.type == 'bidder' then
-        return control.thread(control.when, function() return bids_loaded end, send_signal)
+        return thread(when, function() return bids_loaded end, send_signal)
     elseif state.params.type == 'owner' then
         return wait_for_owner_results(send_signal)
     elseif state.params.type == 'list' then
@@ -203,19 +203,19 @@ function wait_for_owner_results(send_signal)
     if state.page == current_owner_page then
         return send_signal()
     else
-        return control.on_next_event('AUCTION_OWNED_LIST_UPDATE', send_signal)
+        return on_next_event('AUCTION_OWNED_LIST_UPDATE', send_signal)
     end
 end
 
 function wait_for_list_results(send_signal, signal_received)
     local updated, last_update
-    control.event_listener('AUCTION_ITEM_LIST_UPDATE', function(kill)
+    event_listener('AUCTION_ITEM_LIST_UPDATE', function(kill)
 	    kill(signal_received())
         last_update = GetTime()
         updated = true
     end)
     local ignore_owner = state.params.ignore_owner or _g.aux_ignore_owner
-    return control.thread(control.when, function()
+    return thread(when, function()
         -- short circuiting order important, owner_data_complete must be called iif an update has happened.
         local ok = updated and (ignore_owner or owner_data_complete('list')) or last_update and GetTime() - last_update > 5
         updated = false

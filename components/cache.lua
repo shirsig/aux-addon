@@ -16,14 +16,14 @@ _g.aux_characters = {}
 function LOAD()
 	scan_wdb()
 
-	control.event_listener('MERCHANT_SHOW', on_merchant_show)
-	control.event_listener('MERCHANT_CLOSED', on_merchant_closed)
-	control.event_listener('MERCHANT_UPDATE', on_merchant_update)
-	control.event_listener('BAG_UPDATE', on_bag_update)
+	event_listener('MERCHANT_SHOW', on_merchant_show)
+	event_listener('MERCHANT_CLOSED', on_merchant_closed)
+	event_listener('MERCHANT_UPDATE', on_merchant_update)
+	event_listener('BAG_UPDATE', on_bag_update)
 
 	CreateFrame('Frame', nil, MerchantFrame):SetScript('OnUpdate', merchant_on_update)
 
-	control.event_listener('NEW_AUCTION_UPDATE', function()
+	event_listener('NEW_AUCTION_UPDATE', function()
 		for info in present(info.auction_sell_item()) do
 			for item_id in present(cache.item_id(info.name)) do
 				_g.aux_merchant_sell[cache.item_id(info.name)] = info.vendor_price / (info.max_item_charges(item_id) or info.count)
@@ -128,12 +128,12 @@ function merchant_buy_scan()
 					unit_price = min(buy_info.unit_price, new_unit_price)
 				end
 
-				g.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, {
+				_g.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, {
 					unit_price = unit_price,
 					limited = buy_info.limited and new_limited,
 				})
 			else
-				g.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, {
+				_g.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, {
 					unit_price = new_unit_price,
 					limited = new_limited,
 				})
@@ -150,7 +150,7 @@ function merchant_sell_scan()
 	for slot in inventory do
 		local item_info = info.container_item(unpack(slot))
 		if item_info then
-			g.aux_merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity
+			_g.aux_merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity
 		end
 	end
 end
@@ -162,9 +162,9 @@ function scan_wdb(item_id)
 	while processed <= 100 and item_id <= MAX_ITEM_ID do
 		local itemstring = 'item:'..item_id
 		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
-		if name and not g.aux_item_ids[strlower(name)] then
-			g.aux_item_ids[strlower(name)] = item_id
-			g.aux_items[item_id] = persistence.write(items_schema, {
+		if name and not _g.aux_item_ids[strlower(name)] then
+			_g.aux_item_ids[strlower(name)] = item_id
+			_g.aux_items[item_id] = persistence.write(items_schema, {
 				name = name,
 				quality = quality,
 				level = level,
@@ -176,7 +176,7 @@ function scan_wdb(item_id)
 			})
 			local tooltip = info.tooltip(function(tt) tt:SetHyperlink(itemstring) end)
 			if info.auctionable(tooltip, quality) then
-				tinsert(g.aux_auctionable_items, strlower(name))
+				tinsert(_g.aux_auctionable_items, strlower(name))
 			end
 			processed = processed + 1
 		end
@@ -185,9 +185,9 @@ function scan_wdb(item_id)
 
 	if item_id <= MAX_ITEM_ID then
 		local t0 = GetTime()
-		control.thread(control.when, function() return GetTime() - t0 > 0.1 end, scan_wdb, item_id)
+		thread(when, function() return GetTime() - t0 > 0.1 end, scan_wdb, item_id)
 	else
-		sort(g.aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
+		sort(_g.aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 	end
 end
 
@@ -204,5 +204,5 @@ function public.populate_wdb(item_id)
 		AuxTooltip:SetHyperlink('item:'..item_id)
 	end
 
-	control.thread(populate_wdb, item_id + 1)
+	thread(populate_wdb, item_id + 1)
 end

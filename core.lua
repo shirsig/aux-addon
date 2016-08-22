@@ -78,12 +78,12 @@ do
 	end
 end
 
-public.orig = setmetatable({_g={}}, {__index=function(self, key) return self[_g][key] end})
+public.orig = setmetatable({[_g]={}}, {__index=function(self, key) return self[_g][key] end})
 function public.hook(name, handler, object)
 	handler = handler or getfenv(2)[name]
 	object = object or _g
 	orig[object] = orig[object] or {}
-	assert(not orig[object][name] '"'..name..'" is already hooked into.')
+	assert(not orig[object][name], '"'..name..'" is already hooked into.')
 	orig[object][name], object[name] = object[name], handler
 end
 
@@ -96,7 +96,7 @@ do
 		PlaceAuctionBid(type, index, amount)
 		if money >= amount then
 			locked = true
-			control.event_listener('CHAT_MSG_SYSTEM', function(kill)
+			event_listener('CHAT_MSG_SYSTEM', function(kill)
 				if arg1 == ERR_AUCTION_BID_PLACED then
 					call(on_success)
 					locked = false
@@ -114,7 +114,7 @@ do
 		if locked then return end
 		locked = true
 		CancelAuction(index)
-		control.event_listener('CHAT_MSG_SYSTEM', function(kill)
+		event_listener('CHAT_MSG_SYSTEM', function(kill)
 			if arg1 == ERR_AUCTION_REMOVED then
 				call(on_success)
 				locked = false

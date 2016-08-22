@@ -8,7 +8,7 @@ function process()
 		local stacking_complete
 
 		local send_signal, signal_received = signal()
-		control.when(signal_received, function()
+		when(signal_received, function()
 			local slot = signal_received()[1]
 			if slot then
 				return post_auction(slot, process)
@@ -37,13 +37,13 @@ function post_auction(slot, k)
 		StartAuction(max(1, round(state.unit_start_price * item_info.aux_quantity)), round(state.unit_buyout_price * item_info.aux_quantity), state.duration)
 
 		local send_signal, signal_received = signal()
-		control.when(signal_received, function()
+		when(signal_received, function()
 			state.posted = state.posted + 1
 			return k()
 		end)
 
 		local posted
-		control.event_listener('CHAT_MSG_SYSTEM', function(kill)
+		event_listener('CHAT_MSG_SYSTEM', function(kill)
 			if arg1 == ERR_AUCTION_STARTED then
 				send_signal()
 				kill()
@@ -56,7 +56,7 @@ end
 
 function public.stop()
 	if state then
-		control.kill_thread(state.thread_id)
+		kill_thread(state.thread_id)
 
 		local callback = state.callback
 		local posted = state.posted
@@ -72,7 +72,7 @@ end
 function public.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, callback)
 	stop()
 
-	local thread_id = control.thread(process)
+	local thread_id = thread(process)
 
 	state = {
 		thread_id = thread_id,

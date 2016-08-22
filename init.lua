@@ -1,5 +1,5 @@
 function INIT()
-	import :_ 'core' :_ 'util'
+	import :_ 'core' :_ 'control' :_ 'util'
 end
 
 module 'core'

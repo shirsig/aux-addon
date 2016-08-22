@@ -53,7 +53,7 @@ end
 
 function move_item(from_slot, to_slot, amount, k)
 	if locked(from_slot) or locked(to_slot) then
-		return control.wait(k)
+		return wait(k)
 	end
 
 	amount = min(max_stack(from_slot) - stack_size(to_slot), stack_size(from_slot), amount)
@@ -63,7 +63,7 @@ function move_item(from_slot, to_slot, amount, k)
 	SplitContainerItem(from_slot[1], from_slot[2], amount)
 	PickupContainerItem(unpack(to_slot))
 
-	return control.when(function() return stack_size(to_slot) == expected_size end, k)
+	return when(function() return stack_size(to_slot) == expected_size end, k)
 end
 
 function process()
@@ -105,7 +105,7 @@ end
 
 function public.stop()
 	if state then
-		control.kill_thread(state.thread_id)
+		kill_thread(state.thread_id)
 		local callback, slot = state.callback, state.target_slot
 		if slot and not matching_item(slot) then
 			slot = nil
@@ -118,7 +118,7 @@ end
 function public.start(item_key, size, callback)
 	stop()
 
-	local thread_id = control.thread(process)
+	local thread_id = thread(process)
 	state = {
 		thread_id = thread_id,
 		item_key = item_key,

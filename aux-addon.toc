@@ -6,10 +6,10 @@
 module.lua
 init.lua
 core.lua
+util\core.lua
 control.lua
 gui.lua
 
-util\core.lua
 util\completion.lua
 util\persistence.lua
 util\sort.lua

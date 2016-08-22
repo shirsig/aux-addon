@@ -32,6 +32,46 @@ public.config = {
 }
 
 do
+	local function index_handler(self, key)
+		self.private.table = self.private.table[key]
+		if getn(self.private.table) == 0 then
+			return self.public
+		else
+			local color = copy(self.private.table)
+			self.private.table = config.colors
+			return self.private.callback(color)
+		end
+	end
+	function color_accessor(callback)
+		return function()
+			return index_function({callback=callback, table=config.colors}, index_handler)
+		end
+	end
+end
+
+do
+	local mt = {
+		__call = function(self, text)
+			local r, g, b, a = unpack(self)
+			if text then
+				return format('|c%02X%02X%02X%02X', a, r*255, g*255, b*255)..text..FONT_COLOR_CODE_CLOSE
+			else
+				return r, g, b, a
+			end
+		end
+	}
+	public.getter.color = color_accessor(function(color)
+		local r, g, b, a = unpack(color)
+		return setmetatable({r/255, g/255, b/255, a}, mt)
+	end)
+end
+
+public.getter.inline_color = color_accessor(function(color)
+	local r, g, b, a = unpack(color)
+	return format('|c%02X%02X%02X%02X', a, r, g, b)
+end)
+
+do
 	local id = 0
 	function public.getter.name() id = id + 1; return 'aux_frame'..id end
 end
@@ -62,47 +102,6 @@ end
 
 function LOAD()
 	import :_ 'util'
-
-	do
-		local function index_handler(self, key)
-			self.private.table = self.private.table[key]
-			if getn(self.private.table) == 0 then
-				return self.public
-			else
-				local color = copy(self.private.table)
-				self.private.table = config.colors
-				return self.private.callback(color)
-			end
-		end
-		function color_accessor(callback)
-			return function()
-				return index_function({callback=callback, table=config.colors}, index_handler)
-			end
-		end
-	end
-
-	do
-		local mt = {
-			__call = function(self, text)
-				local r, g, b, a = unpack(self)
-				if text then
-					return format('|c%02X%02X%02X%02X', a, r*255, g*255, b*255)..text..FONT_COLOR_CODE_CLOSE
-				else
-					return r, g, b, a
-				end
-			end
-		}
-		public.getter.color = color_accessor(function(color)
-			local r, g, b, a = unpack(color)
-			return setmetatable({r/255, g/255, b/255, a}, mt)
-		end)
-	end
-
-	public.getter.inline_color = color_accessor(function(color)
-		local r, g, b, a = unpack(color)
-		return format('|c%02X%02X%02X%02X', a, r, g, b)
-	end)
-
 	initialize_menu()
 	initialize_dropdown()
 end
@@ -415,7 +414,7 @@ function public.editbox(parent)
             -- editbox:Insert'<ksejfkj>' TODO use insert with special tags to determine cursor position
             -- or use an overlay with itemlinks
             if last_click and GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
-                control.thread(function() editbox:HighlightText() end)
+                thread(function() editbox:HighlightText() end)
             end
             last_click = {t=GetTime(), x=x, y=y}
         end)
