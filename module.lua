@@ -1,7 +1,7 @@
 local type, setmetatable, setfenv, unpack, mask, _g = type, setmetatable, setfenv, unpack, bit.band, getfenv(0)
-local PRIVATE, PUBLIC, MUTABLE, PROPERTY, GETTER, SETTER = 0, 1, 2, 4, 8, 16
-local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, getter=GETTER+PROPERTY, setter=SETTER+PROPERTY}
-local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+GETTER+SETTER, public=MUTABLE+GETTER+SETTER, mutable=PRIVATE+PUBLIC, getter=PRIVATE+PUBLIC, setter=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
+local PRIVATE, PUBLIC, MUTABLE, PROPERTY, ACCESSOR, MUTATOR = 0, 1, 2, 4, 8, 16
+local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, accessor=ACCESSOR+PROPERTY, mutator=MUTATOR+PROPERTY}
+local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+ACCESSOR+MUTATOR, public=MUTABLE+ACCESSOR+MUTATOR, mutable=PRIVATE+PUBLIC, accessor=PRIVATE+PUBLIC, mutator=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
 local error, declaration_error, immutable_error, collision_error, void_error, set_property, lock_mt, env_mt, interface_mt, declarator_mt, importer_mt
 lock_mt = {}
 local _state, _modules = {}, setmetatable({}, lock_mt)
@@ -21,7 +21,7 @@ function importer_mt.__call(self, arg1, arg2)
 		if alias == '_' then
 			for key, modifiers in module.metadata do
 				if not state.metadata[key] and mask(PUBLIC, modifiers) ~= 0 then
-					state.metadata[key], state.data[key], state.getters[key], state.setters[key] = modifiers, module.data[key], module.getters[key], module.setters[key]
+					state.metadata[key], state.data[key], state.accessors[key], state.mutators[key] = modifiers, module.data[key], module.accessors[key], module.mutators[key]
 				end
 			end
 		elseif not state.metadata[alias] then
@@ -53,7 +53,7 @@ function declarator_mt.__newindex(self, key, value)
 	if mask(PROPERTY, state.modifiers) == 0 then
 		state.data[key] = value
 	elseif type(value) == 'function' or declaration_error(2) then
-		local data = mask(GETTER, state.modifiers) ~= 0 and state.getters or state.setters
+		local data = mask(ACCESSOR, state.modifiers) ~= 0 and state.accessors or state.mutators
 		state.property, data[key] = key, value
 	end
 	state.modifiers = PRIVATE
@@ -66,8 +66,8 @@ do
 			if modifiers and mask(access+PROPERTY, modifiers) == access then
 				return state.data[key]
 			else
-				local getter = state.getters[key]
-				if getter then return getter() else return default[key] or void_error(key, 2) end
+				local accessor = state.accessors[key]
+				if accessor then return accessor() else return default[key] or void_error(key, 2) end
 			end
 		end
 	end
@@ -75,8 +75,8 @@ do
 	function env_mt.__newindex(self, key, value)
 		local state = _state[self]; local modifiers = state.metadata[key]
 		if modifiers then
-			local setter = state.setters[key]
-			if setter then return setter(value) end
+			local mutator = state.mutators[key]
+			if mutator then return mutator(value) end
 			if mask(MUTABLE, modifiers) == 0 then immutable_error(key, 2) end
 		else
 			state.metadata[key] = state.modifiers
@@ -86,8 +86,8 @@ do
 	interface_mt = {__metatable=false, __index=index(PUBLIC, {})}
 	function interface_mt.__newindex(self, key, value)
 		local state = _state[self]; local metadata = state.metadata or void_error(key, 2)
-		if mask(PUBLIC+SETTER, metadata) == PUBLIC+SETTER then
-			return state.setters[key](value)
+		if mask(PUBLIC+MUTATOR, metadata) == PUBLIC+MUTATOR then
+			return state.mutators[key](value)
 		elseif mask(PUBLIC, metadata) == PUBLIC or immutable_error(key, 2) then
 			state.data[key] = value
 		end
@@ -96,17 +96,17 @@ end
 function INIT() end
 function module(name)
 	if not _modules[name] then
-		local state, getters, setters, env, interface, declarator, importer
+		local state, accessors, mutators, env, interface, declarator, importer
 		env, interface, declarator, importer = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, importer_mt)
-		getters = {
+		accessors = {
 			private=function() state.modifiers = PRIVATE return declarator end, public=function() state.modifiers = PUBLIC return declarator end,
 			mutable=function() state.modifiers = MUTABLE return declarator end,
-			getter=function() state.modifiers = PROPERTY+GETTER return declarator end, setter=function() state.modifiers = PROPERTY+SETTER return declarator end}
-		setters = {getter=function(value) set_property(getters, state.property, value) end, setter=function(value) set_property(setters, state.property, value) end}
+			accessor=function() state.modifiers = PROPERTY+ACCESSOR return declarator end, mutator=function() state.modifiers = PROPERTY+MUTATOR return declarator end}
+		mutators = {accessor=function(value) set_property(accessors, state.property, value) end, mutator=function(value) set_property(mutators, state.property, value) end}
 		state = {
 			env=env, interface=interface, modifiers=PRIVATE,
-			metadata = setmetatable({_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+GETTER, public=PROPERTY+GETTER, mutable=PROPERTY+GETTER, getter=PROPERTY+GETTER+SETTER, setter=PROPERTY+GETTER+SETTER}, lock_mt),
-			data = {_g=_g, _m=env, _i=interface, import=importer}, getters=getters, setters=setters,
+			metadata = setmetatable({_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+ACCESSOR, public=PROPERTY+ACCESSOR, mutable=PROPERTY+ACCESSOR, accessor=PROPERTY+ACCESSOR+MUTATOR, mutator=PROPERTY+ACCESSOR+MUTATOR}, lock_mt),
+			data = {_g=_g, _m=env, _i=interface, import=importer}, accessors=accessors, mutators=mutators,
 		}
 		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
 		setfenv(INIT, env); INIT()

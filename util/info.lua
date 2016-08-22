@@ -267,10 +267,10 @@ function public.auctionable(tooltip, quality, lootable)
             and not (durability and durability < max_durability)
 end
 
-function public.tooltip(setter)
+function public.tooltip(mutator)
     AuxTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
     AuxTooltip.money = 0
-    setter(AuxTooltip)
+    mutator(AuxTooltip)
     AuxTooltip:Show()
 
     local tooltip = {}

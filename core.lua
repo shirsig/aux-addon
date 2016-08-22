@@ -64,13 +64,13 @@ tabs = {}
 function public.tab(index, name)
 	local module_env = getfenv(2)
 	local tab = {name=name, env=module_env}
-	function module_env.public.getter.ACTIVE() return tab == active_tab end
-	for _, handler in tmp-{'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do module_env.mutable[handler] = nil end
+	function module_env.public.accessor.ACTIVE() return tab == active_tab end
+	for handler in tmp-set-from . OPEN . CLOSE . CLICK_LINK . USE_ITEM do module_env.mutable[handler] = nil end
 	tabs[index] = tab
 end
 do
 	local active_tab_index
-	function getter.active_tab() return tabs[active_tab_index] end
+	function accessor.active_tab() return tabs[active_tab_index] end
 	function on_tab_click(index)
 		call(active_tab_index and active_tab.env.CLOSE)
 		active_tab_index = index
@@ -89,7 +89,7 @@ end
 
 do
 	local locked
-	function public.getter.bid_in_progress() return locked end
+	function public.accessor.bid_in_progress() return locked end
 	function public.place_bid(type, index, amount, on_success)
 		if locked then return end
 		local money = GetMoney()
@@ -109,7 +109,7 @@ end
 
 do
 	local locked
-	function public.getter.cancel_in_progress() return locked end
+	function public.accessor.cancel_in_progress() return locked end
 	function public.cancel_auction(index, on_success)
 		if locked then return end
 		locked = true

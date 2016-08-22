@@ -37,13 +37,13 @@ do
 		call(on_complete)
 	end
 
-	function getter.state()
+	function accessor.state()
 		local _, state = next(filter(scan_states, function(state) return state.id == thread_id end))
 		return state
 	end
 end
 
-function getter.query() return state.params.queries[state.query_index] end
+function accessor.query() return state.params.queries[state.query_index] end
 
 function wait_for_callback(...)
 	local send_signal, signal_received = signal()

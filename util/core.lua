@@ -15,15 +15,15 @@ end
 
 do
 	local value, charges
-	local function setter(n)
+	local function mutator(n)
 		return function(v)
 			assert(charges == 0)
 			value, charges = v, n
 			return v
 		end
 	end
-	for i=1,9 do public[join{replicate(i, 'x')}] = setter(i) end
-	function public.getter.__()
+	for i=1,9 do public[join{replicate(i, 'x')}] = mutator(i) end
+	function public.accessor.__()
 		assert(charges > 0)
 		charges = charges - 1
 		return value
@@ -85,7 +85,7 @@ end
 
 public.huge = 1.8*10^308
 
-function public.getter.modified() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end
+function public.accessor.modified() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end
 
 --do TODO
 --	local _state = setmetatable({}, {__mode='kv'})
@@ -233,7 +233,7 @@ end
 
 function public.round(x) return floor(x + 0.5) end
 
-function public.getter.inventory()
+function public.accessor.inventory()
 	local bag, slot = 0, 0
 	return function()
 		if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then
