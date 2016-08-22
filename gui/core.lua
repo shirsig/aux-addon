@@ -1,25 +1,6 @@
 module 'gui'
 
 public.config = {
-	colors = {
-		text = {enabled = {255, 254, 250, 1}, disabled = {147, 151, 139, 1}},
-		label = {enabled = {216, 225, 211, 1}, disabled = {150, 148, 140, 1}},
-		link = {153, 255, 255, 1},
-		window = {background = {24, 24, 24, .93}, border = {30, 30, 30, 1}},
-		panel = {background = {24, 24, 24, 1}, border = {255, 255, 255, .03}},
-		content = {background = {42, 42, 42, 1}, border = {0, 0, 0, 0}},
-		state = {enabled = {70, 180, 70, 1}, disabled = {190, 70, 70, 1}},
-
-		blue = {41, 146, 255, 1},
-		green = {22, 255, 22, 1},
-		yellow = {255, 255, 0, 1},
-		orange = {255, 146, 24, 1},
-		red = {255, 0, 0, 1},
-		gray = {187, 187, 187, 1},
-
-		blizzard = {0, 180, 255, 1},
-		aux = {255, 255, 154, 1},
-	},
     edge_size = 1.5,
     font = [[Fonts\ARIALN.TTF]],
     small_font_size = 13,
@@ -32,104 +13,58 @@ public.config = {
 }
 
 do
-	local function index_handler(self, key)
-		self.private.table = self.private.table[key]
-		if getn(self.private.table) == 0 then
-			return self.public
-		else
-			local color = copy(self.private.table)
-			self.private.table = config.colors
-			return self.private.callback(color)
-		end
-	end
-	function color_accessor(callback)
-		return function()
-			return index_function({callback=callback, table=config.colors}, index_handler)
-		end
+	local id = 1
+	function public.accessor.name()
+		id = id + 1
+		return 'aux_frame'..id
 	end
 end
 
 do
-	local mt = {
-		__call = function(self, text)
-			local r, g, b, a = unpack(self)
-			if text then
-				return format('|c%02X%02X%02X%02X', a, r*255, g*255, b*255)..text..FONT_COLOR_CODE_CLOSE
-			else
-				return r, g, b, a
-			end
+	local menu, structure, orig
+	menu = CreateFrame('Frame', name, UIParent, 'UIMenuTemplate')
+	hook('OnShow', menu)
+	orig = menu:GetScript 'OnShow'
+	menu:SetScript('OnShow', function()
+		UIMenu_Initialize()
+		for i=1,getn(structure) do
+			UIMenu_AddButton(
+				structure[i][1],
+				structure[i],
+				type(structure[i]) == 'string' and structure[element[3]] or element[3]
+			)
 		end
-	}
-	public.accessor.color = color_accessor(function(color)
-		local r, g, b, a = unpack(color)
-		return setmetatable({r/255, g/255, b/255, a}, mt)
+		return orig()
 	end)
-end
-
-public.accessor.inline_color = color_accessor(function(color)
-	local r, g, b, a = unpack(color)
-	return format('|c%02X%02X%02X%02X', a, r, g, b)
-end)
-
-do
-	local id = 0
-	function public.accessor.name() id = id + 1; return 'aux_frame'..id end
-end
-
-do
-	local menu, structure
 	function public.menu(menu_structure)
 		structure = menu_structure
 		menu:SetPoint('BOTTOMLEFT', GetCursorPosition())
 		menu:Show()
 	end
-	function initialize_menu()
-		menu = CreateFrame('Frame', name, UIParent, 'UIMenuTemplate')
-		local orig = menu:GetScript 'OnShow'
-		menu:SetScript('OnShow', function()
-			UIMenu_Initialize()
-			for i=1,getn(structure) do
-				UIMenu_AddButton(
-					structure[i][1],
-					structure[i],
-					type(structure[i]) == 'string' and structure[element[3]] or element[3]
-				)
-			end
-			return orig()
-		end)
-	end
-end
-
-function LOAD()
-	import :_ 'util'
-	initialize_menu()
-	initialize_dropdown()
 end
 
 do
 	local blizzard_backdrop, aux_background, aux_border
 
-	function initialize_dropdown()
-		aux_border = DropDownList1:CreateTexture()
-		aux_border:SetTexture(1, 1, 1, .02)
-		aux_border:SetPoint('TOPLEFT', DropDownList1Backdrop, 'TOPLEFT', -2, 2)
-		aux_border:SetPoint('BOTTOMRIGHT', DropDownList1Backdrop, 'BOTTOMRIGHT', 1.5, -1.5)
-		aux_border:SetBlendMode 'ADD'
-		aux_background = DropDownList1:CreateTexture(nil, 'OVERLAY')
-		aux_background:SetTexture(color.content.background())
-		aux_background:SetAllPoints(DropDownList1Backdrop)
-		blizzard_backdrop = DropDownList1Backdrop:GetBackdrop()
-		hook('ToggleDropDownMenu', function(...)
-			local ret = {orig.ToggleDropDownMenu(unpack(arg))}
-			local dropdown = getglobal(arg[4] or '') or this:GetParent()
-			if strfind(dropdown:GetName() or '', '^aux_frame%d+$') then
-				set_aux_dropdown_style(dropdown)
-			else
-				set_blizzard_dropdown_style()
-			end
-			return unpack(ret)
-		end)
-	end
+	aux_border = DropDownList1:CreateTexture()
+	aux_border:SetTexture(1, 1, 1, .02)
+	aux_border:SetPoint('TOPLEFT', DropDownList1Backdrop, 'TOPLEFT', -2, 2)
+	aux_border:SetPoint('BOTTOMRIGHT', DropDownList1Backdrop, 'BOTTOMRIGHT', 1.5, -1.5)
+	aux_border:SetBlendMode 'ADD'
+	aux_background = DropDownList1:CreateTexture(nil, 'OVERLAY')
+	aux_background:SetTexture(color.content.background())
+	aux_background:SetAllPoints(DropDownList1Backdrop)
+	blizzard_backdrop = DropDownList1Backdrop:GetBackdrop()
+	hook('ToggleDropDownMenu', function(...)
+		local ret = {orig.ToggleDropDownMenu(unpack(arg))}
+		local dropdown = getglobal(arg[4] or '') or this:GetParent()
+		if strfind(dropdown:GetName() or '', '^aux_frame%d+$') then
+			set_aux_dropdown_style(dropdown)
+		else
+			set_blizzard_dropdown_style()
+		end
+		return unpack(ret)
+	end)
 
 	function set_aux_dropdown_style(dropdown)
 		DropDownList1Backdrop:SetBackdrop{}
