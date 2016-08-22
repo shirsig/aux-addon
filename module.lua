@@ -1,9 +1,8 @@
-local _g = getfenv(); setfenv(0, setmetatable({}, {__index = function(_, key) return key end}))
-local type, setmetatable, setfenv, unpack, mask = _g.type, _g.setmetatable, _g.setfenv, _g.unpack, _g.bit.band, _g.getfenv(0)
+local type, setmetatable, setfenv, unpack, mask, _g = type, setmetatable, setfenv, unpack, bit.band, getfenv(0)
 local PRIVATE, PUBLIC, MUTABLE, PROPERTY, GETTER, SETTER = 0, 1, 2, 4, 8, 16
 local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, getter=GETTER+PROPERTY, setter=SETTER+PROPERTY}
 local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+GETTER+SETTER, public=MUTABLE+GETTER+SETTER, mutable=PRIVATE+PUBLIC, getter=PRIVATE+PUBLIC, setter=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
-local error, declaration_error, immutable_error, collision_error, void_error, import, set_property, lock_mt, env_mt, interface_mt, declarator_mt
+local error, declaration_error, immutable_error, collision_error, void_error, set_property, lock_mt, env_mt, interface_mt, declarator_mt, importer_mt
 lock_mt = {}
 local _state, _modules = {}, setmetatable({}, lock_mt)
 function error(message, level, ...) _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), (level or 1) + 1) end
@@ -11,14 +10,26 @@ function declaration_error(level) error('Malformed declaration.', level + 1) end
 function immutable_error(key, level) error('Field "%s" is immutable.', level + 1, key) end
 function collision_error(key, level) error('Field "%s" already exists.', level + 1, key) end
 function void_error(key, level) error('No field "%s".', level + 1, key) end
-function import(imports, t) for k, v in t do imports[type(k) == 'number' and v or k] = v end end
+importer_mt = {__metatable=false}
+function importer_mt.__index(self, key) self._alias = key end
+function importer_mt.__call(self, name)
+	local state, module, alias = _state[self], _modules[name], self._alias or name; self._alias = nil
+	if not module then error('Import failed. No module "%s".', 2, name) end
+	if alias == '_' then
+		for key, modifiers in module.metadata do
+			if state.metadata[key] then error('Import of "%s" failed. Name collision for "%s"', 1, name, key) end
+			state.metadata[key], state.data[key], state.getters[key], state.setters[key] = modifiers, module.data[key], module.getters[key], module.setters[key]
+		end
+	elseif not state.metadata[alias] or error('Import of "%s" failed. Name collision for "%s"', 1, name, alias) then
+		state.metadata[alias], state.data[alias] = PRIVATE, module.interface
+	end
+end
 function set_property(data, property, value)
 	if property and not data[property] and type(value) == 'function' or declaration_error(2) then
 		data[property] = value
 	end
 end
 declarator_mt = {__metatable=false}
-function declarator_mt.__call() end
 function declarator_mt.__index(self, key)
 	local state, modifier = _state[self], MODIFIER[key]; local modifiers = state.modifiers
 	if modifier then
@@ -41,6 +52,7 @@ function declarator_mt.__newindex(self, key, value)
 	end
 	state.modifiers = PRIVATE
 end
+function declarator_mt.__call() end
 do
 	local function index(access, default)
 		return function(self, key)
@@ -78,8 +90,8 @@ end
 function INIT() end
 function module(name)
 	if not _modules[name] then
-		local state, getters, setters, imports, env, interface, declarator
-		imports, env, interface, declarator = {}, setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt)
+		local state, getters, setters, imports, env, interface, declarator, importer
+		imports, env, interface, declarator, importer = {}, setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, importer_mt)
 		getters = {
 			private=function() state.modifiers = PRIVATE return declarator end, public=function() state.modifiers = PUBLIC return declarator end,
 			mutable=function() state.modifiers = MUTABLE return declarator end,
@@ -88,41 +100,13 @@ function module(name)
 		state = {
 			name=name, env=env, interface=interface, imports={}, modifiers=PRIVATE,
 			metadata = setmetatable({_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+GETTER, public=PROPERTY+GETTER, mutable=PROPERTY+GETTER, getter=PROPERTY+GETTER+SETTER, setter=PROPERTY+GETTER+SETTER}, lock_mt),
-			data = {_g=_g, _m=env, _i=interface, import=function(t) import(imports, t) end},
+			data = {_g=_g, _m=env, _i=interface, import=importer},
 			getters=getters, setters=setters,
 		}
 		_modules[name], _state[env], _state[interface], _state[declarator] = state, state, state, state
 		setfenv(INIT, env); INIT()
 	end
-	local module = _modules[name]
-	setfenv(2, module.env)
-	return module
+	setfenv(2, _modules[name].env)
 end
-local frame = CreateFrame 'Frame'
-frame:RegisterEvent 'ADDON_LOADED'
-frame:SetScript('OnEvent', function()
-	if arg1 ~= ADDON then return end
-	local count = 0
-	local t0 = GetTime()
-	for _, module in _modules do
-		local metadata, data, getters, setters = module.metadata, module.data, module.getters, module.setters
-		for alias, name in module.imports do
-			local import = _modules[name]
-			if not import then error('Import failed. No module "%s".', 1, name) end
-			local import_data, import_getters, import_setters = import.data, import.getters, import.setters
-			if alias == '' then
-				for key, modifiers in import.metadata do
-					if metadata[key] then error('Import of "%s" failed. Name collision for "%s"', 1, name, key) end
-					count = count + 1
-					metadata[key], data[key], getters[key], setters[key] = modifiers, import_data[key], import_getters[key], import_setters[key]
-				end
-			else
-				if metadata[alias] then error('') end
-				metadata[alias], data[alias] = PRIVATE, module.interface
-			end
-		end
-	end
-	aux.log('imported: '..count..' in '..(GetTime()-t0))
-	lock_mt.__newindex = function() error 'Modules are frozen after the loading phase.' end
-	setfenv(0, _g)
-end)
+local frame = CreateFrame 'Frame'; frame:RegisterEvent 'PLAYER_LOGIN'
+frame:SetScript('OnEvent', function() lock_mt.__newindex = function() error 'Modules are frozen after the loading phase.' end end)

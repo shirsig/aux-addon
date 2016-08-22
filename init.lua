@@ -1,9 +1,25 @@
-ADDON = aux
 function INIT()
-	import{['']='modules', ['']='core', ['']='util'}
+	import{['']='core', ['']='util'} --  'xxx' .foo .bar {x = 'core'} {y='core'} 'kek'
 end
 
-module 'core' --  .interface {x = 'core'} {y='core'} 'kek'
+-- import 'foo' 'bar' 'baz'
+import .kek .kuck 'foo' .kick .kock 'bar'
+
+-- x = record '#'. string 'kek'. number 'lol' . record '~'[]].
+--mt = {
+--	__index = function(self, key)
+--
+--		tinsert(self, getn(self), key)
+--		return self
+--	end,
+--	__call = function(self, value)
+--		tinsert(self, getn(self), value);
+--		tinsert(self, {});
+--		return self
+--	end,
+--}
+
+module 'core'
 public.version = '5.0.0'
 
 do

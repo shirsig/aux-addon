@@ -1,5 +1,5 @@
 module 'auctions_tab'
-aux.tab(3, 'Auctions')
+tab(3, 'Auctions')
 
 auction_records = nil
 
