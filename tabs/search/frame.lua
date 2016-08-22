@@ -3,7 +3,7 @@ module 'search_tab' import 'gui'
 FILTER_SPACING = 28.5
 
 function create_frames()
-	frame = CreateFrame('Frame', nil, frame)
+	frame = CreateFrame('Frame', nil, aux_frame)
 	frame:SetAllPoints()
 	frame:SetScript('OnUpdate', on_update)
 	frame:Hide()

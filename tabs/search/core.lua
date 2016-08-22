@@ -51,7 +51,6 @@ end
 RESULTS, SAVED, FILTER = 1, 2, 3
 
 function LOAD()
-	import 'core'
 	create_frames()
 	set_tab(SAVED)
 	update_auto_buy_filter()

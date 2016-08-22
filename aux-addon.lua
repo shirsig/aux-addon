@@ -1,8 +1,4 @@
-function INIT()
-	import :_ 'aux' :_ 'util'
-end
-
-module 'aux'
+module 'core'
 public.version = '5.0.0'
 
 public.bids_loaded = false

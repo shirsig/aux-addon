@@ -1,4 +1,9 @@
-module 'aux' import 'gui'
+module 'core' import 'gui'
+
+function LOAD()
+	for _, tab in _m.tabs do tabs:create_tab(tab.name) end
+	function public.set_tab(id) tabs:select(id) end
+end
 
 do
 	local frame = CreateFrame('Frame', 'aux_frame', UIParent)
@@ -22,21 +27,19 @@ do
 	public.aux_frame = frame
 end
 do
-	local tabs = gui.tabs(frame, 'DOWN')
+	local tabs = gui.tabs(aux_frame, 'DOWN')
 	tabs._on_select = on_tab_click
-	for _, tab in _m.tabs do tabs:create_tab(tab.name) end
-	function public.set_tab(id) tabs:select(id) end
 end
 do
-	local btn = gui.button(frame, 16)
+	local btn = gui.button(aux_frame, 16)
 	btn:SetPoint('BOTTOMRIGHT', -6, 6)
 	gui.set_size(btn, 65, 24)
 	btn:SetText 'Close'
-	btn:SetScript('OnClick', L(frame.Hide, frame))
+	btn:SetScript('OnClick', L(aux_frame.Hide, aux_frame))
 	public.close_button = btn
 end
 do
-	local btn = gui.button(frame, 16)
+	local btn = gui.button(aux_frame, 16)
 	btn:SetPoint('RIGHT', close_button, 'LEFT' , -5, 0)
 	gui.set_size(btn, 65, 24)
 	btn:SetText 'Default UI'

@@ -1,7 +1,7 @@
 module 'post_tab' import 'gui'
 
 function create_frames()
-	frame = CreateFrame('Frame', nil, frame)
+	frame = CreateFrame('Frame', nil, aux_frame)
 	frame:SetAllPoints()
 	frame:SetScript('OnUpdate', on_update)
 	frame:Hide()

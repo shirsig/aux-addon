@@ -107,7 +107,7 @@ function module(name)
 			data = {_g=_g, _m=env, _i=interface, import=importer}, accessors=accessors, mutators=mutators,
 		}
 		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
-		importer [''] (ADDON)
+		importer [''] 'core'
 	end
 	setfenv(2, _modules[name].env)
 end

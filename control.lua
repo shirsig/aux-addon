@@ -1,4 +1,4 @@
-module 'aux'
+module 'core'
 
 event_frame = CreateFrame 'Frame'
 listeners = t
