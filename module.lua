@@ -1,14 +1,12 @@
 local type, setmetatable, setfenv, unpack, mask, _g = type, setmetatable, setfenv, unpack, bit.band, getfenv(0)
 local PRIVATE, PUBLIC, MUTABLE, PROPERTY, ACCESSOR, MUTATOR = 0, 1, 2, 4, 8, 16
-local error, modifier_error, property_error, immutable_error, collision_error, null_error, set_property, env_mt, interface_mt, declarator_mt, importer_mt
+local error, modifier_error, property_error, immutable_error, collision_error, set_property, env_mt, interface_mt, declarator_mt, importer_mt
 local _state, _modules = {}, {}
 function error(message, ...) return function() _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 10, 0), 0) end end
-local NULL = setmetatable({}, {__metatable=false, __index=error'NULL', __newindex=error'NULL'})
 modifier_error = error 'Invalid modifiers.'
 property_error = error 'Accessor/Mutator must be function.'
 function immutable_error(key) return error('Field "%s" is immutable.', key) end
 function collision_error(key) return error('Field "%s" already exists.', key) end
-function null_error(key) return error('No field "%s".', key) end
 importer_mt = {__metatable=false}
 function importer_mt.__index(self, key) _state[self][self] = key; return self end
 function importer_mt.__call(self, arg1, arg2)
@@ -34,7 +32,7 @@ function set_property(data, property, value)
 		data[property] = value
 	end
 end
-declarator_mt = {__metatable=false }
+declarator_mt = {__metatable=false}
 do
 	local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, accessor=ACCESSOR+PROPERTY, mutator=MUTATOR+PROPERTY}
 	local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+ACCESSOR+MUTATOR, public=ACCESSOR+MUTATOR, mutable=PRIVATE, accessor=PRIVATE+PUBLIC, mutator=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
@@ -65,13 +63,9 @@ function declarator_mt.__call() end
 do
 	local function index(access, default)
 		return function(self, key)
-			local state = _state[self]; local modifiers = state.metadata[key]
-			if modifiers and mask(access+PROPERTY, modifiers) == access then
-				return state.data[key]
-			else
-				local accessor = state.accessors[key]
-				if accessor then return accessor() else return default[key] or null_error(key) end
-			end
+			local state = _state[self]; local modifiers = state.metadata[key] or 0
+			if mask(access+ACCESSOR, modifiers) == access+ACCESSOR then return state.accessors[key]() end
+			return state.data[key] or default[key]
 		end
 	end
 	env_mt = {__metatable=false, __index=index(PRIVATE, _g)}
@@ -88,10 +82,10 @@ do
 	end
 	interface_mt = {__metatable=false, __index=index(PUBLIC, {})}
 	function interface_mt.__newindex(self, key, value)
-		local state = _state[self]; local metadata = state.metadata or null_error(key)
-		if mask(PUBLIC+MUTATOR, metadata) == PUBLIC+MUTATOR then
+		local state = _state[self]; local metadata = state.metadata
+		if metadata and mask(PUBLIC+MUTATOR, metadata) == PUBLIC+MUTATOR then
 			return state.mutators[key](value)
-		elseif mask(PUBLIC+PROPERTY, metadata) == PUBLIC or null_error(key) then
+		elseif mask(PUBLIC+PROPERTY, metadata) == PUBLIC then
 			return state.data[key](value)
 		end
 	end
@@ -108,8 +102,8 @@ function module(name)
 		mutators = {accessor=function(value) set_property(accessors, state.property, value) end, mutator=function(value) set_property(mutators, state.property, value) end}
 		state = {
 			env=env, interface=interface, modifiers=PRIVATE,
-			metadata = {NULL=PRIVATE, _g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+ACCESSOR, public=PROPERTY+ACCESSOR, mutable=PROPERTY+ACCESSOR, accessor=PROPERTY+ACCESSOR+MUTATOR, mutator=PROPERTY+ACCESSOR+MUTATOR},
-			data = {NULL=NULL, _g=_g, _m=env, _i=interface, import=importer}, accessors=accessors, mutators=mutators,
+			metadata = {_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+ACCESSOR, public=PROPERTY+ACCESSOR, mutable=PROPERTY+ACCESSOR, accessor=PROPERTY+ACCESSOR+MUTATOR, mutator=PROPERTY+ACCESSOR+MUTATOR},
+			data = {_g=_g, _m=env, _i=interface, import=importer}, accessors=accessors, mutators=mutators,
 		}
 		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
 		setfenv(INIT, env); INIT()

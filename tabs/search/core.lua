@@ -50,7 +50,7 @@ end
 
 RESULTS, SAVED, FILTER = 1, 2, 3
 
-function LOAD()
+function LOAD2()
 	create_frames()
 	set_tab(SAVED)
 	update_auto_buy_filter()

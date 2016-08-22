@@ -436,12 +436,12 @@ function public.editbox(parent)
 	    self:SetFont(config.font, size)
 	    self.display:SetFont(config.font, size)
     end
-    local display = gui.label(editbox)
+    local display = label(editbox)
     display:SetPoint('LEFT', 1.5, 0)
     display:SetPoint('RIGHT', -1.5, 0)
     display:SetTextColor(color.text.enabled())
     editbox.display = display
-    local cursor = gui.label(editbox, config.large_font_size)
+    local cursor = label(editbox, config.large_font_size)
     cursor:SetText '|'
     cursor:SetTextColor(color.text.enabled())
     cursor:SetAlpha(0)
@@ -532,7 +532,7 @@ function public.item(parent)
     btn:RegisterForClicks()
     item.texture = getglobal(btn:GetName()..'Icon')
     item.texture:SetTexCoord(.06, .94, .06, .94)
-    item.name = gui.label(btn, 15)
+    item.name = label(btn, 15)
     item.name:SetJustifyH 'LEFT'
     item.name:SetPoint('LEFT', btn, 'RIGHT', 10, 0)
     item.name:SetPoint('RIGHT', item, 'RIGHT', -10, .5)
