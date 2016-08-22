@@ -195,12 +195,12 @@ function public.formatted_post_filter(components)
 		elseif i > 1 then
 			str = str..'</p><p>'
 			for _=1,getn(stack) do
-				str = str..gui.color.content.background('----')
+				str = str..color.content.background('----')
 			end
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
 
-		local filter_color = (filter_builder_state.selected == i and gui.color.orange or gui.color.aux)
+		local filter_color = (filter_builder_state.selected == i and color.orange or color.aux)
 		local component_text = filter_color(component[2])
 		if component[1] == 'operator' and component[2] ~= 'not' then
 			component_text = component_text..filter_color(tonumber(component[3]) or '')

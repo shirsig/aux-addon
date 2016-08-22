@@ -8,18 +8,18 @@ local HEAD_SPACE = 2
 
 function LOAD()
 	AUCTION_PCT_COLORS = {
-	    {color=gui.inline_color.blue, value=50},
-	    {color=gui.inline_color.green, value=80},
-	    {color=gui.inline_color.yellow, value=110},
-	    {color=gui.inline_color.orange, value=135},
-	    {color=gui.inline_color.red, value=huge},
+	    {color=inline_color.blue, value=50},
+	    {color=inline_color.green, value=80},
+	    {color=inline_color.yellow, value=110},
+	    {color=inline_color.orange, value=135},
+	    {color=inline_color.red, value=huge},
 	}
 
 	TIME_LEFT_STRINGS = {
-		gui.color.red '30m', -- Short
-		gui.color.orange '2h', -- Medium
-		gui.color.yellow '8h', -- Long
-		gui.color.blue '24h', -- Very Long
+		color.red '30m', -- Short
+		color.orange '2h', -- Medium
+		color.yellow '8h', -- Long
+		color.blue '24h', -- Very Long
 	}
 end
 
@@ -80,7 +80,7 @@ public.search_config = {
         align = 'CENTER',
         fill = function(cell, record)
             local display_level = max(record.level, 1)
-            display_level = UnitLevel('player') < record.level and gui.color.red(display_level) or display_level
+            display_level = UnitLevel('player') < record.level and color.red(display_level) or display_level
             cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
@@ -92,9 +92,9 @@ public.search_config = {
         width = 0.06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and gui.color.link(count) or count
+            local numAuctionsText = expandable and color.link(count) or count
             if own > 0 then
-                numAuctionsText = numAuctionsText..(' '..gui.color.yellow('('..own..')'))
+                numAuctionsText = numAuctionsText..(' '..color.yellow('('..own..')'))
             end
             cell:SetText(numAuctionsText)
         end,
@@ -138,7 +138,7 @@ public.search_config = {
         width = 0.13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell:SetText(is_player(record.owner) and (gui.color.yellow(record.owner)) or (record.owner or '---'))
+            cell:SetText(is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -250,7 +250,7 @@ public.auctions_config = {
         align = 'CENTER',
         fill = function(cell, record)
             local display_level = max(record.level, 1)
-            display_level = UnitLevel('player') < record.level and gui.color.red(display_level) or display_level
+            display_level = UnitLevel('player') < record.level and color.red(display_level) or display_level
             cell:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
@@ -262,7 +262,7 @@ public.auctions_config = {
         width = 0.06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
+            local numAuctionsText = expandable and inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -353,7 +353,7 @@ public.auctions_config = {
         width = 0.21,
         align = 'CENTER',
         fill = function(cell, record)
-            cell:SetText(record.high_bidder or gui.color.red 'No Bids')
+            cell:SetText(record.high_bidder or color.red 'No Bids')
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.high_bidder and not record_b.high_bidder then
@@ -396,7 +396,7 @@ public.bids_config = {
         width = 0.06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and gui.inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
+            local numAuctionsText = expandable and inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -439,7 +439,7 @@ public.bids_config = {
         width = 0.13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell:SetText(is_player(record.owner) and (gui.color.yellow(record.owner)) or (record.owner or '---'))
+            cell:SetText(is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '---'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -508,9 +508,9 @@ public.bids_config = {
         fill = function(cell, record)
             local status
             if record.high_bidder then
-                status = gui.color.yellow 'High Bidder'
+                status = color.yellow 'High Bidder'
             else
-                status = gui.color.red 'Outbid'
+                status = color.red 'Outbid'
             end
             cell:SetText(status)
         end,
@@ -541,7 +541,7 @@ function percentage_color(pct)
 end
 
 function public.percentage_historical(pct, bid)
-    return (bid and gui.inline_color.gray or percentage_color(pct))..(pct > 10000 and '>10000' or pct)..'%'..FONT_COLOR_CODE_CLOSE
+    return (bid and inline_color.gray or percentage_color(pct))..(pct > 10000 and '>10000' or pct)..'%'..FONT_COLOR_CODE_CLOSE
 end
 
 function public.time_left(code)
@@ -1038,7 +1038,7 @@ function public.CreateAuctionResultsTable(parent, config)
     scrollBar:SetWidth(10)
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
-    thumbTex:SetTexture(unpack(gui.color.content.background))
+    thumbTex:SetTexture(color.content.background())
     thumbTex:SetHeight(150)
     thumbTex:SetWidth(scrollBar:GetWidth())
     getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
@@ -1065,7 +1065,7 @@ function public.CreateAuctionResultsTable(parent, config)
         text:SetJustifyH 'CENTER'
         text:SetJustifyV 'CENTER'
         text:SetFont(gui.config.font, 12)
-        text:SetTextColor(unpack(gui.color.label.enabled))
+        text:SetTextColor(color.label.enabled())
         cell:SetFontString(text)
         if not column_config.isPrice then cell:SetText(column_config.title or '') end -- TODO
         text:SetAllPoints()

@@ -135,9 +135,9 @@ function update_auction_listing()
 
             tinsert(auction_rows, {
                 cols = {
-                    {value=auction_record.own and gui.color.yellow(auction_record.count) or auction_record.count},
+                    {value=auction_record.own and color.yellow(auction_record.count) or auction_record.count},
                     {value=auction_listing.time_left(auction_record.duration)},
-                    {value=auction_record.stack_size == stack_size and gui.color.yellow(auction_record.stack_size) or auction_record.stack_size},
+                    {value=auction_record.stack_size == stack_size and color.yellow(auction_record.stack_size) or auction_record.stack_size},
                     {value=money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
                     {value=historical_value and auction_listing.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'},
                     {value=auction_record.unit_buyout_price > 0 and money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'},
@@ -273,7 +273,7 @@ function update_item_configuration()
 
         item.texture:SetTexture(nil)
         item.count:SetText()
-        item.name:SetTextColor(unpack(gui.color.label.enabled))
+        item.name:SetTextColor(color.label.enabled())
         item.name:SetText('No item selected')
 
         start_price_frame:Hide()

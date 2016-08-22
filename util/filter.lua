@@ -443,38 +443,38 @@ function prettified_query_string(components)
 
     for key, filter in components.blizzard do
         if key == 'exact' then
-            prettified.prepend(info.display_name(cache.item_id(components.blizzard.name[2])) or gui.color.blizzard('['..components.blizzard.name[2]..']'))
+            prettified.prepend(info.display_name(cache.item_id(components.blizzard.name[2])) or color.blizzard('['..components.blizzard.name[2]..']'))
         elseif key ~= 'name' then
-            prettified.append(gui.color.blizzard(filter[1]))
+            prettified.append(color.blizzard(filter[1]))
         end
     end
 
     if components.blizzard.name and not components.blizzard.exact and components.blizzard.name[2] ~= '' then
-        prettified.prepend(gui.color.blizzard(components.blizzard.name[2]))
+        prettified.prepend(color.blizzard(components.blizzard.name[2]))
     end
 
     for _, component in components.post do
         if component[1] == 'operator' then
-			prettified.append(gui.color.aux(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')))
+			prettified.append(color.aux(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')))
         elseif component[1] == 'filter' then
             if component[2] ~= 'tooltip' then
-                prettified.append(gui.color.aux(component[2]))
+                prettified.append(color.aux(component[2]))
             end
             for parameter in present(component[3]) do
 	            if component[2] == 'item' then
-		            prettified.append(info.display_name(cache.item_id(parameter)) or gui.color.label.enabled('['..parameter..']'))
+		            prettified.append(info.display_name(cache.item_id(parameter)) or color.label.enabled('['..parameter..']'))
 	            else
 		            if filters[component[2]].input_type == 'money' then
 			            prettified.append(money.to_string(money.from_string(parameter), nil, true, nil, gui.inline_color.label.enabled))
 		            else
-			            prettified.append(gui.color.label.enabled(parameter))
+			            prettified.append(color.label.enabled(parameter))
 		            end
 	            end
             end
         end
     end
     if prettified.get() == '' then
-        return gui.color.blizzard'<>'
+        return color.blizzard'<>'
     else
         return prettified.get()
     end

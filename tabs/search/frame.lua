@@ -54,7 +54,7 @@ function create_frames()
 	do
 	    local panel = CreateFrame('Frame', nil, frame)
 	    panel:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]]}
-	    panel:SetBackdropColor(unpack(gui.color.content.background))
+	    panel:SetBackdropColor(color.content.background())
 	    panel:SetPoint('LEFT', settings_button, 'RIGHT', 0, 0)
 	    panel:SetPoint('RIGHT', 0, 0)
 	    panel:SetHeight(42)
@@ -76,9 +76,9 @@ function create_frames()
 				this:SetText(valid_input)
 			end
 			if blizzard_page_index(this:GetText()) and not real_time_button:GetChecked() then
-				this:SetBackdropColor(gui.color.state.enabled())
+				this:SetBackdropColor(color.state.enabled())
 			else
-				this:SetBackdropColor(gui.color.state.disabled())
+				this:SetBackdropColor(color.state.disabled())
 			end
 		end
 		do
@@ -92,7 +92,7 @@ function create_frames()
 		    local label = gui.label(editbox, 16)
 		    label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
 		    label:SetText('Pages')
-		    label:SetTextColor(gui.color.text.enabled())
+		    label:SetTextColor(color.text.enabled())
 		    first_page_input = editbox
 	    end
 		do
@@ -106,7 +106,7 @@ function create_frames()
 		    local label = gui.label(editbox, gui.config.medium_font_size)
 		    label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
 		    label:SetText('-')
-		    label:SetTextColor(gui.color.text.enabled())
+		    label:SetTextColor(color.text.enabled())
 		    last_page_input = editbox
 		end
 	end
@@ -217,7 +217,7 @@ function create_frames()
 	    btn:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
 	    btn:SetWidth(70)
 	    btn:SetHeight(25)
-	    btn:SetText(gui.color.green 'Resume')
+	    btn:SetText(color.green 'Resume')
 	    btn:SetScript('OnClick', function()
 	        execute(true)
 	    end)
@@ -579,7 +579,7 @@ function create_frames()
 	    local scroll_child = CreateFrame('SimpleHTML', nil, scroll_frame)
 	    scroll_frame:SetScrollChild(scroll_child)
 	    scroll_child:SetFont('p', [[Fonts\ARIALN.TTF]], 23)
-	    scroll_child:SetTextColor('p', gui.color.label.enabled())
+	    scroll_child:SetTextColor('p', color.label.enabled())
 	    scroll_child:SetWidth(1)
 	    scroll_child:SetHeight(1)
 	    scroll_child:SetScript('OnHyperlinkClick', data_link_click)

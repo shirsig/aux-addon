@@ -251,7 +251,7 @@ function create_frames()
 	    editbox.pretty:SetPoint('LEFT', 1, 0)
 	    editbox.pretty:SetPoint('RIGHT', -2, 0)
 	    editbox.pretty:SetJustifyH 'RIGHT'
-	    editbox.pretty:SetTextColor(gui.color.text.enabled())
+	    editbox.pretty:SetTextColor(color.text.enabled())
 	    do
 	        local label = gui.label(frame, gui.config.small_font_size)
 	        label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
@@ -303,7 +303,7 @@ function create_frames()
 	    editbox.pretty:SetPoint('LEFT', 1, 0)
 	    editbox.pretty:SetPoint('RIGHT', -2, 0)
 	    editbox.pretty:SetJustifyH 'RIGHT'
-	    editbox.pretty:SetTextColor(gui.color.text.enabled())
+	    editbox.pretty:SetTextColor(color.text.enabled())
 	    do
 	        local label = gui.label(frame, gui.config.small_font_size)
 	        label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
