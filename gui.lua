@@ -524,8 +524,7 @@ end
 
 function public.item(parent)
     local item = CreateFrame('Frame', nil, parent)
-    item:SetWidth(260)
-    item:SetHeight(40)
+    set_size(item, 260, 40)
     local btn = CreateFrame('CheckButton', name, item, 'ActionButtonTemplate')
     item.button = btn
     btn:SetPoint('LEFT', 2, .5)

@@ -1,15 +1,16 @@
 local type, setmetatable, setfenv, unpack, mask, _g = type, setmetatable, setfenv, unpack, bit.band, getfenv(0)
-local PRIVATE, PUBLIC, MUTABLE, PROPERTY, ACCESSOR, MUTATOR = 0, 1, 2, 4, 8, 16
+local PRIVATE, PUBLIC, MUTABLE, PROPERTY, ACCESSOR, MUTATOR, INITIALIZED = 0, 1, 2, 4, 8, 16, 32
 local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, accessor=ACCESSOR+PROPERTY, mutator=MUTATOR+PROPERTY}
 local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+ACCESSOR+MUTATOR, public=MUTABLE+ACCESSOR+MUTATOR, mutable=PRIVATE+PUBLIC, accessor=PRIVATE+PUBLIC, mutator=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
-local error, declaration_error, immutable_error, collision_error, void_error, set_property, lock_mt, env_mt, interface_mt, declarator_mt, importer_mt
-lock_mt = {}
-local _state, _modules = {}, setmetatable({}, lock_mt)
-function error(message, level, ...) _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 5, 0), (level or 1) + 1) end
-function declaration_error(level) error('Malformed declaration.', level + 1) end
-function immutable_error(key, level) error('Field "%s" is immutable.', level + 1, key) end
-function collision_error(key, level) error('Field "%s" already exists.', level + 1, key) end
-function void_error(key, level) error('No field "%s".', level + 1, key) end
+local error, modifier_error, property_error, immutable_error, collision_error, null_error, set_property, env_mt, interface_mt, declarator_mt, importer_mt
+local _state, _modules = {}, {}
+local NULL = setmetatable({}, {__metatable=false, __index=error'NULL', __newindex=error'NULL'})
+function error(message, ...) return function() _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 10, 0)) end end
+modifier_error = error 'Invalid modifiers.'
+property_error = error 'Accessor/Mutator must be function.'
+function immutable_error(key) return error('Field "%s" is immutable.', key) end
+function collision_error(key) return error('Field "%s" already exists.', key) end
+function null_error(key) error('No field "%s".', key) end
 importer_mt = {__metatable=false}
 function importer_mt.__index(self, key) _state[self][self] = key; return self end
 function importer_mt.__call(self, arg1, arg2)
@@ -31,7 +32,7 @@ function importer_mt.__call(self, arg1, arg2)
 	return self
 end
 function set_property(data, property, value)
-	if property and not data[property] and type(value) == 'function' or declaration_error(2) then
+	if property and not data[property] and type(value) == 'function' or property_error() then
 		data[property] = value
 	end
 end
@@ -39,20 +40,20 @@ declarator_mt = {__metatable=false}
 function declarator_mt.__index(self, key)
 	local state, modifier = _state[self], MODIFIER[key]; local modifiers = state.modifiers
 	if modifier then
-		if mask(MODIFIER_MASK[key], modifiers) ~= modifiers then declaration_error(2) end
+		if mask(MODIFIER_MASK[key], modifiers) ~= modifiers then modifier_error() end
 		state.modifiers = modifiers + modifier; return self
-	elseif not state.metadata[key] or collision_error(key, 2) then
-		if mask(PROPERTY_MASK, modifiers) ~= modifiers then declaration_error(2) end
+	elseif not state.metadata[key] or collision_error(key) then
+		if mask(PROPERTY_MASK, modifiers) ~= modifiers then modifier_error() end
 		state.property, state.metadata[key], state.modifiers = key, modifiers + PROPERTY, PRIVATE
 	end
 end
 function declarator_mt.__newindex(self, key, value)
 	local state = _state[self]
-	if state.metadata[key] then collision_error(key, 2) end
+	if state.metadata[key] then collision_error(key) end
 	state.metadata[key] = state.modifiers
 	if mask(PROPERTY, state.modifiers) == 0 then
 		state.data[key] = value
-	elseif type(value) == 'function' or declaration_error(2) then
+	elseif type(value) == 'function' or property_error() then
 		local data = mask(ACCESSOR, state.modifiers) ~= 0 and state.accessors or state.mutators
 		state.property, data[key] = key, value
 	end
@@ -67,7 +68,7 @@ do
 				return state.data[key]
 			else
 				local accessor = state.accessors[key]
-				if accessor then return accessor() else return default[key] or void_error(key, 2) end
+				if accessor then return accessor() else return default[key] or null_error(key) end
 			end
 		end
 	end
@@ -77,7 +78,7 @@ do
 		if modifiers then
 			local mutator = state.mutators[key]
 			if mutator then return mutator(value) end
-			if mask(MUTABLE, modifiers) == 0 then immutable_error(key, 2) end
+			if mask(MUTABLE, modifiers) == 0 then immutable_error(key) end
 		else
 			state.metadata[key] = state.modifiers
 		end
@@ -85,10 +86,10 @@ do
 	end
 	interface_mt = {__metatable=false, __index=index(PUBLIC, {})}
 	function interface_mt.__newindex(self, key, value)
-		local state = _state[self]; local metadata = state.metadata or void_error(key, 2)
+		local state = _state[self]; local metadata = state.metadata or null_error(key)
 		if mask(PUBLIC+MUTATOR, metadata) == PUBLIC+MUTATOR then
 			return state.mutators[key](value)
-		elseif mask(PUBLIC, metadata) == PUBLIC or immutable_error(key, 2) then
+		elseif mask(PUBLIC, metadata) == PUBLIC or immutable_error(key) then
 			state.data[key] = value
 		end
 	end
@@ -105,13 +106,11 @@ function module(name)
 		mutators = {accessor=function(value) set_property(accessors, state.property, value) end, mutator=function(value) set_property(mutators, state.property, value) end}
 		state = {
 			env=env, interface=interface, modifiers=PRIVATE,
-			metadata = setmetatable({_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+ACCESSOR, public=PROPERTY+ACCESSOR, mutable=PROPERTY+ACCESSOR, accessor=PROPERTY+ACCESSOR+MUTATOR, mutator=PROPERTY+ACCESSOR+MUTATOR}, lock_mt),
-			data = {_g=_g, _m=env, _i=interface, import=importer}, accessors=accessors, mutators=mutators,
+			metadata = {NULL=PRIVATE, _g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+ACCESSOR, public=PROPERTY+ACCESSOR, mutable=PROPERTY+ACCESSOR, accessor=PROPERTY+ACCESSOR+MUTATOR, mutator=PROPERTY+ACCESSOR+MUTATOR},
+			data = {NULL=NULL, _g=_g, _m=env, _i=interface, import=importer}, accessors=accessors, mutators=mutators,
 		}
 		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
 		setfenv(INIT, env); INIT()
 	end
 	setfenv(2, _modules[name].env)
 end
-local frame = CreateFrame 'Frame'; frame:RegisterEvent 'PLAYER_LOGIN'
-frame:SetScript('OnEvent', function() lock_mt.__newindex = function() error 'Modules are frozen after the loading phase.' end end)

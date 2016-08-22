@@ -10,7 +10,7 @@ game_tooltip_money = nil
 function LOAD()
     for func, hook in game_tooltip_hooks do
         local func, hook = func, hook
-        hook(
+        _m.hook(
             func,
             function(...)
                 hooked_setter = true
@@ -211,24 +211,23 @@ function game_tooltip_hooks:SetCraftItem(skill, slot)
     else
         link, quantity = GetCraftItemLink(skill), 1
     end
-    if link then extend_tooltip(GameTooltip, link, quantity) end
+    if link then
+	    extend_tooltip(GameTooltip, link, quantity)
+    end
 end
 
 function game_tooltip_hooks:SetCraftSpell(slot)
-    local link = GetCraftItemLink(slot)
-    if link then
-        extend_tooltip(GameTooltip, link, 1)
+    if x(GetCraftItemLink(slot)) then
+        extend_tooltip(GameTooltip, __, 1)
     end
 end
 
 function game_tooltip_hooks:SetTradeSkillItem(skill, slot)
     local link, quantity
     if slot then
-        link = GetTradeSkillReagentItemLink(skill, slot)
-        quantity = ({GetTradeSkillReagentInfo(skill, slot)})[3]
+        link, quantity = GetTradeSkillReagentItemLink(skill, slot), select(3, GetTradeSkillReagentInfo(skill, slot))
     else
-        link = GetTradeSkillItemLink(skill)
-        quantity = 1
+        link, quantity = GetTradeSkillItemLink(skill), 1
     end
     if link then
         extend_tooltip(GameTooltip, link, quantity)
@@ -236,11 +235,11 @@ function game_tooltip_hooks:SetTradeSkillItem(skill, slot)
 end
 
 function game_tooltip_hooks:SetAuctionSellItem()
-    local name, _, quantity, _, _, _ = GetAuctionSellItemInfo()
+    local name, _, quantity = GetAuctionSellItemInfo()
     if name then
         for slot in inventory do
             local link = GetContainerItemLink(unpack(slot))
-            if link and ({info.parse_link(link)})[5] == name then
+            if link and select(5, info.parse_link(link)) == name then
                 extend_tooltip(GameTooltip, link, quantity)
                 return
             end

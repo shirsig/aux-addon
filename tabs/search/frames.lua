@@ -1,4 +1,4 @@
-module 'search_tab'
+module 'search_tab' import 'gui'
 
 FILTER_SPACING = 28.5
 

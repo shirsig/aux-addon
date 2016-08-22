@@ -1,4 +1,4 @@
-module 'post_tab'
+module 'post_tab' import 'gui'
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, frame)

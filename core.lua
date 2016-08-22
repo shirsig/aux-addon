@@ -9,8 +9,7 @@ function LOAD()
 		local frame = CreateFrame('Frame', gui.name, UIParent)
 		tinsert(UISpecialFrames, 'aux_frame1')
 		gui.set_window_style(frame)
-		frame:SetWidth(768)
-		frame:SetHeight(447)
+		gui.set_size(frame, 768, 447)
 		frame:SetPoint('LEFT', 100, 0)
 		frame:SetToplevel(true)
 		frame:SetMovable(true)
@@ -36,8 +35,7 @@ function LOAD()
 	do
 		local btn = gui.button(frame, 16)
 		btn:SetPoint('BOTTOMRIGHT', -6, 6)
-		btn:SetWidth(65)
-		btn:SetHeight(24)
+		gui.set_size(btn, 65, 24)
 		btn:SetText 'Close'
 		btn:SetScript('OnClick', L(frame.Hide, frame))
 		public.close_button = btn
@@ -45,8 +43,7 @@ function LOAD()
 	do
 		local btn = gui.button(frame, 16)
 		btn:SetPoint('RIGHT', close_button, 'LEFT' , -5, 0)
-		btn:SetWidth(65)
-		btn:SetHeight(24)
+		gui.set_size(btn, 65, 24)
 		btn:SetText 'Default UI'
 		btn:SetScript('OnClick',function()
 			if AuctionFrame:IsVisible() then HideUIPanel(AuctionFrame) else ShowUIPanel(AuctionFrame) end
