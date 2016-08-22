@@ -4,12 +4,11 @@
 ## SavedVariables: aux_datasets, aux_items, aux_item_ids, aux_auctionable_items, aux_merchant_buy, aux_merchant_sell, aux_characters, aux_recent_searches, aux_favorite_searches, aux_ignore_owner, aux_price_per_unit
 
 module.lua
-init.lua
-core.lua
-util.lua
+aux-addon.lua
+util\core.lua
 control.lua
-gui.lua
-frames.lua
+gui\core.lua
+frame.lua
 
 
 util\completion.lua
@@ -21,34 +20,34 @@ util\filter.lua
 util\scan_util.lua
 
 
-components\cache.lua
-components\disenchant.lua
-components\slash.lua
-components\scan.lua
-components\stack.lua
-components\post.lua
-components\history.lua
-components\tooltip.lua
+core\cache.lua
+core\disenchant.lua
+core\slash.lua
+core\scan.lua
+core\stack.lua
+core\post.lua
+core\history.lua
+core\tooltip.lua
 
 
-tables\listing.lua
-tables\auction_listing.lua
-tables\item_listing.lua
+gui\listing.lua
+gui\auction_listing.lua
+gui\item_listing.lua
 
 
 tabs\search\core.lua
 tabs\search\results.lua
 tabs\search\saved.lua
 tabs\search\filter.lua
-tabs\search\frames.lua
+tabs\search\frame.lua
 
 tabs\post\core.lua
-tabs\post\frames.lua
+tabs\post\frame.lua
 
 tabs\auctions\core.lua
-tabs\auctions\frames.lua
+tabs\auctions\frame.lua
 
 tabs\bids\core.lua
-tabs\bids\frames.lua
+tabs\bids\frame.lua
 
 

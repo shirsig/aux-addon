@@ -1,13 +1,11 @@
-module 'core'
-
 function INIT()
-	import :_ 'core' :_ 'util'
+	import :_ 'aux' :_ 'util'
 	function LOAD()
-		import :_ 'core' :_ 'control' :_ 'util'
+		import :_ 'aux' :_ 'util'
 	end
 end
 
-module 'core'
+module 'aux'
 public.version = '5.0.0'
 
 do
