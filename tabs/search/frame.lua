@@ -103,7 +103,7 @@ function create_frames()
 		    editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
 		    editbox.enter = execute
 		    editbox.change = change
-		    local label = gui.label(editbox, gui.config.medium_font_size)
+		    local label = gui.label(editbox, gui.font_size.medium)
 		    label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
 		    label:SetText('-')
 		    label:SetTextColor(color.text.enabled())
@@ -187,7 +187,7 @@ function create_frames()
 	    next_button = btn
 	end
 	do
-	    local btn = gui.button(controls, gui.config.huge_font_size)
+	    local btn = gui.button(controls, gui.font_size.huge)
 	    btn:SetPoint('RIGHT', -5, 0)
 	    btn:SetWidth(70)
 	    btn:SetHeight(25)
@@ -202,7 +202,7 @@ function create_frames()
 	    start_button = btn
 	end
 	do
-	    local btn = gui.button(controls, gui.config.huge_font_size)
+	    local btn = gui.button(controls, gui.font_size.huge)
 	    btn:SetPoint('RIGHT', -5, 0)
 	    btn:SetWidth(70)
 	    btn:SetHeight(25)
@@ -213,7 +213,7 @@ function create_frames()
 	    stop_button = btn
 	end
 	do
-	    local btn = gui.button(controls, gui.config.huge_font_size)
+	    local btn = gui.button(controls, gui.font_size.huge)
 	    btn:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
 	    btn:SetWidth(70)
 	    btn:SetHeight(25)
@@ -242,7 +242,7 @@ function create_frames()
 	    gui.horizontal_line(frame, -40)
 	end
 	do
-	    local btn = gui.button(frame, gui.config.large_font_size2)
+	    local btn = gui.button(frame, gui.font_size.large2)
 	    btn:SetPoint('BOTTOMLEFT', frame.content, 'TOPLEFT', 10, 8)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
@@ -251,7 +251,7 @@ function create_frames()
 	    search_results_button = btn
 	end
 	do
-	    local btn = gui.button(frame, gui.config.large_font_size2)
+	    local btn = gui.button(frame, gui.font_size.large2)
 	    btn:SetPoint('TOPLEFT', search_results_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
@@ -260,7 +260,7 @@ function create_frames()
 	    saved_searches_button = btn
 	end
 	do
-	    local btn = gui.button(frame, gui.config.large_font_size2)
+	    local btn = gui.button(frame, gui.font_size.large2)
 	    btn:SetPoint('TOPLEFT', saved_searches_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
@@ -365,7 +365,7 @@ function create_frames()
 	    end)
 	    editbox.change = update_form
 	    editbox.enter = L(editbox.ClearFocus, editbox)
-	    local label = gui.label(editbox, gui.config.small_font_size)
+	    local label = gui.label(editbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
 	    label:SetText 'Name'
 	    name_input = editbox
@@ -374,7 +374,7 @@ function create_frames()
 	    local checkbox = gui.checkbox(frame.filter)
 	    checkbox:SetPoint('TOPLEFT', name_input, 'TOPRIGHT', 16, 0)
 	    checkbox:SetScript('OnClick', update_form)
-	    local label = gui.label(checkbox, gui.config.small_font_size)
+	    local label = gui.label(checkbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Exact')
 	    exact_checkbox = checkbox
@@ -399,7 +399,7 @@ function create_frames()
 		    end
 		    update_form()
 	    end
-	    local label = gui.label(editbox, gui.config.small_font_size)
+	    local label = gui.label(editbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
 	    label:SetText 'Level Range'
 	    min_level_input = editbox
@@ -424,7 +424,7 @@ function create_frames()
 		    end
 		    update_form()
 	    end
-	    local label = gui.label(editbox, gui.config.medium_font_size)
+	    local label = gui.label(editbox, gui.font_size.medium)
 	    label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
 	    label:SetText('-')
 	    max_level_input = editbox
@@ -433,7 +433,7 @@ function create_frames()
 	    local checkbox = gui.checkbox(frame.filter)
 	    checkbox:SetPoint('TOPLEFT', max_level_input, 'TOPRIGHT', 16, 0)
 	    checkbox:SetScript('OnClick', update_form)
-	    local label = gui.label(checkbox, gui.config.small_font_size)
+	    local label = gui.label(checkbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Usable')
 	    usable_checkbox = checkbox
@@ -443,7 +443,7 @@ function create_frames()
 	    class_dropdown = dropdown
 	    dropdown:SetPoint('TOPLEFT', min_level_input, 'BOTTOMLEFT', 0, 5 - FILTER_SPACING)
 	    dropdown:SetWidth(300)
-	    local label = gui.label(dropdown, gui.config.small_font_size)
+	    local label = gui.label(dropdown, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
 	    label:SetText('Item Class')
 	    UIDropDownMenu_Initialize(dropdown, initialize_class_dropdown)
@@ -456,7 +456,7 @@ function create_frames()
 	    subclass_dropdown = dropdown
 	    dropdown:SetPoint('TOPLEFT', class_dropdown, 'BOTTOMLEFT', 0, 10 - FILTER_SPACING)
 	    dropdown:SetWidth(300)
-	    local label = gui.label(dropdown, gui.config.small_font_size)
+	    local label = gui.label(dropdown, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
 	    label:SetText('Item Subclass')
 	    UIDropDownMenu_Initialize(dropdown, initialize_subclass_dropdown)
@@ -469,7 +469,7 @@ function create_frames()
 	    slot_dropdown = dropdown
 	    dropdown:SetPoint('TOPLEFT', subclass_dropdown, 'BOTTOMLEFT', 0, 10 - FILTER_SPACING)
 	    dropdown:SetWidth(300)
-	    local label = gui.label(dropdown, gui.config.small_font_size)
+	    local label = gui.label(dropdown, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
 	    label:SetText('Item Slot')
 	    UIDropDownMenu_Initialize(dropdown, initialize_slot_dropdown)
@@ -482,7 +482,7 @@ function create_frames()
 	    quality_dropdown = dropdown
 	    dropdown:SetPoint('TOPLEFT', slot_dropdown, 'BOTTOMLEFT', 0, 10 - FILTER_SPACING)
 	    dropdown:SetWidth(300)
-	    local label = gui.label(dropdown, gui.config.small_font_size)
+	    local label = gui.label(dropdown, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
 	    label:SetText('Min Quality')
 	    UIDropDownMenu_Initialize(dropdown, initialize_quality_dropdown)
@@ -500,7 +500,7 @@ function create_frames()
 	        UIDropDownMenu_Initialize(this, initialize_filter_dropdown)
 	    end)
 	    getglobal(dropdown:GetName()..'Text'):Hide()
-	    local label = gui.label(dropdown, gui.config.medium_font_size)
+	    local label = gui.label(dropdown, gui.font_size.medium)
 	    label:SetPoint('RIGHT', dropdown, 'LEFT', -15, 0)
 	    label:SetText('Post Filter')
 	    filter_dropdown = dropdown

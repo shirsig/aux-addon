@@ -32,7 +32,7 @@ function create_frames()
 	    checkbox:SetScript('OnClick', function()
 	        refresh = true
 	    end)
-	    local label = gui.label(checkbox, gui.config.small_font_size)
+	    local label = gui.label(checkbox, gui.font_size.small)
 	    label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
 	    label:SetText('Show hidden items')
 	    show_hidden_checkbox = checkbox
@@ -180,7 +180,7 @@ function create_frames()
 	    local dropdown = gui.dropdown(frame.parameters)
 	    dropdown:SetPoint('TOPLEFT', stack_count_slider, 'BOTTOMLEFT', 0, -19)
 	    dropdown:SetWidth(90)
-	    local label = gui.label(dropdown, gui.config.small_font_size)
+	    local label = gui.label(dropdown, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
 	    label:SetText('Duration')
 	    UIDropDownMenu_Initialize(dropdown, initialize_duration_dropdown)
@@ -190,7 +190,7 @@ function create_frames()
 	    duration_dropdown = dropdown
 	end
 	do
-	    local label = gui.label(frame.parameters, gui.config.medium_font_size)
+	    local label = gui.label(frame.parameters, gui.font_size.medium)
 	    label:SetPoint('LEFT', duration_dropdown, 'RIGHT', 25, 0)
 	    deposit = label
 	end
@@ -203,7 +203,7 @@ function create_frames()
 	        write_settings(settings)
 	        refresh = true
 	    end)
-	    local label = gui.label(checkbox, gui.config.small_font_size)
+	    local label = gui.label(checkbox, gui.font_size.small)
 	    label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
 	    label:SetText 'Hide this item'
 	    hide_checkbox = checkbox
@@ -253,7 +253,7 @@ function create_frames()
 	    editbox.pretty:SetJustifyH 'RIGHT'
 	    editbox.pretty:SetTextColor(color.text.enabled())
 	    do
-	        local label = gui.label(frame, gui.config.small_font_size)
+	        local label = gui.label(frame, gui.font_size.small)
 	        label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
 	        label:SetText 'Unit Starting Price'
 	    end
@@ -305,7 +305,7 @@ function create_frames()
 	    editbox.pretty:SetJustifyH 'RIGHT'
 	    editbox.pretty:SetTextColor(color.text.enabled())
 	    do
-	        local label = gui.label(frame, gui.config.small_font_size)
+	        local label = gui.label(frame, gui.font_size.small)
 	        label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
 	        label:SetText 'Unit Buyout Price'
 	    end
@@ -330,7 +330,7 @@ function create_frames()
 	            set_unit_buyout_price(this.amount)
 	        end
 	    end)
-	    local label = gui.label(btn, gui.config.small_font_size)
+	    local label = gui.label(btn, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
 	    label:SetText 'Historical Value'
 	    historical_value_button = btn

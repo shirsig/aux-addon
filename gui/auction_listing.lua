@@ -1064,7 +1064,7 @@ function public.CreateAuctionResultsTable(parent, config)
         local text = cell:CreateFontString()
         text:SetJustifyH 'CENTER'
         text:SetJustifyV 'CENTER'
-        text:SetFont(gui.config.font, 12)
+        text:SetFont(gui.font, 12)
         text:SetTextColor(color.label.enabled())
         cell:SetFontString(text)
         if not column_config.isPrice then cell:SetText(column_config.title or '') end -- TODO
@@ -1110,7 +1110,7 @@ function public.CreateAuctionResultsTable(parent, config)
         for j=1, getn(rt.config) do
             local cell = CreateFrame('Button', nil, row)
             local text = cell:CreateFontString()
-            text:SetFont(gui.config.font, min(14, rt.ROW_HEIGHT))
+            text:SetFont(gui.font, min(14, rt.ROW_HEIGHT))
             text:SetJustifyH(rt.config[j].align or 'LEFT')
             text:SetJustifyV 'CENTER'
             text:SetPoint('TOPLEFT', 1, -1)

@@ -1,15 +1,15 @@
 module 'gui'
 
-public.config = {
-    edge_size = 1.5,
-    font = [[Fonts\ARIALN.TTF]],
-    small_font_size = 13,
-	small_font_size2 = 14,
-    medium_font_size = 15,
-	medium_font_size2 = 16,
-	large_font_size = 17,
-	large_font_size2 = 18,
-    huge_font_size = 23,
+public.font = [[Fonts\ARIALN.TTF]]
+
+public.font_size = {
+    small = 13,
+	small2 = 14,
+    medium = 15,
+	medium2 = 16,
+	large = 17,
+	large2 = 18,
+    huge = 23,
 }
 
 do
@@ -79,7 +79,7 @@ do
 			button:SetPoint('TOPLEFT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
 			button:SetPoint('TOPRIGHT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
 			local text = button:GetFontString()
-			text:SetFont(config.font, config.small_font_size2)
+			text:SetFont(font, font_size.small2)
 			text:SetPoint('TOPLEFT', 18, 0)
 			text:SetPoint('BOTTOMRIGHT', -8, 0)
 			local highlight = getglobal('DropDownList1Button'..i..'Highlight')
@@ -121,7 +121,7 @@ function public.set_size(frame, width, height)
 end
 
 function public.set_frame_style(frame, backdrop_color, border_color, left, right, top, bottom)
-	frame:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=config.edge_size, tile=true, insets={left=left, right=right, top=top, bottom=bottom}}
+	frame:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5, tile=true, insets={left=left, right=right, top=top, bottom=bottom}}
 	frame:SetBackdropColor(backdrop_color())
 	frame:SetBackdropBorderColor(border_color())
 end
@@ -174,7 +174,7 @@ function public.button(parent, text_height)
     button.highlight = highlight
     do
         local label = button:CreateFontString()
-        label:SetFont(config.font, text_height)
+        label:SetFont(font, text_height)
         label:SetPoint('CENTER', 0, 0)
         label:SetJustifyH 'CENTER'
         label:SetJustifyV 'CENTER'
@@ -210,8 +210,7 @@ do
 		tab.id = id
 		tab.group = self
 		tab:SetHeight(24)
-		tab:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=config.edge_size}
-		tab:SetBackdropBorderColor(color.panel.border())
+		set_panel_style(tab)
 		local dock = tab:CreateTexture(nil, 'OVERLAY')
 		dock:SetHeight(3)
 		if self._orientation == 'UP' then
@@ -234,7 +233,7 @@ do
 		tab.text:SetPoint('RIGHT', -3, -1)
 		tab.text:SetJustifyH 'CENTER'
 		tab.text:SetJustifyV 'CENTER'
-		tab.text:SetFont(config.font, config.large_font_size2)
+		tab.text:SetFont(font, font_size.large2)
 		tab:SetFontString(tab.text)
 
 		tab:SetText(text)
@@ -368,21 +367,21 @@ function public.editbox(parent)
 	    self.display:SetJustifyH(alignment)
     end
     function editbox:SetFontSize(size)
-	    self:SetFont(config.font, size)
-	    self.display:SetFont(config.font, size)
+	    self:SetFont(font, size)
+	    self.display:SetFont(font, size)
     end
     local display = label(editbox)
     display:SetPoint('LEFT', 1.5, 0)
     display:SetPoint('RIGHT', -1.5, 0)
     display:SetTextColor(color.text.enabled())
     editbox.display = display
-    local cursor = label(editbox, config.large_font_size)
+    local cursor = label(editbox, font_size.large)
     cursor:SetText '|'
     cursor:SetTextColor(color.text.enabled())
     cursor:SetAlpha(0)
     editbox.cursor = cursor
     editbox:SetAlignment 'LEFT'
-    editbox:SetFontSize(config.medium_font_size)
+    editbox:SetFontSize(font_size.medium)
     return editbox
 end
 
@@ -478,7 +477,7 @@ end
 
 function public.label(parent, size)
     local label = parent:CreateFontString()
-    label:SetFont(config.font, size or config.small_font_size)
+    label:SetFont(font, size or font_size.small)
     label:SetTextColor(color.label.enabled())
     return label
 end
@@ -527,7 +526,7 @@ function public.dropdown(parent)
     text:ClearAllPoints()
     text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
     text:SetPoint('LEFT', 8, 0)
-    text:SetFont(config.font, config.medium_font_size)
+    text:SetFont(font, font_size.medium)
     text:SetShadowColor(0, 0, 0, 0)
 
     return dropdown
@@ -555,7 +554,7 @@ function public.slider(parent)
     label:SetPoint('BOTTOMRIGHT', slider, 'TOPRIGHT', 6, 8)
     label:SetJustifyH 'LEFT'
     label:SetHeight(13)
-    label:SetFont(config.font, config.small_font_size)
+    label:SetFont(font, font_size.small)
     label:SetTextColor(color.label.enabled())
 
     local editbox = editbox(slider)
