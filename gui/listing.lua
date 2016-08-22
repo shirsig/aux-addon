@@ -424,7 +424,7 @@ function public.CreateScrollingTable(parent)
     scrollFrame:SetAllPoints(contentFrame)
     st.scrollFrame = scrollFrame
 
-    local scrollBar = getglobal(scrollFrame:GetName()..'ScrollBar')
+    local scrollBar = _g[scrollFrame:GetName()..'ScrollBar']
     scrollBar:SetWidth(12)
     st.scrollBar = scrollBar
     local thumbTex = scrollBar:GetThumbTexture()
@@ -432,8 +432,8 @@ function public.CreateScrollingTable(parent)
     thumbTex:SetTexture(color.content.background())
     thumbTex:SetHeight(50)
     thumbTex:SetWidth(12)
-    getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
-    getglobal(scrollBar:GetName()..'ScrollDownButton'):Hide()
+    _g[scrollBar:GetName()..'ScrollUpButton']:Hide()
+    _g[scrollBar:GetName()..'ScrollDownButton']:Hide()
 
     -- create head line at default position
     st.headLine = gui.horizontal_line(st, 0)

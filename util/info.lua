@@ -238,8 +238,8 @@ function public.load_tooltip(frame, tooltip)
         end
     end
     for i =1,getn(tooltip) do -- TODO why is this needed?
-        getglobal(frame:GetName()..'TextLeft'..i):SetJustifyH('LEFT')
-        getglobal(frame:GetName()..'TextRight'..i):SetJustifyH('LEFT')
+	    _g[frame:GetName()..'TextLeft'..i]:SetJustifyH('LEFT')
+	    _g[frame:GetName()..'TextRight'..i]:SetJustifyH('LEFT')
     end
 end
 
@@ -250,7 +250,7 @@ function public.display_name(item_id, no_brackets, no_color)
             name = '['..name..']'
         end
         if not no_color then
-            name = ({GetItemQualityColor(item_info.quality)})[4]..name..FONT_COLOR_CODE_CLOSE
+            name = select(4, GetItemQualityColor(item_info.quality))..name..FONT_COLOR_CODE_CLOSE
         end
         return name
     end
@@ -274,12 +274,12 @@ function public.tooltip(mutator)
     AuxTooltip:Show()
 
     local tooltip = {}
-    for i = 1,AuxTooltip:NumLines() do
+    for i=1,AuxTooltip:NumLines() do
         tinsert(tooltip, {
-            left_text = getglobal('AuxTooltipTextLeft'..i):GetText(),
-            left_color = {getglobal('AuxTooltipTextLeft'..i):GetTextColor()},
-            right_text = getglobal('AuxTooltipTextRight'..i):IsVisible() and getglobal('AuxTooltipTextRight'..i):GetText(),
-            right_color = {getglobal('AuxTooltipTextRight'..i):GetTextColor()},
+            left_text = _g['AuxTooltipTextLeft'..i]:GetText(),
+            left_color = {_g['AuxTooltipTextLeft'..i]:GetTextColor()},
+            right_text = _g['AuxTooltipTextRight'..i]:IsVisible() and _g['AuxTooltipTextRight'..i]:GetText(),
+            right_color = {_g['AuxTooltipTextRight'..i]:GetTextColor()},
         })
     end
 
@@ -301,29 +301,31 @@ function item_charges(tooltip)
     return 1
 end
 
-function public.max_item_charges(item_id)
-    return ({
-        -- wizard oil
-        [20744] = 5,
-        [20746] = 5,
-        [20750] = 5,
-        [20749] = 5,
+do
+	local data = {
+		-- wizard oil
+		[20744] = 5,
+		[20746] = 5,
+		[20750] = 5,
+		[20749] = 5,
 
-        -- mana oil
-        [20745] = 5,
-        [20747] = 5,
-        [20748] = 5,
+		-- mana oil
+		[20745] = 5,
+		[20747] = 5,
+		[20748] = 5,
 
-        -- discombobulator
-        [4388] = 5,
+		-- discombobulator
+		[4388] = 5,
 
-        -- recombobulator
-        [4381] = 10,
-        [18637] = 10,
+		-- recombobulator
+		[4381] = 10,
+		[18637] = 10,
 
-        -- ... TODO
-
-    })[item_id]
+		-- ... TODO
+	}
+	function public.max_item_charges(item_id)
+	    return data[item_id]
+	end
 end
 
 function public.durability(tooltip)
@@ -389,15 +391,15 @@ end
 
 function public.item_slot_index(class_index, subclass_index, slot_name)
     for i, slot in {GetAuctionInvTypes(class_index, subclass_index)} do
-        if strupper(getglobal(slot)) == strupper(slot_name) then
-            return i, getglobal(slot)
+        if strupper(_g[slot]) == strupper(slot_name) then
+            return i, _g[slot]
         end
     end
 end
 
 function public.item_quality_index(item_quality)
     for i=0,4 do
-        local quality = getglobal('ITEM_QUALITY'..i..'_DESC')
+        local quality = _g['ITEM_QUALITY'..i..'_DESC']
         if strupper(item_quality) == strupper(quality) then
             return i, quality
         end

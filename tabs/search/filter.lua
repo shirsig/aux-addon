@@ -125,13 +125,13 @@ function get_filter_builder_query()
 		for _, subclass in {blizzard_query.subclass} do
 			local subclasses = {GetAuctionItemSubClasses(class)}
 			add(strlower(subclasses[subclass]))
-			add(blizzard_query.slot and strlower(getglobal(blizzard_query.slot)))
+			add(blizzard_query.slot and strlower(_g[blizzard_query.slot]))
 		end
 	end
 
 	local quality = blizzard_query.quality
 	if quality and quality >= 0 then
-		add(strlower(getglobal('ITEM_QUALITY'..quality..'_DESC')))
+		add(strlower(_g['ITEM_QUALITY'..quality..'_DESC']))
 	end
 
 	local post_filter_string = filter.query_string{blizzard={}, post=post_filter}
@@ -412,7 +412,7 @@ function initialize_slot_dropdown()
 
 		for _, slot in {GetAuctionInvTypes(class_index, subclass_index)} do
 			UIDropDownMenu_AddButton{
-				text = getglobal(slot),
+				text = _g[slot],
 				value = slot,
 				func = on_click,
 			}
@@ -433,7 +433,7 @@ function initialize_quality_dropdown()
 	}
 	for i=0,4 do
 		UIDropDownMenu_AddButton{
-			text = getglobal('ITEM_QUALITY'..i..'_DESC'),
+			text = _g['ITEM_QUALITY'..i..'_DESC'],
 			value = i,
 			func = on_click,
 		}

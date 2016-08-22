@@ -392,7 +392,7 @@ function suggestions(components)
     -- slots
     if not components.blizzard.slot then
         for _, invtype in {GetAuctionInvTypes(index(components.blizzard.class, 2) or 0, index(components.blizzard.subclass, 2) or 0)} do
-            tinsert(suggestions, getglobal(invtype))
+            tinsert(suggestions, _g[invtype])
         end
     end
 
@@ -401,7 +401,7 @@ function suggestions(components)
 
     -- rarities
     if not components.blizzard.quality then
-        for i=0,4 do tinsert(suggestions, getglobal('ITEM_QUALITY'..i..'_DESC')) end
+        for i=0,4 do tinsert(suggestions, _g['ITEM_QUALITY'..i..'_DESC']) end
     end
 
     -- item names

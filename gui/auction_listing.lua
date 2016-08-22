@@ -1031,7 +1031,7 @@ function public.CreateAuctionResultsTable(parent, config)
     rt.scrollFrame = scrollFrame
     FauxScrollFrame_Update(rt.scrollFrame, 0, numRows, rt.ROW_HEIGHT)
 
-    local scrollBar = getglobal(scrollFrame:GetName()..'ScrollBar')
+    local scrollBar = _g[scrollFrame:GetName()..'ScrollBar']
     scrollBar:ClearAllPoints()
     scrollBar:SetPoint('BOTTOMRIGHT', rt, -4, 4)
     scrollBar:SetPoint('TOPRIGHT', rt, -4, -HEAD_HEIGHT)
@@ -1041,8 +1041,8 @@ function public.CreateAuctionResultsTable(parent, config)
     thumbTex:SetTexture(color.content.background())
     thumbTex:SetHeight(150)
     thumbTex:SetWidth(scrollBar:GetWidth())
-    getglobal(scrollBar:GetName()..'ScrollUpButton'):Hide()
-    getglobal(scrollBar:GetName()..'ScrollDownButton'):Hide()
+    _g[scrollBar:GetName()..'ScrollUpButton']:Hide()
+    _g[scrollBar:GetName()..'ScrollDownButton']:Hide()
 
     -- create the header cells
     rt.headCells = {}
