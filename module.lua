@@ -11,18 +11,23 @@ function immutable_error(key, level) error('Field "%s" is immutable.', level + 1
 function collision_error(key, level) error('Field "%s" already exists.', level + 1, key) end
 function void_error(key, level) error('No field "%s".', level + 1, key) end
 importer_mt = {__metatable=false}
-function importer_mt.__index(self, key) self._alias = key end
-function importer_mt.__call(self, name)
-	local state, module, alias = _state[self], _modules[name], self._alias or name; self._alias = nil
-	if not module then error('Import failed. No module "%s".', 2, name) end
+function importer_mt.__index(self, key) _state[self][self] = key; return self end
+function importer_mt.__call(self, arg1, arg2)
+	local name, state, module, alias
+	name = arg2 or arg1
+	state, module = _state[self], _modules[name]
+	alias, state[self] = state[self] or name, nil
+	if not module then return end
 	if alias == '_' then
 		for key, modifiers in module.metadata do
-			if state.metadata[key] then error('Import of "%s" failed. Name collision for "%s"', 1, name, key) end
-			state.metadata[key], state.data[key], state.getters[key], state.setters[key] = modifiers, module.data[key], module.getters[key], module.setters[key]
+			if not state.metadata[key] and mask(PUBLIC, modifiers) ~= 0 then
+				state.metadata[key], state.data[key], state.getters[key], state.setters[key] = modifiers, module.data[key], module.getters[key], module.setters[key]
+			end
 		end
-	elseif not state.metadata[alias] or error('Import of "%s" failed. Name collision for "%s"', 1, name, alias) then
+	elseif not state.metadata[alias] then
 		state.metadata[alias], state.data[alias] = PRIVATE, module.interface
 	end
+	return self
 end
 function set_property(data, property, value)
 	if property and not data[property] and type(value) == 'function' or declaration_error(2) then
@@ -90,20 +95,19 @@ end
 function INIT() end
 function module(name)
 	if not _modules[name] then
-		local state, getters, setters, imports, env, interface, declarator, importer
-		imports, env, interface, declarator, importer = {}, setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, importer_mt)
+		local state, getters, setters, env, interface, declarator, importer
+		env, interface, declarator, importer = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, importer_mt)
 		getters = {
 			private=function() state.modifiers = PRIVATE return declarator end, public=function() state.modifiers = PUBLIC return declarator end,
 			mutable=function() state.modifiers = MUTABLE return declarator end,
 			getter=function() state.modifiers = PROPERTY+GETTER return declarator end, setter=function() state.modifiers = PROPERTY+SETTER return declarator end}
 		setters = {getter=function(value) set_property(getters, state.property, value) end, setter=function(value) set_property(setters, state.property, value) end}
 		state = {
-			name=name, env=env, interface=interface, imports={}, modifiers=PRIVATE,
+			env=env, interface=interface, modifiers=PRIVATE,
 			metadata = setmetatable({_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+GETTER, public=PROPERTY+GETTER, mutable=PROPERTY+GETTER, getter=PROPERTY+GETTER+SETTER, setter=PROPERTY+GETTER+SETTER}, lock_mt),
-			data = {_g=_g, _m=env, _i=interface, import=importer},
-			getters=getters, setters=setters,
+			data = {_g=_g, _m=env, _i=interface, import=importer}, getters=getters, setters=setters,
 		}
-		_modules[name], _state[env], _state[interface], _state[declarator] = state, state, state, state
+		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
 		setfenv(INIT, env); INIT()
 	end
 	setfenv(2, _modules[name].env)

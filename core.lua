@@ -4,6 +4,7 @@ public.bids_loaded = false
 public.current_owner_page = nil
 
 function LOAD()
+	import :_ 'util' 'gui'
 	do
 		local frame = CreateFrame('Frame', gui.name, UIParent)
 		tinsert(UISpecialFrames, 'aux_frame1')

@@ -19,7 +19,7 @@ function public.load_dataset()
     return _g.aux_datasets[dataset_key]
 end
 
---do TODO syntactic sugar
+--do TODO syntactic sugar record '#' {key='string'} {foo='number'}
 --	local mt = {
 --		__unm = function(self, separator)
 --			self.separator = separator

@@ -1,5 +1,5 @@
 module 'tooltip'
-import 'gui' 'lol' 'kek'
+--import 'gui' 'lol' 'kek'
 
 _g.aux_tooltip_value = true
 

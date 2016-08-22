@@ -1,23 +1,6 @@
 function INIT()
-	import{['']='core', ['']='util'} --  'xxx' .foo .bar {x = 'core'} {y='core'} 'kek'
+	import :_ 'core' :_ 'util'
 end
-
--- import 'foo' 'bar' 'baz'
-import .kek .kuck 'foo' .kick .kock 'bar'
-
--- x = record '#'. string 'kek'. number 'lol' . record '~'[]].
---mt = {
---	__index = function(self, key)
---
---		tinsert(self, getn(self), key)
---		return self
---	end,
---	__call = function(self, value)
---		tinsert(self, getn(self), value);
---		tinsert(self, {});
---		return self
---	end,
---}
 
 module 'core'
 public.version = '5.0.0'
@@ -25,7 +8,7 @@ public.version = '5.0.0'
 do
 	local table_pool, auto_recycle = {}, {}
 	function public.wipe(t) -- like with a cloth or something
-		for k in t do t[k] = nil end; setn(t, 0)
+		for k in t do t[k] = nil end; table.setn(t, 0)
 	end
 	function public.recycle(t)
 		auto_recycle[t] = nil; wipe(t); tinsert(table_pool, t)
