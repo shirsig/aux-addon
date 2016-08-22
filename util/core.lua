@@ -33,9 +33,9 @@ end
 do
 	local state
 	local function f()
-		local tmp = state
+		local temp = state
 		state = nil
-		return tmp
+		return temp
 	end
 	function public.present(v)
 		state = v; return f
@@ -199,16 +199,6 @@ function public.map(xs, f)
 	local ys = {}
 	for k, x in xs do ys[k] = f(x, k) end
 	return ys
-end
-
-do
-	local mt = {__call = function(self, key) return self[key] end}
-	function public.set(t)
-		local self = {}
-		for i=1,getn(t) do self[t[i]] = true end
-		recycle(t)
-		return setmetatable(self, mt)
-	end
 end
 
 function public.trim(str)

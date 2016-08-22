@@ -65,7 +65,7 @@ function public.tab(index, name)
 	local module_env = getfenv(2)
 	local tab = {name=name, env=module_env}
 	function module_env.public.getter.ACTIVE() return tab == active_tab end
-	for _, handler in temp-{'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do module_env.mutable[handler] = nil end
+	for _, handler in tmp-{'OPEN', 'CLOSE', 'CLICK_LINK', 'USE_ITEM'} do module_env.mutable[handler] = nil end
 	tabs[index] = tab
 end
 do

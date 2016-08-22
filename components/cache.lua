@@ -14,6 +14,7 @@ _g.aux_merchant_sell = {}
 _g.aux_characters = {}
 
 function LOAD()
+	import 'persistence' 'info'
 	scan_wdb()
 
 	event_listener('MERCHANT_SHOW', on_merchant_show)
