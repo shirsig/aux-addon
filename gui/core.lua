@@ -328,11 +328,7 @@ function public.editbox(parent)
 	    call(this.focus_loss)
     end)
     editbox:SetScript('OnTextChanged', function()
-	    if this.focused then
-	        colorize()
-	    else
-		    format()
-	    end
+	    if this.focused then colorize() else format() end
 	    call(this.change)
     end)
     editbox:SetScript('OnCursorChanged', function()
@@ -387,11 +383,8 @@ end
 
 function public.status_bar(parent)
     local self = CreateFrame('Frame', nil, parent)
-
     local level = parent:GetFrameLevel()
-
     self:SetFrameLevel(level + 1)
-
     do
         -- minor status bar (gray one)
         local status_bar = CreateFrame('STATUSBAR', nil, self, 'TextStatusBar')
@@ -410,7 +403,6 @@ function public.status_bar(parent)
         end)
         self.minor_status_bar = status_bar
     end
-
     do
         -- major status bar (main blue one)
         local status_bar = CreateFrame('STATUSBAR', nil, self, 'TextStatusBar')
@@ -429,7 +421,6 @@ function public.status_bar(parent)
         end)
         self.major_status_bar = status_bar
     end
-
     do
         local text_frame = CreateFrame('Frame', nil, self)
         text_frame:SetFrameLevel(level + 4)
@@ -439,7 +430,6 @@ function public.status_bar(parent)
         text:SetPoint('CENTER', 0, 0)
         self.text = text
     end
-
     function self:update_status(major_status, minor_status)
         if major_status then
             self.major_status_bar:SetValue(major_status)
@@ -448,11 +438,9 @@ function public.status_bar(parent)
             self.minor_status_bar:SetValue(minor_status)
         end
     end
-
     function self:set_text(text)
         self.text:SetText(text)
     end
-
     return self
 end
 

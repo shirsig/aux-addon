@@ -20,6 +20,7 @@ do
 			t[k] = nil
 		end
 		table.setn(t, 0)
+		setmetatable(t, nil)
 	end
 
 	function public.recycle(t)
@@ -29,7 +30,7 @@ do
 	end
 
 	function public.accessor.t() return
-	tremove(table_pool) or {}
+		tremove(table_pool) or {}
 	end
 
 	function public.accessor.tt()
@@ -39,53 +40,80 @@ do
 	end
 
 	do
-		local mt = {
-			__call=function(self, arg) return self[1](arg) end,
-			__sub=function(self, arg) return self[1](arg) end,
-		}
-		function public.modifier(f)
-			local self = t
-			self[1] = f
-			return setmetatable(self, mt)
+		local T = t
+		local mt = {__unm=function(self) T = t; return setmetatable(self, nil) end}
+		function public.accessor.T()
+			wipe(T)
+			return setmetatable(T, mt)
 		end
 	end
 
-	public.temp = modifier(function(t)
-		temporary[t] = true
-		return t
-	end)
-
-	public.perm = modifier(function(t)
-		temporary[t] = false
-		return t
-	end)
-
+	function public.modifier_mt(f)
+		local function apply(_, value) return f(value) end
+		return {
+			__call=apply, __add=apply, __sub=apply, __mul=apply, __div=apply, __pow=apply, __concat=apply, __lt=apply, __le=apply,
+			__unm=function(self) return self end,
+		}
+	end
 	do
-		public.set = modifier(function(t)
-			local self = _m.t
-			for _, v in t do self[v] = true end
-			recycle(t)
-			return self
-		end)
+		local mt = modifier_mt(function(t) temporary[t] = true; return t end)
+		function public.accessor.temp()
+			return setmetatable(T, mt)
+		end
+	end
+	do
+		local mt = modifier_mt(function(t) temporary[t] = false; return t end)
+		function public.accessor.perm()
+			return setmetatable(T, mt)
+		end
 	end
 
-	do
-		local mt = {
-			__call=function(self, value)
-				tinsert(self, value)
+	function public.collector_mt(f)
+		return {
+			__unm=function(self)
+				setmetatable(self, nil)
+			end,
+			__index=function(self, key)
+				f(self, key)
+				return self
+			end,
+			__call=function(self, arg1, arg2)
+				f(self, arg2 or arg1)
 				return self
 			end,
 		}
-		function public.accessor.from()
-			return setmetatable(tt, mt)
+	end
+	do
+		local mt = collector_mt(tinsert)
+		function public.accessor.list()
+			return setmetatable(T, mt)
 		end
 	end
-
-	-- TODO map
+	do
+		local mt = collector_mt(function(self, value)
+			rawset(self, value, true)
+		end)
+		function public.accessor.set()
+			return setmetatable(T, mt)
+		end
+	end
+	do
+		local key
+		local mt = collector_mt(function(self, value)
+			if key ~= nil then
+				rawset(self, key, value)
+			else
+				key = value
+			end
+		end)
+		function public.accessor.map()
+			return setmetatable(T, mt)
+		end
+	end
 end
 
 local event_frame = CreateFrame 'Frame'
-for event in temp-set-from 'ADDON_LOADED' 'VARIABLES_LOADED' 'PLAYER_LOGIN' 'AUCTION_HOUSE_SHOW' 'AUCTION_HOUSE_CLOSED' 'AUCTION_BIDDER_LIST_UPDATE' 'AUCTION_OWNED_LIST_UPDATE' do
+for event in perm <- set 'ADDON_LOADED' 'VARIABLES_LOADED' 'PLAYER_LOGIN' 'AUCTION_HOUSE_SHOW' 'AUCTION_HOUSE_CLOSED' 'AUCTION_BIDDER_LIST_UPDATE' 'AUCTION_OWNED_LIST_UPDATE' do
 	event_frame:RegisterEvent(event)
 end
 
@@ -114,7 +142,11 @@ function public.log(...)
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
 end
 
-tabs = {}
+map :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids'
+tabs = t
+for _, name in from (from 'Search') 'Post' 'Auctions' 'Bids' do
+	tinsert(tabs)
+end
 function public.tab(index, name)
 	local module_env = getfenv(2)
 	local tab = {name=name, env=module_env}
@@ -126,9 +158,25 @@ do
 	local active_tab_index
 	function accessor.active_tab() return tabs[active_tab_index] end
 	function on_tab_click(index)
-		call(active_tab_index and active_tab.env.CLOSE)
+		call(active_tab_index and active_tab.CLOSE)
 		active_tab_index = index
-		call(active_tab_index and active_tab.env.OPEN)
+		call(active_tab_index and active_tab.OPEN)
+	end
+end
+function SetItemRef(...)
+	if arg[3] ~= 'RightButton' or not index(active_tab, 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
+		return orig.SetItemRef(unpack(arg))
+	end
+	for item_info in present(info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
+		return active_tab.CLICK_LINK(item_info)
+	end
+end
+function UseContainerItem(...)
+	if modified or not index(active_tab, 'env', 'USE_ITEM') then
+		return orig.UseContainerItem(unpack(arg))
+	end
+	for item_info in present(info.container_item(arg[1], arg[2])) do
+		return active_tab.env.USE_ITEM(item_info)
 	end
 end
 
@@ -302,23 +350,5 @@ end
 function AuctionFrameAuctions_OnEvent(...)
     if AuctionFrameAuctions:IsVisible() then
         return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
-    end
-end
-
-function SetItemRef(...)
-	if arg[3] ~= 'RightButton' or not index(active_tab, 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
-		return orig.SetItemRef(unpack(arg))
-	end
-	for item_info in present(info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
-		return active_tab.env.CLICK_LINK(item_info)
-	end
-end
-
-function UseContainerItem(...)
-    if modified or not index(active_tab, 'env', 'USE_ITEM') then
-        return orig.UseContainerItem(unpack(arg))
-    end
-    for item_info in present(info.container_item(arg[1], arg[2])) do
-        return active_tab.env.USE_ITEM(item_info)
     end
 end

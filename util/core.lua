@@ -68,11 +68,13 @@ do
 end
 
 function public.call(f, ...)
+	temp(arg)
 	if f then return f(unpack(arg)) end
 end
 
 function public.index(t, ...)
 	for i=1,arg.n do t = t and t[arg[i]] end
+	recycle(arg)
 	return t
 end
 
@@ -107,19 +109,21 @@ end
 function public.expand(array, ...)
 	local t = t
 	for i=1,arg.n do t[arg[i]] = array[i] end
+	recycle(arg)
 	return t
 end
 
 function public.copy(t)
 	local copy = _m.t
 	for k, v in t do copy[k] = v end
-	table.setn(t, getn(t))
-	return copy
+	table.setn(copy, getn(t))
+	return setmetatable(copy, getmetatable(t))
 end
 
 function public.select(i, ...)
+	temp(arg)
 	while i > 1 do i = i - 1; tremove(arg, i) end
-	return tremove(arg, 1), unpack(arg)
+	return tremove(arg, 1), unpack(temp)
 end
 
 function public.size(t)
@@ -135,15 +139,15 @@ function public.key(value, t)
 end
 
 function public.keys(t)
-	local ks = _m.t
-	for k in t do tinsert(ks, k) end
-	return ks
+	local keys = _m.t
+	for k in t do tinsert(keys, k) end
+	return keys
 end
 
 function public.values(t)
-	local vs = _m.t
-	for _, v in t do tinsert(vs, v) end
-	return vs
+	local values = _m.t
+	for _, v in t do tinsert(values, v) end
+	return values
 end
 
 function public.eq(t1, t2)
@@ -161,44 +165,44 @@ function public.eq(t1, t2)
 	return true
 end
 
-function public.any(xs, p)
-	for _, x in xs do
+function public.any(t, p)
+	for _, v in t do
 		if p then
-			if p(x) then return true end
-		elseif x then
+			if p(v) then return true end
+		elseif v then
 			return true
 		end
 	end
 	return false
 end
 
-function public.all(xs, p)
-	for _, x in xs do
+function public.all(t, p)
+	for _, v in t do
 		if p then
-			if not p(x) then
+			if not p(v) then
 				return false
 			end
-		elseif not x then
+		elseif not v then
 			return false
 		end
 	end
 	return true
 end
 
-function public.filter(t0, p)
-	local t = t
-	for k, x in t0 do
-		if p(x, k) then
-			t[k] = x
+function public.filter(t, p)
+	local filtered = _m.t
+	for k, v in t do
+		if p(v, k) then
+			filtered[k] = v
 		end
 	end
-	return t
+	return filtered
 end
 
-function public.map(t0, f)
-	local t = t
-	for k, x in t0 do t[k] = f(x, k) end
-	return t
+function public.map(t, f)
+	local mapped = _m.t
+	for k, v in t do mapped[k] = f(v, k) end
+	return mapped
 end
 
 function public.trim(str)
@@ -206,7 +210,7 @@ function public.trim(str)
 end
 
 function public.split(str, separator)
-	local parts = {}
+	local parts = t
 	while true do
 		local start_index, _ = strfind(str, separator, 1, true)
 		if start_index then
@@ -222,7 +226,7 @@ function public.split(str, separator)
 end
 
 function public.tokenize(str)
-	local tokens = {}
+	local tokens = t
 	for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
 	return tokens
 end
