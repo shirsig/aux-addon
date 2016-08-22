@@ -1,12 +1,12 @@
 function INIT()
 	import :_ 'aux' :_ 'util'
-	function LOAD()
-		import :_ 'aux' :_ 'util'
-	end
 end
 
 module 'aux'
 public.version = '5.0.0'
+
+public.bids_loaded = false
+public.current_owner_page = nil
 
 do
 	local table_pool, temporary = {}, {}
@@ -20,10 +20,10 @@ do
 	end)
 
 	function public.wipe(t) -- like with a cloth or something
-	for k in t do
-		t[k] = nil
-	end
-	table.setn(t, 0)
+		for k in t do
+			t[k] = nil
+		end
+		table.setn(t, 0)
 	end
 
 	function public.recycle(t)
@@ -54,26 +54,10 @@ do
 		end
 	end
 
-	public.tmp = modifier(function(t)
+	public.temp = modifier(function(t)
 		temporary[t] = true
 		return t
 	end)
-
-	do
-		local mt = {
-			__call=function(self, arg1, arg2)
-				tinsert(self, arg2 or arg1)
-				return self
-			end,
-			__index=function(self, key)
-				tinsert(self, key)
-				return self
-			end,
-		}
-		function public.accessor.from()
-			return setmetatable(tt, mt)
-		end
-	end
 
 	do
 		local mt = {__call = function(self, key) return self[key] end}
@@ -84,19 +68,26 @@ do
 			return setmetatable(self, mt)
 		end)
 	end
+	
+	do
+		local mt = {
+			__call=function(self, value)
+				tinsert(self, value)
+				return self
+			end,
+		}
+		function public.accessor.from()
+			return setmetatable(t, mt)
+		end
+	end
 
-	public.array = modifier(function(table)
-		local self = t
-		for _, v in table do tinsert(self, v) end
-		recycle(table)
-		return self
-	end)
+
 
 	-- TODO map
 end
 
 local event_frame = CreateFrame 'Frame'
-for event in tmp-set-from . ADDON_LOADED . VARIABLES_LOADED . PLAYER_LOGIN . AUCTION_HOUSE_SHOW . AUCTION_HOUSE_CLOSED . AUCTION_BIDDER_LIST_UPDATE . AUCTION_OWNED_LIST_UPDATE do
+for event in temp-set-from 'ADDON_LOADED' 'VARIABLES_LOADED' 'PLAYER_LOGIN' 'AUCTION_HOUSE_SHOW' 'AUCTION_HOUSE_CLOSED' 'AUCTION_BIDDER_LIST_UPDATE' 'AUCTION_OWNED_LIST_UPDATE' do
 	event_frame:RegisterEvent(event)
 end
 
@@ -118,9 +109,6 @@ do
 		end
 	end)
 end
-
-public.bids_loaded = false
-public.current_owner_page = nil
 
 function LOAD()
 	import :_ 'util' 'gui'
@@ -181,7 +169,7 @@ function public.tab(index, name)
 	local module_env = getfenv(2)
 	local tab = {name=name, env=module_env}
 	function module_env.public.accessor.ACTIVE() return tab == active_tab end
-	for handler in tmp-set-from . OPEN . CLOSE . CLICK_LINK . USE_ITEM do module_env.mutable[handler] = nil end
+	for handler in temp-set-from 'OPEN' 'CLOSE' 'CLICK_LINK' 'USE_ITEM' do module_env.mutable[handler] = nil end
 	tabs[index] = tab
 end
 do
