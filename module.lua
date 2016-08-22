@@ -1,16 +1,14 @@
 local type, setmetatable, setfenv, unpack, mask, _g = type, setmetatable, setfenv, unpack, bit.band, getfenv(0)
-local PRIVATE, PUBLIC, MUTABLE, PROPERTY, ACCESSOR, MUTATOR, INITIALIZED = 0, 1, 2, 4, 8, 16, 32
-local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, accessor=ACCESSOR+PROPERTY, mutator=MUTATOR+PROPERTY}
-local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+ACCESSOR+MUTATOR, public=MUTABLE+ACCESSOR+MUTATOR, mutable=PRIVATE+PUBLIC, accessor=PRIVATE+PUBLIC, mutator=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
+local PRIVATE, PUBLIC, MUTABLE, PROPERTY, ACCESSOR, MUTATOR = 0, 1, 2, 4, 8, 16
 local error, modifier_error, property_error, immutable_error, collision_error, null_error, set_property, env_mt, interface_mt, declarator_mt, importer_mt
 local _state, _modules = {}, {}
+function error(message, ...) return function() _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 10, 0), 0) end end
 local NULL = setmetatable({}, {__metatable=false, __index=error'NULL', __newindex=error'NULL'})
-function error(message, ...) return function() _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 10, 0)) end end
 modifier_error = error 'Invalid modifiers.'
 property_error = error 'Accessor/Mutator must be function.'
 function immutable_error(key) return error('Field "%s" is immutable.', key) end
 function collision_error(key) return error('Field "%s" already exists.', key) end
-function null_error(key) error('No field "%s".', key) end
+function null_error(key) return error('No field "%s".', key) end
 importer_mt = {__metatable=false}
 function importer_mt.__index(self, key) _state[self][self] = key; return self end
 function importer_mt.__call(self, arg1, arg2)
@@ -36,15 +34,19 @@ function set_property(data, property, value)
 		data[property] = value
 	end
 end
-declarator_mt = {__metatable=false}
-function declarator_mt.__index(self, key)
-	local state, modifier = _state[self], MODIFIER[key]; local modifiers = state.modifiers
-	if modifier then
-		if mask(MODIFIER_MASK[key], modifiers) ~= modifiers then modifier_error() end
-		state.modifiers = modifiers + modifier; return self
-	elseif not state.metadata[key] or collision_error(key) then
-		if mask(PROPERTY_MASK, modifiers) ~= modifiers then modifier_error() end
-		state.property, state.metadata[key], state.modifiers = key, modifiers + PROPERTY, PRIVATE
+declarator_mt = {__metatable=false }
+do
+	local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, accessor=ACCESSOR+PROPERTY, mutator=MUTATOR+PROPERTY}
+	local MODIFIER_MASK, PROPERTY_MASK = {private=MUTABLE+ACCESSOR+MUTATOR, public=ACCESSOR+MUTATOR, mutable=PRIVATE, accessor=PRIVATE+PUBLIC, mutator=PRIVATE+PUBLIC}, PRIVATE+PUBLIC
+	function declarator_mt.__index(self, key)
+		local state, modifier = _state[self], MODIFIER[key]; local modifiers = state.modifiers
+		if modifier then
+			if mask(MODIFIER_MASK[key], modifiers) ~= modifiers then modifier_error() end
+			state.modifiers = modifiers + modifier; return self
+		elseif not state.metadata[key] or collision_error(key) then
+			if mask(PROPERTY_MASK, modifiers) ~= modifiers then modifier_error() end
+			state.property, state.metadata[key], state.modifiers = key, modifiers + PROPERTY, PRIVATE
+		end
 	end
 end
 function declarator_mt.__newindex(self, key, value)
@@ -89,8 +91,8 @@ do
 		local state = _state[self]; local metadata = state.metadata or null_error(key)
 		if mask(PUBLIC+MUTATOR, metadata) == PUBLIC+MUTATOR then
 			return state.mutators[key](value)
-		elseif mask(PUBLIC, metadata) == PUBLIC or immutable_error(key) then
-			state.data[key] = value
+		elseif mask(PUBLIC+PROPERTY, metadata) == PUBLIC or null_error(key) then
+			return state.data[key](value)
 		end
 	end
 end
