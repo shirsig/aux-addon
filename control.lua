@@ -1,4 +1,4 @@
-module 'control'
+module 'core'
 
 event_frame = CreateFrame 'Frame'
 listeners = {}

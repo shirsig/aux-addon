@@ -1,5 +1,8 @@
 function INIT()
-	import :_ 'core' :_ 'control' :_ 'util' -- TODO auto import 'core' instead
+	import :_ 'core' :_ 'util'
+	function LOAD()
+		import :_ 'core' :_ 'control' :_ 'util'
+	end
 end
 
 module 'core'

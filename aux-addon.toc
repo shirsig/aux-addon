@@ -6,9 +6,11 @@
 module.lua
 init.lua
 core.lua
-util\core.lua
+util.lua
 control.lua
 gui.lua
+frames.lua
+
 
 util\completion.lua
 util\persistence.lua
