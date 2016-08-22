@@ -59,6 +59,11 @@ do
 		return t
 	end)
 
+	public.perm = modifier(function(t)
+		temporary[t] = false
+		return t
+	end)
+
 	do
 		local mt = {__call = function(self, key) return self[key] end}
 		public.set = modifier(function(table)
@@ -68,7 +73,7 @@ do
 			return setmetatable(self, mt)
 		end)
 	end
-	
+
 	do
 		local mt = {
 			__call=function(self, value)
@@ -77,11 +82,9 @@ do
 			end,
 		}
 		function public.accessor.from()
-			return setmetatable(t, mt)
+			return setmetatable(tt, mt)
 		end
 	end
-
-
 
 	-- TODO map
 end
