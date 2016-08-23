@@ -52,65 +52,87 @@ do
 	function public.modifier(f)
 		local function apply(_, value) return f(value) end
 		return setmetatable(t, {
-			__index=apply, __call=apply, __add=apply, __sub=apply, __mul=apply, __div=apply, __pow=apply, __concat=apply,
-			__newindex=function(_, _, value) return f(value) end, __unm=function(self) return self end,
+			 __call=apply, __sub=apply, __newindex=function(_, _, value) return f(value) end,
 		})
 	end
-	local temp, perm = modifier(function(t) transient[t] = true; return setmetatable(t, nil) end), modifier(function(t) transient[t] = nil; return t end)
-	public.temp() -- TODO or 'auto' 'free' 'deprecate' 'release'?
-	function accessor() return temp end
-	function mutator(t) return temp(t) end
-	public.perm()
-	function accessor() return perm end
-	function mutator(t) return perm(t) end
+	local temp, perm = modifier(function(t) transient[t] = true end), modifier(function(t) transient[t] = nil; return t end)
+	function public.accessor.temp() return temp end; function mutator(t) return temp(t) end
+	function public.accessor.perm() return perm end; function mutator(t) return perm(t) end
 
-	function public.collector_mt(f) -- TODO somehow use an existing table
-		return {
-			__unm=function(self)
-				return setmetatable(self, nil)
-			end,
-			__index=function(self, key)
-				f(self, key)
-				return self
-			end,
-			__call=function(self, arg1, arg2)
-				f(self, arg2 or arg1)
-				return self
-			end,
-		}
+	function keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20)
+		if not t then return end
+		if k1 ~= nil then t[k1] = true end
+		if k2 ~= nil then t[k2] = true end
+		if k3 ~= nil then t[k3] = true end
+		if k4 ~= nil then t[k4] = true end
+		if k5 ~= nil then t[k5] = true end
+		if k6 ~= nil then t[k6] = true end
+		if k7 ~= nil then t[k7] = true end
+		if k8 ~= nil then t[k8] = true end
+		if k9 ~= nil then t[k9] = true end
+		if k10 ~= nil then t[k10] = true end
+		if k11 ~= nil then t[k11] = true end
+		if k12 ~= nil then t[k12] = true end
+		if k13 ~= nil then t[k13] = true end
+		if k14 ~= nil then t[k14] = true end
+		if k15 ~= nil then t[k15] = true end
+		if k16 ~= nil then t[k16] = true end
+		if k17 ~= nil then t[k17] = true end
+		if k18 ~= nil then t[k18] = true end
+		if k19 ~= nil then t[k19] = true end
+		if k20 ~= nil then t[k20] = true end
+		return t
 	end
-	do
-		local mt = collector_mt(tinsert)
-		function public.accessor.list()
-			return setmetatable(t, mt)
-		end
+	function values(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20)
+		if not t then return end
+		if v1 ~= nil then tinsert(t, v1) end
+		if v2 ~= nil then tinsert(t, v2) end
+		if v3 ~= nil then tinsert(t, v3) end
+		if v4 ~= nil then tinsert(t, v4) end
+		if v5 ~= nil then tinsert(t, v5) end
+		if v6 ~= nil then tinsert(t, v6) end
+		if v7 ~= nil then tinsert(t, v7) end
+		if v8 ~= nil then tinsert(t, v8) end
+		if v9 ~= nil then tinsert(t, v9) end
+		if v10 ~= nil then tinsert(t, v10) end
+		if v11 ~= nil then tinsert(t, v11) end
+		if v12 ~= nil then tinsert(t, v12) end
+		if v13 ~= nil then tinsert(t, v13) end
+		if v14 ~= nil then tinsert(t, v14) end
+		if v15 ~= nil then tinsert(t, v15) end
+		if v16 ~= nil then tinsert(t, v16) end
+		if v17 ~= nil then tinsert(t, v17) end
+		if v18 ~= nil then tinsert(t, v18) end
+		if v19 ~= nil then tinsert(t, v19) end
+		if v20 ~= nil then tinsert(t, v20) end
+		return t
 	end
-	do
-		local mt = collector_mt(function(self, value)
-			self[value] = true
-		end)
-		function public.accessor.set()
-			return setmetatable(t, mt)
-		end
+	function pairs(t,k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8,k9,v9,k10,v10)
+		if not t then return end
+		if k1 ~= nil then t[k1] = v1 end
+		if k2 ~= nil then t[k2] = v2 end
+		if k3 ~= nil then t[k3] = v3 end
+		if k4 ~= nil then t[k4] = v4 end
+		if k5 ~= nil then t[k5] = v5 end
+		if k6 ~= nil then t[k6] = v6 end
+		if k7 ~= nil then t[k7] = v7 end
+		if k8 ~= nil then t[k8] = v8 end
+		if k9 ~= nil then t[k9] = v9 end
+		if k10 ~= nil then t[k10] = v10 end
+		return t
 	end
-	do
-		local key
-		local mt = collector_mt(function(self, value)
-			if key ~= nil then
-				self[key] = value
-				key = nil
-			else
-				key = value
-			end
-		end)
-		function public.accessor.object()
-			return setmetatable(t, mt)
-		end
+	function public.collector_mt(f)
+		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
 	end
+	local set_mt, list_mt, object_mt = collector_mt(keys), collector_mt(values), collector_mt(pairs)
+	public.accessor()
+	set, list, object = function() return setmetatable(t, set_mt) end, function() return setmetatable(t, list_mt) end, function() return setmetatable(t, object_mt) end
+	private()
+	-- TODO or 'auto' 'free' 'deprecate' 'release' 'transient'?
 end
 
 local event_frame = CreateFrame 'Frame'
-for event in temp-set 'ADDON_LOADED' 'VARIABLES_LOADED' 'PLAYER_LOGIN' 'AUCTION_HOUSE_SHOW' 'AUCTION_HOUSE_CLOSED' 'AUCTION_BIDDER_LIST_UPDATE' 'AUCTION_OWNED_LIST_UPDATE' do
+for event in temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
 end
 
@@ -143,9 +165,9 @@ end
 
 tab_info = t
 do
-	local data = temp-list :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids'
+	local data = temp-list('search_tab', 'Search', 'post_tab', 'Post', 'auctions_tab', 'Auctions', 'bids_tab', 'Bids')
 	for i=1,7,2 do
-		local tab = -object :name(data[i + 1]);
+		local tab = -object('name', data[i + 1])
 		local env = (function() module(data[i]) return _m end)()
 		function env.mutator.OPEN(f) tab.OPEN = f end
 		function env.mutator.CLOSE(f) tab.CLOSE = f end

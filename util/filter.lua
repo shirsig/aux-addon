@@ -208,7 +208,7 @@ public.filters = {
 
 function operator(str)
     local operator = str == 'not' and {'operator', 'not', 1}
-    for name in -set 'and', 'or' do
+    for name in -set('and', 'or') do
 	    for arity in present(select(3, strfind(str, '^'..name..'(%d*)$'))) do
 		    arity = tonumber(arity)
 		    operator = not (arity and arity < 2) and {'operator', name, arity}
@@ -319,7 +319,7 @@ function public.parse_query_string(str)
         i = i + 1
     end
 
-    return -object :blizzard(blizzard_filter_parser()) :post(post_filter)
+    return -object('blizzard', blizzard_filter_parser(), 'post', post_filter)
 end
 
 function public.query(query_string)
@@ -496,7 +496,7 @@ end
 function blizzard_query(components)
     local filters = components.blizzard
 
-    local query = -object :name(filters.name and filters.name[2])
+    local query = -object('name', filters.name and filters.name[2])
 
     local item_info, class_index, subclass_index, slot_index
     local item_id = cache.item_id(filters.name[2])
@@ -517,7 +517,7 @@ function blizzard_query(components)
         query.slot = slot_index
         query.quality = item_info.quality
     else
-	    for key in temp-set 'min_level' 'max_level' 'class' 'subclass' 'slot' 'usable' 'quality' do
+	    for key in temp-set('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality') do
             query[key] = index(filters[key], 2)
 	    end
     end

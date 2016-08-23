@@ -1,4 +1,4 @@
-module 'post_tab' import [''] 'core' 'gui' 'listing' 'item_listing' 'money'
+module 'post_tab' import [''] 'core' 'gui' 'listing' 'item_listing' 'money' 'search_tab'
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, aux_frame)
@@ -34,7 +34,7 @@ function create_frames()
 	    end)
 	    local label = gui.label(checkbox, gui.font_size.small)
 	    label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
-	    label:SetText('Show hidden items')
+	    label:SetText 'Show hidden items'
 	    show_hidden_checkbox = checkbox
 	end
 
@@ -57,15 +57,15 @@ function create_frames()
 	)
 
 	auction_listing = listing.CreateScrollingTable(frame.auctions)
-	auction_listing:SetColInfo({
-	    { name='Auctions', width=.12, align='CENTER' },
-	    { name='Left', width=.1, align='CENTER' },
-	    { name='Qty', width=.08, align='CENTER' },
-	    { name='Bid/ea', width=.22, align='RIGHT' },
-	    { name='Bid Pct', width=.13, align='CENTER' },
-	    { name='Buy/ea', width=.22, align='RIGHT' },
-	    { name='Buy Pct', width=.13, align='CENTER' }
-	})
+	auction_listing:SetColInfo{
+	    {name='Auctions', width=.12, align='CENTER'},
+	    {name='Left', width=.1, align='CENTER'},
+	    {name='Qty', width=.08, align='CENTER'},
+	    {name='Bid/ea', width=.22, align='RIGHT'},
+	    {name='Bid Pct', width=.13, align='CENTER'},
+	    {name='Buy/ea', width=.22, align='RIGHT'},
+	    {name='Buy Pct', width=.13, align='CENTER'}
+	}
 	auction_listing:EnableSorting(false)
 	auction_listing:DisableSelection(true)
 	auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
@@ -86,14 +86,14 @@ function create_frames()
 	    status_bar:SetHeight(25)
 	    status_bar:SetPoint('TOPLEFT', aux_frame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 100)
-	    status_bar:set_text('')
+	    status_bar:set_text ''
 	end
 	do
 	    local btn = gui.button(frame.parameters, 16)
 	    btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText('Post')
+	    btn:SetText 'Post'
 	    btn:SetScript('OnClick', post_auctions)
 	    post_button = btn
 	end
@@ -102,7 +102,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', post_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText('Refresh')
+	    btn:SetText 'Refresh'
 	    btn:SetScript('OnClick', function()
 	        scan.abort(scan_id)
 	        refresh_entries()

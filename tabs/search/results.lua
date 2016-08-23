@@ -42,7 +42,7 @@ do
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
-		local search = -object :filter_string(filter_string) :records(t)
+		local search = -object('filter_string', filter_string, 'records', t)
 		tinsert(searches, search)
 		if getn(searches) > 5 then
 			tremove(searches, 1)

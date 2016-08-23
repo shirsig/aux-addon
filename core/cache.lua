@@ -175,7 +175,7 @@ function scan_wdb(item_id)
 				max_stack = max_stack,
 				texture = texture,
 			})
-			local tooltip = info.tooltip(function(tt) tt:SetHyperlink(itemstring) end)
+			local tooltip = info.tooltip(function(tooltip) tooltip:SetHyperlink(itemstring) end)
 			if info.auctionable(tooltip, quality) then
 				tinsert(_g.aux_auctionable_items, strlower(name))
 			end

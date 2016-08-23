@@ -90,7 +90,7 @@ function extend_tooltip(tooltip, link, quantity)
         end
     end
     local color = {r=1, g=1, b=.6}
-    local auctionable = not item_info or info.auctionable(info.tooltip(function(tt) tt:SetHyperlink(item_info.itemstring) end), item_info.quality)
+    local auctionable = not item_info or info.auctionable(info.tooltip(function(tooltip) tooltip:SetHyperlink(item_info.itemstring) end), item_info.quality)
     local item_key = (item_id or 0)..':'..(suffix_id or 0)
     local value = history.value(item_key)
     if auctionable then

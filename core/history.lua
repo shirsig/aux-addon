@@ -35,7 +35,7 @@ do
 end
 
 function accessor.new_record()
-	return -object :next_push(next_push) :data_points(t)
+	return -object('next_push', next_push, 'data_points', t)
 end
 
 function read_record(item_key)
@@ -84,7 +84,7 @@ function public.value(item_key)
 			for _, data_point in item_record.data_points do
 				local weight = .99 ^ round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
 				total_weight = total_weight + weight
-				tinsert(weighted_values, -object :value(data_point.market_value) :weight(weight))
+				tinsert(weighted_values, -object('value', data_point.market_value, 'weight', weight))
 			end
 			for _, weighted_value in weighted_values do
 				weighted_value.weight = weighted_value.weight / total_weight
@@ -93,8 +93,11 @@ function public.value(item_key)
 		else
 			value = calculate_market_value(item_record)
 		end
-		value_cache[item_key] = -object :value(value) :next_push(item_record.next_push)
+		value_cache[item_key] = -object('value', value, 'next_push', tem_record.next_push)
 	end
+	if type(value_cache[item_key].value) == 'table' then
+	for k, v in value_cache[item_key].value.value do log(k, v) end
+end
 	log (value_cache[item_key].value)
 	return value_cache[item_key].value
 end
@@ -120,7 +123,7 @@ end
 
 function push_record(item_record)
 	for market_value in present(calculate_market_value(item_record)) do
-		tinsert(item_record.data_points, 1, -object :market_value(market_value) :time(item_record.next_push))
+		tinsert(item_record.data_points, 1, -object('market_value', market_value, 'time', item_record.next_push))
 		while getn(item_record.data_points) > 11 do
 			tremove(item_record.data_points)
 		end
