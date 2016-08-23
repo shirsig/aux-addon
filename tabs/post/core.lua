@@ -420,7 +420,6 @@ function update_inventory_records()
             end
         end
     end
-
     wipe(inventory_records)
     for _, auctionable in auctionable_map do
         tinsert(inventory_records, auctionable)
@@ -433,18 +432,15 @@ function refresh_entries()
 	if selected_item then
 		local item_id, suffix_id = selected_item.item_id, selected_item.suffix_id
         local item_key = item_id..':'..suffix_id
-
         existing_auctions[item_key] = nil
-
         local query = scan_util.item_query(item_id)
-
         status_bar:update_status(0,0)
-        status_bar:set_text('Scanning auctions...')
+        status_bar:set_text 'Scanning auctions...'
 
 		scan_id = scan.start{
             type = 'list',
             ignore_owner = true,
-			queries = { query },
+			queries = -list(query),
 			on_page_loaded = function(page, total_pages)
                 status_bar:update_status(100 * (page - 1) / total_pages, 0) -- TODO
                 status_bar:set_text(format('Scanning Page %d / %d', page, total_pages))
@@ -465,41 +461,37 @@ function refresh_entries()
 				existing_auctions[item_key] = nil
                 update_historical_value_button()
                 status_bar:update_status(100, 100)
-                status_bar:set_text('Scan aborted')
+                status_bar:set_text 'Scan aborted'
 			end,
 			on_complete = function()
-				existing_auctions[item_key] = existing_auctions[item_key] or {}
+				existing_auctions[item_key] = existing_auctions[item_key] or t
                 refresh = true
                 status_bar:update_status(100, 100)
-                status_bar:set_text('Scan complete')
+                status_bar:set_text 'Scan complete'
             end,
 		}
 	end
 end
 
 function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
-    existing_auctions[key] = existing_auctions[key] or {}
+    existing_auctions[key] = existing_auctions[key] or t
     local entry
-    for _, existing_entry in existing_auctions[key] do
-        if unit_blizzard_bid == existing_entry.unit_blizzard_bid and unit_buyout_price == existing_entry.unit_buyout_price and aux_quantity == existing_entry.stack_size and duration == existing_entry.duration and is_player(owner) == existing_entry.own then
-            entry = existing_entry
+    for _, record in existing_auctions[key] do
+        if unit_blizzard_bid == record.unit_blizzard_bid and unit_buyout_price == record.unit_buyout_price and aux_quantity == record.stack_size and duration == record.duration and is_player(owner) == record.own then
+            entry = record
         end
     end
-
     if not entry then
-        entry = {
-            stack_size = aux_quantity,
-            unit_blizzard_bid = unit_blizzard_bid,
-            unit_buyout_price = unit_buyout_price,
-            duration = duration,
-            own = is_player(owner),
-            count = 0,
-        }
+        entry = -object
+            :stack_size         (aux_quantity)
+	        :unit_blizzard_bid  (unit_blizzard_bid)
+	        :unit_buyout_price  (unit_buyout_price)
+	        :duration           (duration)
+	        :own                (is_player(owner))
+	        :count              (0)
         tinsert(existing_auctions[key], entry)
     end
-
     entry.count = entry.count + 1
-
     return entry
 end
 
@@ -516,7 +508,6 @@ function on_update()
 end
 
 function initialize_duration_dropdown()
-
     local function on_click()
         UIDropDownMenu_SetSelectedValue(duration_dropdown, this.value)
         local settings = read_settings()
@@ -524,19 +515,16 @@ function initialize_duration_dropdown()
         write_settings(settings)
         refresh = true
     end
-
     UIDropDownMenu_AddButton{
         text = '2 Hours',
         value = DURATION_4,
         func = on_click,
     }
-
     UIDropDownMenu_AddButton{
         text = '8 Hours',
         value = DURATION_8,
         func = on_click,
     }
-
     UIDropDownMenu_AddButton{
         text = '24 Hours',
         value = DURATION_24,
