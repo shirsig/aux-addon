@@ -1,10 +1,10 @@
-module 'tooltip' import 'info'
+module 'tooltip' import 'info' 'disenchant' 'cache' 'money' 'history'
 
 _g.aux_tooltip_value = true
 
-game_tooltip_hooks = {}
-hooked_setter = nil
-game_tooltip_money = nil
+game_tooltip_hooks = t
+mutable.hooked_setter = nil
+mutable.game_tooltip_money = nil
 
 function LOAD()
     for name, f in game_tooltip_hooks do
@@ -29,7 +29,7 @@ function LOAD()
         end
         return result
     end)
-    local orig = GameTooltip:GetScript('OnTooltipAddMoney')
+    local orig = GameTooltip:GetScript 'OnTooltipAddMoney'
     GameTooltip:SetScript('OnTooltipAddMoney', function(...) temp=arg
         if hooked_setter then
             game_tooltip_money = arg1
@@ -42,12 +42,9 @@ end
 function extend_tooltip(tooltip, link, quantity)
     local item_id, suffix_id = info.parse_link(link)
     quantity = IsShiftKeyDown() and quantity or 1
-
     if _g.aux_tooltip_disenchant_source then
-        local color = {r=0.7, g=0.7, b=0.7}
-
+        local color = {r=.7, g=.7, b=.7}
         local type, range = disenchant.source(item_id)
-
         if type == 'CRYSTAL' then
             tooltip:AddLine(format('Can disenchant from level %s |cffa335eeEpic|r and |cff0070ddRare|r items.', range), color.r, color.g, color.b, true)
         elseif type == 'SHARD' then
@@ -58,15 +55,11 @@ function extend_tooltip(tooltip, link, quantity)
             tooltip:AddLine(format('Can disenchant from level %s |cff1eff00Uncommon|r items.', range), color.r, color.g, color.b, true)
         end
     end
-
-    local item_info = info.item(item_id)
-    if item_info then
+    for item_info in present(info.item(item_id)) do
         local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
-
         if getn(distribution) > 0 then
-
             if _g.aux_tooltip_disenchant_distribution then
-                local color = {r=0.8, g=0.8, b=0.2}
+                local color = {r=.8, g=.8, b=.2}
 
                 tooltip:AddLine('Disenchants into:', color.r, color.g, color.b)
                 sort(distribution, function(a,b) return a.probability > b.probability end)
@@ -74,38 +67,31 @@ function extend_tooltip(tooltip, link, quantity)
                     tooltip:AddLine(format('  %s%% %s (%s-%s)', event.probability * 100, info.display_name(event.item_id, true) or 'item:'..event.item_id, event.min_quantity, event.max_quantity), color.r, color.g, color.b)
                 end
             end
-
             if _g.aux_tooltip_disenchant_value then
-                local color = {r=0.1, g=0.6, b=0.6}
+                local color = {r=.1, g=.6, b=.6}
 
                 local disenchant_value = disenchant.value(item_info.slot, item_info.quality, item_info.level)
                 tooltip:AddLine('Disenchant Value: '..(disenchant_value and money.to_string2(disenchant_value) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
             end
         end
     end
-
     if _g.aux_tooltip_vendor_buy then
-        local color = {r=0.8, g=0.5, b=0.1}
-
+        local color = {r=.8, g=.5, b=.1}
         local _, price, limited = cache.merchant_info(item_id)
         if price then
             tooltip:AddLine('Vendor Buy '..(limited and '(limited): ' or ': ')..money.to_string2(price * quantity), color.r, color.g, color.b)
         end
     end
     if _g.aux_tooltip_vendor_sell then
-        local color = {r=0.8, g=0.5, b=0.1}
-
+        local color = {r=.8, g=.5, b=.1}
         local price = cache.merchant_info(item_id)
         if price ~= 0 then
             tooltip:AddLine('Vendor Sell: '..(price and money.to_string2(price * quantity) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
     end
-
-    local color = {r=1, g=1, b=0.6}
-
+    local color = {r=1, g=1, b=.6}
     local auctionable = not item_info or info.auctionable(info.tooltip(function(tt) tt:SetHyperlink(item_info.itemstring) end), item_info.quality)
     local item_key = (item_id or 0)..':'..(suffix_id or 0)
-
     local value = history.value(item_key)
     if auctionable then
         if _g.aux_tooltip_value then
@@ -133,50 +119,38 @@ function game_tooltip_hooks:SetHyperlink(itemstring)
 end
 
 function game_tooltip_hooks:SetAuctionItem(type, index)
-    local link = GetAuctionItemLink(type, index)
-    if link then
-        local _, _, quantity = GetAuctionItemInfo(type, index)
-        extend_tooltip(GameTooltip, link, quantity)
+    for link in present(GetAuctionItemLink(type, index)) do
+        extend_tooltip(GameTooltip, link, select(3, GetAuctionItemInfo(type, index)))
     end
 end
 
 function game_tooltip_hooks:SetLootItem(slot)
-    local link = GetLootSlotLink(slot)
-    if link then
-        local _, _, quantity = GetLootSlotInfo(slot)
-        extend_tooltip(GameTooltip, link, quantity)
+    for link in present(GetLootSlotLink(slot)) do
+        extend_tooltip(GameTooltip, link, select(3, GetLootSlotInfo(slot)))
     end
 end
 
 function game_tooltip_hooks:SetQuestItem(qtype, slot)
-    local link = GetQuestItemLink(qtype, slot)
-    if link then
-        local _, _, quantity = GetQuestItemInfo(qtype, slot)
-        extend_tooltip(GameTooltip, link, quantity)
+    for link in present(GetQuestItemLink(qtype, slot)) do
+        extend_tooltip(GameTooltip, link, select(3, GetQuestItemInfo(qtype, slot)))
     end
 end
 
 function game_tooltip_hooks:SetQuestLogItem(qtype, slot)
-    local link = GetQuestLogItemLink(qtype, slot)
-    if link then
-        local _, _, quantity = GetQuestLogRewardInfo(slot)
-        extend_tooltip(GameTooltip, link, quantity)
+    for link in present(GetQuestLogItemLink(qtype, slot)) do
+        extend_tooltip(GameTooltip, link, select(3, GetQuestLogRewardInfo(slot)))
     end
 end
 
 function game_tooltip_hooks:SetBagItem(bag, slot)
-    local link = GetContainerItemLink(bag, slot)
-    if link then
-        local _, quantity = GetContainerItemInfo(bag, slot)
-        extend_tooltip(GameTooltip, link, quantity)
+    for link in present(GetContainerItemLink(bag, slot)) do
+        extend_tooltip(GameTooltip, link, select(2, GetContainerItemInfo(bag, slot)))
     end
 end
 
 function game_tooltip_hooks:SetInboxItem(index)
     local name, _, quantity = GetInboxItem(index)
-
-    local id = name and cache.item_id(name)
-    if id then
+    for id in present(name and cache.item_id(name)) do
         local _, itemstring, quality = GetItemInfo(id)
         local hex = select(4, GetItemQualityColor(tonumber(quality)))
         local link = hex.. '|H'..itemstring..'|h['..name..']|h'..FONT_COLOR_CODE_CLOSE
@@ -185,15 +159,13 @@ function game_tooltip_hooks:SetInboxItem(index)
 end
 
 function game_tooltip_hooks:SetInventoryItem(unit, slot)
-    local link = GetInventoryItemLink(unit, slot)
-    if link then
+    for link in present(GetInventoryItemLink(unit, slot)) do
         extend_tooltip(GameTooltip, link, 1)
     end
 end
 
 function game_tooltip_hooks:SetMerchantItem(slot)
-    local link = GetMerchantItemLink(slot)
-    if link then
+    for link in present(GetMerchantItemLink(slot)) do
         local quantity = select(4, GetMerchantItemInfo(slot))
         extend_tooltip(GameTooltip, link, quantity)
     end
@@ -232,7 +204,7 @@ end
 function game_tooltip_hooks:SetAuctionSellItem()
     local name, _, quantity = GetAuctionSellItemInfo()
     if name then
-        for slot in info.inventory do
+        for slot in info.inventory do temp=slot
             local link = GetContainerItemLink(unpack(slot))
             if link and select(5, info.parse_link(link)) == name then
                 extend_tooltip(GameTooltip, link, quantity)

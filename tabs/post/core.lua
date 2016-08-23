@@ -1,4 +1,4 @@
-module 'post_tab' import 'scan' 'scan_util' 'post' 'history' 'info' 'persistence' 'item_listing'
+module 'post_tab' import 'scan' 'scan_util' 'post' 'history' 'info' 'persistence' 'item_listing' :al 'auction_listing' 'sorting'
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
@@ -135,12 +135,12 @@ function update_auction_listing()
             tinsert(auction_rows, {
                 cols = {
                     {value=auction_record.own and color.yellow(auction_record.count) or auction_record.count},
-                    {value=auction_listing.time_left(auction_record.duration)},
+                    {value=al.time_left(auction_record.duration)},
                     {value=auction_record.stack_size == stack_size and color.yellow(auction_record.stack_size) or auction_record.stack_size},
                     {value=money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
-                    {value=historical_value and auction_listing.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'},
+                    {value=historical_value and al.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'},
                     {value=auction_record.unit_buyout_price > 0 and money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'},
-                    {value=auction_record.unit_buyout_price > 0 and historical_value and auction_listing.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---'},
+                    {value=auction_record.unit_buyout_price > 0 and historical_value and al.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---'},
                 },
                 record = auction_record,
             })
@@ -183,12 +183,12 @@ function price_update()
         local start_price_input = get_unit_start_price()
         settings.start_price = start_price_input
         local historical_value = history.value(selected_item.key)
-        start_price_percentage:SetText(historical_value and auction_listing.percentage_historical(round(start_price_input / historical_value * 100)) or '---')
+        start_price_percentage:SetText(historical_value and al.percentage_historical(round(start_price_input / historical_value * 100)) or '---')
 
         local buyout_price_input = get_unit_buyout_price()
         settings.buyout_price = buyout_price_input
         local historical_value = history.value(selected_item.key)
-        buyout_price_percentage:SetText(historical_value and auction_listing.percentage_historical(round(buyout_price_input / historical_value * 100)) or '---')
+        buyout_price_percentage:SetText(historical_value and al.percentage_historical(round(buyout_price_input / historical_value * 100)) or '---')
 
         write_settings(settings)
     end

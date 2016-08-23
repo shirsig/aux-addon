@@ -6,61 +6,60 @@ module 'history' import 'persistence'
 --	:daily_max_price 'number'
 --	:data_points (list(';') (tuple('@') :market_value 'number' :time 'number'))
 
-local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}}}
+local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}} }
+
 value_cache = t
 
-function accessor.next_push()
-	local date = date '*t'
-	date.hour, date.min, date.sec = 24, 0, 0
-	return time(date)
+do
+	local data
+	function accessor.data()
+		if not data then
+			local dataset = persistence.load_dataset()
+			dataset.history = dataset.history or t
+			data = dataset.history
+		end
+		return data
+	end
 end
 
-function new_record()
+do
+	local next_push = 0
+	function accessor.next_push()
+		if time() > next_push then
+			local date = date '*t'
+			date.hour, date.min, date.sec = 24, 0, 0
+			next_push = time(date)
+		end
+		return next_push
+	end
+end
+
+function accessor.new_record()
 	return -object :next_push(next_push) :data_points(t)
 end
 
-function load_data()
-	local dataset = persistence.load_dataset()
-	dataset.history = dataset.history or t
-	return dataset.history
-end
-
 function read_record(item_key)
-	local data = load_data()
-
-	local record
-	if data[item_key] then
-		record = persistence.read(history_schema, data[item_key])
-	else
-		record = new_record()
-	end
-
+	local record = data[item_key] and persistence.read(history_schema, data[item_key]) or new_record
 	if record.next_push <= time() then
 		push_record(record)
 		write_record(item_key, record)
 	end
-
 	return record
 end
 
 function write_record(item_key, record)
 	value_cache[item_key] = nil
-	local data = load_data()
 	data[item_key] = persistence.write(history_schema, record)
 end
 
 function public.process_auction(auction_record)
 	local item_record = read_record(auction_record.item_key)
-
 	local unit_bid_price = ceil(auction_record.bid_price / auction_record.aux_quantity)
 	local unit_buyout_price = ceil(auction_record.buyout_price / auction_record.aux_quantity)
-
 	if auction_record.buyout_price > 0 then
 		item_record.daily_min_buyout = item_record.daily_min_buyout and min(item_record.daily_min_buyout, unit_buyout_price) or unit_buyout_price
 	end
-
 	item_record.daily_max_price = max(item_record.daily_max_price or 0, unit_buyout_price, unit_bid_price)
-
 	write_record(auction_record.item_key, item_record)
 end
 
@@ -71,14 +70,12 @@ end
 
 function public.value(item_key)
 	if not value_cache[item_key] or value_cache[item_key].next_push <= time() then
-		local item_record = read_record(item_key)
-
-		local value
+		local item_record, value
+		item_record = read_record(item_key)
 		if getn(item_record.data_points) > 0 then
-			local weighted_values = tt
-			local total_weight = 0
+			local total_weight, weighted_values = 0, tt
 			for _, data_point in item_record.data_points do
-				local weight = 0.99^round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
+				local weight = .99 ^ round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
 				total_weight = total_weight + weight
 				tinsert(weighted_values, -object :value(data_point.market_value) :weight(weight))
 			end
@@ -89,16 +86,13 @@ function public.value(item_key)
 		else
 			value = calculate_market_value(item_record)
 		end
-
 		value_cache[item_key] = -object :value(value) :next_push(item_record.next_push)
 	end
-
 	return value_cache[item_key].value
 end
 
 function public.market_value(item_key)
-	local item_record = read_record(item_key)
-	return calculate_market_value(item_record)
+	return calculate_market_value(read_record(item_key))
 end
 
 function calculate_market_value(item_record)
@@ -111,26 +105,22 @@ function weighted_median(list)
 		tinsert(sorted_list, e)
 	end
 	sort(sorted_list, function(a,b) return a.value < b.value end)
-
 	local weight = 0
 	for _, element in sorted_list do
 		weight = weight + element.weight
-		if weight >= 0.5 then
+		if weight >= .5 then
 			return element.value
 		end
 	end
 end
 
 function push_record(item_record)
-
-	local market_value = calculate_market_value(item_record)
-	if market_value then
+	for market_value in present(calculate_market_value(item_record)) do
 		tinsert(item_record.data_points, 1, -object :market_value(market_value) :time(item_record.next_push))
 		while getn(item_record.data_points) > 11 do
 			tremove(item_record.data_points)
 		end
 	end
-
 	item_record.daily_min_buyout = nil
 	item_record.daily_max_price = nil
 	item_record.next_push = next_push
