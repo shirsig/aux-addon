@@ -113,7 +113,7 @@ end
 
 function update_auto_buy_filter()
 	if _g.aux_auto_buy_filter ~= '' then
-		local queries = filter.queries(_g.aux_auto_buy_filter)
+		local queries = filter_util.queries(_g.aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
 				log 'Error: The automatic buyout filter does not support multi-queries'
@@ -308,7 +308,7 @@ function public.execute(resume, real_time)
 	end
 	local filter_string = search_box:GetText()
 
-	local queries = filter.queries(filter_string)
+	local queries = filter_util.queries(filter_string)
 	if not queries then
 		return
 	elseif real_time then

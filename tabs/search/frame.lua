@@ -1,4 +1,4 @@
-module 'search_tab' import 'gui' [''] 'core' 'completion' 'listing' 'auction_listing'
+module 'search_tab' import 'gui' [''] 'core' 'completion' 'listing' 'auction_listing' 'filter_util'
 
 FILTER_SPACING = 28.5
 
@@ -311,7 +311,7 @@ function create_frames()
 	    btn:SetHeight(24)
 	    btn:SetText 'Favorite'
 	    btn:SetScript('OnClick', function()
-	        local filters = filter.queries(search_box:GetText())
+	        local filters = filter_util.queries(search_box:GetText())
 	        if filters then
 	            tinsert(_g.aux_favorite_searches, 1, {
 	                filter_string = search_box:GetText(),
@@ -510,13 +510,13 @@ function create_frames()
 		input:SetPoint('CENTER', filter_dropdown, 'CENTER', 0, 0)
 		input:SetWidth(150)
 		input:SetScript('OnTabPressed', function() filter_parameter_input:SetFocus() end)
-		input.complete = completion.complete(function() return {'and', 'or', 'not', unpack(keys(filter.filters))} end)
+		input.complete = completion.complete(function() return {'and', 'or', 'not', unpack(keys(filter_util.filters))} end)
 		input.char = function() this:complete() end
 		input.change = function()
-			local filter = this:GetText()
-			if filter.filters[filter] and filter.filters[filter].input_type ~= '' then
-				local _, _, suggestions = filter.parse_query_string(filter..'/')
-				filter_parameter_input:SetNumeric(filter.filters[filter].input_type == 'number')
+			local text = this:GetText()
+			if filter_util.filters[text] and filter_util.filters[text].input_type ~= '' then
+				local _, _, suggestions = filter_util.parse_query_string(text..'/')
+				filter_parameter_input:SetNumeric(filter_util.filters[text].input_type == 'number')
 				filter_parameter_input.complete = completion.complete(function() return suggestions or {} end)
 				filter_parameter_input:Show()
 			else

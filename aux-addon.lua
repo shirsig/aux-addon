@@ -42,7 +42,7 @@ do
 	function public.modifier(f)
 		local function apply(_, value) return f(value) end
 		return setmetatable(t, {
-			__index=apply, __call=apply, __add=apply, __sub=apply, __mul=apply, __div=apply, __pow=apply, __concat=apply, __lt=apply, __le=apply,
+			__index=apply, __call=apply, __add=apply, __sub=apply, __mul=apply, __div=apply, __pow=apply, __concat=apply,
 			__newindex=function(_, _, value) return f(value) end, __unm=function(self) return self end,
 		})
 	end
@@ -133,7 +133,7 @@ tab_info = t
 do
 	local data = -list :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids'
 	for i=1,7,2 do
-		local tab = perm<-object :name(data[i + 1]);
+		local tab = perm/-object :name(data[i + 1]);
 		local env = (function() module(data[i]) return _m end)()
 		function env.mutator.OPEN(f) tab.OPEN = f end
 		function env.mutator.CLOSE(f) tab.CLOSE = f end

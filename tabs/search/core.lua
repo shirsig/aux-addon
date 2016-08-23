@@ -1,4 +1,4 @@
-module 'search_tab'
+module 'search_tab' import 'scan'
 
 StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
     text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',

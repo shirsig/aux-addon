@@ -1,4 +1,4 @@
-module 'search_tab'
+module 'search_tab' import 'filter_util'
 
 function valid_level(str)
 	local level = tonumber(str)
@@ -109,8 +109,8 @@ function get_filter_builder_query()
 	end
 
 	local name = blizzard_query.name
-	if not index(filter.parse_query_string(name), 'blizzard', 'name') then
-		name = filter.quote(name)
+	if not index(filter_util.parse_query_string(name), 'blizzard', 'name') then
+		name = filter_util.quote(name)
 	end
 	add((name ~= '' or blizzard_query.exact) and name)
 
@@ -134,7 +134,7 @@ function get_filter_builder_query()
 		add(strlower(_g['ITEM_QUALITY'..quality..'_DESC']))
 	end
 
-	local post_filter_string = filter.query_string{blizzard={}, post=post_filter}
+	local post_filter_string = filter_util.query_string{blizzard={}, post=post_filter}
 	add(post_filter_string ~= '' and post_filter_string)
 
 	return query_string or ''
@@ -171,7 +171,7 @@ function clear_form()
 end
 
 function import_query_string()
-	local components, error = filter.parse_query_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
+	local components, error = filter_util.parse_query_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
 	if components then
 		set_form(components)
 	else
@@ -209,7 +209,7 @@ function public.formatted_post_filter(components)
 			for parameter in present(component[3]) do
 				if component[2] == 'item' then
 					parameter = info.display_name(cache.item_id(parameter)) or '['..parameter..']'
-				elseif filter.filters[component[2]].input_type == 'money' then
+				elseif filter_util.filters[component[2]].input_type == 'money' then
 					parameter = money.to_string(money.from_string(parameter), nil, true)
 				end
 				component_text = component_text..filter_color(': ')..parameter
@@ -262,13 +262,13 @@ end
 
 function add_post_filter()
 	for str in present(filter_input:GetText()) do
-		for filter in present(filter.filters[str]) do
+		for filter in present(filter_util.filters[str]) do
 			if filter.input_type ~= '' then
 				str = str..'/'..filter_parameter_input:GetText()
 			end
 		end
 
-		local components, error, suggestions = filter.parse_query_string(str)
+		local components, error, suggestions = filter_util.parse_query_string(str)
 
 		if components and getn(components.blizzard) == 0 and getn(components.post) == 1 then
 			add_component(components.post[1])
@@ -319,15 +319,15 @@ function set_filter_display_offset(x_offset, y_offset)
 end
 
 function initialize_filter_dropdown()
-	for _, filter in {'and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard'} do
+	for _, filter in -list 'and' 'or' 'not' 'min-unit-bid' 'min-unit-buy' 'max-unit-bid' 'max-unit-buy' 'bid-profit' 'buy-profit' 'bid-vend-profit' 'buy-vend-profit' 'bid-dis-profit' 'buy-dis-profit' 'bid-pct' 'buy-pct' 'item' 'tooltip' 'min-lvl' 'max-lvl' 'rarity' 'left' 'utilizable' 'discard' do
 		UIDropDownMenu_AddButton{
 			text = filter,
 			value = filter,
 			func = function()
 				filter_input:SetText(this.value)
-				if index(filter.filters[this.value], 'input_type') == '' or this.value == 'not' then
+				if index(filter_util.filters[this.value], 'input_type') == '' or this.value == 'not' then
 					add_post_filter()
-				elseif filter.filters[this.value] then
+				elseif filter_util.filters[this.value] then
 					filter_parameter_input:Show()
 					filter_parameter_input:SetFocus()
 				else

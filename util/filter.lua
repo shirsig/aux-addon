@@ -1,4 +1,8 @@
-module 'filter'
+module 'filter_util' import 'info' 'cache'
+
+function LOAD()
+	import 'cache'
+end
 
 function default_filter(str)
     return {

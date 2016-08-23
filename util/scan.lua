@@ -75,7 +75,7 @@ function public.item_query(item_id, first_page, last_page)
     local item_info = info.item(item_id)
 
     if item_info then
-        local query = filter.query(item_info.name..'/exact')
+        local query = filter_util.query(item_info.name..'/exact')
         query.blizzard_query.first_page = first_page
         query.blizzard_query.last_page = last_page
         return {

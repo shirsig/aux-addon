@@ -1,4 +1,4 @@
-module 'auctions_tab'
+module 'auctions_tab' import 'scan'
 
 auction_records = nil
 

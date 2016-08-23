@@ -40,7 +40,7 @@ function create_frames()
 
 	gui.horizontal_line(frame.inventory, -48)
 
-	item_listing = item_listing.create(
+	inventory_listing = item_listing.create(
 	    frame.inventory,
 	    function()
 	        if arg1 == 'LeftButton' then

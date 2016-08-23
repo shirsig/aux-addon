@@ -42,6 +42,7 @@ do
 			local arg1 = arg
 			return function(...) return helper(body, arg1, arg) end
 		else
+			error(debugstack(1, 10))
 			body = gsub(body, '_([ab])', function(char) return '_'..a1b2[char] end)
 			local lambda = loadstring 'return function(_1,_2,_3,_4,_5,_6,_7,_8,_9)'..f..' end'
 			setfenv(lambda, getfenv(2))
@@ -51,11 +52,15 @@ do
 end
 
 function public.call(f, ...) temp=arg
-	if f then return f(unpack(arg)) end
+	if f then
+		return f(unpack(arg))
+	end
 end
 
 function public.index(t, ...) temp=arg
-	for i=1,arg.n do t = t and t[arg[i]] end
+	for i=1,arg.n do
+		t = t and t[arg[i]]
+	end
 	return t
 end
 
@@ -105,12 +110,12 @@ function public.select(i, ...) temp=arg
 	return tremove(arg, 1), unpack(arg)
 end
 
-function public.collect(t, ...) temp=arg
-	local T = T
-	for _, v in t do
-		tinsert(T, arg[v])
+function public.collect(indices, ...) temp=arg
+	local t = _m.t
+	for _, v in indices do
+		tinsert(t, arg[v])
 	end
-	return T
+	return t
 end
 
 function public.hashset(t)

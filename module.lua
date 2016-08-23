@@ -2,9 +2,9 @@ local type, setmetatable, setfenv, unpack, mask, _g = type, setmetatable, setfen
 local PRIVATE, PUBLIC, MUTABLE, PROPERTY, ACCESSOR, MUTATOR = 0, 1, 2, 4, 8, 16
 local error, import_error, modifier_error, property_error, immutable_error, collision_error, set_property, env_mt, interface_mt, declarator_mt, importer_mt
 local _state, _modules = {}, {}
-function error(message, ...) return function() _g.error(format(message, unpack(arg))..'\n'..debugstack(3, 10, 0), 0) end end
-import_error, modifier_error, property_error = error 'Invalid modifiers.', error 'Invalid modifiers.', error 'Accessor/Mutator must be function.'
-immutable_error, collision_error = function(key) return error('Field "%s" is immutable.', key) end, function(key) return error('Field "%s" already exists.', key) end
+function error(message, ...) return _g.error(format(message, unpack(arg))..'\n'..debugstack(1, 10, 0), 0) end
+import_error, modifier_error, property_error = function() error 'Invalid modifiers.' end, function() error 'Invalid modifiers.' end, function() error 'Accessor/Mutator must be function.' end
+immutable_error, collision_error = function(key) error('Field "%s" is immutable.', key) end, function(key) error('Field "%s" already exists.', key) end
 importer_mt = {__metatable=false}
 function importer_mt.__index(self, key)
 	if type(key) ~= 'string' then import_error() end
