@@ -3,20 +3,15 @@ module 'persistence'
 _g.aux_datasets = t
 
 do
-    local realm, faction
-
-    function LOAD()
-        thread(when, function() faction = UnitFactionGroup 'player' return faction end, function() end)
-        realm = GetCVar 'realmName'
-    end
-
-    function accessor.dataset_key() return realm..'|'..faction end
-end
-
-function public.load_dataset()
-    local dataset_key = dataset_key
-    _g.aux_datasets[dataset_key] = _g.aux_datasets[dataset_key] or t
-    return _g.aux_datasets[dataset_key]
+	local dataset
+	function public.accessor.dataset()
+		if not dataset then
+		    local dataset_key = format('%s|%s', GetCVar 'realmName', UnitFactionGroup 'player')
+		    dataset = _g.aux_datasets[dataset_key] or t
+		    _g.aux_datasets[dataset_key] = dataset
+	    end
+	    return dataset
+	end
 end
 
 --do TODO syntactic sugar record '#' {key='string'} {foo='number'}
