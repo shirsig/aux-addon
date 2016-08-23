@@ -1,5 +1,4 @@
 module 'bids_tab'
-tab(4, 'Bids')
 
 auction_records = nil
 

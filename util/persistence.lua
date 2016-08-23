@@ -1,6 +1,6 @@
 module 'persistence'
 
-_g.aux_datasets = {}
+_g.aux_datasets = t
 
 do
     local realm, faction
@@ -15,7 +15,7 @@ end
 
 function public.load_dataset()
     local dataset_key = dataset_key
-    _g.aux_datasets[dataset_key] = _g.aux_datasets[dataset_key] or {}
+    _g.aux_datasets[dataset_key] = _g.aux_datasets[dataset_key] or t
     return _g.aux_datasets[dataset_key]
 end
 
@@ -64,8 +64,7 @@ function public.write(schema, obj)
 end
 
 function public.read_list(schema, str)
-    if str == '' then return {} end
-
+    if str == '' then return t end
     local separator = schema[2]
     local element_type = schema[3]
     local parts = split(str, separator)
@@ -85,7 +84,7 @@ end
 
 function public.read_record(schema, str)
     local separator = schema[2]
-    local record = {}
+    local record = t
     local parts = split(str, separator)
     for i=3,getn(schema) do
         local key, type = next(schema[i])
@@ -96,7 +95,7 @@ end
 
 function public.write_record(schema, record)
     local separator = schema[2]
-    local parts = {}
+    local parts = tt
     for i=3,getn(schema) do
         local key, type = next(schema[i])
         tinsert(parts, write(type, record[key]))

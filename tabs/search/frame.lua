@@ -1,4 +1,4 @@
-module 'search_tab' import 'gui'
+module 'search_tab' import 'gui' [''] 'core' 'completion' 'listing' 'auction_listing'
 
 FILTER_SPACING = 28.5
 
@@ -9,13 +9,13 @@ function create_frames()
 	frame:Hide()
 
 	frame.filter = gui.panel(frame)
-	frame.filter:SetAllPoints(frame.content)
+	frame.filter:SetAllPoints(aux_frame.content)
 
 	frame.results = gui.panel(frame)
-	frame.results:SetAllPoints(frame.content)
+	frame.results:SetAllPoints(aux_frame.content)
 
 	frame.saved = CreateFrame('Frame', nil, frame)
-	frame.saved:SetAllPoints(frame.content)
+	frame.saved:SetAllPoints(aux_frame.content)
 
 	frame.saved.favorite = gui.panel(frame.saved)
 	frame.saved.favorite:SetWidth(378.5)
@@ -243,7 +243,7 @@ function create_frames()
 	end
 	do
 	    local btn = gui.button(frame, gui.font_size.large2)
-	    btn:SetPoint('BOTTOMLEFT', frame.content, 'TOPLEFT', 10, 8)
+	    btn:SetPoint('BOTTOMLEFT', aux_frame.content, 'TOPLEFT', 10, 8)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
 	    btn:SetText 'Search Results'
@@ -272,7 +272,7 @@ function create_frames()
 	    local frame = CreateFrame('Frame', nil, frame)
 	    frame:SetWidth(265)
 	    frame:SetHeight(25)
-	    frame:SetPoint('TOPLEFT', frame.content, 'BOTTOMLEFT', 0, -6)
+	    frame:SetPoint('TOPLEFT', aux_frame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar_frame = frame
 	end
 	do

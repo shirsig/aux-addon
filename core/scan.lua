@@ -45,7 +45,7 @@ end
 
 function accessor.query() return state.params.queries[state.query_index] end
 
-function wait_for_callback(...)
+function wait_for_callback(...) temp=arg
 	local send_signal, signal_received = signal()
 	local suspended
 	local ret

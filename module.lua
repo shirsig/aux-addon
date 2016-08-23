@@ -42,11 +42,12 @@ do
 		local state, modifier = _state[self], MODIFIER[key]; local modifiers = state.modifiers
 		if modifier then
 			if mask(MODIFIER_MASK[key], modifiers) ~= modifiers then modifier_error() end
-			state.modifiers = modifiers + modifier; return self
+			state.modifiers = modifiers + modifier
 		elseif not state.metadata[key] or collision_error(key) then
 			if mask(PROPERTY_MASK, modifiers) ~= modifiers then modifier_error() end
 			state.property, state.metadata[key], state.modifiers = key, modifiers + PROPERTY, PRIVATE
 		end
+		return self
 	end
 end
 function declarator_mt.__newindex(self, key, value)

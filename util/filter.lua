@@ -285,10 +285,11 @@ function public.parse_query_string(str)
 
     local i = 1
     while parts[i] do
-        if x(operator(parts[i])) then
-            tinsert(post_filter, __)
-        elseif x(filters[parts[i]]) then
-            local input_type = __.input_type
+	    local operator = operator(parts[i])
+        if operator then
+            tinsert(post_filter, operator)
+        elseif filters[parts[i]] then
+            local input_type = filters[parts[i]].input_type
             if input_type ~= '' then
                 if not parts[i + 1] or not parse_parameter(input_type, parts[i + 1]) then
                     if parts[i] == 'item' then
@@ -494,8 +495,10 @@ function blizzard_query(components)
     local query = {name=filters.name and filters.name[2]}
 
     local item_info, class_index, subclass_index, slot_index
-    if filters.exact and x(cache.item_id(filters.name[2])) and x(info.item(__)) then
-	    item_info = __
+    local item_id = cache.item_id(filters.name[2])
+    item_info = item_id and info.item(item_id)
+    if filters.exact and item_info then
+	    item_info = info.item(item_id)
         class_index = info.item_class_index(item_info.class)
         subclass_index = info.item_subclass_index(class_index or 0, item_info.subclass)
         slot_index = info.item_slot_index(class_index or 0, subclass_index or 0, item_info.slot)
@@ -510,7 +513,7 @@ function blizzard_query(components)
         query.slot = slot_index
         query.quality = item_info.quality
     else
-	    for _, key in {'min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality'} do
+	    for key in set 'min_level' 'max_level' 'class' 'subclass' 'slot' 'usable' 'quality' do
             query[key] = index(filters[key], 2)
 	    end
     end

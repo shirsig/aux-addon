@@ -1,26 +1,9 @@
-module 'util'
+module 'core'
 
-public.join = _g.join
+public.join = _g.table.concat
 
 function public.replicate(count, value)
 	if count > 0 then return value, replicate(count - 1, value) end
-end
-
-do
-	local value, charges
-	local function mutator(n)
-		return function(v)
-			assert(charges == 0)
-			value, charges = v, n
-			return v
-		end
-	end
-	for i=1,9 do public[join{replicate(i, 'x')}] = mutator(i) end
-	function public.accessor.__()
-		assert(charges > 0)
-		charges = charges - 1
-		return value
-	end
 end
 
 do
@@ -67,14 +50,12 @@ do
 	end
 end
 
-function public.call(f, ...)
-	temp(arg)
+function public.call(f, ...) temp=arg
 	if f then return f(unpack(arg)) end
 end
 
-function public.index(t, ...)
+function public.index(t, ...) temp=arg
 	for i=1,arg.n do t = t and t[arg[i]] end
-	recycle(arg)
 	return t
 end
 
@@ -106,10 +87,9 @@ do
 	end
 end
 
-function public.expand(array, ...)
+function public.expand(array, ...) temp=arg
 	local t = t
 	for i=1,arg.n do t[arg[i]] = array[i] end
-	recycle(arg)
 	return t
 end
 
@@ -120,10 +100,25 @@ function public.copy(t)
 	return setmetatable(copy, getmetatable(t))
 end
 
-function public.select(i, ...)
-	temp(arg)
+function public.select(i, ...) temp=arg
 	while i > 1 do i = i - 1; tremove(arg, i) end
-	return tremove(arg, 1), unpack(temp)
+	return tremove(arg, 1), unpack(arg)
+end
+
+function public.collect(t, ...) temp=arg
+	local T = T
+	for _, v in t do
+		tinsert(T, arg[v])
+	end
+	return T
+end
+
+function public.hashset(t)
+	local set = _m.t
+	for _, v in t do
+		set[v] = true
+	end
+	return set
 end
 
 function public.size(t)

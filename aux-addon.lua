@@ -10,7 +10,7 @@ do
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for t in temporary do
 			recycle(t)
-			log(getn(table_pool))
+--			log(getn(table_pool))
 		end
 		wipe(temporary)
 	end)
@@ -33,19 +33,10 @@ do
 		tremove(table_pool) or {}
 	end
 
-	function public.accessor.tt() -- TODO or 'tmp'?
+	function public.accessor.tt() -- TODO or 'tmp'? t (and t -> T)?
 		local t = tremove(table_pool) or {}
 		temporary[t] = true
 		return t
-	end
-
-	do
-		local T = t
-		local mt = {__unm=function(self) T = t; return setmetatable(self, nil) end}
-		function public.accessor.T()
-			wipe(T)
-			return setmetatable(T, mt)
-		end
 	end
 
 	function public.modifier(f)
@@ -57,16 +48,16 @@ do
 	end
 	local temp, perm = modifier(function(t) temporary[t] = true; return t end), modifier(function(t) temporary[t] = false; return t end)
 	public.temp() -- TODO or 'auto'?
-	function accessor() return setmetatable(T, mt) end
+	function accessor() return setmetatable(tt, mt) end
 	function mutator(value) return temp(value) end
 	public.perm() -- TODO or 'keep'?
-	function accessor() return setmetatable(T, mt) end
+	function accessor() return setmetatable(tt, mt) end
 	function mutator(value) return perm(value) end
 
 	function public.collector_mt(f)
 		return {
 			__unm=function(self)
-				setmetatable(self, nil)
+				return setmetatable(self, nil)
 			end,
 			__index=function(self, key)
 				f(self, key)
@@ -81,7 +72,7 @@ do
 	do
 		local mt = collector_mt(tinsert)
 		function public.accessor.list()
-			return setmetatable(T, mt)
+			return setmetatable(tt, mt)
 		end
 	end
 	do
@@ -89,7 +80,7 @@ do
 			rawset(self, value, true)
 		end)
 		function public.accessor.set()
-			return setmetatable(T, mt)
+			return setmetatable(tt, mt)
 		end
 	end
 	do
@@ -97,12 +88,13 @@ do
 		local mt = collector_mt(function(self, value)
 			if key ~= nil then
 				rawset(self, key, value)
+				key = nil
 			else
 				key = value
 			end
 		end)
-		function public.accessor.map()
-			return setmetatable(T, mt)
+		function public.accessor.object()
+			return setmetatable(tt, mt)
 		end
 	end
 end
@@ -131,17 +123,17 @@ do
 	end)
 end
 
-function public.log(...)
+function public.log(...) temp=arg
 	local msg = '[aux]'
 	for i=1,arg.n do msg = msg..' '..tostring(arg[i]) end
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
-	recycle(arg)
 end
 
 
-tabs = t
-for k, v in map :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids' do
-	local m, tab = _m, -map :name(k) :title(v)
+tab_info = t
+for k, v in -object :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids' do
+	local m, tab = _m, -object :name(v);
+	log(tab.name);
 	(function()
 		module(k)
 		function mutator.OPEN(f) tab.OPEN = f end
@@ -150,12 +142,12 @@ for k, v in map :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :
 		function mutator.CLICK_LINK(f) tab.CLICK_LINK = f end
 		function public.accessor.ACTIVE() return tab == m.active_tab end
 	end)()
-	tinsert(tab, tabs)
+	tinsert(tab_info, tab)
 end
 
 do
 	local active_tab_index
-	function accessor.active_tab() return tabs[active_tab_index] end
+	function accessor.active_tab() return tab_info[active_tab_index] end
 	function on_tab_click(index)
 		call(active_tab_index and active_tab.CLOSE)
 		active_tab_index = index
@@ -163,8 +155,8 @@ do
 	end
 end
 
-function SetItemRef(...) temp(arg)
-	if arg[3] ~= 'RightButton' or not index(active_tab, 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
+function SetItemRef(...) temp=arg
+	if arg[3] ~= 'RightButton' or not index(active_tab, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
 	for item_info in present(info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
@@ -172,17 +164,17 @@ function SetItemRef(...) temp(arg)
 	end
 end
 
-function UseContainerItem(...) temp(arg)
-	if modified or not index(active_tab, 'env', 'USE_ITEM') then
+function UseContainerItem(...) temp=arg
+	if modified or not index(active_tab, 'USE_ITEM') then
 		return orig.UseContainerItem(unpack(arg))
 	end
 	for item_info in present(info.container_item(arg[1], arg[2])) do
-		return active_tab.env.USE_ITEM(item_info)
+		return active_tab.USE_ITEM(item_info)
 	end
 end
 
 public.orig = setmetatable({[_g]=t}, {__index=function(self, key) return self[_g][key] end})
-function public.hook()
+function public.hook(...)
 	local name, object, handler
 	if arg.n == 3 then
 		name, object, handler = unpack(arg)
@@ -248,7 +240,7 @@ end
 
 function AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
-	frame:Show()
+	aux_frame:Show()
 	set_tab(1)
 end
 
@@ -259,7 +251,7 @@ function AUCTION_HOUSE_CLOSED()
 	stack.stop()
 	scan.abort()
 	set_tab()
-	frame:Hide()
+	aux_frame:Hide()
 end
 
 function AUCTION_BIDDER_LIST_UPDATE()
@@ -268,7 +260,7 @@ end
 
 do
 	local last_owner_page_requested
-	function GetOwnerAuctionItems(...) temp(arg)
+	function GetOwnerAuctionItems(...) temp=arg
 		local page = arg[1]
 		last_owner_page_requested = page
 		return orig.GetOwnerAuctionItems(unpack(arg))
@@ -281,7 +273,7 @@ end
 function ADDON_LOADED.Blizzard_AuctionUI()
 	AuctionFrame:UnregisterEvent 'AUCTION_HOUSE_SHOW'
 	AuctionFrame:SetScript('OnHide', nil)
-	hook('ShowUIPanel', function(...) temp(arg)
+	hook('ShowUIPanel', function(...) temp=arg
 		if arg[1] == AuctionFrame then return AuctionFrame:Show() end
 		return orig.ShowUIPanel(unpack(arg))
 	end)
@@ -296,8 +288,7 @@ do
 		return label
 	end
 	function ADDON_LOADED.Blizzard_CraftUI()
-		hook('CraftFrame_SetSelection', function(...)
-			temp(arg)
+		hook('CraftFrame_SetSelection', function(...) temp=arg
 			local results = {orig.CraftFrame_SetSelection(unpack(arg))}
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
@@ -324,8 +315,7 @@ do
 		end)
 	end
 	function ADDON_LOADED.Blizzard_TradeSkillUI()
-		hook('TradeSkillFrame_SetSelection', function(...)
-			temp(arg)
+		hook('TradeSkillFrame_SetSelection', function(...) temp=arg
 			local results = {orig.TradeSkillFrame_SetSelection(unpack(arg))}
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
@@ -353,8 +343,7 @@ do
 	end
 end
 
-function AuctionFrameAuctions_OnEvent(...)
-	temp(arg)
+function AuctionFrameAuctions_OnEvent(...) temp=arg
     if AuctionFrameAuctions:IsVisible() then
         return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end

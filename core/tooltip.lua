@@ -1,5 +1,4 @@
 module 'tooltip'
---import 'gui' 'lol' 'kek'
 
 _g.aux_tooltip_value = true
 
@@ -10,7 +9,7 @@ game_tooltip_money = nil
 function LOAD()
     for name, f in game_tooltip_hooks do
         local name, f = name, f
-        _m.hook(name, GameTooltip, function(...) temp(arg)
+        _m.hook(name, GameTooltip, function(...) temp=arg
             hooked_setter = true
             game_tooltip_money = 0
             local ret = {orig[GameTooltip][name](unpack(arg))}
@@ -20,7 +19,7 @@ function LOAD()
         end)
     end
     local orig = SetItemRef
-    setglobal('SetItemRef', function(...)
+    setglobal('SetItemRef', function(...) temp=arg
         local result = orig(unpack(arg))
         local name, _, quality = GetItemInfo(arg[1])
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
@@ -31,7 +30,7 @@ function LOAD()
         return result
     end)
     local orig = GameTooltip:GetScript('OnTooltipAddMoney')
-    GameTooltip:SetScript('OnTooltipAddMoney', function(...)
+    GameTooltip:SetScript('OnTooltipAddMoney', function(...) temp=arg
         if hooked_setter then
             game_tooltip_money = arg1
         else
@@ -127,7 +126,7 @@ end
 function game_tooltip_hooks:SetHyperlink(itemstring)
     local name, _, quality = GetItemInfo(itemstring)
     if name then
-        local _, _, _, hex = GetItemQualityColor(quality)
+        local hex = select(4, GetItemQualityColor(quality))
         local link = hex.. '|H'..itemstring..'|h['..name..']|h'..FONT_COLOR_CODE_CLOSE
         extend_tooltip(GameTooltip, link, 1)
     end
@@ -179,7 +178,7 @@ function game_tooltip_hooks:SetInboxItem(index)
     local id = name and cache.item_id(name)
     if id then
         local _, itemstring, quality = GetItemInfo(id)
-        local _, _, _, hex = GetItemQualityColor(tonumber(quality))
+        local hex = select(4, GetItemQualityColor(tonumber(quality)))
         local link = hex.. '|H'..itemstring..'|h['..name..']|h'..FONT_COLOR_CODE_CLOSE
         extend_tooltip(GameTooltip, link, quantity)
     end
@@ -195,7 +194,7 @@ end
 function game_tooltip_hooks:SetMerchantItem(slot)
     local link = GetMerchantItemLink(slot)
     if link then
-        local _, _, _, quantity = GetMerchantItemInfo(slot)
+        local quantity = select(4, GetMerchantItemInfo(slot))
         extend_tooltip(GameTooltip, link, quantity)
     end
 end
@@ -213,8 +212,8 @@ function game_tooltip_hooks:SetCraftItem(skill, slot)
 end
 
 function game_tooltip_hooks:SetCraftSpell(slot)
-    if x(GetCraftItemLink(slot)) then
-        extend_tooltip(GameTooltip, __, 1)
+    for link in present(GetCraftItemLink(slot)) do
+        extend_tooltip(GameTooltip, link, 1)
     end
 end
 

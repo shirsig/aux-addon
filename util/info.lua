@@ -176,7 +176,7 @@ end
 
 function public.set_shopping_tooltip(slot)
     local index1, index2 = inventory_index(slot)
-    local tooltips = {}
+    local tooltips = tt
     if index1 then
         local tooltip = tooltip(function(tt) tt:SetInventoryItem('player', index1) end)
         if getn(tooltip) > 0 then
@@ -273,7 +273,7 @@ function public.tooltip(mutator)
     mutator(AuxTooltip)
     AuxTooltip:Show()
 
-    local tooltip = {}
+    local tooltip = t
     for i=1,AuxTooltip:NumLines() do
         tinsert(tooltip, {
             left_text = _g['AuxTooltipTextLeft'..i]:GetText(),

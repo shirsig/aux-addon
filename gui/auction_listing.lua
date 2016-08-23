@@ -926,7 +926,7 @@ local methods = {
         end
     end,
 
-    SetSort = function(self, ...)
+    SetSort = function(self, ...) temp=arg
         for k=1,arg.n do
             for i, sort in self.sorts do
                 if sort.index == abs(arg[k]) then
@@ -934,7 +934,7 @@ local methods = {
                     break
                 end
             end
-            tinsert(self.sorts, 1, { index = abs(arg[k]), descending = arg[k] < 0 })
+            tinsert(self.sorts, 1, {index=abs(arg[k]), descending=arg[k] < 0 })
         end
 
         self.isSorted = nil

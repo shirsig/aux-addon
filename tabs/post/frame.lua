@@ -1,4 +1,4 @@
-module 'post_tab' import 'gui'
+module 'post_tab' import [''] 'core' 'gui' 'listing' 'item_listing' 'money'
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, aux_frame)
@@ -8,20 +8,20 @@ function create_frames()
 
 	frame.content = CreateFrame('Frame', nil, frame)
 	frame.content:SetPoint('TOP', frame, 'TOP', 0, -8)
-	frame.content:SetPoint('BOTTOMLEFT', frame.content, 'BOTTOMLEFT', 0, 0)
-	frame.content:SetPoint('BOTTOMRIGHT', frame.content, 'BOTTOMRIGHT', 0, 0)
+	frame.content:SetPoint('BOTTOMLEFT', aux_frame.content, 'BOTTOMLEFT', 0, 0)
+	frame.content:SetPoint('BOTTOMRIGHT', aux_frame.content, 'BOTTOMRIGHT', 0, 0)
 
-	frame.inventory = gui.panel(frame.content)
+	frame.inventory = gui.panel(aux_frame.content)
 	frame.inventory:SetWidth(212)
 	frame.inventory:SetPoint('TOPLEFT', 0, 0)
 	frame.inventory:SetPoint('BOTTOMLEFT', 0, 0)
 
-	frame.parameters = gui.panel(frame.content)
+	frame.parameters = gui.panel(aux_frame.content)
 	frame.parameters:SetHeight(173)
 	frame.parameters:SetPoint('TOPLEFT', frame.inventory, 'TOPRIGHT', 2.5, 0)
 	frame.parameters:SetPoint('TOPRIGHT', 0, 0)
 
-	frame.auctions = gui.panel(frame.content)
+	frame.auctions = gui.panel(aux_frame.content)
 	frame.auctions:SetHeight(228)
 	frame.auctions:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
 	frame.auctions:SetPoint('BOTTOMRIGHT', 0, 0)
@@ -84,7 +84,7 @@ function create_frames()
 	    status_bar = gui.status_bar(frame)
 	    status_bar:SetWidth(265)
 	    status_bar:SetHeight(25)
-	    status_bar:SetPoint('TOPLEFT', frame.content, 'BOTTOMLEFT', 0, -6)
+	    status_bar:SetPoint('TOPLEFT', aux_frame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 100)
 	    status_bar:set_text('')
 	end

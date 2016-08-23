@@ -1,4 +1,4 @@
-module 'auctions_tab' import 'gui'
+module 'auctions_tab' import 'gui' 'auction_listing'
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, aux_frame)
@@ -8,8 +8,8 @@ function create_frames()
 
 	frame.listing = gui.panel(frame)
 	frame.listing:SetPoint('TOP', frame, 'TOP', 0, -8)
-	frame.listing:SetPoint('BOTTOMLEFT', frame.content, 'BOTTOMLEFT', 0, 0)
-	frame.listing:SetPoint('BOTTOMRIGHT', frame.content, 'BOTTOMRIGHT', 0, 0)
+	frame.listing:SetPoint('BOTTOMLEFT', aux_frame.content, 'BOTTOMLEFT', 0, 0)
+	frame.listing:SetPoint('BOTTOMRIGHT', aux_frame.content, 'BOTTOMRIGHT', 0, 0)
 
 	listing = auction_listing.CreateAuctionResultsTable(frame.listing, auction_listing.auctions_config)
 	listing:SetSort(1,2,3,4,5,6,7,8)
@@ -28,7 +28,7 @@ function create_frames()
 	    status_bar = gui.status_bar(frame)
 	    status_bar:SetWidth(265)
 	    status_bar:SetHeight(25)
-	    status_bar:SetPoint('TOPLEFT', frame.content, 'BOTTOMLEFT', 0, -6)
+	    status_bar:SetPoint('TOPLEFT', aux_frame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 100)
 	    status_bar:set_text('')
 	end

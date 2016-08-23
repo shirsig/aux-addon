@@ -7,8 +7,8 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
         return auction_info and auction_info.search_signature == auction_record.search_signature
     end
 
-    local queries = {}
-    tinsert(queries, {})
+    local queries = t
+    tinsert(queries, t)
 
     if auction_record.blizzard_query then
 

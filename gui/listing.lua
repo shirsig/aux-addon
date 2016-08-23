@@ -1,4 +1,4 @@
-module 'listing'
+module 'listing' import 'gui'
 
 local ST_COUNT = 0
 

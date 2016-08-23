@@ -116,9 +116,9 @@ function update_auto_buy_filter()
 		local queries = filter.queries(_g.aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
-				log('Error: The automatic buyout filter may contain only one query')
+				log 'Error: The automatic buyout filter does not support multi-queries'
 			elseif size(queries[1].blizzard_query) > 0 then
-				log('Error: The automatic buyout filter does not support Blizzard filters')
+				log 'Error: The automatic buyout filter does not support Blizzard filters'
 			else
 				auto_buy_validator = queries[1].validator
 				auto_buy_filter_button.prettified = queries[1].prettified
@@ -168,20 +168,20 @@ function start_real_time_scan(query, search, continuation)
 			end
 		end,
 		on_complete = function()
-			local map = {}
+			local map = tt
 			for _, record in search.records do
 				map[record.sniping_signature] = record
 			end
 			for _, record in new_records do
 				map[record.sniping_signature] = record
 			end
-			new_records = {}
+			new_records = t
 			for _, record in map do
 				tinsert(new_records, record)
 			end
 
 			if getn(new_records) > 1000 then
-				StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
+				StaticPopup_Show 'AUX_SEARCH_TABLE_FULL'
 			else
 				search.records = new_records
 				search.table:SetDatabase(search.records)
@@ -193,7 +193,7 @@ function start_real_time_scan(query, search, continuation)
 		end,
 		on_abort = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text('Scan paused')
+			search.status_bar:set_text 'Scan paused'
 
 			search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
 
@@ -233,9 +233,9 @@ function start_search(queries, continuation)
 		on_scan_start = function()
 			search.status_bar:update_status(0,0)
 			if continuation then
-				search.status_bar:set_text('Resuming scan...')
+				search.status_bar:set_text 'Resuming scan...'
 			else
-				search.status_bar:set_text('Scanning auctions...')
+				search.status_bar:set_text 'Scanning auctions...'
 			end
 		end,
 		on_page_loaded = function(_, total_scan_pages)
@@ -261,13 +261,13 @@ function start_search(queries, continuation)
 			elseif getn(search.records) < 1000 then
 				tinsert(search.records, auction_record)
 				if getn(search.records) == 1000 then
-					StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
+					StaticPopup_Show 'AUX_SEARCH_TABLE_FULL'
 				end
 			end
 		end,
 		on_complete = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text('Scan complete')
+			search.status_bar:set_text 'Scan complete'
 
 			if current_search == search and frame.results:IsVisible() and getn(search.records) == 0 then
 				set_tab(SAVED)
@@ -278,7 +278,7 @@ function start_search(queries, continuation)
 		end,
 		on_abort = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text('Scan paused')
+			search.status_bar:set_text 'Scan paused'
 
 			if current_query then
 				search.continuation = {current_query, current_page + 1}
@@ -313,10 +313,10 @@ function public.execute(resume, real_time)
 		return
 	elseif real_time then
 		if getn(queries) > 1 then
-			log('Invalid filter: The real time mode does not support multiple queries')
+			log 'Error: The real time mode does not support multi-queries'
 			return
 		elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-			log('Invalid filter: The real time mode does not support page range filters')
+			log 'Error: The real time mode does not support page ranges'
 			return
 		end
 	end

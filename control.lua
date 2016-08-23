@@ -61,7 +61,7 @@ end
 
 function public.event_listener(event, cb)
 	local listener_id = id
-	listeners[listener_id] = {event=event, cb=cb, kill=function(...) if arg.n == 0 or arg[1] then kill_listener(listener_id) end end}
+	listeners[listener_id] = {event=event, cb=cb, kill=function(...) temp=arg if arg.n == 0 or arg[1] then kill_listener(listener_id) end end}
 	event_frame:RegisterEvent(event)
 	return listener_id
 end
@@ -73,13 +73,13 @@ function public.on_next_event(event, callback)
 	end)
 end
 
-function public.thread(k, ...)
+function public.thread(k, ...) temp=arg
 	local thread_id = id
 	threads[thread_id] = {k = L(k, unpack(arg))}
 	return thread_id
 end
 
-function public.wait(k, ...)
+function public.wait(k, ...) temp=arg
 	if type(k) == 'number' then
 		when(function() k = k - 1 return k <= 1 end, unpack(arg))
 	else
@@ -87,7 +87,7 @@ function public.wait(k, ...)
 	end
 end
 
-function public.when(p, k, ...)
+function public.when(p, k, ...) temp=arg
 	if p() then
 		return k(unpack(arg))
 	else

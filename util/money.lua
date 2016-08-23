@@ -80,7 +80,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	
 	local text
 	if trim then
-		local parts = {}
+		local parts = tt
 		if gold > 0 then
 			tinsert(parts, format_number(gold, false, nil, color)..gold_text)
 		end
@@ -113,8 +113,9 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 end
 
 function public.from_string(value)
-	if xx(tonumber(value)) and __ >= 0 then
-		return __ * COPPER_PER_GOLD
+	local number = tonumber(value)
+	if number and number >= 0 then
+		return number * COPPER_PER_GOLD
 	end
 
 	-- remove any colors
