@@ -314,17 +314,21 @@ end
 
 function initialize_filter_dropdown()
 	for _, filter in temp-list('and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard') do
-		UIDropDownMenu_AddButton(-object('text', filter, 'value', filter, 'func', function()
-			filter_input:SetText(this.value)
-			if index(filter_util.filters[this.value], 'input_type') == '' or this.value == 'not' then
-				add_post_filter()
-			elseif filter_util.filters[this.value] then
-				filter_parameter_input:Show()
-				filter_parameter_input:SetFocus()
-			else
-				filter_input:SetFocus()
-			end)
-		end)
+		UIDropDownMenu_AddButton(-object(
+			'text', filter,
+			'value', filter,
+			'func', function()
+				filter_input:SetText(this.value)
+				if index(filter_util.filters[this.value], 'input_type') == '' or this.value == 'not' then
+					add_post_filter()
+				elseif filter_util.filters[this.value] then
+					filter_parameter_input:Show()
+					filter_parameter_input:SetFocus()
+				else
+					filter_input:SetFocus()
+				end
+			end
+		))
 	end
 end
 
@@ -339,9 +343,9 @@ function initialize_class_dropdown()
 			update_form()
 		end
 	end
-	UIDropDownMenu_AddButton(-object :text(ALL) :value(0) :func(on_click))
+	UIDropDownMenu_AddButton(-object('text', ALL, 'value', 0, 'func', on_click))
 	for i, class in temp-{GetAuctionItemClasses()} do
-		UIDropDownMenu_AddButton(-object :text(class) :value(i) :func(on_click))
+		UIDropDownMenu_AddButton(-object('text', class, 'value', i, 'func', on_click))
 	end
 end
 
@@ -356,9 +360,9 @@ function initialize_subclass_dropdown()
 	end
 	local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
 	if class_index and GetAuctionItemSubClasses(class_index) then
-		UIDropDownMenu_AddButton(-object :text(ALL) :value(0) :func(on_click))
+		UIDropDownMenu_AddButton(-object('text', ALL, 'value', 0, 'func', on_click))
 		for i, subclass in temp-{GetAuctionItemSubClasses(class_index)} do
-			UIDropDownMenu_AddButton(-object :text(subclass) :value(i) :func(on_click))
+			UIDropDownMenu_AddButton(-object('text', subclass, 'value', i, 'func', on_click))
 		end
 	end
 end
@@ -371,9 +375,9 @@ function initialize_slot_dropdown()
 	local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
 	local subclass_index = UIDropDownMenu_GetSelectedValue(subclass_dropdown)
 	if subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
-		UIDropDownMenu_AddButton(-object :text(ALL) :value '' :func(on_click))
+		UIDropDownMenu_AddButton(-object('text', ALL, 'value', '', 'func', on_click))
 		for _, slot in {GetAuctionInvTypes(class_index, subclass_index)} do
-			UIDropDownMenu_AddButton(-object :text(_g[slot]) :value(slot) :func(on_click))
+			UIDropDownMenu_AddButton(-object('text', _g[slot], 'value', slot, 'func', on_click))
 		end
 	end
 end
@@ -383,8 +387,8 @@ function initialize_quality_dropdown()
 		UIDropDownMenu_SetSelectedValue(quality_dropdown, this.value)
 		update_form()
 	end
-	UIDropDownMenu_AddButton(-object :text(ALL) :value(-1) :func(on_click))
+	UIDropDownMenu_AddButton(-object('text', ALL, 'value', -1, 'func', on_click))
 	for i=0,4 do
-		UIDropDownMenu_AddButton(-object :text(_g['ITEM_QUALITY'..i..'_DESC']) :value(i) :func(on_click))
+		UIDropDownMenu_AddButton(-object('text', _g['ITEM_QUALITY'..i..'_DESC'], 'value', i, 'func', on_click))
 	end
 end

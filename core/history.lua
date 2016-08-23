@@ -93,12 +93,8 @@ function public.value(item_key)
 		else
 			value = calculate_market_value(item_record)
 		end
-		value_cache[item_key] = -object('value', value, 'next_push', tem_record.next_push)
+		value_cache[item_key] = -object('value', value, 'next_push', item_record.next_push)
 	end
-	if type(value_cache[item_key].value) == 'table' then
-	for k, v in value_cache[item_key].value.value do log(k, v) end
-end
-	log (value_cache[item_key].value)
 	return value_cache[item_key].value
 end
 

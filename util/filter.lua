@@ -563,20 +563,21 @@ end
 
 function public.query_builder()
     local filter
-    return -object
-        :appended(function(part)
+    return -object(
+        'appended', function(part)
             return query_builder(not filter and part or filter..'/'..part)
-        end)
-		:prepended(function(part)
+        end,
+		'prepended', function(part)
             return query_builder(not filter and part or part..'/'..filter)
-        end)
-		:append(function(part)
+        end,
+		'append', function(part)
             filter = not filter and part or filter..'/'..part
-        end)
-		:prepend(function(part)
+        end,
+		'prepend', function(part)
             filter = not filter and part or part..'/'..filter
-        end)
-		:get(function()
+        end,
+		'get', function()
             return filter or ''
-        end)
+        end
+    )
 end

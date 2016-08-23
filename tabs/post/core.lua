@@ -395,17 +395,19 @@ function update_inventory_records()
                         availability[i] = 0
                     end
                     availability[charge_class] = item_info.count
-                    auctionable_map[item_info.item_key] = -object ('item_id', item_info.item_id, 'suffix_id', item_info.suffix_id, 'key', item_info.item_key)
-	                    :itemstring(item_info.itemstring)
-	                    :name(item_info.name)
-	                    :texture(item_info.texture)
-	                    :quality(item_info.quality)
-	                    :aux_quantity(item_info.charges or item_info.count)
-	                    :max_stack(item_info.max_stack)
-	                    :max_charges(item_info.max_charges)
-	                    :availability(availability)
---                    for k, v in auctionable_map[item_info.item_key].max_charges do log(k, v) end
-
+                    auctionable_map[item_info.item_key] = -object(
+	                    'item_id', item_info.item_id,
+	                    'suffix_id', item_info.suffix_id,
+	                    'key', item_info.item_key
+	                    'itemstring', item_info.itemstring,
+	                    'name', item_info.name,
+	                    'texture', item_info.texture,
+	                    'quality', item_info.quality,
+	                    'aux_quantity', item_info.charges or item_info.count,
+	                    'max_stack', item_info.max_stack,
+	                    'max_charges', item_info.max_charges,
+	                    'availability', availability
+                    )
                 else
                     local auctionable = auctionable_map[item_info.item_key]
                     auctionable.availability[charge_class] = (auctionable.availability[charge_class] or 0) + item_info.count
