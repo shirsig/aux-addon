@@ -12,13 +12,13 @@ util\color.lua
 gui\core.lua
 frame.lua
 
-util\completion.lua
 util\persistence.lua
 util\sort.lua
 util\money.lua
 util\info.lua
-util\filter.lua
 util\scan.lua
+util\filter.lua
+util\completion.lua
 
 core\cache.lua
 core\disenchant.lua

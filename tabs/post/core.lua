@@ -1,4 +1,4 @@
-module 'post_tab' import 'scan' 'post' 'info'
+module 'post_tab' import 'scan' 'scan_util' 'post' 'history' 'info' 'persistence' 'item_listing'
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
@@ -88,7 +88,7 @@ end
 
 function update_inventory_listing()
 	if not ACTIVE then return end
-	inventory_listing.populate(inventory_listing, values(filter(inventory_records, function(record)
+	item_listing.populate(inventory_listing, values(filter(inventory_records, function(record)
         local settings = read_settings(record.key)
         return record.aux_quantity > 0 and (not settings.hidden or show_hidden_checkbox:GetChecked())
     end)))

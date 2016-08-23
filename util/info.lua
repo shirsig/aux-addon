@@ -244,7 +244,7 @@ function public.load_tooltip(frame, tooltip)
 end
 
 function public.display_name(item_id, no_brackets, no_color)
-    for item_info in present(info.item(item_id)) do
+    for item_info in present(item(item_id)) do
         local name = item_info.name
         if not no_brackets then
             name = '['..name..']'

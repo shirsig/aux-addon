@@ -1,4 +1,4 @@
-module 'search_tab'
+module 'search_tab' import 'info'
 
 _g.aux_auto_buy_filter = ''
 

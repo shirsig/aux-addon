@@ -58,7 +58,7 @@ function public.create(parent, on_click, selected)
 	_g[scrollBar:GetName()..'ScrollUpButton']:Hide()
 	_g[scrollBar:GetName()..'ScrollDownButton']:Hide()
 
-	local rows = {}
+	local rows = t
 	local row_index = 1
 	local max_height = content:GetHeight()
 	local total_height = 0

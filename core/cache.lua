@@ -26,8 +26,8 @@ function LOAD()
 
 	event_listener('NEW_AUCTION_UPDATE', function()
 		for info in present(info.auction_sell_item()) do
-			for item_id in present(cache.item_id(info.name)) do
-				_g.aux_merchant_sell[cache.item_id(info.name)] = info.vendor_price / (info.max_item_charges(item_id) or info.count)
+			for item_id in present(item_id(info.name)) do
+				_g.aux_merchant_sell[_m.item_id(info.name)] = info.vendor_price / (_m.info.max_item_charges(item_id) or info.count)
 			end
 		end
 	end)
@@ -148,8 +148,8 @@ function merchant_buy_scan()
 end
 
 function merchant_sell_scan()
-	for slot in info.inventory do
-		local item_info = info.container_item(unpack(slot))
+	for slot in info.inventory do temp=slot
+		local item_info = temp-info.container_item(unpack(slot))
 		if item_info then
 			_g.aux_merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity
 		end
@@ -196,7 +196,7 @@ function public.populate_wdb(item_id)
 	item_id = item_id or MIN_ITEM_ID
 
 	if item_id > MAX_ITEM_ID then
-		log('Cache populated.')
+		log 'Cache populated.'
 		return
 	end
 

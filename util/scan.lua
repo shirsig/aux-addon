@@ -1,5 +1,9 @@
 module 'scan_util' import 'info'
 
+function LOAD()
+	import 'filter_util' 'scan'
+end
+
 function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
     local function test(index)
