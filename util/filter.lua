@@ -1,4 +1,4 @@
-module 'filter_util' import 'info' 'cache'
+module 'filter_util' import 'info'
 
 function LOAD()
 	import 'cache'
@@ -208,7 +208,7 @@ public.filters = {
 
 function operator(str)
     local operator = str == 'not' and {'operator', 'not', 1}
-    for _, name in {'and', 'or'} do
+    for name in -set 'and', 'or' do
 	    for arity in present(select(3, strfind(str, '^'..name..'(%d*)$'))) do
 		    arity = tonumber(arity)
 		    operator = not (arity and arity < 2) and {'operator', name, arity}
@@ -264,7 +264,7 @@ do
 	}
 
 	function blizzard_filter_parser()
-	    return setmetatable({}, mt)
+	    return setmetatable(t, mt)
 	end
 end
 
@@ -319,14 +319,14 @@ function public.parse_query_string(str)
         i = i + 1
     end
 
-    return {blizzard=blizzard_filter_parser(), post=post_filter}
+    return -object :blizzard(blizzard_filter_parser()) :post(post_filter)
 end
 
 function public.query(query_string)
     local components, error, suggestions = parse_query_string(query_string)
 
     if not components then
-        return nil, suggestions or {}, error
+        return nil, suggestions or t, error
     end
 
     local polish_notation_counter = 0
@@ -340,7 +340,7 @@ function public.query(query_string)
     end
 
     if polish_notation_counter > 0 then
-        local suggestions = {}
+        local suggestions = t
         for key in filters do
             tinsert(suggestions, strlower(key))
         end
@@ -359,7 +359,7 @@ end
 
 function public.queries(query_string)
     local parts = split(query_string, ';')
-    local queries = {}
+    local queries = t
     for _, str in parts do
         str = trim(str)
         local query, _, error = query(str)
@@ -374,7 +374,7 @@ function public.queries(query_string)
 end
 
 function suggestions(components)
-    local suggestions = {}
+    local suggestions = t
 
     if components.blizzard.name and size(components.blizzard) == 1 then tinsert(suggestions, 'exact') end
 
@@ -384,19 +384,19 @@ function suggestions(components)
 
     -- classes
     if not components.blizzard.class then
-        for _, class in {GetAuctionItemClasses()} do tinsert(suggestions, class) end
+        for _, class in temp-{GetAuctionItemClasses()} do tinsert(suggestions, class) end
     end
 
     -- subclasses
     if not components.blizzard.subclass then
-        for _, subclass in {GetAuctionItemSubClasses(index(components.blizzard.class, 2) or 0)} do
+        for _, subclass in temp-{GetAuctionItemSubClasses(index(components.blizzard.class, 2) or 0)} do
             tinsert(suggestions, subclass)
         end
     end
 
     -- slots
     if not components.blizzard.slot then
-        for _, invtype in {GetAuctionInvTypes(index(components.blizzard.class, 2) or 0, index(components.blizzard.subclass, 2) or 0)} do
+        for _, invtype in temp-{GetAuctionInvTypes(index(components.blizzard.class, 2) or 0, index(components.blizzard.subclass, 2) or 0)} do
             tinsert(suggestions, _g[invtype])
         end
     end
@@ -423,7 +423,7 @@ function public.query_string(components)
     local query_builder = query_builder()
 
     for _, filter in components.blizzard do
-        query_builder.append((filter[2] or filter[1]))
+        query_builder.append(filter[2] or filter[1])
     end
 
     for _, component in components.post do
@@ -431,7 +431,7 @@ function public.query_string(components)
             query_builder.append(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or ''))
         elseif component[1] == 'filter' then
             query_builder.append(component[2])
-            for _, parameter in {component[3]} do
+            for parameter in present(component[3]) do
 	            if filter.filters[component[2]].input_type == 'money' then
 		            parameter = money.to_string(money.from_string(parameter), nil, true, nil, nil, true)
 	            end
@@ -496,7 +496,7 @@ end
 function blizzard_query(components)
     local filters = components.blizzard
 
-    local query = {name=filters.name and filters.name[2]}
+    local query = -object :name(filters.name and filters.name[2])
 
     local item_info, class_index, subclass_index, slot_index
     local item_id = cache.item_id(filters.name[2])
@@ -517,7 +517,7 @@ function blizzard_query(components)
         query.slot = slot_index
         query.quality = item_info.quality
     else
-	    for key in set 'min_level' 'max_level' 'class' 'subclass' 'slot' 'usable' 'quality' do
+	    for key in temp-set 'min_level' 'max_level' 'class' 'subclass' 'slot' 'usable' 'quality' do
             query[key] = index(filters[key], 2)
 	    end
     end
@@ -526,7 +526,7 @@ end
 
 function validator(components)
 
-    local validators = {}
+    local validators = tt
     for i, component in components.post do
         if component[1] == 'filter' then
             validators[i] = filters[component[2]].validator(parse_parameter(filters[component[2]].input_type, component[3]))
@@ -563,21 +563,20 @@ end
 
 function public.query_builder()
     local filter
-    return {
-        appended = function(part)
+    return -object
+        :appended(function(part)
             return query_builder(not filter and part or filter..'/'..part)
-        end,
-        prepended = function(part)
+        end)
+		:prepended(function(part)
             return query_builder(not filter and part or part..'/'..filter)
-        end,
-        append = function(part)
+        end)
+		:append(function(part)
             filter = not filter and part or filter..'/'..part
-        end,
-        prepend = function(part)
+        end)
+		:prepend(function(part)
             filter = not filter and part or part..'/'..filter
-        end,
-        get = function()
+        end)
+		:get(function()
             return filter or ''
-        end
-    }
+        end)
 end

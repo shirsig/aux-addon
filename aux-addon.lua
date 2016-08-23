@@ -1,18 +1,28 @@
 module 'core'
 public.version = '5.0.0'
 
-public.bids_loaded = false
-public.current_owner_page = nil
+do
+	local bids_loaded
+	public.bids_loaded()
+	function accessor() return bids_loaded end
+	function mutator(value) bids_loaded = value end
+end
+do
+	local current_owner_page
+	public.current_owner_page()
+	function accessor() return current_owner_page end
+	function mutator(value) current_owner_page = value end
+end
 
 do
-	local table_pool, temporary = {}, {}
+	local table_pool, transient = {}, {}
 
 	CreateFrame'Frame':SetScript('OnUpdate', function()
-		for t in temporary do
+		for t in transient do
 			recycle(t)
 --			log(getn(table_pool))
 		end
-		wipe(temporary)
+		wipe(transient)
 	end)
 
 	function public.wipe(t) -- like with a cloth or something
@@ -20,11 +30,11 @@ do
 			t[k] = nil
 		end
 		table.setn(t, 0)
-		setmetatable(t, nil)
+		return setmetatable(t, nil)
 	end
 
 	function public.recycle(t)
-		temporary[t] = nil
+		transient[t] = nil
 		wipe(t)
 		tinsert(table_pool, t)
 	end
@@ -33,9 +43,9 @@ do
 		return tremove(table_pool) or {}
 	end
 
-	function public.accessor.tt() -- TODO or 'tmp'? t (and t -> T)?
+	function public.accessor.tt()
 		local t = tremove(table_pool) or {}
-		temporary[t] = true
+		transient[t] = true
 		return t
 	end
 
@@ -46,11 +56,11 @@ do
 			__newindex=function(_, _, value) return f(value) end, __unm=function(self) return self end,
 		})
 	end
-	local temp, perm = modifier(function(t) temporary[t] = true; return t end), modifier(function(t) temporary[t] = nil; return t end)
-	public.temp() -- TODO or 'auto'?
+	local temp, perm = modifier(function(t) transient[t] = true; return t end), modifier(function(t) transient[t] = nil; return t end)
+	public.temp() -- TODO or 'auto' 'free' 'release' 'unlock'?
 	function accessor() return temp end
 	function mutator(t) return temp(t) end
-	public.perm() -- TODO or 'keep' 'hold'??
+	public.perm() -- TODO or 'persist' 'lock'??
 	function accessor() return perm end
 	function mutator(t) return perm(t) end
 
@@ -72,7 +82,7 @@ do
 	do
 		local mt = collector_mt(tinsert)
 		function public.accessor.list()
-			return setmetatable(tt, mt)
+			return setmetatable(t, mt)
 		end
 	end
 	do
@@ -80,7 +90,7 @@ do
 			rawset(self, value, true)
 		end)
 		function public.accessor.set()
-			return setmetatable(tt, mt)
+			return setmetatable(t, mt)
 		end
 	end
 	do
@@ -94,13 +104,13 @@ do
 			end
 		end)
 		function public.accessor.object()
-			return setmetatable(tt, mt)
+			return setmetatable(t, mt)
 		end
 	end
 end
 
 local event_frame = CreateFrame 'Frame'
-for event in set 'ADDON_LOADED' 'VARIABLES_LOADED' 'PLAYER_LOGIN' 'AUCTION_HOUSE_SHOW' 'AUCTION_HOUSE_CLOSED' 'AUCTION_BIDDER_LIST_UPDATE' 'AUCTION_OWNED_LIST_UPDATE' do
+for event in temp-set 'ADDON_LOADED' 'VARIABLES_LOADED' 'PLAYER_LOGIN' 'AUCTION_HOUSE_SHOW' 'AUCTION_HOUSE_CLOSED' 'AUCTION_BIDDER_LIST_UPDATE' 'AUCTION_OWNED_LIST_UPDATE' do
 	event_frame:RegisterEvent(event)
 end
 
@@ -131,9 +141,9 @@ end
 
 tab_info = t
 do
-	local data = -list :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids'
+	local data = temp-list :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids'
 	for i=1,7,2 do
-		local tab = perm/-object :name(data[i + 1]);
+		local tab = -object :name(data[i + 1]);
 		local env = (function() module(data[i]) return _m end)()
 		function env.mutator.OPEN(f) tab.OPEN = f end
 		function env.mutator.CLOSE(f) tab.CLOSE = f end

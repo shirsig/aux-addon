@@ -405,3 +405,26 @@ function public.item_quality_index(item_quality)
         end
     end
 end
+
+function public.accessor.inventory()
+	local bag, slot = 0, 0
+	return function()
+		if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then
+			repeat bag = bag + 1 until GetBagName(bag) or bag > 4
+			slot = 1
+		else
+			slot = slot + 1
+		end
+		if bag <= 4 then return {bag, slot}, bag_type(bag) end
+	end
+end
+
+function public.bag_type(bag)
+	if bag == 0 then return 1 end
+	for link in present(GetInventoryItemLink('player', ContainerIDToInventoryID(bag))) do
+		local item_id = parse_link(link)
+		local item_info = item(item_id)
+		log(link, item_id, item_info, item_info.subclass)
+		return item_subclass_index(3, item_info.subclass)
+	end
+end

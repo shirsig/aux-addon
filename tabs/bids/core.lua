@@ -1,6 +1,6 @@
 module 'bids_tab' import 'scan'
 
-auction_records = nil
+auction_records = {}
 
 function LOAD()
 	create_frames()
@@ -25,7 +25,7 @@ function public.scan_bids()
     status_bar:update_status(0,0)
     status_bar:set_text('Scanning auctions...')
 
-    auction_records = {}
+    wipe(auction_records)
     update_listing()
     scan.start{
         type = 'bidder',

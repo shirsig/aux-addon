@@ -1,4 +1,8 @@
-module 'scan'
+module 'scan' import 'info'
+
+function LOAD()
+	import 'history'
+end
 
 PAGE_SIZE = 50
 
@@ -6,7 +10,7 @@ do
 	local scan_states = {}
 
 	function public.start(params)
-		for _, old_state in {scan_states[params.type]} do
+		for old_state in present(scan_states[params.type]) do
 			abort(old_state.id)
 		end
 		local thread_id = thread(L(wait_for_callback, params.on_scan_start, scan))
@@ -38,7 +42,6 @@ do
 	end
 
 	function accessor.state()
-		log (thread_id)
 		local _, state = next(filter(scan_states, function(state) return state.id == thread_id end))
 		return state
 	end

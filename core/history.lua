@@ -1,21 +1,27 @@
-module 'history'
+module 'history' import 'persistence'
+
+--local history_schema = tuple('#')
+--	:next_push 'number'
+--	:daily_min_buyout 'number'
+--	:daily_max_price 'number'
+--	:data_points (list(';') (tuple('@') :market_value 'number' :time 'number'))
 
 local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}}}
-value_cache = {}
+value_cache = t
 
-function next_push()
-	local date = date('*t')
+function accessor.next_push()
+	local date = date '*t'
 	date.hour, date.min, date.sec = 24, 0, 0
 	return time(date)
 end
 
 function new_record()
-	return { next_push = next_push(), data_points = {} }
+	return -object :next_push(next_push) :data_points(t)
 end
 
 function load_data()
 	local dataset = persistence.load_dataset()
-	dataset.history = dataset.history or {}
+	dataset.history = dataset.history or t
 	return dataset.history
 end
 
@@ -69,23 +75,22 @@ function public.value(item_key)
 
 		local value
 		if getn(item_record.data_points) > 0 then
-			local weighted_values = {}
+			local weighted_values = tt
 			local total_weight = 0
 			for _, data_point in item_record.data_points do
-				local weight = 0.99^round((item_record.data_points[1].time - data_point.time) / (60*60*24))
+				local weight = 0.99^round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
 				total_weight = total_weight + weight
-				tinsert(weighted_values, {value = data_point.market_value, weight = weight})
+				tinsert(weighted_values, -object :value(data_point.market_value) :weight(weight))
 			end
 			for _, weighted_value in weighted_values do
 				weighted_value.weight = weighted_value.weight / total_weight
 			end
-
 			value = weighted_median(weighted_values)
 		else
 			value = calculate_market_value(item_record)
 		end
 
-		value_cache[item_key] = {value=value, next_push=item_record.next_push}
+		value_cache[item_key] = -object :value(value) :next_push(item_record.next_push)
 	end
 
 	return value_cache[item_key].value
@@ -101,7 +106,7 @@ function calculate_market_value(item_record)
 end
 
 function weighted_median(list)
-	local sorted_list = {}
+	local sorted_list = tt
 	for _, e in list do
 		tinsert(sorted_list, e)
 	end
@@ -120,7 +125,7 @@ function push_record(item_record)
 
 	local market_value = calculate_market_value(item_record)
 	if market_value then
-		tinsert(item_record.data_points, 1, { market_value = market_value, time = item_record.next_push })
+		tinsert(item_record.data_points, 1, -object :market_value(market_value) :time(item_record.next_push))
 		while getn(item_record.data_points) > 11 do
 			tremove(item_record.data_points)
 		end
@@ -128,5 +133,5 @@ function push_record(item_record)
 
 	item_record.daily_min_buyout = nil
 	item_record.daily_max_price = nil
-	item_record.next_push = next_push()
+	item_record.next_push = next_push
 end

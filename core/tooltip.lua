@@ -1,4 +1,4 @@
-module 'tooltip'
+module 'tooltip' import 'info'
 
 _g.aux_tooltip_value = true
 
@@ -232,7 +232,7 @@ end
 function game_tooltip_hooks:SetAuctionSellItem()
     local name, _, quantity = GetAuctionSellItemInfo()
     if name then
-        for slot in inventory do
+        for slot in info.inventory do
             local link = GetContainerItemLink(unpack(slot))
             if link and select(5, info.parse_link(link)) == name then
                 extend_tooltip(GameTooltip, link, quantity)

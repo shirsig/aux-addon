@@ -2,10 +2,10 @@ module 'search_tab' import 'filter_util'
 
 function valid_level(str)
 	local level = tonumber(str)
-	return level and bound(1, 60, level)
+	return level and bounded(1, 60, level)
 end
 
-blizzard_query = setmetatable({}, {
+blizzard_query = setmetatable(t, {
 	__index = function(_, key)
 		if key == 'name' then
 			return name_input:GetText()
@@ -72,14 +72,14 @@ function update_form()
 	end
 
 	if blizzard_query.exact then
-		for _, key in {'class', 'subclass', 'slot', 'quality'} do
+		for key in temp-set 'class' 'subclass' 'slot' 'quality' do
 			_m[key..'_dropdown'].button:Disable()
 		end
 	else
 		class_dropdown.button:Enable()
 		quality_dropdown.button:Enable()
 	end
-	for _, key in {'min_level', 'max_level'} do
+	for key in temp-set 'min_level' 'max_level' do
 		if blizzard_query.exact then
 			_m[key..'_input']:Disable()
 		else
@@ -92,7 +92,7 @@ function update_form()
 		usable_checkbox:Enable()
 	end
 
-	if any({'min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'}, function(key) return blizzard_query[key] end) then
+	if any(temp-list 'min_level' 'max_level' 'usable' 'class' 'subclass' 'slot' 'quality', function(key) return blizzard_query[key] end) then
 		exact_checkbox:Disable()
 	else
 		exact_checkbox:Enable()
@@ -119,11 +119,11 @@ function get_filter_builder_query()
 	add(blizzard_query.max_level)
 	add(blizzard_query.usable and 'usable')
 
-	for _, class in {blizzard_query.class} do
-		local classes = {GetAuctionItemClasses()}
+	for class in present(blizzard_query.class) do
+		local classes = temp-{GetAuctionItemClasses()}
 		add(strlower(classes[class]))
-		for _, subclass in {blizzard_query.subclass} do
-			local subclasses = {GetAuctionItemSubClasses(class)}
+		for _, subclass in present(blizzard_query.subclass) do
+			local subclasses = temp-{GetAuctionItemSubClasses(class)}
 			add(strlower(subclasses[subclass]))
 			add(blizzard_query.slot and strlower(_g[blizzard_query.slot]))
 		end
@@ -134,7 +134,7 @@ function get_filter_builder_query()
 		add(strlower(_g['ITEM_QUALITY'..quality..'_DESC']))
 	end
 
-	local post_filter_string = filter_util.query_string{blizzard={}, post=post_filter}
+	local post_filter_string = filter_util.query_string(temp-object :blizzard(tt) :post(post_filter))
 	add(post_filter_string ~= '' and post_filter_string)
 
 	return query_string or ''
@@ -165,8 +165,8 @@ function clear_form()
 	UIDropDownMenu_ClearAll(slot_dropdown)
 	UIDropDownMenu_ClearAll(quality_dropdown)
 	filter_parameter_input:ClearFocus()
-	post_filter = {}
-	filter_builder_state = {selected=0}
+	wipe(post_filter)
+	wipe(filter_builder_state).selected = 0
 	update_filter_display()
 end
 
@@ -186,7 +186,7 @@ end
 
 function public.formatted_post_filter(components)
 	local no_line_break
-	local stack = {}
+	local stack = tt
 	local str = ''
 
 	for i, component in components do
@@ -195,7 +195,7 @@ function public.formatted_post_filter(components)
 		elseif i > 1 then
 			str = str..'</p><p>'
 			for _=1,getn(stack) do
-				str = str..color.content.background('----')
+				str = str..color.content.background '----'
 			end
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
@@ -232,8 +232,8 @@ function data_link(id, str)
 	return '|H'..id..'|h'..str..'|h'
 end
 
-post_filter = {}
-filter_builder_state = {selected = 0}
+post_filter = t
+filter_builder_state = -object :selected(0)
 
 function data_link_click()
 	local button = arg3
@@ -314,12 +314,12 @@ function set_filter_display_offset(x_offset, y_offset)
 	local x_upper_bound = 0
 	local y_lower_bound = 0
 	local y_upper_bound = max(0, height - scroll_frame:GetHeight())
-	scroll_frame:SetHorizontalScroll(bound(x_lower_bound, x_upper_bound, x_offset))
-	scroll_frame:SetVerticalScroll(bound(y_lower_bound, y_upper_bound, y_offset))
+	scroll_frame:SetHorizontalScroll(bounded(x_lower_bound, x_upper_bound, x_offset))
+	scroll_frame:SetVerticalScroll(bounded(y_lower_bound, y_upper_bound, y_offset))
 end
 
 function initialize_filter_dropdown()
-	for _, filter in -list 'and' 'or' 'not' 'min-unit-bid' 'min-unit-buy' 'max-unit-bid' 'max-unit-buy' 'bid-profit' 'buy-profit' 'bid-vend-profit' 'buy-vend-profit' 'bid-dis-profit' 'buy-dis-profit' 'bid-pct' 'buy-pct' 'item' 'tooltip' 'min-lvl' 'max-lvl' 'rarity' 'left' 'utilizable' 'discard' do
+	for _, filter in temp-list 'and' 'or' 'not' 'min-unit-bid' 'min-unit-buy' 'max-unit-bid' 'max-unit-buy' 'bid-profit' 'buy-profit' 'bid-vend-profit' 'buy-vend-profit' 'bid-dis-profit' 'buy-dis-profit' 'bid-pct' 'buy-pct' 'item' 'tooltip' 'min-lvl' 'max-lvl' 'rarity' 'left' 'utilizable' 'discard' do
 		UIDropDownMenu_AddButton{
 			text = filter,
 			value = filter,

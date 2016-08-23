@@ -1,4 +1,4 @@
-module 'stack'
+module 'stack' import 'info'
 
 state = nil
 
@@ -23,7 +23,7 @@ function locked(slot)
 end
 
 function find_item_slot(partial)
-	for slot in inventory do
+	for slot in info.inventory do
 		if matching_item(slot, partial) and not eq(slot, state.target_slot) then
 			return slot
 		end
@@ -36,7 +36,7 @@ function matching_item(slot, partial)
 end
 
 function find_empty_slot()
-	for slot, type in inventory do
+	for slot, type in info.inventory do
 		if type == 1 and not GetContainerItemInfo(unpack(slot)) then
 			return slot
 		end
@@ -44,7 +44,7 @@ function find_empty_slot()
 end
 
 function find_charge_item_slot()
-	for slot in inventory do
+	for slot in info.inventory do
 		if matching_item(slot) and charges(slot) == state.target_size then
 			return slot
 		end

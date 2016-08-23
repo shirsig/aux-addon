@@ -1,9 +1,15 @@
 module 'core'
 
 event_frame = CreateFrame 'Frame'
-listeners = t
-threads = t
-public.thread_id = nil
+mutable.listeners = t
+mutable.threads = t
+
+do
+	local thread_id
+	public.thread_id()
+	function accessor() return thread_id end
+	function mutator(value) thread_id = value end
+end
 
 function LOAD()
 	event_frame:SetScript('OnUpdate', UPDATE)

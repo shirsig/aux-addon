@@ -39,7 +39,7 @@ do
 end
 
 function LOAD()
-	ARMOR = set
+	ARMOR = -set
 		'INVTYPE_HEAD'
 		'INVTYPE_NECK'
 		'INVTYPE_SHOULDER'
@@ -55,7 +55,7 @@ function LOAD()
 		'INVTYPE_TRINKET'
 		'INVTYPE_CLOAK'
 		'INVTYPE_HOLDABLE'
-	WEAPON = set
+	WEAPON = -set
 		'INVTYPE_2HWEAPON'
 		'INVTYPE_WEAPONMAINHAND'
 		'INVTYPE_WEAPON'
@@ -80,7 +80,7 @@ end
 
 function public.distribution(slot, quality, level)
     if not (ARMOR[slot] or WEAPON[slot]) or level == 0 then
-        return tt
+        return t
     end
 
     local function p(probability_armor, probability_weapon)
@@ -191,5 +191,5 @@ function public.distribution(slot, quality, level)
             return {{item_id=20725, min_quantity=1, max_quantity=2, probability=1}}
         end
     end
-    return tt
+    return t
 end

@@ -231,35 +231,11 @@ function public.tokenize(str)
 	return tokens
 end
 
-function public.bound(lower_bound, upper_bound, number)
+function public.bounded(lower_bound, upper_bound, number)
 	return max(lower_bound, min(upper_bound, number))
 end
 
 function public.round(x) return floor(x + 0.5) end
-
-function public.accessor.inventory()
-	local bag, slot = 0, 0
-	return function()
-		if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then
-			repeat bag = bag + 1 until GetBagName(bag) or bag > 4
-			slot = 1
-		else
-			slot = slot + 1
-		end
-		if bag <= 4 then return {bag, slot}, bag_type(bag) end
-	end
-end
-
-function public.bag_type(bag)
-	if bag == 0 then
-		return 1
-	end
-	for link in present(GetInventoryItemLink('player', ContainerIDToInventoryID(bag))) do
-		local item_id = info.parse_link(link)
-		local item_info = info.item(item_id)
-		return info.item_subclass_index(3, item_info.subclass)
-	end
-end
 
 function public.later(t0, t)
 	return function() return GetTime() - t0 > t end

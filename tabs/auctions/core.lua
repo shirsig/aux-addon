@@ -1,6 +1,6 @@
 module 'auctions_tab' import 'scan'
 
-auction_records = nil
+auction_records = {}
 
 function LOAD()
 	create_frames()
@@ -25,7 +25,7 @@ function public.scan_auctions()
     status_bar:update_status(0,0)
     status_bar:set_text('Scanning auctions...')
 
-    auction_records = {}
+    wipe(auction_records)
     update_listing()
     scan.start{
         type = 'owner',
@@ -58,7 +58,7 @@ end
 
 do
     local scan_id = 0
-    local IDLE, SEARCHING, FOUND = {}, {}, {}
+    local IDLE, SEARCHING, FOUND = t, t, t
     local state = IDLE
     local found_index
 

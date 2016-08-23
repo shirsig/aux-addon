@@ -1,13 +1,13 @@
-module 'post_tab' import 'scan' 'post'
+module 'post_tab' import 'scan' 'post' 'info'
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
 existing_auctions = {}
-inventory_records = nil
-scan_id = 0
-selected_item = nil
-refresh = nil
+mutable.inventory_records = nil
+mutable.scan_id = 0
+mutable.selected_item = nil
+mutable.refresh = nil
 
 function LOAD()
 	create_frames()
@@ -345,7 +345,7 @@ end
 
 function unit_vendor_price(item_key)
 
-    for slot in inventory do
+    for slot in info.inventory do
 
         local item_info = info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
@@ -416,7 +416,7 @@ function update_inventory_records()
 
     local auction_candidate_map = {}
 
-    for slot in inventory do
+    for slot in info.inventory do
 
         local item_info = info.container_item(unpack(slot))
         if item_info then

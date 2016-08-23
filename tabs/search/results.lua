@@ -2,11 +2,11 @@ module 'search_tab'
 
 _g.aux_auto_buy_filter = ''
 
-search_scan_id = 0
-auto_buy_validator = nil
+mutable.search_scan_id = 0
+mutable.auto_buy_validator = nil
 
 do
-	local searches = {}
+	local searches = t
 	local search_index = 1
 
 	function accessor.current_search() return searches[search_index] end
@@ -42,10 +42,7 @@ do
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
-		local search = {
-			filter_string = filter_string,
-			records = {},
-		}
+		local search = -object :filter_string(filter_string) :records(t)
 		tinsert(searches, search)
 		if getn(searches) > 5 then
 			tremove(searches, 1)
@@ -56,10 +53,10 @@ do
 
 		search.status_bar = status_bars[getn(searches)]
 		search.status_bar:update_status(100, 100)
-		search.status_bar:set_text('')
+		search.status_bar:set_text ''
 
 		search.table = tables[getn(searches)]
-		search.table:SetSort(1,2,3,4,5,6,7,8,9)
+		search.table:SetSort(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		search.table:Reset()
 		search.table:SetDatabase(search.records)
 
@@ -141,7 +138,7 @@ function start_real_time_scan(query, search, continuation)
 	end
 
 	local next_page
-	local new_records = {}
+	local new_records = t
 	search_scan_id = scan.start{
 		type = 'list',
 		queries = {query},
@@ -175,7 +172,7 @@ function start_real_time_scan(query, search, continuation)
 			for _, record in new_records do
 				map[record.sniping_signature] = record
 			end
-			new_records = t
+			wipe(new_records)
 			for _, record in map do
 				tinsert(new_records, record)
 			end
@@ -372,7 +369,7 @@ end
 
 do
 	local scan_id = 0
-	local IDLE, SEARCHING, FOUND = {}, {}, {}
+	local IDLE, SEARCHING, FOUND = t, t, t
 	local state = IDLE
 	local found_index
 
@@ -433,9 +430,7 @@ do
 			bid_button:Disable()
 		end
 
-		if state == SEARCHING then
-			return
-		end
+		if state == SEARCHING then return end
 
 		local selection = current_search.table:GetSelection()
 		if not selection then

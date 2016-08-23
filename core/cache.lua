@@ -1,4 +1,4 @@
-module 'cache'
+module 'cache' import 'info'
 
 MIN_ITEM_ID = 1
 MAX_ITEM_ID = 30000
@@ -148,7 +148,7 @@ function merchant_buy_scan()
 end
 
 function merchant_sell_scan()
-	for slot in inventory do
+	for slot in info.inventory do
 		local item_info = info.container_item(unpack(slot))
 		if item_info then
 			_g.aux_merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity
