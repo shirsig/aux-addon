@@ -3,7 +3,7 @@ module 'post_tab' import 'scan' 'post' 'info'
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
-existing_auctions = {}
+existing_auctions = t
 mutable.inventory_records = nil
 mutable.scan_id = 0
 mutable.selected_item = nil
@@ -35,7 +35,7 @@ function USE_ITEM(item_info)
 	select_item(item_info.item_key)
 end
 
-function default_settings()
+function accessor.default_settings()
     return {
         duration = DURATION_8,
         stack_size = 1,
@@ -48,13 +48,13 @@ end
 function read_settings(item_key)
     item_key = item_key or selected_item.key
     local dataset = persistence.load_dataset()
-    dataset.post = dataset.post or {}
+    dataset.post = dataset.post or t
 
     local settings
     if dataset.post[item_key] then
         settings = persistence.read(settings_schema, dataset.post[item_key])
     else
-        settings = default_settings()
+        settings = default_settings
     end
     return settings
 end
@@ -63,7 +63,7 @@ function write_settings(settings, item_key)
     item_key = item_key or selected_item.key
 
     local dataset = persistence.load_dataset()
-    dataset.post = dataset.post or {}
+    dataset.post = dataset.post or t
 
     dataset.post[item_key] = persistence.write(settings_schema, settings)
 end
@@ -96,12 +96,12 @@ end
 
 function update_auction_listing()
 	if not ACTIVE then return end
-    local auction_rows = {}
+    local auction_rows = t
     if selected_item then
         local unit_start_price = get_unit_start_price()
         local unit_buyout_price = get_unit_buyout_price()
 
-        for i, auction_record in existing_auctions[selected_item.key] or {} do
+        for i, auction_record in existing_auctions[selected_item.key] or tt do
 
             local blizzard_bid_undercut, buyout_price_undercut = undercut(auction_record, stack_size_slider:GetValue())
             blizzard_bid_undercut = money.from_string(money.to_string(blizzard_bid_undercut, true, nil, 3))
@@ -345,7 +345,7 @@ end
 
 function unit_vendor_price(item_key)
 
-    for slot in info.inventory do
+    for slot in info.inventory do temp=slot
 
         local item_info = info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then

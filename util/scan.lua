@@ -1,4 +1,4 @@
-module 'scan_util'
+module 'scan_util' import 'info'
 
 function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
@@ -15,17 +15,13 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
         local blizzard_query1 = copy(auction_record.blizzard_query)
         blizzard_query1.first_page = auction_record.page
         blizzard_query1.last_page = auction_record.page
-        tinsert(queries, {
-            blizzard_query = blizzard_query1,
-        })
+        tinsert(queries, -object :blizzard_query(blizzard_query1))
 
         if auction_record.page > 0 then
             local blizzard_query2 = copy(auction_record.blizzard_query)
             blizzard_query2.first_page = auction_record.page - 1
             blizzard_query2.last_page = auction_record.page - 1
-            tinsert(queries, {
-                blizzard_query = blizzard_query1,
-            })
+            tinsert(queries, -object :blizzard_query(blizzard_query2))
         end
 
         local item_query = item_query(auction_record.item_id, 1, 1)
@@ -41,7 +37,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
         queries = queries,
         on_scan_start = function()
             status_bar:update_status(0, 0)
-            status_bar:set_text('Searching auction...')
+            status_bar:set_text 'Searching auction...'
         end,
         on_start_query = function(query_index)
             status_bar:update_status((query_index - 1) / getn(queries) * 100, 0)
@@ -51,20 +47,20 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
                 found = true
                 ctrl.suspend()
                 status_bar:update_status(100, 100)
-                status_bar:set_text('Auction found')
+                status_bar:set_text 'Auction found'
                 return on_success(auction_record.index)
             end
         end,
         on_abort = function()
             if not found then
                 status_bar:update_status(100, 100)
-                status_bar:set_text('Auction not found')
+                status_bar:set_text 'Auction not found'
                 return on_abort()
             end
         end,
         on_complete = function()
             status_bar:update_status(100, 100)
-            status_bar:set_text('Auction not found')
+            status_bar:set_text 'Auction not found'
             return on_failure()
         end,
     }
@@ -78,9 +74,8 @@ function public.item_query(item_id, first_page, last_page)
         local query = filter_util.query(item_info.name..'/exact')
         query.blizzard_query.first_page = first_page
         query.blizzard_query.last_page = last_page
-        return {
-            validator = query.validator,
-            blizzard_query = query.blizzard_query,
-        }
+        return -object
+            :validator(query.validator)
+            :blizzard_query(query.blizzard_query)
     end
 end

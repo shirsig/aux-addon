@@ -56,11 +56,11 @@ do
 			__newindex=function(_, _, value) return f(value) end, __unm=function(self) return self end,
 		})
 	end
-	local temp, perm = modifier(function(t) transient[t] = true; return t end), modifier(function(t) transient[t] = nil; return t end)
-	public.temp() -- TODO or 'auto' 'free' 'release' 'unlock'?
+	local temp, perm = modifier(function(t) transient[t] = true; return setmetatable(t, nil) end), modifier(function(t) transient[t] = nil; return t end)
+	public.temp() -- TODO or 'auto' 'free' 'release'?
 	function accessor() return temp end
 	function mutator(t) return temp(t) end
-	public.perm() -- TODO or 'persist' 'lock'??
+	public.perm()
 	function accessor() return perm end
 	function mutator(t) return perm(t) end
 
@@ -87,7 +87,7 @@ do
 	end
 	do
 		local mt = collector_mt(function(self, value)
-			rawset(self, value, true)
+			self[value] = true
 		end)
 		function public.accessor.set()
 			return setmetatable(t, mt)
@@ -97,7 +97,7 @@ do
 		local key
 		local mt = collector_mt(function(self, value)
 			if key ~= nil then
-				rawset(self, key, value)
+				self[key] = value
 				key = nil
 			else
 				key = value
@@ -298,7 +298,7 @@ do
 	end
 	function ADDON_LOADED.Blizzard_CraftUI()
 		hook('CraftFrame_SetSelection', function(...) temp=arg
-			local results = {orig.CraftFrame_SetSelection(unpack(arg))}
+			local results = temp-{orig.CraftFrame_SetSelection(unpack(arg))}
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
 			local total_cost = 0
@@ -325,7 +325,7 @@ do
 	end
 	function ADDON_LOADED.Blizzard_TradeSkillUI()
 		hook('TradeSkillFrame_SetSelection', function(...) temp=arg
-			local results = {orig.TradeSkillFrame_SetSelection(unpack(arg))}
+			local results = temp-{orig.TradeSkillFrame_SetSelection(unpack(arg))}
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
 			local total_cost = 0

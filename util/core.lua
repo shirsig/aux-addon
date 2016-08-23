@@ -19,14 +19,14 @@ do
 end
 
 do
-	local formal_parameters = {}
+	local formal_parameters = t
 	for i=1,9 do
 		local key = '_'..i
-		public[key] = {}
+		public[key] = t
 		formal_parameters[_m[key]] = i
 	end
 	local function helper(f, arg1, arg2)
-		local params = {}
+		local params = t
 		for i=1,arg1.n do
 			if formal_parameters[arg1[i]] then
 				tinsert(params, arg2[formal_parameters[arg1[i]]])

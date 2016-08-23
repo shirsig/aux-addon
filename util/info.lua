@@ -33,7 +33,7 @@ do
 		INVTYPE_TABARD = {19},
 	}
 	function public.inventory_index(slot)
-	    return unpack(inventory_index_map[slot] or {})
+	    return unpack(inventory_index_map[slot] or tt)
 	end
 end
 
@@ -191,7 +191,7 @@ function public.set_shopping_tooltip(slot)
     end
 
     if tooltips[1] then
-        tinsert(tooltips[1], 1, {left_text='Currently Equipped', left_color={ 0.5, 0.5, 0.5 }})
+        tinsert(tooltips[1], 1, temp-object :left_text 'Currently Equipped' :left_color(temp-{.5, .5, .5}))
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
         load_tooltip(ShoppingTooltip1, tooltips[1])
         ShoppingTooltip1:Show()
@@ -199,7 +199,7 @@ function public.set_shopping_tooltip(slot)
     end
 
     if tooltips[2] then
-        tinsert(tooltips[2], 1, {left_text='Currently Equipped', left_color={ 0.5, 0.5, 0.5 }})
+        tinsert(tooltips[2], 1, temp-object :left_text 'Currently Equipped' :left_color(temp-{.5, .5, .5}))
         ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
         load_tooltip(ShoppingTooltip2, tooltips[2])
         ShoppingTooltip2:Show()
@@ -237,7 +237,7 @@ function public.load_tooltip(frame, tooltip)
             frame:AddLine(line.left_text, line.left_color[1], line.left_color[2], line.left_color[3], true)
         end
     end
-    for i =1,getn(tooltip) do -- TODO why is this needed?
+    for i=1,getn(tooltip) do -- TODO why is this needed?
 	    _g[frame:GetName()..'TextLeft'..i]:SetJustifyH('LEFT')
 	    _g[frame:GetName()..'TextRight'..i]:SetJustifyH('LEFT')
     end
@@ -357,24 +357,22 @@ end
 
 function public.item(item_id, suffix_id)
     local itemstring = 'item:'..(item_id or 0)..':0:'..(suffix_id or 0)..':0'
-    for name, itemstring, quality, level, class, subclass, max_stack, slot, texture in present(GetItemInfo(itemstring)) do
-	    return {
-	        name = name,
-	        itemstring = itemstring,
-	        quality = quality,
-	        level = level,
-	        class = class,
-	        subclass = subclass,
-	        slot = slot,
-	        max_stack = max_stack,
-	        texture = texture,
-	    }
-    end
-    return cache.item_info(item_id)
+    local name, itemstring, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
+    return name and {
+        name = name,
+        itemstring = itemstring,
+        quality = quality,
+        level = level,
+        class = class,
+        subclass = subclass,
+        slot = slot,
+        max_stack = max_stack,
+        texture = texture,
+    } or cache.item_info(item_id)
 end
 
 function public.item_class_index(item_class)
-    for i, class in {GetAuctionItemClasses()} do
+    for i, class in temp-{GetAuctionItemClasses()} do
         if strupper(class) == strupper(item_class) then
             return i, class
         end
@@ -382,7 +380,7 @@ function public.item_class_index(item_class)
 end
 
 function public.item_subclass_index(class_index, item_subclass)
-    for i, subclass in {GetAuctionItemSubClasses(class_index)} do
+    for i, subclass in temp-{GetAuctionItemSubClasses(class_index)} do
         if strupper(subclass) == strupper(item_subclass) then
             return i, subclass
         end
@@ -390,7 +388,7 @@ function public.item_subclass_index(class_index, item_subclass)
 end
 
 function public.item_slot_index(class_index, subclass_index, slot_name)
-    for i, slot in {GetAuctionInvTypes(class_index, subclass_index)} do
+    for i, slot in temp-{GetAuctionInvTypes(class_index, subclass_index)} do
         if strupper(_g[slot]) == strupper(slot_name) then
             return i, _g[slot]
         end
@@ -424,7 +422,6 @@ function public.bag_type(bag)
 	for link in present(GetInventoryItemLink('player', ContainerIDToInventoryID(bag))) do
 		local item_id = parse_link(link)
 		local item_info = item(item_id)
-		log(link, item_id, item_info, item_info.subclass)
 		return item_subclass_index(3, item_info.subclass)
 	end
 end
