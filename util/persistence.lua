@@ -14,18 +14,6 @@ do
 	end
 end
 
---do TODO syntactic sugar record '#' {key='string'} {foo='number'}
---	local mt = {
---		__unm = function(self, separator)
---			self.separator = separator
---		end,
---		__call = function(self, field) end
---	}
---	function public.accessor.record()
---
---	end
---end
-
 function public.read(schema, str)
     if schema == 'string' then
         return str
@@ -38,7 +26,7 @@ function public.read(schema, str)
     elseif type(schema) == 'table' and schema[1] == 'record' then
         return read_record(schema, str)
     else
-        error 'Invalid schema.'
+        error('Invalid schema.', 2)
     end
 end
 
@@ -54,7 +42,7 @@ function public.write(schema, obj)
     elseif type(schema) == 'table' and schema[1] == 'record' then
         return write_record(schema, obj)
     else
-        error 'Invalid schema.'
+        error('Invalid schema.', 2)
     end
 end
 

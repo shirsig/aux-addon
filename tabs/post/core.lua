@@ -3,8 +3,39 @@ module 'post_tab' import 'scan' 'scan_util' 'post' 'history' 'info' 'persistence
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
+function accessor.default_settings()
+	return -object
+	:duration(DURATION_8)
+	:stack_size(1)
+	:start_price(0)
+	:buyout_price(0)
+	:hidden(false)
+end
+
+do
+	local data
+	function accessor.data()
+		if not data then
+			local dataset = persistence.dataset
+			data = dataset.post or t
+			dataset.post = data
+		end
+		return data
+	end
+end
+
+function read_settings(item_key)
+	item_key = item_key or selected_item.key
+	return data[item_key] and persistence.read(settings_schema, data[item_key]) or default_settings
+end
+
+function write_settings(settings, item_key)
+	item_key = item_key or selected_item.key
+	data[item_key] = persistence.write(settings_schema, settings)
+end
+
 existing_auctions = t
-mutable.inventory_records = nil
+inventory_records = t
 mutable.scan_id = 0
 mutable.selected_item = nil
 mutable.refresh = nil
@@ -15,14 +46,7 @@ end
 
 function OPEN()
     frame:Show()
-
-    deposit:SetText('Deposit: '..money.to_string(0, nil, nil, nil, gui.inline_color.text.enabled))
-
-    set_unit_start_price(0)
-    set_unit_buyout_price(0)
-
     update_inventory_records()
-
     refresh = true
 end
 
@@ -33,39 +57,6 @@ end
 
 function USE_ITEM(item_info)
 	select_item(item_info.item_key)
-end
-
-function accessor.default_settings()
-    return {
-        duration = DURATION_8,
-        stack_size = 1,
-        start_price = 0,
-        buyout_price = 0,
-        hidden = false,
-    }
-end
-
-function read_settings(item_key)
-    item_key = item_key or selected_item.key
-    local dataset = persistence.load_dataset()
-    dataset.post = dataset.post or t
-
-    local settings
-    if dataset.post[item_key] then
-        settings = persistence.read(settings_schema, dataset.post[item_key])
-    else
-        settings = default_settings
-    end
-    return settings
-end
-
-function write_settings(settings, item_key)
-    item_key = item_key or selected_item.key
-
-    local dataset = persistence.load_dataset()
-    dataset.post = dataset.post or t
-
-    dataset.post[item_key] = persistence.write(settings_schema, settings)
 end
 
 function get_unit_start_price()
@@ -171,7 +162,7 @@ function public.select_item(item_key)
     for _, inventory_record in filter(inventory_records, function(record) return record.aux_quantity > 0 end) do
         if inventory_record.key == item_key then
             set_item(inventory_record)
-            break
+            return
         end
     end
 end
@@ -225,7 +216,6 @@ function post_auctions()
 				for i=1,posted do
                     new_auction_record = record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
                 end
-
                 update_inventory_records()
                 selected_item = nil
                 for _, record in inventory_records do
@@ -233,7 +223,6 @@ function post_auctions()
                         set_item(record)
                     end
                 end
-
                 refresh = true
 			end
 		)
@@ -241,32 +230,26 @@ function post_auctions()
 end
 
 function validate_parameters()
-
     if not selected_item then
         post_button:Disable()
         return
     end
-
     if get_unit_buyout_price() > 0 and get_unit_start_price() > get_unit_buyout_price() then
         post_button:Disable()
         return
     end
-
     if get_unit_start_price() == 0 then
         post_button:Disable()
         return
     end
-
     if stack_count_slider:GetValue() == 0 then
         post_button:Disable()
         return
     end
-
     post_button:Enable()
 end
 
 function update_item_configuration()
-
 	if not selected_item then
         refresh_button:Disable()
 
@@ -283,6 +266,10 @@ function update_item_configuration()
         duration_dropdown:Hide()
         historical_value_button:Hide()
         hide_checkbox:Hide()
+
+--        deposit:SetText('Deposit: '..money.to_string(0, nil, nil, nil, gui.inline_color.text.enabled))
+--        set_unit_start_price(0)
+--        set_unit_buyout_price(0)
     else
         start_price_frame:Show()
         buyout_price_frame:Show()
@@ -308,12 +295,9 @@ function update_item_configuration()
 
         do
             local deposit_factor = neutral_faction() and 0.25 or 0.05
-            local stack_size = stack_size_slider:GetValue()
-            local stack_count
-            stack_count = stack_count_slider:GetValue()
-            local deposit = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
-
-            _m.deposit:SetText('Deposit: '..money.to_string(deposit, nil, nil, nil, gui.inline_color.text.enabled))
+            local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
+            local amount = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
+            deposit:SetText('Deposit: '..money.to_string(amount, nil, nil, nil, gui.inline_color.text.enabled))
         end
 
         refresh_button:Enable()
@@ -323,12 +307,10 @@ end
 function undercut(record, stack_size, stack)
     local start_price = round(record.unit_blizzard_bid * (stack and record.stack_size or stack_size))
     local buyout_price = round(record.unit_buyout_price * (stack and record.stack_size or stack_size))
-
     if not record.own then
         start_price = max(0, start_price - 1)
         buyout_price = max(0, buyout_price - 1)
     end
-
     return start_price / stack_size, buyout_price / stack_size
 end
 
@@ -344,12 +326,9 @@ function quantity_update(max_count)
 end
 
 function unit_vendor_price(item_key)
-
     for slot in info.inventory do temp=slot
-
         local item_info = info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
-
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
                 ClearCursor()
                 PickupContainerItem(unpack(slot))
@@ -358,7 +337,6 @@ function unit_vendor_price(item_key)
                 ClearCursor()
                 ClickAuctionSellItemButton()
                 ClearCursor()
-
                 if auction_sell_item then
                     return auction_sell_item.vendor_price / auction_sell_item.count
                 end
@@ -411,53 +389,41 @@ function set_item(item)
 end
 
 function update_inventory_records()
-    inventory_records = {}
-    refresh = true
-
-    local auction_candidate_map = {}
-
-    for slot in info.inventory do
-
-        local item_info = info.container_item(unpack(slot))
-        if item_info then
+    local auctionable_map = tt
+    for slot in info.inventory do temp=slot
+        for item_info in present(info.container_item(unpack(slot))) do
             local charge_class = item_info.charges or 0
-
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
-                if not auction_candidate_map[item_info.item_key] then
-
-                    local availability = {}
+                if not auctionable_map[item_info.item_key] then
+                    local availability = t
                     for i=0,10 do
                         availability[i] = 0
                     end
                     availability[charge_class] = item_info.count
-
-                    auction_candidate_map[item_info.item_key] = {
-                        item_id = item_info.item_id,
-                        suffix_id = item_info.suffix_id,
-
-                        key = item_info.item_key,
-                        itemstring = item_info.itemstring,
-
-                        name = item_info.name,
-                        texture = item_info.texture,
-                        quality = item_info.quality,
-                        aux_quantity = item_info.charges or item_info.count,
-                        max_stack = item_info.max_stack,
-                        max_charges = item_info.max_charges,
-                        availability = availability,
-                    }
+                    auctionable_map[item_info.item_key] = -object
+                        :item_id        (item_info.item_id)
+                        :suffix_id      (item_info.suffix_id)
+	                    :key            (item_info.item_key)
+	                    :itemstring     (item_info.itemstring)
+	                    :name           (item_info.name)
+	                    :texture        (item_info.texture)
+	                    :quality        (item_info.quality)
+	                    :aux_quantity   (item_info.charges or item_info.count)
+	                    :max_stack      (item_info.max_stack)
+	                    :max_charges    (item_info.max_charges)
+	                    :availability   (availability)
                 else
-                    local candidate = auction_candidate_map[item_info.item_key]
-                    candidate.availability[charge_class] = (candidate.availability[charge_class] or 0) + item_info.count
-                    candidate.aux_quantity = candidate.aux_quantity + (item_info.charges or item_info.count)
+                    local auctionable = auctionable_map[item_info.item_key]
+                    auctionable.availability[charge_class] = (auctionable.availability[charge_class] or 0) + item_info.count
+                    auctionable.aux_quantity = auctionable.aux_quantity + (item_info.charges or item_info.count)
                 end
             end
         end
     end
 
-    inventory_records = {}
-    for _, auction_candidate in auction_candidate_map do
-        tinsert(inventory_records, auction_candidate)
+    wipe(inventory_records)
+    for _, auctionable in auctionable_map do
+        tinsert(inventory_records, auctionable)
     end
     sort(inventory_records, function(a, b) return a.name < b.name end)
     refresh = true
@@ -546,7 +512,6 @@ function on_update()
         update_inventory_listing()
         update_auction_listing()
     end
-
     validate_parameters()
 end
 

@@ -57,14 +57,14 @@ do
 		})
 	end
 	local temp, perm = modifier(function(t) transient[t] = true; return setmetatable(t, nil) end), modifier(function(t) transient[t] = nil; return t end)
-	public.temp() -- TODO or 'auto' 'free' 'release'?
+	public.temp() -- TODO or 'auto' 'free' 'deprecate' 'release'?
 	function accessor() return temp end
 	function mutator(t) return temp(t) end
 	public.perm()
 	function accessor() return perm end
 	function mutator(t) return perm(t) end
 
-	function public.collector_mt(f)
+	function public.collector_mt(f) -- TODO somehow use an existing table
 		return {
 			__unm=function(self)
 				return setmetatable(self, nil)
@@ -127,6 +127,8 @@ do
 		elseif event == 'PLAYER_LOGIN' then
 			for _, f in handlers2 do f() end
 			log('v'..version..' loaded.')
+
+			-- TODO test __lt
 		else
 			_m[event]()
 		end
