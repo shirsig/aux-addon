@@ -517,7 +517,7 @@ function blizzard_query(components)
         query.slot = slot_index
         query.quality = item_info.quality
     else
-	    for key in temp-set('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality') do
+	    for key in -temp^set('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality') do
             query[key] = index(filters[key], 2)
 	    end
     end

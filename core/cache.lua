@@ -165,16 +165,16 @@ function scan_wdb(item_id)
 		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 		if name and not _g.aux_item_ids[strlower(name)] then
 			_g.aux_item_ids[strlower(name)] = item_id
-			_g.aux_items[item_id] = persistence.write(items_schema, {
-				name = name,
-				quality = quality,
-				level = level,
-				class = class,
-				subclass = subclass,
-				slot = slot,
-				max_stack = max_stack,
-				texture = texture,
-			})
+			_g.aux_items[item_id] = persistence.write(items_schema, -object(
+				'name', name,
+				'quality', quality,
+				'level', level,
+				'class', class,
+				'subclass', subclass,
+				'slot', slot,
+				'max_stack', max_stack,
+				'texture', texture
+			))
 			local tooltip = info.tooltip(function(tooltip) tooltip:SetHyperlink(itemstring) end)
 			if info.auctionable(tooltip, quality) then
 				tinsert(_g.aux_auctionable_items, strlower(name))

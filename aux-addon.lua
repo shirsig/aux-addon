@@ -52,7 +52,7 @@ do
 	function public.modifier(f)
 		local function apply(_, value) return f(value) end
 		return setmetatable(t, {
-			 __call=apply, __sub=apply, __newindex=function(_, _, value) return f(value) end,
+			 __call=apply, __sub=apply, __pow=apply, __newindex=function(_, _, value) return f(value) end,
 		})
 	end
 	local temp, perm = modifier(function(t) transient[t] = true end), modifier(function(t) transient[t] = nil; return t end)
