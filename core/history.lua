@@ -57,13 +57,16 @@ function public.process_auction(auction_record)
 	local unit_bid_price = ceil(auction_record.bid_price / auction_record.aux_quantity)
 	local unit_buyout_price = ceil(auction_record.buyout_price / auction_record.aux_quantity)
 	local max_unit_price = max(unit_buyout_price, unit_bid_price)
+	local changed
 	if unit_buyout_price > 0 and unit_buyout_price < (item_record.daily_min_buyout or huge) then
 		item_record.daily_min_buyout = unit_buyout_price
-	elseif max_unit_price > item_record.daily_max_price or 0 then
-		item_record.daily_max_price = max_unit_price
-	else
-		return
+		changed = true
 	end
+	if max_unit_price > (item_record.daily_max_price or 0) then
+		item_record.daily_max_price = max_unit_price
+		changed = true
+	end
+	if not changed then return end
 	write_record(auction_record.item_key, item_record)
 end
 
@@ -92,6 +95,7 @@ function public.value(item_key)
 		end
 		value_cache[item_key] = -object :value(value) :next_push(item_record.next_push)
 	end
+	log (value_cache[item_key].value)
 	return value_cache[item_key].value
 end
 

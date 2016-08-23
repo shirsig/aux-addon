@@ -212,15 +212,15 @@ function post_auctions()
             unit_buyout_price,
 			stack_count,
 			function(posted)
-                local new_auction_record
 				for i=1,posted do
-                    new_auction_record = record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
+                    record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
                 end
                 update_inventory_records()
                 selected_item = nil
                 for _, record in inventory_records do
                     if record.key == key then
                         set_item(record)
+	                    break
                     end
                 end
                 refresh = true

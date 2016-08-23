@@ -1,12 +1,14 @@
-SLASH_AUX1 = '/aux'
-function SlashCmdList.AUX(command)
+module 'slash' import 'persistence'
+
+_g.SLASH_AUX1 = '/aux'
+function _g.SlashCmdList.AUX(command)
 	if not command then return end
 	local arguments = tokenize(command)
     if arguments[1] == 'clear' and arguments[2] == 'history' then
-        persistence.load_dataset().history = nil
+        persistence.dataset = nil
         log 'History cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'post' then
-        persistence.load_dataset().post = nil
+        persistence.dataset.post = nil
         log 'Post settings cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'datasets' then
         _g.aux_datasets = {}
