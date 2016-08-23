@@ -3,15 +3,17 @@ module 'cache' import 'info'
 MIN_ITEM_ID = 1
 MAX_ITEM_ID = 30000
 
+--items_schema = record '#' {name='string'} {quality='number'} {level='number'} {class='string'} {subclass='string'} {slot='string'} {max_stack='number'} {texture='string'} -- TODO
+
 items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
 merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'}}
 
-_g.aux_items = {}
-_g.aux_item_ids = {}
-_g.aux_auctionable_items = {}
-_g.aux_merchant_buy = {}
-_g.aux_merchant_sell = {}
-_g.aux_characters = {}
+_g.aux_items = t
+_g.aux_item_ids = t
+_g.aux_auctionable_items = t
+_g.aux_merchant_buy = t
+_g.aux_merchant_sell = t
+_g.aux_characters = t
 
 function LOAD()
 	import 'persistence' 'info'
@@ -35,29 +37,24 @@ end
 
 do
 	local sell_scan_countdown, incomplete_buy_data
-
 	function on_merchant_show()
 		merchant_sell_scan()
 		incomplete_buy_data = not merchant_buy_scan()
 	end
-
 	function on_merchant_closed()
 		sell_scan_countdown = nil
 		incomplete_buy_data = false
 	end
-
 	function on_merchant_update()
 		if incomplete_buy_data then
 			incomplete_buy_data = not merchant_buy_scan()
 		end
 	end
-
 	function on_bag_update()
 		if MerchantFrame:IsVisible() then
 			sell_scan_countdown = 10
 		end
 	end
-
 	function merchant_on_update()
 		if sell_scan_countdown == 0 then
 			sell_scan_countdown = nil
@@ -90,17 +87,17 @@ function public.item_info(item_id)
 	local data_string = _g.aux_items[item_id]
 	if data_string then
 		local cached_data = persistence.read(items_schema, data_string)
-		return {
-			name = cached_data.name,
-			itemstring = 'item:'..item_id..':0:0:0',
-			quality = cached_data.quality,
-			level = cached_data.level,
-			class = cached_data.class,
-			subclass = cached_data.subclass,
-			slot = cached_data.slot,
-			max_stack = cached_data.max_stack,
-			texture = cached_data.texture,
-		}
+		return -object(
+			'name', cached_data.name,
+			'itemstring', 'item:'..item_id..':0:0:0',
+			'quality', cached_data.quality,
+			'level', cached_data.level,
+			'class', cached_data.class,
+			'subclass', cached_data.subclass,
+			'slot', cached_data.slot,
+			'max_stack', cached_data.max_stack,
+			'texture', cached_data.texture
+		)
 	end
 end
 
@@ -129,15 +126,15 @@ function merchant_buy_scan()
 					unit_price = min(buy_info.unit_price, new_unit_price)
 				end
 
-				_g.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, {
-					unit_price = unit_price,
-					limited = buy_info.limited and new_limited,
-				})
+				_g.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, -object(
+					'unit_price', unit_price,
+					'limited', buy_info.limited and new_limited
+				))
 			else
-				_g.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, {
-					unit_price = new_unit_price,
-					limited = new_limited,
-				})
+				_g.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, -object(
+					'unit_price', new_unit_price,
+					'limited', new_limited
+				))
 			end
 		else
 			incomplete_data = true

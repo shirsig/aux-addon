@@ -405,7 +405,8 @@ function update_inventory_records()
 	                    'quality', item_info.quality,
 	                    'aux_quantity', item_info.charges or item_info.count,
 	                    'max_stack', item_info.max_stack,
-	                    'max_charges', item_info.max_charges,
+	                    'max_charges', item_info.max_charges
+                    )(
 	                    'availability', availability
                     )
                 else
