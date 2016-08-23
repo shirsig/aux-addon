@@ -51,6 +51,7 @@ do
 	function accessor() return temp end
 	function mutator(t) return temp(t) end
 	public.perm() -- TODO or 'keep' 'hold'??
+	function accessor() return perm end
 	function mutator(t) return perm(t) end
 
 	function public.collector_mt(f)

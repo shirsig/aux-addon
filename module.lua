@@ -30,7 +30,7 @@ function importer_mt.__call(self, arg1, arg2)
 	return self
 end
 function set_property(metadata, data, modifier, key, f)
-	if key and not data[key] and type(f) == 'function' or property_error() then
+	if key and not data[key] and (type(f) == 'function' or property_error()) then
 		metadata[key] = metadata[key] + modifier
 		data[key] = f
 	end
@@ -68,7 +68,6 @@ do
 	local function index(access, default)
 		return function(self, key)
 			local state = _state[self]; local modifiers = state.metadata[key] or 0
-			if key == 'perm' then DEFAULT_CHAT_FRAME:AddMessage(tostring(key)) end
 			if mask(access+ACCESSOR, modifiers) == access+ACCESSOR then return state.accessors[key]() end
 			return state.data[key] or default[key]
 		end
