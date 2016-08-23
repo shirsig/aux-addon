@@ -374,7 +374,7 @@ function suggestions(components)
 
     if components.blizzard.name and size(components.blizzard) == 1 then tinsert(suggestions, 'exact') end
 
-    tinsert(suggestions, 'and'); tinsert(suggestions, 'or'); tinsert(suggestions, 'not'); tinsert(suggestions, 'tt')
+    tinsert(suggestions, 'and'); tinsert(suggestions, 'or'); tinsert(suggestions, 'not'); tinsert(suggestions, 'tooltip')
 
     for key in filters do tinsert(suggestions, key) end
 

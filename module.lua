@@ -29,9 +29,10 @@ function importer_mt.__call(self, arg1, arg2)
 	end
 	return self
 end
-function set_property(data, property, value)
-	if property and not data[property] and type(value) == 'function' or property_error() then
-		data[property] = value
+function set_property(metadata, data, modifier, key, f)
+	if key and not data[key] and type(f) == 'function' or property_error() then
+		metadata[key] = metadata[key] + modifier
+		data[key] = f
 	end
 end
 declarator_mt = {__metatable=false}
@@ -67,6 +68,7 @@ do
 	local function index(access, default)
 		return function(self, key)
 			local state = _state[self]; local modifiers = state.metadata[key] or 0
+			if key == 'perm' then DEFAULT_CHAT_FRAME:AddMessage(tostring(key)) end
 			if mask(access+ACCESSOR, modifiers) == access+ACCESSOR then return state.accessors[key]() end
 			return state.data[key] or default[key]
 		end
@@ -101,7 +103,7 @@ function module(name)
 			private=function() state.modifiers = PRIVATE return declarator end, public=function() state.modifiers = PUBLIC return declarator end,
 			mutable=function() state.modifiers = MUTABLE return declarator end,
 			accessor=function() state.modifiers = PROPERTY+ACCESSOR return declarator end, mutator=function() state.modifiers = PROPERTY+MUTATOR return declarator end}
-		mutators = {accessor=function(value) set_property(accessors, state.property, value) end, mutator=function(value) set_property(mutators, state.property, value) end}
+		mutators = {accessor=function(f) set_property(state.metadata, accessors, ACCESSOR, state.property, f) end, mutator=function(f) set_property(state.metadata, mutators, MUTATOR, state.property, f) end}
 		state = {
 			env=env, interface=interface, modifiers=PRIVATE,
 			metadata = {_g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+ACCESSOR, public=PROPERTY+ACCESSOR, mutable=PROPERTY+ACCESSOR, accessor=PROPERTY+ACCESSOR+MUTATOR, mutator=PROPERTY+ACCESSOR+MUTATOR},

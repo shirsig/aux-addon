@@ -29,8 +29,8 @@ do
 		tinsert(table_pool, t)
 	end
 
-	function public.accessor.t() return
-		tremove(table_pool) or {}
+	function public.accessor.t()
+		return tremove(table_pool) or {}
 	end
 
 	function public.accessor.tt() -- TODO or 'tmp'? t (and t -> T)?
@@ -46,13 +46,12 @@ do
 			__newindex=function(_, _, value) return f(value) end, __unm=function(self) return self end,
 		})
 	end
-	local temp, perm = modifier(function(t) temporary[t] = true; return t end), modifier(function(t) temporary[t] = false; return t end)
+	local temp, perm = modifier(function(t) temporary[t] = true; return t end), modifier(function(t) temporary[t] = nil; return t end)
 	public.temp() -- TODO or 'auto'?
-	function accessor() return setmetatable(tt, mt) end
-	function mutator(value) return temp(value) end
-	public.perm() -- TODO or 'keep'?
-	function accessor() return setmetatable(tt, mt) end
-	function mutator(value) return perm(value) end
+	function accessor() return temp end
+	function mutator(t) return temp(t) end
+	public.perm() -- TODO or 'keep' 'hold'??
+	function mutator(t) return perm(t) end
 
 	function public.collector_mt(f)
 		return {
@@ -129,20 +128,19 @@ function public.log(...) temp=arg
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
 end
 
-
 tab_info = t
-for k, v in -object :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids' do
-	local m, tab = _m, -object :name(v);
-	log(tab.name);
-	(function()
-		module(k)
-		function mutator.OPEN(f) tab.OPEN = f end
-		function mutator.CLOSE(f) tab.CLOSE = f end
-		function mutator.USE_ITEM(f) tab.USE_ITEM = f end
-		function mutator.CLICK_LINK(f) tab.CLICK_LINK = f end
-		function public.accessor.ACTIVE() return tab == m.active_tab end
-	end)()
-	tinsert(tab_info, tab)
+do
+	local data = -list :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids'
+	for i=1,7,2 do
+		local tab = perm<-object :name(data[i + 1]);
+		local env = (function() module(data[i]) return _m end)()
+		function env.mutator.OPEN(f) tab.OPEN = f end
+		function env.mutator.CLOSE(f) tab.CLOSE = f end
+		function env.mutator.USE_ITEM(f) tab.USE_ITEM = f end
+		function env.mutator.CLICK_LINK(f) tab.CLICK_LINK = f end
+		function env.public.accessor.ACTIVE() return tab == active_tab end
+		tinsert(tab_info, tab)
+	end
 end
 
 do
@@ -174,7 +172,7 @@ function UseContainerItem(...) temp=arg
 end
 
 public.orig = setmetatable({[_g]=t}, {__index=function(self, key) return self[_g][key] end})
-function public.hook(...)
+function public.hook(...) temp=arg
 	local name, object, handler
 	if arg.n == 3 then
 		name, object, handler = unpack(arg)
