@@ -8,20 +8,16 @@ hooked_setter = nil
 game_tooltip_money = nil
 
 function LOAD()
-    for func, hook in game_tooltip_hooks do
-        local func, hook = func, hook
-        _m.hook(
-            func,
-            function(...)
-                hooked_setter = true
-                game_tooltip_money = 0
-                local results = {orig[GameTooltip][func](unpack(arg)) }
-                hooked_setter = false
-                hook(unpack(arg))
-                return unpack(results)
-            end,
-            GameTooltip
-        )
+    for name, f in game_tooltip_hooks do
+        local name, f = name, f
+        _m.hook(name, GameTooltip, function(...) temp(arg)
+            hooked_setter = true
+            game_tooltip_money = 0
+            local ret = {orig[GameTooltip][name](unpack(arg))}
+            hooked_setter = false
+            f(unpack(arg))
+            return unpack(ret)
+        end)
     end
     local orig = SetItemRef
     setglobal('SetItemRef', function(...)

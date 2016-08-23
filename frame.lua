@@ -1,8 +1,7 @@
 module 'core' import 'gui'
 
 function LOAD()
-	for _, tab in _m.tabs do tabs:create_tab(tab.name) end
-	function public.set_tab(id) tabs:select(id) end
+	for _, info in tab_info do tabs:create_tab(info.name) end
 end
 
 do
@@ -27,8 +26,9 @@ do
 	public.aux_frame = frame
 end
 do
-	local tabs = gui.tabs(aux_frame, 'DOWN')
+	tabs = gui.tabs(aux_frame, 'DOWN')
 	tabs._on_select = on_tab_click
+	function public.set_tab(id) tabs:select(id) end
 end
 do
 	local btn = gui.button(aux_frame, 16)

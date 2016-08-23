@@ -33,7 +33,7 @@ do
 		tremove(table_pool) or {}
 	end
 
-	function public.accessor.tt()
+	function public.accessor.tt() -- TODO or 'tmp'?
 		local t = tremove(table_pool) or {}
 		temporary[t] = true
 		return t
@@ -48,25 +48,20 @@ do
 		end
 	end
 
-	function public.modifier_mt(f)
+	function public.modifier(f)
 		local function apply(_, value) return f(value) end
-		return {
-			__call=apply, __add=apply, __sub=apply, __mul=apply, __div=apply, __pow=apply, __concat=apply, __lt=apply, __le=apply,
-			__unm=function(self) return self end,
-		}
+		return setmetatable(t, {
+			__index=apply, __call=apply, __add=apply, __sub=apply, __mul=apply, __div=apply, __pow=apply, __concat=apply, __lt=apply, __le=apply,
+			__newindex=function(_, _, value) return f(value) end, __unm=function(self) return self end,
+		})
 	end
-	do
-		local mt = modifier_mt(function(t) temporary[t] = true; return t end)
-		function public.accessor.temp()
-			return setmetatable(T, mt)
-		end
-	end
-	do
-		local mt = modifier_mt(function(t) temporary[t] = false; return t end)
-		function public.accessor.perm()
-			return setmetatable(T, mt)
-		end
-	end
+	local temp, perm = modifier(function(t) temporary[t] = true; return t end), modifier(function(t) temporary[t] = false; return t end)
+	public.temp() -- TODO or 'auto'?
+	function accessor() return setmetatable(T, mt) end
+	function mutator(value) return temp(value) end
+	public.perm() -- TODO or 'keep'?
+	function accessor() return setmetatable(T, mt) end
+	function mutator(value) return perm(value) end
 
 	function public.collector_mt(f)
 		return {
@@ -113,22 +108,22 @@ do
 end
 
 local event_frame = CreateFrame 'Frame'
-for event in perm <- set 'ADDON_LOADED' 'VARIABLES_LOADED' 'PLAYER_LOGIN' 'AUCTION_HOUSE_SHOW' 'AUCTION_HOUSE_CLOSED' 'AUCTION_BIDDER_LIST_UPDATE' 'AUCTION_OWNED_LIST_UPDATE' do
+for event in set 'ADDON_LOADED' 'VARIABLES_LOADED' 'PLAYER_LOGIN' 'AUCTION_HOUSE_SHOW' 'AUCTION_HOUSE_CLOSED' 'AUCTION_BIDDER_LIST_UPDATE' 'AUCTION_OWNED_LIST_UPDATE' do
 	event_frame:RegisterEvent(event)
 end
 
 ADDON_LOADED = t
 do
-	local variables_loaded_hooks, player_login_hooks = t, t
-	function public.mutator.LOAD(f) tinsert(variables_loaded_hooks, f) end
-	function public.mutator.LOAD2(f) tinsert(player_login_hooks, f) end
+	local handlers, handlers2 = t, t
+	function public.mutator.LOAD(f) tinsert(handlers, f) end
+	function public.mutator.LOAD2(f) tinsert(handlers2, f) end
 	event_frame:SetScript('OnEvent', function()
 		if event == 'ADDON_LOADED' then
 			if ADDON_LOADED[arg1] then ADDON_LOADED[arg1]() end
 		elseif event == 'VARIABLES_LOADED' then
-			for _, f in variables_loaded_hooks do f() end
+			for _, f in handlers do f() end
 		elseif event == 'PLAYER_LOGIN' then
-			for _, f in player_login_hooks do f() end
+			for _, f in handlers2 do f() end
 			log('v'..version..' loaded.')
 		else
 			_m[event]()
@@ -140,20 +135,24 @@ function public.log(...)
 	local msg = '[aux]'
 	for i=1,arg.n do msg = msg..' '..tostring(arg[i]) end
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
+	recycle(arg)
 end
 
-map :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids'
+
 tabs = t
-for _, name in from (from 'Search') 'Post' 'Auctions' 'Bids' do
-	tinsert(tabs)
+for k, v in map :search_tab 'Search' :post_tab 'Post' :auctions_tab 'Auctions' :bids_tab 'Bids' do
+	local m, tab = _m, -map :name(k) :title(v)
+	(function()
+		module(k)
+		function mutator.OPEN(f) tab.OPEN = f end
+		function mutator.CLOSE(f) tab.CLOSE = f end
+		function mutator.USE_ITEM(f) tab.USE_ITEM = f end
+		function mutator.CLICK_LINK(f) tab.CLICK_LINK = f end
+		function public.accessor.ACTIVE() return tab == m.active_tab end
+	end)()
+	tinsert(tab, tabs)
 end
-function public.tab(index, name)
-	local module_env = getfenv(2)
-	local tab = {name=name, env=module_env}
-	function module_env.public.accessor.ACTIVE() return tab == active_tab end
-	for handler in temp-set-from 'OPEN' 'CLOSE' 'CLICK_LINK' 'USE_ITEM' do module_env.mutable[handler] = nil end
-	tabs[index] = tab
-end
+
 do
 	local active_tab_index
 	function accessor.active_tab() return tabs[active_tab_index] end
@@ -163,7 +162,8 @@ do
 		call(active_tab_index and active_tab.OPEN)
 	end
 end
-function SetItemRef(...)
+
+function SetItemRef(...) temp(arg)
 	if arg[3] ~= 'RightButton' or not index(active_tab, 'env', 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
@@ -171,7 +171,8 @@ function SetItemRef(...)
 		return active_tab.CLICK_LINK(item_info)
 	end
 end
-function UseContainerItem(...)
+
+function UseContainerItem(...) temp(arg)
 	if modified or not index(active_tab, 'env', 'USE_ITEM') then
 		return orig.UseContainerItem(unpack(arg))
 	end
@@ -180,13 +181,19 @@ function UseContainerItem(...)
 	end
 end
 
-public.orig = setmetatable({[_g]={}}, {__index=function(self, key) return self[_g][key] end})
-function public.hook(name, handler, object)
+public.orig = setmetatable({[_g]=t}, {__index=function(self, key) return self[_g][key] end})
+function public.hook()
+	local name, object, handler
+	if arg.n == 3 then
+		name, object, handler = unpack(arg)
+	else
+		object, name, handler = _g, unpack(arg)
+	end
 	handler = handler or getfenv(2)[name]
-	object = object or _g
-	orig[object] = orig[object] or {}
+	orig[object] = orig[object] or t
 	assert(not orig[object][name], '"'..name..'" is already hooked into.')
 	orig[object][name], object[name] = object[name], handler
+	return hook
 end
 
 do
@@ -261,7 +268,7 @@ end
 
 do
 	local last_owner_page_requested
-	function GetOwnerAuctionItems(...)
+	function GetOwnerAuctionItems(...) temp(arg)
 		local page = arg[1]
 		last_owner_page_requested = page
 		return orig.GetOwnerAuctionItems(unpack(arg))
@@ -274,14 +281,11 @@ end
 function ADDON_LOADED.Blizzard_AuctionUI()
 	AuctionFrame:UnregisterEvent 'AUCTION_HOUSE_SHOW'
 	AuctionFrame:SetScript('OnHide', nil)
-	hook('ShowUIPanel', function(...)
+	hook('ShowUIPanel', function(...) temp(arg)
 		if arg[1] == AuctionFrame then return AuctionFrame:Show() end
 		return orig.ShowUIPanel(unpack(arg))
 	end)
-	hook('GetOwnerAuctionItems', GetOwnerAuctionItems)
-	hook('SetItemRef', SetItemRef)
-	hook('UseContainerItem', UseContainerItem)
-	hook('AuctionFrameAuctions_OnEvent', AuctionFrameAuctions_OnEvent)
+	hook 'GetOwnerAuctionItems' 'SetItemRef' 'UseContainerItem' 'AuctionFrameAuctions_OnEvent'
 end
 
 do
@@ -293,6 +297,7 @@ do
 	end
 	function ADDON_LOADED.Blizzard_CraftUI()
 		hook('CraftFrame_SetSelection', function(...)
+			temp(arg)
 			local results = {orig.CraftFrame_SetSelection(unpack(arg))}
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
@@ -320,6 +325,7 @@ do
 	end
 	function ADDON_LOADED.Blizzard_TradeSkillUI()
 		hook('TradeSkillFrame_SetSelection', function(...)
+			temp(arg)
 			local results = {orig.TradeSkillFrame_SetSelection(unpack(arg))}
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
@@ -348,6 +354,7 @@ do
 end
 
 function AuctionFrameAuctions_OnEvent(...)
+	temp(arg)
     if AuctionFrameAuctions:IsVisible() then
         return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end

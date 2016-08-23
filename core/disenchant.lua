@@ -34,12 +34,12 @@ do
 	}
 
 	function public.source(item_id)
-	    return unpack(data[item_id] or {})
+	    return unpack(data[item_id] or tt)
 	end
 end
 
 function LOAD()
-	ARMOR = set-from
+	ARMOR = set
 		'INVTYPE_HEAD'
 		'INVTYPE_NECK'
 		'INVTYPE_SHOULDER'
@@ -55,7 +55,7 @@ function LOAD()
 		'INVTYPE_TRINKET'
 		'INVTYPE_CLOAK'
 		'INVTYPE_HOLDABLE'
-	WEAPON = set-from
+	WEAPON = set
 		'INVTYPE_2HWEAPON'
 		'INVTYPE_WEAPONMAINHAND'
 		'INVTYPE_WEAPON'
