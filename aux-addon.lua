@@ -17,6 +17,9 @@ do
 	function mutator(value) current_owner_page = value end
 end
 
+public.empty = {}
+public.pass = function() end
+
 do
 	local pool, overflow_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
 	CreateFrame'Frame':SetScript('OnUpdate', function()
