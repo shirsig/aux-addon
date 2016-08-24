@@ -141,12 +141,9 @@ do
 		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
 	end
 	local set_mt, list_mt, object_mt = collector_mt(keys), collector_mt(values), collector_mt(pairs)
---	public.accessor()
---	set, list, object = function() return setmetatable(t, set_mt) end, function() return setmetatable(t, list_mt) end, function() return setmetatable(t, object_mt) end
---	private()
-	function public.set.get() return setmetatable(t, set_mt) end
-	function public.list.get() return setmetatable(t, list_mt) end
-	function public.object.get() return setmetatable(t, object_mt) end
+	public.property()
+	set, list, object = {get=function() return setmetatable(t, set_mt) end}, {get=function() return setmetatable(t, list_mt) end}, {get=function() return setmetatable(t, object_mt) end}
+	private()
 	-- TODO or 'auto' 'transient'?
 end
 
