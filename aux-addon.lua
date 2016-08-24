@@ -3,9 +3,12 @@ public.version = '5.0.0'
 
 do
 	local bids_loaded
-	public.bids_loaded()
-	function accessor() return bids_loaded end
-	function mutator(value) bids_loaded = value end
+	public.property.bids_loaded{
+		get = function() return bids_loaded end,
+		set = function(value) bids_loaded = value end,
+	}
+--	function public.bids_loaded.get()
+--	end
 end
 do
 	local current_owner_page
@@ -15,7 +18,7 @@ do
 end
 
 do
-	local pool, weak_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
+	local pool, overflow_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for t in transient do recycle(t) end
 		wipe(transient)
@@ -31,35 +34,39 @@ do
 		if getn(pool) < 50 then
 			tinsert(pool, t)
 		else
-			tinsert(weak_pool, t)
+			tinsert(overflow_pool, t)
 		end
-		log(getn(table_pool), '-', getn(weak_pool))
+		log(getn(table_pool), '-', getn(overflow_pool))
 	end
 	function public.accessor.t()
-		return tremove(pool) or tremove(weak_pool) or {}
+		return tremove(pool) or tremove(overflow_pool) or {}
 	end
 	function public.accessor.tt()
-		local t = tremove(pool) or tremove(weak_pool) or {}
+		local t = tremove(pool) or tremove(overflow_pool) or {}
 		transient[t] = true
 		return t
 	end
 	function public.operator_mt(f)
-		local function apply(self, value) recycle(self); return self.raw and setmetatable(f(value), nil) or f(value) end
+		local function apply(self, value)
+			local raw = self.raw
+			recycle(self)
+			return raw and setmetatable(f(value), nil) or f(value)
+		end
 		return {__unm=function(self) self.raw = true end, __call=apply, __sub=apply}
 	end
 	do
-		local temp, temp_mt, perm, perm_mt
-		function temp(t) transient[t] = true return t end
-		temp_mt = operator_mt(temp)
-		function perm(t) transient[t] = nil return t end
-		perm_mt = operator_mt(perm)
+		local make_transient, make_persistent, temp_mt, perm_mt
+		function make_transient(t) transient[t] = true return t end
+		function make_persistent(t) transient[t] = nil return t end
+		temp_mt = operator_mt(make_transient)
+		perm_mt = operator_mt(make_persistent)
 		function public.accessor.temp() return setmetatable(t, temp_mt) end
-		function mutator(t) return temp(t) end
+		function mutator(t) return make_transient(t) end
 		function public.accessor.perm() return setmetatable(t, perm_mt) end
-		function mutator(t) return perm(t) end
+		function mutator(t) return make_persistent(t) end
 	end
 	local function keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
-		assert(overflow == nil, 'Overflow.')
+		if overflow ~= nil then error 'Overflow.' end
 		if k1 ~= nil then t[k1] = true end
 		if k2 ~= nil then t[k2] = true end
 		if k3 ~= nil then t[k3] = true end
@@ -83,7 +90,7 @@ do
 		return t
 	end
 	local function values(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,overflow)
-		assert(overflow == nil, 'Overflow.')
+		if overflow ~= nil then error 'Overflow.' end
 		if v1 ~= nil then tinsert(t, v1) end
 		if v2 ~= nil then tinsert(t, v2) end
 		if v3 ~= nil then tinsert(t, v3) end
@@ -107,7 +114,7 @@ do
 		return t
 	end
 	local function pairs(t,k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8,k9,v9,k10,v10,overflow)
-		assert(overflow == nil, 'Overflow.')
+		if overflow ~= nil then error 'Overflow.' end
 		if k1 ~= nil then t[k1] = v1 end
 		if k2 ~= nil then t[k2] = v2 end
 		if k3 ~= nil then t[k3] = v3 end
@@ -130,7 +137,7 @@ do
 	function public.accessor.set() return setmetatable(t, set_mt) end
 	function public.accessor.list() return setmetatable(t, list_mt) end
 	function public.accessor.object() return setmetatable(t, object_mt) end
-	-- TODO or 'auto' 'free' 'deprecate' 'release' 'transient'?
+	-- TODO or 'auto' 'transient'?
 end
 
 local event_frame = CreateFrame 'Frame'
