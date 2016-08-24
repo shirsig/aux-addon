@@ -11,11 +11,11 @@ function importer_mt.__index(self, key)
 	if type(key) ~= 'string' then import_error() end
 	_state[self][self] = key; return self
 end
-function importer_mt.__call(self, arg1, arg2)
-	local name, state, module, alias
+function importer_mt.__call(self, arg1, arg2, state) state=_state[self]
+	local name, module, alias
 	name = arg2 or arg1
 	if type(name) ~= 'string' then import_error() end
-	state, module = _state[self], _modules[name]
+	module = _modules[name]
 	alias, state[self] = state[self] or name, nil
 	if module then
 		if alias == '' then
@@ -34,13 +34,12 @@ declarator_mt = {__metatable=false}
 do
 	local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE}
 	local COMPATIBLE = {private=MUTABLE+PROPERTY, public=PROPERTY, mutable=PRIVATE}
-	function declarator_mt.__index(self, key)
-		local state, modifiers, modifier, compatible; state = _state[self]
+	function declarator_mt.__index(self, key, state) state=_state[self]
 		if state.property then declaration_error() end
-		modifiers, modifier, compatible = state.modifiers, MODIFIER[key], COMPATIBLE[key]
+		local modifiers, modifier, compatible = state[self], MODIFIER[key], COMPATIBLE[key]
 		if not modifier then modifier, compatible, state.property = PROPERTY, PRIVATE+PUBLIC, key end
 		if mask(compatible, modifiers) ~= modifiers then declaration_error() end
-		state.modifiers = modifiers + modifier
+		state[self] = modifiers + modifier
 		return self
 	end
 end
@@ -61,13 +60,13 @@ do
 			self.data[key] = value
 		end
 	end
-	declarator_mt.__newindex = function(self, key, value) self=_state[self]
-		local property, modifiers; property, modifiers, self[self] = self.property, self[self], PRIVATE
-		if property then self.property = nil; declare(self, modifiers, property, {key=value}) end
+	declarator_mt.__newindex = function(self, key, value, state) state=_state[self]
+		local property, modifiers; property, modifiers, state[self] = state.property, state[self], PRIVATE
+		if property then state.property = nil; declare(state, modifiers, property, {[key]=value}) end
 	end
-	function declarator_mt.__call(self, value) self=_state[self]
-		local property, modifiers; property, modifiers, self[self] = self.property, self[self], PRIVATE
-		if property then self.property = nil; declare(self, modifiers, property, value) else self.modifiers = modifiers end
+	function declarator_mt.__call(self, value, state) state=_state[self]
+		local property, modifiers; property, modifiers, state[self] = state.property, state[self], PRIVATE
+		if property then state.property = nil; declare(state, modifiers, property, value) else state.modifiers = modifiers end
 	end
 end
 do
