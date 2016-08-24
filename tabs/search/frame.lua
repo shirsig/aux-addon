@@ -247,7 +247,7 @@ function create_frames()
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
 	    btn:SetText 'Search Results'
-	    btn:SetScript('OnClick', function() set_tab(RESULTS) end)
+	    btn:SetScript('OnClick', function() set_subtab(RESULTS) end)
 	    search_results_button = btn
 	end
 	do
@@ -256,7 +256,7 @@ function create_frames()
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
 	    btn:SetText 'Saved Searches'
-	    btn:SetScript('OnClick', function() set_tab(SAVED) end)
+	    btn:SetScript('OnClick', function() set_subtab(SAVED) end)
 	    saved_searches_button = btn
 	end
 	do
@@ -265,7 +265,7 @@ function create_frames()
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
 	    btn:SetText 'Filter Builder'
-	    btn:SetScript('OnClick', function() set_tab(FILTER) end)
+	    btn:SetScript('OnClick', function() set_subtab(FILTER) end)
 	    new_filter_button = btn
 	end
 	do

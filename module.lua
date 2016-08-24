@@ -108,6 +108,7 @@ function module(name)
 			metadata = {_=MUTABLE, _g=PRIVATE, _m=PRIVATE, _i=PRIVATE, import=PRIVATE, private=PROPERTY+ACCESSOR, public=PROPERTY+ACCESSOR, mutable=PROPERTY+ACCESSOR, accessor=PROPERTY+ACCESSOR+MUTATOR, mutator=PROPERTY+ACCESSOR+MUTATOR},
 			data = {_g=_g, _m=env, _i=interface, import=importer}, accessors=accessors, mutators=mutators,
 		}
+		if not name then error('kek', 2) end
 		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
 		importer [''] 'core'
 	end

@@ -45,7 +45,7 @@ public.filters = {
     },
 
     ['left'] = {
-        input_type = {'30m', '2h', '8h', '24h'},
+        input_type = -list('30m', '2h', '8h', '24h'),
         validator = function(index)
             return function(auction_record)
                 return auction_record.duration == index
@@ -54,7 +54,7 @@ public.filters = {
     },
 
     ['rarity'] = {
-        input_type = {'poor', 'common', 'uncommon', 'rare', 'epic'},
+        input_type = -list('poor', 'common', 'uncommon', 'rare', 'epic'),
         validator = function(index)
             return function(auction_record)
                 return auction_record.quality == index - 1
@@ -207,11 +207,11 @@ public.filters = {
 }
 
 function operator(str)
-    local operator = str == 'not' and {'operator', 'not', 1}
+    local operator = str == 'not' and -list('operator', 'not', 1)
     for name in -set('and', 'or') do
 	    for arity in present(select(3, strfind(str, '^'..name..'(%d*)$'))) do
 		    arity = tonumber(arity)
-		    operator = not (arity and arity < 2) and {'operator', name, arity}
+		    operator = not (arity and arity < 2) and -list('operator', name, arity)
 	    end
     end
     return operator or nil
@@ -229,7 +229,7 @@ do
 			end
 			for number in present(tonumber(select(3, strfind(str, '^(%d+)$')))) do
 				if number >= 1 and number <= 60 then
-					for _, filter in {'min_level', 'max_level'} do
+					for filter in -temp^set('min_level', 'max_level') do
 						if not self[filter] then
 							self[filter] = {str, number}
 							return true
@@ -237,12 +237,12 @@ do
 					end
 				end
 			end
-			for _, parser in {
-				{'class', info.item_class_index},
-				{'subclass', L(info.item_subclass_index, index(self.class, 2) or 0, _1)},
-				{'slot', L(info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0, _1)},
-				{'quality', info.item_quality_index},
-			} do
+			for _, parser in -list(
+				-list('class', info.item_class_index),
+				-list('subclass', L(info.item_subclass_index, index(self.class, 2) or 0, _1)),
+				-list('slot', L(info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0, _1)),
+				-list('quality', info.item_quality_index)
+			) do
 				if not self[parser[1]] then
 					tinsert(parser, str)
 					for index, label in present(parser[2](select(3, unpack(parser)))) do
@@ -254,7 +254,7 @@ do
 			if not self[str] and (str == 'usable' or str == 'exact' and self.name and size(self) == 1) then
 				self[str] = {str, 1}
 			elseif i == 1 and strlen(str) <= 63 then
-				self.name = {str, unquote(str)}
+				self.name = -list(str, unquote(str))
 --				return nil, 'The name filter must not be longer than 63 characters'
 			else
 				return
@@ -304,14 +304,14 @@ function public.parse_query_string(str)
                         return nil, 'Invalid input for '..parts[i]..'. Expecting: '..input_type
                     end
                 end
-                tinsert(post_filter, {'filter', parts[i], parts[i + 1]})
+                tinsert(post_filter, -list('filter', parts[i], parts[i + 1]))
                 i = i + 1
             else
-                tinsert(post_filter, {'filter', parts[i]})
+                tinsert(post_filter, -list('filter', parts[i]))
             end
         elseif not blizzard_filter_parser(parts[i], i) then
 	        if parts[i] ~= '' then
-		        tinsert(post_filter, {'filter', 'tooltip', parts[i]})
+		        tinsert(post_filter, -list('filter', 'tooltip', parts[i]))
 	        else
 	            return nil, 'Empty modifier'
 	        end

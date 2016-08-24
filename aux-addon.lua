@@ -51,16 +51,14 @@ do
 
 	function public.modifier(f)
 		local function apply(_, value) return f(value) end
-		return setmetatable(t, {
-			 __call=apply, __sub=apply, __pow=apply, __newindex=function(_, _, value) return f(value) end,
-		})
+		return setmetatable(t, {__call=apply, __sub=apply, __pow=apply, __newindex=function(_, _, value) return f(value) end})
 	end
-	local temp, perm = modifier(function(t) transient[t] = true end), modifier(function(t) transient[t] = nil; return t end)
+	local temp, perm = modifier(function(t) transient[t] = true return t end), modifier(function(t) transient[t] = nil; return t end)
 	function public.accessor.temp() return temp end; function mutator(t) return temp(t) end
 	function public.accessor.perm() return perm end; function mutator(t) return perm(t) end
 
-	local function keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20)
-		if not t then return end
+	local function keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
+		assert(overflow == nil, 'Overflow.')
 		if k1 ~= nil then t[k1] = true end
 		if k2 ~= nil then t[k2] = true end
 		if k3 ~= nil then t[k3] = true end
@@ -83,8 +81,8 @@ do
 		if k20 ~= nil then t[k20] = true end
 		return t
 	end
-	local function values(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20)
-		if not t then return end
+	local function values(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,overflow)
+		assert(overflow == nil, 'Overflow.')
 		if v1 ~= nil then tinsert(t, v1) end
 		if v2 ~= nil then tinsert(t, v2) end
 		if v3 ~= nil then tinsert(t, v3) end
@@ -107,8 +105,8 @@ do
 		if v20 ~= nil then tinsert(t, v20) end
 		return t
 	end
-	local function pairs(t,k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8,k9,v9,k10,v10)
-		if not t then return end
+	local function pairs(t,k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8,k9,v9,k10,v10,overflow)
+		assert(overflow == nil, 'Overflow.')
 		if k1 ~= nil then t[k1] = v1 end
 		if k2 ~= nil then t[k2] = v2 end
 		if k3 ~= nil then t[k3] = v3 end
@@ -121,7 +119,7 @@ do
 		if k10 ~= nil then t[k10] = v10 end
 		return t
 	end
-	function public.collector_mt(f)
+	local function collector_mt(f)
 		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
 	end
 	local set_mt, list_mt, object_mt = collector_mt(keys), collector_mt(values), collector_mt(pairs)
@@ -164,8 +162,9 @@ end
 
 tab_info = t
 do
-	local data = temp-list('search_tab', 'Search', 'post_tab', 'Post', 'auctions_tab', 'Auctions', 'bids_tab', 'Bids')
-	for i=1,7,2 do
+	local data = -temp^list('search_tab', 'Search', 'post_tab', 'Post', 'auctions_tab', 'Auctions', 'bids_tab', 'Bids')
+	for i=1,getn(data),2 do
+		log(data[i], data[i + 1])
 		local tab = -object('name', data[i + 1])
 		local env = (function() module(data[i]) return _m end)()
 		function env.mutator.OPEN(f) tab.OPEN = f end

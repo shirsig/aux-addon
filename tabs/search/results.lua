@@ -66,13 +66,13 @@ do
 	function previous_search()
 		search_box:ClearFocus()
 		update_search(search_index - 1)
-		set_tab(RESULTS)
+		set_subtab(RESULTS)
 	end
 
 	function next_search()
 		search_box:ClearFocus()
 		update_search(search_index + 1)
-		set_tab(RESULTS)
+		set_subtab(RESULTS)
 	end
 end
 
@@ -267,7 +267,7 @@ function start_search(queries, continuation)
 			search.status_bar:set_text 'Scan complete'
 
 			if current_search == search and frame.results:IsVisible() and getn(search.records) == 0 then
-				set_tab(SAVED)
+				set_subtab(SAVED)
 			end
 
 			search.active = false
@@ -348,7 +348,7 @@ function public.execute(resume, real_time)
 	current_search.active = true
 	update_start_stop()
 
-	set_tab(RESULTS)
+	set_subtab(RESULTS)
 	if real_time then
 		start_real_time_scan(queries[1], nil, continuation)
 	else
