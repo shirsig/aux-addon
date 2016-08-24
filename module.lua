@@ -75,10 +75,9 @@ do
 	local function index(public)
 		local access = public and PUBLIC or 0
 		return function(self, key, state) state=_state[self]
-			local getter, modifiers = state.getters[key], state.metadata[key] or 0
-			local masked = mask(access+PROPERTY, modifiers)
+			local masked = mask(access+PROPERTY, state.metadata[key] or 0)
 			if masked == access+PROPERTY then
-				return getter and getter[key]()
+				return state.getters[key]()
 			elseif masked == access then
 				return state.data[key]
 			elseif not public then
@@ -91,7 +90,7 @@ do
 		local modifiers = state.metadata[key]
 		if modifiers then
 			if mask(PROPERTY, modifiers) ~= 0 then
-				state.setters(value)
+				state.setters[key](value)
 			elseif mask(MUTABLE, modifiers) ~= 0 or mutability_error(key) then
 				state.data[key] = value
 			end
@@ -101,11 +100,13 @@ do
 	end
 	interface_mt = {__metatable=false, __index=index(true)}
 	function interface_mt.__newindex(self, key, value, state) state=_state[self]
-		local metadata = state.metadata
-		if metadata and mask(PUBLIC+PROPERTY, metadata) == PUBLIC+PROPERTY then
-			return state.setters[key](value)
-		elseif mask(PUBLIC+PROPERTY, metadata) == PUBLIC then
-			return state.data[key](value)
+		local modifiers = state.metadata[key]
+		if modifiers then
+			if mask(PUBLIC+PROPERTY, modifiers) == PUBLIC+PROPERTY then
+				return state.setters[key](value)
+			elseif mask(PUBLIC, modifiers) ~= 0 then
+				return state.data[key](value)
+			end
 		end
 	end
 end
@@ -114,8 +115,8 @@ function module(name)
 		local state, getters, env, interface, declarator, importer
 		env, interface, declarator, importer = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, importer_mt)
 		getters = {
-			private=function() state.modifiers=PRIVATE; state.property=nil return declarator end, public=function() state.modifiers=PUBLIC; state.property=nil return declarator end,
-			mutable=function() state.modifiers=MUTABLE; state.property=nil return declarator end, property=function() state.modifiers=MUTABLE; state.property=nil return declarator end,
+			private=function() state[declarator]=state.modifiers; return declarator.private end, public=function() state[declarator]=state.modifiers; return declarator.public end,
+			mutable=function() state[declarator]=state.modifiers; return declarator.mutable end, property=function() state[declarator]=state.modifiers; return declarator.property end,
 		}
 		state = {
 			env=env, interface=interface, modifiers=PRIVATE,
@@ -123,7 +124,8 @@ function module(name)
 			data = {_G=_G, M=env, error=error, import=importer}, getters=getters, setters={},
 		}
 		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
-		importer [''] 'core'
+		importer [''] 'core' -- TODO
 	end
+	-- TODO create_env (per module call)
 	setfenv(2, _modules[name].env)
 end
