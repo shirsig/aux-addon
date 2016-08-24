@@ -72,14 +72,14 @@ function update_form()
 	end
 
 	if blizzard_query.exact then
-		for key in -temp^set('class', 'subclass', 'slot', 'quality') do
+		for key in -temp-set('class', 'subclass', 'slot', 'quality') do
 			_m[key..'_dropdown'].button:Disable()
 		end
 	else
 		class_dropdown.button:Enable()
 		quality_dropdown.button:Enable()
 	end
-	for key in -temp^set('min_level', 'max_level') do
+	for key in -temp-set('min_level', 'max_level') do
 		if blizzard_query.exact then
 			_m[key..'_input']:Disable()
 		else
@@ -134,7 +134,7 @@ function get_filter_builder_query()
 		add(strlower(_g['ITEM_QUALITY'..quality..'_DESC']))
 	end
 
-	local post_filter_string = filter_util.query_string(-temp^object('blizzard', tt, 'post', post_filter))
+	local post_filter_string = filter_util.query_string(-temp-object('blizzard', tt, 'post', post_filter))
 	add(post_filter_string ~= '' and post_filter_string)
 
 	return query_string or ''
@@ -313,7 +313,7 @@ function set_filter_display_offset(x_offset, y_offset)
 end
 
 function initialize_filter_dropdown()
-	for _, filter in -temp^list('and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity')('left', 'utilizable', 'discard') do
+	for _, filter in -temp-list('and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity')('left', 'utilizable', 'discard') do
 		UIDropDownMenu_AddButton(-object(
 			'text', filter,
 			'value', filter,

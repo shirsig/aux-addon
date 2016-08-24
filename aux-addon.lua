@@ -15,48 +15,49 @@ do
 end
 
 do
-	local table_pool, transient = {}, {}
-
+	local pool, weak_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
 	CreateFrame'Frame':SetScript('OnUpdate', function()
-		for t in transient do
-			recycle(t)
---			log(getn(table_pool))
-		end
+		for t in transient do recycle(t) end
 		wipe(transient)
 	end)
-
 	function public.wipe(t) -- like with a cloth or something
-		for k in t do
-			t[k] = nil
-		end
+		for k in t do t[k] = nil end
 		table.setn(t, 0)
 		return setmetatable(t, nil)
 	end
-
 	function public.recycle(t)
 		transient[t] = nil
 		wipe(t)
-		tinsert(table_pool, t)
+		if getn(pool) < 50 then
+			tinsert(pool, t)
+		else
+			tinsert(weak_pool, t)
+		end
+		log(getn(table_pool), '-', getn(weak_pool))
 	end
-
 	function public.accessor.t()
-		return tremove(table_pool) or {}
+		return tremove(pool) or tremove(weak_pool) or {}
 	end
-
 	function public.accessor.tt()
-		local t = tremove(table_pool) or {}
+		local t = tremove(pool) or tremove(weak_pool) or {}
 		transient[t] = true
 		return t
 	end
-
-	function public.modifier(f)
-		local function apply(_, value) return f(value) end
-		return setmetatable(t, {__call=apply, __sub=apply, __pow=apply, __newindex=function(_, _, value) return f(value) end})
+	function public.operator_mt(f)
+		local function apply(self, value) recycle(self); return self.raw and setmetatable(f(value), nil) or f(value) end
+		return {__unm=function(self) self.raw = true end, __call=apply, __sub=apply}
 	end
-	local temp, perm = modifier(function(t) transient[t] = true return t end), modifier(function(t) transient[t] = nil; return t end)
-	function public.accessor.temp() return temp end; function mutator(t) return temp(t) end
-	function public.accessor.perm() return perm end; function mutator(t) return perm(t) end
-
+	do
+		local temp, temp_mt, perm, perm_mt
+		function temp(t) transient[t] = true return t end
+		temp_mt = operator_mt(temp)
+		function perm(t) transient[t] = nil return t end
+		perm_mt = operator_mt(perm)
+		function public.accessor.temp() return setmetatable(t, temp_mt) end
+		function mutator(t) return temp(t) end
+		function public.accessor.perm() return setmetatable(t, perm_mt) end
+		function mutator(t) return perm(t) end
+	end
 	local function keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
 		assert(overflow == nil, 'Overflow.')
 		if k1 ~= nil then t[k1] = true end
@@ -123,13 +124,17 @@ do
 		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
 	end
 	local set_mt, list_mt, object_mt = collector_mt(keys), collector_mt(values), collector_mt(pairs)
-
-	public.accessor.set, public.accessor.list, public.accessor.object = function() return setmetatable(t, set_mt) end, function() return setmetatable(t, list_mt) end, function() return setmetatable(t, object_mt) end
+--	public.accessor()
+--	set, list, object = function() return setmetatable(t, set_mt) end, function() return setmetatable(t, list_mt) end, function() return setmetatable(t, object_mt) end
+--	private()
+	function public.accessor.set() return setmetatable(t, set_mt) end
+	function public.accessor.list() return setmetatable(t, list_mt) end
+	function public.accessor.object() return setmetatable(t, object_mt) end
 	-- TODO or 'auto' 'free' 'deprecate' 'release' 'transient'?
 end
 
 local event_frame = CreateFrame 'Frame'
-for event in -temp^set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
+for event in -temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
 end
 
@@ -162,7 +167,7 @@ end
 
 tab_info = t
 do
-	local data = -temp^list('search_tab', 'Search', 'post_tab', 'Post', 'auctions_tab', 'Auctions', 'bids_tab', 'Bids')
+	local data = -temp-list('search_tab', 'Search', 'post_tab', 'Post', 'auctions_tab', 'Auctions', 'bids_tab', 'Bids')
 	for i=1,getn(data),2 do
 		log(data[i], data[i + 1])
 		local tab = -object('name', data[i + 1])
