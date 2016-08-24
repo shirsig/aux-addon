@@ -88,7 +88,7 @@ public.font_size = {
 
 do
 	local id = 1
-	function public.accessor.name()
+	function public.name.get()
 		id = id + 1
 		return 'aux_frame'..id
 	end

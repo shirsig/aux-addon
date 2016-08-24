@@ -403,7 +403,7 @@ function public.item_quality_index(item_quality)
     end
 end
 
-function public.accessor.inventory()
+function public.inventory.get()
 	local bag, slot = 0, 0
 	return function()
 		if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then

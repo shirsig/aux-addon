@@ -66,7 +66,7 @@ end
 
 public.huge = 1.8*10^308
 
-function public.accessor.modified() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end
+function public.modified.get() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end
 
 --do TODO
 --	local _state = setmetatable({}, {__mode='kv'})

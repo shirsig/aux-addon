@@ -41,13 +41,13 @@ do
 		call(on_complete)
 	end
 
-	function accessor.state()
+	function property.state.get()
 		local _, state = next(filter(scan_states, function(state) return state.id == thread_id end))
 		return state
 	end
 end
 
-function accessor.query() return state.params.queries[state.query_index] end
+function property.query.get() return state.params.queries[state.query_index] end
 
 function wait_for_callback(...) temp=arg
 	local send_signal, signal_received = signal()

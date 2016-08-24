@@ -3,18 +3,19 @@ public.version = '5.0.0'
 
 do
 	local bids_loaded
-	public.property.bids_loaded{
+	public.bids_loaded
+	{
 		get = function() return bids_loaded end,
 		set = function(value) bids_loaded = value end,
 	}
---	function public.bids_loaded.get()
---	end
 end
 do
 	local current_owner_page
-	public.current_owner_page()
-	function accessor() return current_owner_page end
-	function mutator(value) current_owner_page = value end
+	public.current_owner_page
+	{
+		get = function() return current_owner_page end,
+		set = function(value) current_owner_page = value end,
+	}
 end
 
 public.empty = {}
@@ -41,10 +42,10 @@ do
 		end
 		log(getn(table_pool), '-', getn(overflow_pool))
 	end
-	function public.accessor.t()
+	function public.t.get()
 		return tremove(pool) or tremove(overflow_pool) or {}
 	end
-	function public.accessor.tt()
+	function public.tt.get()
 		local t = tremove(pool) or tremove(overflow_pool) or {}
 		transient[t] = true
 		return t
@@ -63,10 +64,16 @@ do
 		function make_persistent(t) transient[t] = nil return t end
 		temp_mt = operator_mt(make_transient)
 		perm_mt = operator_mt(make_persistent)
-		function public.accessor.temp() return setmetatable(t, temp_mt) end
-		function mutator(t) return make_transient(t) end
-		function public.accessor.perm() return setmetatable(t, perm_mt) end
-		function mutator(t) return make_persistent(t) end
+		public.temp
+		{
+			get = function() return setmetatable(t, temp_mt) end,
+			set = function(t) return make_transient(t) end,
+		}
+		public.perm
+		{
+			get = function() return setmetatable(t, perm_mt) end,
+			set = function(t) return make_persistent(t) end,
+		}
 	end
 	local function keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
 		if overflow ~= nil then error 'Overflow.' end
@@ -137,9 +144,9 @@ do
 --	public.accessor()
 --	set, list, object = function() return setmetatable(t, set_mt) end, function() return setmetatable(t, list_mt) end, function() return setmetatable(t, object_mt) end
 --	private()
-	function public.accessor.set() return setmetatable(t, set_mt) end
-	function public.accessor.list() return setmetatable(t, list_mt) end
-	function public.accessor.object() return setmetatable(t, object_mt) end
+	function public.set.get() return setmetatable(t, set_mt) end
+	function public.list.get() return setmetatable(t, list_mt) end
+	function public.object.get() return setmetatable(t, object_mt) end
 	-- TODO or 'auto' 'transient'?
 end
 
@@ -151,8 +158,8 @@ end
 ADDON_LOADED = t
 do
 	local handlers, handlers2 = t, t
-	function public.mutator.LOAD(f) tinsert(handlers, f) end
-	function public.mutator.LOAD2(f) tinsert(handlers2, f) end
+	function public.LOAD.set(f) tinsert(handlers, f) end
+	function public.LOAD2.set(f) tinsert(handlers2, f) end
 	event_frame:SetScript('OnEvent', function()
 		if event == 'ADDON_LOADED' then
 			if ADDON_LOADED[arg1] then ADDON_LOADED[arg1]() end
@@ -182,18 +189,18 @@ do
 		log(data[i], data[i + 1])
 		local tab = -object('name', data[i + 1])
 		local env = (function() module(data[i]) return M end)()
-		function env.mutator.OPEN(f) tab.OPEN = f end
-		function env.mutator.CLOSE(f) tab.CLOSE = f end
-		function env.mutator.USE_ITEM(f) tab.USE_ITEM = f end
-		function env.mutator.CLICK_LINK(f) tab.CLICK_LINK = f end
-		function env.public.accessor.ACTIVE() return tab == active_tab end
+		function env.OPEN.set(f) tab.OPEN = f end
+		function env.CLOSE.set(f) tab.CLOSE = f end
+		function env.USE_ITEM.set(f) tab.USE_ITEM = f end
+		function env.CLICK_LINK.set(f) tab.CLICK_LINK = f end
+		function env.public.ACTIVE.get() return tab == active_tab end
 		tinsert(tab_info, tab)
 	end
 end
 
 do
 	local active_tab_index
-	function accessor.active_tab() return tab_info[active_tab_index] end
+	function property.active_tab.get() return tab_info[active_tab_index] end
 	function on_tab_click(index)
 		call(active_tab_index and active_tab.CLOSE)
 		active_tab_index = index
@@ -236,7 +243,7 @@ end
 
 do
 	local locked
-	function public.accessor.bid_in_progress() return locked end
+	function public.bid_in_progress.get() return locked end
 	function public.place_bid(type, index, amount, on_success)
 		if locked then return end
 		local money = GetMoney()
@@ -256,7 +263,7 @@ end
 
 do
 	local locked
-	function public.accessor.cancel_in_progress() return locked end
+	function public.cancel_in_progress.get() return locked end
 	function public.cancel_auction(index, on_success)
 		if locked then return end
 		locked = true

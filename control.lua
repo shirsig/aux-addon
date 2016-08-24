@@ -6,9 +6,12 @@ mutable.threads = t
 
 do
 	local thread_id
-	public.thread_id()
-	function accessor() return thread_id end
-	function mutator(value) thread_id = value end
+	public.thread_id
+	{
+		get = function() return thread_id end,
+		set = function(value) thread_id = value end,
+	}
+
 end
 
 function LOAD()
@@ -50,7 +53,7 @@ end
 
 do
 	local id = 0
-	function accessor.id() id = id + 1; return id end
+	function property.id.get() id = id + 1; return id end
 end
 
 function public.kill_listener(listener_id)

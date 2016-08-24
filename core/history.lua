@@ -12,7 +12,7 @@ value_cache = t
 
 do
 	local data
-	function accessor.data()
+	function property.data.get()
 		if not data then
 			local dataset = persistence.dataset
 			data = dataset.history or t
@@ -24,7 +24,7 @@ end
 
 do
 	local next_push = 0
-	function accessor.next_push()
+	function property.next_push.get()
 		if time() > next_push then
 			local date = date '*t'
 			date.hour, date.min, date.sec = 24, 0, 0
@@ -34,7 +34,7 @@ do
 	end
 end
 
-function accessor.new_record()
+function property.new_record.get()
 	return -object('next_push', next_push, 'data_points', t)
 end
 

@@ -3,13 +3,13 @@ module 'post_tab' import 'scan' 'scan_util' 'post' 'history' 'info' 'persistence
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
-function accessor.default_settings()
+function property.default_settings.get()
 	return -object('duration', DURATION_8 , 'stack_size', 1, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
 end
 
 do
 	local data
-	function accessor.data()
+	function property.data.get()
 		if not data then
 			local dataset = persistence.dataset
 			data = dataset.post or t
