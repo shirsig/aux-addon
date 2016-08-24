@@ -1,10 +1,11 @@
 local type, setmetatable, setfenv, unpack, next, mask, pcall, _g = type, setmetatable, setfenv, unpack, next, bit.band, pcall, getfenv(0)
 local PRIVATE, PUBLIC, MUTABLE, DYNAMIC, PROPERTY = 0, 1, 2, 4, 8
-local error, import_error, declaration_error, collision_error, assignment_error, set_property, env_mt, interface_mt, declarator_mt, importer_mt
+local error, import_error, declaration_error, collision_error, mutability_error, set_property, env_mt, interface_mt, declarator_mt, importer_mt
+local empty, pass = {}, function() end
+local _state, _modules = {}, {}
 function error(message, ...) return _g.error(format(message or '', unpack(arg))..'\n'..debugstack(), 0) end
 import_error, declaration_error = function() error 'Invalid import statement.' end, function() error 'Invalid declaration.' end
-collision_error, assignment_error = function(key) error('Field "%s" already exists.', key) end, function(key) error('Field "%s" is immutable.', key) end
-local _state, _modules = {}, {}
+collision_error, mutability_error = function(key) error('Field "%s" already exists.', key) end, function(key) error('Field "%s" is immutable.', key) end
 importer_mt = {__metatable=false}
 function importer_mt.__index(self, key)
 	if type(key) ~= 'string' then import_error() end
@@ -44,58 +45,61 @@ do
 	end
 end
 do
-	local function declare(self, key, value, getter, setter)
-		local property, metadata = self.metadata, self.property
-		if property and (type(value) == 'function' or declaration_error()) then
-			if key == 'get' then getter = value elseif key == 'set' or declaration_error() then setter = value end
-			key, value = property, nil
-		end
-		local old_modifiers, new_modifiers = metadata[key], self.modifiers
-		if old_modifiers then collision_error(key) end
-		metadata[key], self.modifiers = new_modifiers, PRIVATE
-		self.data[key], self.getters[key], self.setters[key] = value, getter, setter
-	end
-	declarator_mt.__newindex = declare --TODO
 	local function unpack_property_value(t)
-		local get, set; get, set, t.get, t.set = t.get, t.set, nil, nil
-		if next(t) or get and type(get ~= 'function') or set and type(set) ~= 'function' then error() end
+		local get, set; get, set, t.get, t.set = t.get or pass, t.set or pass, nil, nil
+		if next(t) or type(get ~= 'function') or type(set) ~= 'function' then error() end
 		return get, set
 	end
-	function declarator_mt.__call(self, value)
-		local state, property; state = _state[self]; property = state.property
-		if property then
+	local function declare(self, modifiers, key, value)
+		local metadata = self.metadata
+		if metadata[key] then collision_error(key) end
+		metadata[key] = modifiers
+		if mask(PROPERTY, modifiers) ~= 0 then
 			local success, getter, setter = pcall(unpack_property_value, value)
-			if success or declaration_error() then declare(state, property, nil, getter, setter)
+			if success or declaration_error() then self.getters[key], self.setters[key] = getter, setter end
+		else
+			self.data[key] = value
 		end
+	end
+	declarator_mt.__newindex = function(self, key, value) self=_state[self]
+		local property, modifiers; property, modifiers, self[self] = self.property, self[self], PRIVATE
+		if property then self.property = nil; declare(self, modifiers, property, {key=value}) end
+	end
+	function declarator_mt.__call(self, value) self=_state[self]
+		local property, modifiers; property, modifiers, self[self] = self.property, self[self], PRIVATE
+		if property then self.property = nil; declare(self, modifiers, property, value) else self.modifiers = modifiers end
 	end
 end
 do
-	local function index(public, default)
-		local access, default
-		if public then access, default = PUBLIC, {} else access, default = 0, _g end
+	local function index(public)
+		local access = public and PUBLIC or 0
 		return function(self, key)
-			local state, getter, modifiers; state = _state[self];
+			local state, getter, modifiers; state = _state[self]
 			getter, modifiers = state.getters[key], state.metadata[key] or 0
-			if mask((public*PUBLIC)+PROPERTY, modifiers) == access+PROPERTY then return getter and getter[key]() end
-			return state.data[key] or default[key]
+			local masked = mask(access+PROPERTY, modifiers)
+			if masked == access+PROPERTY then
+				return getter and getter[key]()
+			elseif masked == access then
+				return state.data[key]
+			elseif not public then
+				return _g[key]
+			end
 		end
 	end
-	env_mt = {__metatable=false, __index=index(PRIVATE, _g)}
+	env_mt = {__metatable=false, __index=index()}
 	function env_mt.__newindex(self, key, value)
-		local state = _state[self]; local modifiers = state.metadata[key]
+		local state, modifiers; state = _state[self]; modifiers = state.metadata[key]
 		if modifiers then
-			local mutator = state.setters[key]
-			if mutator then return mutator(value) end
-			if mask(MUTABLE, modifiers) == 0 then assignment_error(key) end
+			local setter = state.setters[key]
+			if setter then setter(value) elseif mask(MUTABLE, modifiers) ~= 0 or mutability_error(key) then state.data[key] = value end
 		else
-			state.metadata[key] = state.modifiers
+			declare(state, key, value)
 		end
-		state.data[key] = value
 	end
-	interface_mt = {__metatable=false, __index=index(PUBLIC, {})}
+	interface_mt = {__metatable=false, __index=index(true)}
 	function interface_mt.__newindex(self, key, value)
-		local state = _state[self]; local metadata = state.metadata
-		if metadata and mask(PUBLIC+MUTATOR, metadata) == PUBLIC+MUTATOR then
+		local state, metadata; state = _state[self]; metadata = state.metadata
+		if metadata and mask(PUBLIC+PROPERTY, metadata) == PUBLIC+PROPERTY then
 			return state.setters[key](value)
 		elseif mask(PUBLIC+PROPERTY, metadata) == PUBLIC then
 			return state.data[key](value)
@@ -104,17 +108,16 @@ do
 end
 function module(name)
 	if not _modules[name] then
-		local state, getters, setters, env, interface, declarator, importer
+		local state, getters, env, interface, declarator, importer
 		env, interface, declarator, importer = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, importer_mt)
 		getters = {
 			private=function() state.modifiers=PRIVATE; state.property=nil return declarator end, public=function() state.modifiers=PUBLIC; state.property=nil return declarator end,
 			mutable=function() state.modifiers=MUTABLE; state.property=nil return declarator end,
 		}
-		setters = {accessor=function(f) set_property(state.metadata, getters, ACCESSOR, state.property, f) end, mutator=function(f) set_property(state.metadata, setters, MUTATOR, state.property, f) end}
 		state = {
 			env=env, interface=interface, modifiers=PRIVATE,
-			metadata = {_=MUTABLE, _g=PRIVATE, _m=PRIVATE, _i=PRIVATE, error=PRIVATE, import=PRIVATE, private=PROPERTY+ACCESSOR, public=PROPERTY+ACCESSOR, mutable=PROPERTY+ACCESSOR, accessor=PROPERTY+ACCESSOR+MUTATOR, mutator=PROPERTY+ACCESSOR+MUTATOR},
-			data = {_g=_g, _m=env, _i=interface, error=error, import=importer}, getters=getters, setters=setters,
+			metadata = {_=MUTABLE, _g=PRIVATE, _m=PRIVATE, _i=PRIVATE, error=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, mutable=PROPERTY, accessor=PROPERTY, mutator=PROPERTY},
+			data = {_g=_g, _m=env, _i=interface, error=error, import=importer}, getters=getters, setters={},
 		}
 		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
 		importer [''] 'core'
