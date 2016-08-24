@@ -216,7 +216,7 @@ function create_frames()
 	    local frame = CreateFrame('Frame', nil, frame.parameters)
 	    start_price_frame = frame
 	    gui.set_content_style(frame)
-	    frame:SetPoint('TOPRIGHT', _m.frame.parameters, 'TOPRIGHT', -71, -60)
+	    frame:SetPoint('TOPRIGHT', M.frame.parameters, 'TOPRIGHT', -71, -60)
 	    frame:SetWidth(180)
 	    frame:SetHeight(22)
 	    local editbox = gui.editbox(frame)

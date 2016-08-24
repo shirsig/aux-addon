@@ -120,8 +120,8 @@ function public.auction(index, query_type)
             link = link,
             itemstring = item_info.itemstring,
             item_key = item_id..':'..suffix_id,
-            search_signature = join(temp-{item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), _g.aux_ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
-            sniping_signature = join(temp-{item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, _g.aux_ignore_owner and (is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
+            search_signature = join(temp-{item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), _G.aux_ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+            sniping_signature = join(temp-{item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, _G.aux_ignore_owner and (is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
 
             name = name,
             texture = texture,
@@ -165,7 +165,7 @@ function public.bid_update(auction_record)
     auction_record.unit_blizzard_bid = auction_record.blizzard_bid / auction_record.aux_quantity
     auction_record.unit_bid_price = auction_record.bid_price / auction_record.aux_quantity
     auction_record.high_bidder = 1
-    auction_record.search_signature = join(temp-{auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, _g.aux_ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
+    auction_record.search_signature = join(temp-{auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, _G.aux_ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
 end
 
 function public.set_tooltip(itemstring, owner, anchor)
@@ -237,8 +237,8 @@ function public.load_tooltip(frame, tooltip)
         end
     end
     for i=1,getn(tooltip) do -- TODO why is this needed?
-	    _g[frame:GetName()..'TextLeft'..i]:SetJustifyH('LEFT')
-	    _g[frame:GetName()..'TextRight'..i]:SetJustifyH('LEFT')
+	    _G[frame:GetName()..'TextLeft'..i]:SetJustifyH('LEFT')
+	    _G[frame:GetName()..'TextRight'..i]:SetJustifyH('LEFT')
     end
 end
 
@@ -275,10 +275,10 @@ function public.tooltip(setter)
     local tooltip = t
     for i=1,AuxTooltip:NumLines() do
         tinsert(tooltip, {
-            left_text = _g['AuxTooltipTextLeft'..i]:GetText(),
-            left_color = {_g['AuxTooltipTextLeft'..i]:GetTextColor()},
-            right_text = _g['AuxTooltipTextRight'..i]:IsVisible() and _g['AuxTooltipTextRight'..i]:GetText(),
-            right_color = {_g['AuxTooltipTextRight'..i]:GetTextColor()},
+            left_text = _G['AuxTooltipTextLeft'..i]:GetText(),
+            left_color = {_G['AuxTooltipTextLeft'..i]:GetTextColor()},
+            right_text = _G['AuxTooltipTextRight'..i]:IsVisible() and _G['AuxTooltipTextRight'..i]:GetText(),
+            right_color = {_G['AuxTooltipTextRight'..i]:GetTextColor()},
         })
     end
 
@@ -388,15 +388,15 @@ end
 
 function public.item_slot_index(class_index, subclass_index, slot_name)
     for i, slot in temp-{GetAuctionInvTypes(class_index, subclass_index)} do
-        if strupper(_g[slot]) == strupper(slot_name) then
-            return i, _g[slot]
+        if strupper(_G[slot]) == strupper(slot_name) then
+            return i, _G[slot]
         end
     end
 end
 
 function public.item_quality_index(item_quality)
     for i=0,4 do
-        local quality = _g['ITEM_QUALITY'..i..'_DESC']
+        local quality = _G['ITEM_QUALITY'..i..'_DESC']
         if strupper(item_quality) == strupper(quality) then
             return i, quality
         end

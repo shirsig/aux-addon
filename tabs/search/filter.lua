@@ -73,7 +73,7 @@ function update_form()
 
 	if blizzard_query.exact then
 		for key in -temp-set('class', 'subclass', 'slot', 'quality') do
-			_m[key..'_dropdown'].button:Disable()
+			M[key..'_dropdown'].button:Disable()
 		end
 	else
 		class_dropdown.button:Enable()
@@ -81,9 +81,9 @@ function update_form()
 	end
 	for key in -temp-set('min_level', 'max_level') do
 		if blizzard_query.exact then
-			_m[key..'_input']:Disable()
+			M[key..'_input']:Disable()
 		else
-			_m[key..'_input']:Enable()
+			M[key..'_input']:Enable()
 		end
 	end
 	if blizzard_query.exact then
@@ -125,13 +125,13 @@ function get_filter_builder_query()
 		for subclass in present(blizzard_query.subclass) do
 			local subclasses = temp-{GetAuctionItemSubClasses(class)}
 			add(strlower(subclasses[subclass]))
-			add(blizzard_query.slot and strlower(_g[blizzard_query.slot]))
+			add(blizzard_query.slot and strlower(_G[blizzard_query.slot]))
 		end
 	end
 
 	local quality = blizzard_query.quality
 	if quality and quality >= 0 then
-		add(strlower(_g['ITEM_QUALITY'..quality..'_DESC']))
+		add(strlower(_G['ITEM_QUALITY'..quality..'_DESC']))
 	end
 
 	local post_filter_string = filter_util.query_string(-temp-object('blizzard', tt, 'post', post_filter))
@@ -377,7 +377,7 @@ function initialize_slot_dropdown()
 	if subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
 		UIDropDownMenu_AddButton(-object('text', ALL, 'value', '', 'func', on_click))
 		for _, slot in {GetAuctionInvTypes(class_index, subclass_index)} do
-			UIDropDownMenu_AddButton(-object('text', _g[slot], 'value', slot, 'func', on_click))
+			UIDropDownMenu_AddButton(-object('text', _G[slot], 'value', slot, 'func', on_click))
 		end
 	end
 end
@@ -389,6 +389,6 @@ function initialize_quality_dropdown()
 	end
 	UIDropDownMenu_AddButton(-object('text', ALL, 'value', -1, 'func', on_click))
 	for i=0,4 do
-		UIDropDownMenu_AddButton(-object('text', _g['ITEM_QUALITY'..i..'_DESC'], 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton(-object('text', _G['ITEM_QUALITY'..i..'_DESC'], 'value', i, 'func', on_click))
 	end
 end

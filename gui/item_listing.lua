@@ -48,15 +48,15 @@ function public.create(parent, on_click, selected)
 	scroll_frame:SetPoint('TOPLEFT', content, 'TOPLEFT', 0, 15)
 	scroll_frame:SetPoint('BOTTOMRIGHT', content, 'BOTTOMRIGHT', -4, -15)
 
-	local scrollBar = _g[scroll_frame:GetName()..'ScrollBar']
+	local scrollBar = _G[scroll_frame:GetName()..'ScrollBar']
 	scrollBar:SetWidth(12)
 	local thumbTex = scrollBar:GetThumbTexture()
 	thumbTex:SetPoint('CENTER', 0, 0)
 	thumbTex:SetTexture(color.content.background())
 	thumbTex:SetHeight(50)
 	thumbTex:SetWidth(12)
-	_g[scrollBar:GetName()..'ScrollUpButton']:Hide()
-	_g[scrollBar:GetName()..'ScrollDownButton']:Hide()
+	_G[scrollBar:GetName()..'ScrollUpButton']:Hide()
+	_G[scrollBar:GetName()..'ScrollDownButton']:Hide()
 
 	local rows = t
 	local row_index = 1

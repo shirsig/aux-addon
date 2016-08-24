@@ -1,6 +1,6 @@
-local type, setmetatable, setfenv, unpack, next, mask, pcall, _g = type, setmetatable, setfenv, unpack, next, bit.band, pcall, getfenv(0)
+local type, setmetatable, setfenv, unpack, next, mask, pcall, _G = type, setmetatable, setfenv, unpack, next, bit.band, pcall, getfenv(0)
 local PRIVATE, PUBLIC, MUTABLE, DYNAMIC, PROPERTY = 0, 1, 2, 4, 8
-local function error(message, ...) return _g.error(format(message or '', unpack(arg))..'\n'..debugstack(), 0) end
+local function error(message, ...) return _G.error(format(message or '', unpack(arg))..'\n'..debugstack(), 0) end
 local import_error, declaration_error = function() error 'Invalid import statement.' end, function() error 'Invalid declaration.' end
 local collision_error, mutability_error = function(key) error('Field "%s" already exists.', key) end, function(key) error('Field "%s" is immutable.', key) end
 local declare, env_mt, interface_mt, declarator_mt, importer_mt
@@ -82,7 +82,7 @@ do
 			elseif masked == access then
 				return state.data[key]
 			elseif not public then
-				return _g[key]
+				return _G[key]
 			end
 		end
 	end
@@ -115,12 +115,12 @@ function module(name)
 		env, interface, declarator, importer = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, importer_mt)
 		getters = {
 			private=function() state.modifiers=PRIVATE; state.property=nil return declarator end, public=function() state.modifiers=PUBLIC; state.property=nil return declarator end,
-			mutable=function() state.modifiers=MUTABLE; state.property=nil return declarator end,
+			mutable=function() state.modifiers=MUTABLE; state.property=nil return declarator end, property=function() state.modifiers=MUTABLE; state.property=nil return declarator end,
 		}
 		state = {
 			env=env, interface=interface, modifiers=PRIVATE,
-			metadata = {_=MUTABLE, _g=PRIVATE, _m=PRIVATE, _i=PRIVATE, error=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, mutable=PROPERTY, accessor=PROPERTY, mutator=PROPERTY},
-			data = {_g=_g, _m=env, _i=interface, error=error, import=importer}, getters=getters, setters={},
+			metadata = {_=MUTABLE, _G=PRIVATE, M=PRIVATE, error=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, mutable=PROPERTY, property=PROPERTY},
+			data = {_G=_G, M=env, error=error, import=importer}, getters=getters, setters={},
 		}
 		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
 		importer [''] 'core'

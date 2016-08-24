@@ -164,7 +164,7 @@ do
 
 			-- TODO test __lt
 		else
-			_m[event]()
+			M[event]()
 		end
 	end)
 end
@@ -181,7 +181,7 @@ do
 	for i=1,getn(data),2 do
 		log(data[i], data[i + 1])
 		local tab = -object('name', data[i + 1])
-		local env = (function() module(data[i]) return _m end)()
+		local env = (function() module(data[i]) return M end)()
 		function env.mutator.OPEN(f) tab.OPEN = f end
 		function env.mutator.CLOSE(f) tab.CLOSE = f end
 		function env.mutator.USE_ITEM(f) tab.USE_ITEM = f end
@@ -219,13 +219,13 @@ function UseContainerItem(...) temp=arg
 	end
 end
 
-public.orig = setmetatable({[_g]=t}, {__index=function(self, key) return self[_g][key] end})
+public.orig = setmetatable({[_G]=t}, {__index=function(self, key) return self[_G][key] end})
 function public.hook(...) temp=arg
 	local name, object, handler
 	if arg.n == 3 then
 		name, object, handler = unpack(arg)
 	else
-		object, name, handler = _g, unpack(arg)
+		object, name, handler = _G, unpack(arg)
 	end
 	handler = handler or getfenv(2)[name]
 	orig[object] = orig[object] or t
@@ -273,7 +273,7 @@ end
 
 function public.is_player(name, current)
 	local realm = GetCVar 'realmName'
-	return not current and index(_g.aux_characters, realm, name) or UnitName 'player' == name
+	return not current and index(_G.aux_characters, realm, name) or UnitName 'player' == name
 end
 
 function public.neutral_faction()

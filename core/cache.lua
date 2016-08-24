@@ -8,12 +8,12 @@ MAX_ITEM_ID = 30000
 items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
 merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'}}
 
-_g.aux_items = t
-_g.aux_item_ids = t
-_g.aux_auctionable_items = t
-_g.aux_merchant_buy = t
-_g.aux_merchant_sell = t
-_g.aux_characters = t
+_G.aux_items = t
+_G.aux_item_ids = t
+_G.aux_auctionable_items = t
+_G.aux_merchant_buy = t
+_G.aux_merchant_sell = t
+_G.aux_characters = t
 
 function LOAD()
 	import 'persistence' 'info'
@@ -29,7 +29,7 @@ function LOAD()
 	event_listener('NEW_AUCTION_UPDATE', function()
 		for info in present(info.auction_sell_item()) do
 			for item_id in present(item_id(info.name)) do
-				_g.aux_merchant_sell[_m.item_id(info.name)] = info.vendor_price / (_m.info.max_item_charges(item_id) or info.count)
+				_G.aux_merchant_sell[M.item_id(info.name)] = info.vendor_price / (M.info.max_item_charges(item_id) or info.count)
 			end
 		end
 	end)
@@ -76,15 +76,15 @@ end
 
 function public.merchant_info(item_id)
 	local buy_info
-	if _g.aux_merchant_buy[item_id] then
-		buy_info = persistence.read(merchant_buy_schema, _g.aux_merchant_buy[item_id])
+	if _G.aux_merchant_buy[item_id] then
+		buy_info = persistence.read(merchant_buy_schema, _G.aux_merchant_buy[item_id])
 	end
 
-	return _g.aux_merchant_sell[item_id], buy_info and buy_info.unit_price, buy_info and buy_info.limited
+	return _G.aux_merchant_sell[item_id], buy_info and buy_info.unit_price, buy_info and buy_info.limited
 end
 
 function public.item_info(item_id)
-	local data_string = _g.aux_items[item_id]
+	local data_string = _G.aux_items[item_id]
 	if data_string then
 		local cached_data = persistence.read(items_schema, data_string)
 		return -object(
@@ -102,7 +102,7 @@ function public.item_info(item_id)
 end
 
 function public.item_id(item_name)
-	return _g.aux_item_ids[strlower(item_name)]
+	return _G.aux_item_ids[strlower(item_name)]
 end
 
 function merchant_buy_scan()
@@ -114,8 +114,8 @@ function merchant_buy_scan()
 		if link then
 			local item_id = info.parse_link(link)
 			local new_unit_price, new_limited = price / count, stock >= 0
-			if _g.aux_merchant_buy[item_id] then
-				local buy_info = persistence.read(merchant_buy_schema, _g.aux_merchant_buy[item_id])
+			if _G.aux_merchant_buy[item_id] then
+				local buy_info = persistence.read(merchant_buy_schema, _G.aux_merchant_buy[item_id])
 
 				local unit_price
 				if buy_info.limited and not new_limited then
@@ -126,12 +126,12 @@ function merchant_buy_scan()
 					unit_price = min(buy_info.unit_price, new_unit_price)
 				end
 
-				_g.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, -object(
+				_G.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, -object(
 					'unit_price', unit_price,
 					'limited', buy_info.limited and new_limited
 				))
 			else
-				_g.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, -object(
+				_G.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, -object(
 					'unit_price', new_unit_price,
 					'limited', new_limited
 				))
@@ -148,7 +148,7 @@ function merchant_sell_scan()
 	for slot in info.inventory do temp=slot
 		local item_info = temp-info.container_item(unpack(slot))
 		if item_info then
-			_g.aux_merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity
+			_G.aux_merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity
 		end
 	end
 end
@@ -160,9 +160,9 @@ function scan_wdb(item_id)
 	while processed <= 100 and item_id <= MAX_ITEM_ID do
 		local itemstring = 'item:'..item_id
 		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
-		if name and not _g.aux_item_ids[strlower(name)] then
-			_g.aux_item_ids[strlower(name)] = item_id
-			_g.aux_items[item_id] = persistence.write(items_schema, -object(
+		if name and not _G.aux_item_ids[strlower(name)] then
+			_G.aux_item_ids[strlower(name)] = item_id
+			_G.aux_items[item_id] = persistence.write(items_schema, -object(
 				'name', name,
 				'quality', quality,
 				'level', level,
@@ -174,7 +174,7 @@ function scan_wdb(item_id)
 			))
 			local tooltip = info.tooltip(function(tooltip) tooltip:SetHyperlink(itemstring) end)
 			if info.auctionable(tooltip, quality) then
-				tinsert(_g.aux_auctionable_items, strlower(name))
+				tinsert(_G.aux_auctionable_items, strlower(name))
 			end
 			processed = processed + 1
 		end
@@ -185,7 +185,7 @@ function scan_wdb(item_id)
 		local t0 = GetTime()
 		thread(when, function() return GetTime() - t0 > 0.1 end, scan_wdb, item_id)
 	else
-		sort(_g.aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
+		sort(_G.aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 	end
 end
 

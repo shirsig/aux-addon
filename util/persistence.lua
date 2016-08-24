@@ -1,14 +1,14 @@
 module 'persistence'
 
-_g.aux_datasets = t
+_G.aux_datasets = t
 
 do
 	local dataset
 	function public.accessor.dataset()
 		if not dataset then
 		    local dataset_key = format('%s|%s', GetCVar 'realmName', UnitFactionGroup 'player')
-		    dataset = _g.aux_datasets[dataset_key] or t
-		    _g.aux_datasets[dataset_key] = dataset
+		    dataset = _G.aux_datasets[dataset_key] or t
+		    _G.aux_datasets[dataset_key] = dataset
 	    end
 	    return dataset
 	end

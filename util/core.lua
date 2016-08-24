@@ -1,6 +1,6 @@
 module 'core'
 
-public.join = _g.table.concat
+public.join = _G.table.concat
 
 function public.replicate(count, value)
 	if count > 0 then return value, replicate(count - 1, value) end
@@ -23,7 +23,7 @@ do
 	for i=1,9 do
 		local key = '_'..i
 		public[key] = t
-		formal_parameters[_m[key]] = i
+		formal_parameters[M[key]] = i
 	end
 	local function helper(f, arg1, arg2)
 		local params = t
@@ -99,7 +99,7 @@ function public.expand(array, ...) temp=arg
 end
 
 function public.copy(t)
-	local copy = _m.t
+	local copy = M.t
 	for k, v in t do copy[k] = v end
 	table.setn(copy, getn(t))
 	return setmetatable(copy, getmetatable(t))
@@ -111,7 +111,7 @@ function public.select(i, ...) temp=arg
 end
 
 function public.collect(indices, ...) temp=arg
-	local t = _m.t
+	local t = M.t
 	for _, v in indices do
 		tinsert(t, arg[v])
 	end
@@ -119,7 +119,7 @@ function public.collect(indices, ...) temp=arg
 end
 
 function public.hashset(t)
-	local set = _m.t
+	local set = M.t
 	for _, v in t do
 		set[v] = true
 	end
@@ -139,13 +139,13 @@ function public.key(value, t)
 end
 
 function public.keys(t)
-	local keys = _m.t
+	local keys = M.t
 	for k in t do tinsert(keys, k) end
 	return keys
 end
 
 function public.values(t)
-	local values = _m.t
+	local values = M.t
 	for _, v in t do tinsert(values, v) end
 	return values
 end
@@ -190,7 +190,7 @@ function public.all(t, p)
 end
 
 function public.filter(t, p)
-	local filtered = _m.t
+	local filtered = M.t
 	for k, v in t do
 		if p(v, k) then
 			filtered[k] = v
@@ -200,7 +200,7 @@ function public.filter(t, p)
 end
 
 function public.map(t, f)
-	local mapped = _m.t
+	local mapped = M.t
 	for k, v in t do mapped[k] = f(v, k) end
 	return mapped
 end

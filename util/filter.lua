@@ -297,7 +297,7 @@ function public.parse_query_string(str)
             if input_type ~= '' then
                 if not parts[i + 1] or not parse_parameter(input_type, parts[i + 1]) then
                     if parts[i] == 'item' then
-                        return nil, 'Invalid item name', _g.aux_auctionable_items
+                        return nil, 'Invalid item name', _G.aux_auctionable_items
                     elseif type(input_type) == 'table' then
                         return nil, 'Invalid choice for '..parts[i], input_type
                     else
@@ -354,7 +354,7 @@ function public.query(query_string)
         blizzard_query = blizzard_query(components),
         validator = validator(components),
         prettified = prettified_query_string(components),
-    }, _m.suggestions(components)
+    }, M.suggestions(components)
 end
 
 function public.queries(query_string)
@@ -397,7 +397,7 @@ function suggestions(components)
     -- slots
     if not components.blizzard.slot then
         for _, invtype in temp-{GetAuctionInvTypes(index(components.blizzard.class, 2) or 0, index(components.blizzard.subclass, 2) or 0)} do
-            tinsert(suggestions, _g[invtype])
+            tinsert(suggestions, _G[invtype])
         end
     end
 
@@ -406,12 +406,12 @@ function suggestions(components)
 
     -- rarities
     if not components.blizzard.quality then
-        for i=0,4 do tinsert(suggestions, _g['ITEM_QUALITY'..i..'_DESC']) end
+        for i=0,4 do tinsert(suggestions, _G['ITEM_QUALITY'..i..'_DESC']) end
     end
 
     -- item names
     if size(components.blizzard) + getn(components.post) == 1 and components.blizzard.name == '' then
-        for _, name in _g.aux_auctionable_items do
+        for _, name in _G.aux_auctionable_items do
             tinsert(suggestions, name..'/exact')
         end
     end

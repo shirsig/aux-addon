@@ -147,7 +147,7 @@ function scan_page(i)
 	end
 
 	local auction_info = info.auction(i, state.params.type)
-	if auction_info and (auction_info.owner or state.params.ignore_owner or _g.aux_ignore_owner) then
+	if auction_info and (auction_info.owner or state.params.ignore_owner or _G.aux_ignore_owner) then
 		auction_info.index = i
 		auction_info.page = state.page
 		auction_info.blizzard_query = query.blizzard_query
@@ -218,7 +218,7 @@ function wait_for_list_results(send_signal, signal_received)
         last_update = GetTime()
         updated = true
     end)
-    local ignore_owner = state.params.ignore_owner or _g.aux_ignore_owner
+    local ignore_owner = state.params.ignore_owner or _G.aux_ignore_owner
     return thread(when, function()
         -- short circuiting order important, owner_data_complete must be called iif an update has happened.
         local ok = updated and (ignore_owner or owner_data_complete('list')) or last_update and GetTime() - last_update > 5

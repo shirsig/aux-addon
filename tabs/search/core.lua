@@ -19,7 +19,7 @@ StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
 }
 do
     local function action()
-        _g.aux_auto_buy_filter = _g[this:GetParent():GetName()..'EditBox']:GetText()
+        _G.aux_auto_buy_filter = _G[this:GetParent():GetName()..'EditBox']:GetText()
         update_auto_buy_filter()
     end
 
@@ -29,7 +29,7 @@ do
         button2 = 'Cancel',
         hasEditBox = 1,
         OnShow = function()
-            local edit_box = _g[this:GetName()..'EditBox']
+            local edit_box = _G[this:GetName()..'EditBox']
             edit_box:SetMaxLetters(nil)
             edit_box:SetFocus()
             edit_box:HighlightText()
