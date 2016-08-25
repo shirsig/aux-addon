@@ -2,6 +2,17 @@ local type, setmetatable, setfenv, unpack, next, mask, combine, pcall, _G = type
 local error, import_error, declaration_error, collision_error, mutability_error
 local pass, env_mt, interface_mt, declarator_mt, importer_mt
 
+module 'util' (
+	a,
+	b,
+	c
+)
+
+import: util (a, b, c)
+
+from 'util' import ()
+import 'util' as 'kek'
+
 local PRIVATE, PUBLIC, MUTABLE, DYNAMIC, PROPERTY = 1, 2, 4, 8, 16
 local _state, _modules = {}, {}
 
@@ -15,8 +26,9 @@ mutability_error = function(key) error('Field "%s" is immutable.', key) end
 
 pass = function() end
 
-function get()
-	setfenv()
+generic_function_mt = {__metatable=false}
+function generic_function_mt:__call()
+
 end
 
 do
@@ -36,29 +48,33 @@ do
 		state[self] = key; return self
 	end
 	function importer_mt:__call(arg1, arg2, state) state=_state[self]
-		local name, alias, module; name = arg2 or arg1
+		local name, alias, module; name = arg2 or arg1 or import_error()
 		alias, state[self] = state[self] or name, nil
 		return pcall(import, state, _modules[name], alias) and self or import_error()
 	end
 end
 
 do
-	local declare
-	do
-		local function unpack_property_value(t)
-			local get, set; get, set, t.get, t.set = t.get or pass, t.set or pass, nil, nil
-			if next(t) or type(get) ~= 'function' or type(set) ~= 'function' then error() end
-			return get, set
-		end
-		function declare(state, modifiers, key, value)
-			local metadata = state.metadata
-			metadata[key] = metadata[key] and collision_error(key) or modifiers
-			if mask(PROPERTY, modifiers) == 0 then
-				state.data[key] = value
-			else
-				local success, getter, setter = pcall(unpack_property_value, value)
-				if success or declaration_error() then state.getters[key], state.setters[key] = getter, setter end
+	local function dynamize(f)
+		return function(...) setfenv(f, getfenv(2)); return f(unpack(arg)) end
+	end
+	local function unpack_property_value(t)
+		local get, set; get, set, t.get, t.set = t.get or pass, t.set or pass, nil, nil
+		if next(t) or type(get) ~= 'function' or type(set) ~= 'function' then error() end
+		return get, set
+	end
+	local function declare(state, modifiers, key, value)
+		local metadata, dynamic, property = state.metadata, mask(DYNAMIC, modifiers) ~= 0, mask(PROPERTY, modifiers) ~= 0
+		metadata[key] = metadata[key] and collision_error(key) or modifiers
+		if property then
+			local success, getter, setter = pcall(unpack_property_value, value)
+			if success or declaration_error() then
+				if dynamic then getter, setter = dynamize(getter), dynamize(setter) end
+				state.getters[key], state.setters[key] = getter, setter
 			end
+		else
+			if dynamic and (type(value) == 'function' or declaration_error()) then value = dynamize(value) end
+			state.data[key] = value
 		end
 	end
 
@@ -89,6 +105,7 @@ do
 
 	env_mt = {__metatable=false}
 	function env_mt:__index(key, state) state=_state[self]
+		if state.intercept_index(key) then return end
 		if mask(PROPERTY, state.metadata[key] or 0) ~= 0 then
 			return state.getters[key]()
 		else
@@ -97,6 +114,7 @@ do
 		end
 	end
 	function env_mt:__newindex(key, value, state) state=_state[self]
+		if state.intercept_newindex(key, value) then return end
 		local modifiers = state.metadata[key]
 		if modifiers then
 			if mask(PROPERTY, modifiers) ~= 0 then
@@ -107,6 +125,9 @@ do
 		else
 			declare(state, state.modifiers, key, value)
 		end
+	end
+	function env_mt:__call(key, ...)
+		_state[self].intercept_call(key, arg)
 	end
 end
 
@@ -132,9 +153,8 @@ end
 
 function module(name)
 	if not _modules[name] then
-		local state, env, interface, declarator, importer
-		env, interface, declarator, importer = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, importer_mt)
-		state = {
+		local env, interface, declarator, importer = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, importer_mt)
+		local state = {
 			env = env,
 			interface = interface,
 			modifiers = PRIVATE,

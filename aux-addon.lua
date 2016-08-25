@@ -34,7 +34,8 @@ do
 		return t
 	end
 	function public.recycle(t)
-		wipe(t)
+		while getn(t) > 0 do tremove(t) end --  TODO or is setn enough?
+		if next(t) then return end -- no hashtables, they can't be shrunk -- TODO "n" field?
 		if getn(pool) < 50 then
 			tinsert(pool, t)
 		else
