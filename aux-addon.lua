@@ -22,31 +22,31 @@ public.empty = {}
 public.pass = function() end
 
 do
-	local pool, overflow_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
+	local pool, weak_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
 	CreateFrame'Frame':SetScript('OnUpdate', function()
-		for t in transient do recycle(t) end
+--		local t = tremove(transient)
+		for _, t in transient do recycle(t) end
 		wipe(transient)
 	end)
 	function public.wipe(t) -- like with a cloth or something
 		for k in t do t[k] = nil end
 		table.setn(t, 0)
-		return setmetatable(t, nil)
+		return t
 	end
 	function public.recycle(t)
-		transient[t] = nil
 		wipe(t)
 		if getn(pool) < 50 then
 			tinsert(pool, t)
 		else
-			tinsert(overflow_pool, t)
+			tinsert(weak_pool, t)
 		end
-		log(getn(table_pool), '-', getn(overflow_pool))
+		log(getn(table_pool), '-', getn(weak_pool))
 	end
 	function public.t.get()
-		return tremove(pool) or tremove(overflow_pool) or {}
+		return tremove(pool) or tremove(weak_pool) or {}
 	end
 	function public.tt.get()
-		local t = tremove(pool) or tremove(overflow_pool) or {}
+		local t = tremove(pool) or tremove(weak_pool) or {}
 		transient[t] = true
 		return t
 	end
@@ -59,45 +59,14 @@ do
 		return {__unm=function(self) self.raw = true end, __call=apply, __sub=apply}
 	end
 	do
-		local make_transient, make_persistent, temp_mt, perm_mt
-		function make_transient(t) transient[t] = true return t end
-		function make_persistent(t) transient[t] = nil return t end
+		local make_transient, temp_mt
+		function make_transient(t) tinsert(transient, t) return t end
 		temp_mt = operator_mt(make_transient)
-		perm_mt = operator_mt(make_persistent)
 		public.temp
 		{
 			get = function() return setmetatable(t, temp_mt) end,
 			set = function(t) return make_transient(t) end,
 		}
-		public.perm
-		{
-			get = function() return setmetatable(t, perm_mt) end,
-			set = function(t) return make_persistent(t) end,
-		}
-	end
-	local function keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
-		if overflow ~= nil then error 'Overflow.' end
-		if k1 ~= nil then t[k1] = true end
-		if k2 ~= nil then t[k2] = true end
-		if k3 ~= nil then t[k3] = true end
-		if k4 ~= nil then t[k4] = true end
-		if k5 ~= nil then t[k5] = true end
-		if k6 ~= nil then t[k6] = true end
-		if k7 ~= nil then t[k7] = true end
-		if k8 ~= nil then t[k8] = true end
-		if k9 ~= nil then t[k9] = true end
-		if k10 ~= nil then t[k10] = true end
-		if k11 ~= nil then t[k11] = true end
-		if k12 ~= nil then t[k12] = true end
-		if k13 ~= nil then t[k13] = true end
-		if k14 ~= nil then t[k14] = true end
-		if k15 ~= nil then t[k15] = true end
-		if k16 ~= nil then t[k16] = true end
-		if k17 ~= nil then t[k17] = true end
-		if k18 ~= nil then t[k18] = true end
-		if k19 ~= nil then t[k19] = true end
-		if k20 ~= nil then t[k20] = true end
-		return t
 	end
 	local function values(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,overflow)
 		if overflow ~= nil then error 'Overflow.' end
@@ -142,13 +111,13 @@ do
 	end
 	local set_mt, list_mt, object_mt = collector_mt(keys), collector_mt(values), collector_mt(pairs)
 	public.property()
-	set, list, object = {get=function() return setmetatable(t, set_mt) end}, {get=function() return setmetatable(t, list_mt) end}, {get=function() return setmetatable(t, object_mt) end}
+	list, object = {get=function() return setmetatable(t, list_mt) end}, {get=function() return setmetatable(t, object_mt) end}
 	private()
 	-- TODO or 'auto' 'transient'?
 end
 
 local event_frame = CreateFrame 'Frame'
-for event in -temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
+for _, event in -temp-list('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
 end
 

@@ -208,7 +208,7 @@ public.filters = {
 
 function operator(str)
     local operator = str == 'not' and -list('operator', 'not', 1)
-    for name in -set('and', 'or') do
+    for _, name in -temp-list('and', 'or') do
 	    for arity in present(select(3, strfind(str, '^'..name..'(%d*)$'))) do
 		    arity = tonumber(arity)
 		    operator = not (arity and arity < 2) and -list('operator', name, arity)
@@ -229,7 +229,7 @@ do
 			end
 			for number in present(tonumber(select(3, strfind(str, '^(%d+)$')))) do
 				if number >= 1 and number <= 60 then
-					for filter in -temp-set('min_level', 'max_level') do
+					for _, filter in -temp-list('min_level', 'max_level') do
 						if not self[filter] then
 							self[filter] = {str, number}
 							return true
@@ -517,7 +517,7 @@ function blizzard_query(components)
         query.slot = slot_index
         query.quality = item_info.quality
     else
-	    for key in -temp-set('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality') do
+	    for _, key in -temp-list('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality') do
             query[key] = index(filters[key], 2)
 	    end
     end

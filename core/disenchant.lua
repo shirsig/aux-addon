@@ -39,7 +39,7 @@ do
 end
 
 function LOAD()
-	ARMOR = -set(
+	ARMOR = set(
 		'INVTYPE_HEAD',
 		'INVTYPE_NECK',
 		'INVTYPE_SHOULDER',
@@ -56,7 +56,7 @@ function LOAD()
 		'INVTYPE_CLOAK',
 		'INVTYPE_HOLDABLE'
 	)
-	WEAPON = -set(
+	WEAPON = set(
 		'INVTYPE_2HWEAPON',
 		'INVTYPE_WEAPONMAINHAND',
 		'INVTYPE_WEAPON',
