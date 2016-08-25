@@ -2,19 +2,12 @@ local type, setmetatable, setfenv, unpack, next, mask, combine, pcall, _G = type
 local error, import_error, declaration_error, collision_error, mutability_error
 local pass, env_mt, interface_mt, declarator_mt, importer_mt
 
-module 'util' (
-	a,
-	b,
-	c
-)
+aux:module 'kek'
 
-import: util (a, b, c)
+aux.module 'kek'
 
-from 'util' import ()
-import 'util' as 'kek'
-
-local PRIVATE, PUBLIC, MUTABLE, DYNAMIC, PROPERTY = 1, 2, 4, 8, 16
-local _state, _modules = {}, {}
+local NULL, PRIVATE, PUBLIC, MUTABLE, DYNAMIC, PROPERTY = 0, 1, 2, 4, 8, 16
+local state, env_state = {}, {}, {}
 
 function error(message, ...)
 	return _G.error(format(message or '', unpack(arg))..'\n'..debugstack(), 0)
@@ -26,33 +19,24 @@ mutability_error = function(key) error('Field "%s" is immutable.', key) end
 
 pass = function() end
 
-generic_function_mt = {__metatable=false}
-function generic_function_mt:__call()
+--function intercept_index(env, callback, state)
+--
+--end
+--
+--function intercept_newindex(env, callback, state)
+--
+--end
+--
+--function intercept_call(env, callback, state)
+--
+--end
+--
+--generic_function_mt = {__metatable=false}
+--function generic_function_mt:__call(...)
+--	self.
+--end
 
-end
 
-do
-	importer_mt = {__metatable=false}
-	local function import(state, module, alias)
-		if alias == '' then
-			for key, modifiers in module.metadata do
-				if not state.metadata[key] and mask(PUBLIC, modifiers) ~= 0 then
-					state.metadata[key], state.data[key], state.getters[key], state.setters[key] = modifiers, module.data[key], module.getters[key], module.setters[key]
-				end
-			end
-		elseif not state.metadata[alias] then
-			state.metadata[alias], state.data[alias] = PRIVATE, module.interface
-		end
-	end
-	function importer_mt:__index(key, state) state=_state[self]
-		state[self] = key; return self
-	end
-	function importer_mt:__call(arg1, arg2, state) state=_state[self]
-		local name, alias, module; name = arg2 or arg1 or import_error()
-		alias, state[self] = state[self] or name, nil
-		return pcall(import, state, _modules[name], alias) and self or import_error()
-	end
-end
 
 do
 	local function dynamize(f)
@@ -105,7 +89,7 @@ do
 
 	env_mt = {__metatable=false}
 	function env_mt:__index(key, state) state=_state[self]
-		if state.intercept_index(key) then return end
+		if state.intercept_index(key) then return self end
 		if mask(PROPERTY, state.metadata[key] or 0) ~= 0 then
 			return state.getters[key]()
 		else
@@ -127,7 +111,7 @@ do
 		end
 	end
 	function env_mt:__call(key, ...)
-		_state[self].intercept_call(key, arg)
+		_state[self].intercept_call(key, arg); return self
 	end
 end
 
@@ -150,29 +134,69 @@ function interface_mt:__newindex(key, value, state) state=_state[self]
 		end
 	end
 end
+local metadata_mt = {
+	__index = function() return 0 end
+}
 
-function module(name)
-	if not _modules[name] then
-		local env, interface, declarator, importer = setmetatable({}, env_mt), setmetatable({}, interface_mt), setmetatable({}, declarator_mt), setmetatable({}, importer_mt)
-		local state = {
-			env = env,
-			interface = interface,
-			modifiers = PRIVATE,
-			metadata = {_=PROPERTY, _G=PRIVATE, M=PRIVATE, error=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, mutable=PROPERTY, dynamic=PROPERTY, property=PROPERTY},
-			data = {_G=_G, M=env, error=error, import=importer},
-			getters = {
-				_ = pass,
-				private = function() state[declarator] = PRIVATE; return declarator end,
-				public = function() state[declarator] = PUBLIC; return declarator end,
-				mutable = function() state[declarator] = MUTABLE; return declarator end,
-				dynamic = function() state[declarator] = DYNAMIC; return declarator end,
-				property = function() state[declarator] = PROPERTY; return declarator end,
-			},
-			setters = {_=pass, private=pass, public=pass, mutable=pass, dynamic=pass, property=pass},
-		}
-		_modules[name], _state[env], _state[interface], _state[declarator], _state[importer] = state, state, state, state, state
-		importer [''] 'core' -- TODO
+local function import(state, interface)
+	local module = _state[interface] or import_error()
+end
+
+local function create_module(...)
+	local env_state, env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
+	local state = {
+		env = env,
+		interface = interface,
+		modifiers = PRIVATE,
+		metadata = {_=PROPERTY, _G=PRIVATE, M=PRIVATE, error=PRIVATE, import=PRIVATE, private=PROPERTY, public=PROPERTY, mutable=PROPERTY, dynamic=PROPERTY, property=PROPERTY},
+		fields = {_G=_G, M=env, error=error},
+		getters = {
+			_ = pass,
+			private = function() state[declarator] = PRIVATE; return declarator end,
+			public = function() state[declarator] = PUBLIC; return declarator end,
+			mutable = function() state[declarator] = MUTABLE; return declarator end,
+			dynamic = function() state[declarator] = DYNAMIC; return declarator end,
+			property = function() state[declarator] = PROPERTY; return declarator end,
+		},
+		setters = {_=pass, private=pass, public=pass, mutable=pass, dynamic=pass, property=pass},
+	}
+	state[env], state[interface] = state, state
+
+	for i=1,arg.n do
+		local module = state[arg[i] or import_error()] or import_error()
+		for k, v in module.metadata do
+			if mask(PUBLIC, v) ~= 0 then
+
+			end
+		end
 	end
-	-- TODO create_env (per module call)
-	setfenv(2, _modules[name].env)
+
+	return env, interface
+
+--	-- TODO create_env (per module call)
+--	setfenv(2, _modules[name].env)
+end
+
+do
+	local modules = {}
+	function _G.module(name)
+		local module = modules[name]
+		if not module then
+			local submodules = {}
+			module = create_module()
+--			local submodules = create_module()
+			module.metadata[name] = submodules.interface
+			module.metadata.module = PUBLIC
+			function module.fields.module(name)
+				local submodule = submodules[name]
+				if not submodule then
+					submodule = create_module()
+					submodules[name] = submodule
+				end
+				setfenv(2, submodule.env)
+			end
+			modules[name], _G[name] = module, module
+		end
+		setfenv(2, module.env)
+	end
 end

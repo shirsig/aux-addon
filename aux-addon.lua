@@ -1,4 +1,18 @@
-module 'core'
+do
+	local modules = {core={create_module()}}
+	aux = setmetatable({}, {
+		__metatable = false,
+		__index = function(_, key) return modules[key][2] end,
+		__newindex = function() end,
+		__call = function(_, name)
+			modules[name] = modules[name] or {create_module(aux.core)}
+			setfenv(2, modules[name][1]())
+		end,
+	})
+end
+
+aux 'core'
+
 public.version = '5.0.0'
 
 do
@@ -69,7 +83,7 @@ do
 			set = function(t) return make_transient(t) end,
 		}
 	end
-	local function values(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,overflow)
+	local function fill(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,overflow)
 		if overflow ~= nil then error 'Overflow.' end
 		if v1 ~= nil then tinsert(t, v1) end
 		if v2 ~= nil then tinsert(t, v2) end
@@ -93,26 +107,18 @@ do
 		if v20 ~= nil then tinsert(t, v20) end
 		return t
 	end
-	local function pairs(t,k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8,k9,v9,k10,v10,overflow)
-		if overflow ~= nil then error 'Overflow.' end
-		if k1 ~= nil then t[k1] = v1 end
-		if k2 ~= nil then t[k2] = v2 end
-		if k3 ~= nil then t[k3] = v3 end
-		if k4 ~= nil then t[k4] = v4 end
-		if k5 ~= nil then t[k5] = v5 end
-		if k6 ~= nil then t[k6] = v6 end
-		if k7 ~= nil then t[k7] = v7 end
-		if k8 ~= nil then t[k8] = v8 end
-		if k9 ~= nil then t[k9] = v9 end
-		if k10 ~= nil then t[k10] = v10 end
-		return t
-	end
 	local function collector_mt(f)
 		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
 	end
+	local object_mt = {
+		__newindex()
+	}
+--	table-from(1,2,3)
 	local set_mt, list_mt, object_mt = collector_mt(keys), collector_mt(values), collector_mt(pairs)
+	modifier = public.property
 	public.property()
-	list, object = {get=function() return setmetatable(t, list_mt) end}, {get=function() return setmetatable(t, object_mt) end}
+--	list, object = {get=function() return setmetatable(t, list_mt) end}, {get=function() return setmetatable(t, object_mt) end}
+	modifier = nil
 	private()
 	-- TODO or 'auto' 'transient'?
 end
