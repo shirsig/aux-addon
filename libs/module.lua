@@ -1,4 +1,4 @@
-local type, setmetatable, setfenv, unpack, next, mask, combine, pcall, _G = type, setmetatable, setfenv, unpack, next, bit.band, bit.bor, pcall, getfenv(0)
+local type, setmetatable, setfenv, unpack, next, intersection, union, pcall, _G = type, setmetatable, setfenv, unpack, next, bit.band, bit.bor, pcall, getfenv(0)
 local error, import_error, declaration_error, collision_error, mutability_error
 local pass, start_declaration, advance_declaration, env_mt, interface_mt, metadata_mt, property_mt
 
@@ -23,9 +23,10 @@ do
 		return get, set
 	end
 	local function declare(state, modifiers, key, value)
+		if intersection(MUTABLE, modifiers) * intersection(PUBLIC+PROPERTY, modifiers) ~= 0 then declaration_error() end
 		local metadata = state.metadata
 		metadata[key] = metadata[key] and collision_error(key) or modifiers
-		if mask(PROPERTY, modifiers) == 0 then
+		if intersection(PROPERTY, modifiers) == 0 then
 			state.data[key] = value
 		else
 			local success, getter, setter = pcall(unpack_property_value, value)
@@ -37,22 +38,20 @@ do
 
 	do
 		local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, property=PROPERTY}
-		local COMPATIBLE = {private=MUTABLE+PROPERTY, public=PROPERTY, mutable=PRIVATE, property=PUBLIC}
 		local state, modifiers, property
 		local function intercept(_, key, value)
 			if type == INDEX and (not property or declaration_error()) then
-				local modifier, compatible = MODIFIER[key], COMPATIBLE[key]
-				if not modifier then modifier, compatible, property = PROPERTY, PUBLIC, key end
-				if mask(compatible, modifiers) ~= modifiers then declaration_error() end
-				modifiers = modifiers + modifier
+				local modifier = MODIFIER[key]
+				if not modifier then modifier, property = PROPERTY, key end
+				modifiers = union(modifiers, modifier)
 				return true
 			elseif type == NEWINDEX then
 				if property then key, value = property, {[key]=value} end
-				declare(state, modifiers, key, value)
+				declare(state, union(modifiers, state.modifiers), key, value)
 				advance_declaration = pass
 				return true
 			elseif type == CALL then
-				if property then declare(state, modifiers, property, value) else state.modifiers = modifiers end
+				if property then declare(state, union(modifiers, state.modifiers), property, value) else state.modifiers = modifiers end
 				advance_declaration = pass
 				return true
 			end
@@ -66,7 +65,7 @@ do
 	env_mt = {__metatable=false}
 	function env_mt:__index(key, state) state=_state[self]
 		if advance_declaration(INDEX, key) then return self end
-		if mask(PROPERTY, state.metadata[key] or 0) ~= 0 then
+		if intersection(PROPERTY, state.metadata[key] or 0) ~= 0 then
 			return state.getters[key]()
 		else
 			local value = state.data[key]
@@ -77,9 +76,9 @@ do
 		if advance_declaration(NEWINDEX, key, value) then return end
 		local modifiers = state.metadata[key]
 		if modifiers then
-			if mask(PROPERTY, modifiers) ~= 0 then
+			if intersection(PROPERTY, modifiers) ~= 0 then
 				state.setters[key](value)
-			elseif mask(MUTABLE, modifiers) ~= 0 or mutability_error(key) then
+			elseif intersection(MUTABLE, modifiers) ~= 0 or mutability_error(key) then
 				state.data[key] = value
 			end
 		else
@@ -93,7 +92,7 @@ end
 
 interface_mt = {__metatable=false}
 function interface_mt:__index(key, state) state=_state[self]
-	local masked = mask(PUBLIC+PROPERTY, state.metadata[key] or 0)
+	local masked = intersection(PUBLIC+PROPERTY, state.metadata[key] or 0)
 	if masked == PUBLIC+PROPERTY then
 		return state.getters[key]()
 	elseif masked == PUBLIC then
@@ -101,7 +100,7 @@ function interface_mt:__index(key, state) state=_state[self]
 	end
 end
 function interface_mt:__newindex(key, value, state) state=_state[self]
-	if mask(PUBLIC+PROPERTY, state.metadata[key] or 0) == PUBLIC+PROPERTY then
+	if intersection(PUBLIC+PROPERTY, state.metadata[key] or 0) == PUBLIC+PROPERTY then
 		return state.setters[key](value)
 --	elseif masked == PUBLIC and type(state.data[key]) == 'function' then
 --		return state.data[key](value)
@@ -114,7 +113,7 @@ local function module(...)
 	local state, env, interface
 	env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
 	state = {
-		metadata = {_=PROPERTY, _G=PRIVATE, M=PRIVATE, I=PRIVATE, error=PRIVATE, private=PROPERTY, public=PROPERTY, mutable=PROPERTY, property=PROPERTY},
+		metadata = {_=PROPERTY, error=PRIVATE, pass=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, private=PROPERTY, public=PROPERTY, mutable=PROPERTY, property=PROPERTY},
 		fields = {_G=_G, M=env, I=interface, error=error},
 		getters = setmetatable({
 			private = function() start_declaration(PRIVATE, state); return env end,
@@ -127,7 +126,7 @@ local function module(...)
 	for i=1,arg.n do
 		local module = state[arg[i] or import_error()] or import_error()
 		for k, v in module.metadata do
-			if mask(PUBLIC, v) ~= 0 and (not state.metadata[k] or import_error()) then
+			if intersection(PUBLIC, v) ~= 0 and (not state.metadata[k] or import_error()) then
 				state.metadata[k], state.data[k], state.getters[k], state.setters[k] = v, module.data[k], module.getters[k], module.setters[k]
 			end
 		end

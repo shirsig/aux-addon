@@ -38,8 +38,7 @@ do
 	}
 end
 
-public.empty = {}
-public.pass = function() end
+public.empty = setmetatable({}, {__metatable=false, __newindex=error})
 
 do
 	local pool, weak_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
