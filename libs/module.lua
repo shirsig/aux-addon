@@ -20,8 +20,9 @@ local _state, _public = {}, {[nop]=true}
 do
 	local function declare(self, public, type, name, value)
 		if _G.type(value) ~= 'function' and (not type or declaration_error()) then value, type = const(value), INDEX end
-		self[type][name] = self[type][name] and collision_error(name) or value
-		_public[value] = public
+		if self[type][name] then declaration_error() end
+		self[type][name], _public[value] = value, public
+		if self[CALL][name] and self[INDEX][name] then declaration_error() end
 	end
 
 	declaration = nop
@@ -78,26 +79,21 @@ do
 	env_mt = {__metatable=false}
 	function env_mt:__index(key) local state=_state[self]
 		if declaration(state, INDEX, key) then return self end
-		if intersection(PROPERTY, state.metadata[key] or 0) ~= 0 then
-			return state.getters[key]()
+		if state[INDEX][key] then
+			return state[INDEX][key]()
+		elseif state[CALL][key] then
+			return state[CALL][key]
 		else
-			local value = state.methods[key]
-			if value ~= nil then return value else return _G[key] end
+			return _G[key]
 		end
 	end
 	function env_mt:__newindex(key, value) local state=_state[self]
 		if declaration(state, NEWINDEX, key, value) then return end
-		local modifiers = state.metadata[key]
-		if modifiers then
-			if intersection(PROPERTY, modifiers) ~= 0 then
-				state.mutators[key](value)
-			end
-		else
-			declare(state, state.modifiers, key, value)
-		end
+		if state[NEWINDEX][key] then state[NEWINDEX][key](value) end
+		declare(state, state.modifiers, key, value) -- TODO
 	end
-	function env_mt:__call(key, ...)
-		declaration(_state[self], CALL, key, arg)
+	function env_mt:__call(key, value)
+		declaration(_state[self], CALL, key, value)
 	end
 end
 
@@ -119,8 +115,6 @@ end
 --	-- TODO new instance
 --end
 
-noop_mt = {__index=function() return nop end}
-
 function module(...)
 	local env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
 	local state; state = {
@@ -139,9 +133,12 @@ function module(...)
 	}
 	for i=1,arg.n do
 		local module = state[arg[i] or import_error()] or import_error()
-		for k, v in module.metadata do
-			if intersection(PUBLIC, v) ~= 0 and (not state.metadata[k] or import_error()) then
-				state.metadata[k], state.methods[k], state.mutators[k] = v, module.methods[k], module.mutators[k]
+		local call, index, newindex = state[CALL], state[INDEX], state[NEWINDEX]
+		for _, type in {CALL, INDEX, NEWINDEX} do
+			for k, f in module[type] do
+				if _public[f] and (not (call[k] or index[k] or newindex[k]) or import_error()) then
+					state[type] = f
+				end
 			end
 		end
 	end
