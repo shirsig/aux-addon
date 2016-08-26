@@ -15,16 +15,9 @@ local function const(_) return function() return _ end end
 --local function vararg_id(...) return unpack(arg) end
 --local function vararg_const(...) return function() return unpack(arg) end end
 
-local _state, _public, _type = {}, {}, {}
+local _state, _public, _type = {}, {[nop]=true}, {}
 
 do
-	local function extract(v)
-		local f, call, get, set
-		call, get, set, v.call, v.get, v.set = v.call, v.get, v.set, nil, nil, nil
-		if next(v) or call ~= nil and get ~= nil or set ~= nil and type(set) ~= 'function' then error() end
-		if call ~= nil then f = call else f = get end
-		return f, set
-	end
 	local function declare(self, modifiers, key, value)
 		local metadata = self.metadata
 		metadata[key] = metadata[key] and collision_error(key) or modifiers
@@ -40,15 +33,21 @@ do
 
 	declaration = nop
 	do
+		local function extract(v)
+			local call, get, set
+			call, get, set, v.call, v.get, v.set = v.call, v.get, v.set, nil, nil, nil
+			if next(v) or call ~= nil and get ~= nil or set ~= nil and type(set) ~= 'function' then error() end
+			return call, get, set
+		end
 		local PUBLIC = {public=true, private=false}
-		local PREFIX_TYPE = {method=CALL, accessor=INDEX, mutator=NEWINDEX}
+		local PREFIX_TYPE = {method=CALL, getter=INDEX, setter=NEWINDEX}
 		local SUFFIX_TYPE = {call=CALL, get=INDEX, set=NEWINDEX}
 		local state, access, type, name
 		local function intercept(self, event, key, value)
 			if self ~= state then declaration_error() end
 			if event == INDEX and (not name or declaration_error()) then
-				if ACCESS[key] then
-					access = (access and declaration_error()) or ACCESS[key]
+				if PUBLIC[key] then
+					access = (access ~= nil and declaration_error()) or PUBLIC[key]
 				elseif PREFIX_TYPE[key] then
 					type = (type and declaration_error()) or PREFIX_TYPE[key]
 				elseif not type or declaration_error() then
@@ -64,14 +63,22 @@ do
 				declaration = nop
 				return true
 			elseif event == CALL then
-				if name then declare(self, access, type, name, value) else self.access, self.type = access, type end
+				if name then
+					local success, call, get, set = pcall(extract, value)
+					if not success then declaration_error() end
+					if call then declare(self, access, type, name, call) end
+					if get then declare(self, access, type, name, get) end
+					if set then declare(self, access, type, name, set) end
+				else
+					self.access, self.type = access, type
+				end
 				declaration = nop
 				return true
 			end
 		end
-		function start_declaration(self, modifier)
+		function start_declaration(self, access, type)
 			if declaration ~= nop then declaration_error() end
-			declaration, state, modifiers, property = intercept, self, modifier, nil
+			declaration, state, access, type, name = intercept, self, access, type, nil
 		end
 	end
 
@@ -124,26 +131,20 @@ end
 noop_mt = {__index=function() return nop end}
 
 function module(...)
-	local state, env, interface
-	env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
-	state = {
-		metadata = {_=ACCESSOR, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, private=ACCESSOR, public=ACCESSOR, accessor=ACCESSOR},
-		methods = setmetatable({
-			_G = function() return _G end,
-			M = function() return env end,
-			I = function() return interface end,
-			private = function() start_declaration(state, PRIVATE); return env end,
-			public = function() start_declaration(state, PUBLIC); return env end,
-			accessor = function() start_declaration(state, ACCESSOR); return env end,
-			mutator = function() start_declaration(state, MUTATOR); return env end,
-			error = error,
-			nop = nop,
-			id = id,
-			const = const,
-		}, noop_mt),
-		mutators = setmetatable({}, noop_mt),
-		modifiers = PRIVATE,
-	}
+	local env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
+	local call = setmetatable({}, noop_mt); local index, newindex = CALL, setmetatable({}, noop_mt)
+	local state = {call=call, index=index, newindex=newindex, public=false}
+	call.error = error
+	call.nop = nop
+	call.id = id
+	call.const = const
+	index._G = const(_G)
+	index.M = const(env)
+	index.I = const(interface)
+	index.private = function() start_declaration(state, false); return env end
+	index.public = function() start_declaration(state, true); return env end
+	index.accessor = function() start_declaration(state, nil, INDEX); return env end
+	index.mutator = function() start_declaration(state, nil, NEWINDEX); return env end
 	for i=1,arg.n do
 		local module = state[arg[i] or import_error()] or import_error()
 		for k, v in module.metadata do
