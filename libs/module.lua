@@ -40,7 +40,7 @@ do
 				if name then
 					type = TYPE[key] or declaration_error()
 				else
-					name = key
+					name = key -- TODO tostring if value nil?
 					if typeof(value) == 'function' then type = CALL else type, value = INDEX, const(value) end
 				end
 				declare(self, access, name, {[type]=value})
@@ -71,7 +71,8 @@ do
 	function env_mt:__newindex(key, value) local state=_state[self]
 		if declaration(state, NEWINDEX, key, value) then return end
 		local newindex = state[NEWINDEX][key]
-		if newindex then newindex(value) else declare(state, nil, nil, key, value) end
+		if newindex then newindex(value); return end
+		start_declaration(state); declaration(state, NEWINDEX, key, value)
 	end
 	function env_mt:__call(key, value)
 		declaration(_state[self], CALL, key, value)
