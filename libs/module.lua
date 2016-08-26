@@ -1,23 +1,22 @@
 if module then return end
 local type, setmetatable, setfenv, unpack, next, intersection, union, pcall, _G = type, setmetatable, setfenv, unpack, next, bit.band, bit.bor, pcall, getfenv(0)
-local error, import_error, declaration_error, collision_error, mutability_error
-local noop, id, const, start_declaration, declaration, env_mt, interface_mt, noop_mt
+local start_declaration, declaration, env_mt, interface_mt, noop_mt
 
 local PRIVATE, PUBLIC, PROPERTY = 0, 1, 2
 local INDEX, NEWINDEX, CALL = 1, 2, 3
 local _state = {}
 
-function error(message, ...)
+local function error(message, ...)
 	return _G.error(format(message or '', unpack(arg))..'\n'..debugstack(), 0)
 end
-import_error = function() error 'Invalid imports.' end
-declaration_error = function() error 'Invalid declaration.' end
-collision_error = function(key) error('Field "%s" already exists.', key) end
+local function import_error() error 'Invalid imports.' end
+local function declaration_error() error 'Invalid declaration.' end
+local function collision_error(key) error('"%s" already exists.', key) end
 
-function noop() end
-function id(_) return _ end
+local function noop() end
+local function id(_) return _ end
 --function vararg_id(...) return unpack(arg) end
-function const(_) return function() return _ end end
+local function const(_) return function() return _ end end
 --function vararg_const(...) return function() return unpack(arg) end end
 
 do
