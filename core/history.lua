@@ -1,4 +1,4 @@
-module 'history' import 'persistence'
+aux 'history' import 'persistence'
 
 --local history_schema = tuple('#')
 --	:next_push 'number'

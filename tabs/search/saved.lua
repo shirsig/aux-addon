@@ -1,4 +1,4 @@
-module 'search_tab'
+aux 'search_tab'
 
 _G.aux_favorite_searches = {}
 _G.aux_recent_searches = {}

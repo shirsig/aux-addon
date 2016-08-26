@@ -1,4 +1,4 @@
-module 'cache' import 'info'
+aux 'cache' import 'info'
 
 MIN_ITEM_ID = 1
 MAX_ITEM_ID = 30000

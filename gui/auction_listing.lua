@@ -1,4 +1,4 @@
-module 'auction_listing' import 'gui' 'sorting' 'history' 'money' 'info'
+aux 'auction_listing' import 'gui' 'sorting' 'history' 'money' 'info'
 
 _G.aux_price_per_unit = false
 

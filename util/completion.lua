@@ -1,4 +1,4 @@
-module 'completion' import 'filter_util'
+aux 'completion' import 'filter_util'
 
 function public:complete_filter()
 	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution

@@ -1,4 +1,4 @@
-module 'slash' import 'persistence'
+aux 'slash' import 'persistence'
 
 _G.SLASH_AUX1 = '/aux'
 function _G.SlashCmdList.AUX(command)

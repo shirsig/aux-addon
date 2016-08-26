@@ -1,4 +1,4 @@
-module 'persistence'
+aux 'persistence'
 
 _G.aux_datasets = t
 

@@ -1,4 +1,4 @@
-module 'scan_util' import 'info'
+aux 'scan_util' import 'info'
 
 function LOAD()
 	import 'filter_util' 'scan'

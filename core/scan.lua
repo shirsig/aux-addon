@@ -1,4 +1,4 @@
-module 'scan' import 'info'
+aux 'scan' import 'info'
 
 function LOAD()
 	import 'history'

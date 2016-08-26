@@ -1,4 +1,4 @@
-module 'auctions_tab' import 'scan'
+aux 'auctions_tab' import 'scan'
 
 auction_records = {}
 

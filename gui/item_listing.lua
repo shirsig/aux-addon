@@ -1,4 +1,4 @@
-module 'item_listing' import 'gui' 'info'
+aux 'item_listing' import 'gui' 'info'
 
 local ROW_HEIGHT = 39
 

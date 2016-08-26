@@ -1,4 +1,4 @@
-module 'sorting'
+aux 'sorting'
 
 public()
 

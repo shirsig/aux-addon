@@ -1,4 +1,4 @@
-module 'core'
+aux 'core'
 
 public.join = _G.table.concat
 

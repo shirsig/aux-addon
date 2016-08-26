@@ -1,4 +1,4 @@
-module 'search_tab' import 'gui' [''] 'core' 'completion' 'listing' 'auction_listing' 'filter_util'
+aux 'search_tab' import 'gui' [''] 'core' 'completion' 'listing' 'auction_listing' 'filter_util'
 
 FILTER_SPACING = 28.5
 

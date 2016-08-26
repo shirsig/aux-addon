@@ -1,4 +1,4 @@
-module 'search_tab' import 'filter_util'
+aux 'search_tab' import 'filter_util'
 
 function valid_level(str)
 	local level = tonumber(str)

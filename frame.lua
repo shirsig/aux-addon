@@ -1,4 +1,4 @@
-module 'core' import 'gui'
+aux 'core' import 'gui'
 
 function LOAD()
 	for _, info in tab_info do tabs:create_tab(info.name) end

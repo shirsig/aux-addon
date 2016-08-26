@@ -1,4 +1,4 @@
-module 'post_tab' import 'scan' 'scan_util' 'post' 'history' 'info' 'persistence' 'item_listing' :al 'auction_listing' 'sorting'
+aux 'post_tab' import 'scan' 'scan_util' 'post' 'history' 'info' 'persistence' 'item_listing' :al 'auction_listing' 'sorting'
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}

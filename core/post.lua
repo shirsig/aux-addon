@@ -1,4 +1,4 @@
-module 'post'
+aux 'post'
 
 state = nil
 

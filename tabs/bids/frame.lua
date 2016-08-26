@@ -1,4 +1,4 @@
-module 'bids_tab' import 'gui' 'auction_listing'
+aux 'bids_tab' import 'gui' 'auction_listing'
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, aux_frame)

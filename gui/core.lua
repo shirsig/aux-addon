@@ -1,4 +1,4 @@
-module 'gui'
+aux 'gui'
 
 function LOAD()
 	do

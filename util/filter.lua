@@ -1,4 +1,4 @@
-module 'filter_util' import 'info'
+aux 'filter_util' import 'info'
 
 function LOAD()
 	import 'cache'

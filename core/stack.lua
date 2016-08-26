@@ -1,4 +1,4 @@
-module 'stack' import 'info'
+aux 'stack' import 'info'
 
 state = nil
 

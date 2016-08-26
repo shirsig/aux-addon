@@ -1,4 +1,4 @@
-module 'post_tab' import [''] 'core' 'gui' 'listing' 'item_listing' 'money' 'search_tab'
+aux 'post_tab' import [''] 'core' 'gui' 'listing' 'item_listing' 'money' 'search_tab'
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, aux_frame)

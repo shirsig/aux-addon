@@ -1,4 +1,4 @@
-module 'tooltip' import 'info' 'disenchant' 'cache' 'money' 'history'
+aux 'tooltip' import 'info' 'disenchant' 'cache' 'money' 'history'
 
 _G.aux_tooltip_value = true
 

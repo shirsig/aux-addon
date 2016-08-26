@@ -1,4 +1,4 @@
-module 'core'
+aux 'core'
 
 event_frame = CreateFrame 'Frame'
 mutable.listeners = t
