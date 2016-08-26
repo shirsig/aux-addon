@@ -13,12 +13,6 @@ local function nop() end
 local function id(v) return v end
 local function const(v) return function() return v end end
 
-local c
-do
-	local mt = {__metatable=false, index=error, newindex=error}
-	function c() return setmetatable({}, mt) end
-end
-
 local _state = {}
 
 local env_mt, start_declaration
@@ -46,7 +40,8 @@ do
 				if name then
 					type = TYPE[key] or declaration_error()
 				else
-					name, type = key, CALL
+					name = key
+					if typeof(value) == 'function' then type = CALL else type, value = INDEX, const(value) end
 				end
 				declare(self, access, name, {[type]=value})
 				declaration = nop
@@ -57,7 +52,7 @@ do
 					if not success then declaration_error() end
 					declare(self, access, name, {[CALL]=call, [INDEX]=get, [NEWINDEX]=set})
 				else
-					self.access, self.type = access, type
+					self.default_access = access
 				end
 				declaration = nop
 				return true
@@ -67,25 +62,24 @@ do
 	env_mt = {__metatable=false}
 	function env_mt:__index(key) local state=_state[self]
 		if declaration(state, INDEX, key) then return self end
-		if state[INDEX][key] then
-			return state[INDEX][key]()
-		else
-			return state[CALL][key] or _G[key]
+		local index = state[INDEX][key]
+		if index then return index() else
+			local call = state[CALL][key]
+			if call then return call else return _G[key] end
 		end
 	end
 	function env_mt:__newindex(key, value) local state=_state[self]
 		if declaration(state, NEWINDEX, key, value) then return end
-		if state[NEWINDEX][key] then state[NEWINDEX][key](value) end
-		declare(state, state.modifiers, key, value) -- TODO
+		local newindex = state[NEWINDEX][key]
+		if newindex then newindex(value) else declare(state, nil, nil, key, value) end
 	end
 	function env_mt:__call(key, value)
 		declaration(_state[self], CALL, key, value)
 	end
 	function declare(self, access, name, t)
 		self.access[name] = self.access[name] and collision_error(name) or access or self.default_access
-		for k, v in t do
-			if typeof(v) ~= 'function' then declaration_error() end
-			self[k][name] = v
+		for type, value in t do
+			self[type][name] = typeof(value) == 'function' and value or declaration_error()
 		end
 	end
 	function extract(v)
@@ -115,17 +109,16 @@ function module(...)
 	local state, env, interface, access, call, index, newindex
 	env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
 	state = {default_access=PRIVATE}
-	state.access = {error=PRIVATE, c=PRIVATE, nop=PRIVATE, id=PRIVATE, const=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, access=PRIVATE, public=PRIVATE, private=PRIVATE}
+	state.access = {error=PRIVATE, nop=PRIVATE, id=PRIVATE, const=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE}
 	state[CALL] = {error=error, nop=nop, id=id, const=const}
 	state[INDEX] = {
-		c = c,
 		_G = const(_G),
 		M = const(env),
 		I = const(interface),
 		public = function() start_declaration(state, PUBLIC); return env end,
 		private = function() start_declaration(state, PRIVATE); return env end,
 	}
-	state[NEWINDEX] = {access=function(access) state.default_access = access end}
+	state[NEWINDEX] = {}
 	for i=1,arg.n do
 		local module = _state[arg[i] or import_error()] or import_error()
 		local import_call, import_index, import_newindex = module[CALL], module[INDEX], module[NEWINDEX]
