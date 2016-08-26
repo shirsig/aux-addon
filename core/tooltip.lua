@@ -1,4 +1,4 @@
-aux 'tooltip' import 'info' 'disenchant' 'cache' 'money' 'history'
+aux 'tooltip' local info, disenchant, cache, money, history = aux.info, aux.disenchant, aux.cache, aux.money, aux.history
 
 _G.aux_tooltip_value = true
 

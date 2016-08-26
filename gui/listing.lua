@@ -1,4 +1,4 @@
-aux 'listing' import 'gui'
+aux 'listing' local gui = aux.gui
 
 local ST_COUNT = 0
 

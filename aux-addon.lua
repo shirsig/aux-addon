@@ -41,7 +41,7 @@ end
 public.empty = setmetatable({}, {__metatable=false, __newindex=error})
 
 do
-	local pool, weak_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
+	local pool, overflow_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 --		local t = tremove(transient)
 		for _, t in transient do recycle(t) end
@@ -53,8 +53,7 @@ do
 		return t
 	end
 	function public.recycle(t)
-		while getn(t) > 0 do tremove(t) end --  TODO or is setn enough?
-		if next(t) then return end -- no hashtables, they can't be shrunk -- TODO "n" field?
+		wipe(t)
 		if getn(pool) < 50 then
 			tinsert(pool, t)
 		else
@@ -79,16 +78,47 @@ do
 		return {__unm=function(self) self.raw = true end, __call=apply, __sub=apply}
 	end
 	do
-		local make_transient, temp_mt
-		function make_transient(t) tinsert(transient, t) return t end
+		local make_transient, make_persistent, temp_mt, perm_mt
+		function make_transient(t) transient[t] = true return t end
+		function make_persistent(t) transient[t] = nil return t end
 		temp_mt = operator_mt(make_transient)
+		perm_mt = operator_mt(make_persistent)
 		public.temp
 		{
 			get = function() return setmetatable(t, temp_mt) end,
 			set = function(t) return make_transient(t) end,
 		}
+		public.perm
+		{
+			get = function() return setmetatable(t, perm_mt) end,
+			set = function(t) return make_persistent(t) end,
+		}
 	end
-	local function fill(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,overflow)
+	local function insert_keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
+		if overflow ~= nil then error 'Overflow.' end
+		if k1 ~= nil then t[k1] = true end
+		if k2 ~= nil then t[k2] = true end
+		if k3 ~= nil then t[k3] = true end
+		if k4 ~= nil then t[k4] = true end
+		if k5 ~= nil then t[k5] = true end
+		if k6 ~= nil then t[k6] = true end
+		if k7 ~= nil then t[k7] = true end
+		if k8 ~= nil then t[k8] = true end
+		if k9 ~= nil then t[k9] = true end
+		if k10 ~= nil then t[k10] = true end
+		if k11 ~= nil then t[k11] = true end
+		if k12 ~= nil then t[k12] = true end
+		if k13 ~= nil then t[k13] = true end
+		if k14 ~= nil then t[k14] = true end
+		if k15 ~= nil then t[k15] = true end
+		if k16 ~= nil then t[k16] = true end
+		if k17 ~= nil then t[k17] = true end
+		if k18 ~= nil then t[k18] = true end
+		if k19 ~= nil then t[k19] = true end
+		if k20 ~= nil then t[k20] = true end
+		return t
+	end
+	local function insert_values(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,overflow)
 		if overflow ~= nil then error 'Overflow.' end
 		if v1 ~= nil then tinsert(t, v1) end
 		if v2 ~= nil then tinsert(t, v2) end
@@ -112,24 +142,32 @@ do
 		if v20 ~= nil then tinsert(t, v20) end
 		return t
 	end
+	local function insert_pairs(t,k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8,k9,v9,k10,v10,overflow)
+		if overflow ~= nil then error 'Overflow.' end
+		if k1 ~= nil then t[k1] = v1 end
+		if k2 ~= nil then t[k2] = v2 end
+		if k3 ~= nil then t[k3] = v3 end
+		if k4 ~= nil then t[k4] = v4 end
+		if k5 ~= nil then t[k5] = v5 end
+		if k6 ~= nil then t[k6] = v6 end
+		if k7 ~= nil then t[k7] = v7 end
+		if k8 ~= nil then t[k8] = v8 end
+		if k9 ~= nil then t[k9] = v9 end
+		if k10 ~= nil then t[k10] = v10 end
+		return t
+	end
 	local function collector_mt(f)
 		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
 	end
-	local object_mt = {
-		__newindex()
-	}
---	table-from(1,2,3)
-	local set_mt, list_mt, object_mt = collector_mt(keys), collector_mt(values), collector_mt(pairs)
-	modifier = public.property
+	local set_mt, list_mt, object_mt = collector_mt(insert_keys), collector_mt(insert_values), collector_mt(insert_pairs)
 	public.property()
---	list, object = {get=function() return setmetatable(t, list_mt) end}, {get=function() return setmetatable(t, object_mt) end}
-	modifier = nil
+	set, list, object = {get=function() return setmetatable(t, set_mt) end}, {get=function() return setmetatable(t, list_mt) end}, {get=function() return setmetatable(t, object_mt) end}
 	private()
 	-- TODO or 'auto' 'transient'?
 end
 
 local event_frame = CreateFrame 'Frame'
-for _, event in -temp-list('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
+for event in -temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
 end
 

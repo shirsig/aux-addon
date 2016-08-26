@@ -1,4 +1,4 @@
-aux 'item_listing' import 'gui' 'info'
+aux 'item_listing' local gui, info = aux.gui, aux.info
 
 local ROW_HEIGHT = 39
 

@@ -1,8 +1,4 @@
-aux 'scan' import 'info'
-
-function LOAD()
-	import 'history'
-end
+aux 'scan' local info, history = aux.info, aux.history
 
 PAGE_SIZE = 50
 

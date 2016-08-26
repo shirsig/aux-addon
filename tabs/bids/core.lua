@@ -1,4 +1,4 @@
-aux 'bids_tab' import 'scan'
+aux 'bids_tab' local scan = aux.scan
 
 auction_records = {}
 

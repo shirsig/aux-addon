@@ -64,14 +64,6 @@ function public.index(t, ...) temp=arg
 	return t
 end
 
-function public.set(...) temp=arg
-	local t = t
-	for i=1,arg.n do
-		t[arg[i]] = true
-	end
-	return t
-end
-
 public.huge = 1.8*10^308
 
 function public.modified.get() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end

@@ -1,4 +1,4 @@
-aux 'search_tab' import 'info'
+aux 'search_tab' local info = aux.info
 
 _G.aux_auto_buy_filter = ''
 

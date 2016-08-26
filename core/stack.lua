@@ -1,4 +1,4 @@
-aux 'stack' import 'info'
+aux 'stack' local info = aux.info
 
 state = nil
 

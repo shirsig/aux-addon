@@ -1,8 +1,4 @@
-aux 'scan_util' import 'info'
-
-function LOAD()
-	import 'filter_util' 'scan'
-end
+aux 'scan_util' local info , filter_util, scan = aux.info, aux.filter_util, aux.scan
 
 function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
 

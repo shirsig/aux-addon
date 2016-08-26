@@ -1,3 +1,4 @@
+if module then return end
 local type, setmetatable, setfenv, unpack, next, intersection, union, pcall, _G = type, setmetatable, setfenv, unpack, next, bit.band, bit.bor, pcall, getfenv(0)
 local error, import_error, declaration_error, collision_error, mutability_error
 local pass, start_declaration, advance_declaration, env_mt, interface_mt, metadata_mt, property_mt

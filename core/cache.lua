@@ -1,4 +1,4 @@
-aux 'cache' import 'info'
+aux 'cache' local info, persistence = aux.info, aux.persistence
 
 MIN_ITEM_ID = 1
 MAX_ITEM_ID = 30000
@@ -16,7 +16,6 @@ _G.aux_merchant_sell = t
 _G.aux_characters = t
 
 function LOAD()
-	import 'persistence' 'info'
 	scan_wdb()
 
 	event_listener('MERCHANT_SHOW', on_merchant_show)

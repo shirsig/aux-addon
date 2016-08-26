@@ -1,4 +1,4 @@
-aux 'auction_listing' import 'gui' 'sorting' 'history' 'money' 'info'
+aux 'auction_listing' local gui, sorting, history, money, info = aux.gui, aux.sorting, aux.history, aux.money, aux.info
 
 _G.aux_price_per_unit = false
 

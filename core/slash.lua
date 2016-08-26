@@ -1,4 +1,4 @@
-aux 'slash' import 'persistence'
+aux 'slash' local persistence = aux.persistence
 
 _G.SLASH_AUX1 = '/aux'
 function _G.SlashCmdList.AUX(command)
