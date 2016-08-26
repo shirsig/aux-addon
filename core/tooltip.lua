@@ -3,8 +3,23 @@ aux 'tooltip' local info, disenchant, cache, money, history = aux.info, aux.dise
 _G.aux_tooltip_value = true
 
 game_tooltip_hooks = t
-mutable.hooked_setter = nil
-mutable.game_tooltip_money = nil
+
+do
+	local c
+	hooked_setter
+		{
+			get = function() return c end,
+			set = function(v) c = v end,
+		}
+end
+do
+	local amount
+	game_tooltip_money
+	{
+		get = function() return amount end,
+		set = function(v) amount = v end,
+	}
+end
 
 function LOAD()
     for name, f in game_tooltip_hooks do

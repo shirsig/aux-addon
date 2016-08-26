@@ -1,8 +1,23 @@
 aux 'core'
 
 event_frame = CreateFrame 'Frame'
-mutable.listeners = t
-mutable.threads = t
+
+do
+	local t = t
+	listeners
+	{
+		get = function() return t end,
+		set = function(v) t = v end,
+	}
+end
+do
+	local t = t
+	threads
+	{
+		get = function() return t end,
+		set = function(v) t = v end,
+	}
+end
 
 do
 	local thread_id

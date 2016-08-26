@@ -32,9 +32,31 @@ end
 
 existing_auctions = t
 inventory_records = t
-mutable.scan_id = 0
-mutable.selected_item = nil
-mutable.refresh = nil
+
+do
+	local id = 0
+	scan_id
+	{
+		get = function() return id end,
+		set = function(v) id = v end,
+	}
+end
+do
+	local item
+	selected_item
+	{
+		get = function() return item end,
+		set = function(v) item = v end,
+	}
+end
+do
+	local c = 0
+	refresh
+	{
+		get = function() return c end,
+		set = function(v) c = v end,
+	}
+end
 
 function LOAD()
 	create_frames()

@@ -2,8 +2,22 @@ aux 'search_tab' local info = aux.info
 
 _G.aux_auto_buy_filter = ''
 
-mutable.search_scan_id = 0
-mutable.auto_buy_validator = nil
+do
+	local id = 0
+	search_scan_id
+	{
+		get = function() return id end,
+		set = function(v) id = v end,
+	}
+end
+do
+	local validator
+	auto_buy_validator
+	{
+		get = function() return validator end,
+		set = function(v) validator = v end,
+	}
+end
 
 do
 	local searches = t
