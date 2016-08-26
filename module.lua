@@ -1,8 +1,8 @@
-local type, setmetatable, getfenv, setfenv, unpack, next, mask, combine, pcall, _G = type, setmetatable, getfenv, setfenv, unpack, next, bit.band, bit.bor, pcall, getfenv(0)
+local type, setmetatable, setfenv, unpack, next, mask, combine, pcall, _G = type, setmetatable, setfenv, unpack, next, bit.band, bit.bor, pcall, getfenv(0)
 local error, import_error, declaration_error, collision_error, mutability_error
 local pass, start_declaration, advance_declaration, env_mt, interface_mt, metadata_mt, property_mt
 
-local NULL, PRIVATE, PUBLIC, MUTABLE, PROPERTY = 0, 1, 2, 4, 8
+local PRIVATE, PUBLIC, MUTABLE, PROPERTY = 0, 1, 2, 4
 local INDEX, NEWINDEX, CALL = 1, 2, 4
 local _state = {}
 
@@ -37,7 +37,7 @@ do
 
 	do
 		local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, property=PROPERTY}
-		local COMPATIBLE = {private=MUTABLE+PROPERTY, public=PROPERTY, mutable=PRIVATE, property=PRIVATE+PUBLIC}
+		local COMPATIBLE = {private=MUTABLE+PROPERTY, public=PROPERTY, mutable=PRIVATE, property=PUBLIC}
 		local module, modifiers, property
 		local function intercept(_, key, value)
 			if type == INDEX and (not property or declaration_error()) then
@@ -66,7 +66,7 @@ do
 
 	env_mt = {__metatable=false}
 	function env_mt:__index(key, state) state=_state[self]
-		if state.intercept(INDEX, key) then return self end
+		if advance_declaration(INDEX, key) then return self end
 		if mask(PROPERTY, state.metadata[key] or 0) ~= 0 then
 			return state.getters[key]()
 		else
@@ -75,7 +75,7 @@ do
 		end
 	end
 	function env_mt:__newindex(key, value, state) state=_state[self]
-		if state.intercept(NEWINDEX, key, value) then return end
+		if advance_declaration(NEWINDEX, key, value) then return end
 		local modifiers = state.metadata[key]
 		if modifiers then
 			if mask(PROPERTY, modifiers) ~= 0 then
@@ -88,7 +88,7 @@ do
 		end
 	end
 	function env_mt:__call(key, ...)
-		_state[self].intercept(CALL, key, arg)
+		advance_declaration(CALL, key, arg)
 	end
 end
 
@@ -102,30 +102,26 @@ function interface_mt:__index(key, state) state=_state[self]
 	end
 end
 function interface_mt:__newindex(key, value, state) state=_state[self]
-	local modifiers = state.metadata[key]
-	if modifiers then
-		if mask(PUBLIC+PROPERTY, modifiers) == PUBLIC+PROPERTY then
-			return state.setters[key](value)
-		elseif mask(PUBLIC, modifiers) ~= 0 then
-			return state.data[key](value)
-		end
+	if mask(PUBLIC+PROPERTY, state.metadata[key] or 0) == PUBLIC+PROPERTY then
+		return state.setters[key](value)
+--	elseif masked == PUBLIC and type(state.data[key]) == 'function' then
+--		return state.data[key](value)
 	end
 end
 
-metadata_mt = {__index=function() return 0 end}
-property_mt = {__index=function() return pass end }
+property_mt = {__index=function() return pass end}
 
-local function create_module(...)
+local function module(...)
 	local state, env, interface
 	env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
 	state = {
-		metadata = {_=PROPERTY, _G=PRIVATE, M=PRIVATE, error=PRIVATE, private=PROPERTY, public=PROPERTY, mutable=PROPERTY, property=PROPERTY},
+		metadata = {_=PROPERTY, _G=PRIVATE, M=PRIVATE, I=PRIVATE, error=PRIVATE, private=PROPERTY, public=PROPERTY, mutable=PROPERTY, property=PROPERTY},
 		fields = {_G=_G, M=env, I=interface, error=error},
 		getters = setmetatable({
-			private = function() start_declaration(PRIVATE, state); return getfenv(2) end,
-			public = function() start_declaration(PUBLIC, state); return getfenv(2) end,
-			mutable = function() start_declaration(MUTABLE, state); return getfenv(2) end,
-			property = function() start_declaration(PROPERTY, state); return getfenv(2) end,
+			private = function() start_declaration(PRIVATE, state); return env end,
+			public = function() start_declaration(PUBLIC, state); return env end,
+			mutable = function() start_declaration(MUTABLE, state); return env end,
+			property = function() start_declaration(PROPERTY, state); return env end,
 		}, property_mt),
 		setters = setmetatable({}, property_mt),
 	}
@@ -138,5 +134,5 @@ local function create_module(...)
 		end
 	end
 	state[env], state[interface] = state, state
-	return env, interface
+	setfenv(2, env)
 end
