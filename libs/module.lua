@@ -10,7 +10,6 @@ local function declaration_error() error 'Invalid declaration.' end
 local function collision_error(key) error('"%s" already exists.', key) end
 
 local function nop() end
-local function id(v) return v end
 local function const(v) return function() return v end end
 
 local _state = {}
@@ -32,16 +31,17 @@ do
 		function declare(self, access, name, data)
 			self.access[name] = self.access[name] and collision_error(name) or access or self.default_access
 			for type, value in data do
-				self[type][name] = typeof(value) == 'function' and value or declaration_error()
+				if typeof(value) ~= 'function' and (type == GETTER or declaration_error()) then
+					value = const(value == nil and tostring(value) or value)
+				end
+				self[type][name] = value
 			end
 		end
-		function reset()
-			STATE, module, access, name = _0, nil, nil, nil
-		end
+		function reset() STATE, module, access, name = _0, nil, nil, nil end
 		function declaration_index(self, key)
 			if STATE == _0 then
 				if not ACCESS[key] then return false end
-				STATE, module, access = _1, self, ACCESS[key]
+				module, access = self, ACCESS[key]
 				STATE = _1; return true
 			elseif STATE == _1 or declaration_error() then
 				STATE, name = _2, key; return true
@@ -51,21 +51,17 @@ do
 			if STATE == _0 then
 				if not self.access[key] then return false end
 				STATE = _1; return true
-			elseif STATE == _1 then
-				local type
-				if typeof(value) == 'function' then
-					type = FUNCTION
-				else
-					type, value = GETTER, const(value == nil and tostring(value) or value)
-				end
-				declare(self, access, key, {[type]=value})
-				reset(); return true
-			elseif STATE == _2 or declaration_error() then
-				declare(self, access, key, {[TYPE[key] or declaration_error()]=value})
-				reset(); return true
 			end
+			local type
+			if STATE == _1 then
+				type = typeof(value) == 'function' and FUNCTION or GETTER
+			elseif STATE == _2 or declaration_error() then
+				type = TYPE[key] or declaration_error()
+			end
+			declare(self, access, key, {[type]=value})
+			reset(); return true
 		end
-		function declaration_call(self)
+		function declaration_call(self, value)
 			if STATE == _1 then
 				self.default_access = access
 				reset(); return true
@@ -109,8 +105,8 @@ end
 
 function module(...)
 	local env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
-	local access = {error=PRIVATE, nop=PRIVATE, id=PRIVATE, const=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE}
-	local functions, getters, setters = {error=error, nop=nop, id=id, const=const}, {_G=const(_G), M=const(env), I=const(interface)}, {}
+	local access = {error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE}
+	local functions, getters, setters = {error=error, nop=nop}, {_G=const(_G), M=const(env), I=const(interface)}, {}
 	for i=1,arg.n do
 		local module = _state[arg[i] or import_error()] or import_error()
 		local import_functions, import_getters, import_setters = module[FUNCTION], module[GETTER], module[SETTER]
