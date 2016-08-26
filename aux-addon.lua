@@ -1,19 +1,25 @@
+--aux_account_settings = {} -- TODO
+--aux_character_settings = {}
+
+module()
+
+public.version = '5.0.0'
+
 do
-	local modules = {core={create_module()}}
-	aux = setmetatable({}, {
+	local modules = {core={env=M, interface=I}}
+	_G.aux = setmetatable({}, {
 		__metatable = false,
-		__index = function(_, key) return modules[key][2] end,
+		__index = function(_, key) return modules[key].interface end,
 		__newindex = function() end,
 		__call = function(_, name)
-			modules[name] = modules[name] or {create_module(aux.core)}
-			setfenv(2, modules[name][1]())
+			if not modules[name] then
+				module(aux.core)
+				modules[name] = {env=M, interface=I}
+			end
+			setfenv(2, modules[name].env)
 		end,
 	})
 end
-
-aux 'core'
-
-public.version = '5.0.0'
 
 do
 	local bids_loaded
