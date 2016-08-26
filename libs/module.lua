@@ -1,8 +1,8 @@
 if module then return end
-local typeof, setmetatable, setfenv, unpack, next, pcall, _G = type, setmetatable, setfenv, unpack, next, pcall, getfenv(0)
+local typeof, tostring, setmetatable, setfenv, unpack, next, pcall, _G = type, tostring, setmetatable, setfenv, unpack, next, pcall, getfenv(0)
 
 local PUBLIC, PRIVATE = 1, 2
-local INDEX, NEWINDEX, CALL = 1, 2, 3
+local GETTER, SETTER, FUNCTION = 1, 2, 3
 
 local function error(msg, ...) return _G.error(format(msg or '', unpack(arg))..'\n'..debugstack(), 0) end
 local function import_error() error 'Invalid imports.' end
@@ -15,121 +15,113 @@ local function const(v) return function() return v end end
 
 local _state = {}
 
-local env_mt, start_declaration
+local env_mt
 do
-	local intercept, declare, extract
-	local state, access, type, name
-	local declaration = nop
-	function start_declaration(self, access, type)
-		if declaration ~= nop then declaration_error() end
-		declaration, state, access, type, name = intercept, self, access, type, nil
-	end
+	local ACCESS, TYPE = {public=PUBLIC, private=PRIVATE}, {call=FUNCTION, get=GETTER, set=SETTER}
+	local declaration_index, declaration_newindex, declaration_call
+	local _0, _1, _2 = 0, 1, 2
+	local STATE, module, access, name
 	do
-		local ACCESS = {public=PUBLIC, private=PRIVATE}
-		local TYPE = {call=CALL, get=INDEX, set=NEWINDEX}
-		function intercept(self, event, key, value)
-			if self ~= state then declaration_error() end
-			if event == INDEX and (not name or declaration_error()) then
-				if ACCESS[key] and (not access or declaration_error()) then
-					access = ACCESS[key]
+		local extract, declare, reset
+		function extract(v)
+			local call, get, set
+			call, get, set, v.call, v.get, v.set = v.call, v.get, v.set, nil, nil, nil
+			if next(v) or call ~= nil and get ~= nil then error() end
+			return call, get, set
+		end
+		function declare(self, access, name, data)
+			self.access[name] = self.access[name] and collision_error(name) or access or self.default_access
+			for type, value in data do
+				self[type][name] = typeof(value) == 'function' and value or declaration_error()
+			end
+		end
+		function reset()
+			STATE, module, access, name = _0, nil, nil, nil
+		end
+		function declaration_index(self, key)
+			if STATE == _0 then
+				if not ACCESS[key] then return false end
+				STATE, module, access = _1, self, ACCESS[key]
+				STATE = _1; return true
+			elseif STATE == _1 or declaration_error() then
+				STATE, name = _2, key; return true
+			end
+		end
+		function declaration_newindex(self, key, value)
+			if STATE == _0 then
+				if not self.access[key] then return false end
+				STATE = _1; return true
+			elseif STATE == _1 then
+				local type
+				if typeof(value) == 'function' then
+					type = FUNCTION
 				else
-					name = key
+					type, value = GETTER, const(value == nil and tostring(value) or value)
 				end
-				return true
-			elseif event == NEWINDEX then
-				if name then
-					type = TYPE[key] or declaration_error()
-				else
-					name = key -- TODO tostring if value nil?
-					if typeof(value) == 'function' then type = CALL else type, value = INDEX, const(value) end
-				end
-				declare(self, access, name, {[type]=value})
-				declaration = nop
-				return true
-			elseif event == CALL then
-				if name then
-					local success, call, get, set = pcall(extract, value)
-					if not success then declaration_error() end
-					declare(self, access, name, {[CALL]=call, [INDEX]=get, [NEWINDEX]=set})
-				else
-					self.default_access = access
-				end
-				declaration = nop
-				return true
+				declare(self, access, key, {[type]=value})
+				reset(); return true
+			elseif STATE == _2 or declaration_error() then
+				declare(self, access, key, {[TYPE[key] or declaration_error()]=value})
+				reset(); return true
+			end
+		end
+		function declaration_call(self)
+			if STATE == _1 then
+				self.default_access = access
+				reset(); return true
+			elseif STATE == _2 or declaration_error() then
+				local success, call, get, set = pcall(extract, value)
+				if not success then declaration_error() end
+				declare(self, access, name, {[FUNCTION]=call, [GETTER]=get, [SETTER]=set})
+				reset(); return true
 			end
 		end
 	end
+
 	env_mt = {__metatable=false}
 	function env_mt:__index(key) local state=_state[self]
-		if declaration(state, INDEX, key) then return self end
-		local index = state[INDEX][key]
-		if index then return index() else
-			local call = state[CALL][key]
-			if call then return call else return _G[key] end
-		end
+		if declaration_index(state, key) then return self end
+		local get = state[GETTER][key]
+		if get then return get() end
+		local f = state[FUNCTION][key]
+		if f then return f else return _G[key] end
 	end
 	function env_mt:__newindex(key, value) local state=_state[self]
-		if declaration(state, NEWINDEX, key, value) then return end
-		local newindex = state[NEWINDEX][key]
-		if newindex then newindex(value); return end
-		start_declaration(state); declaration(state, NEWINDEX, key, value)
+		if declaration_newindex(state, key, value) then return end
+		local f = state[SETTER][key]
+		if f then f(value); return end
 	end
-	function env_mt:__call(key, value)
-		declaration(_state[self], CALL, key, value)
-	end
-	function declare(self, access, name, t)
-		self.access[name] = self.access[name] and collision_error(name) or access or self.default_access
-		for type, value in t do
-			self[type][name] = typeof(value) == 'function' and value or declaration_error()
-		end
-	end
-	function extract(v)
-		local call, get, set
-		call, get, set, v.call, v.get, v.set = v.call, v.get, v.set, nil, nil, nil
-		if next(v) or call ~= nil and get ~= nil then error() end
-		return call, get, set
+	function env_mt:__call(value)
+		declaration_call(_state[self], value)
 	end
 end
 
 local interface_mt = {__metatable=false}
 function interface_mt:__index(key) local state=_state[self]
 	if state.access[key] == PUBLIC then
-		local index = state[INDEX][key]
-		if index then return index() else return state[CALL][key] end
+		local index = state[GETTER][key]
+		if index then return index() else return state[FUNCTION][key] end
 	end
 end
 function interface_mt:__newindex(key, value) local state=_state[self]
-	if state.access[key] == PUBLIC then (state[NEWINDEX][key] or state[CALL][key])(value) end
+	if state.access[key] == PUBLIC then (state[SETTER][key] or state[FUNCTION][key])(value) end
 end
 
---function interface_mt:__call(key, ...) local state=_state[self]
---	-- TODO new instance
---end
-
 function module(...)
-	local state, env, interface, access, call, index, newindex
-	env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
-	state = {default_access=PRIVATE}
-	state.access = {error=PRIVATE, nop=PRIVATE, id=PRIVATE, const=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE}
-	state[CALL] = {error=error, nop=nop, id=id, const=const}
-	state[INDEX] = {
-		_G = const(_G),
-		M = const(env),
-		I = const(interface),
-		public = function() start_declaration(state, PUBLIC); return env end,
-		private = function() start_declaration(state, PRIVATE); return env end,
-	}
-	state[NEWINDEX] = {}
+	local env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
+	local access = {error=PRIVATE, nop=PRIVATE, id=PRIVATE, const=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE}
+	local functions, getters, setters = {error=error, nop=nop, id=id, const=const}, {_G=const(_G), M=const(env), I=const(interface)}, {}
 	for i=1,arg.n do
 		local module = _state[arg[i] or import_error()] or import_error()
-		local import_call, import_index, import_newindex = module[CALL], module[INDEX], module[NEWINDEX]
+		local import_functions, import_getters, import_setters = module[FUNCTION], module[GETTER], module[SETTER]
 		for k, v in module.access do
 			if v == PUBLIC and (not access[k] or import_error()) then
-				call[k], index[k], newindex[k] = import_call[k], import_index[k], import_newindex[k]
+				functions[k], getters[k], setters[k] = import_functions[k], import_getters[k], import_setters[k]
 				access[k] = PRIVATE
 			end
 		end
 	end
+	local state = {access=access, [FUNCTION]=functions, [GETTER]=getters, [SETTER]=setters, default_access=PRIVATE}
 	_state[env], _state[interface] = state, state
 	setfenv(2, env)
 end
