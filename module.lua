@@ -1,6 +1,6 @@
 local type, setmetatable, setfenv, unpack, next, mask, combine, pcall, _G = type, setmetatable, setfenv, unpack, next, bit.band, bit.bor, pcall, getfenv(0)
 local error, import_error, declaration_error, collision_error, mutability_error
-local pass, env_mt, interface_mt, declarator_mt, importer_mt
+local pass, start_declaration, declarator, metadata_mt, property_mt, env_mt, interface_mt
 
 local NULL, PRIVATE, PUBLIC, MUTABLE, DYNAMIC, PROPERTY = 0, 1, 2, 4, 8, 16
 local INDEX, NEWINDEX, CALL = 1, 2, 4
@@ -15,32 +15,6 @@ collision_error = function(key) error('Field "%s" already exists.', key) end
 mutability_error = function(key) error('Field "%s" is immutable.', key) end
 
 pass = function() end
-
-do
-	local mt = {__metatable=false}
-	do
-		local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, dynamic=DYNAMIC, property=PROPERTY}
-		local COMPATIBLE = {private=MUTABLE+PROPERTY, public=DYNAMIC+PROPERTY, mutable=PRIVATE, dynamic=PUBLIC+PROPERTY, property=PUBLIC}
-		function mt:__call(state, type, key, value)
-			if type == INDEX then
-				if state.property then declaration_error() end
-				local modifiers, modifier, compatible = state.modifiers, MODIFIER[key], COMPATIBLE[key]
-				if not modifier then modifier, compatible, state.property = PROPERTY, PUBLIC, key end
-				if mask(compatible, modifiers) ~= modifiers then declaration_error() end
-				state.properties = modifiers + modifier
-				return true
-			elseif type == NEWINDEX then
-				local property, modifiers; property, modifiers, state.modifiers = state.property, state.modifiers, PRIVATE
-				if property then key, value, state.property = property, {[key]=value}, nil end
-				declare(state.module, modifiers, key, value)
-			elseif type == CALL then
-				local property, modifiers; property, modifiers, state.modifiers = state.property, state.modifiers, PRIVATE
-				if property then state.property = nil; declare(state, modifiers, property, value) else state.modifiers = modifiers end
-			end
-		end
-	end
-	local declarator = setmetatable({}, declarator_mt)
-end
 
 do
 	local function dynamize(f)
@@ -63,6 +37,37 @@ do
 		else
 			if dynamic and (type(value) == 'function' or declaration_error()) then value = dynamize(value) end
 			state.data[key] = value
+		end
+	end
+
+	do
+		local mt = {__metatable=false, __call=pass}
+		local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, dynamic=DYNAMIC, property=PROPERTY}
+		local COMPATIBLE = {private=MUTABLE+PROPERTY, public=DYNAMIC+PROPERTY, mutable=PRIVATE, dynamic=PUBLIC+PROPERTY, property=PUBLIC}
+		local advance_declaration, module, modifiers, property
+		local function intercept(_, key, value)
+			if type == INDEX and (not property or declaration_error()) then
+				local modifier, compatible = MODIFIER[key], COMPATIBLE[key]
+				if not modifier then modifier, compatible, property = PROPERTY, PUBLIC, key end
+				if mask(compatible, modifiers) ~= modifiers then declaration_error() end
+				modifiers = modifiers + modifier
+				return true
+			elseif type == NEWINDEX then
+				if property then key, value = property, {[key]=value} end
+				declare(module, modifiers, key, value)
+				mt.__call = pass
+				return true
+			elseif type == CALL then
+				local property, modifiers; property, modifiers, modifiers = property, modifiers, PRIVATE
+				if property then property = nil; declare(module, modifiers, property, value) else module.modifiers = modifiers end
+				mt.__call = pass
+				return true
+			end
+		end
+		declarator = setmetatable({}, mt)
+		function start_declaration(state, modifier)
+			if intercept ~= pass then declaration_error() end
+			advance_declaration, module, modifiers, property = intercept, state, modifier, nil
 		end
 	end
 
@@ -90,7 +95,7 @@ do
 		end
 	end
 	function env_mt:__call(key, ...)
-		_state[self].intercept(CALL, key, arg); return self
+		_state[self].intercept(CALL, key, arg)
 	end
 end
 
@@ -118,16 +123,17 @@ metadata_mt = {__index=function() return 0 end}
 property_mt = {__index=function() return pass end}
 
 local function create_module(...)
-	local env_state, env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
-	local state = {
+	local state, env, interface
+	env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
+	state = {
 		metadata = {_=PROPERTY, _G=PRIVATE, M=PRIVATE, error=PRIVATE, private=PROPERTY, public=PROPERTY, mutable=PROPERTY, dynamic=PROPERTY, property=PROPERTY},
 		fields = {_G=_G, M=env, error=error},
 		getters = setmetatable({
-			private = function() state[declarator] = PRIVATE; return declarator end,
-			public = function() state[declarator] = PUBLIC; return declarator end,
-			mutable = function() state[declarator] = MUTABLE; return declarator end,
-			dynamic = function() state[declarator] = DYNAMIC; return declarator end,
-			property = function() state[declarator] = PROPERTY; return declarator end,
+			private = function() start_declaration(PRIVATE, state); return getfenv(2) end,
+			public = function() start_declaration(PUBLIC, state); return getfenv(2) end,
+			mutable = function() start_declaration(MUTABLE, state); return getfenv(2) end,
+			dynamic = function() start_declaration(DYNAMIC, state); return getfenv(2) end,
+			property = function() start_declaration(PROPERTY, state); return getfenv(2) end,
 		}, property_mt),
 		setters = setmetatable({}, property_mt),
 	}
