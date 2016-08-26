@@ -1,6 +1,6 @@
 if module then return end
 local type, setmetatable, setfenv, unpack, next, pcall, _G = type, setmetatable, setfenv, unpack, next, pcall, getfenv(0)
-local start_declaration, declaration, env_mt, interface_mt, noop_mt
+local start_declaration, declaration, env_mt, interface_mt
 
 local INDEX, NEWINDEX, CALL = 1, 2, 3
 
@@ -15,20 +15,13 @@ local function const(_) return function() return _ end end
 --local function vararg_id(...) return unpack(arg) end
 --local function vararg_const(...) return function() return unpack(arg) end end
 
-local _state, _public, _type = {}, {[nop]=true}, {}
+local _state, _public = {}, {[nop]=true}
 
 do
-	local function declare(self, modifiers, key, value)
-		local metadata = self.metadata
-		metadata[key] = metadata[key] and collision_error(key) or modifiers
-		if intersection(ACCESSOR, modifiers) == 0 then
-			self.methods[key] = value
-		else
-			local success, f, mutator = pcall(extract, value)
-			if success or declaration_error() then
-				self.methods[key], self.mutators[key] = type(f) == 'function' and f or const(f), mutator or nop
-			end
-		end
+	local function declare(self, public, type, name, value)
+		if _G.type(value) ~= 'function' and (not type or declaration_error()) then value, type = const(value), INDEX end
+		self[type][name] = self[type][name] and collision_error(name) or value
+		_public[value] = public
 	end
 
 	declaration = nop
@@ -36,18 +29,18 @@ do
 		local function extract(v)
 			local call, get, set
 			call, get, set, v.call, v.get, v.set = v.call, v.get, v.set, nil, nil, nil
-			if next(v) or call ~= nil and get ~= nil or set ~= nil and type(set) ~= 'function' then error() end
+			if next(v) then error() end
 			return call, get, set
 		end
 		local PUBLIC = {public=true, private=false}
 		local PREFIX_TYPE = {method=CALL, getter=INDEX, setter=NEWINDEX}
 		local SUFFIX_TYPE = {call=CALL, get=INDEX, set=NEWINDEX}
-		local state, access, type, name
+		local state, public, type, name
 		local function intercept(self, event, key, value)
 			if self ~= state then declaration_error() end
 			if event == INDEX and (not name or declaration_error()) then
 				if PUBLIC[key] then
-					access = (access ~= nil and declaration_error()) or PUBLIC[key]
+					public = (public ~= nil and declaration_error()) or PUBLIC[key]
 				elseif PREFIX_TYPE[key] then
 					type = (type and declaration_error()) or PREFIX_TYPE[key]
 				elseif not type or declaration_error() then
@@ -59,26 +52,26 @@ do
 					type = SUFFIX_TYPE[key] or declaration_error()
 					key = name
 				end
-				declare(self, access, type, key, value)
+				declare(self, public, type, key, value)
 				declaration = nop
 				return true
 			elseif event == CALL then
 				if name then
 					local success, call, get, set = pcall(extract, value)
 					if not success then declaration_error() end
-					if call then declare(self, access, type, name, call) end
-					if get then declare(self, access, type, name, get) end
-					if set then declare(self, access, type, name, set) end
+					if call then declare(self, public, type, name, call) end
+					if get then declare(self, public, type, name, get) end
+					if set then declare(self, public, type, name, set) end
 				else
-					self.access, self.type = access, type
+					self.access, self.type = public, type
 				end
 				declaration = nop
 				return true
 			end
 		end
-		function start_declaration(self, access, type)
+		function start_declaration(self, public, type)
 			if declaration ~= nop then declaration_error() end
-			declaration, state, access, type, name = intercept, self, access, type, nil
+			declaration, state, public, type, name = intercept, self, public, type, nil
 		end
 	end
 
@@ -110,41 +103,40 @@ end
 
 interface_mt = {__metatable=false}
 function interface_mt:__index(key) local state=_state[self]
-	local masked = intersection(PUBLIC+PROPERTY, state.metadata[key] or 0)
-	if masked == PUBLIC+PROPERTY then
-		return state.getters[key]()
-	elseif masked == PUBLIC then
-		return state.methods[key]
+	local call = state[CALL][key]
+	if call and _public[call] then
+		return call
+	else
+		local index = state[INDEX][key]
+		return (_public[index] and index or nop)()
 	end
 end
 function interface_mt:__newindex(key, value) local state=_state[self]
-	if intersection(PUBLIC+PROPERTY, state.metadata[key] or 0) == PUBLIC+PROPERTY then
-		return state.mutators[key](value)
-	elseif masked == PUBLIC and type(state.methods[key]) == 'function' then
-		return state.methods[key](value)
-	end
+	local f = state[NEWINDEX][key] or state[CALL][key] or nop
+	if _public[f] then f(value) end
 end
-function interface_mt:__call(key, ...) local state=_state[self]
-	-- TODO new instance
-end
+--function interface_mt:__call(key, ...) local state=_state[self]
+--	-- TODO new instance
+--end
 
 noop_mt = {__index=function() return nop end}
 
 function module(...)
 	local env, interface = setmetatable({}, env_mt), setmetatable({}, interface_mt)
-	local call = setmetatable({}, noop_mt); local index, newindex = CALL, setmetatable({}, noop_mt)
-	local state = {call=call, index=index, newindex=newindex, public=false}
-	call.error = error
-	call.nop = nop
-	call.id = id
-	call.const = const
-	index._G = const(_G)
-	index.M = const(env)
-	index.I = const(interface)
-	index.private = function() start_declaration(state, false); return env end
-	index.public = function() start_declaration(state, true); return env end
-	index.accessor = function() start_declaration(state, nil, INDEX); return env end
-	index.mutator = function() start_declaration(state, nil, NEWINDEX); return env end
+	local state; state = {
+		[CALL]={error=error, nop=nop, id=id, const=const},
+		[INDEX]={
+			_G = const(_G),
+			M = const(env),
+			I = const(interface),
+			private = function() start_declaration(state, false); return env end,
+			public = function() start_declaration(state, true); return env end,
+			accessor = function() start_declaration(state, nil, INDEX); return env end,
+			mutator = function() start_declaration(state, nil, NEWINDEX); return env end,
+		},
+		[NEWINDEX]={},
+		public=false,
+	}
 	for i=1,arg.n do
 		local module = state[arg[i] or import_error()] or import_error()
 		for k, v in module.metadata do
