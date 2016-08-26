@@ -18,8 +18,8 @@ pass = function() end
 
 do
 	local function unpack_property_value(t)
-		local get, set; get, set, t.get, t.set = t.get or pass, t.set or pass, nil, nil
-		if next(t) or type(get) ~= 'function' or type(set) ~= 'function' then error() end
+		local get, set; get, set, t.get, t.set = t.get, t.set, nil, nil
+		if next(t) or get ~= nil and type(get) ~= 'function' or set ~= nil and type(set) ~= 'function' then error() end
 		return get, set
 	end
 	local function declare(state, modifiers, key, value)
@@ -38,7 +38,7 @@ do
 	do
 		local MODIFIER = {private=PRIVATE, public=PUBLIC, mutable=MUTABLE, property=PROPERTY}
 		local COMPATIBLE = {private=MUTABLE+PROPERTY, public=PROPERTY, mutable=PRIVATE, property=PUBLIC}
-		local module, modifiers, property
+		local state, modifiers, property
 		local function intercept(_, key, value)
 			if type == INDEX and (not property or declaration_error()) then
 				local modifier, compatible = MODIFIER[key], COMPATIBLE[key]
@@ -48,19 +48,18 @@ do
 				return true
 			elseif type == NEWINDEX then
 				if property then key, value = property, {[key]=value} end
-				declare(module, modifiers, key, value)
+				declare(state, modifiers, key, value)
 				advance_declaration = pass
 				return true
 			elseif type == CALL then
-				local property, modifiers; property, modifiers, modifiers = property, modifiers, PRIVATE
-				if property then property = nil; declare(module, modifiers, property, value) else module.modifiers = modifiers end
+				if property then declare(state, modifiers, property, value) else state.modifiers = modifiers end
 				advance_declaration = pass
 				return true
 			end
 		end
 		function start_declaration(state, modifier)
 			if advance_declaration ~= pass then declaration_error() end
-			advance_declaration, module, modifiers, property = intercept, state, modifier, nil
+			advance_declaration, state, modifiers, property = intercept, state, modifier, nil
 		end
 	end
 
