@@ -43,29 +43,30 @@ public.empty = setmetatable({}, {__metatable=false, __newindex=error})
 do
 	local pool, overflow_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
 	CreateFrame'Frame':SetScript('OnUpdate', function()
---		local t = tremove(transient)
-		for _, t in transient do recycle(t) end
+		for t in transient do recycle(t) end
 		wipe(transient)
 	end)
 	function public.wipe(t) -- like with a cloth or something
 		for k in t do t[k] = nil end
+		t.reset = 1
+		t.reset = nil
 		table.setn(t, 0)
-		return t
+		return setmetatable(t, nil)
 	end
 	function public.recycle(t)
 		wipe(t)
 		if getn(pool) < 50 then
 			tinsert(pool, t)
 		else
-			tinsert(weak_pool, t)
+			overflow_pool[t] = true
 		end
 		log(getn(table_pool), '-', getn(weak_pool))
 	end
 	function public.t.get()
-		return tremove(pool) or tremove(weak_pool) or {}
+		return tremove(pool) or tremove(overflow_pool, next(overflow_pool)) or {}
 	end
 	function public.tt.get()
-		local t = tremove(pool) or tremove(weak_pool) or {}
+		local t = tremove(pool) or tremove(overflow_pool, next(overflow_pool)) or {}
 		transient[t] = true
 		return t
 	end
@@ -78,21 +79,24 @@ do
 		return {__unm=function(self) self.raw = true end, __call=apply, __sub=apply}
 	end
 	do
-		local make_transient, make_persistent, temp_mt, perm_mt
-		function make_transient(t) transient[t] = true return t end
-		function make_persistent(t) transient[t] = nil return t end
-		temp_mt = operator_mt(make_transient)
-		perm_mt = operator_mt(make_persistent)
-		public.temp
-		{
-			get = function() return setmetatable(t, temp_mt) end,
-			set = function(t) return make_transient(t) end,
-		}
-		public.perm
-		{
-			get = function() return setmetatable(t, perm_mt) end,
-			set = function(t) return make_persistent(t) end,
-		}
+		local function make_transient(t) transient[t] = true return t end
+		local function make_persistent(t) transient[t] = nil return t end
+		do
+			local mt = operator_mt(make_transient)
+			public.temp
+			{
+				get = function() return setmetatable(t, mt) end,
+				set = function(t) return make_transient(t) end,
+			}
+		end
+		do
+			local mt = operator_mt(make_persistent)
+			public.perm
+			{
+				get = function() return setmetatable(t, mt) end,
+				set = function(t) return make_persistent(t) end,
+			}
+		end
 	end
 	local function insert_keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
 		if overflow ~= nil then error 'Overflow.' end
