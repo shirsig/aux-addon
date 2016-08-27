@@ -4,13 +4,13 @@ aux 'post_tab' local scan, scan_util, post, history, info, persistence, item_lis
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
-function default_settings.get()
+function private.default_settings.get()
 	return -object('duration', DURATION_8 , 'stack_size', 1, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
 end
 
 do
 	local data
-	function data.get()
+	function private.data.get()
 		if not data then
 			local dataset = persistence.dataset
 			data = dataset.post or t

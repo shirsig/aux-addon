@@ -77,7 +77,7 @@ do
 		public.temp
 		{
 			get = function() return setmetatable(t, mt) end,
-			set = function(t) return make_transient(t) end,
+			set = function(t) make_transient(t) end,
 		}
 	end
 	do
@@ -85,7 +85,7 @@ do
 		public.perm
 		{
 			get = function() return setmetatable(t, mt) end,
-			set = function(t) return make_persistent(t) end,
+			set = function(t) make_persistent(t) end,
 		}
 	end
 
@@ -155,15 +155,20 @@ do
 		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
 	end
 	local set_mt, list_mt, object_mt = collector_mt(insert_keys), collector_mt(insert_values), collector_mt(insert_pairs)
-	public()
-	function list() return setmetatable(t, list_mt) end
-	function set() return setmetatable(t, set_mt) end
-	function object() return setmetatable(t, object_mt) end
-	private()
+	function public.set.get() return setmetatable(t, set_mt) end
+	function public.list.get() return setmetatable(t, list_mt) end
+	function public.object.get() return setmetatable(t, object_mt) end
+end
+
+function public.log(...) temp=arg
+	local msg = '[aux]'
+	for i=1,arg.n do msg = msg..' '..tostring(arg[i]) end
+	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
 end
 
 local event_frame = CreateFrame 'Frame'
 for event in -temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
+	log(event)
 	event_frame:RegisterEvent(event)
 end
 
@@ -188,12 +193,6 @@ do
 	end)
 end
 
-function public.log(...) temp=arg
-	local msg = '[aux]'
-	for i=1,arg.n do msg = msg..' '..tostring(arg[i]) end
-	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
-end
-
 tab_info = t
 do
 	local data = -temp-list('search_tab', 'Search', 'post_tab', 'Post', 'auctions_tab', 'Auctions', 'bids_tab', 'Bids')
@@ -212,7 +211,7 @@ end
 
 do
 	local index
-	function active_tab.get() return tab_info[index] end
+	function private.active_tab.get() return tab_info[index] end
 	function on_tab_click(i)
 		call(index and active_tab.CLOSE)
 		index = i

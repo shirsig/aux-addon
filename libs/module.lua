@@ -51,13 +51,9 @@ do
 		state.declaration_access, state.declaration_name = nil, nil
 	end
 	function declarator_mt:__call(value) local state=_state[self]
-		if state.declaration_name then
-			local success, f, getter, setter = pcall(extract, value)
-			if not success then declaration_error() end
-			declare(state, state.declaration_access, state.declaration_name, {[FUNCTION]=f, [GETTER]=getter, [SETTER]=setter})
-		elseif state.declaration_access or declaration_error() then
-			state.default_access = state.declaration_access
-		end
+		local success, f, getter, setter = pcall(extract, value)
+		if not (success and state.declaration_name) then declaration_error() end
+		declare(state, state.declaration_access, state.declaration_name, {[FUNCTION]=f, [GETTER]=getter, [SETTER]=setter})
 		state.declaration_access, state.declaration_name = nil, nil
 	end
 end

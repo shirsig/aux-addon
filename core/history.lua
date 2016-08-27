@@ -6,7 +6,7 @@ value_cache = t
 
 do
 	local cache
-	function data.get()
+	function private.data.get()
 		if not cache then
 			local dataset = persistence.dataset
 			cache = dataset.history or t
@@ -18,7 +18,7 @@ end
 
 do
 	local time = 0
-	function next_push.get()
+	function private.next_push.get()
 		if time() > time then
 			local date = date '*t'
 			date.hour, date.min, date.sec = 24, 0, 0
@@ -28,7 +28,7 @@ do
 	end
 end
 
-function new_record.get()
+function private.new_record.get()
 	return -object('next_push', next_push, 'data_points', t)
 end
 

@@ -23,7 +23,7 @@ do
 	local searches = t
 	local search_index = 1
 
-	function current_search.get() return searches[search_index] end
+	function private.current_search.get() return searches[search_index] end
 
 	function update_search(index)
 		searches[search_index].status_bar:Hide()

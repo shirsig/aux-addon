@@ -78,7 +78,7 @@ function USE_ITEM(item_info)
 	execute(nil, false)
 end
 
-function subtab.set(tab)
+function private.subtab.set(tab)
     search_results_button:UnlockHighlight()
     saved_searches_button:UnlockHighlight()
     new_filter_button:UnlockHighlight()
