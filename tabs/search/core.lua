@@ -51,7 +51,7 @@ RESULTS, SAVED, FILTER = 1, 2, 3
 
 function LOAD()
 	create_frames()
-	set_subtab(SAVED)
+	subtab = SAVED
 	update_auto_buy_filter()
 	new_search ''
 	current_search.placeholder = true
@@ -78,8 +78,7 @@ function USE_ITEM(item_info)
 	execute(nil, false)
 end
 
-function set_subtab(tab)
-
+function subtab.set(tab)
     search_results_button:UnlockHighlight()
     saved_searches_button:UnlockHighlight()
     new_filter_button:UnlockHighlight()

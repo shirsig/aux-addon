@@ -1,4 +1,4 @@
---aux_account_settings = {} -- TODO
+--aux_account_settings = {} -- TODO clean up the mess of savedvariables
 --aux_character_settings = {}
 
 module()
@@ -21,31 +21,22 @@ do
 	})
 end
 
-do
-	local bids_loaded
-	public.bids_loaded
-	{
-		get = function() return bids_loaded end,
-		set = function(value) bids_loaded = value end,
-	}
-end
-do
-	local current_owner_page
-	public.current_owner_page
-	{
-		get = function() return current_owner_page end,
-		set = function(value) current_owner_page = value end,
-	}
-end
+local bids_loaded
+function public.bids_loaded.get() return bids_loaded end
+
+local current_owner_page
+function public.current_owner_page.get() return current_owner_page end
 
 public.empty = setmetatable({}, {__metatable=false, __newindex=error})
 
 do
 	local pool, overflow_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
+
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for t in transient do recycle(t) end
 		wipe(transient)
 	end)
+
 	function public.wipe(t) -- like with a cloth or something
 		for k in t do t[k] = nil end
 		t.reset = 1
@@ -53,6 +44,7 @@ do
 		table.setn(t, 0)
 		return setmetatable(t, nil)
 	end
+
 	function public.recycle(t)
 		wipe(t)
 		if getn(pool) < 50 then
@@ -60,8 +52,9 @@ do
 		else
 			overflow_pool[t] = true
 		end
-		log(getn(table_pool), '-', getn(weak_pool))
+--		log(getn(table_pool), '-', getn(weak_pool))
 	end
+
 	function public.t.get()
 		return tremove(pool) or tremove(overflow_pool, next(overflow_pool)) or {}
 	end
@@ -70,6 +63,7 @@ do
 		transient[t] = true
 		return t
 	end
+
 	function public.operator_mt(f)
 		local function apply(self, value)
 			local raw = self.raw
@@ -79,25 +73,22 @@ do
 		return {__unm=function(self) self.raw = true end, __call=apply, __sub=apply}
 	end
 	do
-		local function make_transient(t) transient[t] = true return t end
-		local function make_persistent(t) transient[t] = nil return t end
-		do
-			local mt = operator_mt(make_transient)
-			public.temp
-			{
-				get = function() return setmetatable(t, mt) end,
-				set = function(t) return make_transient(t) end,
-			}
-		end
-		do
-			local mt = operator_mt(make_persistent)
-			public.perm
-			{
-				get = function() return setmetatable(t, mt) end,
-				set = function(t) return make_persistent(t) end,
-			}
-		end
+		local mt = operator_mt(function(t) transient[t] = true return t end)
+		public.temp
+		{
+			get = function() return setmetatable(t, mt) end,
+			set = function(t) return make_transient(t) end,
+		}
 	end
+	do
+		local mt = operator_mt(function(t) transient[t] = nil return t end)
+		public.perm
+		{
+			get = function() return setmetatable(t, mt) end,
+			set = function(t) return make_persistent(t) end,
+		}
+	end
+
 	local function insert_keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
 		if overflow ~= nil then error 'Overflow.' end
 		if k1 ~= nil then t[k1] = true end
@@ -164,10 +155,11 @@ do
 		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
 	end
 	local set_mt, list_mt, object_mt = collector_mt(insert_keys), collector_mt(insert_values), collector_mt(insert_pairs)
-	public.property()
-	set, list, object = {get=function() return setmetatable(t, set_mt) end}, {get=function() return setmetatable(t, list_mt) end}, {get=function() return setmetatable(t, object_mt) end}
+	public()
+	function set.list() return setmetatable(t, list_mt) end
+	function set.set() return setmetatable(t, set_mt) end
+	function set.object() return setmetatable(t, object_mt) end
 	private()
-	-- TODO or 'auto' 'transient'?
 end
 
 local event_frame = CreateFrame 'Frame'
@@ -219,12 +211,12 @@ do
 end
 
 do
-	local active_tab_index
-	function property.active_tab.get() return tab_info[active_tab_index] end
-	function on_tab_click(index)
-		call(active_tab_index and active_tab.CLOSE)
-		active_tab_index = index
-		call(active_tab_index and active_tab.OPEN)
+	local index
+	function active_tab.get() return tab_info[index] end
+	function on_tab_click(i)
+		call(index and active_tab.CLOSE)
+		index = i
+		call(index and active_tab.OPEN)
 	end
 end
 
@@ -314,7 +306,7 @@ end
 function AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
 	aux_frame:Show()
-	set_tab(1)
+	tab = 1
 end
 
 function AUCTION_HOUSE_CLOSED()
@@ -323,7 +315,7 @@ function AUCTION_HOUSE_CLOSED()
 	post.stop()
 	stack.stop()
 	scan.abort()
-	set_tab()
+	tab = nil
 	aux_frame:Hide()
 end
 

@@ -5,30 +5,30 @@ local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='
 value_cache = t
 
 do
-	local data
-	function property.data.get()
-		if not data then
+	local cache
+	function data.get()
+		if not cache then
 			local dataset = persistence.dataset
-			data = dataset.history or t
-			dataset.history = data
+			cache = dataset.history or t
+			dataset.history = cache
 		end
-		return data
+		return cache
 	end
 end
 
 do
-	local next_push = 0
-	function property.next_push.get()
-		if time() > next_push then
+	local time = 0
+	function next_push.get()
+		if time() > time then
 			local date = date '*t'
 			date.hour, date.min, date.sec = 24, 0, 0
-			next_push = time(date)
+			time = time(date)
 		end
-		return next_push
+		return time
 	end
 end
 
-function property.new_record.get()
+function new_record.get()
 	return -object('next_push', next_push, 'data_points', t)
 end
 

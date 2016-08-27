@@ -36,26 +36,22 @@ do
 		if ACCESS[key] and not state.declaration_access then
 			state.declaration_access = ACCESS[key]
 		elseif not state.declaration_name or declaration_error() then
-			state.declaration_name = key
+			state.declaration_name = typeof(key) == 'string' and key or declaration_error()
 		end
 		return self
 	end
 	function declarator_mt:__newindex(key, value) local state=_state[self]
---			if module.access[key] then return end
-		local type
-		if state.declaration_name then
-			type = TYPE[key] or declaration_error()
-		else
-			type = typeof(value) == 'function' and FUNCTION or GETTER
-		end
+		local type = state.declaration_name
+				and (TYPE[key] or declaration_error())
+				or typeof(value) == 'function' and FUNCTION or GETTER
 		declare(state, state.declaration_access, key, {[type]=value})
 		state.declaration_access, state.declaration_name = nil, nil
 	end
 	function declarator_mt:__call(value) local state=_state[self]
 		if state.declaration_name then
-			local success, f, get, set = pcall(extract, value)
+			local success, f, getter, setter = pcall(extract, value)
 			if not success then declaration_error() end
-			declare(state, state.declaration_access, state.declaration_name, {[FUNCTION]=f, [GETTER]=get, [SETTER]=set})
+			declare(state, state.declaration_access, state.declaration_name, {[FUNCTION]=f, [GETTER]=getter, [SETTER]=setter})
 		elseif state.declaration_access or declaration_error() then
 			state.default_access = state.declaration_access
 		end
@@ -65,15 +61,15 @@ end
 
 local env_mt = {__metatable=false}
 function env_mt:__index(key) local state=_state[self]
-	local get = state[GETTER][key]
-	if get then return get() end
+	local getter = state[GETTER][key]
+	if getter then return getter() end
 	local f = state[FUNCTION][key]
 	if f then return f else return _G[key] end
 end
 function env_mt:__newindex(key, value) local state=_state[self]
 	if state.access[key] then
-		local f = state[SETTER][key]
-		if f then f(value) end
+		local setter = state[SETTER][key]
+		if setter then setter(value) end
 	else
 		return state.declarator[key]
 	end
@@ -82,8 +78,8 @@ end
 local interface_mt = {__metatable=false}
 function interface_mt:__index(key) local state=_state[self]
 	if state.access[key] == PUBLIC then
-		local get = state[GETTER][key]
-		if get then return get() else return state[FUNCTION][key] end
+		local getter = state[GETTER][key]
+		if getter then return getter() else return state[FUNCTION][key] end
 	end
 end
 function interface_mt:__newindex(key, value) local state=_state[self]

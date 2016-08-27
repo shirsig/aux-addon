@@ -2,32 +2,10 @@ aux 'core'
 
 event_frame = CreateFrame 'Frame'
 
-do
-	local t = t
-	listeners
-	{
-		get = function() return t end,
-		set = function(v) t = v end,
-	}
-end
-do
-	local t = t
-	threads
-	{
-		get = function() return t end,
-		set = function(v) t = v end,
-	}
-end
+local listeners, threads = t, t
 
-do
-	local thread_id
-	public.thread_id
-	{
-		get = function() return thread_id end,
-		set = function(value) thread_id = value end,
-	}
-
-end
+local thread_id
+function public.thread_id.get() return thread_id end
 
 function LOAD()
 	event_frame:SetScript('OnUpdate', UPDATE)
@@ -49,7 +27,7 @@ function UPDATE()
 		end
 	end
 
-	listeners = filter(listeners, function(l) return not l.killed end)
+	listeners = filter(listeners, function(l) return not l.killed end) -- TODO wipe tables instead
 	threads = filter(threads, function(th) return not th.killed end)
 
 	for id, thread in threads do
@@ -68,17 +46,17 @@ end
 
 do
 	local id = 0
-	function property.id.get() id = id + 1; return id end
+	function id.get() id = id + 1; return id end
 end
 
 function public.kill_listener(listener_id)
-	for _, listener in {listeners[listener_id]} do
+	for listener in present(listeners[listener_id]) do
 		listener.killed = true
 	end
 end
 
 function public.kill_thread(thread_id)
-	for _, thread in {threads[thread_id]} do
+	for thread in present(threads[thread_id]) do
 		thread.killed = true
 	end
 end
