@@ -162,11 +162,11 @@ do
 	end
 	local set_mt, list_mt, object_mt = collector_mt(insert_keys), collector_mt(insert_values), collector_mt(insert_pairs)
 
-	_=public
-	function set.get() return setmetatable(t, set_mt) end
-	function list.get() return setmetatable(t, list_mt) end
-	function object.get() return setmetatable(t, object_mt) end
-	_=private
+	if public then
+		function set.get() return setmetatable(t, set_mt) end
+		function list.get() return setmetatable(t, list_mt) end
+		function object.get() return setmetatable(t, object_mt) end
+	end
 end
 
 function public.log(...) temp=arg
