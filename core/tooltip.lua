@@ -2,36 +2,29 @@ aux 'tooltip' local info, disenchant, cache, money, history = aux.info, aux.dise
 
 _G.aux_tooltip_value = true
 
-game_tooltip_hooks = t
-
-do
-	local c
-	hooked_setter
-		{
-			get = function() return c end,
-			set = function(v) c = v end,
-		}
-end
-do
-	local amount
-	game_tooltip_money
-	{
-		get = function() return amount end,
-		set = function(v) amount = v end,
-	}
-end
+local game_tooltip_hooks, game_tooltip_money, inside_hook = t, 0, false
 
 function LOAD()
-    for name, f in game_tooltip_hooks do
-        local name, f = name, f
-        M.hook(name, GameTooltip, function(...) temp=arg
-            hooked_setter = true
-            game_tooltip_money = 0
-            local ret = {orig[GameTooltip][name](unpack(arg))}
-            hooked_setter = false
-            f(unpack(arg))
-            return unpack(ret)
-        end)
+	do
+	    for name, f in game_tooltip_hooks do
+	        local name, f = name, f
+	        hook(name, GameTooltip, function(...) temp=arg
+	            inside_hook = true
+	            game_tooltip_money = 0
+	            local ret = {orig[GameTooltip][name](unpack(arg))}
+	            inside_hook = false
+	            f(unpack(arg))
+	            return unpack(ret)
+	        end)
+	    end
+	    local orig = GameTooltip:GetScript 'OnTooltipAddMoney'
+	    GameTooltip:SetScript('OnTooltipAddMoney', function(...) temp=arg
+		    if inside_hook then
+			    game_tooltip_money = arg1
+		    else
+			    return orig(unpack(arg))
+		    end
+	    end)
     end
     local orig = SetItemRef
     setglobal('SetItemRef', function(...) temp=arg
@@ -43,14 +36,6 @@ function LOAD()
             extend_tooltip(ItemRefTooltip, link, 1)
         end
         return result
-    end)
-    local orig = GameTooltip:GetScript 'OnTooltipAddMoney'
-    GameTooltip:SetScript('OnTooltipAddMoney', function(...) temp=arg
-        if hooked_setter then
-            game_tooltip_money = arg1
-        else
-            return orig(unpack(arg))
-        end
     end)
 end
 

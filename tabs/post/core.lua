@@ -30,17 +30,8 @@ function write_settings(settings, item_key)
 	data[item_key] = persistence.write(settings_schema, settings)
 end
 
-existing_auctions = t
-inventory_records = t
+local scan_id, inventory_records, existing_auctions = 0, t, t
 
-do
-	local id = 0
-	scan_id
-	{
-		get = function() return id end,
-		set = function(v) id = v end,
-	}
-end
 do
 	local item
 	selected_item
