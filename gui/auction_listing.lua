@@ -1,4 +1,4 @@
-aux 'auction_listing' local gui, sorting, history, money, info = aux.gui, aux.sorting, aux.history, aux.money, aux.info
+aux 'auction_listing' local gui, sorting, money, info = aux.gui, aux.sorting, aux.money, aux.info
 
 _G.aux_price_per_unit = false
 
@@ -523,7 +523,7 @@ public.bids_config = {
 function record_percentage(record)
     if not record then return end
 
-    local historical_value = history.value(record.item_key) or 0
+    local historical_value = aux.history.value(record.item_key) or 0
     if historical_value > 0 then
         if record.unit_buyout_price > 0 then
             return round(100 * record.unit_buyout_price / historical_value, 1)

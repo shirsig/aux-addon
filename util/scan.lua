@@ -1,4 +1,4 @@
-aux 'scan_util' local info , filter_util, scan = aux.info, aux.filter_util, aux.scan
+aux 'scan_util' local info , filter_util = aux.info, aux.filter_util
 
 function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
@@ -32,7 +32,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
 
 
     local found
-    return scan.start{
+    return aux.scan.start{
         type = auction_record.query_type,
         queries = queries,
         on_scan_start = function()

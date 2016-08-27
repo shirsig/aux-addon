@@ -1,4 +1,4 @@
-aux 'filter_util' local info, cache = aux.info, aux.cache
+aux 'filter_util' local info = aux.info
 
 function default_filter(str)
     return {
@@ -176,7 +176,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local vendor_price = cache.merchant_info(auction_record.item_id)
+                local vendor_price = aux.cache.merchant_info(auction_record.item_id)
                 return vendor_price and vendor_price * auction_record.aux_quantity - auction_record.bid_price >= amount
             end
         end
@@ -186,7 +186,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local vendor_price = cache.merchant_info(auction_record.item_id)
+                local vendor_price = aux.cache.merchant_info(auction_record.item_id)
                 return auction_record.buyout_price > 0 and vendor_price and vendor_price * auction_record.aux_quantity - auction_record.buyout_price >= amount
             end
         end
@@ -444,7 +444,7 @@ function prettified_query_string(components)
 
     for key, filter in components.blizzard do
         if key == 'exact' then
-            prettified.prepend(info.display_name(cache.item_id(components.blizzard.name[2])) or color.blizzard('['..components.blizzard.name[2]..']'))
+            prettified.prepend(info.display_name(aux.cache.item_id(components.blizzard.name[2])) or color.blizzard('['..components.blizzard.name[2]..']'))
         elseif key ~= 'name' then
             prettified.append(color.blizzard(filter[1]))
         end
@@ -463,7 +463,7 @@ function prettified_query_string(components)
             end
             for parameter in present(component[3]) do
 	            if component[2] == 'item' then
-		            prettified.append(info.display_name(cache.item_id(parameter)) or color.label.enabled('['..parameter..']'))
+		            prettified.append(info.display_name(aux.cache.item_id(parameter)) or color.label.enabled('['..parameter..']'))
 	            else
 		            if filters[component[2]].input_type == 'money' then
 			            prettified.append(money.to_string(money.from_string(parameter), nil, true, nil, gui.inline_color.label.enabled))
@@ -495,7 +495,7 @@ function blizzard_query(components)
     local query = -object('name', filters.name and filters.name[2])
 
     local item_info, class_index, subclass_index, slot_index
-    local item_id = cache.item_id(filters.name[2])
+    local item_id = aux.cache.item_id(filters.name[2])
     item_info = item_id and info.item(item_id)
     if filters.exact and item_info then
 	    item_info = info.item(item_id)

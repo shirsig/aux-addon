@@ -1,6 +1,6 @@
 aux 'stack' local info = aux.info
 
-state = nil
+local state = nil
 
 function stack_size(slot)
     local container_item_info = info.container_item(unpack(slot))

@@ -100,8 +100,7 @@ function module(...)
 		local module_functions, module_getters, module_setters = module[FUNCTION], module[GETTER], module[SETTER]
 		for k, v in module.access do
 			if v == PUBLIC and (not access[k] or import_error()) then
-				functions[k], getters[k], setters[k] = module_functions[k], module_getters[k], module_setters[k]
-				access[k] = PRIVATE
+				access[k], functions[k], getters[k], setters[k] = PRIVATE, module_functions[k], module_getters[k], module_setters[k]
 			end
 		end
 	end

@@ -10,16 +10,18 @@ do
 	_G.aux = setmetatable({}, {
 		__metatable = false,
 		__index = function(_, key) return modules[key].interface end,
-		__newindex = function() end,
-		__call = function(_, name)
+		__newindex = error,
+		__call = function(self, name)
 			if not modules[name] then
 				module(aux.core)
+				aux = self
 				modules[name] = {env=M, interface=I}
 			end
 			setfenv(2, modules[name].env)
 		end,
 	})
 end
+local aux = aux
 
 local bids_loaded
 function public.bids_loaded.get() return bids_loaded end
@@ -50,7 +52,7 @@ do
 		if getn(pool) < 50 then
 			tinsert(pool, t)
 		else
-			overflow_pool[t] = true
+			tinsert(overflow_pool, t)
 		end
 --		log(getn(table_pool), '-', getn(weak_pool))
 	end
@@ -314,9 +316,9 @@ end
 function AUCTION_HOUSE_CLOSED()
 	bids_loaded = false
 	current_owner_page = nil
-	post.stop()
-	stack.stop()
-	scan.abort()
+	aux.post.stop()
+	aux.stack.stop()
+	aux.scan.abort()
 	tab = nil
 	aux_frame:Hide()
 end
@@ -366,10 +368,10 @@ do
 					total_cost = nil
 					break
 				end
-				local item_id, suffix_id = info.parse_link(link)
+				local item_id, suffix_id = aux.info.parse_link(link)
 				local count = select(3, GetCraftReagentInfo(id, i))
-				local _, price, limited = cache.merchant_info(item_id)
-				local value = price and not limited and price or history.value(item_id..':'..suffix_id)
+				local _, price, limited = aux.cache.merchant_info(item_id)
+				local value = price and not limited and price or aux.history.value(item_id..':'..suffix_id)
 				if not value then
 					total_cost = nil
 					break
@@ -393,10 +395,10 @@ do
 					total_cost = nil
 					break
 				end
-				local item_id, suffix_id = info.parse_link(link)
+				local item_id, suffix_id = aux.info.parse_link(link)
 				local count = select(3, GetTradeSkillReagentInfo(id, i))
-				local _, price, limited = cache.merchant_info(item_id)
-				local value = price and not limited and price or history.value(item_id..':'..suffix_id)
+				local _, price, limited = aux.cache.merchant_info(item_id)
+				local value = price and not limited and price or aux.history.value(item_id..':'..suffix_id)
 				if not value then
 					total_cost = nil
 					break

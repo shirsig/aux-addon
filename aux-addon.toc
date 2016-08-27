@@ -17,17 +17,17 @@ util\persistence.lua
 util\sort.lua
 util\money.lua
 util\info.lua
-util\scan.lua
 util\filter.lua
+util\scan.lua
 util\completion.lua
 
 core\cache.lua
+core\history.lua
 core\disenchant.lua
 core\slash.lua
 core\scan.lua
 core\stack.lua
 core\post.lua
-core\history.lua
 core\tooltip.lua
 
 gui\listing.lua

@@ -1,6 +1,6 @@
 aux 'post'
 
-state = nil
+local state = nil
 
 function process()
 	if state.posted < state.count then
