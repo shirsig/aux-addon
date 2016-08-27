@@ -70,23 +70,27 @@ do
 			recycle(self)
 			return raw and setmetatable(f(value), nil) or f(value)
 		end
-		return {__unm=function(self) self.raw = true end, __call=apply, __sub=apply}
+		return {__unm=function(self) self.raw = true; return self end, __call=apply, __sub=apply}
 	end
 	do
-		local mt = operator_mt(function(t) transient[t] = true return t end)
-		public.temp
-		{
-			get = function() return setmetatable(t, mt) end,
-			set = function(t) make_transient(t) end,
-		}
-	end
-	do
-		local mt = operator_mt(function(t) transient[t] = nil return t end)
-		public.perm
-		{
-			get = function() return setmetatable(t, mt) end,
-			set = function(t) make_persistent(t) end,
-		}
+		local function make_transient(t) transient[t] = true; return t end
+		local function make_persistent(t) transient[t] = nil; return t end
+		do
+			local mt = operator_mt(make_transient)
+			public.temp
+			{
+				get = function() return setmetatable(t, mt) end,
+				set = function(t) return make_transient(t) end,
+			}
+		end
+		do
+			local mt = operator_mt(make_persistent)
+			public.perm
+			{
+				get = function() return setmetatable(t, mt) end,
+				set = function(t) return make_persistent(t) end,
+			}
+		end
 	end
 
 	local function insert_keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
@@ -155,9 +159,11 @@ do
 		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
 	end
 	local set_mt, list_mt, object_mt = collector_mt(insert_keys), collector_mt(insert_values), collector_mt(insert_pairs)
-	function public.set.get() return setmetatable(t, set_mt) end
-	function public.list.get() return setmetatable(t, list_mt) end
-	function public.object.get() return setmetatable(t, object_mt) end
+	public()
+	function set.get() return setmetatable(t, set_mt) end
+	function list.get() return setmetatable(t, list_mt) end
+	function object.get() return setmetatable(t, object_mt) end
+	private()
 end
 
 function public.log(...) temp=arg
@@ -168,7 +174,6 @@ end
 
 local event_frame = CreateFrame 'Frame'
 for event in -temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
-	log(event)
 	event_frame:RegisterEvent(event)
 end
 
@@ -195,15 +200,13 @@ end
 
 tab_info = t
 do
-	local data = -temp-list('search_tab', 'Search', 'post_tab', 'Post', 'auctions_tab', 'Auctions', 'bids_tab', 'Bids')
-	for i=1,getn(data),2 do
-		log(data[i], data[i + 1])
-		local tab = -object('name', data[i + 1])
-		local env = (function() module(data[i]) return M end)()
-		function env.OPEN.set(f) tab.OPEN = f end
-		function env.CLOSE.set(f) tab.CLOSE = f end
-		function env.USE_ITEM.set(f) tab.USE_ITEM = f end
-		function env.CLICK_LINK.set(f) tab.CLICK_LINK = f end
+	for k, v in -temp-object('search_tab', 'Search', 'post_tab', 'Post', 'auctions_tab', 'Auctions', 'bids_tab', 'Bids') do
+		local tab = -object('name', v)
+		local env = (function() aux(v) return M end)()
+		function env.private.OPEN.set(f) tab.OPEN = f end
+		function env.private.CLOSE.set(f) tab.CLOSE = f end
+		function env.private.USE_ITEM.set(f) tab.USE_ITEM = f end
+		function env.private.CLICK_LINK.set(f) tab.CLICK_LINK = f end
 		function env.public.ACTIVE.get() return tab == active_tab end
 		tinsert(tab_info, tab)
 	end

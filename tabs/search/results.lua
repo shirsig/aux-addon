@@ -19,6 +19,15 @@ do
 	}
 end
 
+function property.get() end
+function property.set() end
+auto_buy_validator = property
+{
+
+}
+
+
+
 do
 	local searches = t
 	local search_index = 1

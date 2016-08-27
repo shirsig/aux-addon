@@ -24,7 +24,7 @@ do
 		return f, getter, setter
 	end
 	local function declare(state, access, name, data)
-		state.access[name] = state.access[name] and collision_error(name) or access or state.default_access
+		state.access[name] = state.access[name] and collision_error(name) or access or state.default_access or declaration_error()
 		for type, value in data do
 			if typeof(value) ~= 'function' and (type == GETTER or declaration_error()) then
 				value = const(value == nil and tostring(value) or value)
@@ -51,9 +51,13 @@ do
 		state.declaration_access, state.declaration_name = nil, nil
 	end
 	function declarator_mt:__call(value) local state=_state[self]
-		local success, f, getter, setter = pcall(extract, value)
-		if not (success and state.declaration_name) then declaration_error() end
-		declare(state, state.declaration_access, state.declaration_name, {[FUNCTION]=f, [GETTER]=getter, [SETTER]=setter})
+		if state.declaration_name then
+			local success, f, getter, setter = pcall(extract, value)
+			if not success then declaration_error() end
+			declare(state, state.declaration_access, state.declaration_name, {[FUNCTION]=f, [GETTER]=getter, [SETTER]=setter})
+		elseif state.declaration_access or declaration_error() then
+			state.default_access = state.declaration_access
+		end
 		state.declaration_access, state.declaration_name = nil, nil
 	end
 end
@@ -62,8 +66,7 @@ local env_mt = {__metatable=false}
 function env_mt:__index(key) local state=_state[self]
 	local getter = state[GETTER][key]
 	if getter then return getter() end
-	local f = state[FUNCTION][key]
-	if f then return f else return _G[key] end
+	return state[FUNCTION][key] or _G[key] or state.declarator[key]
 end
 function env_mt:__newindex(key, value) local state=_state[self]
 	if state.access[key] then
@@ -90,7 +93,7 @@ function module(...)
 	declarator, env, interface = setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
 	access = {error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE}
 	functions = {error=error, nop=nop}
-	getters = {_G=const(_G), M=const(env), I=const(interface), public=function() state.declaration_access = PUBLIC return declarator end, private=function() state.declaration_access = PRIVATE return declarator end}
+	getters = {_G=const(_G), M=const(env), I=const(interface), public=function() state.declaration_access = PUBLIC; return declarator end, private=function() state.declaration_access = PRIVATE; return declarator end}
 	setters = {}
 	for i=1,arg.n do
 		local module = _state[arg[i] or import_error()] or import_error()
