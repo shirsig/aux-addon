@@ -56,7 +56,8 @@ function extend_tooltip(tooltip, link, quantity)
             tooltip:AddLine(format('Can disenchant from level %s |cff1eff00Uncommon|r items.', range), color.r, color.g, color.b, true)
         end
     end
-    for item_info in present(info.item(item_id)) do
+    local item_info = info.item(item_id)
+    if item_info then
         local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
         if getn(distribution) > 0 then
             if _G.aux_tooltip_disenchant_distribution then
