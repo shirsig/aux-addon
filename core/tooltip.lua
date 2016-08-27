@@ -2,10 +2,11 @@ aux 'tooltip' local info, disenchant, cache, money, history = aux.info, aux.dise
 
 _G.aux_tooltip_value = true
 
-local game_tooltip_hooks, game_tooltip_money, inside_hook = t, 0, false
+local game_tooltip_hooks, game_tooltip_money = t, 0
 
 function LOAD()
 	do
+		local inside_hook = false
 	    for name, f in game_tooltip_hooks do
 	        local name, f = name, f
 	        hook(name, GameTooltip, function(...) temp=arg
@@ -31,8 +32,8 @@ function LOAD()
         local result = orig(unpack(arg))
         local name, _, quality = GetItemInfo(arg[1])
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
-            local _, _, _, hex = GetItemQualityColor(quality)
-            local link = hex.. '|H'..arg[1]..'|h['..name..']|h'..FONT_COLOR_CODE_CLOSE
+            local color_code = select(4, GetItemQualityColor(quality))
+            local link = color_code.. '|H'..arg[1]..'|h['..name..']|h'..FONT_COLOR_CODE_CLOSE
             extend_tooltip(ItemRefTooltip, link, 1)
         end
         return result

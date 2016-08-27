@@ -35,31 +35,31 @@ do
 	function declarator_mt:__index(key) local state=_state[self]
 		if ACCESS[key] and not state.declaration_access then
 			state.declaration_access = ACCESS[key]
-		elseif not state.declarator_name or declaration_error() then
-			state.declarator_name = key
+		elseif not state.declaration_name or declaration_error() then
+			state.declaration_name = key
 		end
 		return self
 	end
 	function declarator_mt:__newindex(key, value) local state=_state[self]
 --			if module.access[key] then return end
 		local type
-		if state.declarator_name then
+		if state.declaration_name then
 			type = TYPE[key] or declaration_error()
 		else
 			type = typeof(value) == 'function' and FUNCTION or GETTER
 		end
 		declare(state, state.declaration_access, key, {[type]=value})
-		state.declaration_access, state.declarator_name = nil, nil
+		state.declaration_access, state.declaration_name = nil, nil
 	end
 	function declarator_mt:__call(value) local state=_state[self]
-		if state.declarator_name then
+		if state.declaration_name then
 			local success, f, get, set = pcall(extract, value)
 			if not success then declaration_error() end
-			declare(state, state.declaration_access, state.declarator_name, {[FUNCTION]=f, [GETTER]=get, [SETTER]=set})
+			declare(state, state.declaration_access, state.declaration_name, {[FUNCTION]=f, [GETTER]=get, [SETTER]=set})
 		elseif state.declaration_access or declaration_error() then
 			state.default_access = state.declaration_access
 		end
-		state.declaration_access, state.declarator_name = nil, nil
+		state.declaration_access, state.declaration_name = nil, nil
 	end
 end
 
@@ -71,9 +71,12 @@ function env_mt:__index(key) local state=_state[self]
 	if f then return f else return _G[key] end
 end
 function env_mt:__newindex(key, value) local state=_state[self]
-	if declaration_newindex(state, key, value) then return end
-	local f = state[SETTER][key]
-	if f then f(value); return end
+	if state.access[key] then
+		local f = state[SETTER][key]
+		if f then f(value) end
+	else
+		return state.declarator[key]
+	end
 end
 
 local interface_mt = {__metatable=false}
@@ -84,7 +87,7 @@ function interface_mt:__index(key) local state=_state[self]
 	end
 end
 function interface_mt:__newindex(key, value) local state=_state[self]
-	if state.access[key] == PUBLIC then (state[SETTER][key] or state[FUNCTION][key])(value) end
+	if state.access[key] == PUBLIC then (state[SETTER][key] or nop)(value) end
 end
 
 function module(...)
@@ -96,15 +99,15 @@ function module(...)
 	setters = {}
 	for i=1,arg.n do
 		local module = _state[arg[i] or import_error()] or import_error()
-		local import_functions, import_getters, import_setters = module[FUNCTION], module[GETTER], module[SETTER]
+		local module_functions, module_getters, module_setters = module[FUNCTION], module[GETTER], module[SETTER]
 		for k, v in module.access do
 			if v == PUBLIC and (not access[k] or import_error()) then
-				functions[k], getters[k], setters[k] = import_functions[k], import_getters[k], import_setters[k]
+				functions[k], getters[k], setters[k] = module_functions[k], module_getters[k], module_setters[k]
 				access[k] = PRIVATE
 			end
 		end
 	end
-	state = {access=access, [FUNCTION]=functions, [GETTER]=getters, [SETTER]=setters, default_access=PRIVATE}
+	state = {access=access, [FUNCTION]=functions, [GETTER]=getters, [SETTER]=setters, declarator=declarator, default_access=PRIVATE}
 	_state[declarator], _state[env], _state[interface] = state, state, state
 	setfenv(2, env)
 end
