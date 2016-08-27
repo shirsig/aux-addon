@@ -41,10 +41,13 @@ do
 		return self
 	end
 	function declarator_mt:__newindex(key, value) local state=_state[self]
-		local type = state.declaration_name
-				and (TYPE[key] or declaration_error())
-				or typeof(value) == 'function' and FUNCTION or GETTER
-		declare(state, state.declaration_access, key, {[type]=value})
+		local name, type = state.declaration_name, nil
+		if name then
+			type = TYPE[key] or declaration_error()
+		else
+			name, type = key, typeof(value) == 'function' and FUNCTION or GETTER
+		end
+		declare(state, state.declaration_access, name, {[type]=value})
 		state.declaration_access, state.declaration_name = nil, nil
 	end
 	function declarator_mt:__call(value) local state=_state[self]
@@ -71,7 +74,7 @@ function env_mt:__newindex(key, value) local state=_state[self]
 		local setter = state[SETTER][key]
 		if setter then setter(value) end
 	else
-		return state.declarator[key]
+		state.declarator[key] = value
 	end
 end
 

@@ -156,9 +156,9 @@ do
 	end
 	local set_mt, list_mt, object_mt = collector_mt(insert_keys), collector_mt(insert_values), collector_mt(insert_pairs)
 	public()
-	function set.list() return setmetatable(t, list_mt) end
-	function set.set() return setmetatable(t, set_mt) end
-	function set.object() return setmetatable(t, object_mt) end
+	function list() return setmetatable(t, list_mt) end
+	function set() return setmetatable(t, set_mt) end
+	function object() return setmetatable(t, object_mt) end
 	private()
 end
 
