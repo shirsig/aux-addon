@@ -19,10 +19,11 @@ do
 		__newindex = error,
 		__call = function(self, name)
 			if not modules[name] then
-				module(aux.core)
+				module()
 				private.aux = self
 				modules[name] = {env=M, interface=I}
 			end
+			modules[name].env.import(modules.core.interface)
 			setfenv(2, modules[name].env)
 		end,
 	})
@@ -63,7 +64,7 @@ do
 		else
 			tinsert(overflow_pool, t)
 		end
-		log(getn(pool), '-', getn(overflow_pool))
+--		log(getn(pool), '-', getn(overflow_pool))
 	end
 	
 	function public.t.get()
@@ -173,8 +174,6 @@ do
 	private()
 end
 
-(function(...) log( _G.arg) end)()
-
 local event_frame = CreateFrame('Frame')
 for event in -temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
@@ -193,8 +192,6 @@ do
 		elseif event == 'PLAYER_LOGIN' then
 			for _, f in handlers2 do f() end
 			log('v'..version..' loaded.')
-
-			-- TODO test __lt
 		else
 			M[event]()
 		end

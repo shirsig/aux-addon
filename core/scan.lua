@@ -38,7 +38,7 @@ do
 	end
 
 	function private.state.get()
-		local _, state = next(filter(scan_states, function(state) return state.id == thread_id end))
+		local _, state = next(filter(copy(scan_states), function(state) return state.id == thread_id end))
 		return state
 	end
 end

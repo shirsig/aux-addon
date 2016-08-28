@@ -50,7 +50,6 @@ do
 		end
 	}
 	public.color.get = color_accessor(function(color)
-		log'kek'
 		local r, g, b, a = unpack(color)
 		return setmetatable({r/255, g/255, b/255, a}, mt)
 	end)

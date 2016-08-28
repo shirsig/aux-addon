@@ -88,7 +88,7 @@ end
 
 function update_inventory_listing()
 	if not ACTIVE then return end
-	item_listing.populate(inventory_listing, values(filter(inventory_records, function(record)
+	item_listing.populate(inventory_listing, values(filter(copy(inventory_records), function(record)
         local settings = read_settings(record.key)
         return record.aux_quantity > 0 and (not settings.hidden or show_hidden_checkbox:GetChecked())
     end)))
@@ -168,7 +168,7 @@ function update_auction_listing()
 end
 
 function public.select_item(item_key)
-    for _, inventory_record in filter(inventory_records, function(record) return record.aux_quantity > 0 end) do
+    for _, inventory_record in filter(copy(inventory_records), function(record) return record.aux_quantity > 0 end) do
         if inventory_record.key == item_key then
             set_item(inventory_record)
             return

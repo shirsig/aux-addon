@@ -5,8 +5,8 @@ local PUBLIC, PRIVATE = 1, 2
 local CALL, INDEX, NEWINDEX = 1, 2, 3
 
 local function error(msg, ...) return _G.error(format(msg or '', unpack(arg))..'\n'..debugstack(), 0) end
-local function import_error() error 'Import failed.' end
-local function declaration_error() error 'Invalid declaration.' end
+local function import_error() error('Import error.') end
+local function declaration_error() error('Declaration error.') end
 local function collision_error(key) error('"%s" already exists.', key) end
 
 local function nop() end
@@ -88,16 +88,7 @@ function interface_mt:__newindex(key, value) self=state[self]
 	if self.access[key] == PUBLIC then (self[NEWINDEX][key] or nop)(value) end
 end
 
-function module(...)
-	local declarator, env, interface = setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
-	local self; self = {
-		access = {_=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
-		[CALL] = {error=error, nop=nop},
-		[INDEX] = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
-		[NEWINDEX] = {_=nop},
-		declarator = declarator,
-		default_access = PRIVATE,
-	}
+local function import(self, ...)
 	for i = 1, arg.n do
 		local module = state[arg[i] or import_error()]
 		for k, v in module.access do
@@ -106,6 +97,18 @@ function module(...)
 			end
 		end
 	end
+end
+
+function module(...)
+	local declarator, env, interface = setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
+	local self; self = {
+		access = {_=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
+		[CALL] = {import=function(...) import(self, unpack(arg)) end, error=error, nop=nop},
+		[INDEX] = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
+		[NEWINDEX] = {_=nop},
+		declarator = declarator,
+		default_access = PRIVATE,
+	}
 	state[declarator], state[env], state[interface] = self, self, self
 	setfenv(2, env)
 end

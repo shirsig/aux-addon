@@ -190,13 +190,12 @@ function public.all(t, p)
 end
 
 function public.filter(t, p)
-	local filtered = M.t
 	for k, v in t do
-		if p(v, k) then
-			filtered[k] = v
+		if not p(v, k) then
+			t[k] = nil
 		end
 	end
-	return filtered
+	return t
 end
 
 function public.map(t, f)

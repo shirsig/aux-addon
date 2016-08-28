@@ -27,8 +27,8 @@ function UPDATE()
 		end
 	end
 
-	listeners = filter(listeners, function(l) return not l.killed end) -- TODO wipe tables instead
-	threads = filter(threads, function(th) return not th.killed end)
+	filter(listeners, function(l) return not l.killed end)
+	filter(threads, function(th) return not th.killed end)
 
 	for id, thread in threads do
 		if not thread.killed then
