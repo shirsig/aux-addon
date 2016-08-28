@@ -32,7 +32,7 @@ function LOAD()
 			DropDownList1:SetHeight(DropDownList1:GetHeight() - 10)
 			DropDownList1:ClearAllPoints()
 			DropDownList1:SetPoint('TOPLEFT', dropdown, 'BOTTOMLEFT', -2, -2)
-			for i=1,UIDROPDOWNMENU_MAXBUTTONS do
+			for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
 				local button = _G['DropDownList1Button'..i]
 				button:SetPoint('TOPLEFT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
 				button:SetPoint('TOPRIGHT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
@@ -57,7 +57,7 @@ function LOAD()
 			DropDownList1Backdrop:SetBackdrop(blizzard_backdrop)
 			aux_border:Hide()
 			aux_background:Hide()
-			for i=1,UIDROPDOWNMENU_MAXBUTTONS do
+			for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
 				local button = _G['DropDownList1Button'..i]
 				local text = button:GetFontString()
 				text:SetFont([[Fonts\FRIZQT__.ttf]], 10)
@@ -100,7 +100,7 @@ do
 	orig = menu:GetScript 'OnShow'
 	menu:SetScript('OnShow', function()
 		UIMenu_Initialize()
-		for i=1,getn(structure) do
+		for i = 1, getn(structure) do
 			UIMenu_AddButton(
 				structure[i][1],
 				structure[i],

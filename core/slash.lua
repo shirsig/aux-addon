@@ -53,7 +53,7 @@ function _G.SlashCmdList.AUX(command)
     elseif arguments[1] == 'chars' and arguments[2] == 'add' then
 		local realm = GetCVar 'realmName'
 		_G.aux_characters[realm] = _G.aux_characters[realm] or {}
-		for i=3,getn(arguments) do
+		for i = 3, getn(arguments) do
 			local name = gsub(strlower(arguments[i]), '^%l', strupper)
 			if not _G.aux_characters[realm][name] then
 				_G.aux_characters[realm][name] = true
@@ -65,7 +65,7 @@ function _G.SlashCmdList.AUX(command)
 		if not _G.aux_characters[realm] then
 			return
 		end
-		for i=3,getn(arguments) do
+		for i = 3, getn(arguments) do
 			local name = gsub(strlower(arguments[i]), '^%l', strupper)
 			if _G.aux_characters[realm][name] then
 				_G.aux_characters[realm][name] = nil

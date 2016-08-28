@@ -104,7 +104,7 @@ local methods = {
             st.updateSort = nil
         end
 
-        for i=1, st.sizes.numRows do
+        for i = 1, st.sizes.numRows do
             st.rows[i].data = nil
             if i > getn(st.rowData) then
                 st.rows[i]:Hide()
@@ -375,7 +375,7 @@ local methods = {
 
         row.cols = {}
         st.rows[rowNum] = row
-        for i=1, getn(st.colInfo) do
+        for i = 1, getn(st.colInfo) do
             st:AddRowCol(rowNum)
         end
     end,

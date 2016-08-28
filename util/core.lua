@@ -20,14 +20,14 @@ end
 
 do
 	local formal_parameters = t
-	for i=1,9 do
+	for i = 1, 9 do
 		local key = '_'..i
 		public[key] = t
 		formal_parameters[M[key]] = i
 	end
 	local function helper(f, arg1, arg2)
 		local params = t
-		for i=1,arg1.n do
+		for i = 1, arg1.n do
 			if formal_parameters[arg1[i]] then
 				tinsert(params, arg2[formal_parameters[arg1[i]]])
 			else
@@ -58,7 +58,7 @@ function public.call(f, ...) temp=arg
 end
 
 function public.index(t, ...) temp=arg
-	for i=1,arg.n do
+	for i = 1, arg.n do
 		t = t and t[arg[i]]
 	end
 	return t
@@ -94,7 +94,7 @@ end
 
 function public.expand(array, ...) temp=arg
 	local t = t
-	for i=1,arg.n do t[arg[i]] = array[i] end
+	for i = 1, arg.n do t[arg[i]] = array[i] end
 	return t
 end
 

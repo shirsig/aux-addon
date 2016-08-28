@@ -12,7 +12,7 @@ local function collision_error(key) error('"%s" already exists.', key) end
 local function nop() end
 local function const(v) return function() return v end end
 
-local _state = {}
+local state = {}
 
 local declarator_mt = {__metatable=false}
 do
@@ -23,86 +23,86 @@ do
 		if next(v) or f ~= nil and getter ~= nil then error() end
 		return f, getter, setter
 	end
-	local function declare(state, access, name, handlers)
-		state.access[name] = state.access[name] and collision_error(name) or access or PRIVATE
+	local function declare(self, access, name, handlers)
+		self.access[name] = self.access[name] and collision_error(name) or access or PRIVATE
 		for event, handler in handlers do
 			if type(handler) ~= 'function' and (event == INDEX or declaration_error()) then
 				handler = const(handler == nil and tostring(name) or handler)
 			end
-			state[event][name] = handler
+			self[event][name] = handler
 		end
 	end
-	function declarator_mt:__index(key) local state=_state[self]
-		if ACCESS[key] and not state.declaration_access then
-			state.declaration_access = ACCESS[key]
-		elseif not state.declaration_name or declaration_error() then
-			state.declaration_name = type(key) == 'string' and key or declaration_error()
+	function declarator_mt:__index(key) self=state[self]
+		if ACCESS[key] and not self.declaration_access then
+			self.declaration_access = ACCESS[key]
+		elseif not self.declaration_name or declaration_error() then
+			self.declaration_name = type(key) == 'string' and key or declaration_error()
 		end
-		return self
+		return self.declarator
 	end
-	function declarator_mt:__newindex(key, value) local state=_state[self]
-		local name, event = state.declaration_name, nil
+	function declarator_mt:__newindex(key, value) self=state[self]
+		local name, event = self.declaration_name, nil
 		if name then
 			event = EVENT[key] or declaration_error()
 		else
 			name, event = key, type(value) == 'function' and CALL or INDEX
 		end
-		declare(state, state.declaration_access, name, {[event]=value})
-		state.declaration_access, state.declaration_name = nil, nil
+		declare(self, self.declaration_access, name, {[event]=value})
+	self.declaration_access, self.declaration_name = nil, nil
 	end
-	function declarator_mt:__call(value) local state=_state[self]
-		if state.declaration_name then
+	function declarator_mt:__call(value) self=state[self]
+		if self.declaration_name then
 			local success, f, getter, setter = pcall(extract, value)
 			if not success then declaration_error() end
-			declare(state, state.declaration_access, state.declaration_name, {[CALL]=f, [INDEX]=getter, [NEWINDEX]=setter})
+			declare(self, self.declaration_access, self.declaration_name, {[CALL]=f, [INDEX]=getter, [NEWINDEX]=setter})
 		end
-		state.declaration_access, state.declaration_name = nil, nil
+	self.declaration_access, self.declaration_name = nil, nil
 	end
 end
 
 local env_mt = {__metatable=false}
-function env_mt:__index(key) local state=_state[self]
-	local getter = state[INDEX][key]
+function env_mt:__index(key) self=state[self]
+	local getter = self[INDEX][key]
 	if getter then return getter() end
-	return state[CALL][key] or _G[key] or state.declarator[key]
+	return self[CALL][key] or _G[key] or self.declarator[key]
 end
-function env_mt:__newindex(key, value) local state=_state[self]
-	if state.access[key] then
-		local setter = state[NEWINDEX][key] or collision_error(key)
+function env_mt:__newindex(key, value) self=state[self]
+	if self.access[key] then
+		local setter = self[NEWINDEX][key] or collision_error(key)
 		setter(value)
 	else
-		state.declarator[key] = value
+		self.declarator[key] = value
 	end
 end
 
 local interface_mt = {__metatable=false}
-function interface_mt:__index(key) local state=_state[self]
-	if state.access[key] == PUBLIC then
-		local getter = state[INDEX][key]
-		if getter then return getter() else return state[CALL][key] end
+function interface_mt:__index(key) self=state[self]
+	if self.access[key] == PUBLIC then
+		local getter = self[INDEX][key]
+		if getter then return getter() else return self[CALL][key] end
 	end
 end
-function interface_mt:__newindex(key, value) local state=_state[self]
-	if state.access[key] == PUBLIC then (state[NEWINDEX][key] or nop)(value) end
+function interface_mt:__newindex(key, value) self=state[self]
+	if self.access[key] == PUBLIC then (self[NEWINDEX][key] or nop)(value) end
 end
 
 function module(...)
-	local state, declarator, env, interface, access, functions, getters, setters
-	declarator, env, interface = setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
-	access = {_=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE}
-	functions = {error=error, nop=nop}
-	getters = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end}
-	setters = {_=nop}
-	for i=1,arg.n do
-		local module = _state[arg[i] or import_error()] or import_error()
-		local module_functions, module_getters, module_setters = module[CALL], module[INDEX], module[NEWINDEX]
+	local declarator, env, interface = setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
+	local self = {
+		access = {_=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
+		[CALL] = {error=error, nop=nop},
+		[INDEX] = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
+		[NEWINDEX] = {_=nop},
+		declarator = declarator,
+	}
+	for i = 1, arg.n do
+		local module = state[arg[i] or import_error()]
 		for k, v in module.access do
-			if v == PUBLIC and (not access[k] or import_error()) then
-				access[k], functions[k], getters[k], setters[k] = PRIVATE, module_functions[k], module_getters[k], module_setters[k]
+			if v == PUBLIC and not self.access[k] then
+				self.access[k], self[CALL][k], self[INDEX][k], self[NEWINDEX][k] = PRIVATE, module[CALL][k], module[INDEX][k], module[NEWINDEX][k]
 			end
 		end
 	end
-	state = {access=access, [CALL]=functions, [INDEX]=getters, [NEWINDEX]=setters, declarator=declarator}
-	_state[declarator], _state[env], _state[interface] = state, state, state
+	state[declarator], state[env], state[interface] = self, self, self
 	setfenv(2, env)
 end

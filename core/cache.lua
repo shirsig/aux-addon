@@ -65,7 +65,7 @@ do
 end
 
 function merchant_loaded()
-	for i=1,GetMerchantNumItems() do
+	for i = 1, GetMerchantNumItems() do
 		if not GetMerchantItemLink(i) then
 			return false
 		end
@@ -107,7 +107,7 @@ end
 function merchant_buy_scan()
 
 	local incomplete_data
-	for i=1,GetMerchantNumItems() do
+	for i = 1, GetMerchantNumItems() do
 		local _, _, price, count, stock = GetMerchantItemInfo(i)
 		local link = GetMerchantItemLink(i)
 		if link then

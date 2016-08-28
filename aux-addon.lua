@@ -57,6 +57,7 @@ do
 --		log(getn(table_pool), '-', getn(weak_pool))
 	end
 
+
 	function public.t.get()
 		return tremove(pool) or tremove(overflow_pool, next(overflow_pool)) or {}
 	end
@@ -171,7 +172,7 @@ end
 
 function public.log(...) temp=arg
 	local msg = '[aux]'
-	for i=1,arg.n do msg = msg..' '..tostring(arg[i]) end
+	for i = 1, arg.n do msg = msg..' '..tostring(arg[i]) end
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
 end
 
@@ -363,7 +364,7 @@ do
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
 			local total_cost = 0
-			for i=1,reagent_count do
+			for i = 1, reagent_count do
 				local link = GetCraftReagentItemLink(id, i)
 				if not link then
 					total_cost = nil
@@ -390,7 +391,7 @@ do
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
 			local total_cost = 0
-			for i=1,reagent_count do
+			for i = 1, reagent_count do
 				local link = GetTradeSkillReagentItemLink(id, i)
 				if not link then
 					total_cost = nil

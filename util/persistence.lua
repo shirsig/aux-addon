@@ -69,7 +69,7 @@ function public.read_record(schema, str)
     local separator = schema[2]
     local record = t
     local parts = split(str, separator)
-    for i=3,getn(schema) do
+    for i = 3, getn(schema) do
         local key, type = next(schema[i])
         record[key] = read(type, parts[i - 2])
     end
@@ -79,7 +79,7 @@ end
 function public.write_record(schema, record)
     local separator = schema[2]
     local parts = tt
-    for i=3,getn(schema) do
+    for i = 3, getn(schema) do
         local key, type = next(schema[i])
         tinsert(parts, write(type, record[key]))
     end

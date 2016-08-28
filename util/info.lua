@@ -236,7 +236,7 @@ function public.load_tooltip(frame, tooltip)
             frame:AddLine(line.left_text, line.left_color[1], line.left_color[2], line.left_color[3], true)
         end
     end
-    for i=1,getn(tooltip) do -- TODO why is this needed?
+    for i = 1, getn(tooltip) do -- TODO why is this needed?
 	    _G[frame:GetName()..'TextLeft'..i]:SetJustifyH('LEFT')
 	    _G[frame:GetName()..'TextRight'..i]:SetJustifyH('LEFT')
     end
@@ -273,7 +273,7 @@ function public.tooltip(setter)
     AuxTooltip:Show()
 
     local tooltip = t
-    for i=1,AuxTooltip:NumLines() do
+    for i = 1, AuxTooltip:NumLines() do
         tinsert(tooltip, {
             left_text = _G['AuxTooltipTextLeft'..i]:GetText(),
             left_color = {_G['AuxTooltipTextLeft'..i]:GetTextColor()},
@@ -395,7 +395,7 @@ function public.item_slot_index(class_index, subclass_index, slot_name)
 end
 
 function public.item_quality_index(item_quality)
-    for i=0,4 do
+    for i = 0, 4 do
         local quality = _G['ITEM_QUALITY'..i..'_DESC']
         if strupper(item_quality) == strupper(quality) then
             return i, quality

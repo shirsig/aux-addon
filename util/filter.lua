@@ -402,7 +402,7 @@ function suggestions(components)
 
     -- rarities
     if not components.blizzard.quality then
-        for i=0,4 do tinsert(suggestions, _G['ITEM_QUALITY'..i..'_DESC']) end
+        for i = 0, 4 do tinsert(suggestions, _G['ITEM_QUALITY'..i..'_DESC']) end
     end
 
     -- item names
@@ -534,7 +534,7 @@ function validator(components)
             return false
         end
         local stack = {}
-        for i=getn(components.post),1,-1 do
+        for i = getn(components.post), 1, -1 do
             local type, name, param = unpack(components.post[i])
             if type == 'operator' then
                 local args = {}

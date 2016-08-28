@@ -224,7 +224,7 @@ function wait_for_list_results(send_signal, signal_received)
 end
 
 function owner_data_complete(type)
-    for i=1,PAGE_SIZE do
+    for i = 1, PAGE_SIZE do
         local auction_info = info.auction(i, type)
         if auction_info and not auction_info.owner then
             return false

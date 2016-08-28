@@ -221,7 +221,7 @@ function post_auctions()
             unit_buyout_price,
 			stack_count,
 			function(posted)
-				for i=1,posted do
+				for i = 1, posted do
                     record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
                 end
                 update_inventory_records()
@@ -405,7 +405,7 @@ function update_inventory_records()
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
                 if not auctionable_map[item_info.item_key] then
                     local availability = t
-                    for i=0,10 do
+                    for i = 0, 10 do
                         availability[i] = 0
                     end
                     availability[charge_class] = item_info.count

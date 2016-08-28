@@ -227,7 +227,7 @@ function start_search(queries, continuation)
 
 	if continuation then
 		start_query, start_page = unpack(continuation)
-		for i=1,start_query-1 do
+		for i = 1, start_query - 1 do
 			tremove(queries, 1)
 		end
 		queries[1].blizzard_query.first_page = (queries[1].blizzard_query.first_page or 0) + start_page - 1

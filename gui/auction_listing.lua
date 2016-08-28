@@ -533,7 +533,7 @@ function record_percentage(record)
 end
 
 function percentage_color(pct)
-	for i=1,getn(AUCTION_PCT_COLORS) do
+	for i = 1, getn(AUCTION_PCT_COLORS) do
 		if pct < AUCTION_PCT_COLORS[i].value then
 			return AUCTION_PCT_COLORS[i].color
 		end
@@ -693,7 +693,7 @@ local methods = {
 
         -- Populate the row info from the database by combining identical auctions and auctions
         -- of the same base item. Also, get the number of rows which will be shown.
-        for i=1, getn(records) do
+        for i = 1, getn(records) do
             local record = records[i]
             local prevRecord = records[i-1]
             if prevRecord and record.search_signature == prevRecord.search_signature then
@@ -903,7 +903,7 @@ local methods = {
 
     RemoveSelectedRecord = function(self, count)
         count = count or 1
-        for i=1, count do
+        for i = 1, count do
             local index = key(self.selected, self.records)
             if index then
                 tremove(self.records, index)
@@ -914,7 +914,7 @@ local methods = {
 
     InsertAuctionRecord = function(self, record, count)
         count = count or 1
-        for i=1, count do
+        for i = 1, count do
             tinsert(self.records, record)
         end
         self:SetDatabase()
@@ -1089,7 +1089,7 @@ function public.CreateAuctionResultsTable(parent, config)
 
     -- create the rows
     rt.rows = {}
-    for i=1, numRows do
+    for i = 1, numRows do
         local row = CreateFrame('Frame', nil, rt.contentFrame)
         row:SetHeight(rt.ROW_HEIGHT)
         if i == 1 then
