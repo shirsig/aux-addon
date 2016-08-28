@@ -5,7 +5,7 @@ module()
 
 public.version = '5.0.0'
 
-function public.log(...) --temp=arg
+function public.log(...) temp=arg
 	local msg = '[aux]'
 	for i = 1, arg.n do msg = msg..' '..tostring(arg[i]) end
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
@@ -35,7 +35,10 @@ function public.bids_loaded.get() return bids_loaded end
 local current_owner_page
 function public.current_owner_page.get() return current_owner_page end
 
-function public.F() end
+do
+	local mt = {__call=function(self,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20) return self.f(unpack(self)) end}
+	function public.F.get(arg) arg.f = tremove(arg, 1) return setmetatable(arg, mt) end
+end
 
 do
 	local pool, overflow_pool, tmp = {}, setmetatable({}, {__mode='v'}), {}
@@ -62,7 +65,7 @@ do
 		end
 		log(getn(pool), '-', getn(overflow_pool))
 	end
-
+	
 	function public.t.get()
 		return tremove(pool) or tremove(overflow_pool, next(overflow_pool)) or {}
 	end
@@ -98,65 +101,65 @@ do
 	end
 
 	local function insert_keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
-		if overflow ~= nil then error 'Overflow.' end
-		if k1 ~= nil then t[k1] = true end
-		if k2 ~= nil then t[k2] = true end
-		if k3 ~= nil then t[k3] = true end
-		if k4 ~= nil then t[k4] = true end
-		if k5 ~= nil then t[k5] = true end
-		if k6 ~= nil then t[k6] = true end
-		if k7 ~= nil then t[k7] = true end
-		if k8 ~= nil then t[k8] = true end
-		if k9 ~= nil then t[k9] = true end
-		if k10 ~= nil then t[k10] = true end
-		if k11 ~= nil then t[k11] = true end
-		if k12 ~= nil then t[k12] = true end
-		if k13 ~= nil then t[k13] = true end
-		if k14 ~= nil then t[k14] = true end
-		if k15 ~= nil then t[k15] = true end
-		if k16 ~= nil then t[k16] = true end
-		if k17 ~= nil then t[k17] = true end
-		if k18 ~= nil then t[k18] = true end
-		if k19 ~= nil then t[k19] = true end
-		if k20 ~= nil then t[k20] = true end
+		if k1 == nil then return t end; t[k1] = true
+		if k2 == nil then return t end; t[k2] = true
+		if k3 == nil then return t end; t[k3] = true
+		if k4 == nil then return t end; t[k4] = true
+		if k5 == nil then return t end; t[k5] = true
+		if k6 == nil then return t end; t[k6] = true
+		if k7 == nil then return t end; t[k7] = true
+		if k8 == nil then return t end; t[k8] = true
+		if k9 == nil then return t end; t[k9] = true
+		if k10 == nil then return t end; t[k10] = true
+		if k11 == nil then return t end; t[k11] = true
+		if k12 == nil then return t end; t[k12] = true
+		if k13 == nil then return t end; t[k13] = true
+		if k14 == nil then return t end; t[k14] = true
+		if k15 == nil then return t end; t[k15] = true
+		if k16 == nil then return t end; t[k16] = true
+		if k17 == nil then return t end; t[k17] = true
+		if k18 == nil then return t end; t[k18] = true
+		if k19 == nil then return t end; t[k19] = true
+		if k20 == nil then return t end; t[k20] = true
+		if overflow ~= nil then error('Overflow.') end
 		return t
 	end
 	local function insert_values(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,overflow)
-		if overflow ~= nil then error 'Overflow.' end
-		if v1 ~= nil then tinsert(t, v1) end
-		if v2 ~= nil then tinsert(t, v2) end
-		if v3 ~= nil then tinsert(t, v3) end
-		if v4 ~= nil then tinsert(t, v4) end
-		if v5 ~= nil then tinsert(t, v5) end
-		if v6 ~= nil then tinsert(t, v6) end
-		if v7 ~= nil then tinsert(t, v7) end
-		if v8 ~= nil then tinsert(t, v8) end
-		if v9 ~= nil then tinsert(t, v9) end
-		if v10 ~= nil then tinsert(t, v10) end
-		if v11 ~= nil then tinsert(t, v11) end
-		if v12 ~= nil then tinsert(t, v12) end
-		if v13 ~= nil then tinsert(t, v13) end
-		if v14 ~= nil then tinsert(t, v14) end
-		if v15 ~= nil then tinsert(t, v15) end
-		if v16 ~= nil then tinsert(t, v16) end
-		if v17 ~= nil then tinsert(t, v17) end
-		if v18 ~= nil then tinsert(t, v18) end
-		if v19 ~= nil then tinsert(t, v19) end
-		if v20 ~= nil then tinsert(t, v20) end
+		if v1 == nil then return t end; tinsert(t, v1)
+		if v2 == nil then return t end; tinsert(t, v2)
+		if v3 == nil then return t end; tinsert(t, v3)
+		if v4 == nil then return t end; tinsert(t, v4)
+		if v5 == nil then return t end; tinsert(t, v5)
+		if v6 == nil then return t end; tinsert(t, v6)
+		if v7 == nil then return t end; tinsert(t, v7)
+		if v8 == nil then return t end; tinsert(t, v8)
+		if v9 == nil then return t end; tinsert(t, v9)
+		if v10 == nil then return t end; tinsert(t, v10)
+		if v11 == nil then return t end; tinsert(t, v11)
+		if v12 == nil then return t end; tinsert(t, v12)
+		if v13 == nil then return t end; tinsert(t, v13)
+		if v14 == nil then return t end; tinsert(t, v14)
+		if v15 == nil then return t end; tinsert(t, v15)
+		if v16 == nil then return t end; tinsert(t, v16)
+		if v17 == nil then return t end; tinsert(t, v17)
+		if v18 == nil then return t end; tinsert(t, v18)
+		if v19 == nil then return t end; tinsert(t, v19)
+		if v20 == nil then return t end; tinsert(t, v20)
+		if overflow ~= nil then error('Overflow.') end
 		return t
 	end
 	local function insert_pairs(t,k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8,k9,v9,k10,v10,overflow)
-		if overflow ~= nil then error 'Overflow.' end
-		if k1 ~= nil then t[k1] = v1 end
-		if k2 ~= nil then t[k2] = v2 end
-		if k3 ~= nil then t[k3] = v3 end
-		if k4 ~= nil then t[k4] = v4 end
-		if k5 ~= nil then t[k5] = v5 end
-		if k6 ~= nil then t[k6] = v6 end
-		if k7 ~= nil then t[k7] = v7 end
-		if k8 ~= nil then t[k8] = v8 end
-		if k9 ~= nil then t[k9] = v9 end
-		if k10 ~= nil then t[k10] = v10 end
+		if k1 == nil then return t end t[k1] = v1
+		if k2 == nil then return t end t[k2] = v2
+		if k3 == nil then return t end t[k3] = v3
+		if k4 == nil then return t end t[k4] = v4
+		if k5 == nil then return t end t[k5] = v5
+		if k6 == nil then return t end t[k6] = v6
+		if k7 == nil then return t end t[k7] = v7
+		if k8 == nil then return t end t[k8] = v8
+		if k9 == nil then return t end t[k9] = v9
+		if k10 == nil then return t end t[k10] = v10
+		if overflow ~= nil then error('Overflow.') end
 		return t
 	end
 	local function collector_mt(f)
@@ -170,13 +173,7 @@ do
 	private()
 end
 
---local wt = setmetatable(t, {__mode='kv'})
---local a, b = t, t
---tinsert(wt, a)
---tinsert(wt, t)
---tinsert(wt, b)
---collectgarbage()
---log (getn(wt))
+(function(...) log( _G.arg) end)()
 
 local event_frame = CreateFrame('Frame')
 for event in -temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do

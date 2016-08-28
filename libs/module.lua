@@ -64,8 +64,6 @@ end
 
 local env_mt = {__metatable=false}
 function env_mt:__index(key) self=state[self]
-	local quote = state.quote
-	if quote then return quote(key) end
 	local getter = self[INDEX][key]
 	if getter then return getter() end
 	return self[CALL][key] or _G[key] or self.declarator[key]
@@ -96,7 +94,7 @@ function module(...)
 		access = {_=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
 		[CALL] = {error=error, nop=nop},
 		[INDEX] = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
-		[NEWINDEX] = {_=nop, quote=function(enable) self.quote = enable and type(enable) == 'function' and enable or tostring end},
+		[NEWINDEX] = {_=nop},
 		declarator = declarator,
 		default_access = PRIVATE,
 	}
