@@ -35,10 +35,10 @@ function public.bids_loaded.get() return bids_loaded end
 local current_owner_page
 function public.current_owner_page.get() return current_owner_page end
 
-do
-	local mt = {__call=function(self,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20) return self.f(unpack(self)) end}
-	function public.F.get(arg) arg.f = tremove(arg, 1) return setmetatable(arg, mt) end
-end
+--do
+--	local mt = {__call=function(self,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20) return self.f(unpack(self)) end}
+--	function public.F.get(arg) arg.f = tremove(arg, 1) return setmetatable(arg, mt) end
+--end
 
 do
 	local pool, overflow_pool, tmp = {}, setmetatable({}, {__mode='v'}), {}
