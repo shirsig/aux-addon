@@ -3,7 +3,7 @@ aux 'scan' local info, history = aux.info, aux.history
 PAGE_SIZE = 50
 
 do
-	local scan_states = {}
+	local scan_states = t
 
 	function public.start(params)
 		for old_state in present(scan_states[params.type]) do
@@ -18,7 +18,7 @@ do
 	end
 
 	function public.abort(scan_id)
-		local aborted = {}
+		local aborted = t
 		for type, state in scan_states do
 			if not scan_id or state.id == scan_id then
 				kill_thread(state.id)
@@ -108,7 +108,7 @@ function submit_query()
 		elseif state.params.type == 'owner' then
 			GetOwnerAuctionItems(state.page)
 		else
-			local blizzard_query = query.blizzard_query or {}
+			local blizzard_query = query.blizzard_query or t
 			QueryAuctionItems(
 				blizzard_query.name,
 				blizzard_query.min_level,

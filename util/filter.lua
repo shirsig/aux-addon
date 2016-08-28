@@ -279,7 +279,7 @@ function parse_parameter(input_type, str)
 end
 
 function public.parse_query_string(str)
-    local post_filter = {}
+    local post_filter = t
     local blizzard_filter_parser = blizzard_filter_parser()
     local parts = map(split(str, '/'), function(part) return strlower(trim(part)) end)
 
@@ -533,11 +533,11 @@ function validator(components)
         if components.blizzard.exact and strlower(info.item(record.item_id).name) ~= components.blizzard.name[2] then
             return false
         end
-        local stack = {}
+        local stack = tt
         for i = getn(components.post), 1, -1 do
             local type, name, param = unpack(components.post[i])
             if type == 'operator' then
-                local args = {}
+                local args = tt
                 while (not param or param > 0) and getn(stack) > 0 do
                     tinsert(args, tremove(stack))
                     param = param and param - 1

@@ -79,7 +79,7 @@ end
 function public.write_record(schema, record)
     local separator = schema[2]
     local parts = tt
-    for i = 3, getn(schema) do
+    for i = 3 , getn(schema) do
         local key, type = next(schema[i])
         tinsert(parts, write(type, record[key]))
     end

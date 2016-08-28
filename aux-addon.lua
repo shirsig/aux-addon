@@ -5,6 +5,12 @@ module()
 
 public.version = '5.0.0'
 
+function public.log(...) --temp=arg
+	local msg = '[aux]'
+	for i = 1, arg.n do msg = msg..' '..tostring(arg[i]) end
+	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
+end
+
 do
 	local modules = {core={env=M, interface=I}}
 	_G.aux = setmetatable({}, {
@@ -29,14 +35,14 @@ function public.bids_loaded.get() return bids_loaded end
 local current_owner_page
 function public.current_owner_page.get() return current_owner_page end
 
-public.empty = setmetatable({}, {__metatable=false, __newindex=error})
+function public.F() end
 
 do
-	local pool, overflow_pool, transient = {}, setmetatable({}, {__mode='v'}), {}
+	local pool, overflow_pool, tmp = {}, setmetatable({}, {__mode='v'}), {}
 
 	CreateFrame'Frame':SetScript('OnUpdate', function()
-		for t in transient do recycle(t) end
-		wipe(transient)
+		for t in tmp do recycle(t) end
+		wipe(tmp)
 	end)
 
 	function public.wipe(t) -- like with a cloth or something
@@ -54,16 +60,15 @@ do
 		else
 			tinsert(overflow_pool, t)
 		end
---		log(getn(table_pool), '-', getn(weak_pool))
+		log(getn(pool), '-', getn(overflow_pool))
 	end
-
 
 	function public.t.get()
 		return tremove(pool) or tremove(overflow_pool, next(overflow_pool)) or {}
 	end
 	function public.tt.get()
 		local t = tremove(pool) or tremove(overflow_pool, next(overflow_pool)) or {}
-		transient[t] = true
+		tmp[t] = true
 		return t
 	end
 
@@ -76,24 +81,20 @@ do
 		return {__unm=function(self) self.raw = true; return self end, __call=apply, __sub=apply}
 	end
 	do
-		local function make_transient(t) transient[t] = true; return t end
-		local function make_persistent(t) transient[t] = nil; return t end
-		do
-			local mt = operator_mt(make_transient)
-			public.temp
-			{
-				get = function() return setmetatable(t, mt) end,
-				set = function(t) return make_transient(t) end,
-			}
-		end
-		do
-			local mt = operator_mt(make_persistent)
-			public.perm
-			{
-				get = function() return setmetatable(t, mt) end,
-				set = function(t) return make_persistent(t) end,
-			}
-		end
+		local mt = operator_mt(function(t) tmp[t] = true; return t end)
+		public.temp
+		{
+			get = function() return setmetatable(t, mt) end,
+			set = function(t) tmp[t] = true end,
+		}
+	end
+	do
+		local mt = operator_mt(function(t) tmp[t] = nil; return t end)
+		public.perm
+		{
+			get = function() return setmetatable(t, mt) end,
+			set = function(t) tmp[t] = nil end,
+		}
 	end
 
 	local function insert_keys(t,k1,k2,k3,k4,k5,k6,k7,k8,k9,k10,k11,k12,k13,k14,k15,k16,k17,k18,k19,k20,overflow)
@@ -162,19 +163,20 @@ do
 		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
 	end
 	local set_mt, list_mt, object_mt = collector_mt(insert_keys), collector_mt(insert_values), collector_mt(insert_pairs)
-
-	if public then
-		function set.get() return setmetatable(t, set_mt) end
-		function list.get() return setmetatable(t, list_mt) end
-		function object.get() return setmetatable(t, object_mt) end
-	end
+	public()
+	function set.get() return setmetatable(t, set_mt) end
+	function list.get() return setmetatable(t, list_mt) end
+	function object.get() return setmetatable(t, object_mt) end
+	private()
 end
 
-function public.log(...) temp=arg
-	local msg = '[aux]'
-	for i = 1, arg.n do msg = msg..' '..tostring(arg[i]) end
-	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
-end
+--local wt = setmetatable(t, {__mode='kv'})
+--local a, b = t, t
+--tinsert(wt, a)
+--tinsert(wt, t)
+--tinsert(wt, b)
+--collectgarbage()
+--log (getn(wt))
 
 local event_frame = CreateFrame('Frame')
 for event in -temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
@@ -206,7 +208,7 @@ tab_info = t
 do
 	for k, v in -temp-object('search_tab', 'Search', 'post_tab', 'Post', 'auctions_tab', 'Auctions', 'bids_tab', 'Bids') do
 		local tab = -object('name', v)
-		local env = (function() aux(v) return M end)()
+		local env = (function() aux(k) return M end)()
 		function env.private.OPEN.set(f) tab.OPEN = f end
 		function env.private.CLOSE.set(f) tab.CLOSE = f end
 		function env.private.USE_ITEM.set(f) tab.USE_ITEM = f end

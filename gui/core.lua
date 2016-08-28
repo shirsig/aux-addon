@@ -14,14 +14,14 @@ function LOAD()
 		aux_background:SetAllPoints(DropDownList1Backdrop)
 		blizzard_backdrop = DropDownList1Backdrop:GetBackdrop()
 		hook('ToggleDropDownMenu', function(...) temp=arg
-		local ret = {orig.ToggleDropDownMenu(unpack(arg)) }
-		local dropdown = _G[arg[4] or ''] or this:GetParent()
-		if strfind(dropdown:GetName() or '', '^aux_frame%d+$') then
-			set_aux_dropdown_style(dropdown)
-		else
-			set_blizzard_dropdown_style()
-		end
-		return unpack(ret)
+			local ret = {orig.ToggleDropDownMenu(unpack(arg)) }
+			local dropdown = _G[arg[4] or ''] or this:GetParent()
+			if strfind(dropdown:GetName() or '', '^aux_frame%d+$') then
+				set_aux_dropdown_style(dropdown)
+			else
+				set_blizzard_dropdown_style()
+			end
+			return unpack(ret)
 		end)
 
 		function set_aux_dropdown_style(dropdown)
@@ -203,7 +203,7 @@ function public.resize_tab(tab, width, padding)
 end
 
 do
-	local mt = {__index={}}
+	local mt = {__index=t}
 	function mt.__index:create_tab(text)
 		local id = getn(self._tabs) + 1
 

@@ -17,14 +17,14 @@ local state = {}
 local declarator_mt = {__metatable=false}
 do
 	local ACCESS, EVENT = {public=PUBLIC, private=PRIVATE}, {call=CALL, get=INDEX, set=NEWINDEX}
-	local function extract(v)
+	local function extract_handlers(v)
 		local f, getter, setter
 		f, getter, setter, v.call, v.get, v.set = v.call, v.get, v.set, nil, nil, nil
 		if next(v) or f ~= nil and getter ~= nil then error() end
 		return f, getter, setter
 	end
 	local function declare(self, access, name, handlers)
-		self.access[name] = self.access[name] and collision_error(name) or access or PRIVATE
+		self.access[name] = self.access[name] and collision_error(name) or access or self.default_access
 		for event, handler in handlers do
 			if type(handler) ~= 'function' and (event == INDEX or declaration_error()) then
 				handler = const(handler == nil and tostring(name) or handler)
@@ -33,7 +33,7 @@ do
 		end
 	end
 	function declarator_mt:__index(key) self=state[self]
-		if ACCESS[key] and not self.declaration_access then
+		if ACCESS[key] and (not (self.declaration_access or self.declaration_name) or declaration_error()) then
 			self.declaration_access = ACCESS[key]
 		elseif not self.declaration_name or declaration_error() then
 			self.declaration_name = type(key) == 'string' and key or declaration_error()
@@ -48,20 +48,24 @@ do
 			name, event = key, type(value) == 'function' and CALL or INDEX
 		end
 		declare(self, self.declaration_access, name, {[event]=value})
-	self.declaration_access, self.declaration_name = nil, nil
+		self.declaration_access, self.declaration_name = nil, nil
 	end
 	function declarator_mt:__call(value) self=state[self]
 		if self.declaration_name then
-			local success, f, getter, setter = pcall(extract, value)
+			local success, f, getter, setter = pcall(extract_handlers, value)
 			if not success then declaration_error() end
 			declare(self, self.declaration_access, self.declaration_name, {[CALL]=f, [INDEX]=getter, [NEWINDEX]=setter})
+		elseif self.declaration_access or declaration_error() then
+			self.default_access = self.declaration_access
 		end
-	self.declaration_access, self.declaration_name = nil, nil
+		self.declaration_access, self.declaration_name = nil, nil
 	end
 end
 
 local env_mt = {__metatable=false}
 function env_mt:__index(key) self=state[self]
+	local quote = state.quote
+	if quote then return quote(key) end
 	local getter = self[INDEX][key]
 	if getter then return getter() end
 	return self[CALL][key] or _G[key] or self.declarator[key]
@@ -88,12 +92,13 @@ end
 
 function module(...)
 	local declarator, env, interface = setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
-	local self = {
+	local self; self = {
 		access = {_=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
 		[CALL] = {error=error, nop=nop},
 		[INDEX] = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
-		[NEWINDEX] = {_=nop},
+		[NEWINDEX] = {_=nop, quote=function(enable) self.quote = enable and type(enable) == 'function' and enable or tostring end},
 		declarator = declarator,
+		default_access = PRIVATE,
 	}
 	for i = 1, arg.n do
 		local module = state[arg[i] or import_error()]

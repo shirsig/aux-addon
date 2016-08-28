@@ -81,12 +81,12 @@ function public.modified.get() return IsShiftKeyDown() or IsControlKeyDown() or 
 --end
 
 do
-	local _state = setmetatable({}, {__mode='kv'})
+	local _state = setmetatable(t, -object('__mode', 'kv'))
 	local __index = function(self, key)
 		return _state[self].handler({public=self, private=_state[self].state}, key)
 	end
 	function public.index_function(state, handler) -- TODO rename table-accessor, use predicate to stop
-		local state, self = {handler=handler, state=state}, {}
+		local state, self = {handler=handler, state=state}, t
 		_state[self] = state
 		return setmetatable(self, {__metatable=false, __index=__index, state=state})
 	end
