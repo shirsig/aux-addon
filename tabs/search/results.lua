@@ -67,7 +67,7 @@ do
 
 		search.status_bar = status_bars[getn(searches)]
 		search.status_bar:update_status(100, 100)
-		search.status_bar:set_text ''
+		search.status_bar:set_text('')
 
 		search.table = tables[getn(searches)]
 		search.table:SetSort(1, 2, 3, 4, 5, 6, 7, 8, 9)
@@ -192,7 +192,7 @@ function start_real_time_scan(query, search, continuation)
 			end
 
 			if getn(new_records) > 1000 then
-				StaticPopup_Show 'AUX_SEARCH_TABLE_FULL'
+				StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
 			else
 				search.records = new_records
 				search.table:SetDatabase(search.records)
@@ -204,7 +204,7 @@ function start_real_time_scan(query, search, continuation)
 		end,
 		on_abort = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text 'Scan paused'
+			search.status_bar:set_text('Scan paused')
 
 			search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
 
@@ -244,9 +244,9 @@ function start_search(queries, continuation)
 		on_scan_start = function()
 			search.status_bar:update_status(0,0)
 			if continuation then
-				search.status_bar:set_text 'Resuming scan...'
+				search.status_bar:set_text('Resuming scan...')
 			else
-				search.status_bar:set_text 'Scanning auctions...'
+				search.status_bar:set_text('Scanning auctions...')
 			end
 		end,
 		on_page_loaded = function(_, total_scan_pages)
@@ -272,13 +272,13 @@ function start_search(queries, continuation)
 			elseif getn(search.records) < 1000 then
 				tinsert(search.records, auction_record)
 				if getn(search.records) == 1000 then
-					StaticPopup_Show 'AUX_SEARCH_TABLE_FULL'
+					StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
 				end
 			end
 		end,
 		on_complete = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text 'Scan complete'
+			search.status_bar:set_text('Scan complete')
 
 			if current_search == search and frame.results:IsVisible() and getn(search.records) == 0 then
 				subtab = SAVED
@@ -289,7 +289,7 @@ function start_search(queries, continuation)
 		end,
 		on_abort = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text 'Scan paused'
+			search.status_bar:set_text('Scan paused')
 
 			if current_query then
 				search.continuation = {current_query, current_page + 1}

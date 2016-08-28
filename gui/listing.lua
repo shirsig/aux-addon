@@ -334,7 +334,7 @@ local methods = {
         local col = CreateFrame('Button', nil, row)
         local text = col:CreateFontString()
         text:SetFont(gui.font, ST_ROW_TEXT_SIZE)
-        text:SetJustifyV 'CENTER'
+        text:SetJustifyV('CENTER')
         text:SetPoint('TOPLEFT', 1, -1)
         text:SetPoint('BOTTOMRIGHT', -1, 1)
         col.text = text

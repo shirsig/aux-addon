@@ -53,7 +53,7 @@ function LOAD()
 	create_frames()
 	subtab = SAVED
 	update_auto_buy_filter()
-	new_search ''
+	new_search('')
 	current_search.placeholder = true
 end
 

@@ -508,7 +508,7 @@ public.bids_config = {
         fill = function(cell, record)
             local status
             if record.high_bidder then
-                status = color.yellow 'High Bidder'
+                status = color.yellow('High Bidder')
             else
                 status = color.red 'Outbid'
             end
@@ -732,9 +732,9 @@ local methods = {
         -- update sorting highlights
         for _, cell in self.headCells do
             local tex = cell:GetNormalTexture()
-            tex:SetTexture [[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]]
+            tex:SetTexture([[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]])
             tex:SetTexCoord(.017, 1, .083, .909)
-            tex:SetAlpha(0.5)
+            tex:SetAlpha(.5)
         end
 
         if getn(self.sorts) > 0 then
@@ -1062,8 +1062,8 @@ function public.CreateAuctionResultsTable(parent, config)
         cell:SetScript('OnClick', rt.OnHeadColumnClick)
 
         local text = cell:CreateFontString()
-        text:SetJustifyH 'CENTER'
-        text:SetJustifyV 'CENTER'
+        text:SetJustifyH('CENTER')
+        text:SetJustifyV('CENTER')
         text:SetFont(gui.font, 12)
         text:SetTextColor(color.label.enabled())
         cell:SetFontString(text)
@@ -1072,14 +1072,14 @@ function public.CreateAuctionResultsTable(parent, config)
 
         local tex = cell:CreateTexture()
         tex:SetAllPoints()
-        tex:SetTexture [[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]]
+        tex:SetTexture([[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]])
         tex:SetTexCoord(.017, 1, .083, .909)
         tex:SetAlpha(.5)
         cell:SetNormalTexture(tex)
 
         local tex = cell:CreateTexture()
         tex:SetAllPoints()
-        tex:SetTexture [[Interface\Buttons\UI-Listbox-Highlight]]
+        tex:SetTexture([[Interface\Buttons\UI-Listbox-Highlight]])
         tex:SetTexCoord(.025, .957, .087, .931)
         tex:SetAlpha(.2)
         cell:SetHighlightTexture(tex)
@@ -1112,7 +1112,7 @@ function public.CreateAuctionResultsTable(parent, config)
             local text = cell:CreateFontString()
             text:SetFont(gui.font, min(14, rt.ROW_HEIGHT))
             text:SetJustifyH(rt.config[j].align or 'LEFT')
-            text:SetJustifyV 'CENTER'
+            text:SetJustifyV('CENTER')
             text:SetPoint('TOPLEFT', 1, -1)
             text:SetPoint('BOTTOMRIGHT', -1, 1)
             cell:SetFontString(text)

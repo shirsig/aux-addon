@@ -34,7 +34,7 @@ function create_frames()
 	    end)
 	    local label = gui.label(checkbox, gui.font_size.small)
 	    label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
-	    label:SetText 'Show hidden items'
+	    label:SetText('Show hidden items')
 	    show_hidden_checkbox = checkbox
 	end
 
@@ -86,14 +86,14 @@ function create_frames()
 	    status_bar:SetHeight(25)
 	    status_bar:SetPoint('TOPLEFT', aux_frame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 100)
-	    status_bar:set_text ''
+	    status_bar:set_text('')
 	end
 	do
 	    local btn = gui.button(frame.parameters, 16)
 	    btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText 'Post'
+	    btn:SetText('Post')
 	    btn:SetScript('OnClick', post_auctions)
 	    post_button = btn
 	end
@@ -102,7 +102,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', post_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText 'Refresh'
+	    btn:SetText('Refresh')
 	    btn:SetScript('OnClick', function()
 	        scan.abort(scan_id)
 	        refresh_entries()
@@ -150,7 +150,7 @@ function create_frames()
 	    end)
 	    slider.editbox:SetNumeric(true)
 	    slider.editbox:SetMaxLetters(3)
-	    slider.label:SetText 'Stack Size'
+	    slider.label:SetText('Stack Size')
 	    stack_size_slider = slider
 	end
 	do
@@ -173,7 +173,7 @@ function create_frames()
 	        end
 	    end)
 	    slider.editbox:SetNumeric(true)
-	    slider.label:SetText 'Stack Count'
+	    slider.label:SetText('Stack Count')
 	    stack_count_slider = slider
 	end
 	do
@@ -205,7 +205,7 @@ function create_frames()
 	    end)
 	    local label = gui.label(checkbox, gui.font_size.small)
 	    label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
-	    label:SetText 'Hide this item'
+	    label:SetText('Hide this item')
 	    hide_checkbox = checkbox
 	end
 	local function money_input()
@@ -221,7 +221,7 @@ function create_frames()
 	    frame:SetHeight(22)
 	    local editbox = gui.editbox(frame)
 	    editbox:SetAllPoints()
-	    editbox:SetAlignment 'RIGHT'
+	    editbox:SetAlignment('RIGHT')
 	    editbox:SetFontSize(17)
 	    editbox:SetScript('OnTabPressed', function()
 	        if IsShiftKeyDown() and stack_count_slider.editbox:IsVisible() then
@@ -250,18 +250,18 @@ function create_frames()
 	    editbox.pretty = gui.label(frame, 17)
 	    editbox.pretty:SetPoint('LEFT', 1, 0)
 	    editbox.pretty:SetPoint('RIGHT', -2, 0)
-	    editbox.pretty:SetJustifyH 'RIGHT'
+	    editbox.pretty:SetJustifyH('RIGHT')
 	    editbox.pretty:SetTextColor(color.text.enabled())
 	    do
 	        local label = gui.label(frame, gui.font_size.small)
 	        label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
-	        label:SetText 'Unit Starting Price'
+	        label:SetText('Unit Starting Price')
 	    end
 	    do
 	        local label = gui.label(frame, 14)
 	        label:SetPoint('LEFT', frame, 'RIGHT', 8, 0)
 	        label:SetWidth(50)
-	        label:SetJustifyH 'CENTER'
+	        label:SetJustifyH('CENTER')
 	        start_price_percentage = label
 	    end
 	    unit_start_price = editbox
@@ -275,7 +275,7 @@ function create_frames()
 	    frame:SetHeight(22)
 	    local editbox = gui.editbox(frame)
 	    editbox:SetAllPoints()
-	    editbox:SetAlignment 'RIGHT'
+	    editbox:SetAlignment('RIGHT')
 	    editbox:SetFontSize(17)
 	    editbox:SetScript('OnTabPressed', function()
 	        if IsShiftKeyDown() then
@@ -302,18 +302,18 @@ function create_frames()
 	    editbox.pretty = gui.label(frame, 17)
 	    editbox.pretty:SetPoint('LEFT', 1, 0)
 	    editbox.pretty:SetPoint('RIGHT', -2, 0)
-	    editbox.pretty:SetJustifyH 'RIGHT'
+	    editbox.pretty:SetJustifyH('RIGHT')
 	    editbox.pretty:SetTextColor(color.text.enabled())
 	    do
 	        local label = gui.label(frame, gui.font_size.small)
 	        label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
-	        label:SetText 'Unit Buyout Price'
+	        label:SetText('Unit Buyout Price')
 	    end
 	    do
 	        local label = gui.label(frame, 14)
 	        label:SetPoint('LEFT', frame, 'RIGHT', 8, 0)
 	        label:SetWidth(50)
-	        label:SetJustifyH 'CENTER'
+	        label:SetJustifyH('CENTER')
 	        buyout_price_percentage = label
 	    end
 	    unit_buyout_price = editbox
@@ -322,7 +322,7 @@ function create_frames()
 	    local btn = gui.button(frame.parameters, 14)
 	    btn:SetPoint('TOPRIGHT', -10, -146)
 	    gui.set_size(btn, 150, 20)
-	    btn:GetFontString():SetJustifyH 'RIGHT'
+	    btn:GetFontString():SetJustifyH('RIGHT')
 	    btn:GetFontString():SetPoint('RIGHT', -2, 0)
 	    btn:SetScript('OnClick', function()
 	        if this.amount then
@@ -332,7 +332,7 @@ function create_frames()
 	    end)
 	    local label = gui.label(btn, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
-	    label:SetText 'Historical Value'
+	    label:SetText('Historical Value')
 	    historical_value_button = btn
 	end
 end

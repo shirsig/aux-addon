@@ -246,7 +246,7 @@ function create_frames()
 	    btn:SetPoint('BOTTOMLEFT', aux_frame.content, 'TOPLEFT', 10, 8)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
-	    btn:SetText 'Search Results'
+	    btn:SetText('Search Results')
 	    btn:SetScript('OnClick', function() subtab = RESULTS end)
 	    search_results_button = btn
 	end
@@ -255,7 +255,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', search_results_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
-	    btn:SetText 'Saved Searches'
+	    btn:SetText('Saved Searches')
 	    btn:SetScript('OnClick', function() subtab = SAVED end)
 	    saved_searches_button = btn
 	end
@@ -264,7 +264,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', saved_searches_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
-	    btn:SetText 'Filter Builder'
+	    btn:SetText('Filter Builder')
 	    btn:SetScript('OnClick', function() subtab = FILTER end)
 	    new_filter_button = btn
 	end
@@ -280,7 +280,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText 'Bid'
+	    btn:SetText('Bid')
 	    btn:Disable()
 	    bid_button = btn
 	end
@@ -289,7 +289,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText 'Buyout'
+	    btn:SetText('Buyout')
 	    btn:Disable()
 	    buyout_button = btn
 	end
@@ -298,7 +298,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', buyout_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText 'Clear'
+	    btn:SetText('Clear')
 	    btn:SetScript('OnClick', function()
 	        while tremove(current_search.records) do end
 	        current_search.table:SetDatabase()
@@ -309,7 +309,7 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
-	    btn:SetText 'Favorite'
+	    btn:SetText('Favorite')
 	    btn:SetScript('OnClick', function()
 	        local filters = filter_util.queries(search_box:GetText())
 	        if filters then
@@ -325,7 +325,7 @@ function create_frames()
 	    local btn1 = gui.button(frame.filter, 16)
 	    btn1:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
 	    gui.set_size(btn1, 80, 24)
-	    btn1:SetText 'Search'
+	    btn1:SetText('Search')
 	    btn1:SetScript('OnClick', function()
 	        export_query_string()
 	        execute()
@@ -334,13 +334,13 @@ function create_frames()
 	    local btn2 = gui.button(frame.filter, 16)
 	    btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
 	    gui.set_size(btn2, 80, 24)
-	    btn2:SetText 'Export'
+	    btn2:SetText('Export')
 	    btn2:SetScript('OnClick', export_query_string)
 
 	    local btn3 = gui.button(frame.filter, 16)
 	    btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
 	    gui.set_size(btn3, 80, 24)
-	    btn3:SetText 'Import'
+	    btn3:SetText('Import')
 	    btn3:SetScript('OnClick', import_query_string)
 	end
 	do
@@ -367,7 +367,7 @@ function create_frames()
 	    editbox.enter = L(editbox.ClearFocus, editbox)
 	    local label = gui.label(editbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-	    label:SetText 'Name'
+	    label:SetText('Name')
 	    name_input = editbox
 	end
 	do
@@ -401,7 +401,7 @@ function create_frames()
 	    end
 	    local label = gui.label(editbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-	    label:SetText 'Level Range'
+	    label:SetText('Level Range')
 	    min_level_input = editbox
 	end
 	do

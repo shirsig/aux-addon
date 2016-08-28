@@ -193,7 +193,7 @@ function public.formatted_post_filter(components)
 		elseif i > 1 then
 			str = str..'</p><p>'
 			for _=1,getn(stack) do
-				str = str..color.content.background '----'
+				str = str..color.content.background('----')
 			end
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
@@ -269,7 +269,7 @@ function add_post_filter()
 		if components and getn(components.blizzard) == 0 and getn(components.post) == 1 then
 			add_component(components.post[1])
 			update_filter_display()
-			filter_parameter_input:SetText ''
+			filter_parameter_input:SetText('')
 			filter_input:HighlightText()
 			filter_input:SetFocus()
 		elseif error then

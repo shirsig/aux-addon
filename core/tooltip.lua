@@ -18,7 +18,7 @@ function LOAD()
 	            return unpack(ret)
 	        end)
 	    end
-	    local orig = GameTooltip:GetScript 'OnTooltipAddMoney'
+	    local orig = GameTooltip:GetScript('OnTooltipAddMoney')
 	    GameTooltip:SetScript('OnTooltipAddMoney', function(...) temp=arg
 		    if inside_hook then
 			    game_tooltip_money = arg1

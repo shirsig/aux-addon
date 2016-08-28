@@ -20,7 +20,7 @@ do
 	local time = 0
 	function private.next_push.get()
 		if time() > time then
-			local date = date '*t'
+			local date = date('*t')
 			date.hour, date.min, date.sec = 24, 0, 0
 			time = time(date)
 		end

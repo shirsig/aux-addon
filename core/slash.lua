@@ -51,7 +51,7 @@ function _G.SlashCmdList.AUX(command)
 	    _G.aux_ignore_owner = not _G.aux_ignore_owner
         log('Ignoring of owner '..(_G.aux_ignore_owner and 'enabled' or 'disabled')..'.')
     elseif arguments[1] == 'chars' and arguments[2] == 'add' then
-		local realm = GetCVar 'realmName'
+		local realm = GetCVar('realmName')
 		_G.aux_characters[realm] = _G.aux_characters[realm] or {}
 		for i = 3, getn(arguments) do
 			local name = gsub(strlower(arguments[i]), '^%l', strupper)
@@ -61,7 +61,7 @@ function _G.SlashCmdList.AUX(command)
 			end
 		end
 	elseif arguments[1] == 'chars' and arguments[2] == 'remove' then
-		local realm = GetCVar 'realmName'
+		local realm = GetCVar('realmName')
 		if not _G.aux_characters[realm] then
 			return
 		end
@@ -73,7 +73,7 @@ function _G.SlashCmdList.AUX(command)
 			end
 		end
 	elseif arguments[1] == 'chars' then
-		local realm = GetCVar 'realmName'
+		local realm = GetCVar('realmName')
 		local chars = {}
 		for name in _G.aux_characters[realm] or {} do
 			tinsert(chars, name)

@@ -446,7 +446,7 @@ function refresh_entries()
         existing_auctions[item_key] = nil
         local query = scan_util.item_query(item_id)
         status_bar:update_status(0,0)
-        status_bar:set_text 'Scanning auctions...'
+        status_bar:set_text('Scanning auctions...')
 
 		scan_id = scan.start{
             type = 'list',
@@ -472,13 +472,13 @@ function refresh_entries()
 				existing_auctions[item_key] = nil
                 update_historical_value_button()
                 status_bar:update_status(100, 100)
-                status_bar:set_text 'Scan aborted'
+                status_bar:set_text('Scan aborted')
 			end,
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or t
                 refresh = true
                 status_bar:update_status(100, 100)
-                status_bar:set_text 'Scan complete'
+                status_bar:set_text('Scan complete')
             end,
 		}
 	end

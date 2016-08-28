@@ -14,7 +14,7 @@ do
 	frame:SetMovable(true)
 	frame:EnableMouse(true)
 	frame:SetClampedToScreen(true)
-	frame:RegisterForDrag 'LeftButton'
+	frame:RegisterForDrag('LeftButton')
 	frame:SetScript('OnDragStart', function() this:StartMoving() end)
 	frame:SetScript('OnDragStop', function() this:StopMovingOrSizing() end)
 	frame:SetScript('OnShow', function() PlaySound 'AuctionWindowOpen' end)
@@ -34,7 +34,7 @@ do
 	local btn = gui.button(aux_frame, 16)
 	btn:SetPoint('BOTTOMRIGHT', -6, 6)
 	gui.set_size(btn, 65, 24)
-	btn:SetText 'Close'
+	btn:SetText('Close')
 	btn:SetScript('OnClick', L(aux_frame.Hide, aux_frame))
 	public.close_button = btn
 end
@@ -42,7 +42,7 @@ do
 	local btn = gui.button(aux_frame, 16)
 	btn:SetPoint('RIGHT', close_button, 'LEFT' , -5, 0)
 	gui.set_size(btn, 65, 24)
-	btn:SetText 'Default UI'
+	btn:SetText('Default UI')
 	btn:SetScript('OnClick',function()
 		if AuctionFrame:IsVisible() then HideUIPanel(AuctionFrame) else ShowUIPanel(AuctionFrame) end
 	end)

@@ -1,6 +1,6 @@
 aux 'core'
 
-event_frame = CreateFrame 'Frame'
+event_frame = CreateFrame('Frame')
 
 local listeners, threads = t, t
 

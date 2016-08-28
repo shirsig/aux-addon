@@ -37,7 +37,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
         queries = queries,
         on_scan_start = function()
             status_bar:update_status(0, 0)
-            status_bar:set_text 'Searching auction...'
+            status_bar:set_text('Searching auction...')
         end,
         on_start_query = function(query_index)
             status_bar:update_status((query_index - 1) / getn(queries) * 100, 0)
@@ -47,20 +47,20 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
                 found = true
                 ctrl.suspend()
                 status_bar:update_status(100, 100)
-                status_bar:set_text 'Auction found'
+                status_bar:set_text('Auction found')
                 return on_success(auction_record.index)
             end
         end,
         on_abort = function()
             if not found then
                 status_bar:update_status(100, 100)
-                status_bar:set_text 'Auction not found'
+                status_bar:set_text('Auction not found')
                 return on_abort()
             end
         end,
         on_complete = function()
             status_bar:update_status(100, 100)
-            status_bar:set_text 'Auction not found'
+            status_bar:set_text('Auction not found')
             return on_failure()
         end,
     }

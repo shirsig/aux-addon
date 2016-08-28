@@ -14,7 +14,7 @@ do
 		__call = function(self, name)
 			if not modules[name] then
 				module(aux.core)
-				aux = self
+				private.aux = self
 				modules[name] = {env=M, interface=I}
 			end
 			setfenv(2, modules[name].env)
@@ -176,7 +176,7 @@ function public.log(...) temp=arg
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
 end
 
-local event_frame = CreateFrame 'Frame'
+local event_frame = CreateFrame('Frame')
 for event in -temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
 end
@@ -297,12 +297,12 @@ do
 end
 
 function public.is_player(name, current)
-	local realm = GetCVar 'realmName'
+	local realm = GetCVar('realmName')
 	return not current and index(_G.aux_characters, realm, name) or UnitName 'player' == name
 end
 
 function public.neutral_faction()
-	return not UnitFactionGroup 'npc'
+	return not UnitFactionGroup('npc')
 end
 
 function public.min_bid_increment(current_bid)
@@ -342,7 +342,7 @@ do
 end
 
 function ADDON_LOADED.Blizzard_AuctionUI()
-	AuctionFrame:UnregisterEvent 'AUCTION_HOUSE_SHOW'
+	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
 	AuctionFrame:SetScript('OnHide', nil)
 	hook('ShowUIPanel', function(...) temp=arg
 		if arg[1] == AuctionFrame then return AuctionFrame:Show() end
