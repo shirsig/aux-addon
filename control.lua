@@ -93,6 +93,6 @@ function public.when(p, k, ...) temp=arg
 	if p() then
 		return k(unpack(arg))
 	else
-		return wait(when, p, L(k, unpack(arg)))
+		return wait(when, p, k, unpack(arg))
 	end
 end

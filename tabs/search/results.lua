@@ -172,7 +172,7 @@ function start_real_time_scan(query, search, continuation)
 				if search.auto_buy then
 					ctrl.suspend()
 					place_bid('list', auction_record.index, auction_record.buyout_price, L(ctrl.resume, true))
-					thread(when, later(GetTime(), 10), L(ctrl.resume, false))
+					thread(when, later(GetTime(), 10), ctrl.resume, false)
 				else
 					tinsert(new_records, auction_record)
 				end
@@ -268,7 +268,7 @@ function start_search(queries, continuation)
 			if search.auto_buy then
 				ctrl.suspend()
 				place_bid('list', auction_record.index, auction_record.buyout_price, L(ctrl.resume, true))
-				thread(when, later(GetTime(), 10), L(ctrl.resume, false))
+				thread(when, later(GetTime(), 10), ctrl.resume, false)
 			elseif getn(search.records) < 1000 then
 				tinsert(search.records, auction_record)
 				if getn(search.records) == 1000 then

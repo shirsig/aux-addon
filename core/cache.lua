@@ -181,8 +181,7 @@ function scan_wdb(item_id)
 	end
 
 	if item_id <= MAX_ITEM_ID then
-		local t0 = GetTime()
-		thread(when, function() return GetTime() - t0 > .1 end, scan_wdb, item_id)
+		thread(wait, 10, scan_wdb, item_id)
 	else
 		sort(_G.aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 	end
@@ -190,16 +189,13 @@ end
 
 function public.populate_wdb(item_id)
 	item_id = item_id or MIN_ITEM_ID
-
 	if item_id > MAX_ITEM_ID then
 		log 'Cache populated.'
 		return
 	end
-
 	if not GetItemInfo('item:'..item_id) then
 		log('Fetching item '..item_id..'.')
 		AuxTooltip:SetHyperlink('item:'..item_id)
 	end
-
 	thread(populate_wdb, item_id + 1)
 end
