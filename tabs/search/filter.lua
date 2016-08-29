@@ -43,16 +43,12 @@ blizzard_query = setmetatable(t, {
 		elseif key == 'usable' then
 			usable_checkbox:SetChecked(value)
 		elseif key == 'class' then
-			UIDropDownMenu_Initialize(class_dropdown, initialize_class_dropdown)
 			UIDropDownMenu_SetSelectedValue(class_dropdown, value)
 		elseif key == 'subclass' then
-			UIDropDownMenu_Initialize(subclass_dropdown, initialize_subclass_dropdown)
 			UIDropDownMenu_SetSelectedValue(subclass_dropdown, value)
 		elseif key == 'slot' then
-			UIDropDownMenu_Initialize(slot_dropdown, initialize_slot_dropdown)
 			UIDropDownMenu_SetSelectedValue(slot_dropdown, value)
 		elseif key == 'quality' then
-			UIDropDownMenu_Initialize(quality_dropdown, initialize_quality_dropdown)
 			UIDropDownMenu_SetSelectedValue(quality_dropdown, value)
 		end
 	end,
@@ -140,12 +136,12 @@ function get_filter_builder_query()
 	return filter_string or ''
 end
 
-function set_form(components)
+function set_form(filter)
 	clear_form()
-	for key, filter in components.blizzard do
+	for key, filter in filter.blizzard do
 		blizzard_query[key] = filter[2]
 	end
-	for _, component in components.post do
+	for _, component in filter.post do
 		add_component(component)
 	end
 	update_filter_display()
@@ -171,9 +167,9 @@ function clear_form()
 end
 
 function import_filter_string()
-	local components, error = filter_util.parse_filter_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
-	if components or log(error) then
-		set_form(components)
+	local filter, error = filter_util.parse_filter_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
+	if filter or log(error) then
+		set_form(filter)
 	end
 end
 
@@ -376,7 +372,7 @@ function initialize_slot_dropdown()
 	local subclass_index = UIDropDownMenu_GetSelectedValue(subclass_dropdown)
 	if subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
 		UIDropDownMenu_AddButton(T('text', ALL, 'value', '', 'func', on_click))
-		for _, slot in {GetAuctionInvTypes(class_index, subclass_index)} do
+		for _, slot in temp-list(GetAuctionInvTypes(class_index, subclass_index)) do
 			UIDropDownMenu_AddButton(T('text', _G[slot], 'value', slot, 'func', on_click))
 		end
 	end

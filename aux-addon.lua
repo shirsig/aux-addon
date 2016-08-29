@@ -264,7 +264,7 @@ function SetItemRef(...) temp=arg
 	if arg[3] ~= 'RightButton' or not index(active_tab, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
-	for item_info in present(info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
+	for item_info in present(aux.info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
 		return active_tab.CLICK_LINK(item_info)
 	end
 end
