@@ -17,15 +17,15 @@ function process()
 			end
 		end)
 
-		return stack.start(state.item_key, state.stack_size, send_signal)
+		return aux.stack.start(state.item_key, state.stack_size, send_signal)
 	end
 
 	return stop()
 end
 
 function post_auction(slot, k)
-	local item_info = info.container_item(unpack(slot))
-	if item_info.item_key == state.item_key and info.auctionable(item_info.tooltip) and item_info.aux_quantity == state.stack_size then
+	local item_info = aux.info.container_item(unpack(slot))
+	if item_info.item_key == state.item_key and aux.info.auctionable(item_info.tooltip) and item_info.aux_quantity == state.stack_size then
 
 		ClearCursor()
 		ClickAuctionSellItemButton()

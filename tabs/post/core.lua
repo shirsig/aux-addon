@@ -409,7 +409,7 @@ function update_inventory_records()
                         availability[i] = 0
                     end
                     availability[charge_class] = item_info.count
-                    auctionable_map[item_info.item_key] = T(
+                    auctionable_map[item_info.item_key] = T[2](
 	                    'item_id', item_info.item_id,
 	                    'suffix_id', item_info.suffix_id,
 	                    'key', item_info.item_key,

@@ -208,7 +208,7 @@ function create_frames()
 	    btn:SetHeight(25)
 	    btn:SetText('Stop')
 	    btn:SetScript('OnClick', function()
-	        scan.abort(search_scan_id)
+	        aux.scan.abort(search_scan_id)
 	    end)
 	    stop_button = btn
 	end

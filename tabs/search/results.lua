@@ -1,4 +1,4 @@
-aux 'search_tab' local info = aux.info
+aux 'search_tab' local info, scan = aux.info, aux.scan
 
 _G.aux_auto_buy_filter = ''
 
@@ -396,7 +396,7 @@ do
 
 		scan.abort(scan_id)
 		state = SEARCHING
-		scan_id = scan_util.find(
+		scan_id = aux.scan_util.find(
 			record,
 			current_search.status_bar,
 			function()

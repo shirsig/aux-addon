@@ -220,45 +220,43 @@ do
 				self.max_level = self.max_level or self.min_level
 				return self
 			end
-			if self.exact then
-				return
-			end
+			if self.exact then return end
 			for number in present(tonumber(select(3, strfind(str, '^(%d+)$')))) do
 				if number >= 1 and number <= 60 then
 					for filter in temp-set('min_level', 'max_level') do
 						if not self[filter] then
-							self[filter] = {str, number}
+							self[filter] = list(str, number)
 							return true
 						end
 					end
 				end
 			end
-			for _, parser in list(
-				list('class', info.item_class_index),
-				list('subclass', L(info.item_subclass_index, index(self.class, 2) or 0, _1)),
-				list('slot', L(info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0, _1)),
-				list('quality', info.item_quality_index)
+			for _, parser in temp-list(
+				temp-list('class', info.item_class_index),
+				temp-list('subclass', L(info.item_subclass_index, index(self.class, 2) or 0, _1)),
+				temp-list('slot', L(info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0, _1)),
+				temp-list('quality', info.item_quality_index)
 			) do
 				if not self[parser[1]] then
 					tinsert(parser, str)
-					for index, label in present(parser[2](select(3, unpack(parser)))) do
-						self[parser[1]] = {label, index}
+					local index, label = parser[2](select(3, unpack(parser)))
+					if index then
+						self[parser[1]] = list(label, index)
 						return true
 					end
 				end
 			end
 			if not self[str] and (str == 'usable' or str == 'exact' and self.name and size(self) == 1) then
-				self[str] = {str, 1}
+				self[str] = list(str, 1)
 			elseif i == 1 and strlen(str) <= 63 then
 				self.name = list(str, unquote(str))
---				return nil, 'The name filter must not be longer than 63 characters'
+--				return nil, 'The name filter must not be longer than 63 characters' TODO
 			else
 				return
 			end
 			return true
 		end,
 	}
-
 	function blizzard_filter_parser()
 	    return setmetatable(t, mt)
 	end

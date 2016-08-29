@@ -371,7 +371,8 @@ function public.item(item_id, suffix_id)
 end
 
 function public.item_class_index(item_class)
-    for i, class in temp-{GetAuctionItemClasses()} do
+    for i, class in temp-list(GetAuctionItemClasses()) do
+	    if item_class == nil then error() end
         if strupper(class) == strupper(item_class) then
             return i, class
         end
@@ -379,7 +380,7 @@ function public.item_class_index(item_class)
 end
 
 function public.item_subclass_index(class_index, item_subclass)
-    for i, subclass in temp-{GetAuctionItemSubClasses(class_index)} do
+    for i, subclass in temp-list(GetAuctionItemSubClasses(class_index)) do
         if strupper(subclass) == strupper(item_subclass) then
             return i, subclass
         end
@@ -387,7 +388,7 @@ function public.item_subclass_index(class_index, item_subclass)
 end
 
 function public.item_slot_index(class_index, subclass_index, slot_name)
-    for i, slot in temp-{GetAuctionInvTypes(class_index, subclass_index)} do
+    for i, slot in temp-list(GetAuctionInvTypes(class_index, subclass_index)) do
         if strupper(_G[slot]) == strupper(slot_name) then
             return i, _G[slot]
         end

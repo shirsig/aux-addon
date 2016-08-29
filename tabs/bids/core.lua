@@ -51,7 +51,7 @@ end
 
 function test(record)
     return function(index)
-        local auction_info = info.auction(index, 'bidder')
+        local auction_info = aux.info.auction(index, 'bidder')
         return auction_info and auction_info.search_signature == record.search_signature
     end
 end
@@ -67,7 +67,7 @@ do
 
         scan.abort(scan_id)
         state = SEARCHING
-        scan_id = scan_util.find(
+        scan_id = aux.scan_util.find(
             record,
             status_bar,
             function() state = IDLE end,
