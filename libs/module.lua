@@ -43,7 +43,7 @@ do
 	function declarator_mt:__newindex(key, value) self=state[self]
 		local name, event = self.declaration_name, nil
 		if name then
-			event = EVENT[key] or declaration_error()
+			event = EVENT[key] or error(name)
 		else
 			name, event = key, type(value) == 'function' and CALL or INDEX
 		end
