@@ -314,8 +314,8 @@ local methods = {
         local tex = col:CreateTexture()
         tex:SetAllPoints()
         tex:SetTexture([[Interface\Buttons\UI-Listbox-Highlight]])
-        tex:SetTexCoord(0.025, 0.957, 0.087, 0.931)
-        tex:SetAlpha(0.2)
+        tex:SetTexCoord(.025, .957, .087, .931)
+        tex:SetAlpha(.2)
         col:SetHighlightTexture(tex)
 
         tinsert(st.headCols, col)

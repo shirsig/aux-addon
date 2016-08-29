@@ -32,7 +32,7 @@ function public.to_string2(money, exact, color)
 
 	if not exact and money >= 10000 then
 		-- Round to nearest silver
-		money = floor(money / 100 + 0.5) * 100
+		money = floor(money / 100 + .5) * 100
 	end
 	local g, s, c = to_gsc(money)
 

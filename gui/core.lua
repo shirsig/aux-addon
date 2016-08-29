@@ -28,7 +28,7 @@ function LOAD()
 			DropDownList1Backdrop:SetBackdrop{}
 			aux_border:Show()
 			aux_background:Show()
-			DropDownList1:SetWidth(dropdown:GetWidth() * 0.9)
+			DropDownList1:SetWidth(dropdown:GetWidth() * .9)
 			DropDownList1:SetHeight(DropDownList1:GetHeight() - 10)
 			DropDownList1:ClearAllPoints()
 			DropDownList1:SetPoint('TOPLEFT', dropdown, 'BOTTOMLEFT', -2, -2)
@@ -376,6 +376,7 @@ function public.editbox(parent)
     cursor:SetText('|')
     cursor:SetTextColor(color.text.enabled())
     cursor:SetAlpha(0)
+    cursor.last_change = 0
     editbox.cursor = cursor
     editbox:SetAlignment('LEFT')
     editbox:SetFontSize(font_size.medium)
@@ -507,7 +508,7 @@ function public.dropdown(parent)
 
     local button = _G[dropdown:GetName()..'Button']
     button:ClearAllPoints()
-    button:SetScale(0.9)
+    button:SetScale(.9)
     button:SetPoint('RIGHT', dropdown, 0, 0)
     dropdown.button = button
 

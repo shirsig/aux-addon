@@ -233,7 +233,7 @@ function public.bounded(lower_bound, upper_bound, number)
 	return max(lower_bound, min(upper_bound, number))
 end
 
-function public.round(x) return floor(x + 0.5) end
+function public.round(x) return floor(x + .5) end
 
 function public.later(t0, t)
 	return function() return GetTime() - t0 > t end

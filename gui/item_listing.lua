@@ -79,7 +79,7 @@ function public.create(parent, on_click, selected)
 			end)
 
 			row.item = gui.item(row)
-			row.item:SetScale(0.9)
+			row.item:SetScale(.9)
 			row.item:SetPoint('LEFT', 2.5, 0)
 			row.item:SetPoint('RIGHT', -2.5, 0)
 			row.item.button:SetScript('OnEnter', function()

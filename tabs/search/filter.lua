@@ -92,7 +92,7 @@ function update_form()
 		usable_checkbox:Enable()
 	end
 
-	if any(values('min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'), function(key) return blizzard_query[key] end) then
+	if any(list('min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'), function(key) return blizzard_query[key] end) then
 		exact_checkbox:Disable()
 	else
 		exact_checkbox:Enable()
@@ -120,10 +120,10 @@ function get_filter_builder_query()
 	add(blizzard_query.usable and 'usable')
 
 	for class in present(blizzard_query.class) do
-		local classes = temp-{GetAuctionItemClasses()}
+		local classes = temp-list(GetAuctionItemClasses())
 		add(strlower(classes[class]))
 		for subclass in present(blizzard_query.subclass) do
-			local subclasses = temp-{GetAuctionItemSubClasses(class)}
+			local subclasses = temp-list(GetAuctionItemSubClasses(class))
 			add(strlower(subclasses[subclass]))
 			add(blizzard_query.slot and strlower(_G[blizzard_query.slot]))
 		end
@@ -206,9 +206,9 @@ function public.formatted_post_filter(components)
 		elseif component[1] == 'filter' then
 			for parameter in present(component[3]) do
 				if component[2] == 'item' then
-					parameter = info.display_name(cache.item_id(parameter)) or '['..parameter..']'
+					parameter = aux.info.display_name(aux.cache.item_id(parameter)) or '['..parameter..']'
 				elseif filter_util.filters[component[2]].input_type == 'money' then
-					parameter = money.to_string(money.from_string(parameter), nil, true)
+					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true)
 				end
 				component_text = component_text..filter_color(': ')..parameter
 			end
@@ -344,7 +344,7 @@ function initialize_class_dropdown()
 		end
 	end
 	UIDropDownMenu_AddButton(T('text', ALL, 'value', 0, 'func', on_click))
-	for i, class in temp-{GetAuctionItemClasses()} do
+	for i, class in temp-list(GetAuctionItemClasses()) do
 		UIDropDownMenu_AddButton(T('text', class, 'value', i, 'func', on_click))
 	end
 end

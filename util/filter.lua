@@ -264,7 +264,7 @@ end
 
 function parse_parameter(input_type, str)
     if input_type == 'money' then
-        local money = money.from_string(str)
+        local money = aux.money.from_string(str)
         return money and money > 0 and money or nil
     elseif input_type == 'number' then
         local number = tonumber(str)
@@ -426,8 +426,8 @@ function public.query_string(components)
         elseif component[1] == 'filter' then
             query_builder.append(component[2])
             for parameter in present(component[3]) do
-	            if filter.filters[component[2]].input_type == 'money' then
-		            parameter = money.to_string(money.from_string(parameter), nil, true, nil, nil, true)
+	            if aux.filter_util.filters[component[2]].input_type == 'money' then
+		            parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, nil, true)
 	            end
                 query_builder.append(parameter)
             end
@@ -464,7 +464,7 @@ function prettified_query_string(components)
 		            prettified.append(info.display_name(aux.cache.item_id(parameter)) or color.label.enabled('['..parameter..']'))
 	            else
 		            if filters[component[2]].input_type == 'money' then
-			            prettified.append(money.to_string(money.from_string(parameter), nil, true, nil, gui.inline_color.label.enabled))
+			            prettified.append(aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, gui.inline_color.label.enabled))
 		            else
 			            prettified.append(color.label.enabled(parameter))
 		            end

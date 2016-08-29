@@ -55,14 +55,14 @@ end
 public.search_config = {
     {
         title = 'Item',
-        width = 0.35,
+        width = .35,
         init = item_column_init,
         fill = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
                 cell.spacer:SetWidth(10)
-                cell.icon:SetAlpha(0.5)
-                cell:GetFontString():SetAlpha(0.7)
+                cell.icon:SetAlpha(.5)
+                cell:GetFontString():SetAlpha(.7)
             else
                 cell.spacer:SetWidth(1)
                 cell.icon:SetAlpha(1)
@@ -76,7 +76,7 @@ public.search_config = {
     },
     {
         title = 'Lvl',
-        width = 0.035,
+        width = .035,
         align = 'CENTER',
         fill = function(cell, record)
             local display_level = max(record.level, 1)
@@ -89,7 +89,7 @@ public.search_config = {
     },
     {
         title = 'Auctions',
-        width = 0.06,
+        width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
             local numAuctionsText = expandable and color.link(count) or count
@@ -113,7 +113,7 @@ public.search_config = {
     },
     {
         title = 'Stack Size',
-        width = 0.055,
+        width = .055,
         align = 'CENTER',
         fill = function(cell, record)
             cell:SetText(record.aux_quantity)
@@ -124,7 +124,7 @@ public.search_config = {
     },
     {
         title = 'Time Left',
-        width = 0.04,
+        width = .04,
         align = 'CENTER',
         fill = function(cell, record)
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
@@ -135,7 +135,7 @@ public.search_config = {
     },
     {
         title = 'Seller',
-        width = 0.13,
+        width = .13,
         align = 'CENTER',
         fill = function(cell, record)
             cell:SetText(is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '---'))
@@ -154,7 +154,7 @@ public.search_config = {
     },
     {
         title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
-        width = 0.125,
+        width = .125,
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
@@ -190,7 +190,7 @@ public.search_config = {
     },
     {
         title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
-        width = 0.125,
+        width = .125,
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
@@ -208,7 +208,7 @@ public.search_config = {
     },
     {
         title = '% Hist. Value',
-        width = 0.08,
+        width = .08,
         align = 'CENTER',
         fill = function(cell, record)
             local pct, bidPct = record_percentage(record)
@@ -225,14 +225,14 @@ public.search_config = {
 public.auctions_config = {
     {
         title = 'Item',
-        width = 0.35,
+        width = .35,
         init = item_column_init,
         fill = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
                 cell.spacer:SetWidth(10)
-                cell.icon:SetAlpha(0.5)
-                cell:GetFontString():SetAlpha(0.7)
+                cell.icon:SetAlpha(.5)
+                cell:GetFontString():SetAlpha(.7)
             else
                 cell.spacer:SetWidth(1)
                 cell.icon:SetAlpha(1)
@@ -246,7 +246,7 @@ public.auctions_config = {
     },
     {
         title = 'Lvl',
-        width = 0.035,
+        width = .035,
         align = 'CENTER',
         fill = function(cell, record)
             local display_level = max(record.level, 1)
@@ -259,7 +259,7 @@ public.auctions_config = {
     },
     {
         title = 'Auctions',
-        width = 0.06,
+        width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
             local numAuctionsText = expandable and inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
@@ -280,7 +280,7 @@ public.auctions_config = {
     },
     {
         title = 'Stack Size',
-        width = 0.055,
+        width = .055,
         align = 'CENTER',
         fill = function(cell, record)
             cell:SetText(record.aux_quantity)
@@ -291,7 +291,7 @@ public.auctions_config = {
     },
     {
         title = 'Time Left',
-        width = 0.04,
+        width = .04,
         align = 'CENTER',
         fill = function(cell, record)
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
@@ -302,7 +302,7 @@ public.auctions_config = {
     },
     {
         title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
-        width = 0.125,
+        width = .125,
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
@@ -332,7 +332,7 @@ public.auctions_config = {
     },
     {
         title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
-        width = 0.125,
+        width = .125,
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
@@ -350,7 +350,7 @@ public.auctions_config = {
     },
     {
         title = 'High Bidder',
-        width = 0.21,
+        width = .21,
         align = 'CENTER',
         fill = function(cell, record)
             cell:SetText(record.high_bidder or color.red 'No Bids')
@@ -372,14 +372,14 @@ public.auctions_config = {
 public.bids_config = {
     {
         title = 'Item',
-        width = 0.35,
+        width = .35,
         init = item_column_init,
         fill = function(cell, record, _, _, _, indented)
             cell.icon:SetTexture(record.texture)
             if indented then
                 cell.spacer:SetWidth(10)
-                cell.icon:SetAlpha(0.5)
-                cell:GetFontString():SetAlpha(0.7)
+                cell.icon:SetAlpha(.5)
+                cell:GetFontString():SetAlpha(.7)
             else
                 cell.spacer:SetWidth(1)
                 cell.icon:SetAlpha(1)
@@ -393,7 +393,7 @@ public.bids_config = {
     },
     {
         title = 'Auctions',
-        width = 0.06,
+        width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
             local numAuctionsText = expandable and inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
@@ -414,7 +414,7 @@ public.bids_config = {
     },
     {
         title = 'Stack Size',
-        width = 0.055,
+        width = .055,
         align = 'CENTER',
         fill = function(cell, record)
             cell:SetText(record.aux_quantity)
@@ -425,7 +425,7 @@ public.bids_config = {
     },
     {
         title = 'Time Left',
-        width = 0.04,
+        width = .04,
         align = 'CENTER',
         fill = function(cell, record)
             cell:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
@@ -436,7 +436,7 @@ public.bids_config = {
     },
     {
         title = 'Seller',
-        width = 0.13,
+        width = .13,
         align = 'CENTER',
         fill = function(cell, record)
             cell:SetText(is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '---'))
@@ -455,7 +455,7 @@ public.bids_config = {
     },
     {
         title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
-        width = 0.125,
+        width = .125,
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
@@ -485,7 +485,7 @@ public.bids_config = {
     },
     {
         title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
-        width = 0.125,
+        width = .125,
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
@@ -503,7 +503,7 @@ public.bids_config = {
     },
     {
         title = 'Status',
-        width = 0.115,
+        width = .115,
         align = 'CENTER',
         fill = function(cell, record)
             local status
