@@ -81,7 +81,7 @@ function public.modified.get() return IsShiftKeyDown() or IsControlKeyDown() or 
 --end
 
 do
-	local _state = setmetatable(t, -object('__mode', 'kv'))
+	local _state = setmetatable(t, T('__mode', 'kv'))
 	local __index = function(self, key)
 		return _state[self].handler({public=self, private=_state[self].state}, key)
 	end

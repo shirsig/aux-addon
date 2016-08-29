@@ -76,16 +76,15 @@ do
 		return t
 	end
 
-	function public.operator_mt(f)
+	function public.modifier_mt(f)
 		local function apply(self, value)
-			local raw = self.raw
 			recycle(self)
-			return raw and setmetatable(f(value), nil) or f(value)
+			return f(value)
 		end
-		return {__unm=function(self) self.raw = true; return self end, __call=apply, __sub=apply}
+		return {__call=apply, __sub=apply}
 	end
 	do
-		local mt = operator_mt(function(t) tmp[t] = true; return t end)
+		local mt = modifier_mt(function(t) tmp[t] = true; return t end)
 		public.temp
 		{
 			get = function() return setmetatable(t, mt) end,
@@ -93,7 +92,7 @@ do
 		}
 	end
 	do
-		local mt = operator_mt(function(t) tmp[t] = nil; return t end)
+		local mt = modifier_mt(function(t) tmp[t] = nil; return t end)
 		public.perm
 		{
 			get = function() return setmetatable(t, mt) end,
@@ -123,31 +122,30 @@ do
 		if k19 == nil then return t end; t[k19] = true
 		if k20 == nil then return t end; t[k20] = true
 		if overflow ~= nil then error('Overflow.') end
-		return t
 	end
 	local function insert_values(t,v1,v2,v3,v4,v5,v6,v7,v8,v9,v10,v11,v12,v13,v14,v15,v16,v17,v18,v19,v20,overflow)
-		if v1 == nil then return t end; tinsert(t, v1)
-		if v2 == nil then return t end; tinsert(t, v2)
-		if v3 == nil then return t end; tinsert(t, v3)
-		if v4 == nil then return t end; tinsert(t, v4)
-		if v5 == nil then return t end; tinsert(t, v5)
-		if v6 == nil then return t end; tinsert(t, v6)
-		if v7 == nil then return t end; tinsert(t, v7)
-		if v8 == nil then return t end; tinsert(t, v8)
-		if v9 == nil then return t end; tinsert(t, v9)
-		if v10 == nil then return t end; tinsert(t, v10)
-		if v11 == nil then return t end; tinsert(t, v11)
-		if v12 == nil then return t end; tinsert(t, v12)
-		if v13 == nil then return t end; tinsert(t, v13)
-		if v14 == nil then return t end; tinsert(t, v14)
-		if v15 == nil then return t end; tinsert(t, v15)
-		if v16 == nil then return t end; tinsert(t, v16)
-		if v17 == nil then return t end; tinsert(t, v17)
-		if v18 == nil then return t end; tinsert(t, v18)
-		if v19 == nil then return t end; tinsert(t, v19)
-		if v20 == nil then return t end; tinsert(t, v20)
+		local n = getn(t)
+		if v1 == nil then return t end; t[n + 1] = v1
+		if v2 == nil then return t end; t[n + 2] = v2
+		if v3 == nil then return t end; t[n + 3] = v3
+		if v4 == nil then return t end; t[n + 4] = v4
+		if v5 == nil then return t end; t[n + 5] = v5
+		if v6 == nil then return t end; t[n + 6] = v6
+		if v7 == nil then return t end; t[n + 7] = v7
+		if v8 == nil then return t end; t[n + 8] = v8
+		if v9 == nil then return t end; t[n + 9] = v9
+		if v10 == nil then return t end; t[n + 10] = v10
+		if v11 == nil then return t end; t[n + 11] = v11
+		if v12 == nil then return t end; t[n + 12] = v12
+		if v13 == nil then return t end; t[n + 13] = v13
+		if v14 == nil then return t end; t[n + 14] = v14
+		if v15 == nil then return t end; t[n + 15] = v15
+		if v16 == nil then return t end; t[n + 16] = v16
+		if v17 == nil then return t end; t[n + 17] = v17
+		if v18 == nil then return t end; t[n + 18] = v18
+		if v19 == nil then return t end; t[n + 19] = v19
+		if v20 == nil then return t end; t[n + 20] = v20
 		if overflow ~= nil then error('Overflow.') end
-		return t
 	end
 	local function insert_pairs(t,k1,v1,k2,v2,k3,v3,k4,v4,k5,v5,k6,v6,k7,v7,k8,v8,k9,v9,k10,v10,overflow)
 		if k1 == nil then return t end t[k1] = v1
@@ -161,21 +159,27 @@ do
 		if k9 == nil then return t end t[k9] = v9
 		if k10 == nil then return t end t[k10] = v10
 		if overflow ~= nil then error('Overflow.') end
-		return t
 	end
-	local function collector_mt(f)
-		return {__call=f, __unm=function(self) return setmetatable(self, nil) end}
+	local function constructor_mt(insert)
+		return {
+			__call=function(self,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,overflow)
+				self.t, self.n = self.t or t, (self.n or 1) - 1
+				insert(self.t,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14,a15,a16,a17,a18,a19,a20,overflow)
+				return self.n > 0 and self or self.t
+			end,
+			__index=function(self, key) self.n = key end,
+		}
 	end
-	local set_mt, list_mt, object_mt = collector_mt(insert_keys), collector_mt(insert_values), collector_mt(insert_pairs)
+	local set_mt, list_mt, table_mt = constructor_mt(insert_keys), constructor_mt(insert_values), constructor_mt(insert_pairs)
 	public()
-	function set.get() return setmetatable(t, set_mt) end
-	function list.get() return setmetatable(t, list_mt) end
-	function object.get() return setmetatable(t, object_mt) end
+	function set.get() return setmetatable(tt, set_mt) end
+	function list.get() return setmetatable(tt, list_mt) end
+	function T.get() return setmetatable(tt, table_mt) end
 	private()
 end
 
 local event_frame = CreateFrame('Frame')
-for event in -temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
+for event in temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
 end
 
@@ -200,9 +204,9 @@ end
 
 tab_info = t
 do
-	for k, v in -temp-object('search_tab', 'Search', 'post_tab', 'Post', 'auctions_tab', 'Auctions', 'bids_tab', 'Bids') do
-		local tab = -object('name', v)
-		local env = (function() aux(k) return M end)()
+	for _, info in temp-list(temp-list('search_tab', 'Search'), temp-list('post_tab', 'Post'), temp-list('auctions_tab', 'Auctions'), temp-list('bids_tab', 'Bids')) do
+		local tab = T('name', info[2])
+		local env = (function() aux(info[1]) return M end)()
 		function env.private.OPEN.set(f) tab.OPEN = f end
 		function env.private.CLOSE.set(f) tab.CLOSE = f end
 		function env.private.USE_ITEM.set(f) tab.USE_ITEM = f end

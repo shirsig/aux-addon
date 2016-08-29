@@ -15,13 +15,13 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
         local blizzard_query1 = copy(auction_record.blizzard_query)
         blizzard_query1.first_page = auction_record.page
         blizzard_query1.last_page = auction_record.page
-        tinsert(queries, -object('blizzard_query', blizzard_query1))
+        tinsert(queries, T('blizzard_query', blizzard_query1))
 
         if auction_record.page > 0 then
             local blizzard_query2 = copy(auction_record.blizzard_query)
             blizzard_query2.first_page = auction_record.page - 1
             blizzard_query2.last_page = auction_record.page - 1
-            tinsert(queries, -object('blizzard_query', blizzard_query2))
+            tinsert(queries, T('blizzard_query', blizzard_query2))
         end
 
         local item_query = item_query(auction_record.item_id, 1, 1)
@@ -71,6 +71,6 @@ function public.item_query(item_id, first_page, last_page)
         local query = filter_util.query(item_info.name..'/exact')
         query.blizzard_query.first_page = first_page
         query.blizzard_query.last_page = last_page
-        return -object('validator', query.validator, 'blizzard_query', query.blizzard_query)
+        return T('validator', query.validator, 'blizzard_query', query.blizzard_query)
     end
 end

@@ -72,14 +72,14 @@ function update_form()
 	end
 
 	if blizzard_query.exact then
-		for key in -temp-set('class', 'subclass', 'slot', 'quality') do
+		for key in temp-set('class', 'subclass', 'slot', 'quality') do
 			M[key..'_dropdown'].button:Disable()
 		end
 	else
 		class_dropdown.button:Enable()
 		quality_dropdown.button:Enable()
 	end
-	for key in -temp-set('min_level', 'max_level') do
+	for key in temp-set('min_level', 'max_level') do
 		if blizzard_query.exact then
 			M[key..'_input']:Disable()
 		else
@@ -134,7 +134,7 @@ function get_filter_builder_query()
 		add(strlower(_G['ITEM_QUALITY'..quality..'_DESC']))
 	end
 
-	local post_filter_string = filter_util.query_string(-temp-object('blizzard', tt, 'post', post_filter))
+	local post_filter_string = filter_util.query_string(temp-T('blizzard', tt, 'post', post_filter))
 	add(post_filter_string ~= '' and post_filter_string)
 
 	return query_string or ''
@@ -231,7 +231,7 @@ function data_link(id, str)
 end
 
 post_filter = t
-filter_builder_state = -object('selected', 0)
+filter_builder_state = T('selected', 0)
 
 function data_link_click()
 	local button = arg3
@@ -313,8 +313,8 @@ function set_filter_display_offset(x_offset, y_offset)
 end
 
 function initialize_filter_dropdown()
-	for filter in -temp-set('and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity')('left', 'utilizable', 'discard') do
-		UIDropDownMenu_AddButton(-object(
+	for filter in temp-set('and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity')('left', 'utilizable', 'discard') do
+		UIDropDownMenu_AddButton(T(
 			'text', filter,
 			'value', filter,
 			'func', function()
@@ -343,9 +343,9 @@ function initialize_class_dropdown()
 			update_form()
 		end
 	end
-	UIDropDownMenu_AddButton(-object('text', ALL, 'value', 0, 'func', on_click))
+	UIDropDownMenu_AddButton(T('text', ALL, 'value', 0, 'func', on_click))
 	for i, class in temp-{GetAuctionItemClasses()} do
-		UIDropDownMenu_AddButton(-object('text', class, 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton(T('text', class, 'value', i, 'func', on_click))
 	end
 end
 
@@ -360,9 +360,9 @@ function initialize_subclass_dropdown()
 	end
 	local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
 	if class_index and GetAuctionItemSubClasses(class_index) then
-		UIDropDownMenu_AddButton(-object('text', ALL, 'value', 0, 'func', on_click))
-		for i, subclass in temp-{GetAuctionItemSubClasses(class_index)} do
-			UIDropDownMenu_AddButton(-object('text', subclass, 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton(T('text', ALL, 'value', 0, 'func', on_click))
+		for i, subclass in temp-list(GetAuctionItemSubClasses(class_index)) do
+			UIDropDownMenu_AddButton(T('text', subclass, 'value', i, 'func', on_click))
 		end
 	end
 end
@@ -375,9 +375,9 @@ function initialize_slot_dropdown()
 	local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
 	local subclass_index = UIDropDownMenu_GetSelectedValue(subclass_dropdown)
 	if subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
-		UIDropDownMenu_AddButton(-object('text', ALL, 'value', '', 'func', on_click))
+		UIDropDownMenu_AddButton(T('text', ALL, 'value', '', 'func', on_click))
 		for _, slot in {GetAuctionInvTypes(class_index, subclass_index)} do
-			UIDropDownMenu_AddButton(-object('text', _G[slot], 'value', slot, 'func', on_click))
+			UIDropDownMenu_AddButton(T('text', _G[slot], 'value', slot, 'func', on_click))
 		end
 	end
 end
@@ -387,8 +387,8 @@ function initialize_quality_dropdown()
 		UIDropDownMenu_SetSelectedValue(quality_dropdown, this.value)
 		update_form()
 	end
-	UIDropDownMenu_AddButton(-object('text', ALL, 'value', -1, 'func', on_click))
+	UIDropDownMenu_AddButton(T('text', ALL, 'value', -1, 'func', on_click))
 	for i = 0, 4 do
-		UIDropDownMenu_AddButton(-object('text', _G['ITEM_QUALITY'..i..'_DESC'], 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton(T('text', _G['ITEM_QUALITY'..i..'_DESC'], 'value', i, 'func', on_click))
 	end
 end

@@ -56,7 +56,7 @@ do
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
-		local search = -object('filter_string', filter_string, 'records', t)
+		local search = T('filter_string', filter_string, 'records', t)
 		tinsert(searches, search)
 		if getn(searches) > 5 then
 			tremove(searches, 1)
@@ -124,7 +124,7 @@ end
 
 function update_auto_buy_filter()
 	if _G.aux_auto_buy_filter ~= '' then
-		local queries = filter_util.queries(_G.aux_auto_buy_filter)
+		local queries = aux.filter_util.queries(_G.aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
 				log 'Error: The automatic buyout filter does not support multi-queries'
@@ -319,7 +319,7 @@ function public.execute(resume, real_time)
 	end
 	local filter_string = search_box:GetText()
 
-	local queries = filter_util.queries(filter_string)
+	local queries = aux.filter_util.queries(filter_string)
 	if not queries then
 		return
 	elseif real_time then

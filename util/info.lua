@@ -190,7 +190,7 @@ function public.set_shopping_tooltip(slot)
     end
 
     if tooltips[1] then
-        tinsert(tooltips[1], 1, -temp-object('left_text', 'Currently Equipped', 'left_color', -temp-list(.5, .5, .5)))
+        tinsert(tooltips[1], 1, temp-T('left_text', 'Currently Equipped', 'left_color', temp-list(.5, .5, .5)))
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
         load_tooltip(ShoppingTooltip1, tooltips[1])
         ShoppingTooltip1:Show()
@@ -198,7 +198,7 @@ function public.set_shopping_tooltip(slot)
     end
 
     if tooltips[2] then
-        tinsert(tooltips[2], 1, -temp-object('left_text', 'Currently Equipped', 'left_color', -temp-list(.5, .5, .5)))
+        tinsert(tooltips[2], 1, temp-T('left_text', 'Currently Equipped', 'left_color', temp-list(.5, .5, .5)))
         ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
         load_tooltip(ShoppingTooltip2, tooltips[2])
         ShoppingTooltip2:Show()

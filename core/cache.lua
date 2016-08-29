@@ -28,7 +28,7 @@ function LOAD()
 	event_listener('NEW_AUCTION_UPDATE', function()
 		for info in present(info.auction_sell_item()) do
 			for item_id in present(item_id(info.name)) do
-				_G.aux_merchant_sell[M.item_id(info.name)] = info.vendor_price / (M.info.max_item_charges(item_id) or info.count)
+				_G.aux_merchant_sell[M.item_id(info.name)] = info.vendor_price / (aux.info.max_item_charges(item_id) or info.count)
 			end
 		end
 	end)
@@ -86,7 +86,7 @@ function public.item_info(item_id)
 	local data_string = _G.aux_items[item_id]
 	if data_string then
 		local cached_data = persistence.read(items_schema, data_string)
-		return -object(
+		return T(
 			'name', cached_data.name,
 			'itemstring', 'item:'..item_id..':0:0:0',
 			'quality', cached_data.quality,
@@ -125,12 +125,12 @@ function merchant_buy_scan()
 					unit_price = min(buy_info.unit_price, new_unit_price)
 				end
 
-				_G.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, -object(
+				_G.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, T(
 					'unit_price', unit_price,
 					'limited', buy_info.limited and new_limited
 				))
 			else
-				_G.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, -object(
+				_G.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, T(
 					'unit_price', new_unit_price,
 					'limited', new_limited
 				))
@@ -161,7 +161,7 @@ function scan_wdb(item_id)
 		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 		if name and not _G.aux_item_ids[strlower(name)] then
 			_G.aux_item_ids[strlower(name)] = item_id
-			_G.aux_items[item_id] = persistence.write(items_schema, -object(
+			_G.aux_items[item_id] = persistence.write(items_schema, T(
 				'name', name,
 				'quality', quality,
 				'level', level,
