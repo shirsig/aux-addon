@@ -313,10 +313,10 @@ function create_frames()
 	    btn:SetScript('OnClick', function()
 	        local filters = filter_util.queries(search_box:GetText())
 	        if filters then
-	            tinsert(_G.aux_favorite_searches, 1, {
-	                filter_string = search_box:GetText(),
-	                prettified = join(map(filters, function(filter) return filter.prettified end), ';'),
-	            })
+	            tinsert(_G.aux_favorite_searches, 1, T(
+	                'filter_string', search_box:GetText(),
+	                'prettified', join(map(filters, function(filter) return filter.prettified end), ';')
+	            ))
 	        end
 	        update_search_listings()
 	    end)

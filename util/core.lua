@@ -199,9 +199,8 @@ function public.filter(t, p)
 end
 
 function public.map(t, f)
-	local mapped = M.t
-	for k, v in t do mapped[k] = f(v, k) end
-	return mapped
+	for k, v in t do t[k] = f(v, k) end
+	return t
 end
 
 function public.trim(str)

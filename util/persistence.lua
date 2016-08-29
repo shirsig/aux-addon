@@ -50,8 +50,7 @@ function public.read_list(schema, str)
     if str == '' then return t end
     local separator = schema[2]
     local element_type = schema[3]
-    local parts = split(str, separator)
-    return map(parts, function(part)
+    return map(split(str, separator), function(part)
         return read(element_type, part)
     end)
 end
@@ -59,7 +58,7 @@ end
 function public.write_list(schema, list)
     local separator = schema[2]
     local element_type = schema[3]
-    local parts = map(list, function(element)
+    local parts = map(copy(list), function(element)
         return write(element_type, element)
     end)
     return join(parts, separator)
