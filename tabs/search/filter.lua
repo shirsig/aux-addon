@@ -24,8 +24,8 @@ blizzard_query = setmetatable(t, {
 			local subclass_index = UIDropDownMenu_GetSelectedValue(subclass_dropdown)
 			return (subclass_index or 0) > 0 and subclass_index or nil
 		elseif key == 'slot' then
-			local slot_token = UIDropDownMenu_GetSelectedValue(slot_dropdown)
-			return slot_token ~= '' and slot_token or nil
+			local slot_index = UIDropDownMenu_GetSelectedValue(slot_dropdown)
+			return (slot_index or 0) > 0 and slot_index or nil
 		elseif key == 'quality' then
 			local quality_code = UIDropDownMenu_GetSelectedValue(quality_dropdown)
 			return (quality_code or -1) >= 0 and quality_code or nil
@@ -43,12 +43,16 @@ blizzard_query = setmetatable(t, {
 		elseif key == 'usable' then
 			usable_checkbox:SetChecked(value)
 		elseif key == 'class' then
+			UIDropDownMenu_Initialize(class_dropdown, initialize_class_dropdown)
 			UIDropDownMenu_SetSelectedValue(class_dropdown, value)
 		elseif key == 'subclass' then
+			UIDropDownMenu_Initialize(subclass_dropdown, initialize_subclass_dropdown)
 			UIDropDownMenu_SetSelectedValue(subclass_dropdown, value)
 		elseif key == 'slot' then
+			UIDropDownMenu_Initialize(slot_dropdown, initialize_slot_dropdown)
 			UIDropDownMenu_SetSelectedValue(slot_dropdown, value)
 		elseif key == 'quality' then
+			UIDropDownMenu_Initialize(quality_dropdown, initialize_quality_dropdown)
 			UIDropDownMenu_SetSelectedValue(quality_dropdown, value)
 		end
 	end,
@@ -115,13 +119,16 @@ function get_filter_builder_query()
 	add(blizzard_query.max_level)
 	add(blizzard_query.usable and 'usable')
 
-	for class in present(blizzard_query.class) do
+	for class_index in present(blizzard_query.class) do
 		local classes = temp-list(GetAuctionItemClasses())
-		add(strlower(classes[class]))
-		for subclass in present(blizzard_query.subclass) do
-			local subclasses = temp-list(GetAuctionItemSubClasses(class))
-			add(strlower(subclasses[subclass]))
-			add(blizzard_query.slot and strlower(_G[blizzard_query.slot]))
+		add(strlower(classes[class_index]))
+		for subclass_index in present(blizzard_query.subclass) do
+			local subclasses = temp-list(GetAuctionItemSubClasses(class_index))
+			add(strlower(subclasses[subclass_index]))
+			for slot_index in present(blizzard_query.slot) do
+				local slots = temp-list(GetAuctionInvTypes(class_index, subclass_index))
+				add(strlower(_G[slots[slot_index]]))
+			end
 		end
 	end
 
@@ -138,11 +145,12 @@ end
 
 function set_form(filter)
 	clear_form()
-	for key, filter in filter.blizzard do
-		blizzard_query[key] = filter[2]
-	end
-	for _, component in filter.post do
-		add_component(component)
+	for _, component in filter.components do
+		if component[1] == 'blizzard' then
+			blizzard_query[component[2]] = component[4]
+		else
+			add_component(component)
+		end
 	end
 	update_filter_display()
 end
@@ -372,8 +380,8 @@ function initialize_slot_dropdown()
 	local subclass_index = UIDropDownMenu_GetSelectedValue(subclass_dropdown)
 	if subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
 		UIDropDownMenu_AddButton(T('text', ALL, 'value', '', 'func', on_click))
-		for _, slot in temp-list(GetAuctionInvTypes(class_index, subclass_index)) do
-			UIDropDownMenu_AddButton(T('text', _G[slot], 'value', slot, 'func', on_click))
+		for i, slot in temp-list(GetAuctionInvTypes(class_index, subclass_index)) do
+			UIDropDownMenu_AddButton(T('text', _G[slot], 'value', i, 'func', on_click))
 		end
 	end
 end
