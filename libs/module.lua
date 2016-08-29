@@ -62,13 +62,13 @@ do
 	end
 end
 
-local env_mt = {__metatable=false}
-function env_mt:__index(key) self=state[self]
+local environment_mt = {__metatable=false}
+function environment_mt:__index(key) self=state[self]
 	local getter = self[INDEX][key]
 	if getter then return getter() end
 	return self[CALL][key] or _G[key] or self.declarator[key]
 end
-function env_mt:__newindex(key, value) self=state[self]
+function environment_mt:__newindex(key, value) self=state[self]
 	if self.access[key] then
 		local setter = self[NEWINDEX][key] or collision_error(key)
 		setter(value)
@@ -100,15 +100,15 @@ local function import(self, ...)
 end
 
 function module(...)
-	local declarator, env, interface = setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
+	local declarator, environment, interface = setmetatable({}, declarator_mt), setmetatable({}, environment_mt), setmetatable({}, interface_mt)
 	local self; self = {
 		access = {_=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
 		[CALL] = {import=function(...) import(self, unpack(arg)) end, error=error, nop=nop},
-		[INDEX] = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
+		[INDEX] = {_G=const(_G), M=const(environment), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
 		[NEWINDEX] = {_=nop},
 		declarator = declarator,
 		default_access = PRIVATE,
 	}
-	state[declarator], state[env], state[interface] = self, self, self
-	setfenv(2, env)
+	state[declarator], state[environment], state[interface] = self, self, self
+	setfenv(2, environment)
 end

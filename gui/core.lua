@@ -334,7 +334,7 @@ function public.editbox(parent)
     end)
     editbox:SetScript('OnCursorChanged', function()
 	    this.cursor.last_change = GetTime()
-	    this.cursor:SetPoint(this:GetJustifyH(), this, this:GetJustifyH(), call(arg1 > 0 and max or min, 0, arg1 - 1.5), 1.5)
+	    this.cursor:SetPoint(this:GetJustifyH(), this, this:GetJustifyH(), call(arg1 > 0 and max or min, 0, arg1 - 1), 1.5)
     end)
     editbox:SetScript('OnChar', function() call(this.char) end)
     do

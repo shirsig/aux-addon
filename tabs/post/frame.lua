@@ -213,45 +213,25 @@ function create_frames()
 
 	end
 	do
-	    local frame = CreateFrame('Frame', nil, frame.parameters)
-	    start_price_frame = frame
-	    gui.set_content_style(frame)
-	    frame:SetPoint('TOPRIGHT', M.frame.parameters, 'TOPRIGHT', -71, -60)
-	    frame:SetWidth(180)
-	    frame:SetHeight(22)
-	    local editbox = gui.editbox(frame)
-	    editbox:SetAllPoints()
+	    local editbox = gui.editbox(frame.parameters)
+	    editbox:SetPoint('TOPRIGHT', -71, -60)
+	    editbox:SetWidth(180)
+	    editbox:SetHeight(22)
 	    editbox:SetAlignment('RIGHT')
 	    editbox:SetFontSize(17)
 	    editbox:SetScript('OnTabPressed', function()
-	        if IsShiftKeyDown() and stack_count_slider.editbox:IsVisible() then
-	            stack_count_slider.editbox:SetFocus()
-	        elseif IsShiftKeyDown() then
-	            stack_size_slider.editbox:SetFocus()
-	        else
-	            unit_buyout_price:SetFocus()
-	        end
+		    if IsShiftKeyDown() then
+			    stack_count_slider.editbox:SetFocus()
+		    else
+			    unit_buyout_price:SetFocus()
+		    end
 	    end)
-	    editbox.change = function()
-		    this.pretty:SetText(money.to_string(get_unit_start_price(), true, nil, 3))
-		    refresh = true
-	    end
+	    editbox.formatter = function() return money.to_string(get_unit_start_price(), true, nil, 3) end
+	    editbox.change = function() refresh = true end
 	    editbox.enter = function() this:ClearFocus() end
-	    editbox.focus_gain = function()
-	        this.pretty:Hide()
-	        this:SetAlpha(1)
-	    end
 	    editbox.focus_loss = function()
-	        this:SetText(money.to_string(get_unit_start_price(), true, nil, 3, nil, true))
-	        this.pretty:Show()
-	        this:SetAlpha(0)
+		    this:SetText(money.to_string(get_unit_start_price(), true, nil, 3, nil, true))
 	    end
-	    editbox:SetAlpha(0)
-	    editbox.pretty = gui.label(frame, 17)
-	    editbox.pretty:SetPoint('LEFT', 1, 0)
-	    editbox.pretty:SetPoint('RIGHT', -2, 0)
-	    editbox.pretty:SetJustifyH('RIGHT')
-	    editbox.pretty:SetTextColor(color.text.enabled())
 	    do
 	        local label = gui.label(frame, gui.font_size.small)
 	        label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)
@@ -267,14 +247,10 @@ function create_frames()
 	    unit_start_price = editbox
 	end
 	do
-	    local frame = CreateFrame('Frame', nil, frame.parameters)
-	    buyout_price_frame = frame
-	    gui.set_content_style(frame)
-	    frame:SetPoint('TOPRIGHT', unit_start_price, 'BOTTOMRIGHT', 0, -19)
-	    frame:SetWidth(180)
-	    frame:SetHeight(22)
-	    local editbox = gui.editbox(frame)
-	    editbox:SetAllPoints()
+	    local editbox = gui.editbox(frame.parameters)
+	    editbox:SetPoint('TOPRIGHT', unit_start_price, 'BOTTOMRIGHT', 0, -19)
+	    editbox:SetWidth(180)
+	    editbox:SetHeight(22)
 	    editbox:SetAlignment('RIGHT')
 	    editbox:SetFontSize(17)
 	    editbox:SetScript('OnTabPressed', function()
@@ -284,26 +260,12 @@ function create_frames()
 	            stack_size_slider.editbox:SetFocus()
 	        end
 	    end)
-	    editbox.change = function()
-		    this.pretty:SetText(money.to_string(get_unit_buyout_price(), true, nil, 3))
-		    refresh = true
-	    end
+	    editbox.formatter = function() return money.to_string(get_unit_buyout_price(), true, nil, 3) end
+	    editbox.change = function() refresh = true end
 	    editbox.enter = function() this:ClearFocus() end
-	    editbox.focus_gain = function()
-	        this.pretty:Hide()
-	        this:SetAlpha(1)
-	    end
 	    editbox.focus_loss = function()
-	        this:SetText(money.to_string(get_unit_buyout_price(), true, nil, 3, nil, true))
-	        this.pretty:Show()
-	        this:SetAlpha(0)
+		    this:SetText(money.to_string(get_unit_buyout_price(), true, nil, 3, nil, true))
 	    end
-	    editbox:SetAlpha(0)
-	    editbox.pretty = gui.label(frame, 17)
-	    editbox.pretty:SetPoint('LEFT', 1, 0)
-	    editbox.pretty:SetPoint('RIGHT', -2, 0)
-	    editbox.pretty:SetJustifyH('RIGHT')
-	    editbox.pretty:SetTextColor(color.text.enabled())
 	    do
 	        local label = gui.label(frame, gui.font_size.small)
 	        label:SetPoint('BOTTOMLEFT', frame, 'TOPLEFT', -2, 1)

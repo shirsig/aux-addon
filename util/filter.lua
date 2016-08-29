@@ -464,7 +464,7 @@ function prettified_query_string(components)
 		            prettified.append(info.display_name(aux.cache.item_id(parameter)) or color.label.enabled('['..parameter..']'))
 	            else
 		            if filters[component[2]].input_type == 'money' then
-			            prettified.append(aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, gui.inline_color.label.enabled))
+			            prettified.append(aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, inline_color.label.enabled))
 		            else
 			            prettified.append(color.label.enabled(parameter))
 		            end
@@ -493,7 +493,7 @@ function blizzard_query(components)
     local query = T('name', filters.name and filters.name[2])
 
     local item_info, class_index, subclass_index, slot_index
-    local item_id = aux.cache.item_id(filters.name[2])
+    local item_id = filters.name and aux.cache.item_id(filters.name[2])
     item_info = item_id and info.item(item_id)
     if filters.exact and item_info then
 	    item_info = info.item(item_id)
@@ -520,10 +520,11 @@ end
 
 function validator(components)
 
-    local validators = tt
+    local validators = t
     for i, component in components.post do
-        if component[1] == 'filter' then
-            validators[i] = filters[component[2]].validator(parse_parameter(filters[component[2]].input_type, component[3]))
+	    local type, name, param = unpack(component)
+        if type == 'filter' then
+            validators[i] = filters[name].validator(parse_parameter(filters[name].input_type, param))
         end
     end
 
