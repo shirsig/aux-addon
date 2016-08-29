@@ -318,7 +318,7 @@ function public.parse_filter_string(str)
         i = i + 1
     end
 
-    return T('all', filter, 'blizzard', blizzard_filter_parser(), 'post', post_filter)
+    return T('components', filter, 'blizzard', blizzard_filter_parser(), 'post', post_filter)
 end
 
 function public.query(filter_string)
@@ -409,7 +409,7 @@ function suggestions(filter)
     end
 
     -- item names
-    if getn(filter.all) == 0 and filter.blizzard.name == '' then -- TODO
+    if getn(filter.components) == 1 then
         for _, name in _G.aux_auctionable_items do
             tinsert(suggestions, name..'/exact')
         end
@@ -421,7 +421,7 @@ end
 function public.filter_string(filter)
     local query_builder = query_builder()
 
-    for _, component in filter.all do
+    for _, component in filter.components do
 	    if component[1] == 'blizzard' then
 		    query_builder.append(filter[4] or filter[3])
         elseif component[1] == 'operator' then
@@ -443,12 +443,12 @@ end
 function prettified_filter_string(filter)
     local prettified = query_builder()
 
-    for _, component in filter.all do
+    for _, component in filter.components do
 	    if component[1] == 'blizzard' then
 		    if component[2] == 'name' then
 			    if filter.blizzard.exact then
 			        prettified.append(info.display_name(aux.cache.item_id(component[4])) or color.blizzard('['..component[4]..']'))
-			    else
+			    elseif component[4] ~= '' then
 				    prettified.append(color.blizzard(component[4]))
 			    end
 		    elseif component[2] ~= 'exact' then
@@ -557,17 +557,8 @@ end
 function public.query_builder()
     local filter
     return T(
-        'appended', function(part)
-            return query_builder(not filter and part or filter..'/'..part)
-        end,
-		'prepended', function(part)
-            return query_builder(not filter and part or part..'/'..filter)
-        end,
 		'append', function(part)
             filter = not filter and part or filter..'/'..part
-        end,
-		'prepend', function(part)
-            filter = not filter and part or part..'/'..filter
         end,
 		'get', function()
             return filter or ''
