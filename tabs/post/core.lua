@@ -74,7 +74,7 @@ function get_unit_start_price()
 end
 
 function set_unit_start_price(amount)
-    unit_start_price:SetText(aux.money.to_string(amount, true, nil, 3))
+    unit_start_price:SetText(aux.money.to_string(amount, true, nil, 3, nil, true))
 end
 
 function get_unit_buyout_price()
@@ -83,7 +83,7 @@ function get_unit_buyout_price()
 end
 
 function set_unit_buyout_price(amount)
-    unit_buyout_price:SetText(aux.money.to_string(amount, true, nil, 3))
+    unit_buyout_price:SetText(aux.money.to_string(amount, true, nil, 3, nil, true))
 end
 
 function update_inventory_listing()
