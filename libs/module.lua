@@ -1,5 +1,5 @@
 if module then return end
-local type, tostring, setmetatable, setfenv, unpack, next, pcall, _G = type, tostring, setmetatable, setfenv, unpack, next, pcall, getfenv(0)
+local type, setmetatable, setfenv, unpack, next, pcall, _G = type, setmetatable, setfenv, unpack, next, pcall, getfenv(0)
 
 local PUBLIC, PRIVATE = 1, 2
 local CALL, INDEX, NEWINDEX = 1, 2, 3
@@ -17,17 +17,11 @@ local state = {}
 local declarator_mt = {__metatable=false}
 do
 	local ACCESS, EVENT = {public=PUBLIC, private=PRIVATE}, {call=CALL, get=INDEX, set=NEWINDEX}
-	local function extract_handlers(v)
-		local f, getter, setter
-		f, getter, setter, v.call, v.get, v.set = v.call, v.get, v.set, nil, nil, nil
-		if next(v) or f ~= nil and getter ~= nil then error() end
-		return f, getter, setter
-	end
 	local function declare(self, access, name, handlers)
 		self.access[name] = self.access[name] and collision_error(name) or access or self.default_access
 		for event, handler in handlers do
 			if type(handler) ~= 'function' and (event == INDEX or declaration_error()) then
-				handler = const(handler == nil and tostring(name) or handler)
+				handler = const(handler)
 			end
 			self[event][name] = handler
 		end
@@ -50,10 +44,11 @@ do
 		declare(self, self.declaration_access, name, {[event]=value})
 		self.declaration_access, self.declaration_name = nil, nil
 	end
-	function declarator_mt:__call(value) self=state[self]
+	function declarator_mt:__call(v) self=state[self]
 		if self.declaration_name then
-			local success, f, getter, setter = pcall(extract_handlers, value)
-			if not success then declaration_error() end
+			if type(v) ~= 'table' or getmetatable(v) ~= nil then declaration_error() end
+			local f, getter, setter; f, getter, setter, v.call, v.get, v.set = v.call, v.get, v.set, nil, nil, nil
+			if next(v) or f ~= nil and getter ~= nil then declaration_error() end
 			declare(self, self.declaration_access, self.declaration_name, {[CALL]=f, [INDEX]=getter, [NEWINDEX]=setter})
 		elseif self.declaration_access or declaration_error() then
 			self.default_access = self.declaration_access
