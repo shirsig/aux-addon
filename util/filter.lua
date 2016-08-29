@@ -418,10 +418,10 @@ function suggestions(filter)
     return suggestions
 end
 
-function public.filter_string(filter)
+function public.filter_string(components)
     local query_builder = query_builder()
 
-    for _, component in filter.components do
+    for _, component in components do
 	    if component[1] == 'blizzard' then
 		    query_builder.append(filter[4] or filter[3])
         elseif component[1] == 'operator' then

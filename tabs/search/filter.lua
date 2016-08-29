@@ -134,7 +134,7 @@ function get_filter_builder_query()
 		add(strlower(_G['ITEM_QUALITY'..quality..'_DESC']))
 	end
 
-	local post_filter_string = filter_util.filter_string(temp-T('blizzard', tt, 'post', post_filter))
+	local post_filter_string = filter_util.filter_string(post_filter)
 	add(post_filter_string ~= '' and post_filter_string)
 
 	return filter_string or ''

@@ -273,7 +273,7 @@ function UseContainerItem(...) temp=arg
 	if modified or not index(active_tab, 'USE_ITEM') then
 		return orig.UseContainerItem(unpack(arg))
 	end
-	for item_info in present(info.container_item(arg[1], arg[2])) do
+	for item_info in present(aux.info.container_item(arg[1], arg[2])) do
 		return active_tab.USE_ITEM(item_info)
 	end
 end
