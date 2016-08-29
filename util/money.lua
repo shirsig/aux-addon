@@ -5,8 +5,7 @@ GOLD_TEXT = '|cffffd70ag|r'
 SILVER_TEXT = '|cffc7c7cfs|r'
 COPPER_TEXT = '|cffeda55fc|r'
 private()
---a = nil
-----log(a)
+
 COPPER_PER_SILVER = 100
 COPPER_PER_GOLD = 10000
 
