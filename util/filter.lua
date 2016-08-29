@@ -117,8 +117,8 @@ public.filters = {
         validator = function(pct)
             return function(auction_record)
                 return auction_record.unit_buyout_price > 0
-                        and history.value(auction_record.item_key)
-                        and auction_record.unit_buyout_price / history.value(auction_record.item_key) * 100 <= pct
+                        and aux.history.value(auction_record.item_key)
+                        and auction_record.unit_buyout_price / aux.history.value(auction_record.item_key) * 100 <= pct
             end
         end
     },
@@ -128,8 +128,8 @@ public.filters = {
         validator = function(pct)
             return function(auction_record)
                 return auction_record.unit_buyout_price > 0
-                        and history.value(auction_record.item_key)
-                        and auction_record.unit_buyout_price / history.value(auction_record.item_key) * 100 <= pct
+                        and aux.history.value(auction_record.item_key)
+                        and auction_record.unit_buyout_price / aux.history.value(auction_record.item_key) * 100 <= pct
             end
         end
     },
@@ -138,7 +138,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                return history.value(auction_record.item_key) and history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
+                return aux.history.value(auction_record.item_key) and aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
             end
         end
     },
@@ -147,7 +147,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                return auction_record.buyout_price > 0 and history.value(auction_record.item_key) and history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
+                return auction_record.buyout_price > 0 and aux.history.value(auction_record.item_key) and aux.history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
             end
         end
     },
@@ -156,7 +156,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local disenchant_value = disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
+                local disenchant_value = aux.disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
                 return disenchant_value and disenchant_value - auction_record.bid_price >= amount
             end
         end
@@ -166,7 +166,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local disenchant_value = disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
+                local disenchant_value = aux.disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
                 return auction_record.buyout_price > 0 and disenchant_value and disenchant_value - auction_record.buyout_price >= amount
             end
         end
@@ -223,10 +223,10 @@ do
 			if self.exact then return end
 			for number in present(tonumber(select(3, strfind(str, '^(%d+)$')))) do
 				if number >= 1 and number <= 60 then
-					for filter in temp-set('min_level', 'max_level') do
-						if not self[filter] then
-							self[filter] = list(str, number)
-							return true
+					for key in temp-set('min_level', 'max_level') do
+						if not self[key] then
+							self[key] = list(str, number)
+							return list('blizzard', key, str, number)
 						end
 					end
 				end
@@ -242,19 +242,18 @@ do
 					local index, label = parser[2](select(3, unpack(parser)))
 					if index then
 						self[parser[1]] = list(label, index)
-						return true
+						return list('blizzard', parser[1], label, index)
 					end
 				end
 			end
 			if not self[str] and (str == 'usable' or str == 'exact' and self.name and size(self) == 1) then
 				self[str] = list(str, 1)
+				return list('blizzard', str, 1)
 			elseif i == 1 and strlen(str) <= 63 then
 				self.name = list(str, unquote(str))
+				return list('blizzard', 'name', str, unquote(str))
 --				return nil, 'The name filter must not be longer than 63 characters' TODO
-			else
-				return
 			end
-			return true
 		end,
 	}
 	function blizzard_filter_parser()
@@ -276,8 +275,8 @@ function parse_parameter(input_type, str)
     end
 end
 
-function public.parse_query_string(str)
-    local post_filter = t
+function public.parse_filter_string(str)
+    local filter, post_filter = t, t
     local blizzard_filter_parser = blizzard_filter_parser()
     local parts = map(split(str, '/'), function(part) return strlower(trim(part)) end)
 
@@ -286,6 +285,7 @@ function public.parse_query_string(str)
 	    local operator = operator(parts[i])
         if operator then
             tinsert(post_filter, operator)
+	        tinsert(filter, operator)
         elseif filters[parts[i]] then
             local input_type = filters[parts[i]].input_type
             if input_type ~= '' then
@@ -303,9 +303,14 @@ function public.parse_query_string(str)
             else
                 tinsert(post_filter, list('filter', parts[i]))
             end
-        elseif not blizzard_filter_parser(parts[i], i) then
-	        if parts[i] ~= '' then
+            tinsert(filter, post_filter[getn(post_filter)])
+        else
+	        local part = blizzard_filter_parser(parts[i], i)
+	        if part then
+		        tinsert(filter, part)
+	        elseif parts[i] ~= '' then
 		        tinsert(post_filter, list('filter', 'tooltip', parts[i]))
+		        tinsert(filter, post_filter[getn(post_filter)])
 	        else
 	            return nil, 'Empty modifier'
 	        end
@@ -313,18 +318,18 @@ function public.parse_query_string(str)
         i = i + 1
     end
 
-    return T('blizzard', blizzard_filter_parser(), 'post', post_filter)
+    return T('all', filter, 'blizzard', blizzard_filter_parser(), 'post', post_filter)
 end
 
-function public.query(query_string)
-    local components, error, suggestions = parse_query_string(query_string)
+function public.query(filter_string)
+    local filter, error, suggestions = parse_filter_string(filter_string)
 
-    if not components then
+    if not filter then
         return nil, suggestions or t, error
     end
 
     local polish_notation_counter = 0
-    for _, component in components.post do
+    for _, component in filter.post do
         if component[1] == 'operator' then
             polish_notation_counter = max(polish_notation_counter, 1)
             polish_notation_counter = polish_notation_counter + (tonumber(component[2]) or 1) - 1
@@ -345,14 +350,14 @@ function public.query(query_string)
     end
 
     return {
-        blizzard_query = blizzard_query(components),
-        validator = validator(components),
-        prettified = prettified_query_string(components),
-    }, M.suggestions(components)
+        blizzard_query = blizzard_query(filter),
+        validator = validator(filter),
+        prettified = prettified_filter_string(filter),
+    }, M.suggestions(filter)
 end
 
-function public.queries(query_string)
-    local parts = split(query_string, ';')
+function public.queries(filter_string)
+    local parts = split(filter_string, ';')
     local queries = t
     for _, str in parts do
         str = trim(str)
@@ -367,44 +372,44 @@ function public.queries(query_string)
     return queries
 end
 
-function suggestions(components)
+function suggestions(filter)
     local suggestions = t
 
-    if components.blizzard.name and size(components.blizzard) == 1 then tinsert(suggestions, 'exact') end
+    if filter.blizzard.name and size(filter.blizzard) == 1 then tinsert(suggestions, 'exact') end
 
     tinsert(suggestions, 'and'); tinsert(suggestions, 'or'); tinsert(suggestions, 'not'); tinsert(suggestions, 'tooltip')
 
     for key in filters do tinsert(suggestions, key) end
 
     -- classes
-    if not components.blizzard.class then
-        for _, class in temp-{GetAuctionItemClasses()} do tinsert(suggestions, class) end
+    if not filter.blizzard.class then
+        for _, class in temp-list(GetAuctionItemClasses()) do tinsert(suggestions, class) end
     end
 
     -- subclasses
-    if not components.blizzard.subclass then
-        for _, subclass in temp-{GetAuctionItemSubClasses(index(components.blizzard.class, 2) or 0)} do
+    if not filter.blizzard.subclass then
+        for _, subclass in temp-list(GetAuctionItemSubClasses(index(filter.blizzard.class, 2) or 0)) do
             tinsert(suggestions, subclass)
         end
     end
 
     -- slots
-    if not components.blizzard.slot then
-        for _, invtype in temp-{GetAuctionInvTypes(index(components.blizzard.class, 2) or 0, index(components.blizzard.subclass, 2) or 0)} do
+    if not filter.blizzard.slot then
+        for _, invtype in temp-list(GetAuctionInvTypes(index(filter.blizzard.class, 2) or 0, index(filter.blizzard.subclass, 2) or 0)) do
             tinsert(suggestions, _G[invtype])
         end
     end
 
     -- usable
-    if not components.blizzard.usable then tinsert(suggestions, 'usable') end
+    if not filter.blizzard.usable then tinsert(suggestions, 'usable') end
 
     -- rarities
-    if not components.blizzard.quality then
+    if not filter.blizzard.quality then
         for i = 0, 4 do tinsert(suggestions, _G['ITEM_QUALITY'..i..'_DESC']) end
     end
 
     -- item names
-    if size(components.blizzard) + getn(components.post) == 1 and components.blizzard.name == '' then
+    if getn(filter.all) == 0 and filter.blizzard.name == '' then -- TODO
         for _, name in _G.aux_auctionable_items do
             tinsert(suggestions, name..'/exact')
         end
@@ -413,15 +418,13 @@ function suggestions(components)
     return suggestions
 end
 
-function public.query_string(components)
+function public.filter_string(filter)
     local query_builder = query_builder()
 
-    for _, filter in components.blizzard do
-        query_builder.append(filter[2] or filter[1])
-    end
-
-    for _, component in components.post do
-        if component[1] == 'operator' then
+    for _, component in filter.all do
+	    if component[1] == 'blizzard' then
+		    query_builder.append(filter[4] or filter[3])
+        elseif component[1] == 'operator' then
             query_builder.append(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or ''))
         elseif component[1] == 'filter' then
             query_builder.append(component[2])
@@ -437,23 +440,21 @@ function public.query_string(components)
     return query_builder.get()
 end
 
-function prettified_query_string(components)
+function prettified_filter_string(filter)
     local prettified = query_builder()
 
-    for key, filter in components.blizzard do
-        if key == 'exact' then
-            prettified.prepend(info.display_name(aux.cache.item_id(components.blizzard.name[2])) or color.blizzard('['..components.blizzard.name[2]..']'))
-        elseif key ~= 'name' then
-            prettified.append(color.blizzard(filter[1]))
-        end
-    end
-
-    if components.blizzard.name and not components.blizzard.exact and components.blizzard.name[2] ~= '' then
-        prettified.prepend(color.blizzard(components.blizzard.name[2]))
-    end
-
-    for _, component in components.post do
-        if component[1] == 'operator' then
+    for _, component in filter.all do
+	    if component[1] == 'blizzard' then
+		    if component[2] == 'name' then
+			    if filter.blizzard.exact then
+			        prettified.append(info.display_name(aux.cache.item_id(component[4])) or color.blizzard('['..component[4]..']'))
+			    else
+				    prettified.append(color.blizzard(component[4]))
+			    end
+		    elseif component[2] ~= 'exact' then
+			    prettified.append(color.blizzard(component[3]))
+		    end
+        elseif component[1] == 'operator' then
 			prettified.append(color.aux(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')))
         elseif component[1] == 'filter' then
             if component[2] ~= 'tooltip' then
@@ -487,11 +488,9 @@ function public.unquote(name)
     return select(3, strfind(name, '^<(.*)>$')) or name
 end
 
-function blizzard_query(components)
-    local filters = components.blizzard
-
+function blizzard_query(filter)
+    local filters = filter.blizzard
     local query = T('name', filters.name and filters.name[2])
-
     local item_info, class_index, subclass_index, slot_index
     local item_id = filters.name and aux.cache.item_id(filters.name[2])
     item_info = item_id and info.item(item_id)
@@ -501,7 +500,6 @@ function blizzard_query(components)
         subclass_index = info.item_subclass_index(class_index or 0, item_info.subclass)
         slot_index = info.item_slot_index(class_index or 0, subclass_index or 0, item_info.slot)
     end
-
     if item_info then
         query.min_level = item_info.level
         query.max_level = item_info.level
@@ -518,10 +516,10 @@ function blizzard_query(components)
     return query
 end
 
-function validator(components)
+function validator(filter)
 
     local validators = t
-    for i, component in components.post do
+    for i, component in filter.post do
 	    local type, name, param = unpack(component)
         if type == 'filter' then
             validators[i] = filters[name].validator(parse_parameter(filters[name].input_type, param))
@@ -529,12 +527,12 @@ function validator(components)
     end
 
     return function(record)
-        if components.blizzard.exact and strlower(info.item(record.item_id).name) ~= components.blizzard.name[2] then
+        if filter.blizzard.exact and strlower(info.item(record.item_id).name) ~= filter.blizzard.name[2] then
             return false
         end
         local stack = tt
-        for i = getn(components.post), 1, -1 do
-            local type, name, param = unpack(components.post[i])
+        for i = getn(filter.post), 1, -1 do
+            local type, name, param = unpack(filter.post[i])
             if type == 'operator' then
                 local args = tt
                 while (not param or param > 0) and getn(stack) > 0 do

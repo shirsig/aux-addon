@@ -100,16 +100,16 @@ function update_form()
 end
 
 function get_filter_builder_query()
-	local query_string
+	local filter_string
 
 	local function add(part)
 		if part then
-			query_string = query_string and query_string..'/'..part or part
+			filter_string = filter_string and filter_string..'/'..part or part
 		end
 	end
 
 	local name = blizzard_query.name
-	if not index(filter_util.parse_query_string(name), 'blizzard', 'name') then
+	if not index(filter_util.parse_filter_string(name), 'blizzard', 'name') then
 		name = filter_util.quote(name)
 	end
 	add((name ~= '' or blizzard_query.exact) and name)
@@ -134,10 +134,10 @@ function get_filter_builder_query()
 		add(strlower(_G['ITEM_QUALITY'..quality..'_DESC']))
 	end
 
-	local post_filter_string = filter_util.query_string(temp-T('blizzard', tt, 'post', post_filter))
+	local post_filter_string = filter_util.filter_string(temp-T('blizzard', tt, 'post', post_filter))
 	add(post_filter_string ~= '' and post_filter_string)
 
-	return query_string or ''
+	return filter_string or ''
 end
 
 function set_form(components)
@@ -170,14 +170,14 @@ function clear_form()
 	update_filter_display()
 end
 
-function import_query_string()
-	local components, error = filter_util.parse_query_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
+function import_filter_string()
+	local components, error = filter_util.parse_filter_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
 	if components or log(error) then
 		set_form(components)
 	end
 end
 
-function export_query_string()
+function export_filter_string()
 	search_box:SetText(get_filter_builder_query())
 	filter_parameter_input:ClearFocus()
 end
@@ -265,7 +265,7 @@ function add_post_filter()
 				str = str..'/'..filter_parameter_input:GetText()
 			end
 		end
-		local components, error, suggestions = filter_util.parse_query_string(str)
+		local components, error, suggestions = filter_util.parse_filter_string(str)
 		if components and getn(components.blizzard) == 0 and getn(components.post) == 1 then
 			add_component(components.post[1])
 			update_filter_display()
