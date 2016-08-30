@@ -5,6 +5,7 @@
 ## SavedVariables: aux_datasets, aux_items, aux_item_ids, aux_auctionable_items, aux_merchant_buy, aux_merchant_sell, aux_characters, aux_recent_searches, aux_favorite_searches, aux_ignore_owner, aux_price_per_unit
 
 libs\module.lua
+libs\green_t.lua
 
 aux-addon.lua
 util\core.lua

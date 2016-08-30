@@ -101,7 +101,7 @@ function extend_tooltip(tooltip, link, quantity)
         end
         if _G.aux_tooltip_daily  then
             local market_value = history.market_value(item_key)
-            tooltip:AddLine('Today: '..(market_value and money.to_string2(market_value * quantity)..' ('..auction_listing.percentage_historical(round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Today: '..(market_value and money.to_string2(market_value * quantity)..' ('..aux.auction_listing.percentage_historical(round(market_value / value * 100))..')' or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
     end
 

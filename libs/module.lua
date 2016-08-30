@@ -57,13 +57,13 @@ do
 	end
 end
 
-local environment_mt = {__metatable=false}
-function environment_mt:__index(key) self=state[self]
+local env_mt = {__metatable=false}
+function env_mt:__index(key) self=state[self]
 	local getter = self[INDEX][key]
 	if getter then return getter() end
 	return self[CALL][key] or _G[key] or self.declarator[key]
 end
-function environment_mt:__newindex(key, value) self=state[self]
+function env_mt:__newindex(key, value) self=state[self]
 	if self.access[key] then
 		local setter = self[NEWINDEX][key] or collision_error(key)
 		setter(value)
@@ -82,10 +82,12 @@ end
 function interface_mt:__newindex(key, value) self=state[self]
 	if self.access[key] == PUBLIC then (self[NEWINDEX][key] or nop)(value) end
 end
+function interface_mt:__eq() return true end
+local INTERFACE = setmetatable({}, interface_mt)
 
 local function import(self, ...)
 	for i = 1, arg.n do
-		local module = state[arg[i] or import_error()]
+		local module = state[arg[i] == INTERFACE and arg[i] or import_error()]
 		for k, v in module.access do
 			if v == PUBLIC and not self.access[k] then
 				self.access[k], self[CALL][k], self[INDEX][k], self[NEWINDEX][k] = PRIVATE, module[CALL][k], module[INDEX][k], module[NEWINDEX][k]
@@ -94,16 +96,18 @@ local function import(self, ...)
 	end
 end
 
-function module(...)
-	local declarator, environment, interface = setmetatable({}, declarator_mt), setmetatable({}, environment_mt), setmetatable({}, interface_mt)
+function module(name)
+	if name and _G[name] then return true end
+	local declarator, env, interface = setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
 	local self; self = {
 		access = {_=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
 		[CALL] = {import=function(...) import(self, unpack(arg)) end, error=error, nop=nop},
-		[INDEX] = {_G=const(_G), M=const(environment), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
+		[INDEX] = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
 		[NEWINDEX] = {_=nop},
 		declarator = declarator,
 		default_access = PRIVATE,
 	}
-	state[declarator], state[environment], state[interface] = self, self, self
-	setfenv(2, environment)
+	state[declarator], state[env], state[interface] = self, self, self
+	if name then _G[name] = interface end
+	setfenv(2, env)
 end
