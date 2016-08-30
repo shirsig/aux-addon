@@ -68,15 +68,15 @@ function public.tt.get()
 end
 
 do
-	local function modifier_mt(f)
+	local function mt(f)
 		local function apply(self, value)
 			recycle(self)
-			return f(value)
+			return type(value) == 'table' and f(value) or value
 		end
 		return {__call=apply, __sub=apply}
 	end
 	do
-		local mt = modifier_mt(function(t) tmp[t] = true; return t end)
+		local mt = mt(function(t) tmp[t] = true; return t end)
 		public.temp
 			{
 				get = function() return setmetatable(table(), mt) end,
@@ -84,7 +84,7 @@ do
 			}
 	end
 	do
-		local mt = modifier_mt(function(t) tmp[t] = nil; return t end)
+		local mt = mt(function(t) tmp[t] = nil; return t end)
 		public.perm
 			{
 				get = function() return setmetatable(table(), mt) end,
