@@ -11,10 +11,10 @@ CreateFrame('Frame'):SetScript('OnUpdate', function()
 	wipe(tmp)
 end)
 
---do
---	local t = setmetatable({}, {__metatable=false, newindex=error})
---	public.O.get = t
---end
+do
+	local t = setmetatable({}, {__metatable=false, __newindex=error})
+	public.O.get = t
+end
 
 function wipe(t) -- like with a cloth or something
 	for k in t do t[k] = nil end
@@ -78,18 +78,18 @@ do
 	do
 		local mt = mt(function(t) tmp[t] = true; return t end)
 		public.temp
-			{
-				get = function() return setmetatable(table(), mt) end,
-				set = function(t) tmp[t] = true end,
-			}
+		{
+			get = function() return setmetatable(table(), mt) end,
+			set = function(t) tmp[t] = true end,
+		}
 	end
 	do
 		local mt = mt(function(t) tmp[t] = nil; return t end)
 		public.perm
-			{
-				get = function() return setmetatable(table(), mt) end,
-				set = function(t) tmp[t] = nil end,
-			}
+		{
+			get = function() return setmetatable(table(), mt) end,
+			set = function(t) tmp[t] = nil end,
+		}
 	end
 end
 do
