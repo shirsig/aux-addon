@@ -367,7 +367,7 @@ function public.item(item_id, suffix_id)
         slot = slot,
         max_stack = max_stack,
         texture = texture,
-    } or cache.item_info(item_id)
+    } or aux.cache.item_info(item_id)
 end
 
 function public.item_class_index(item_class)

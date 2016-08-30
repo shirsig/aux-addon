@@ -278,7 +278,8 @@ end
 function public.parse_filter_string(str)
     local filter, post_filter = t, t
     local blizzard_filter_parser = blizzard_filter_parser()
-    local parts = map(split(str, '/'), function(part) return strlower(trim(part)) end)
+
+    local parts = str and map(split(str, '/'), function(part) return strlower(trim(part)) end) or t
 
     local i = 1
     while parts[i] do
@@ -409,7 +410,7 @@ function suggestions(filter)
     end
 
     -- item names
-    if getn(filter.components) == 1 then
+    if getn(filter.components) == 0 then
         for _, name in _G.aux_auctionable_items do
             tinsert(suggestions, name..'/exact')
         end
