@@ -115,7 +115,7 @@ function create_frames()
 	    item:SetPoint('TOPLEFT', 10, -6)
 	    item.button:SetScript('OnEnter', function()
 	        if selected_item then
-	            info.set_tooltip(selected_item.itemstring, this, 'ANCHOR_RIGHT')
+	            aux.info.set_tooltip(selected_item.itemstring, this, 'ANCHOR_RIGHT')
 	        end
 	    end)
 	    item.button:SetScript('OnLeave', function()
