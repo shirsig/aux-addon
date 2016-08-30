@@ -83,7 +83,7 @@ do
                     bid_button:SetScript('OnClick', function()
                         if test(record)(index) and listing:ContainsRecord(record) then
                             place_bid('bidder', index, record.bid_price, record.bid_price < record.buyout_price and function()
-                                info.bid_update(record)
+                                aux.info.bid_update(record)
                                 listing:SetDatabase()
                             end or L(listing.RemoveAuctionRecord, listing, record))
                         end

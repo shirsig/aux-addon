@@ -104,7 +104,7 @@ function create_frames()
 	    btn:SetHeight(24)
 	    btn:SetText('Refresh')
 	    btn:SetScript('OnClick', function()
-	        scan.abort(scan_id)
+	        aux.scan.abort(scan_id)
 	        refresh_entries()
 	        refresh = true
 	    end)
@@ -226,7 +226,7 @@ function create_frames()
 			    unit_buyout_price:SetFocus()
 		    end
 	    end)
-	    editbox.colorizer = function(text) return gsub(text, '[gsc]', function(str) return str == 'g' and aux.money.GOLD_TEXT or str == 's' and aux.money.SILVER_TEXT or str == 'c' and aux.money.COPPER_TEXT end) end
+	    editbox.colorizer = function(text) return gsub(text, '[gsc]', function(str) return str == 'g' and money.GOLD_TEXT or str == 's' and money.SILVER_TEXT or str == 'c' and money.COPPER_TEXT end) end
 	    editbox.formatter = function() return money.to_string(get_unit_start_price(), true, nil, 3) end
 	    editbox.change = function() refresh = true end
 	    editbox.enter = function() this:ClearFocus() end
@@ -261,7 +261,7 @@ function create_frames()
 	            stack_size_slider.editbox:SetFocus()
 	        end
 	    end)
-	    editbox.colorizer = function(text) return gsub(text, '[gsc]', function(str) return str == 'g' and aux.money.GOLD_TEXT or str == 's' and aux.money.SILVER_TEXT or str == 'c' and aux.money.COPPER_TEXT end) end
+	    editbox.colorizer = function(text) return gsub(text, '[gsc]', function(str) return str == 'g' and money.GOLD_TEXT or str == 's' and money.SILVER_TEXT or str == 'c' and money.COPPER_TEXT end) end
 	    editbox.formatter = function() return money.to_string(get_unit_buyout_price(), true, nil, 3) end
 	    editbox.change = function() refresh = true end
 	    editbox.enter = function() this:ClearFocus() end

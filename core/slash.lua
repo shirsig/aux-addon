@@ -25,7 +25,7 @@ function _G.SlashCmdList.AUX(command)
 	    _G.aux_auctionable_items = {}
         log 'Item cache cleared.'
     elseif arguments[1] == 'populate' and arguments[2] == 'wdb' then
-        cache.populate_wdb()
+        aux.cache.populate_wdb()
     elseif arguments[1] == 'tooltip' and arguments[2] == 'value' then
 	    _G.aux_tooltip_value = not _G.aux_tooltip_value
         log('Historical value in tooltip '..(_G.aux_tooltip_value and 'enabled' or 'disabled')..'.')
