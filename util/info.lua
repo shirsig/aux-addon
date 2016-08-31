@@ -48,36 +48,36 @@ function public.container_item(bag, slot)
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
         local aux_quantity = charges or count
-        return {
-            item_id = item_id,
-            suffix_id = suffix_id,
-            unique_id = unique_id,
-            enchant_id = enchant_id,
+        return T(
+            'item_id', item_id,
+            'suffix_id', suffix_id,
+            'unique_id', unique_id,
+            'enchant_id', enchant_id,
 
-            link = link,
-            itemstring = item_info.itemstring,
-            item_key = item_id..':'..suffix_id,
+            'link', link,
+            'itemstring', item_info.itemstring,
+            'item_key', item_id..':'..suffix_id,
 
-            name = item_info.name,
-            texture = texture,
-            level = item_info.level,
-            type = item_info.type,
-            subtype = item_info.subtype,
-            slot = item_info.slot,
-            quality = item_info.quality,
-            max_stack = item_info.max_stack,
+            'name', item_info.name,
+            'texture', texture,
+            'level', item_info.level,
+            'type', item_info.type,
+            'subtype', item_info.subtype,
+            'slot', item_info.slot,
+            'quality', item_info.quality,
+            'max_stack', item_info.max_stack,
 
-            count = count,
-            locked = locked,
-            readable = readable,
-            lootable = lootable,
+            'count', count,
+            'locked', locked,
+            'readable', readable,
+            'lootable', lootable,
 
-            tooltip = tooltip,
-    	    tooltip_money = tooltip_money,
-            max_charges = max_charges,
-            charges = charges,
-            aux_quantity = aux_quantity,
-        }
+            'tooltip', tooltip,
+    	    'tooltip_money', tooltip_money,
+            'max_charges', max_charges,
+            'charges', charges,
+            'aux_quantity', aux_quantity
+        )
     end
 end
 
