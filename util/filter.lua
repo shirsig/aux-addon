@@ -223,7 +223,7 @@ do
 			if self.exact then return end
 			for number in present(tonumber(select(3, strfind(str, '^(%d+)$')))) do
 				if number >= 1 and number <= 60 then
-					for key in temp-set('min_level', 'max_level') do
+					for _, key in temp-list('min_level', 'max_level') do
 						if not self[key] then
 							self[key] = list(str, number)
 							return list('blizzard', key, str, number)

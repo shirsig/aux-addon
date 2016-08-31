@@ -4,7 +4,7 @@ local type, getmetatable, setmetatable, setfenv, unpack, next, _G = type, getmet
 local PUBLIC, PRIVATE = 1, 2
 local CALL, INDEX, NEWINDEX = 1, 2, 3
 
-local function debug(...) for i = 1, arg.n do DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE..i..') '..tostring(arg[i])) end end
+local function debug(...) DEFAULT_CHAT_FRAME:AddMessage(' ') for i = 1, arg.n do DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE..i..') '..tostring(arg[i])) end DEFAULT_CHAT_FRAME:AddMessage(' ') end
 
 local function error(msg, ...) return _G.error(format(msg or '', unpack(arg))..'\n'..debugstack(), 0) end
 local function import_error() error('Import error.') end
