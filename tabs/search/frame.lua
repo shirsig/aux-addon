@@ -517,7 +517,7 @@ function create_frames()
 			if filter_util.filters[text] and filter_util.filters[text].input_type ~= '' then
 				local _, _, suggestions = filter_util.parse_filter_string(text..'/')
 				filter_parameter_input:SetNumeric(filter_util.filters[text].input_type == 'number')
-				filter_parameter_input.complete = completion.complete(function() return suggestions or {} end)
+				filter_parameter_input.complete = completion.complete(function() return suggestions or O end)
 				filter_parameter_input:Show()
 			else
 				filter_parameter_input:Hide()

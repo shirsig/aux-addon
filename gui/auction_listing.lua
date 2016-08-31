@@ -996,10 +996,10 @@ function public.CreateAuctionResultsTable(parent, config)
     local numRows = 16
     rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / numRows
     rt.scrollDisabled = nil
-    rt.expanded = {}
-    rt.handlers = {}
-    rt.sorts = {}
-    rt.records = {}
+    rt.expanded = t
+    rt.handlers = t
+    rt.sorts = t
+    rt.records = t
     rt.rowInfo = {numDisplayRows=0}
 
     for name, func in methods do
@@ -1045,7 +1045,7 @@ function public.CreateAuctionResultsTable(parent, config)
     _G[scrollBar:GetName()..'ScrollDownButton']:Hide()
 
     -- create the header cells
-    rt.headCells = {}
+    rt.headCells = t
     for i, column_config in rt.config do
         local cell = CreateFrame('Button', nil, rt.contentFrame)
         cell:SetHeight(HEAD_HEIGHT)
@@ -1088,7 +1088,7 @@ function public.CreateAuctionResultsTable(parent, config)
     end
 
     -- create the rows
-    rt.rows = {}
+    rt.rows = t
     for i = 1, numRows do
         local row = CreateFrame('Frame', nil, rt.contentFrame)
         row:SetHeight(rt.ROW_HEIGHT)
@@ -1106,7 +1106,7 @@ function public.CreateAuctionResultsTable(parent, config)
         row.highlight = highlight
         row.rt = rt
 
-        row.cells = {}
+        row.cells = t
         for j=1, getn(rt.config) do
             local cell = CreateFrame('Button', nil, row)
             local text = cell:CreateFontString()

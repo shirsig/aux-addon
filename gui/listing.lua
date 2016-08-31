@@ -445,11 +445,11 @@ function public.CreateScrollingTable(parent)
 
     -- setup default values
     st.isTSMScrollingTable = true
-    st.sizes = {}
-    st.headCols = {}
-    st.rows = {}
-    st.handlers = {}
-    st.sortInfo = {enabled=nil}
+    st.sizes = t
+    st.headCols = t
+    st.rows = t
+    st.handlers = t
+    st.sortInfo = t
     st.colInfo = DEFAULT_COL_INFO
 
     return st

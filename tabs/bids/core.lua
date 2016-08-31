@@ -1,6 +1,6 @@
 aux 'bids_tab' local scan = aux.scan
 
-auction_records = {}
+auction_records = t
 
 function LOAD()
 	create_frames()
@@ -29,7 +29,7 @@ function public.scan_bids()
     update_listing()
     scan.start{
         type = 'bidder',
-        queries = {{ blizzard_query = {} }},
+        queries = {{blizzard_query=t}},
         on_page_loaded = function(page, total_pages)
             status_bar:update_status(100 * (page - 1) / total_pages, 0)
             status_bar:set_text(format('Scanning (Page %d / %d)', page, total_pages))
@@ -58,7 +58,7 @@ end
 
 do
     local scan_id = 0
-    local IDLE, SEARCHING, FOUND = {}, {}, {}
+    local IDLE, SEARCHING, FOUND = 1, 2, 3
     local state = IDLE
     local found_index
 
