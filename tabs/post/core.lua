@@ -409,7 +409,7 @@ function update_inventory_records()
                         availability[i] = 0
                     end
                     availability[charge_class] = item_info.count
-                    auctionable_map[item_info.item_key] = T[2](
+                    auctionable_map[item_info.item_key] = T(
 	                    'item_id', item_info.item_id,
 	                    'suffix_id', item_info.suffix_id,
 	                    'key', item_info.item_key,
@@ -419,8 +419,7 @@ function update_inventory_records()
 	                    'quality', item_info.quality,
 	                    'aux_quantity', item_info.charges or item_info.count,
 	                    'max_stack', item_info.max_stack,
-	                    'max_charges', item_info.max_charges
-                    )(
+	                    'max_charges', item_info.max_charges,
 	                    'availability', availability
                     )
                 else

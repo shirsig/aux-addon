@@ -1,8 +1,10 @@
 if module then return end
-local type, setmetatable, setfenv, unpack, next, pcall, _G = type, setmetatable, setfenv, unpack, next, pcall, getfenv(0)
+local type, getmetatable, setmetatable, setfenv, unpack, next, _G = type, getmetatable, setmetatable, setfenv, unpack, next, getfenv(0)
 
 local PUBLIC, PRIVATE = 1, 2
 local CALL, INDEX, NEWINDEX = 1, 2, 3
+
+local function debug(...) for i = 1, arg.n do DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE..i..') '..tostring(arg[i])) end end
 
 local function error(msg, ...) return _G.error(format(msg or '', unpack(arg))..'\n'..debugstack(), 0) end
 local function import_error() error('Import error.') end
@@ -100,8 +102,8 @@ function module(name)
 	if name and _G[name] then return true end
 	local declarator, env, interface = setmetatable({}, declarator_mt), setmetatable({}, env_mt), setmetatable({}, interface_mt)
 	local self; self = {
-		access = {_=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
-		[CALL] = {import=function(...) import(self, unpack(arg)) end, error=error, nop=nop},
+		access = {debug=PRIVATE, _=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
+		[CALL] = {debug=debug, import=function(...) import(self, unpack(arg)) end, error=error, nop=nop},
 		[INDEX] = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
 		[NEWINDEX] = {_=nop},
 		declarator = declarator,
