@@ -4,33 +4,33 @@ UNCOMMON, RARE, EPIC = 2, 3, 4
 
 do
 	local data = {
-		[10940] = list('DUST', '1-20'),
-		[11083] = list('DUST', '21-30'),
-		[11137] = list('DUST', '31-40'),
-		[11176] = list('DUST', '41-50'),
-		[16204] = list('DUST', '51-60'),
+		[10940] = A('DUST', '1-20'),
+		[11083] = A('DUST', '21-30'),
+		[11137] = A('DUST', '31-40'),
+		[11176] = A('DUST', '41-50'),
+		[16204] = A('DUST', '51-60'),
 
-		[10938] = list('ESSENCE', '1-10'),
-		[10939] = list('ESSENCE', '11-15'),
-		[10998] = list('ESSENCE', '16-20'),
-		[11082] = list('ESSENCE', '21-25'),
-		[11134] = list('ESSENCE', '26-30'),
-		[11135] = list('ESSENCE', '31-35'),
-		[11174] = list('ESSENCE', '36-40'),
-		[11175] = list('ESSENCE', '41-45'),
-		[16202] = list('ESSENCE', '46-50'),
-		[16203] = list('ESSENCE', '51-60'),
+		[10938] = A('ESSENCE', '1-10'),
+		[10939] = A('ESSENCE', '11-15'),
+		[10998] = A('ESSENCE', '16-20'),
+		[11082] = A('ESSENCE', '21-25'),
+		[11134] = A('ESSENCE', '26-30'),
+		[11135] = A('ESSENCE', '31-35'),
+		[11174] = A('ESSENCE', '36-40'),
+		[11175] = A('ESSENCE', '41-45'),
+		[16202] = A('ESSENCE', '46-50'),
+		[16203] = A('ESSENCE', '51-60'),
 
-		[10978] = list('SHARD', '1-20'),
-		[11084] = list('SHARD', '21-25'),
-		[11138] = list('SHARD', '26-30'),
-		[11139] = list('SHARD', '31-35'),
-		[11177] = list('SHARD', '36-40'),
-		[11178] = list('SHARD', '41-45'),
-		[14343] = list('SHARD', '46-50'),
-		[14344] = list('SHARD', '51-60'),
+		[10978] = A('SHARD', '1-20'),
+		[11084] = A('SHARD', '21-25'),
+		[11138] = A('SHARD', '26-30'),
+		[11139] = A('SHARD', '31-35'),
+		[11177] = A('SHARD', '36-40'),
+		[11178] = A('SHARD', '41-45'),
+		[14343] = A('SHARD', '46-50'),
+		[14344] = A('SHARD', '51-60'),
 
-		[20725] = list('CRYSTAL', '51+'),
+		[20725] = A('CRYSTAL', '51+'),
 	}
 
 	function public.source(item_id)
@@ -39,7 +39,7 @@ do
 end
 
 function LOAD()
-	ARMOR = set(
+	ARMOR = S(
 		'INVTYPE_HEAD',
 		'INVTYPE_NECK',
 		'INVTYPE_SHOULDER',
@@ -56,7 +56,7 @@ function LOAD()
 		'INVTYPE_CLOAK',
 		'INVTYPE_HOLDABLE'
 	)
-	WEAPON = set(
+	WEAPON = S(
 		'INVTYPE_2HWEAPON',
 		'INVTYPE_WEAPONMAINHAND',
 		'INVTYPE_WEAPON',
@@ -95,66 +95,66 @@ function public.distribution(slot, quality, level)
 
     if quality == UNCOMMON then
         if level <= 10 then
-            return list(
+            return A(
                 T('item_id', 10940, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.8, .2)),
                 T('item_id', 10938, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .8))
             )
         elseif level <= 15 then
-            return list(
+            return A(
                 T('item_id', 10940, 'min_quantity', 2, 'max_quantity', 3, 'probability', p(.75, .2)),
                 T('item_id', 10939, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
                 T('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
             )
         elseif level <= 20 then
-            return list(
+            return A(
                 T('item_id', 10940, 'min_quantity', 4, 'max_quantity', 6, 'probability', p(.75, .15)),
                 T('item_id', 10998, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.15, .75)),
                 T('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', .10)
             )
         elseif level <= 25 then
-            return list(
+            return A(
                 T('item_id', 11083, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
                 T('item_id', 11082, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
                 T('item_id', 11084, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
 			)
         elseif level <= 30 then
-            return list(
+            return A(
                 T('item_id', 11083, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .2)),
                 T('item_id', 11134, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
                 T('item_id', 11138, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
             )
         elseif level <= 35 then
-            return list(
+            return A(
                 T('item_id', 11137, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
                 T('item_id', 11135, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
                 T('item_id', 11139, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
             )
         elseif level <= 40 then
-            return list(
+            return A(
                 T('item_id', 11137, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .2)),
                 T('item_id', 11174, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
                 T('item_id', 11177, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
             )
         elseif level <= 45 then
-            return list(
+            return A(
                 T('item_id', 11176, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
                 T('item_id', 11175, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
                 T('item_id', 11178, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
             )
         elseif level <= 50 then
-            return list(
+            return A(
                 T('item_id', 11176, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .22)),
                 T('item_id', 16202, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
                 T('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
             )
         elseif level <= 55 then
-            return list(
+            return A(
                 T('item_id', 16204, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .22)),
                 T('item_id', 16203, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
                 T('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
 			)
         elseif level <= 60 then
-            return list(
+            return A(
                 T('item_id', 16204, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .22)),
                 T('item_id', 16203, 'min_quantity', 2, 'max_quantity', 3, 'probability', p(.2, .75)),
                 T('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
@@ -162,35 +162,35 @@ function public.distribution(slot, quality, level)
         end
     elseif quality == RARE then
         if level <= 20 then
-            return list({item_id=10978, min_quantity=1, max_quantity=1, probability=1}) -- TODO
+            return A({item_id=10978, min_quantity=1, max_quantity=1, probability=1}) -- TODO
         elseif level <= 25 then
-            return list({item_id=11084, min_quantity=1, max_quantity=1, probability=1})
+            return A({item_id=11084, min_quantity=1, max_quantity=1, probability=1})
         elseif level <= 30 then
-            return list({item_id=11138, min_quantity=1, max_quantity=1, probability=1})
+            return A({item_id=11138, min_quantity=1, max_quantity=1, probability=1})
         elseif level <= 35 then
-            return list({item_id=11139, min_quantity=1, max_quantity=1, probability=1})
+            return A({item_id=11139, min_quantity=1, max_quantity=1, probability=1})
         elseif level <= 40 then
-            return list({item_id=11177, min_quantity=1, max_quantity=1, probability=1})
+            return A({item_id=11177, min_quantity=1, max_quantity=1, probability=1})
         elseif level <= 45 then
-            return list({item_id=11178, min_quantity=1, max_quantity=1, probability=1})
+            return A({item_id=11178, min_quantity=1, max_quantity=1, probability=1})
         elseif level <= 50 then
-            return list({item_id=14343, min_quantity=1, max_quantity=1, probability=1})
+            return A({item_id=14343, min_quantity=1, max_quantity=1, probability=1})
         elseif level <= 55 then
-            return list({item_id=14344, min_quantity=1, max_quantity=1, probability=.995}, {item_id=20725, min_quantity=1, max_quantity=1, probability=.005})
+            return A({item_id=14344, min_quantity=1, max_quantity=1, probability=.995}, {item_id=20725, min_quantity=1, max_quantity=1, probability=.005})
         elseif level <= 60 then
-            return list({item_id=14344, min_quantity=1, max_quantity=1, probability=.995}, {item_id=20725, min_quantity=1, max_quantity=1, probability=.005})
+            return A({item_id=14344, min_quantity=1, max_quantity=1, probability=.995}, {item_id=20725, min_quantity=1, max_quantity=1, probability=.005})
         end
     elseif quality == EPIC then
         if level <= 40 then
-            return list({item_id=11177, min_quantity=2, max_quantity=4, probability=1})
+            return A({item_id=11177, min_quantity=2, max_quantity=4, probability=1})
         elseif level <= 45 then
-            return list({item_id=11178, min_quantity=2, max_quantity=4, probability=1})
+            return A({item_id=11178, min_quantity=2, max_quantity=4, probability=1})
         elseif level <= 50 then
-            return list({item_id=14343, min_quantity=2, max_quantity=4, probability=1})
+            return A({item_id=14343, min_quantity=2, max_quantity=4, probability=1})
         elseif level <= 55 then
-            return list({item_id=20725, min_quantity=1, max_quantity=1, probability=1})
+            return A({item_id=20725, min_quantity=1, max_quantity=1, probability=1})
         elseif level <= 60 then
-            return list({item_id=20725, min_quantity=1, max_quantity=2, probability=1})
+            return A({item_id=20725, min_quantity=1, max_quantity=2, probability=1})
         end
     end
     return t

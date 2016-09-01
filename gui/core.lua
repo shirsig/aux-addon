@@ -14,7 +14,7 @@ function LOAD()
 		aux_background:SetAllPoints(DropDownList1Backdrop)
 		blizzard_backdrop = DropDownList1Backdrop:GetBackdrop()
 		hook('ToggleDropDownMenu', function(...) temp=arg
-			local ret = temp-ret(orig.ToggleDropDownMenu(unpack(arg)))
+			local ret = temp-A0(orig.ToggleDropDownMenu(unpack(arg)))
 			local dropdown = _G[arg[4] or ''] or this:GetParent()
 			if strfind(dropdown:GetName() or '', '^aux_frame%d+$') then
 				set_aux_dropdown_style(dropdown)

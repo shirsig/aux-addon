@@ -41,7 +41,7 @@ public.filters = {
     },
 
     ['left'] = {
-        input_type = list('30m', '2h', '8h', '24h'),
+        input_type = A('30m', '2h', '8h', '24h'),
         validator = function(index)
             return function(auction_record)
                 return auction_record.duration == index
@@ -50,7 +50,7 @@ public.filters = {
     },
 
     ['rarity'] = {
-        input_type = list('poor', 'common', 'uncommon', 'rare', 'epic'),
+        input_type = A('poor', 'common', 'uncommon', 'rare', 'epic'),
         validator = function(index)
             return function(auction_record)
                 return auction_record.quality == index - 1
@@ -203,11 +203,11 @@ public.filters = {
 }
 
 function operator(str)
-    local operator = str == 'not' and list('operator', 'not', 1)
-    for name in temp-set('and', 'or') do
+    local operator = str == 'not' and A('operator', 'not', 1)
+    for name in temp-S('and', 'or') do
 	    for arity in present(select(3, strfind(str, '^'..name..'(%d*)$'))) do
 		    arity = tonumber(arity)
-		    operator = not (arity and arity < 2) and list('operator', name, arity)
+		    operator = not (arity and arity < 2) and A('operator', name, arity)
 	    end
     end
     return operator or nil
@@ -223,35 +223,35 @@ do
 			if self.exact then return end
 			for number in present(tonumber(select(3, strfind(str, '^(%d+)$')))) do
 				if number >= 1 and number <= 60 then
-					for _, key in temp-list('min_level', 'max_level') do
+					for _, key in temp-A('min_level', 'max_level') do
 						if not self[key] then
-							self[key] = list(str, number)
-							return list('blizzard', key, str, number)
+							self[key] = A(str, number)
+							return A('blizzard', key, str, number)
 						end
 					end
 				end
 			end
-			for _, parser in temp-list(
-				temp-list('class', info.item_class_index),
-				temp-list('subclass', L(info.item_subclass_index, index(self.class, 2) or 0, _1)),
-				temp-list('slot', L(info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0, _1)),
-				temp-list('quality', info.item_quality_index)
+			for _, parser in temp-A(
+				temp-A('class', info.item_class_index),
+				temp-A('subclass', L(info.item_subclass_index, index(self.class, 2) or 0, _1)),
+				temp-A('slot', L(info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0, _1)),
+				temp-A('quality', info.item_quality_index)
 			) do
 				if not self[parser[1]] then
 					tinsert(parser, str)
 					local index, label = parser[2](select(3, unpack(parser)))
 					if index then
-						self[parser[1]] = list(label, index)
-						return list('blizzard', parser[1], label, index)
+						self[parser[1]] = A(label, index)
+						return A('blizzard', parser[1], label, index)
 					end
 				end
 			end
 			if not self[str] and (str == 'usable' or str == 'exact' and self.name and size(self) == 1) then
-				self[str] = list(str, 1)
-				return list('blizzard', str, 1)
+				self[str] = A(str, 1)
+				return A('blizzard', str, 1)
 			elseif i == 1 and strlen(str) <= 63 then
-				self.name = list(str, unquote(str))
-				return list('blizzard', 'name', str, unquote(str))
+				self.name = A(str, unquote(str))
+				return A('blizzard', 'name', str, unquote(str))
 --				return nil, 'The name filter must not be longer than 63 characters' TODO
 			end
 		end,
@@ -299,10 +299,10 @@ function public.parse_filter_string(str)
                         return nil, 'Invalid input for '..parts[i]..'. Expecting: '..input_type
                     end
                 end
-                tinsert(post_filter, list('filter', parts[i], parts[i + 1]))
+                tinsert(post_filter, A('filter', parts[i], parts[i + 1]))
                 i = i + 1
             else
-                tinsert(post_filter, list('filter', parts[i]))
+                tinsert(post_filter, A('filter', parts[i]))
             end
             tinsert(filter, post_filter[getn(post_filter)])
         else
@@ -310,7 +310,7 @@ function public.parse_filter_string(str)
 	        if part then
 		        tinsert(filter, part)
 	        elseif parts[i] ~= '' then
-		        tinsert(post_filter, list('filter', 'tooltip', parts[i]))
+		        tinsert(post_filter, A('filter', 'tooltip', parts[i]))
 		        tinsert(filter, post_filter[getn(post_filter)])
 	        else
 	            return nil, 'Empty modifier'
@@ -384,19 +384,19 @@ function suggestions(filter)
 
     -- classes
     if not filter.blizzard.class then
-        for _, class in temp-list(GetAuctionItemClasses()) do tinsert(suggestions, class) end
+        for _, class in temp-A(GetAuctionItemClasses()) do tinsert(suggestions, class) end
     end
 
     -- subclasses
     if not filter.blizzard.subclass then
-        for _, subclass in temp-list(GetAuctionItemSubClasses(index(filter.blizzard.class, 2) or 0)) do
+        for _, subclass in temp-A(GetAuctionItemSubClasses(index(filter.blizzard.class, 2) or 0)) do
             tinsert(suggestions, subclass)
         end
     end
 
     -- slots
     if not filter.blizzard.slot then
-        for _, invtype in temp-list(GetAuctionInvTypes(index(filter.blizzard.class, 2) or 0, index(filter.blizzard.subclass, 2) or 0)) do
+        for _, invtype in temp-A(GetAuctionInvTypes(index(filter.blizzard.class, 2) or 0, index(filter.blizzard.subclass, 2) or 0)) do
             tinsert(suggestions, _G[invtype])
         end
     end
@@ -510,7 +510,7 @@ function blizzard_query(filter)
         query.slot = slot_index
         query.quality = item_info.quality
     else
-	    for key in temp-set('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality') do
+	    for key in temp-S('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality') do
             query[key] = index(filters[key], 2)
 	    end
     end

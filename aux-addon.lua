@@ -81,7 +81,7 @@ function public.current_owner_page.get() return current_owner_page end
 --end
 
 local event_frame = CreateFrame('Frame')
-for event in temp-set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
+for event in temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
 end
 
@@ -106,7 +106,7 @@ end
 
 tab_info = t
 do
-	for _, info in temp-list(temp-list('search_tab', 'Search'), temp-list('post_tab', 'Post'), temp-list('auctions_tab', 'Auctions'), temp-list('bids_tab', 'Bids')) do
+	for _, info in temp-A(temp-A('search_tab', 'Search'), temp-A('post_tab', 'Post'), temp-A('auctions_tab', 'Auctions'), temp-A('bids_tab', 'Bids')) do
 		local tab = T('name', info[2])
 		local env = (function() _G.aux(info[1]) return M end)()
 		function env.private.OPEN.set(f) tab.OPEN = f end

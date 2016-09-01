@@ -450,7 +450,7 @@ function refresh_entries()
 		scan_id = scan.start{
             type = 'list',
             ignore_owner = true,
-			queries = list(query),
+			queries = A(query),
 			on_page_loaded = function(page, total_pages)
                 status_bar:update_status(100 * (page - 1) / total_pages, 0) -- TODO
                 status_bar:set_text(format('Scanning Page %d / %d', page, total_pages))

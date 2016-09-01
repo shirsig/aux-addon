@@ -72,14 +72,14 @@ function update_form()
 	end
 
 	if blizzard_query.exact then
-		for key in temp-set('class', 'subclass', 'slot', 'quality') do
+		for key in temp-S('class', 'subclass', 'slot', 'quality') do
 			M[key..'_dropdown'].button:Disable()
 		end
 	else
 		class_dropdown.button:Enable()
 		quality_dropdown.button:Enable()
 	end
-	for key in temp-set('min_level', 'max_level') do
+	for key in temp-S('min_level', 'max_level') do
 		if blizzard_query.exact then
 			M[key..'_input']:Disable()
 		else
@@ -92,7 +92,7 @@ function update_form()
 		usable_checkbox:Enable()
 	end
 
-	if any(list('min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'), function(key) return blizzard_query[key] end) then
+	if any(A('min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'), function(key) return blizzard_query[key] end) then
 		exact_checkbox:Disable()
 	else
 		exact_checkbox:Enable()
@@ -120,13 +120,13 @@ function get_filter_builder_query()
 	add(blizzard_query.usable and 'usable')
 
 	for class_index in present(blizzard_query.class) do
-		local classes = temp-list(GetAuctionItemClasses())
+		local classes = temp-A(GetAuctionItemClasses())
 		add(strlower(classes[class_index]))
 		for subclass_index in present(blizzard_query.subclass) do
-			local subclasses = temp-list(GetAuctionItemSubClasses(class_index))
+			local subclasses = temp-A(GetAuctionItemSubClasses(class_index))
 			add(strlower(subclasses[subclass_index]))
 			for slot_index in present(blizzard_query.slot) do
-				local slots = temp-list(GetAuctionInvTypes(class_index, subclass_index))
+				local slots = temp-A(GetAuctionInvTypes(class_index, subclass_index))
 				add(strlower(_G[slots[slot_index]]))
 			end
 		end
@@ -317,7 +317,7 @@ function set_filter_display_offset(x_offset, y_offset)
 end
 
 function initialize_filter_dropdown()
-	for filter in temp-set('and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard') do
+	for filter in temp-S('and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard') do
 		UIDropDownMenu_AddButton(T(
 			'text', filter,
 			'value', filter,
@@ -348,7 +348,7 @@ function initialize_class_dropdown()
 		end
 	end
 	UIDropDownMenu_AddButton(T('text', ALL, 'value', 0, 'func', on_click))
-	for i, class in temp-list(GetAuctionItemClasses()) do
+	for i, class in temp-A(GetAuctionItemClasses()) do
 		UIDropDownMenu_AddButton(T('text', class, 'value', i, 'func', on_click))
 	end
 end
@@ -365,7 +365,7 @@ function initialize_subclass_dropdown()
 	local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
 	if class_index and GetAuctionItemSubClasses(class_index) then
 		UIDropDownMenu_AddButton(T('text', ALL, 'value', 0, 'func', on_click))
-		for i, subclass in temp-list(GetAuctionItemSubClasses(class_index)) do
+		for i, subclass in temp-A(GetAuctionItemSubClasses(class_index)) do
 			UIDropDownMenu_AddButton(T('text', subclass, 'value', i, 'func', on_click))
 		end
 	end
@@ -380,7 +380,7 @@ function initialize_slot_dropdown()
 	local subclass_index = UIDropDownMenu_GetSelectedValue(subclass_dropdown)
 	if subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
 		UIDropDownMenu_AddButton(T('text', ALL, 'value', '', 'func', on_click))
-		for i, slot in temp-list(GetAuctionInvTypes(class_index, subclass_index)) do
+		for i, slot in temp-A(GetAuctionInvTypes(class_index, subclass_index)) do
 			UIDropDownMenu_AddButton(T('text', _G[slot], 'value', i, 'func', on_click))
 		end
 	end

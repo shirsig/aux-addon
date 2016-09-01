@@ -1,56 +1,24 @@
+--__.green_t = function()
+
 if module 'green_t' then return end
 
-local next, setn, setmetatable = next, table.setn, setmetatable
-local wipe, recycle, table
-local pool, pool_size = {}, 0
-local overflow_pool = setmetatable({}, {__mode='k'})
-local tmp = {}
-
-CreateFrame('Frame'):SetScript('OnUpdate', function()
-	for t in tmp do recycle(t) end
-	wipe(tmp)
-end)
-
-do
-	local t = setmetatable({}, {__metatable=false, __newindex=error})
-	public.O.get = t
-end
-
-function wipe(t) -- like with a cloth or something
+local wipe_chunk = [[
 	for k in t do t[k] = nil end
-	t.reset = 1
-	t.reset = nil
+	t.reset, t.reset = nil, 1
 	setn(t, 0)
-	return setmetatable(t, nil)
-end
-public.wipe = wipe
+	setmetatable(t, nil)
+]]
 
-function recycle(t)
-	wipe(t)
+local recycle_chunk = wipe_chunk..[[
 	if pool_size < 50 then
 		pool_size = pool_size + 1
 		pool[pool_size] = t
 	else
 		overflow_pool[t] = true
 	end
-end
-public.recycle = recycle
+]]
 
-function table()
-	if pool_size > 0 then
-		pool_size = pool_size - 1
-		return pool[pool_size + 1]
-	end
-	local t = next(overflow_pool)
-	if t then
-		overflow_pool[t] = nil
-		return t
-	end
-	return {}
-end
-public.t.get = table
-
-function public.tt.get()
+local acquire_chunk = [[
 	local t
 	if pool_size > 0 then
 		t = pool[pool_size]
@@ -63,69 +31,107 @@ function public.tt.get()
 			t = {}
 		end
 	end
-	tmp[t] = true
-	return t
+]]
+
+pool, pool_size, overflow_pool, tmp = {}, 0, setmetatable({}, {__mode='k'}), {}
+
+public.empty = setmetatable({}, {__metatable=false, __newindex=nop})
+
+do
+	local f = loadstring([[
+		local setmetatable, setn = setmetatable, table.setn
+		return function(t)
+	]]..wipe_chunk..'return t end') -- like with a cloth or something
+	setfenv(f, M)
+	public.wipe = f()
 end
 
 do
-	local function mt(f)
-		local function apply(self, value)
-			recycle(self)
-			return type(value) == 'table' and f(value) or value
-		end
-		return {__call=apply, __sub=apply}
-	end
-	do
-		local mt = mt(function(t) tmp[t] = true; return t end)
-		public.temp
-		{
-			get = function() return setmetatable(table(), mt) end,
-			set = function(t) tmp[t] = true end,
-		}
-	end
-	do
-		local mt = mt(function(t) tmp[t] = nil; return t end)
-		public.perm
-		{
-			get = function() return setmetatable(table(), mt) end,
-			set = function(t) tmp[t] = nil end,
-		}
-	end
+	local f = loadstring([[
+		local setmetatable, setn, pool, pool_size, overflow_pool = setmetatable, table.setn, pool, pool_size, overflow_pool
+		return function(t)
+	]]..recycle_chunk..'end')
+	setfenv(f, M)
+	public.recycle = f()
 end
+
 do
-	local KEYS, VALUES, RETURN_VALUES, PAIRS = 1, 2, 3, 4
-	local function insert(type)
-		local code = 'local setn = table.setn; return function('
-		for i = 1, 99 do
-			code = code..'a'..i..','
-		end
-		code = code..'overflow) local t = t;'
-		if type == KEYS then
-			for i = 1, 99 do
-				code = code..format('if a%d == nil then return t end; t[a%d] = true;', i, i)
-			end
-		elseif type == VALUES then
-			code = code..'setn(t, 99); if a1 == nil then return t end; t[1] = a1;'
-			for i = 2, 99 do
-				code = code..format('if a%d == nil then setn(t, %d); return t end; t[%d] = a%d;', i, i - 1, i, i)
-			end
-		elseif type == RETURN_VALUES then
-			code = code..'setn(t, 99);'
-			for i = 1, 99 do
-				code = code..format('t[%d] = a%d;', i, i)
-			end
-		elseif type == PAIRS then
-			for i = 1, 97, 2 do
-				code = code..format('if a%d == nil then return t end; t[a%d] = a%d;', i, i, i + 1)
-			end
-		end
-		code = code..'return overflow ~= nil and error("Overflow.") or t; end;'
-		local f = loadstring(code)
-		setfenv(f, M)
-		return f
-	end
-	public.set.get = insert(KEYS)
-	public.list.get = insert(VALUES)
-	public.ret.get = insert(RETURN_VALUES)
-	public.T.get = insert(PAIRS)
+	local f = loadstring(format([[
+		local setmetatable, setn, pool, pool_size, overflow_pool, t = setmetatable, table.setn, pool, pool_size, overflow_pool, tmp
+		return function() for t in t do %s end %s end
+	]], recycle_chunk, wipe_chunk))
+	setfenv(f, M)
+	CreateFrame'Frame':SetScript('OnUpdate', f())
 end
+
+do
+	local f = loadstring(format([[
+		local next, pool, pool_size, overflow_pool, tmp = next, pool, pool_size, overflow_pool, tmp
+		return function() %s; tmp[t] = true; return t end
+	]], acquire_chunk))
+	setfenv(f, M)
+	public.tt.get = f()
+end
+
+do local next, pool, pool_size, overflow_pool = next, pool, pool_size, overflow_pool
+	function public.t.get()
+		if pool_size > 0 then
+			pool_size = pool_size - 1
+			return pool[pool_size + 1]
+		end
+		local t = next(overflow_pool)
+		if t then
+			overflow_pool[t] = nil
+			return t
+		end
+		return {}
+	end
+end
+
+do local setmetatable, type, tmp = setmetatable, type, tmp
+	do local f, mt
+		f = function(_, v) if type(v) == 'table' then tmp[v] = true end return v end
+		mt = {__call=f, __sub=f}
+		public.temp {get=function() return setmetatable(tt, mt) end, set=function(t) tmp[t] = true end}
+	end
+	do local f, mt
+		f = function(_, v) if type(v) == 'table' then tmp[v] = nil end return v end
+		mt = {__call=f, __sub=f}
+		public.perm {get=function() return setmetatable(tt, mt) end, set=function(t) tmp[t] = nil end}
+	end
+end
+
+do
+	local SET, ARRAY, ARRAY0, TABLE = 1, 2, 3, 4
+	local function insert(type)
+		local chunk = 'local setn, error = table.setn, error; return function('
+		for i = 1, 99 do chunk = chunk..'a'..i..',' end
+		chunk = chunk..'overflow)'..acquire_chunk
+		if type == SET then
+			for i = 1, 99 do
+				chunk = chunk..format('if a%d == nil then return t end t[a%d] = true;', i, i)
+			end
+		elseif type == ARRAY then
+			chunk = chunk..'setn(t, 99); if a1 == nil then return t end t[1] = a1;'
+			for i = 2, 99 do
+				chunk = chunk..format('if a%d == nil then setn(t, %d); return t end t[%d] = a%d;', i, i - 1, i, i)
+			end
+		elseif type == ARRAY0 then
+			chunk = chunk..'setn(t, 99);'
+			for i = 1, 99 do
+				chunk = chunk..format('t[%d] = a%d;', i, i)
+			end
+		elseif type == TABLE then
+			for i = 1, 97, 2 do
+				chunk = chunk..format('if a%d == nil then return t end t[a%d] = a%d;', i, i, i + 1)
+			end
+		end
+		chunk = chunk..'return overflow ~= nil and error("Overflow.") or t end'
+		local f = loadstring(chunk)
+		setfenv(f, M)
+		return f()
+	end
+	public(); S, A, A0, T = insert(SET), insert(ARRAY), insert(ARRAY0), insert(TABLE)
+end
+
+--end
