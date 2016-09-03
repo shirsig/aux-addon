@@ -26,9 +26,9 @@ local function prototype() local eq = const(true)
 	return setmetatable({__metatable=false, __eq=eq}, {__metatable=false, __eq=eq, __call=function(self, t) return setmetatable(t, self) end})
 end
 
-local state = {}
-
 local INTERFACE, ENVIRONMENT, DECLARATOR = prototype(), prototype(), prototype()
+
+local state = {}
 
 function INTERFACE:__index(key) self=state[self]
 	if self.access[key] == PUBLIC then
@@ -112,7 +112,7 @@ function module(name)
 		access = {inspect=PRIVATE, _=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
 		[CALL] = {inspect=inspect, import=function(interface) import(self, interface) end, error=error, nop=nop},
 		[INDEX] = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
-		[NEWINDEX] = {_=nop},
+		[NEWINDEX] = {inspect=inspect, _=nop},
 		declarator = declarator,
 		default_access = PRIVATE,
 	}

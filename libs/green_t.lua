@@ -37,11 +37,12 @@ pool, pool_size, overflow_pool, tmp = {}, 0, setmetatable({}, {__mode='k'}), {}
 
 public.empty = setmetatable({}, {__metatable=false, __newindex=nop})
 
+--select(1, 2, 3, END, kek()) -- TODO
 do
 	local f = loadstring([[
 		local setmetatable, setn = setmetatable, table.setn
 		return function(t)
-	]]..wipe_chunk..'return t end') -- like with a cloth or something
+	]]..wipe_chunk..'return t end')
 	setfenv(f, M)
 	public.wipe = f()
 end
