@@ -1,4 +1,4 @@
-aux 'post_tab' local scan, scan_util, history, info, persistence, item_listing, al, sorting = aux.scan, aux.scan_util, aux.history, aux.info, aux.persistence, aux.item_listing, aux.auction_listing, aux.sorting
+aux 'post_tab' private() local scan, scan_util, history, info, persistence, item_listing, al, sorting = aux.scan, aux.scan_util, aux.history, aux.info, aux.persistence, aux.item_listing, aux.auction_listing, aux.sorting
 
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440

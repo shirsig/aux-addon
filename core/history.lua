@@ -1,4 +1,4 @@
-aux 'history' local persistence = aux.persistence
+aux 'history' private() local persistence = aux.persistence
 
 local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}} }
 

@@ -1,4 +1,4 @@
-aux 'cache' local info, persistence = aux.info, aux.persistence
+aux 'cache' private() local info, persistence = aux.info, aux.persistence
 
 MIN_ITEM_ID = 1
 MAX_ITEM_ID = 30000

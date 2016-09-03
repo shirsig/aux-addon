@@ -1,4 +1,4 @@
-aux 'completion' local filter_util = aux.filter_util
+aux 'completion' private() local filter_util = aux.filter_util
 
 function public:complete_filter()
 	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution

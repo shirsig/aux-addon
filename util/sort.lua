@@ -1,4 +1,4 @@
-aux 'sorting'
+aux 'sorting' private()
 
 public()
 

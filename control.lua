@@ -1,4 +1,4 @@
-aux 'core'
+aux 'core' private()
 
 event_frame = CreateFrame('Frame')
 

@@ -1,4 +1,4 @@
-aux 'filter_util' local info = aux.info
+aux 'filter_util' private() local info = aux.info
 
 function default_filter(str)
     return {

@@ -1,4 +1,4 @@
-aux 'core'
+aux 'core' private()
 
 public.join = _G.table.concat
 

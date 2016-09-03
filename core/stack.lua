@@ -1,4 +1,4 @@
-aux 'stack' local info = aux.info
+aux 'stack' private() local info = aux.info
 
 local state
 

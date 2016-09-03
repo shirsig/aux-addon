@@ -1,4 +1,4 @@
-aux 'listing' local gui = aux.gui
+aux 'listing' private() local gui = aux.gui
 
 local ST_COUNT = 0
 

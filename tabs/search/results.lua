@@ -1,4 +1,4 @@
-aux 'search_tab' local info, scan = aux.info, aux.scan
+aux 'search_tab' private() local info, scan = aux.info, aux.scan
 
 _G.aux_auto_buy_filter = ''
 

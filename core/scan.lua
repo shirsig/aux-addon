@@ -1,4 +1,4 @@
-aux 'scan' local info, history = aux.info, aux.history
+aux 'scan' private() local info, history = aux.info, aux.history
 
 PAGE_SIZE = 50
 

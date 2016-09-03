@@ -1,4 +1,4 @@
-aux 'auctions_tab' local scan = aux.scan
+aux 'auctions_tab' private() local scan = aux.scan
 
 auction_records = t
 

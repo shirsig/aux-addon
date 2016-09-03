@@ -5,10 +5,12 @@ do
 	local modules = {}
 	aux = function(name)
 		if not modules[name] then
-			module()
-			modules[name] = M
-			import (green_t)
-			private.aux = setmetatable({}, {__metatable=false, __index=function(_, key) return modules[key].I end, __newindex=error})
+			(function()
+				_ = module
+				modules[name] = M
+				import (green_t)
+				private.aux = setmetatable({}, {__metatable=false, __index=function(_, key) return modules[key].I end, __newindex=error})
+			end)()
 		end
 		modules[name].import (modules.core.I)
 		setfenv(2, modules[name])
@@ -59,7 +61,7 @@ end
 --	end
 --end
 
-aux 'core'
+aux 'core' private()
 
 public.version = '5.0.0'
 

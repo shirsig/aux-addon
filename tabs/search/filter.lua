@@ -1,4 +1,4 @@
-aux 'search_tab' local filter_util = aux.filter_util
+aux 'search_tab' private() local filter_util = aux.filter_util
 
 function valid_level(str)
 	local level = tonumber(str)

@@ -1,4 +1,4 @@
-aux 'search_tab' local scan, scan_util = aux.scan, aux.scan_util
+aux 'search_tab' private() local scan, scan_util = aux.scan, aux.scan_util
 
 StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
     text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',
