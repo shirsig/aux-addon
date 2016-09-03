@@ -119,7 +119,7 @@ do
         elseif state == FOUND and not test(selection.record)(found_index) then
             buyout_button:Disable()
             bid_button:Disable()
-            if not bid_in_progress() then state = IDLE end
+            if not bid_in_progress then state = IDLE end
         end
     end
 end

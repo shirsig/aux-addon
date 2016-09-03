@@ -364,7 +364,7 @@ function public.queries(filter_string)
         str = trim(str)
         local query, _, error = query(str)
         if not query then
-            log('Invalid filter:', error)
+            print('Invalid filter:', error)
             return
         else
             tinsert(queries, query)

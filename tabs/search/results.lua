@@ -127,9 +127,9 @@ function update_auto_buy_filter()
 		local queries = aux.filter_util.queries(_G.aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
-				log 'Error: The automatic buyout filter does not support multi-queries'
+				print 'Error: The automatic buyout filter does not support multi-queries'
 			elseif size(queries[1].blizzard_query) > 0 then
-				log 'Error: The automatic buyout filter does not support Blizzard filters'
+				print 'Error: The automatic buyout filter does not support Blizzard filters'
 			else
 				auto_buy_validator = queries[1].validator
 				auto_buy_filter_button.prettified = queries[1].prettified
@@ -324,10 +324,10 @@ function public.execute(resume, real_time)
 		return
 	elseif real_time then
 		if getn(queries) > 1 then
-			log 'Error: The real time mode does not support multi-queries'
+			print 'Error: The real time mode does not support multi-queries'
 			return
 		elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-			log 'Error: The real time mode does not support page ranges'
+			print 'Error: The real time mode does not support page ranges'
 			return
 		end
 	end
@@ -454,7 +454,7 @@ do
 		elseif state == FOUND and not test(selection.record)(found_index) then
 			buyout_button:Disable()
 			bid_button:Disable()
-			if not bid_in_progress() then
+			if not bid_in_progress then
 				state = IDLE
 			end
 		end

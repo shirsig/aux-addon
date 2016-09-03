@@ -176,7 +176,7 @@ end
 
 function import_filter_string()
 	local filter, error = filter_util.parse_filter_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
-	if filter or log(error) then
+	if filter or print(error) then
 		set_form(filter)
 	end
 end
@@ -277,7 +277,7 @@ function add_post_filter()
 			filter_input:HighlightText()
 			filter_input:SetFocus()
 		elseif error then
-			log(error)
+			print(error)
 		end
 	end
 end

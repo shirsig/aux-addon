@@ -4,15 +4,24 @@ local type, getmetatable, setmetatable, setfenv, unpack, next, _G = type, getmet
 local PUBLIC, PRIVATE = 1, 2
 local CALL, INDEX, NEWINDEX = 1, 2, 3
 
-local inspect = setmetatable({}, {
-	__call=function(_, ...)
-		DEFAULT_CHAT_FRAME:AddMessage(' ')
-		for i = 1, arg.n do DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE..format('arg%d: %s = %s', i, type(arg[i]), tostring(arg[i]))) end
-		DEFAULT_CHAT_FRAME:AddMessage(' ')
-		return unpack(arg)
-	end,
-	__sub=function(self, v) self(v); return v end, __pow=function(self, v) self(v); return v end,
-})
+do
+	local function print(msg) DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE..msg) end
+	p = setmetatable({}, {
+		__call=function(_, ...)
+			for i = 1, arg.n do
+				if type(arg[i]) == 'table' then
+					print('arg'..i..' = {')
+					for k, v in arg[i] do print(format('    %s: %s = %s', type(k) == 'string' and k or '['..tostring(k)..']', type(v), tostring(v))) end
+					print('}')
+				else
+					print(format('arg%d: %s = %s', i, type(arg[i]), tostring(arg[i])))
+				end
+			end
+			return unpack(arg)
+		end,
+		__pow=function(self, v) self(v); return v end,
+	})
+end
 
 local function error(msg, ...) return _G.error(format(msg or '', unpack(arg))..'\n'..debugstack(), 0) end
 local function import_error() error('Import error.') end
@@ -109,10 +118,10 @@ function module(name)
 	if name and _G[name] then return true end
 	local interface, env, declarator = INTERFACE {}, ENVIRONMENT {}, DECLARATOR {}
 	local self; self = {
-		access = {inspect=PRIVATE, _=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
-		[CALL] = {inspect=inspect, import=function(interface) import(self, interface) end, error=error, nop=nop},
+		access = {p=PRIVATE, _=PRIVATE, error=PRIVATE, nop=PRIVATE, _G=PRIVATE, M=PRIVATE, I=PRIVATE, public=PRIVATE, private=PRIVATE},
+		[CALL] = {p=p, import=function(interface) import(self, interface) end, error=error, nop=nop},
 		[INDEX] = {_G=const(_G), M=const(env), I=const(interface), public=function() return declarator.public end, private=function() return declarator.private end},
-		[NEWINDEX] = {inspect=inspect, _=nop},
+		[NEWINDEX] = {p=p, _=nop},
 		declarator = declarator,
 		default_access = PRIVATE,
 	}

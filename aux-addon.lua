@@ -63,10 +63,8 @@ aux 'core'
 
 public.version = '5.0.0'
 
-function public.log(...) temp=arg
-	local msg = '[aux]'
-	for i = 1, arg.n do msg = msg..' '..tostring(arg[i]) end
-	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..msg)
+function public.print(...) temp=arg
+	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..'[aux] '..join(map(arg, tostring), ' '))
 end
 
 local bids_loaded
@@ -97,7 +95,7 @@ do
 			for _, f in handlers do f() end
 		elseif event == 'PLAYER_LOGIN' then
 			for _, f in handlers2 do f() end
-			log('v'..version..' loaded.')
+			print('v'..version..' loaded.')
 		else
 			M[event]()
 		end

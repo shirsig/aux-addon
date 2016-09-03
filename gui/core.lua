@@ -398,7 +398,7 @@ function public.status_bar(parent)
         status_bar:SetFrameLevel(level + 2)
         status_bar:SetScript('OnUpdate', function()
             if this:GetValue() < 100 then
-                this:SetAlpha(1 - ((math.sin(GetTime()*math.pi)+1)/2)/2)
+                this:SetAlpha(1 - ((math.sin(GetTime()*PI)+1)/2)/2)
             else
                 this:SetAlpha(1)
             end
@@ -416,7 +416,7 @@ function public.status_bar(parent)
         status_bar:SetFrameLevel(level + 3)
         status_bar:SetScript('OnUpdate', function()
             if this:GetValue() < 100 then
-                this:SetAlpha(1 - ((math.sin(GetTime()*math.pi)+1)/2)/2)
+                this:SetAlpha(1 - ((math.sin(GetTime()*PI)+1)/2)/2)
             else
                 this:SetAlpha(1)
             end
