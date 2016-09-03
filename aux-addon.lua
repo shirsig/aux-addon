@@ -6,8 +6,7 @@ do
 	aux = function(name)
 		if not modules[name] then
 			(function()
-				_ = module
-				modules[name] = M
+				modules[name] = module and M
 				import (green_t)
 				private.aux = setmetatable({}, {__metatable=false, __index=function(_, key) return modules[key].I end, __newindex=error})
 			end)()
@@ -262,7 +261,7 @@ do
 	end
 	function ADDON_LOADED.Blizzard_CraftUI()
 		hook('CraftFrame_SetSelection', function(...) temp=arg
-			local results = temp-{orig.CraftFrame_SetSelection(unpack(arg))}
+			local ret = temp-A(orig.CraftFrame_SetSelection(unpack(arg)))
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
 			local total_cost = 0
@@ -284,12 +283,12 @@ do
 				end
 			end
 			CraftReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
-			return unpack(results)
+			return unpack(ret)
 		end)
 	end
 	function ADDON_LOADED.Blizzard_TradeSkillUI()
 		hook('TradeSkillFrame_SetSelection', function(...) temp=arg
-			local results = temp-{orig.TradeSkillFrame_SetSelection(unpack(arg))}
+			local ret = temp-A(orig.TradeSkillFrame_SetSelection(unpack(arg)))
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
 			local total_cost = 0
@@ -311,7 +310,7 @@ do
 				end
 			end
 			TradeSkillReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
-			return unpack(results)
+			return unpack(ret)
 		end)
 	end
 end

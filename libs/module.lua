@@ -2,7 +2,7 @@ if module then return end
 local setfenv, getmetatable, setmetatable, type, unpack, next, _G = setfenv, getmetatable, setmetatable, type, unpack, next, getfenv(0)
 
 local PUBLIC, PRIVATE = 1, 2
-local FIELD, INDEX, NEWINDEX = 1, 2, 3
+local CALL, INDEX, NEWINDEX = 1, 2, 3
 
 local inspect
 do local function print(msg) DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE..msg) end
@@ -21,7 +21,6 @@ do local function print(msg) DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE..
 		__pow=function(self, v) self(v); return v end,
 	})
 end
-p = inspect -- TODO
 
 local function error(msg, ...) return _G.error(format(msg or '', unpack(arg))..'\n'..debugstack(), 0) end
 local function import_error() error('Import error.') end
@@ -40,14 +39,16 @@ local INTERFACE, ENVIRONMENT, DECLARATOR = prototype(), prototype(), prototype()
 local state = {}
 
 function INTERFACE:__index(key) self=state[self]
-	return (self.access[key] == PUBLIC or nil) and self[FIELD][key] or (self[INDEX][key] or nop)()
+	if self.access[key] == PUBLIC then return self[CALL][key] or (self[INDEX][key] or nop)() end
 end
 function INTERFACE:__newindex(key, value) self=state[self]
-	return (self.access[key] == PUBLIC or nil) and (self[NEWINDEX][key] or nop)(value)
+	if self.access[key] == PUBLIC then (self[NEWINDEX][key] or nop)(value) end
 end
 
-function ENVIRONMENT:__index(key) self=state[self] local getter = self[INDEX][key]
-	return self[FIELD][key] or getter and getter() or not getter and (_G[key] or self.declarator[key])
+function ENVIRONMENT:__index(key) self=state[self]
+	local f = self[CALL][key]; if f then return f end
+	local getter = self[INDEX][key]; if getter then return getter() end
+	return _G[key] or self.declarator[key]
 end
 function ENVIRONMENT:__newindex(key, value) self=state[self]
 	if self.access[key] then (self[NEWINDEX][key] or collision_error(key))(value) else self.declarator[key] = value end
@@ -55,11 +56,11 @@ end
 ENVIRONMENT.__call = nop -- TODO
 
 do
-	local ACCESS, EVENT = {public=PUBLIC, private=PRIVATE}, {value=FIELD, get=INDEX, set=NEWINDEX}
-	local function declare(self, access, name, value)
+	local ACCESS, EVENT = {public=PUBLIC, private=PRIVATE}, {call=CALL, get=INDEX, set=NEWINDEX}
+	local function declare(self, access, name, handlers)
 		self.access[name] = (not self.access[name] or collision_error(name)) and access or self.default_access or declaration_error()
-		for k, v in value do
-			if v and (k == FIELD or type(v) == 'function') or declaration_error() then self[k][name] = v end
+		for event, handler in handlers do local handler
+			self[event][name] = type(handler) == 'function' and handler or event == INDEX and function() return handler end or declaration_error()
 		end
 	end
 	function DECLARATOR:__index(key) self=state[self]; local name, access = self.declaration_name, self.declaration_access
@@ -72,16 +73,16 @@ do
 	end
 	function DECLARATOR:__newindex(key, value) self=state[self]; local name, access = self.declaration_name, self.declaration_access
 		if name then declare(self, access, name, {[EVENT[key] or nil_error(name)]=value})
-		elseif access or self.default_access then declare(self, access, key, {[FIELD]=value})
-		else _G[key] = (not _G[key] or collision_error(key)) and value end --	G.error(nil) TODO silent error?
+		elseif access or self.default_access then declare(self, access, key, {[type(value) == 'function' and CALL or INDEX]=value})
+		else _G[key] = (_G[key] == nil or collision_error(key)) and value end --	G.error(nil) TODO silent error?
 		self.declaration_access, self.declaration_name = nil, nil
 	end
 	function DECLARATOR:__call(v) self=state[self]; local name, access = self.declaration_name, self.declaration_access
 		if name then
 			if type(v) ~= 'table' or getmetatable(v) ~= nil then (access and declaration_error() or nil_error)(name) end
-			local value, getter, setter; value, getter, setter, v.value, v.get, v.set = v.value, v.get, v.set, nil, nil, nil
-			if next(v) or value ~= nil and getter ~= nil then (access and declaration_error() or nil_error)(name) end
-			declare(self, access, name, {[FIELD]=value, [INDEX]=getter, [NEWINDEX]=setter})
+			local f, getter, setter; f, getter, setter, v.call, v.get, v.set = v.call, v.get, v.set, nil, nil, nil
+			if next(v) or f ~= nil and getter ~= nil then (access and declaration_error() or nil_error)(name) end
+			declare(self, access, name, {[CALL]=f, [INDEX]=getter, [NEWINDEX]=setter})
 		elseif access or nil_error() then self.default_access = access end
 		self.declaration_access, self.declaration_name = nil, nil
 	end
@@ -92,7 +93,7 @@ local function import(self, interface)
 	local module = (interface == INTERFACE or import_error()) and state[interface]
 	for k, v in module.access do
 		if v == PUBLIC and not self.access[k] then
-			self.access[k], self[FIELD][k], self[INDEX][k], self[NEWINDEX][k] = PRIVATE, module[FIELD][k], module[INDEX][k], module[NEWINDEX][k]
+			self.access[k], self[CALL][k], self[INDEX][k], self[NEWINDEX][k] = PRIVATE, module[CALL][k], module[INDEX][k], module[NEWINDEX][k]
 		end
 	end
 end
@@ -102,8 +103,8 @@ setmetatable(_G, {
 		if key ~= 'module' then return nil end
 		local interface, environment, declarator = INTERFACE {}, ENVIRONMENT {}, DECLARATOR {}
 		local self; self = {
-			access = {_G=PRIVATE, I=PRIVATE, M=PRIVATE, public=PRIVATE, private=PRIVATE, import=PRIVATE, _=PRIVATE, p=PRIVATE, error=PRIVATE, nop=PRIVATE},
-			[FIELD] = {_G=_G, I=interface, M=environment, import=function(interface) import(self, interface) end, p=inspect, error=error, nop=nop},
+			access = {pp=PRIVATE, _G=PRIVATE, I=PRIVATE, M=PRIVATE, public=PRIVATE, private=PRIVATE, import=PRIVATE, _=PRIVATE, p=PRIVATE, error=PRIVATE, nop=PRIVATE},
+			[CALL] = {pp=function(o) inspect(o == ENVIRONMENT) end, _G=_G, I=interface, M=environment, import=function(interface) import(self, interface) end, p=inspect, error=error, nop=nop},
 			[INDEX] = {public=function() return declarator.public end, private=function() return declarator.private end},
 			[NEWINDEX] = {p=inspect, _=nop},
 			declarator = declarator,
