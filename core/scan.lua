@@ -27,14 +27,14 @@ do
 			end
 		end
 		for _, state in aborted do
-			call(state.params.on_abort)
+			(state.params.on_abort or nop)()
 		end
 	end
 
 	function complete()
 		local on_complete = state.params.on_complete
 		scan_states[state.params.type] = nil
-		call(on_complete)
+		(on_complete or nop)()
 	end
 
 	function private.state.get()
@@ -101,7 +101,7 @@ end
 
 function submit_query()
 	when(function() return state.params.type ~= 'list' or CanSendAuctionQuery() end, function()
-		call(state.params.on_submit_query)
+		(state.params.on_submit_query or nop)()
 		state.last_query_time = GetTime()
 		if state.params.type == 'bidder' then
 			GetBidderAuctionItems(state.page)
@@ -151,7 +151,7 @@ function scan_page(i)
 
 		history.process_auction(auction_info)
 
-		if call(state.params.auto_buy_validator, auction_info) then
+		if (state.params.auto_buy_validator or nop)(auction_info) then
 			local send_signal, signal_received = signal()
 			when(signal_received, recurse)
 			place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, L(send_signal, true))

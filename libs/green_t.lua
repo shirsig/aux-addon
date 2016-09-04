@@ -3,10 +3,10 @@ green_t = module
 local next, setn, type, setmetatable = next, table.setn, type, setmetatable
 local wipe, release, acquire, acquire_temp
 
-local pool, pool_size, overflow_pool, tmp = {}, 0, setmetatable({}, {__mode='k'}), {}
+local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, {__mode='k'}), {}
 
 CreateFrame('Frame'):SetScript('OnUpdate', function()
-	for t in tmp do release(t) end; wipe(tmp)
+	for t in auto_release do release(t) end; wipe(auto_release)
 end)
 
 function wipe(t)
@@ -18,7 +18,7 @@ end
 public.wipe = wipe
 
 function release(t)
-	wipe(t); tmp[t] = nil
+	wipe(t); auto_release[t] = nil
 	if pool_size < 50 then
 		pool_size = pool_size + 1
 		pool[pool_size] = t
@@ -39,7 +39,7 @@ function acquire()
 end
 public.t.get = acquire
 
-function acquire_temp() local t = acquire(); tmp[t] = true; return t end
+function acquire_temp() local t = acquire(); auto_release[t] = true; return t end
 public.tt.get = acquire_temp
 
 do local mt = {__newindex=nop}
@@ -47,14 +47,14 @@ do local mt = {__newindex=nop}
 end
 
 do local f, mt
-	f = function(_, v) if type(v) == 'table' then tmp[v] = true end return v end
+	f = function(_, v) if type(v) == 'table' then auto_release[v] = true end return v end
 	mt = {__call=f, __sub=f}
-	public.temp {get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) tmp[t] = true end}
+	public.temp {get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) auto_release[t] = true end}
 end
 do local f, mt
-	f = function(_, v) if type(v) == 'table' then tmp[v] = nil end return v end
+	f = function(_, v) if type(v) == 'table' then auto_release[v] = nil end return v end
 	mt = {__call=f, __sub=f}
-	public.perm {get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) tmp[t] = nil end}
+	public.perm {get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) auto_release[t] = nil end}
 end
 
 --T :kek(5) :foo(1) :bar{} :moo 'trump' TODO possible alternative constructor syntax, but high overhead, more elegant because not limited, sometimes better looking.

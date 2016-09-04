@@ -2,6 +2,15 @@ aux 'core'
 
 public.join = _G.table.concat
 
+do local mt = {__index=function(self, key) setmetatable(self, nil); return getfenv(2)[key] end}
+	function public.__(t) return setmetatable(t, mt) end
+end
+
+function public.range(arg1, arg2)
+	local i, n = arg2 and arg1 or 1, arg2 or arg1
+	if i <= n then return first, range(i + 1, n) end
+end
+
 function public.replicate(count, value)
 	if count > 0 then return value, replicate(count - 1, value) end
 end
@@ -36,32 +45,22 @@ do
 		end
 		return f(unpack(params))
 	end
-	local a1b2 = {a=1, b=2}
 	function public.L(body, ...)
 		if type(body) == 'function' then
 			local arg1 = arg
 			return function(...) return helper(body, arg1, arg) end
 		else
-			error(debugstack(1, 10))
-			body = gsub(body, '_([ab])', function(char) return '_'..a1b2[char] end)
-			local lambda = loadstring 'return function(_1,_2,_3,_4,_5,_6,_7,_8,_9)'..f..' end'
+--			body = gsub(body, '_([ab])', function(char) return '_'.. end)
+--			local lambda = loadstring('return function(_1,_2,_3,_4,_5,_6,_7,_8,_9)'..body..' end')
+			local lambda = loadstring('return '..body) or loadstring(body)
 			setfenv(lambda, getfenv(2))
 			return lambda
 		end
 	end
 end
 
-function public.call(f, ...) temp=arg
-	if f then
-		return f(unpack(arg))
-	end
-end
-
 function public.index(t, ...) temp=arg
-	for i = 1, arg.n do
-		t = t and t[arg[i]]
-	end
-	return t
+	for i = 1, arg.n do t = t and t[arg[i]] end return t
 end
 
 public.huge = 1.8*10^308

@@ -107,11 +107,9 @@ function public.stop()
 	if state then
 		kill_thread(state.thread_id)
 		local callback, slot = state.callback, state.target_slot
-		if slot and not matching_item(slot) then
-			slot = nil
-		end
+		slot = slot and matching_item(slot) and slot or nil
 		state = nil
-		call(callback, slot)
+		(callback or nop)(slot)
 	end
 end
 

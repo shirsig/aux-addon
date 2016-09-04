@@ -267,7 +267,7 @@ do
 	function mt.__index:select(id)
 		self._selected = id
 		self:update()
-		call(self._on_select, id)
+		;(self._on_select or nop)(id)
 	end
 	function mt.__index:update()
 		for _, tab in self._tabs do
@@ -304,13 +304,13 @@ function public.editbox(parent)
     editbox:SetHeight(24)
     editbox:SetTextColor(0, 0, 0, 0)
     set_content_style(editbox)
-    local function colorize() this.display:SetText(call(this.colorizer, this:GetText()) or this:GetText()) end
-    local function format() this.display:SetText(call(this.formatter or this.colorizer, this:GetText()) or this:GetText()) end
+    local function colorize() this.display:SetText((this.colorizer or nop)(this:GetText()) or this:GetText()) end
+    local function format() this.display:SetText((this.formatter or this.colorizer or nop)(this:GetText()) or this:GetText()) end
     editbox:SetScript('OnEscapePressed', function()
         this:ClearFocus()
-	    call(this.escape)
+	    ;(this.escape or nop)()
     end)
-    editbox:SetScript('OnEnterPressed', function() call(this.enter) end)
+    editbox:SetScript('OnEnterPressed', function() (this.enter or nop)() end)
     editbox:SetScript('OnEditFocusGained', function()
 	    colorize()
 	    this.focused = true
@@ -318,7 +318,7 @@ function public.editbox(parent)
 	    this:SetScript('OnUpdate', function()
 			this.cursor:SetAlpha(mod(floor((GetTime()-this.cursor.last_change) * 2 + 1), 2))
 	    end)
-	    call(this.focus_gain)
+	    ;(this.focus_gain or nop)()
     end)
     editbox:SetScript('OnEditFocusLost', function()
 	    format()
@@ -326,17 +326,17 @@ function public.editbox(parent)
 	    this.cursor:SetAlpha(0)
 	    this:HighlightText(0, 0)
 	    this:SetScript('OnUpdate', nil)
-	    call(this.focus_loss)
+	    ;(this.focus_loss or nop)()
     end)
     editbox:SetScript('OnTextChanged', function()
 	    if this.focused then colorize() else format() end
-	    call(this.change)
+	    (this.change or nop)()
     end)
     editbox:SetScript('OnCursorChanged', function()
 	    this.cursor.last_change = GetTime()
-	    this.cursor:SetPoint(this:GetJustifyH(), this, this:GetJustifyH(), call(arg1 > 0 and max or min, 0, arg1 - 1), 1.5)
+	    this.cursor:SetPoint(this:GetJustifyH(), this, this:GetJustifyH(), (arg1 > 0 and max or min)(0, arg1 - 1), 1.5)
     end)
-    editbox:SetScript('OnChar', function() call(this.char) end)
+    editbox:SetScript('OnChar', function() (this.char or nop)() end)
     do
         local last_click
         editbox:SetScript('OnMouseDown', function()
@@ -398,7 +398,7 @@ function public.status_bar(parent)
         status_bar:SetFrameLevel(level + 2)
         status_bar:SetScript('OnUpdate', function()
             if this:GetValue() < 100 then
-                this:SetAlpha(1 - ((math.sin(GetTime()*PI)+1)/2)/2)
+                this:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
             else
                 this:SetAlpha(1)
             end
@@ -416,7 +416,7 @@ function public.status_bar(parent)
         status_bar:SetFrameLevel(level + 3)
         status_bar:SetScript('OnUpdate', function()
             if this:GetValue() < 100 then
-                this:SetAlpha(1 - ((math.sin(GetTime()*PI)+1)/2)/2)
+	            this:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
             else
                 this:SetAlpha(1)
             end

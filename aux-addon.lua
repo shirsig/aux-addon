@@ -122,9 +122,9 @@ do
 	local index
 	function private.active_tab.get() return tab_info[index] end
 	function on_tab_click(i)
-		call(index and active_tab.CLOSE)
+		(index and active_tab.CLOSE or nop)()
 		index = i
-		call(index and active_tab.OPEN)
+		;(index and active_tab.OPEN or nop)()
 	end
 end
 
@@ -172,7 +172,7 @@ do
 			locked = true
 			event_listener('CHAT_MSG_SYSTEM', function(kill)
 				if arg1 == ERR_AUCTION_BID_PLACED then
-					call(on_success)
+					(on_success or nop)()
 					locked = false
 					kill()
 				end
@@ -190,7 +190,7 @@ do
 		CancelAuction(index)
 		event_listener('CHAT_MSG_SYSTEM', function(kill)
 			if arg1 == ERR_AUCTION_REMOVED then
-				call(on_success)
+				(on_success or nop)()
 				locked = false
 				kill()
 			end
