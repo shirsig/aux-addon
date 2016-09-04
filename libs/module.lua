@@ -59,8 +59,8 @@ do
 	local ACCESS, EVENT = {public=PUBLIC, private=PRIVATE}, {call=CALL, get=INDEX, set=NEWINDEX}
 	local function declare(self, access, name, handlers)
 		self.access[name] = (not self.access[name] or collision_error(name)) and access or self.default_access or declaration_error()
-		for event, handler in handlers do local handler
-			self[event][name] = type(handler) == 'function' and handler or event == INDEX and function() return handler end or declaration_error()
+		for event, handler in handlers do local handler = handler
+			self[event][name] = type(handler) == 'function' and handler or (event == INDEX and function() return handler end or declaration_error())
 		end
 	end
 	function DECLARATOR:__index(key) self=state[self]; local name, access = self.declaration_name, self.declaration_access
