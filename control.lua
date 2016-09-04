@@ -1,6 +1,6 @@
 aux 'core'
 
-event_frame = CreateFrame('Frame')
+local event_frame = CreateFrame('Frame')
 
 local listeners, threads = t, t
 
@@ -13,52 +13,47 @@ function LOAD()
 end
 
 function EVENT()
-	for _, listener in listeners do
-		if event == listener.event and not listener.killed then
+	for id, listener in listeners do
+		if listener.killed then
+			listeners[id] = nil
+		elseif event == listener.event then
 			listener.cb(listener.kill)
 		end
 	end
 end
 
-function UPDATE()
-	for _, listener in listeners do
-		if not any(listeners, function(l) return not l.killed and l.event == listener.event end) then
-			event_frame:UnregisterEvent(listener.event)
+do
+	function UPDATE()
+		for _, listener in listeners do
+			local event, needed = listener.event, false
+			for _, listener in listeners do needed = needed or listener.event == event and not listener.killed end
+			if not needed then event_frame:UnregisterEvent(event) end
 		end
-	end
 
-	filter(listeners, function(l) return not l.killed end)
-	filter(threads, function(th) return not th.killed end)
-
-	for id, thread in threads do
-		if not thread.killed then
-			local k = thread.k
-			thread.k = nil
-			thread_id = id
-			k()
-			thread_id = nil
-			if not thread.k then
-				thread.killed = true
+		for id, thread in threads do
+			if thread.killed or not thread.k then
+				threads[id] = nil
+			else
+				local k = thread.k
+				thread.k = nil
+				thread_id = id
+				k()
+				thread_id = nil
 			end
 		end
 	end
 end
 
-do
-	local id = 0
+do local id = 0
 	function private.id.get() id = id + 1; return id end
 end
 
 function public.kill_listener(listener_id)
-	for listener in present(listeners[listener_id]) do
-		listener.killed = true
-	end
+	for listener in present(listeners[listener_id]) do listener.killed = true end
 end
 
 function public.kill_thread(thread_id)
-	for thread in present(threads[thread_id]) do
-		thread.killed = true
-	end
+	for thread in present(threads[thread_id]) do thread.killed = true end
 end
 
 function public.event_listener(event, cb)
@@ -69,15 +64,12 @@ function public.event_listener(event, cb)
 end
 
 function public.on_next_event(event, callback)
-	event_listener(event, function(kill)
-		callback()
-		kill()
-	end)
+	event_listener(event, function(kill) callback(); kill() end)
 end
 
 function public.thread(k, ...) temp=arg
 	local thread_id = id
-	threads[thread_id] = {k = L(k, unpack(arg))}
+	threads[thread_id] = T('k', L(k, unpack(arg)))
 	return thread_id
 end
 
