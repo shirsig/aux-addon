@@ -29,8 +29,8 @@ function release(t)
 end
 public.release = release
 
-function public.strip(t)
-	if getn(t) > 0 then return tremove(t, 1), strip(t) else release(t) end
+function public.ret(t)
+	if getn(t) > 0 then return tremove(t, 1), ret(t) else release(t) end
 end
 
 function acquire()
