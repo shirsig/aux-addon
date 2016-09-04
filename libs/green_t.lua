@@ -53,16 +53,21 @@ end
 
 do local f, mt
 	f = function(_, v) if type(v) == 'table' then auto_release[v] = true end return v end
-	mt = {__call=f, __sub=f}
+	mt = {__call=f, __sub=f, __exp=f}
 	public.temp {get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) auto_release[t] = true end}
 end
 do local f, mt
 	f = function(_, v) if type(v) == 'table' then auto_release[v] = nil end return v end
-	mt = {__call=f, __sub=f}
+	mt = {__call=f, __sub=f, __exp=f}
 	public.perm {get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) auto_release[t] = nil end}
 end
 
---T :kek(5) :foo(1) :bar{} :moo 'trump' TODO possible alternative constructor syntax, but high overhead, more elegant because not limited, sometimes better looking.
+do  local mt, object, key = {__newindex=nop}, {}, nil
+	function mt:__unm() local temp = object; object = acquire(); return temp end
+	function mt:__index(k) key = k; return self end
+	function mt:__call(v) object[key] = v; key = nil return self end
+	function public.object.get() return setmetatable(acquire_temp(), mt) end
+end
 
 do  local SET, ARRAY, ARRAY0, TABLE = 1, 2, 3, 4
 	local function insert(type)
