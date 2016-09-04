@@ -599,18 +599,6 @@ local methods = {
         this:GetParent().row.rt.isShowingItemTooltip = nil
     end,
 
---    OnIconClick = function(self, ...)
---        if IsModifiedClick() then
---            HandleModifiedItemClick(self:GetParent().row.data.record.rawItemLink)
---        else
---            self:GetParent():GetScript("OnClick")(self:GetParent(), ...)
---        end
---    end,
---
---    OnIconDoubleClick = function(self, ...)
---        self:GetParent():GetScript("OnDoubleClick")(self:GetParent(), ...)
---    end,
-
     OnCellEnter = function()
         local rt = this.rt
         local row = this.row
