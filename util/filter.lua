@@ -205,7 +205,7 @@ public.filters = {
 function operator(str)
     local operator = str == 'not' and A('operator', 'not', 1)
     for name in temp-S('and', 'or') do
-	    for arity in present(select(3, strfind(str, '^'..name..'(%d*)$'))) do
+	    for arity in present(select(3, strfind(str, '^' .. name .. '(%d*)$'))) do
 		    arity = tonumber(arity)
 		    operator = not (arity and arity < 2) and A('operator', name, arity)
 	    end
@@ -294,9 +294,9 @@ function public.parse_filter_string(str)
                     if parts[i] == 'item' then
                         return nil, 'Invalid item name', _G.aux_auctionable_items
                     elseif type(input_type) == 'table' then
-                        return nil, 'Invalid choice for '..parts[i], input_type
+                        return nil, 'Invalid choice for ' .. parts[i], input_type
                     else
-                        return nil, 'Invalid input for '..parts[i]..'. Expecting: '..input_type
+                        return nil, 'Invalid input for ' .. parts[i] .. '. Expecting: ' .. input_type
                     end
                 end
                 tinsert(post_filter, A('filter', parts[i], parts[i + 1]))
@@ -406,13 +406,13 @@ function suggestions(filter)
 
     -- rarities
     if not filter.blizzard.quality then
-        for i = 0, 4 do tinsert(suggestions, _G['ITEM_QUALITY'..i..'_DESC']) end
+        for i = 0, 4 do tinsert(suggestions, _G['ITEM_QUALITY' .. i..'_DESC']) end
     end
 
     -- item names
     if getn(filter.components) == 0 then
         for _, name in _G.aux_auctionable_items do
-            tinsert(suggestions, name..'/exact')
+            tinsert(suggestions, name .. '/exact')
         end
     end
 
@@ -426,7 +426,7 @@ function public.filter_string(components)
 	    if component[1] == 'blizzard' then
 		    query_builder.append(filter[4] or filter[3])
         elseif component[1] == 'operator' then
-            query_builder.append(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or ''))
+            query_builder.append(component[2] .. (component[2] ~= 'not' and tonumber(component[3]) or ''))
         elseif component[1] == 'filter' then
             query_builder.append(component[2])
             for parameter in present(component[3]) do
@@ -448,7 +448,7 @@ function prettified_filter_string(filter)
 	    if component[1] == 'blizzard' then
 		    if component[2] == 'name' then
 			    if filter.blizzard.exact then
-			        prettified.append(info.display_name(aux.cache.item_id(component[4])) or color.blizzard('['..component[4]..']'))
+			        prettified.append(info.display_name(aux.cache.item_id(component[4])) or color.blizzard('[' .. component[4] .. ']'))
 			    elseif component[4] ~= '' then
 				    prettified.append(color.blizzard(component[4]))
 			    end
@@ -456,14 +456,14 @@ function prettified_filter_string(filter)
 			    prettified.append(color.blizzard(component[3]))
 		    end
         elseif component[1] == 'operator' then
-			prettified.append(color.aux(component[2]..(component[2] ~= 'not' and tonumber(component[3]) or '')))
+			prettified.append(color.aux(component[2] .. (component[2] ~= 'not' and tonumber(component[3]) or '')))
         elseif component[1] == 'filter' then
             if component[2] ~= 'tooltip' then
                 prettified.append(color.aux(component[2]))
             end
             for parameter in present(component[3]) do
 	            if component[2] == 'item' then
-		            prettified.append(info.display_name(aux.cache.item_id(parameter)) or color.label.enabled('['..parameter..']'))
+		            prettified.append(info.display_name(aux.cache.item_id(parameter)) or color.label.enabled('[' .. parameter .. ']'))
 	            else
 		            if filters[component[2]].input_type == 'money' then
 			            prettified.append(aux.money.to_string(aux.money.from_string(parameter), nil, true, nil, inline_color.label.enabled))
@@ -482,7 +482,7 @@ function prettified_filter_string(filter)
 end
 
 function public.quote(name)
-    return '<'..name..'>'
+    return '<' .. name .. '>'
 end
 
 function public.unquote(name)
@@ -559,7 +559,7 @@ function public.query_builder()
     local filter
     return T(
 		'append', function(part)
-            filter = not filter and part or filter..'/'..part
+            filter = not filter and part or filter .. '/' .. part
         end,
 		'get', function()
             return filter or ''

@@ -21,7 +21,7 @@ function public.render(item_listing)
 				row.highlight:Hide()
 			end
 			row.item.texture:SetTexture(item_record.texture)
-			row.item.name:SetText('['..item_record.name..']')
+			row.item.name:SetText('[' .. item_record.name .. ']')
 			local color = ITEM_QUALITY_COLORS[item_record.quality]
 			row.item.name:SetTextColor(color.r, color.g, color.b)
 			if item_record.aux_quantity > 1 then
@@ -41,22 +41,22 @@ function public.create(parent, on_click, selected)
 	content:SetPoint('TOPLEFT', 0, -51)
 	content:SetPoint('BOTTOMRIGHT', -15, 0)
 
-	local scroll_frame = CreateFrame('ScrollFrame', gui.name..'ScrollFrame', parent, 'FauxScrollFrameTemplate')
+	local scroll_frame = CreateFrame('ScrollFrame', gui.name .. 'ScrollFrame', parent, 'FauxScrollFrameTemplate')
 	scroll_frame:SetScript('OnVerticalScroll', function(self, offset)
 		FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() render(this.item_listing) end)
 	end)
 	scroll_frame:SetPoint('TOPLEFT', content, 'TOPLEFT', 0, 15)
 	scroll_frame:SetPoint('BOTTOMRIGHT', content, 'BOTTOMRIGHT', -4, -15)
 
-	local scrollBar = _G[scroll_frame:GetName()..'ScrollBar']
+	local scrollBar = _G[scroll_frame:GetName() .. 'ScrollBar']
 	scrollBar:SetWidth(12)
 	local thumbTex = scrollBar:GetThumbTexture()
 	thumbTex:SetPoint('CENTER', 0, 0)
 	thumbTex:SetTexture(color.content.background())
 	thumbTex:SetHeight(50)
 	thumbTex:SetWidth(12)
-	_G[scrollBar:GetName()..'ScrollUpButton']:Hide()
-	_G[scrollBar:GetName()..'ScrollDownButton']:Hide()
+	_G[scrollBar:GetName() .. 'ScrollUpButton']:Hide()
+	_G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
 
 	local rows = t
 	local row_index = 1

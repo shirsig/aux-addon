@@ -56,7 +56,7 @@ function public.container_item(bag, slot)
 
             'link', link,
             'itemstring', item_info.itemstring,
-            'item_key', item_id..':'..suffix_id,
+            'item_key', item_id .. ':' .. suffix_id,
 
             'name', item_info.name,
             'texture', texture,
@@ -119,7 +119,7 @@ function public.auction(index, query_type)
 
             'link', link,
             'itemstring', item_info.itemstring,
-            'item_key', item_id..':'..suffix_id,
+            'item_key', item_id .. ':' .. suffix_id,
             'search_signature', join(temp-{item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), _G.aux_ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
             'sniping_signature', join(temp-{item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, _G.aux_ignore_owner and (is_player(owner, true) and 0 or 1) or (owner or '?')}, ':'),
 
@@ -237,8 +237,8 @@ function public.load_tooltip(frame, tooltip)
         end
     end
     for i = 1, getn(tooltip) do -- TODO why is this needed?
-	    _G[frame:GetName()..'TextLeft'..i]:SetJustifyH('LEFT')
-	    _G[frame:GetName()..'TextRight'..i]:SetJustifyH('LEFT')
+	    _G[frame:GetName() .. 'TextLeft' .. i]:SetJustifyH('LEFT')
+	    _G[frame:GetName() .. 'TextRight' .. i]:SetJustifyH('LEFT')
     end
 end
 
@@ -246,10 +246,10 @@ function public.display_name(item_id, no_brackets, no_color)
     for item_info in present(item(item_id)) do
         local name = item_info.name
         if not no_brackets then
-            name = '['..name..']'
+            name = '[' .. name .. ']'
         end
         if not no_color then
-            name = select(4, GetItemQualityColor(item_info.quality))..name..FONT_COLOR_CODE_CLOSE
+            name = select(4, GetItemQualityColor(item_info.quality)) .. name .. FONT_COLOR_CODE_CLOSE
         end
         return name
     end
@@ -275,10 +275,10 @@ function public.tooltip(setter)
     local tooltip = t
     for i = 1, AuxTooltip:NumLines() do
         tinsert(tooltip, {
-            left_text = _G['AuxTooltipTextLeft'..i]:GetText(),
-            left_color = {_G['AuxTooltipTextLeft'..i]:GetTextColor()},
-            right_text = _G['AuxTooltipTextRight'..i]:IsVisible() and _G['AuxTooltipTextRight'..i]:GetText(),
-            right_color = {_G['AuxTooltipTextRight'..i]:GetTextColor()},
+            left_text = _G['AuxTooltipTextLeft' .. i]:GetText(),
+            left_color = {_G['AuxTooltipTextLeft' .. i]:GetTextColor()},
+            right_text = _G['AuxTooltipTextRight' .. i]:IsVisible() and _G['AuxTooltipTextRight' .. i]:GetText(),
+            right_color = {_G['AuxTooltipTextRight' .. i]:GetTextColor()},
         })
     end
 
@@ -287,7 +287,7 @@ end
 
 function item_charges(tooltip)
 	for _, line in tooltip do
-        local pattern = '^'..gsub(gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)')..'$'
+        local pattern = '^' .. gsub(gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)') .. '$'
 
         local _, _, left_charges_string = strfind(line.left_text or '', pattern)
         local _, _, right_charges_string = strfind(line.right_text or '', pattern)
@@ -329,7 +329,7 @@ end
 
 function public.durability(tooltip)
     for _, line in tooltip do
-        local pattern = '^'..gsub(gsub(DURABILITY_TEMPLATE, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)')..'$'
+        local pattern = '^' .. gsub(gsub(DURABILITY_TEMPLATE, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)') .. '$'
         local _, _, left_durability_string, left_max_durability_string = strfind(line.left_text or '', pattern)
         local _, _, right_durability_string, right_max_durability_string = strfind(line.right_text or '', pattern)
         local durability = tonumber(left_durability_string) or tonumber(right_durability_string)
@@ -342,7 +342,7 @@ end
 
 function public.item_key(link)
     local item_id, suffix_id = parse_link(link)
-    return item_id..':'..suffix_id
+    return item_id .. ':' .. suffix_id
 end
 
 function public.parse_link(link)
@@ -351,11 +351,11 @@ function public.parse_link(link)
 end
 
 function public.itemstring(item_id, suffix_id, unique_id, enchant_id)
-    return 'item:'..(item_id or 0)..':'..(enchant_id or 0)..':'..(suffix_id or 0)..':'..(unique_id or 0)
+    return 'item:' .. (item_id or 0) .. ':' .. (enchant_id or 0) .. ':' .. (suffix_id or 0) .. ':' .. (unique_id or 0)
 end
 
 function public.item(item_id, suffix_id)
-    local itemstring = 'item:'..(item_id or 0)..':0:'..(suffix_id or 0)..':0'
+    local itemstring = 'item:' .. (item_id or 0) .. ':0:' .. (suffix_id or 0) .. ':0'
     local name, itemstring, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
     return name and {
         name = name,
@@ -397,7 +397,7 @@ end
 
 function public.item_quality_index(item_quality)
     for i = 0, 4 do
-        local quality = _G['ITEM_QUALITY'..i..'_DESC']
+        local quality = _G['ITEM_QUALITY' .. i..'_DESC']
         if strupper(item_quality) == strupper(quality) then
             return i, quality
         end

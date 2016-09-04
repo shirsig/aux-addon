@@ -43,7 +43,7 @@ do
 		__call = function(self, text)
 			local r, g, b, a = unpack(self)
 			if text then
-				return format('|c%02X%02X%02X%02X', a, r*255, g*255, b*255)..text..FONT_COLOR_CODE_CLOSE
+				return format('|c%02X%02X%02X%02X', a, r*255, g*255, b*255) .. text .. FONT_COLOR_CODE_CLOSE
 			else
 				return r, g, b, a
 			end

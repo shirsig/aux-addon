@@ -28,9 +28,9 @@ function public.to_string2(money, exact, color)
 	local GOLD = 'ffd100'
 	local SILVER = 'e6e6e6'
 	local COPPER = 'c8602c'
-	local START = '|cff%s%d'..FONT_COLOR_CODE_CLOSE
-	local PART = color..'.|cff%s%02d'..FONT_COLOR_CODE_CLOSE
-	local NONE = '|cffa0a0a0'..TEXT_NONE..FONT_COLOR_CODE_CLOSE
+	local START = '|cff%s%d' .. FONT_COLOR_CODE_CLOSE
+	local PART = color .. '.|cff%s%02d' .. FONT_COLOR_CODE_CLOSE
+	local NONE = '|cffa0a0a0' .. TEXT_NONE .. FONT_COLOR_CODE_CLOSE
 
 	if not exact and money >= 10000 then
 		-- Round to nearest silver
@@ -42,15 +42,15 @@ function public.to_string2(money, exact, color)
 
 	local fmt = START
 	if g > 0 then
-		str = str..format(fmt, GOLD, g)
+		str = str .. format(fmt, GOLD, g)
 		fmt = PART
 	end
 	if s > 0 or c > 0 then
-		str = str..format(fmt, SILVER, s)
+		str = str .. format(fmt, SILVER, s)
 		fmt = PART
 	end
 	if c > 0 then
-		str = str..format(fmt, COPPER, c)
+		str = str .. format(fmt, COPPER, c)
 	end
 	if str == '' then
 		str = NONE
@@ -70,7 +70,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 
 	-- rounding
 	if decimal_points then
-		copper = tonumber(format('%.'..decimal_points..'f', copper))
+		copper = tonumber(format('%.' .. decimal_points .. 'f', copper))
 	end
 
 	local gold_text, silver_text, copper_text
@@ -84,30 +84,30 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	if trim then
 		local parts = tt
 		if gold > 0 then
-			tinsert(parts, format_number(gold, false, nil, color)..gold_text)
+			tinsert(parts, format_number(gold, false, nil, color) .. gold_text)
 		end
 		if silver > 0 then
-			tinsert(parts, format_number(silver, pad, nil, color)..silver_text)
+			tinsert(parts, format_number(silver, pad, nil, color) .. silver_text)
 		end
 		if copper > 0 or gold == 0 and silver == 0 then
-			tinsert(parts, format_number(copper, pad, decimal_points, color)..copper_text)
+			tinsert(parts, format_number(copper, pad, decimal_points, color) .. copper_text)
 		end
 		text = join(parts, ' ')
 	else
 		if gold > 0 then
-			text = format_number(gold, false, nil, color)..gold_text..' '..format_number(silver, pad, nil, color)..silver_text..' '..format_number(copper, pad, decimal_points, color)..copper_text
+			text = format_number(gold, false, nil, color) .. gold_text .. ' ' .. format_number(silver, pad, nil, color) .. silver_text .. ' ' .. format_number(copper, pad, decimal_points, color) .. copper_text
 		elseif silver > 0 then
-			text = format_number(silver, false, nil, color)..silver_text..' '..format_number(copper, pad, decimal_points, color)..copper_text
+			text = format_number(silver, false, nil, color) .. silver_text .. ' ' .. format_number(copper, pad, decimal_points, color) .. copper_text
 		else
-			text = format_number(copper, false, decimal_points, color)..copper_text
+			text = format_number(copper, false, decimal_points, color) .. copper_text
 		end
 	end
 
 	if is_negative then
 		if color then
-			text = color..'-'..FONT_COLOR_CODE_CLOSE..text
+			text = color .. '-' .. FONT_COLOR_CODE_CLOSE .. text
 		else
-			text = '-'..text
+			text = '-' .. text
 		end
 	end
 
@@ -140,9 +140,9 @@ end
 
 function public.format_number(num, pad, decimal_padding, color)
 	local padding = pad and 2 + (decimal_padding and decimal_padding + 1 or 0) or 0
-	num = format('%0'..padding..'.0'..(decimal_padding or 0)..'f', num)
+	num = format('%0' .. padding .. '.0' .. (decimal_padding or 0) .. 'f', num)
 	if color then
-		return color..num..FONT_COLOR_CODE_CLOSE
+		return color .. num .. FONT_COLOR_CODE_CLOSE
 	else
 		return num
 	end

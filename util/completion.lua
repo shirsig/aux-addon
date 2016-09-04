@@ -15,7 +15,7 @@ function public:complete_filter()
 
 	for _, suggestion in suggestions do
 		if strsub(strupper(suggestion), 1, strlen(current_modifier)) == strupper(current_modifier) then
-			this:SetText(strlower(strsub(filter_string, 1, start_index - 1).. suggestion))
+			this:SetText(strlower(strsub(filter_string, 1, start_index - 1) ..  suggestion))
 			this:HighlightText(strlen(filter_string), -1)
 			return
 		end

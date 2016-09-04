@@ -62,43 +62,42 @@ do local f, mt
 	public.perm {get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) auto_release[t] = nil end}
 end
 
-do  local mt, key = {}, nil
+do local mt, key = {}, nil
 	function mt:__unm() local temp = mt.__index; mt.__index = nil; return temp end
 	function mt:__index(k) key = k; return self end
 	function mt:__call(v) self[key] = v; key = nil return self end
 	function public.__(t) mt.__newindex = wipe(t); return setmetatable(acquire_temp(), mt) end
 end
 
-do  local SET, ARRAY, ARRAY0, TABLE = 1, 2, 3, 4
-	local function constructor(type)
+do local function constructor(type)
 		local chunk = 'local setn, error = table.setn, error; return function('
-		for i = 1, 99 do chunk = chunk..'a'..i..',' end
-		chunk = chunk..'overflow) local t = t'
-		if type == SET then
+		for i = 1, 99 do chunk = chunk .. 'a' .. i..',' end
+		chunk = chunk .. 'overflow) local t = t'
+		if type == 'set' then
 			for i = 1, 99 do chunk = format('%s; if a%d == nil then return t end; t[a%d] = true', chunk, i, i) end
-		elseif type == ARRAY then
-			chunk = chunk..'; setn(t, 99); if a1 == nil then return t end; t[1] = a1'
+		elseif type == 'array' then
+			chunk = chunk .. '; setn(t, 99); if a1 == nil then return t end; t[1] = a1'
 			for i = 2, 99 do chunk = format('%s; if a%d == nil then setn(t, %d); return t end; t[%d] = a%d', chunk, i, i - 1, i, i) end
-		elseif type == ARRAY0 then
-			chunk = chunk..'; setn(t, 99)'
+		elseif type == 'array0' then
+			chunk = chunk .. '; setn(t, 99)'
 			for i = 1, 99 do chunk = format('%s; t[%d] = a%d', chunk, i, i) end
-		elseif type == TABLE then
+		elseif type == 'table' then
 			for i = 1, 97, 2 do chunk = format('%s; if a%d == nil then return t end; t[a%d] = a%d', chunk, i, i, i + 1) end
 		end
-		chunk = chunk..'; return (overflow == nil or error "Overflow.") and t end'
+		chunk = chunk .. '; return (overflow == nil or error "Overflow.") and t end'
 		local f = loadstring(chunk); setfenv(f, M); return f()
 	end
-	public(); S, A, A0, T = constructor(SET), constructor(ARRAY), constructor(ARRAY0), constructor(TABLE)
+	public(); S, A, A0, T = constructor'set', constructor'array', constructor 'array0', constructor 'table'
 end
 
 do local chunk = 'return function(i'
-	for i = 1, 99 do chunk = chunk..',a'..i end
-	chunk = chunk..')'
+	for i = 1, 99 do chunk = chunk .. ',a' .. i end
+	chunk = chunk .. ')'
 	for i = 1, 99 do
 		chunk = format('%s if i == %d then return a%i', chunk, i, i)
-		for j = i + 1, 99 do chunk = chunk..',a'..j end
-		chunk = chunk..' end'
+		for j = i + 1, 99 do chunk = chunk .. ',a' .. j end
+		chunk = chunk .. ' end'
 	end
-	chunk = chunk..' end'
+	chunk = chunk .. ' end'
 	public.select = loadstring(chunk)()
 end

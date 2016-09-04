@@ -24,7 +24,7 @@ end
 do
 	local formal_parameters = t
 	for i = 1, 9 do
-		local key = '_'..i
+		local key = '_' .. i
 		public[key] = t
 		formal_parameters[M[key]] = i
 	end
@@ -44,9 +44,9 @@ do
 			local arg1 = arg
 			return function(...) return helper(body, arg1, arg) end
 		else
---			body = gsub(body, '_([ab])', function(char) return '_'.. end)
---			local lambda = loadstring('return function(_1,_2,_3,_4,_5,_6,_7,_8,_9)'..body..' end')
-			local lambda = loadstring('return '..body) or loadstring(body)
+--			body = gsub(body, '_([ab])', function(char) return '_' ..  end)
+--			local lambda = loadstring('return function(_1,_2,_3,_4,_5,_6,_7,_8,_9)' .. body .. ' end')
+			local lambda = loadstring('return ' .. body) or loadstring(body)
 			setfenv(lambda, getfenv(2))
 			return lambda
 		end

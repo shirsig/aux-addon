@@ -292,7 +292,7 @@ local methods = {
 
     AddColumn = function(st)
         local colNum = getn(st.headCols) + 1
-        local col = CreateFrame('Button', st:GetName()..'HeadCol'..colNum, st.contentFrame)
+        local col = CreateFrame('Button', st:GetName() .. 'HeadCol' .. colNum, st.contentFrame)
         if colNum == 1 then
             col:SetPoint('TOPLEFT', 0, -1)
         else
@@ -407,7 +407,7 @@ local methods = {
 function public.CreateScrollingTable(parent)
     -- create the base frame
     ST_COUNT = ST_COUNT + 1
-    local st = CreateFrame('Frame', 'TSMScrollingTable'..ST_COUNT, parent)
+    local st = CreateFrame('Frame', 'TSMScrollingTable' .. ST_COUNT, parent)
     st:SetAllPoints()
 --    st:SetScript('OnSizeChanged', function() st:Redraw() end)
 
@@ -417,14 +417,14 @@ function public.CreateScrollingTable(parent)
     st.contentFrame = contentFrame
 
     -- frame to hold the header columns and the rows
-    local scrollFrame = CreateFrame('ScrollFrame', st:GetName()..'ScrollFrame', st, 'FauxScrollFrameTemplate')
+    local scrollFrame = CreateFrame('ScrollFrame', st:GetName() .. 'ScrollFrame', st, 'FauxScrollFrameTemplate')
     scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
         FauxScrollFrame_OnVerticalScroll(ST_ROW_HEIGHT, function() st:RefreshRows() end)
     end)
     scrollFrame:SetAllPoints(contentFrame)
     st.scrollFrame = scrollFrame
 
-    local scrollBar = _G[scrollFrame:GetName()..'ScrollBar']
+    local scrollBar = _G[scrollFrame:GetName() .. 'ScrollBar']
     scrollBar:SetWidth(12)
     st.scrollBar = scrollBar
     local thumbTex = scrollBar:GetThumbTexture()
@@ -432,8 +432,8 @@ function public.CreateScrollingTable(parent)
     thumbTex:SetTexture(color.content.background())
     thumbTex:SetHeight(50)
     thumbTex:SetWidth(12)
-    _G[scrollBar:GetName()..'ScrollUpButton']:Hide()
-    _G[scrollBar:GetName()..'ScrollDownButton']:Hide()
+    _G[scrollBar:GetName() .. 'ScrollUpButton']:Hide()
+    _G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
 
     -- create head line at default position
     st.headLine = gui.horizontal_line(st, 0)

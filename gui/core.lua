@@ -33,20 +33,20 @@ function LOAD()
 			DropDownList1:ClearAllPoints()
 			DropDownList1:SetPoint('TOPLEFT', dropdown, 'BOTTOMLEFT', -2, -2)
 			for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
-				local button = _G['DropDownList1Button'..i]
+				local button = _G['DropDownList1Button' .. i]
 				button:SetPoint('TOPLEFT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
 				button:SetPoint('TOPRIGHT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
 				local text = button:GetFontString()
 				text:SetFont(font, font_size.small2)
 				text:SetPoint('TOPLEFT', 18, 0)
 				text:SetPoint('BOTTOMRIGHT', -8, 0)
-				local highlight = _G['DropDownList1Button'..i..'Highlight']
+				local highlight = _G['DropDownList1Button' .. i..'Highlight']
 				highlight:ClearAllPoints()
 				highlight:SetDrawLayer('OVERLAY')
 				highlight:SetHeight(14)
 				highlight:SetPoint('LEFT', 5, 0)
 				highlight:SetPoint('RIGHT', -3, 0)
-				local check = _G['DropDownList1Button'..i..'Check']
+				local check = _G['DropDownList1Button' .. i..'Check']
 				check:SetWidth(16)
 				check:SetHeight(16)
 				check:SetPoint('LEFT', 3, -1)
@@ -58,14 +58,14 @@ function LOAD()
 			aux_border:Hide()
 			aux_background:Hide()
 			for i = 1, UIDROPDOWNMENU_MAXBUTTONS do
-				local button = _G['DropDownList1Button'..i]
+				local button = _G['DropDownList1Button' .. i]
 				local text = button:GetFontString()
 				text:SetFont([[Fonts\FRIZQT__.ttf]], 10)
 				text:SetShadowOffset(1, -1)
-				local highlight = _G['DropDownList1Button'..i..'Highlight']
+				local highlight = _G['DropDownList1Button' .. i..'Highlight']
 				highlight:SetAllPoints()
 				highlight:SetDrawLayer('BACKGROUND')
-				local check = _G['DropDownList1Button'..i..'Check']
+				local check = _G['DropDownList1Button' .. i..'Check']
 				check:SetWidth(24)
 				check:SetHeight(24)
 				check:SetPoint('LEFT', 0, 0)
@@ -90,7 +90,7 @@ do
 	local id = 1
 	function public.name.get()
 		id = id + 1
-		return 'aux_frame'..id
+		return 'aux_frame' .. id
 	end
 end
 
@@ -454,13 +454,13 @@ function public.item(parent)
     btn:SetPoint('LEFT', 2, .5)
     btn:SetHighlightTexture(nil)
     btn:RegisterForClicks()
-    item.texture = _G[btn:GetName()..'Icon']
+    item.texture = _G[btn:GetName() .. 'Icon']
     item.texture:SetTexCoord(.06, .94, .06, .94)
     item.name = label(btn, 15)
     item.name:SetJustifyH('LEFT')
     item.name:SetPoint('LEFT', btn, 'RIGHT', 10, 0)
     item.name:SetPoint('RIGHT', item, 'RIGHT', -10, .5)
-    item.count = _G[btn:GetName()..'Count']
+    item.count = _G[btn:GetName() .. 'Count']
     item.count:SetTextHeight(17)
     return item
 end
@@ -502,17 +502,17 @@ function public.dropdown(parent)
     local dropdown = CreateFrame('Frame', name, parent, 'UIDropDownMenuTemplate')
 	set_content_style(dropdown, 0, 0, 4, 4)
 
-    _G[dropdown:GetName()..'Left']:Hide()
-    _G[dropdown:GetName()..'Middle']:Hide()
-    _G[dropdown:GetName()..'Right']:Hide()
+    _G[dropdown:GetName() .. 'Left']:Hide()
+    _G[dropdown:GetName() .. 'Middle']:Hide()
+    _G[dropdown:GetName() .. 'Right']:Hide()
 
-    local button = _G[dropdown:GetName()..'Button']
+    local button = _G[dropdown:GetName() .. 'Button']
     button:ClearAllPoints()
     button:SetScale(.9)
     button:SetPoint('RIGHT', dropdown, 0, 0)
     dropdown.button = button
 
-    local text = _G[dropdown:GetName()..'Text']
+    local text = _G[dropdown:GetName() .. 'Text']
     text:ClearAllPoints()
     text:SetPoint('RIGHT', button, 'LEFT', -2, 0)
     text:SetPoint('LEFT', 8, 0)

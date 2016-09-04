@@ -94,7 +94,7 @@ public.search_config = {
         fill = function(cell, record, count, own, expandable)
             local numAuctionsText = expandable and color.link(count) or count
             if own > 0 then
-                numAuctionsText = numAuctionsText..(' '..color.yellow('('..own..')'))
+                numAuctionsText = numAuctionsText .. (' ' .. color.yellow('(' .. own .. ')'))
             end
             cell:SetText(numAuctionsText)
         end,
@@ -262,7 +262,7 @@ public.auctions_config = {
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
+            local numAuctionsText = expandable and inline_color.link .. count .. FONT_COLOR_CODE_CLOSE or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -396,7 +396,7 @@ public.bids_config = {
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and inline_color.link..count..FONT_COLOR_CODE_CLOSE or count
+            local numAuctionsText = expandable and inline_color.link .. count .. FONT_COLOR_CODE_CLOSE or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -541,7 +541,7 @@ function percentage_color(pct)
 end
 
 function public.percentage_historical(pct, bid)
-    return (bid and inline_color.gray or percentage_color(pct))..(pct > 10000 and '>10000' or pct)..'%'..FONT_COLOR_CODE_CLOSE
+    return (bid and inline_color.gray or percentage_color(pct)) .. (pct > 10000 and '>10000' or pct) .. '%' .. FONT_COLOR_CODE_CLOSE
 end
 
 function public.time_left(code)
@@ -636,7 +636,7 @@ local methods = {
             ChatFrameEditBox:Insert(this.row.data.record.link)
         elseif not modified and button == 'RightButton' then -- TODO not when alt (how?)
             tab = 1
-            search_tab.set_filter(strlower(info.item(this.row.data.record.item_id).name)..'/exact')
+            search_tab.set_filter(strlower(info.item(this.row.data.record.item_id).name) .. '/exact')
             search_tab.execute(nil, false)
         else
             local selection = this.rt:GetSelection()
@@ -1019,7 +1019,7 @@ function public.CreateAuctionResultsTable(parent, config)
     rt.scrollFrame = scrollFrame
     FauxScrollFrame_Update(rt.scrollFrame, 0, numRows, rt.ROW_HEIGHT)
 
-    local scrollBar = _G[scrollFrame:GetName()..'ScrollBar']
+    local scrollBar = _G[scrollFrame:GetName() .. 'ScrollBar']
     scrollBar:ClearAllPoints()
     scrollBar:SetPoint('BOTTOMRIGHT', rt, -4, 4)
     scrollBar:SetPoint('TOPRIGHT', rt, -4, -HEAD_HEIGHT)
@@ -1029,8 +1029,8 @@ function public.CreateAuctionResultsTable(parent, config)
     thumbTex:SetTexture(color.content.background())
     thumbTex:SetHeight(150)
     thumbTex:SetWidth(scrollBar:GetWidth())
-    _G[scrollBar:GetName()..'ScrollUpButton']:Hide()
-    _G[scrollBar:GetName()..'ScrollDownButton']:Hide()
+    _G[scrollBar:GetName() .. 'ScrollUpButton']:Hide()
+    _G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
 
     -- create the header cells
     rt.headCells = t

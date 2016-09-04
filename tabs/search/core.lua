@@ -19,7 +19,7 @@ StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
 }
 do
     local function action()
-        _G.aux_auto_buy_filter = _G[this:GetParent():GetName()..'EditBox']:GetText()
+        _G.aux_auto_buy_filter = _G[this:GetParent():GetName() .. 'EditBox']:GetText()
         update_auto_buy_filter()
     end
 
@@ -29,7 +29,7 @@ do
         button2 = 'Cancel',
         hasEditBox = 1,
         OnShow = function()
-            local edit_box = _G[this:GetName()..'EditBox']
+            local edit_box = _G[this:GetName() .. 'EditBox']
             edit_box:SetMaxLetters(nil)
             edit_box:SetFocus()
             edit_box:HighlightText()
@@ -69,12 +69,12 @@ function CLOSE()
 end
 
 function CLICK_LINK(item_info)
-	set_filter(strlower(item_info.name)..'/exact')
+	set_filter(strlower(item_info.name) .. '/exact')
 	execute(nil, false)
 end
 
 function USE_ITEM(item_info)
-	set_filter(strlower(item_info.name)..'/exact')
+	set_filter(strlower(item_info.name) .. '/exact')
 	execute(nil, false)
 end
 
@@ -107,10 +107,10 @@ function public.add_filter(filter_string)
     old_filter_string = trim(old_filter_string)
 
     if old_filter_string ~= '' then
-        old_filter_string = old_filter_string..';'
+        old_filter_string = old_filter_string .. ';'
     end
 
-    search_box:SetText(old_filter_string..filter_string)
+    search_box:SetText(old_filter_string .. filter_string)
 end
 
 function blizzard_page_index(str)

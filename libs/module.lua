@@ -5,14 +5,14 @@ local PUBLIC, PRIVATE = 1, 2
 local CALL, INDEX, NEWINDEX = 1, 2, 3
 
 local inspect
-do  local function print(msg) DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE..msg) end
+do  local function print(msg) DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE .. msg) end
 	local mt = {__metatable=false, __pow=function(self, v) self(v); return v end}
 	function mt:__call(...)
 		for i = 1, arg.n do
-			print('arg'..i..' = '..(type(arg[i]) == 'string' and '"'..arg[i]..'"' or tostring(arg[i])))
+			print('arg' .. i..' = ' .. (type(arg[i]) == 'string' and '"' .. arg[i] .. '"' or tostring(arg[i])))
 			if type(arg[i]) == 'table' and next(arg[i]) then
 				print('{')
-				for k, v in arg[i] do print('    '..(type(k) == 'string' and k or '['..tostring(k)..']')..' = '..(type(v) == 'string' and '"'..v..'"' or tostring(v))) end
+				for k, v in arg[i] do print('    ' .. (type(k) == 'string' and k or '[' .. tostring(k) .. ']') .. ' = ' .. (type(v) == 'string' and '"' .. v..'"' or tostring(v))) end
 				print('}')
 			end
 		end
@@ -21,7 +21,7 @@ do  local function print(msg) DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE.
 	inspect = setmetatable({}, mt)
 end
 
-local function error(msg, ...) return _G.error(format(msg or '', unpack(arg))..'\n'..debugstack(), 0) end
+local function error(msg, ...) return _G.error(format(msg or '', unpack(arg)) .. '\n' .. debugstack(), 0) end
 local function import_error() error('Import error.') end
 local function declaration_error() error('Declaration error.') end
 local function collision_error(key) error('"%s" already exists.', key) end

@@ -68,7 +68,7 @@ end
 
 function public.item_query(item_id, first_page, last_page)
     for item_info in present(info.item(item_id)) do
-        local query = filter_util.query(item_info.name..'/exact')
+        local query = filter_util.query(item_info.name .. '/exact')
         query.blizzard_query.first_page = first_page
         query.blizzard_query.last_page = last_page
         return T('validator', query.validator, 'blizzard_query', query.blizzard_query)

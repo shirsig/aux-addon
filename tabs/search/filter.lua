@@ -73,7 +73,7 @@ function update_form()
 
 	if blizzard_query.exact then
 		for key in temp-S('class', 'subclass', 'slot', 'quality') do
-			M[key..'_dropdown'].button:Disable()
+			M[key .. '_dropdown'].button:Disable()
 		end
 	else
 		class_dropdown.button:Enable()
@@ -81,9 +81,9 @@ function update_form()
 	end
 	for key in temp-S('min_level', 'max_level') do
 		if blizzard_query.exact then
-			M[key..'_input']:Disable()
+			M[key .. '_input']:Disable()
 		else
-			M[key..'_input']:Enable()
+			M[key .. '_input']:Enable()
 		end
 	end
 	if blizzard_query.exact then
@@ -104,7 +104,7 @@ function get_filter_builder_query()
 
 	local function add(part)
 		if part then
-			filter_string = filter_string and filter_string..'/'..part or part
+			filter_string = filter_string and filter_string .. '/' .. part or part
 		end
 	end
 
@@ -134,7 +134,7 @@ function get_filter_builder_query()
 
 	local quality = blizzard_query.quality
 	if quality and quality >= 0 then
-		add(strlower(_G['ITEM_QUALITY'..quality..'_DESC']))
+		add(strlower(_G['ITEM_QUALITY' .. quality .. '_DESC']))
 	end
 
 	local post_filter_string = filter_util.filter_string(post_filter)
@@ -193,11 +193,11 @@ function public.formatted_post_filter(components)
 
 	for i, component in components do
 		if no_line_break then
-			str = str..' '
+			str = str .. ' '
 		elseif i > 1 then
-			str = str..'</p><p>'
+			str = str .. '</p><p>'
 			for _=1,getn(stack) do
-				str = str..color.content.background('----')
+				str = str .. color.content.background('----')
 			end
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
@@ -205,16 +205,16 @@ function public.formatted_post_filter(components)
 		local filter_color = (filter_builder_state.selected == i and color.orange or color.aux)
 		local component_text = filter_color(component[2])
 		if component[1] == 'operator' and component[2] ~= 'not' then
-			component_text = component_text..filter_color(tonumber(component[3]) or '')
+			component_text = component_text .. filter_color(tonumber(component[3]) or '')
 			tinsert(stack, component[3])
 		elseif component[1] == 'filter' then
 			for parameter in present(component[3]) do
 				if component[2] == 'item' then
-					parameter = aux.info.display_name(aux.cache.item_id(parameter)) or '['..parameter..']'
+					parameter = aux.info.display_name(aux.cache.item_id(parameter)) or '[' .. parameter .. ']'
 				elseif filter_util.filters[component[2]].input_type == 'money' then
 					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true)
 				end
-				component_text = component_text..filter_color(': ')..parameter
+				component_text = component_text .. filter_color(': ') .. parameter
 			end
 			while getn(stack) > 0 and stack[getn(stack)] do
 				local top = tremove(stack)
@@ -224,14 +224,14 @@ function public.formatted_post_filter(components)
 				end
 			end
 		end
-		str = str..data_link(i, component_text)
+		str = str .. data_link(i, component_text)
 	end
 
-	return '<html><body><p>'..str..'</p></body></html>'
+	return '<html><body><p>' .. str .. '</p></body></html>'
 end
 
 function data_link(id, str)
-	return '|H'..id..'|h'..str..'|h'
+	return '|H' .. id .. '|h' .. str .. '|h'
 end
 
 post_filter = t
@@ -266,7 +266,7 @@ function add_post_filter()
 	for str in present(filter_input:GetText()) do
 		for filter in present(filter_util.filters[str]) do
 			if filter.input_type ~= '' then
-				str = str..'/'..filter_parameter_input:GetText()
+				str = str .. '/' .. filter_parameter_input:GetText()
 			end
 		end
 		local components, error, suggestions = filter_util.parse_filter_string(str)
@@ -393,6 +393,6 @@ function initialize_quality_dropdown()
 	end
 	UIDropDownMenu_AddButton(T('text', ALL, 'value', -1, 'func', on_click))
 	for i = 0, 4 do
-		UIDropDownMenu_AddButton(T('text', _G['ITEM_QUALITY'..i..'_DESC'], 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton(T('text', _G['ITEM_QUALITY' .. i..'_DESC'], 'value', i, 'func', on_click))
 	end
 end

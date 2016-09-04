@@ -88,7 +88,7 @@ function public.item_info(item_id)
 		local cached_data = persistence.read(items_schema, data_string)
 		return T(
 			'name', cached_data.name,
-			'itemstring', 'item:'..item_id..':0:0:0',
+			'itemstring', 'item:' .. item_id .. ':0:0:0',
 			'quality', cached_data.quality,
 			'level', cached_data.level,
 			'class', cached_data.class,
@@ -157,7 +157,7 @@ function scan_wdb(item_id)
 
 	local processed = 0
 	while processed <= 100 and item_id <= MAX_ITEM_ID do
-		local itemstring = 'item:'..item_id
+		local itemstring = 'item:' .. item_id
 		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 		if name and not _G.aux_item_ids[strlower(name)] then
 			_G.aux_item_ids[strlower(name)] = item_id
@@ -193,9 +193,9 @@ function public.populate_wdb(item_id)
 		print 'Cache populated.'
 		return
 	end
-	if not GetItemInfo('item:'..item_id) then
-		print('Fetching item '..item_id..'.')
-		AuxTooltip:SetHyperlink('item:'..item_id)
+	if not GetItemInfo('item:' .. item_id) then
+		print('Fetching item ' .. item_id .. '.')
+		AuxTooltip:SetHyperlink('item:' .. item_id)
 	end
 	thread(populate_wdb, item_id + 1)
 end

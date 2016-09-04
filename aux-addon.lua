@@ -66,7 +66,7 @@ aux 'core'
 public.version = '5.0.0'
 
 function public.print(...) temp=arg
-	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE..'[aux] '..join(map(arg, tostring), ' '))
+	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '[aux] ' .. join(map(arg, tostring), ' '))
 end
 
 local bids_loaded
@@ -97,7 +97,7 @@ do
 			for _, f in handlers do f() end
 		elseif event == 'PLAYER_LOGIN' then
 			for _, f in handlers2 do f() end
-			print('v'..version..' loaded.')
+			print('v' .. version .. ' loaded.')
 		else
 			M[event]()
 		end
@@ -156,7 +156,7 @@ function public.hook(...) temp=arg
 	end
 	handler = handler or getfenv(2)[name]
 	orig[object] = orig[object] or t
-	assert(not orig[object][name], '"'..name..'" is already hooked into.')
+	assert(not orig[object][name], '"' .. name .. '" is already hooked into.')
 	orig[object][name], object[name] = object[name], handler
 	return hook
 end
@@ -255,9 +255,9 @@ end
 
 do
 	local function cost_label(cost)
-		local label = LIGHTYELLOW_FONT_COLOR_CODE..'(Total Cost: '..FONT_COLOR_CODE_CLOSE
-		label = label..(cost and aux.money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE..'---'..FONT_COLOR_CODE_CLOSE)
-		label = label..LIGHTYELLOW_FONT_COLOR_CODE..')'..FONT_COLOR_CODE_CLOSE
+		local label = LIGHTYELLOW_FONT_COLOR_CODE .. '(Total Cost: ' .. FONT_COLOR_CODE_CLOSE
+		label = label .. (cost and aux.money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE)
+		label = label .. LIGHTYELLOW_FONT_COLOR_CODE .. ')' .. FONT_COLOR_CODE_CLOSE
 		return label
 	end
 	function ADDON_LOADED.Blizzard_CraftUI()
@@ -275,7 +275,7 @@ do
 				local item_id, suffix_id = aux.info.parse_link(link)
 				local count = select(3, GetCraftReagentInfo(id, i))
 				local _, price, limited = aux.cache.merchant_info(item_id)
-				local value = price and not limited and price or aux.history.value(item_id..':'..suffix_id)
+				local value = price and not limited and price or aux.history.value(item_id .. ':' .. suffix_id)
 				if not value then
 					total_cost = nil
 					break
@@ -283,7 +283,7 @@ do
 					total_cost = total_cost + value * count
 				end
 			end
-			CraftReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
+			CraftReagentLabel:SetText(SPELL_REAGENTS .. ' ' .. cost_label(total_cost))
 			return unpack(ret)
 		end)
 	end
@@ -302,7 +302,7 @@ do
 				local item_id, suffix_id = aux.info.parse_link(link)
 				local count = select(3, GetTradeSkillReagentInfo(id, i))
 				local _, price, limited = aux.cache.merchant_info(item_id)
-				local value = price and not limited and price or aux.history.value(item_id..':'..suffix_id)
+				local value = price and not limited and price or aux.history.value(item_id .. ':' .. suffix_id)
 				if not value then
 					total_cost = nil
 					break
@@ -310,7 +310,7 @@ do
 					total_cost = total_cost + value * count
 				end
 			end
-			TradeSkillReagentLabel:SetText(SPELL_REAGENTS..' '..cost_label(total_cost))
+			TradeSkillReagentLabel:SetText(SPELL_REAGENTS .. ' ' .. cost_label(total_cost))
 			return unpack(ret)
 		end)
 	end

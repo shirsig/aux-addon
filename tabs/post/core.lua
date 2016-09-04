@@ -273,7 +273,7 @@ function update_item_configuration()
         historical_value_button:Hide()
         hide_checkbox:Hide()
 
---        deposit:SetText('Deposit: '..money.to_string(0, nil, nil, nil, gui.inline_color.text.enabled))
+--        deposit:SetText('Deposit: ' .. money.to_string(0, nil, nil, nil, gui.inline_color.text.enabled))
 --        set_unit_start_price(0)
 --        set_unit_buyout_price(0)
     else
@@ -287,7 +287,7 @@ function update_item_configuration()
         hide_checkbox:Show()
 
         item.texture:SetTexture(selected_item.texture)
-        item.name:SetText('['..selected_item.name..']')
+        item.name:SetText('[' .. selected_item.name .. ']')
         local color = ITEM_QUALITY_COLORS[selected_item.quality]
         item.name:SetTextColor(color.r, color.g, color.b)
 		if selected_item.aux_quantity > 1 then
@@ -303,7 +303,7 @@ function update_item_configuration()
             local deposit_factor = neutral_faction() and .25 or .05
             local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
-            deposit:SetText('Deposit: '..aux.money.to_string(amount, nil, nil, nil, inline_color.text.enabled))
+            deposit:SetText('Deposit: ' .. aux.money.to_string(amount, nil, nil, nil, inline_color.text.enabled))
         end
 
         refresh_button:Enable()
@@ -438,7 +438,7 @@ end
 function refresh_entries()
 	if selected_item then
 		local item_id, suffix_id = selected_item.item_id, selected_item.suffix_id
-        local item_key = item_id..':'..suffix_id
+        local item_key = item_id .. ':' .. suffix_id
         existing_auctions[item_key] = nil
         local query = scan_util.item_query(item_id)
         status_bar:update_status(0,0)
