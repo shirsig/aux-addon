@@ -25,8 +25,13 @@ function release(t)
 	else
 		overflow_pool[t] = true
 	end
+	return
 end
 public.release = release
+
+function public.bk(t)
+	if getn(t) > 0 then return tremove(t, 1), bk(t) else release(t) end
+end
 
 function acquire()
 	if pool_size > 0 then
@@ -84,4 +89,16 @@ do  local SET, ARRAY, ARRAY0, TABLE = 1, 2, 3, 4
 		return function() return setmetatable(t, mt) end
 	end
 	public(); S.get = getter(SET); A.get = getter(ARRAY); A0.get = getter(ARRAY0); T.get = getter(TABLE)
+end
+
+do local chunk = 'return function(i'
+	for i = 1, 99 do chunk = chunk..',a'..i end
+	chunk = chunk..')'
+	for i = 1, 99 do
+		chunk = format('%s if i == %d then return a%i', chunk, i, i)
+		for j = i + 1, 99 do chunk = chunk..',a'..j end
+		chunk = chunk..' end'
+	end
+	chunk = chunk..' end'
+	public.select = loadstring(chunk)()
 end

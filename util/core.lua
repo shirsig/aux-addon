@@ -22,9 +22,7 @@ do
 		state = nil
 		return temp
 	end
-	function public.present(v)
-		state = v; return f
-	end
+	function public.present(v) state = v; return f end
 end
 
 do
@@ -67,18 +65,6 @@ public.huge = 1.8*10^308
 
 function public.modified.get() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end
 
---do TODO
---	local _state = setmetatable({}, {__mode='kv'})
---	local __index = function(self, key)
---		return _state[self].handler({public=self, private=_state[self].state}, key)
---	end
---	function public.class(state, handler)
---		local state, self = {handler=handler, state=state}, {}
---		_state[self] = state
---		return setmetatable(self, {__metatable=false, __index=__index, state=state})
---	end
---end
-
 do
 	local _state = setmetatable(t, T('__mode', 'kv'))
 	local __index = function(self, key)
@@ -91,38 +77,11 @@ do
 	end
 end
 
-function public.expand(array, ...) temp=arg
-	local t = t
-	for i = 1, arg.n do t[arg[i]] = array[i] end
-	return t
-end
-
 function public.copy(t)
 	local copy = M.t
 	for k, v in t do copy[k] = v end
 	table.setn(copy, getn(t))
 	return setmetatable(copy, getmetatable(t))
-end
-
-function public.select(i, ...) temp=arg
-	while i > 1 do i = i - 1; tremove(arg, i) end
-	return tremove(arg, 1), unpack(arg)
-end
-
-function public.collect(indices, ...) temp=arg
-	local t = M.t
-	for _, v in indices do
-		tinsert(t, arg[v])
-	end
-	return t
-end
-
-function public.hashset(t)
-	local set = M.t
-	for _, v in t do
-		set[v] = true
-	end
-	return set
 end
 
 function public.size(t)
@@ -132,12 +91,10 @@ function public.size(t)
 end
 
 function public.key(value, t)
-	for k, v in t do
-		if v == value then return k end
-	end
+	for k, v in t do if v == value then return k end end
 end
 
-function public.keys(t)
+function public.keys(t) -- TODO recursive return instead of new table
 	local keys = M.t
 	for k in t do tinsert(keys, k) end
 	return keys
@@ -152,14 +109,10 @@ end
 function public.eq(t1, t2)
 	if not t1 or not t2 then return false end
 	for key, value in t1 do
-		if t2[key] ~= value then
-			return false
-		end
+		if t2[key] ~= value then return false end
 	end
 	for key, value in t2 do
-		if t1[key] ~= value then
-			return false
-		end
+		if t1[key] ~= value then return false end
 	end
 	return true
 end
@@ -178,9 +131,7 @@ end
 function public.all(t, p)
 	for _, v in t do
 		if p then
-			if not p(v) then
-				return false
-			end
+			if not p(v) then return false end
 		elseif not v then
 			return false
 		end
@@ -190,9 +141,7 @@ end
 
 function public.filter(t, p)
 	for k, v in t do
-		if not p(v, k) then
-			t[k] = nil
-		end
+		if not p(v, k) then t[k] = nil end
 	end
 	return t
 end
@@ -202,14 +151,12 @@ function public.map(t, f)
 	return t
 end
 
-function public.trim(str)
-	return gsub(str, '^%s*(.-)%s*$', '%1')
-end
+function public.trim(str) return gsub(str, '^%s*(.-)%s*$', '%1') end
 
 function public.split(str, separator)
 	local parts = t
 	while true do
-		local start_index, _ = strfind(str, separator, 1, true)
+		local start_index = strfind(str, separator, 1, true)
 		if start_index then
 			local part = strsub(str, 1, start_index - 1)
 			tinsert(parts, part)
@@ -238,7 +185,6 @@ function public.later(t0, t)
 	return function() return GetTime() - t0 > t end
 end
 
-function public.signal()
-	local params
+function public.signal() local params
 	return function(...) params = arg end, function() return params end
 end
