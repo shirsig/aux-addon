@@ -2,10 +2,6 @@ aux 'core'
 
 public.join = _G.table.concat
 
-do local mt = {__index=function(self, key) setmetatable(self, nil); return getfenv(2)[key] end}
-	function public.__(t) return setmetatable(t, mt) end
-end
-
 function public.range(arg1, arg2)
 	local i, n = arg2 and arg1 or 1, arg2 or arg1
 	if i <= n then return first, range(i + 1, n) end
