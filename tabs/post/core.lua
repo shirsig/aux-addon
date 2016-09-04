@@ -1,4 +1,4 @@
-aux 'post_tab' private() local scan, scan_util, history, info, persistence, item_listing, al, sorting = aux.scan, aux.scan_util, aux.history, aux.info, aux.persistence, aux.item_listing, aux.auction_listing, aux.sorting
+aux 'post_tab' local scan, scan_util, history, info, persistence, item_listing, al, sorting = aux.scan, aux.scan_util, aux.history, aux.info, aux.persistence, aux.item_listing, aux.auction_listing, aux.sorting
 
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
@@ -32,21 +32,18 @@ end
 
 local scan_id, inventory_records, existing_auctions = 0, t, t
 
-do
-	local item
-	selected_item
-	{
-		get = function() return item end,
-		set = function(v) item = v end,
-	}
+function refresh_button_click()
+	aux.scan.abort(scan_id)
+	refresh_entries()
+	refresh = true
 end
-do
-	local c = 0
-	refresh
-	{
-		get = function() return c end,
-		set = function(v) c = v end,
-	}
+
+do local item
+	selected_item {get=function() return item end, set=function(v) item = v end}
+end
+
+do local c = 0
+	refresh {get=function() return c end, set=function(v) c = v end}
 end
 
 function LOAD()

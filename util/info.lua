@@ -1,4 +1,4 @@
-aux 'info' private()
+aux 'info'
 
 CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
 AuxTooltip:SetScript('OnTooltipAddMoney', function()

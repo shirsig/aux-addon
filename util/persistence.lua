@@ -1,4 +1,4 @@
-aux 'persistence' private()
+aux 'persistence'
 
 _G.aux_datasets = t
 

@@ -1,4 +1,4 @@
-aux 'auction_listing' private() local gui, sorting, money, info = aux.gui, aux.sorting, aux.money, aux.info
+aux 'auction_listing' local gui, sorting, money, info = aux.gui, aux.sorting, aux.money, aux.info
 
 _G.aux_price_per_unit = false
 

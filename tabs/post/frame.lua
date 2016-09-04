@@ -1,4 +1,4 @@
-aux 'post_tab' private() local gui, listing, item_listing, money, search_tab = aux.gui, aux.listing, aux.item_listing, aux.money, aux.search_tab
+aux 'post_tab' local gui, listing, item_listing, money, search_tab = aux.gui, aux.listing, aux.item_listing, aux.money, aux.search_tab
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, aux_frame)
@@ -103,11 +103,7 @@ function create_frames()
 	    btn:SetWidth(80)
 	    btn:SetHeight(24)
 	    btn:SetText('Refresh')
-	    btn:SetScript('OnClick', function()
-	        aux.scan.abort(scan_id)
-	        refresh_entries()
-	        refresh = true
-	    end)
+	    btn:SetScript('OnClick', refresh_button_click)
 	    refresh_button = btn
 	end
 	do

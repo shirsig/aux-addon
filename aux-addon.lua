@@ -1,17 +1,18 @@
 --aux_account_settings = {} -- TODO clean up the mess of savedvariables
 --aux_character_settings = {}
 
-do
-	local modules = {}
+do  local modules = {}
+	local mt = {__metatable=false, __index=function(_, key) return modules[key].I end, __newindex=error}
 	aux = function(name)
 		if not modules[name] then
 			(function()
 				modules[name] = module and M
 				import (green_t)
-				private.aux = setmetatable({}, {__metatable=false, __index=function(_, key) return modules[key].I end, __newindex=error})
+				private.aux = setmetatable(t, mt)
 			end)()
 		end
 		modules[name].import (modules.core.I)
+		modules[name].private()
 		setfenv(2, modules[name])
 	end
 end
@@ -60,7 +61,7 @@ end
 --	end
 --end
 
-aux 'core' private()
+aux 'core'
 
 public.version = '5.0.0'
 

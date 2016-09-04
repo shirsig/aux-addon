@@ -1,4 +1,4 @@
-aux 'item_listing' private() local gui, info = aux.gui, aux.info
+aux 'item_listing' local gui, info = aux.gui, aux.info
 
 local ROW_HEIGHT = 39
 

@@ -1,4 +1,4 @@
-aux 'search_tab' private() local gui, completion, listing, auction_listing, filter_util = aux.gui, aux.completion, aux.listing, aux.auction_listing, aux.filter_util
+aux 'search_tab' local gui, completion, listing, auction_listing, filter_util = aux.gui, aux.completion, aux.listing, aux.auction_listing, aux.filter_util
 
 FILTER_SPACING = 28.5
 

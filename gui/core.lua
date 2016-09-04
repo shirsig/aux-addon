@@ -1,4 +1,4 @@
-aux 'gui' private()
+aux 'gui'
 
 function LOAD()
 	do

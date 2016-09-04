@@ -1,4 +1,4 @@
-aux 'core' private() local gui = aux.gui
+aux 'core' local gui = aux.gui
 
 function LOAD()
 	for _, info in tab_info do tabs:create_tab(info.name) end

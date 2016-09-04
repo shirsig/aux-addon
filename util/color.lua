@@ -1,4 +1,4 @@
-aux 'core' private()
+aux 'core'
 
 COLORS = {
 	text = {enabled = {255, 254, 250, 1}, disabled = {147, 151, 139, 1}},

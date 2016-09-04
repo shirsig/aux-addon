@@ -1,4 +1,4 @@
-aux 'disenchant' private()
+aux 'disenchant'
 
 UNCOMMON, RARE, EPIC = 2, 3, 4
 

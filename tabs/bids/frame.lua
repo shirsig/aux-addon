@@ -1,4 +1,4 @@
-aux 'bids_tab' private() local gui, auction_listing = aux.gui, aux.auction_listing
+aux 'bids_tab' local gui, auction_listing = aux.gui, aux.auction_listing
 
 function create_frames()
 	frame = CreateFrame('Frame', nil, aux_frame)

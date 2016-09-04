@@ -1,4 +1,4 @@
-aux 'search_tab' private()
+aux 'search_tab'
 
 _G.aux_favorite_searches = t
 _G.aux_recent_searches = t

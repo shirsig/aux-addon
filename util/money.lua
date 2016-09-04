@@ -1,4 +1,4 @@
-aux 'money' private()
+aux 'money'
 
 public()
 GOLD_TEXT = '|cffffd70ag|r'

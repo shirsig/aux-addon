@@ -1,4 +1,4 @@
-aux 'post' private()
+aux 'post'
 
 local state = nil
 
