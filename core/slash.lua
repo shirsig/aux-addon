@@ -1,5 +1,7 @@
 aux 'slash' local persistence = aux.persistence
 
+_G.aux_ignore_owner = true
+
 _G.SLASH_AUX1 = '/aux'
 function _G.SlashCmdList.AUX(command)
 	if not command then return end
@@ -11,18 +13,18 @@ function _G.SlashCmdList.AUX(command)
         persistence.dataset.post = nil
         print 'Post settings cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'datasets' then
-        _G.aux_datasets = {}
+        _G.aux_datasets = t
         print 'Datasets cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'merchant' and arguments[3] == 'buy' then
-	    _G.aux_merchant_buy = {}
+	    _G.aux_merchant_buy = t
         print 'Merchant buy prices cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'merchant' and arguments[3] == 'sell' then
-	    _G.aux_merchant_sell = {}
+	    _G.aux_merchant_sell = t
         print 'Merchant sell prices cleared.'
     elseif arguments[1] == 'clear' and arguments[2] == 'item' and arguments[3] == 'cache' then
-	    _G.aux_items = {}
-	    _G.aux_item_ids = {}
-	    _G.aux_auctionable_items = {}
+	    _G.aux_items = t
+	    _G.aux_item_ids = t
+	    _G.aux_auctionable_items = t
         print 'Item cache cleared.'
     elseif arguments[1] == 'populate' and arguments[2] == 'wdb' then
         aux.cache.populate_wdb()
@@ -52,7 +54,7 @@ function _G.SlashCmdList.AUX(command)
         print('Ignoring of owner '..(_G.aux_ignore_owner and 'enabled' or 'disabled')..'.')
     elseif arguments[1] == 'chars' and arguments[2] == 'add' then
 		local realm = GetCVar('realmName')
-		_G.aux_characters[realm] = _G.aux_characters[realm] or {}
+		_G.aux_characters[realm] = _G.aux_characters[realm] or t
 		for i = 3, getn(arguments) do
 			local name = gsub(strlower(arguments[i]), '^%l', strupper)
 			if not _G.aux_characters[realm][name] then
@@ -74,14 +76,14 @@ function _G.SlashCmdList.AUX(command)
 		end
 	elseif arguments[1] == 'chars' then
 		local realm = GetCVar('realmName')
-		local chars = {}
-		for name in _G.aux_characters[realm] or {} do
+		local chars = t
+		for name in _G.aux_characters[realm] or t do
 			tinsert(chars, name)
 		end
 		if getn(chars) > 0 then
 			print('Your characters: "'..join(chars, ', ')..'".')
 		else
-			print('You don\'t have any additional characters. To add your characters type "/aux chars add NAME1 NAME2 NAME3...".')
+			print 'You don\'t have any additional characters. To add your characters type "/aux chars add NAME1 NAME2 NAME3...".'
 		end
 	else
 		print('Unknown command: "'..command..'"')
