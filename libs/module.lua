@@ -5,21 +5,20 @@ local PUBLIC, PRIVATE = 1, 2
 local CALL, INDEX, NEWINDEX = 1, 2, 3
 
 local inspect
-do local function print(msg) DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE..msg) end
-	inspect = setmetatable({}, {
-		__call=function(_, ...)
-			for i = 1, arg.n do
-				print('arg'..i..' = '..(type(arg[i]) == 'string' and '"'..arg[i]..'"' or tostring(arg[i])))
-				if type(arg[i]) == 'table' and next(arg[i]) then
-					print('{')
-					for k, v in arg[i] do print('    '..(type(k) == 'string' and k or '['..tostring(k)..']')..' = '..(type(v) == 'string' and '"'..v..'"' or tostring(v))) end
-					print('}')
-				end
+do  local function print(msg) DEFAULT_CHAT_FRAME:AddMessage(RED_FONT_COLOR_CODE..msg) end
+	local mt = {__metatable=false, __pow=function(self, v) self(v); return v end}
+	function mt:__call(...)
+		for i = 1, arg.n do
+			print('arg'..i..' = '..(type(arg[i]) == 'string' and '"'..arg[i]..'"' or tostring(arg[i])))
+			if type(arg[i]) == 'table' and next(arg[i]) then
+				print('{')
+				for k, v in arg[i] do print('    '..(type(k) == 'string' and k or '['..tostring(k)..']')..' = '..(type(v) == 'string' and '"'..v..'"' or tostring(v))) end
+				print('}')
 			end
-			return unpack(arg)
-		end,
-		__pow=function(self, v) self(v); return v end,
-	})
+		end
+		return unpack(arg)
+	end
+	inspect = setmetatable({}, mt)
 end
 
 local function error(msg, ...) return _G.error(format(msg or '', unpack(arg))..'\n'..debugstack(), 0) end
@@ -103,8 +102,8 @@ setmetatable(_G, {
 		if key ~= 'module' then return nil end
 		local interface, environment, declarator = INTERFACE {}, ENVIRONMENT {}, DECLARATOR {}
 		local self; self = {
-			access = {pp=PRIVATE, _G=PRIVATE, I=PRIVATE, M=PRIVATE, public=PRIVATE, private=PRIVATE, import=PRIVATE, _=PRIVATE, p=PRIVATE, error=PRIVATE, nop=PRIVATE},
-			[CALL] = {pp=function(o) inspect(o == ENVIRONMENT) end, _G=_G, I=interface, M=environment, import=function(interface) import(self, interface) end, p=inspect, error=error, nop=nop},
+			access = {_G=PRIVATE, I=PRIVATE, M=PRIVATE, public=PRIVATE, private=PRIVATE, import=PRIVATE, _=PRIVATE, p=PRIVATE, error=PRIVATE, nop=PRIVATE},
+			[CALL] = {_G=_G, I=interface, M=environment, import=function(interface) import(self, interface) end, p=inspect, error=error, nop=nop},
 			[INDEX] = {public=function() return declarator.public end, private=function() return declarator.private end},
 			[NEWINDEX] = {p=inspect, _=nop},
 			declarator = declarator,
