@@ -162,35 +162,35 @@ function public.distribution(slot, quality, level)
         end
     elseif quality == RARE then
         if level <= 20 then
-            return A({item_id=10978, min_quantity=1, max_quantity=1, probability=1}) -- TODO
+            return A(T('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 25 then
-            return A({item_id=11084, min_quantity=1, max_quantity=1, probability=1})
+            return A(T('item_id', 11084, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 30 then
-            return A({item_id=11138, min_quantity=1, max_quantity=1, probability=1})
+            return A(T('item_id', 11138, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 35 then
-            return A({item_id=11139, min_quantity=1, max_quantity=1, probability=1})
+            return A(T('item_id', 11139, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 40 then
-            return A({item_id=11177, min_quantity=1, max_quantity=1, probability=1})
+            return A(T('item_id', 11177, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 45 then
-            return A({item_id=11178, min_quantity=1, max_quantity=1, probability=1})
+            return A(T('item_id', 11178, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 50 then
-            return A({item_id=14343, min_quantity=1, max_quantity=1, probability=1})
+            return A(T('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 55 then
-            return A({item_id=14344, min_quantity=1, max_quantity=1, probability=.995}, {item_id=20725, min_quantity=1, max_quantity=1, probability=.005})
+            return A(T('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), T('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
         elseif level <= 60 then
-            return A({item_id=14344, min_quantity=1, max_quantity=1, probability=.995}, {item_id=20725, min_quantity=1, max_quantity=1, probability=.005})
+            return A(T('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), T('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
         end
     elseif quality == EPIC then
         if level <= 40 then
-            return A({item_id=11177, min_quantity=2, max_quantity=4, probability=1})
+            return A(T('item_id', 11177, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
         elseif level <= 45 then
-            return A({item_id=11178, min_quantity=2, max_quantity=4, probability=1})
+            return A(T('item_id', 11178, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
         elseif level <= 50 then
-            return A({item_id=14343, min_quantity=2, max_quantity=4, probability=1})
+            return A(T('item_id', 14343, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
         elseif level <= 55 then
-            return A({item_id=20725, min_quantity=1, max_quantity=1, probability=1})
+            return A(T('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 60 then
-            return A({item_id=20725, min_quantity=1, max_quantity=2, probability=1})
+            return A(T('item_id', 20725, 'min_quantity', 1, 'max_quantity', 2, 'probability', 1))
         end
     end
     return t
