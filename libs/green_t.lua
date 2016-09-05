@@ -125,7 +125,6 @@ do
 	public.T.get = pseudo_literal'kv'
 end
 
-p = T('koo', 1, 5, 'mooo')
 do
 	local body = ''
 	for i = 2, 100 do

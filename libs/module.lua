@@ -68,7 +68,7 @@ do
 		elseif access or nil_error() then self.default_access = access end
 		self.declaration_access, self.declaration_name = nil, nil
 	end
-	DECLARATOR.__tostring = function() return 'NIL' end
+	DECLARATOR.__tostring = function() return 'nil table' end
 end
 
 local function import(self, interface)
@@ -80,19 +80,18 @@ local function import(self, interface)
 	end
 end
 
-setmetatable(_G, {
-	__index = function(_, key)
-		if key ~= 'module' then return nil end
-		local interface, environment, declarator = INTERFACE {}, ENVIRONMENT {}, DECLARATOR {}
-		local self; self = {
-			access = {_G=PRIVATE, I=PRIVATE, M=PRIVATE, public=PRIVATE, private=PRIVATE, import=PRIVATE, _=PRIVATE, p=PRIVATE, error=PRIVATE, nop=PRIVATE},
-			[CALL] = {_G=_G, I=interface, M=environment, import=function(interface) import(self, interface) end, p=inspect, error=error, nop=nop},
-			[INDEX] = {public=function() return declarator.public end, private=function() return declarator.private end},
-			[NEWINDEX] = {p=inspect, _=nop},
-			declarator = declarator,
-		}
-		state[interface], state[environment], state[declarator] = self, self, self
-		setfenv(2, environment)
-		return interface
-	end,
-})
+local mt = {}; setmetatable(_G, mt)
+function mt:__index(key)
+	if key ~= 'module' then return nil end
+	local interface, environment, declarator = INTERFACE {}, ENVIRONMENT {}, DECLARATOR {}
+	self = {
+		access = {_G=PRIVATE, I=PRIVATE, M=PRIVATE, public=PRIVATE, private=PRIVATE, import=PRIVATE, _=PRIVATE, error=PRIVATE, nop=PRIVATE},
+		[CALL] = {_G=_G, I=interface, M=environment, import=function(interface) import(self, interface) end, error=error, nop=nop},
+		[INDEX] = {public=function() return declarator.public end, private=function() return declarator.private end},
+		[NEWINDEX] = {_=nop},
+		declarator = declarator,
+	}
+	state[interface], state[environment], state[declarator] = self, self, self
+	setfenv(2, environment)
+	return interface
+end

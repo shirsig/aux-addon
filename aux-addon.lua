@@ -9,6 +9,7 @@ do  local modules = {}
 				modules[name] = module and M
 				import (green_t)
 				private.aux = setmetatable(t, mt)
+				private.p.set = inspect
 			end)()
 		end
 		modules[name].import (modules.core.I)
@@ -32,6 +33,7 @@ local current_owner_page
 function public.current_owner_page.get() return current_owner_page end
 
 local event_frame = CreateFrame('Frame')
+
 for event in temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
 end
@@ -39,13 +41,13 @@ end
 ADDON_LOADED = t
 do
 	local handlers, handlers2 = t, t
-	function public.LOAD.set(f) handlers[f] = true end
+	function public.LOAD.set(f) tinsert(handlers, f) end
 	function public.LOAD2.set(f) handlers2[f] = true end
 	event_frame:SetScript('OnEvent', function()
 		if event == 'ADDON_LOADED' then
 			(ADDON_LOADED[arg1] or nop)()
 		elseif event == 'VARIABLES_LOADED' then
-			for f in handlers do f() end
+			for _, f in handlers do f() end
 		elseif event == 'PLAYER_LOGIN' then
 			for f in handlers2 do f() end
 			print('v' .. version .. ' loaded.')
@@ -151,7 +153,7 @@ end
 
 function public.is_player(name, current)
 	local realm = GetCVar('realmName')
-	return not current and index(_G.aux_characters, realm, name) or UnitName 'player' == name
+	return not current and index(_G.aux_characters, realm, name) or UnitName('player') == name
 end
 
 function public.neutral_faction()
@@ -269,6 +271,6 @@ end
 
 function AuctionFrameAuctions_OnEvent(...) temp=arg
     if AuctionFrameAuctions:IsVisible() then
-        return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
+	    return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end
 end
