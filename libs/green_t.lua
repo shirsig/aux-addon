@@ -1,5 +1,5 @@
---green_t = module
-setglobal('green_t', green_t and error(nil) or module)
+green_t = module
+--setglobal('green_t', green_t and error(nil) or module)
 
 local next, setn, type, setmetatable = next, table.setn, type, setmetatable
 local wipe, release, acquire, acquire_temp, empty
@@ -12,9 +12,10 @@ CreateFrame('Frame'):SetScript('OnUpdate', function()
 end)
 
 function wipe(t)
-	setmetatable(t, nil); setn(t, 0)
+	setmetatable(t, nil)
 	for k in t do t[k] = nil end
 	t.reset, t.reset = nil, 1
+	setn(t, 0)
 	return t
 end
 public.wipe = wipe
@@ -28,7 +29,6 @@ function release(t)
 	else
 		overflow_pool[t] = true
 	end
-	return
 end
 public.release = release
 
@@ -134,6 +134,6 @@ end
 --end
 
 function public.select(i, ...) temp=arg
-while i > 1 do i = i - 1; tremove(arg, i) end
-return tremove(arg, 1), unpack(arg)
+	while i > 1 do i = i - 1; tremove(arg, i) end
+	return tremove(arg, 1), unpack(arg)
 end
