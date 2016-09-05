@@ -1,5 +1,49 @@
 aux 'core'
 
+--do
+--	local call_method, call_self
+--	local function generic_call(...)
+--		return call_method(call_self, unpack(arg))
+--	end
+--
+--	local state = setmetatable({}, {__mode='k'})
+--	local mt = {__metatable=false}
+--	function mt:__index(self, key) self=state[self]
+--	local getter = self.class.getters[key]
+--	if getter then return getter(self.self) end
+--	local method = self.class.methods[key]
+--	if method then
+--		call_method, call_self = method, self.self
+--		return generic_call
+--	end
+--	end
+--	function mt:__newindex(self, key, value) self=state[self]
+--	local setter = self.class.setters[key]
+--	if setter then return setter(self.self, value) end
+--	end
+--	--	function mt:__unm(self) self=state[self]
+--	--		reclaim()
+--	--	end
+--	local function instantiate(methods, getters, setters, init, arg)
+--		local interface = setmetatable({}, mt)
+--		local self = {I=interface}; init(self, unpack(arg))
+--		state[interface] = {class={methods=methods, getters=getters, setters=setters}, self=self}
+--		return interface
+--	end
+--	function public.class(methods, getters, setters, init)
+--		return function(arg) instantiate(methods, getters, setters, init, arg) end
+--	end
+--end
+--
+--do
+--	local state = {}
+--	local mt = {__metatable=false, __newindex=error}
+--	function mt:__index(key) return state[self][key] end
+--	function public.immutable(t)
+--		return class({}, t, {}, function() end, {})
+--	end
+--end
+
 public.join = _G.table.concat
 
 function public.range(arg1, arg2)
@@ -46,7 +90,7 @@ do
 		else
 --			body = gsub(body, '_([ab])', function(char) return '_' ..  end)
 --			local lambda = loadstring('return function(_1,_2,_3,_4,_5,_6,_7,_8,_9)' .. body .. ' end')
-			local lambda = loadstring('return ' .. body) or loadstring(body)
+			local lambda = loadstring('return ' .. body) or loadstring(body) or error()
 			setfenv(lambda, getfenv(2))
 			return lambda
 		end

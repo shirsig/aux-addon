@@ -1,6 +1,6 @@
 aux 'scan' local info, history = aux.info, aux.history
 
-PAGE_SIZE = 50
+local PAGE_SIZE = 50
 
 do
 	local scan_states = t
@@ -38,8 +38,7 @@ do
 	end
 
 	function private.state.get()
-		local _, state = next(filter(copy(scan_states), function(state) return state.id == thread_id end))
-		return state
+		for _, state in scan_states do if state.id == thread_id then return state end end
 	end
 end
 
@@ -47,8 +46,7 @@ function private.query.get() return state.params.queries[state.query_index] end
 
 function wait_for_callback(...) temp=arg
 	local send_signal, signal_received = signal()
-	local suspended
-	local ret
+	local suspended, ret
 
 	local f = tremove(arg, 1)
 	local k = tremove(arg)
@@ -60,9 +58,7 @@ function wait_for_callback(...) temp=arg
 		})
 		f(unpack(arg))
 	end
-	if not suspended then
-		send_signal()
-	end
+	if not suspended then send_signal() end
 
 	return when(signal_received, function() return k(unpack(signal_received())) end)
 end
@@ -92,11 +88,7 @@ function scan()
 end
 
 function process_query()
-	if query.blizzard_query then
-		return submit_query()
-	else
-		return scan_page()
-	end
+	return (query.blizzard_query and submit_query or scan_page)()
 end
 
 function submit_query()
@@ -226,9 +218,7 @@ end
 function owner_data_complete(type)
     for i = 1, PAGE_SIZE do
         local auction_info = info.auction(i, type)
-        if auction_info and not auction_info.owner then
-            return false
-        end
+        if auction_info and not auction_info.owner then return false end
     end
     return true
 end

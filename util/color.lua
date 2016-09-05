@@ -33,7 +33,7 @@ do
 	end
 	function color_accessor(callback)
 		return function()
-			return index_function({callback=callback, table=COLORS}, index_handler)
+			return index_function(__(tt) :callback(callback) :table(COLORS), index_handler)
 		end
 	end
 end
@@ -51,7 +51,7 @@ do
 	}
 	public.color.get = color_accessor(function(color)
 		local r, g, b, a = unpack(color)
-		return setmetatable({r/255, g/255, b/255, a}, mt)
+		return setmetatable(A(r/255, g/255, b/255, a), mt)
 	end)
 end
 
