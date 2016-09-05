@@ -90,15 +90,15 @@ function public.pseudo_vararg_function(body, upvals)
 end
 
 local function insert_chunk(mode)
-	local body = ''
+	local body = 'repeat '
 	if mode == 'k' then
 		for i = 2, 99 do
-			body = body .. format('if a%1$d == nil then return end; a1[a%1$d] = true;', i)
+			body = body .. format('if a%1$d == nil then break end; a1[a%1$d] = true;', i)
 		end
 	elseif mode == 'v' then
-		body = body .. 'if a2 == nil then return end; a1[1] = a2;'
+		body = body .. 'if a2 == nil then break end; a1[1] = a2;'
 		for i = 3, 99 do
-			body = body .. format('if a%1$d == nil then setn(a1, %d); return end; a1[%d] = a%1$d;', i, i-2, i-1)
+			body = body .. format('if a%1$d == nil then setn(a1, %d); break end; a1[%d] = a%1$d;', i, i-2, i-1)
 		end
 	elseif mode == 'v0' then
 		body = body .. 'setn(a1, 98);'
@@ -107,19 +107,16 @@ local function insert_chunk(mode)
 		end
 	elseif mode == 'kv' then
 		for i = 2, 98, 2 do
-			body = body .. format('if a%1$d == nil then return end; a1[a%1$d] = a%d;', i, i+1)
+			body = body .. format('if a%1$d == nil then break end; a1[a%1$d] = a%d;', i, i+1)
 		end
 	end
-	return body .. 'if a100 ~= nil then error"Overflow." end;'
+	return body .. 'if a100 ~= nil then error"Overflow." end until false;'
 end
 
 do
 	local function pseudo_literal(mode)
 		local upvals = {setmetatable=setmetatable, setn=table.setn, error=error}
-		local mt = {
-			__newindex = nop,
-			__call = pseudo_vararg_function(insert_chunk(mode) .. 'setmetatable(a1, nil); return a1', upvals)
-		}
+		local mt = {__call = pseudo_vararg_function(insert_chunk(mode) .. 'setmetatable(a1, nil); return a1', upvals)}
 		return function() return setmetatable(acquire_temp(), mt) end
 	end
 	public.S.get = pseudo_literal'k'
@@ -128,6 +125,7 @@ do
 	public.T.get = pseudo_literal'kv'
 end
 
+p = T('koo', 1, 5, 'mooo')
 do
 	local body = ''
 	for i = 2, 100 do

@@ -33,7 +33,7 @@ do
 	end
 	function color_accessor(callback)
 		return function()
-			return index_function(__(tt) :callback(callback) :table(COLORS), index_handler)
+			return index_function({callback=callback, table=COLORS}, index_handler)
 		end
 	end
 end
