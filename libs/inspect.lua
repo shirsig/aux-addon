@@ -11,13 +11,17 @@ local function format_value(v)
 end
 
 local function print_table(t, max_depth, depth)
-	local indent = strrep(' ', depth * 4)
+	local padding = strrep(' ', depth * 4)
 	for k, v in t do
-		print(indent .. format_key(k) .. ' = ' .. format_value(v))
-		if type(v) == 'table' and next(v) and depth < max_depth then
-			print(indent .. '{')
+		if depth == max_depth then
+			print(padding .. '...')
+			return
+		end
+		print(padding .. format_key(k) .. ' = ' .. format_value(v))
+		if type(v) == 'table' then
+			print(padding .. '{')
 			print_table(v, max_depth, depth + 1)
-			print(indent .. '}')
+			print(padding .. '}')
 		end
 	end
 end
