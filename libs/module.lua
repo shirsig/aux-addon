@@ -10,7 +10,7 @@ local function declaration_error() error('Declaration error.') end
 local function collision_error(key) error('"%s" already exists.', key) end
 local function nil_error(key) if key then error('"%s" is nil.', key) else error('Callee is nil') end end
 
-local nop = function() end
+local nop, id = function() end, function(v) return v end
 
 local function prototype() local eq = function() return true end
 	return setmetatable({__metatable=false, __eq=eq}, {__metatable=false, __eq=eq, __call=function(self, t) return setmetatable(t, self) end})
@@ -85,8 +85,8 @@ function mt:__index(key)
 	if key ~= 'module' then return nil end
 	local interface, environment, declarator = INTERFACE {}, ENVIRONMENT {}, DECLARATOR {}
 	self = {
-		access = {_G=PRIVATE, I=PRIVATE, M=PRIVATE, public=PRIVATE, private=PRIVATE, import=PRIVATE, _=PRIVATE, error=PRIVATE, nop=PRIVATE},
-		[CALL] = {_G=_G, I=interface, M=environment, import=function(interface) import(self, interface) end, error=error, nop=nop},
+		access = {_G=PRIVATE, I=PRIVATE, M=PRIVATE, public=PRIVATE, private=PRIVATE, import=PRIVATE, _=PRIVATE, error=PRIVATE, nop=PRIVATE, id=PRIVATE},
+		[CALL] = {_G=_G, I=interface, M=environment, import=function(interface) import(self, interface) end, error=error, nop=nop, id=id},
 		[INDEX] = {public=function() return declarator.public end, private=function() return declarator.private end},
 		[NEWINDEX] = {_=nop},
 		declarator = declarator,

@@ -9,7 +9,7 @@ do  local modules = {}
 				modules[name] = module and M
 				import (green_t)
 				private.aux = setmetatable(t, mt)
-				private.p.set = inspect
+				private.p.set = function(v) inspect(nil, v) end
 			end)()
 		end
 		modules[name].import (modules.core.I)

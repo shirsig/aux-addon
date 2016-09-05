@@ -45,7 +45,7 @@ do
 end
 
 do local id = 0
-	function private.id.get() id = id + 1; return id end
+	function private.unique_id.get() id = id + 1; return id end
 end
 
 function public.kill_listener(listener_id)
@@ -57,7 +57,7 @@ function public.kill_thread(thread_id)
 end
 
 function public.event_listener(event, cb)
-	local listener_id = id
+	local listener_id = unique_id
 	listeners[listener_id] = {event=event, cb=cb, kill=function(...) temp=arg if arg.n == 0 or arg[1] then kill_listener(listener_id) end end}
 	event_frame:RegisterEvent(event)
 	return listener_id
@@ -68,7 +68,7 @@ function public.on_next_event(event, callback)
 end
 
 function public.thread(k, ...) temp=arg
-	local thread_id = id
+	local thread_id = unique_id
 	threads[thread_id] = T('k', L(k, unpack(arg)))
 	return thread_id
 end

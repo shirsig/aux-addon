@@ -302,10 +302,10 @@ function public.editbox(parent)
     editbox:SetTextInsets(1.5, 1.5, 3, 3)
     editbox:SetMaxLetters(nil)
     editbox:SetHeight(24)
-    editbox:SetTextColor(0, 0, 0, 0)
+--    editbox:SetTextColor(0, 0, 0, 0)
     set_content_style(editbox)
-    local function colorize() this.display:SetText((this.colorizer or nop)(this:GetText()) or this:GetText()) end
-    local function format() this.display:SetText((this.formatter or this.colorizer or nop)(this:GetText()) or this:GetText()) end
+    local function colorize() end -- this.display:SetText((this.colorizer or id)(this:GetText())) end
+    local function format() end-- this.display:SetText((this.formatter or this.colorizer or id)(this:GetText())) end
     editbox:SetScript('OnEscapePressed', function()
         this:ClearFocus()
 	    ;(this.escape or nop)()
@@ -316,7 +316,7 @@ function public.editbox(parent)
 	    this.focused = true
 	    this:HighlightText()
 	    this:SetScript('OnUpdate', function()
-			this.cursor:SetAlpha(mod(floor((GetTime()-this.cursor.last_change) * 2 + 1), 2))
+			this.cursor:SetAlpha(mod(floor((GetTime() - this.cursor.last_change) * 2 + 1), 2))
 	    end)
 	    ;(this.focus_gain or nop)()
     end)
@@ -338,16 +338,21 @@ function public.editbox(parent)
     end)
     editbox:SetScript('OnChar', function() (this.char or nop)() end)
     do
-        local last_click
+        local last_click = T('t', 0)
         editbox:SetScript('OnMouseDown', function()
             local x, y = GetCursorPosition()
             -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
             -- editbox:Insert'<ksejfkj>' TODO use insert with special tags to determine cursor position
             -- or use an overlay with itemlinks
-            if last_click and GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
+            if GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
                 thread(function() editbox:HighlightText() end)
             end
-            last_click = {t=GetTime(), x=x, y=y}
+            wipe(last_click)
+            last_click.t = GetTime()
+            last_click.x = x
+            last_click.y = y
+            --            __(last_click) :t(GetTime()) :x(x) :y(y) TODO
+
         end)
     end
     function editbox:Enable()
