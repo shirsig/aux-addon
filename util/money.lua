@@ -79,7 +79,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	else
 		gold_text, silver_text, copper_text = GOLD_TEXT, SILVER_TEXT, COPPER_TEXT
 	end
-	
+
 	local text
 	if trim then
 		local parts = tt
