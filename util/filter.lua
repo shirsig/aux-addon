@@ -239,6 +239,7 @@ do
 			) do
 				if not self[parser[1]] then
 					tinsert(parser, str)
+					p(str, p(unpack(parser)), p(select(3, unpack(parser))))
 					local index, label = parser[2](select(3, unpack(parser)))
 					if index then
 						self[parser[1]] = A(label, index)

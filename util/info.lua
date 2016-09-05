@@ -372,7 +372,7 @@ end
 
 function public.item_class_index(item_class)
     for i, class in temp-A(GetAuctionItemClasses()) do
-	    if item_class == nil then error() end
+	    if type(item_class) ~= 'string' then error() end
         if strupper(class) == strupper(item_class) then
             return i, class
         end

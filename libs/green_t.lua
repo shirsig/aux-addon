@@ -117,7 +117,7 @@ do
 	local function pseudo_literal(mode)
 		local upvals = {setmetatable=setmetatable, setn=table.setn, error=error}
 		local mt = {__call = pseudo_vararg_function(insert_chunk(mode) .. 'setmetatable(a1, nil); return a1', upvals)}
-		return function() return setmetatable(acquire_temp(), mt) end
+		return function() return setmetatable(acquire(), mt) end
 	end
 	public.S.get = pseudo_literal'k'
 	public.A.get = pseudo_literal'v'
@@ -125,10 +125,15 @@ do
 	public.T.get = pseudo_literal'kv'
 end
 
-do
-	local body = ''
-	for i = 2, 100 do
-		body = body .. format('if a1 == %d then return %s end;', i, arg_chunk(i, 100))
-	end
-	public.select = pseudo_vararg_function(body)
+--do
+--	local body = ''
+--	for i = 2, 100 do
+--		body = body .. format('if a1 == %d then return %s end;', i, arg_chunk(i, 100))
+--	end
+--	public.select = pseudo_vararg_function(body)
+--end
+
+function public.select(i, ...) temp=arg
+while i > 1 do i = i - 1; tremove(arg, i) end
+return tremove(arg, 1), unpack(arg)
 end
