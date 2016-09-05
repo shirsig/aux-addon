@@ -64,12 +64,12 @@ do  local f = function(_, v) if type(v) == 'table' then auto_release[v] = nil en
 	public.perm {get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) auto_release[t] = nil end}
 end
 
---do local mt, key = {}, nil
---	function mt:__unm() local temp = mt.__index; mt.__index = nil; return temp end
---	function mt:__index(k) key = k; return self end
---	function mt:__call(v) self[key] = v; key = nil return self end
---	function public.__(t) mt.__newindex = wipe(t); return setmetatable(acquire_temp(), mt) end
---end
+do local mt, key = {}, nil
+	function mt:__unm() local temp = mt.__index; mt.__index = nil; return temp end
+	function mt:__index(k) key = k; return self end
+	function mt:__call(v) self[key] = v; key = nil return self end
+	function public.__(t) mt.__newindex = wipe(t); return setmetatable(acquire_temp(), mt) end
+end
 
 local function arg_chunk(k, n)
 	k = k or 1
@@ -137,7 +137,6 @@ end
 --	public.T.get = pseudo_literal'kv'
 --end
 
-
 function public.pseudo_vararg_function(body, upvals)
 	local upval_chunk = ''
 	for k in upvals or empty() do
@@ -155,8 +154,3 @@ do
 	end
 	public.select = pseudo_vararg_function(body)
 end
-
---function public.select(i, ...) temp=arg
---	while i > 1 do i = i - 1; tremove(arg, i) end
---	return tremove(arg, 1), unpack(arg)
---end
