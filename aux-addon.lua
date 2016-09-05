@@ -42,14 +42,14 @@ ADDON_LOADED = t
 do
 	local handlers, handlers2 = t, t
 	function public.LOAD.set(f) tinsert(handlers, f) end
-	function public.LOAD2.set(f) handlers2[f] = true end
+	function public.LOAD2.set(f) tinsert(handlers2, f) end
 	event_frame:SetScript('OnEvent', function()
 		if event == 'ADDON_LOADED' then
 			(ADDON_LOADED[arg1] or nop)()
 		elseif event == 'VARIABLES_LOADED' then
 			for _, f in handlers do f() end
 		elseif event == 'PLAYER_LOGIN' then
-			for f in handlers2 do f() end
+			for _, f in handlers2 do f() end
 			print('v' .. version .. ' loaded.')
 		else
 			M[event]()
