@@ -75,8 +75,8 @@ function set_unit_start_price(amount)
 end
 
 function get_unit_buyout_price()
-    local money_text = p/unit_buyout_price:GetText()
-    return p/aux.money.from_string(money_text) or 0
+    local money_text = unit_buyout_price:GetText()
+    return aux.money.from_string(money_text) or 0
 end
 
 function set_unit_buyout_price(amount)

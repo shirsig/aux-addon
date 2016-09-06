@@ -5,10 +5,11 @@ local next, setn, type, setmetatable = next, table.setn, type, setmetatable
 local wipe, release, acquire, acquire_temp, empty
 
 -- TODO mandatory operation table mandate + comply/fulfill functions
-local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, {__mode='k'}), {}
+local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, { __mode='k' }), {}
 
 CreateFrame('Frame'):SetScript('OnUpdate', function()
-	for t in auto_release do release(t) end; wipe(auto_release)
+	for t in auto_release do release(t) end
+	wipe(auto_release)
 end)
 
 function wipe(t)
@@ -33,7 +34,11 @@ end
 public.release = release
 
 function public.ret(t)
-	if getn(t) > 0 then return tremove(t, 1), ret(t) else release(t) end
+	if getn(t) > 0 then
+		return tremove(t, 1), ret(t)
+	else
+		release(t)
+	end
 end
 
 function acquire()
@@ -42,29 +47,40 @@ function acquire()
 		return pool[pool_size + 1]
 	end
 	local t = next(overflow_pool)
-	if t then overflow_pool[t] = nil; return t end
+	if t then
+		overflow_pool[t] = nil
+		return t
+	end
 	return {}
 end
 public.t.get = acquire
 
-function acquire_temp() local t = acquire(); auto_release[t] = true; return t end
+function acquire_temp()
+	local t = acquire()
+	auto_release[t] = true
+	return t
+end
 public.tt.get = acquire_temp
 
-do local mt = {__newindex=nop}
+do
+	local mt = { __newindex=nop }
 	function empty() return setmetatable(acquire_temp(), mt) end
 	public.empty.get = empty
 end
 
-do  local f = function(_, v) if type(v) == 'table' then auto_release[v] = true end return v end
-	local mt = {__call=f, __sub=f}
+do
+	local f = function(_, v) if type(v) == 'table' then auto_release[v] = true end return v end
+	local mt = { __call=f, __sub=f }
 	public.temp {get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) auto_release[t] = true end}
 end
-do  local f = function(_, v) if type(v) == 'table' then auto_release[v] = nil end return v end
-	local mt = {__call=f, __sub=f}
-	public.perm {get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) auto_release[t] = nil end}
+do
+	local f = function(_, v) if type(v) == 'table' then auto_release[v] = nil end return v end
+	local mt = { __call=f, __sub=f }
+	public.perm { get=function() return setmetatable(acquire_temp(), mt) end, set=function(t) auto_release[t] = nil end }
 end
 
-do local mt, key = {}, nil
+do
+	local mt, key = {}, nil
 	function mt:__unm() local temp = mt.__index; mt.__index = nil; return temp end
 	function mt:__index(k) key = k; return self end
 	function mt:__call(v) self[key] = v; key = nil return self end
@@ -79,64 +95,6 @@ local function arg_chunk(k, n)
 	return str
 end
 
-
-
---local function insert_chunk(mode)
---	local body = 'repeat '
---	if mode == 'k' then
---		for i = 2, 99 do
---			body = body .. format('if a%1$d == nil then break end; a1[a%1$d] = true;', i)
---		end
---	elseif mode == 'v' then
---		body = body .. 'if a2 == nil then break end; a1[1] = a2;'
---		for i = 3, 99 do
---			body = body .. format('if a%1$d == nil then setn(a1, %d); break end; a1[%d] = a%1$d;', i, i-2, i-1)
---		end
---	elseif mode == 'v0' then
---		body = body .. 'setn(a1, 98);'
---		for i = 2, 99 do
---			body = body .. format('a1[%d] = a%d;', i-1, i)
---		end
---	elseif mode == 'kv' then
---		for i = 2, 98, 2 do
---			body = body .. format('if a%1$d == nil then break end; a1[a%1$d] = a%d;', i, i+1)
---		end
---	end
---	return body .. 'if a100 ~= nil then error"Overflow." end until false;'
---end
-
-do local function constructor(type)
-	local chunk = 'local setn, error = table.setn, error; return function('
-	for i = 1, 99 do chunk = chunk .. 'a' .. i..',' end
-	chunk = chunk .. 'overflow) local t = t'
-	if type == 'set' then
-		for i = 1, 99 do chunk = format('%s; if a%d == nil then return t end; t[a%d] = true', chunk, i, i) end
-	elseif type == 'array' then
-		chunk = chunk .. '; setn(t, 99); if a1 == nil then return t end; t[1] = a1'
-		for i = 2, 99 do chunk = format('%s; if a%d == nil then setn(t, %d); return t end; t[%d] = a%d', chunk, i, i - 1, i, i) end
-	elseif type == 'array0' then
-		chunk = chunk .. '; setn(t, 99)'
-		for i = 1, 99 do chunk = format('%s; t[%d] = a%d', chunk, i, i) end
-	elseif type == 'table' then
-		for i = 1, 97, 2 do chunk = format('%s; if a%d == nil then return t end; t[a%d] = a%d', chunk, i, i, i + 1) end
-	end
-	chunk = chunk .. '; return (overflow == nil or error "Overflow.") and t end'
-	local f = loadstring(chunk); setfenv(f, M); return f()
-end
-public(); S, A, A0, T = constructor'set', constructor'array', constructor 'array0', constructor 'table'
-end
---do
---	local function pseudo_literal(mode)
---		local upvals = {setmetatable=setmetatable, setn=table.setn, error=error}
---		local mt = {__call = pseudo_vararg_function(insert_chunk(mode) .. 'setmetatable(a1, nil); return a1', upvals)}
---		return function() return setmetatable(acquire(), mt) end
---	end
---	public.S.get = pseudo_literal'k'
---	public.A.get = pseudo_literal'v'
---	public.A0.get = pseudo_literal'v0'
---	public.T.get = pseudo_literal'kv'
---end
-
 function public.pseudo_vararg_function(body, upvals)
 	local upval_chunk = ''
 	for k in upvals or empty() do
@@ -147,10 +105,47 @@ function public.pseudo_vararg_function(body, upvals)
 	return f()
 end
 
+local function insert_chunk(mode)
+	local body = 'repeat '
+	if mode == 'k' then
+		for i = 2, 99 do
+			body = body .. format('if a%1$d == nil then break end; a1[a%1$d] = true;', i)
+		end
+	elseif mode == 'v' then
+		body = body .. 'if a2 == nil then break end; a1[1] = a2;'
+		for i = 3, 99 do
+			body = body .. format('if a%1$d == nil then setn(a1, %d); break end; a1[%d] = a%1$d;', i, i-2, i-1)
+		end
+	elseif mode == 'v0' then
+		body = body .. 'setn(a1, 98);'
+		for i = 2, 99 do
+			body = body .. format('a1[%d] = a%d;', i-1, i)
+		end
+	elseif mode == 'kv' then
+		for i = 2, 98, 2 do
+			body = body .. format('if a%1$d == nil then break end; a1[a%1$d] = a%d;', i, i+1)
+		end
+	end
+	return body .. 'if a100 ~= nil then error"Overflow." end until true;'
+end
+
+do
+	local function pseudo_literal(mode)
+		local upvals = {setmetatable=setmetatable, setn=table.setn, error=error}
+		local mt = {__call = pseudo_vararg_function(insert_chunk(mode) .. 'setmetatable(a1, nil); return a1', upvals)}
+		return function() return setmetatable(acquire(), mt) end
+	end
+	public.S.get = pseudo_literal'k'
+	public.A.get = pseudo_literal'v'
+	public.A0.get = pseudo_literal'v0'
+	public.T.get = pseudo_literal'kv'
+end
+
 do
 	local body = ''
-	for i = 2, 100 do
-		body = body .. format('if a1 == %d then return %s end;', i, arg_chunk(i-1, 100))
+	for i = 1, 99 do
+		body = body .. format('if a1 == %d then return %s end;', i, arg_chunk(i+1, 100))
 	end
 	public.select = pseudo_vararg_function(body)
 end
+

@@ -157,10 +157,10 @@ function public.eq(t1, t2)
 	return true
 end
 
-function public.any(t, p)
+function public.any(t, predicate)
 	for _, v in t do
-		if p then
-			if p(v) then return true end
+		if predicate then
+			if predicate(v) then return true end
 		elseif v then
 			return true
 		end
@@ -168,10 +168,10 @@ function public.any(t, p)
 	return false
 end
 
-function public.all(t, p)
+function public.all(t, predicate)
 	for _, v in t do
-		if p then
-			if not p(v) then return false end
+		if predicate then
+			if not predicate(v) then return false end
 		elseif not v then
 			return false
 		end
@@ -179,9 +179,9 @@ function public.all(t, p)
 	return true
 end
 
-function public.filter(t, p)
+function public.filter(t, predicate)
 	for k, v in t do
-		if not p(v, k) then t[k] = nil end
+		if not predicate(v, k) then t[k] = nil end
 	end
 	return t
 end

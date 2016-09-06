@@ -224,7 +224,6 @@ function create_frames()
 	    editbox.change = function() refresh = true end
 	    editbox.enter = function() this:ClearFocus() end
 	    editbox.focus_loss = function()
-		    p = this.SetText
 		    this:SetText(money.to_string(get_unit_start_price(), true, nil, 3, nil, true))
 	    end
 	    do
@@ -261,7 +260,6 @@ function create_frames()
 	    editbox.change = function() refresh = true end
 	    editbox.enter = function() this:ClearFocus() end
 	    editbox.focus_loss = function()
-		    p(this.SetText)
 		    this:SetText(money.to_string(get_unit_buyout_price(), true, nil, 3, nil, true))
 	    end
 	    do
@@ -277,8 +275,6 @@ function create_frames()
 	        buyout_price_percentage = label
 	    end
 	    unit_buyout_price = editbox
-		local o = editbox.SetText
-		function editbox:SetText(v) p(v) o(self, v) end
 	end
 	do
 	    local btn = gui.button(frame.parameters, 14)

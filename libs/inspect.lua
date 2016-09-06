@@ -35,16 +35,26 @@ function inspect(_, ...)
 	return unpack(arg)
 end
 
+local function setting(v)
+	if type(v) == 'number' then
+		depth = v
+	elseif type(v) == 'function' then
+		print('#' .. v())
+	else
+		print('#' .. v)
+	end
+end
+
 local mt = { __metatable=false, __call=inspect, __div=inspect }
 
 function mt:__index(key)
-	if type(key) == 'number' then
-		depth = key
-	elseif type(key) == 'function' then
-		print('#' .. key())
-	else
-		print('#' .. key)
-	end
+	setting(key)
+	return self
+end
+
+function mt:__newindex(key, value)
+	setting(key)
+	self(value)
 	return self
 end
 

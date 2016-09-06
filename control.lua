@@ -81,10 +81,10 @@ function public.wait(k, ...) temp=arg
 	end
 end
 
-function public.when(p, k, ...) temp=arg
-	if p() then
+function public.when(c, k, ...) temp=arg
+	if c() then
 		return k(unpack(arg))
 	else
-		return wait(when, p, k, unpack(arg))
+		return wait(when, c, k, unpack(arg))
 	end
 end
