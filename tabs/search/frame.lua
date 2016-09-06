@@ -111,7 +111,7 @@ function create_frames()
 		end
 	end
 	do
-	    local btn = gui.checkbutton(settings, gui.font_size.large)
+	    local btn = gui.checkbutton(settings)
 	    btn:SetPoint('LEFT', 230, 0)
 	    btn:SetWidth(140)
 	    btn:SetHeight(25)
@@ -126,7 +126,7 @@ function create_frames()
 	    public.real_time_button = btn
 	end
 	do
-	    local btn = gui.checkbutton(settings, gui.font_size.large)
+	    local btn = gui.checkbutton(settings)
 	    btn:SetPoint('LEFT', real_time_button, 'RIGHT', 15, 0)
 	    btn:SetWidth(140)
 	    btn:SetHeight(25)
@@ -141,7 +141,7 @@ function create_frames()
 	    auto_buy_button = btn
 	end
 	do
-	    local btn = gui.checkbutton(settings, gui.font_size.large)
+	    local btn = gui.checkbutton(settings)
 	    btn:SetPoint('LEFT', auto_buy_button, 'RIGHT', 15, 0)
 	    btn:SetWidth(140)
 	    btn:SetHeight(25)
