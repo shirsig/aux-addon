@@ -215,7 +215,7 @@ do
 	end
 	function ADDON_LOADED.Blizzard_CraftUI()
 		hook('CraftFrame_SetSelection', function(...) auto[arg] = true
-			local ret = temp-A(orig.CraftFrame_SetSelection(unpack(arg)))
+			local ret = temp-A0(orig.CraftFrame_SetSelection(unpack(arg)))
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
 			local total_cost = 0
@@ -242,7 +242,7 @@ do
 	end
 	function ADDON_LOADED.Blizzard_TradeSkillUI()
 		hook('TradeSkillFrame_SetSelection', function(...) auto[arg] = true
-			local ret = temp-A(orig.TradeSkillFrame_SetSelection(unpack(arg)))
+			local ret = temp-A0(orig.TradeSkillFrame_SetSelection(unpack(arg)))
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
 			local total_cost = 0

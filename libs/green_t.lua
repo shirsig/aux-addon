@@ -112,29 +112,43 @@ function public.pseudo_vararg_function(body, upvals)
 end
 
 do
-	local body = [[
-		if arg100 ~= nil then error("Vararg overflow.") end
+	local MAXPARAMS = 100
+
+	local code = [[
+		local f, setn, acquire_auto = f, setn, acquire_auto
+		return function(
+	]]
+	for i = 1, MAXPARAMS - 1 do
+		code = code .. format('a%d,', i)
+	end
+	code = code .. [[
+		overflow)
+		if overflow ~= nil then error("Vararg overflow.") end
 		local n
 		repeat
 	]]
-	for i = 99, 1, -1 do
-		body = body .. format('if a%1$d ~= nil then n = %1$d; break end;', i)
+	for i = MAXPARAMS - 1, 1, -1 do
+		code = code .. format('if a%1$d ~= nil then n = %1$d; break end;', i)
 	end
-	body = body .. [[
+	code = code .. [[
 		until true
 		local t = acquire_auto()
 		setn(t, n)
 		repeat
 	]]
-	for i = 1, 99 do
-		body = body .. format('if %1$d > n then break end; t[%1$d] = a%1$d;', i)
+	for i = 1, MAXPARAMS - 1 do
+		code = code .. format('if %1$d > n then break end; t[%1$d] = a%1$d;', i)
 	end
-	body = body .. [[
+	code = code .. [[
 		until true
 		return f(t)
+		end
 	]]
+
 	function public.vararg(f)
-		return pseudo_vararg_function(body, {f=f, error=error, setn=setn, acquire=acquire_auto, release=release})
+		local chunk = loadstring(code)
+		setfenv(chunk, {f=f, setn=setn, acquire_auto=acquire_auto})
+		return chunk()
 	end
 end
 
@@ -168,7 +182,13 @@ do
 		local mt = {__call = pseudo_vararg_function(insert_chunk(mode) .. 'setmetatable(a1, nil); return a1', upvals)}
 		return function() return setmetatable(acquire(), mt) end
 	end
-	public.S.get = pseudo_table_literal('k')
+	public.S = vararg(function(arg)
+		local set = acquire()
+		for _, v in arg do
+			if v ~= nil then set[v] = true end
+		end
+		return set
+	end)
 	public.A.get = pseudo_table_literal('v')
 	public.A0.get = pseudo_table_literal('v0')
 	public.T.get = pseudo_table_literal('kv')
