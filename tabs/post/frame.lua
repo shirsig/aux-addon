@@ -89,19 +89,15 @@ function create_frames()
 	    status_bar:set_text('')
 	end
 	do
-	    local btn = gui.button(frame.parameters, 16)
+	    local btn = gui.button(frame.parameters)
 	    btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
-	    btn:SetWidth(80)
-	    btn:SetHeight(24)
 	    btn:SetText('Post')
 	    btn:SetScript('OnClick', post_auctions)
 	    post_button = btn
 	end
 	do
-	    local btn = gui.button(frame.parameters, 16)
+	    local btn = gui.button(frame.parameters)
 	    btn:SetPoint('TOPLEFT', post_button, 'TOPRIGHT', 5, 0)
-	    btn:SetWidth(80)
-	    btn:SetHeight(24)
 	    btn:SetText('Refresh')
 	    btn:SetScript('OnClick', refresh_button_click)
 	    refresh_button = btn
@@ -121,7 +117,7 @@ function create_frames()
 	do
 	    local slider = gui.slider(frame.parameters)
 	    slider:SetValueStep(1)
-	    slider:SetPoint('TOPLEFT', 13, -74)
+	    slider:SetPoint('TOPLEFT', 13, -73)
 	    slider:SetWidth(190)
 	    slider:SetScript('OnValueChanged', function()
 	        quantity_update(true)
@@ -174,7 +170,7 @@ function create_frames()
 	end
 	do
 	    local dropdown = gui.dropdown(frame.parameters)
-	    dropdown:SetPoint('TOPLEFT', stack_count_slider, 'BOTTOMLEFT', 0, -19)
+	    dropdown:SetPoint('TOPLEFT', stack_count_slider, 'BOTTOMLEFT', 0, -21)
 	    dropdown:SetWidth(90)
 	    local label = gui.label(dropdown, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)

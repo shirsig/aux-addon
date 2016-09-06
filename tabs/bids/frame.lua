@@ -37,28 +37,22 @@ function create_frames()
 	    status_bar:set_text('')
 	end
 	do
-	    local btn = gui.button(frame, 16)
+	    local btn = gui.button(frame)
 	    btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
-	    btn:SetWidth(80)
-	    btn:SetHeight(24)
 	    btn:SetText('Bid')
 	    btn:Disable()
 	    bid_button = btn
 	end
 	do
-	    local btn = gui.button(frame, 16)
+	    local btn = gui.button(frame)
 	    btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
-	    btn:SetWidth(80)
-	    btn:SetHeight(24)
 	    btn:SetText('Buyout')
 	    btn:Disable()
 	    buyout_button = btn
 	end
 	do
-	    local btn = gui.button(frame, 16)
+	    local btn = gui.button(frame)
 	    btn:SetPoint('TOPLEFT', buyout_button, 'TOPRIGHT', 5, 0)
-	    btn:SetWidth(80)
-	    btn:SetHeight(24)
 	    btn:SetText('Refresh')
 	    btn:SetScript('OnClick', function()
 	        scan_bids()

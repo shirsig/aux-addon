@@ -1,5 +1,14 @@
 aux 'gui'
 
+public.font = [[Fonts\ARIALN.TTF]]
+
+public.font_size = {
+	small = 13,
+	medium = 15,
+	large = 18,
+	huge = 23,
+}
+
 function LOAD()
 	do
 		local blizzard_backdrop, aux_background, aux_border
@@ -37,7 +46,7 @@ function LOAD()
 				button:SetPoint('TOPLEFT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
 				button:SetPoint('TOPRIGHT', 0, -((button:GetID() - 1) * UIDROPDOWNMENU_BUTTON_HEIGHT) - 7)
 				local text = button:GetFontString()
-				text:SetFont(font, font_size.small2)
+				text:SetFont(font, 14)
 				text:SetPoint('TOPLEFT', 18, 0)
 				text:SetPoint('BOTTOMRIGHT', -8, 0)
 				local highlight = _G['DropDownList1Button' .. i..'Highlight']
@@ -73,18 +82,6 @@ function LOAD()
 		end
 	end
 end
-
-public.font = [[Fonts\ARIALN.TTF]]
-
-public.font_size = {
-    small = 13,
-	small2 = 14,
-    medium = 15,
-	medium2 = 16,
-	large = 17,
-	large2 = 18,
-    huge = 23,
-}
 
 do
 	local id = 1
@@ -165,8 +162,9 @@ function public.checkbutton(parent, text_height)
 end
 
 function public.button(parent, text_height)
-    text_height = text_height or 16
+    text_height = text_height or font_size.large
     local button = CreateFrame('Button', nil, parent)
+    set_size(button, 80, 24)
     set_content_style(button)
     local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
     highlight:SetAllPoints()
@@ -234,7 +232,7 @@ do
 		tab.text:SetPoint('RIGHT', -3, -1)
 		tab.text:SetJustifyH('CENTER')
 		tab.text:SetJustifyV('CENTER')
-		tab.text:SetFont(font, font_size.large2)
+		tab.text:SetFont(font, font_size.large)
 		tab:SetFontString(tab.text)
 
 		tab:SetText(text)
@@ -377,7 +375,7 @@ function public.editbox(parent)
     display:SetPoint('RIGHT', -1.5, 0)
     display:SetTextColor(color.text.enabled())
     editbox.display = display
-    local cursor = label(editbox, font_size.large)
+    local cursor = label(editbox, 17)
     cursor:SetText('|')
     cursor:SetTextColor(color.text.enabled())
     cursor:SetAlpha(0)
@@ -432,7 +430,7 @@ function public.status_bar(parent)
         local text_frame = CreateFrame('Frame', nil, self)
         text_frame:SetFrameLevel(level + 4)
         text_frame:SetAllPoints(self)
-        local text = label(text_frame, 15)
+        local text = label(text_frame, font_size.medium)
         text:SetTextColor(color.text.enabled())
         text:SetPoint('CENTER', 0, 0)
         self.text = text
@@ -461,7 +459,7 @@ function public.item(parent)
     btn:RegisterForClicks()
     item.texture = _G[btn:GetName() .. 'Icon']
     item.texture:SetTexCoord(.06, .94, .06, .94)
-    item.name = label(btn, 15)
+    item.name = label(btn, font_size.medium)
     item.name:SetJustifyH('LEFT')
     item.name:SetPoint('LEFT', btn, 'RIGHT', 10, 0)
     item.name:SetPoint('RIGHT', item, 'RIGHT', -10, .5)

@@ -111,7 +111,7 @@ function create_frames()
 		end
 	end
 	do
-	    local btn = gui.checkbutton(settings)
+	    local btn = gui.checkbutton(settings, gui.font_size.large)
 	    btn:SetPoint('LEFT', 230, 0)
 	    btn:SetWidth(140)
 	    btn:SetHeight(25)
@@ -126,7 +126,7 @@ function create_frames()
 	    public.real_time_button = btn
 	end
 	do
-	    local btn = gui.checkbutton(settings)
+	    local btn = gui.checkbutton(settings, gui.font_size.large)
 	    btn:SetPoint('LEFT', real_time_button, 'RIGHT', 15, 0)
 	    btn:SetWidth(140)
 	    btn:SetHeight(25)
@@ -141,7 +141,7 @@ function create_frames()
 	    auto_buy_button = btn
 	end
 	do
-	    local btn = gui.checkbutton(settings)
+	    local btn = gui.checkbutton(settings, gui.font_size.large)
 	    btn:SetPoint('LEFT', auto_buy_button, 'RIGHT', 15, 0)
 	    btn:SetWidth(140)
 	    btn:SetHeight(25)
@@ -242,7 +242,7 @@ function create_frames()
 	    gui.horizontal_line(frame, -40)
 	end
 	do
-	    local btn = gui.button(frame, gui.font_size.large2)
+	    local btn = gui.button(frame, gui.font_size.large)
 	    btn:SetPoint('BOTTOMLEFT', aux_frame.content, 'TOPLEFT', 10, 8)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
@@ -251,7 +251,7 @@ function create_frames()
 	    search_results_button = btn
 	end
 	do
-	    local btn = gui.button(frame, gui.font_size.large2)
+	    local btn = gui.button(frame, gui.font_size.large)
 	    btn:SetPoint('TOPLEFT', search_results_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
@@ -260,7 +260,7 @@ function create_frames()
 	    saved_searches_button = btn
 	end
 	do
-	    local btn = gui.button(frame, gui.font_size.large2)
+	    local btn = gui.button(frame, gui.font_size.large)
 	    btn:SetPoint('TOPLEFT', saved_searches_button, 'TOPRIGHT', 5, 0)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
@@ -276,28 +276,22 @@ function create_frames()
 	    status_bar_frame = frame
 	end
 	do
-	    local btn = gui.button(frame.results, 16)
+	    local btn = gui.button(frame.results)
 	    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-	    btn:SetWidth(80)
-	    btn:SetHeight(24)
 	    btn:SetText('Bid')
 	    btn:Disable()
 	    bid_button = btn
 	end
 	do
-	    local btn = gui.button(frame.results, 16)
+	    local btn = gui.button(frame.results)
 	    btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
-	    btn:SetWidth(80)
-	    btn:SetHeight(24)
 	    btn:SetText('Buyout')
 	    btn:Disable()
 	    buyout_button = btn
 	end
 	do
-	    local btn = gui.button(frame.results, 16)
+	    local btn = gui.button(frame.results)
 	    btn:SetPoint('TOPLEFT', buyout_button, 'TOPRIGHT', 5, 0)
-	    btn:SetWidth(80)
-	    btn:SetHeight(24)
 	    btn:SetText('Clear')
 	    btn:SetScript('OnClick', function()
 	        while tremove(current_search.records) do end
@@ -305,10 +299,8 @@ function create_frames()
 	    end)
 	end
 	do
-	    local btn = gui.button(frame.saved, 16)
+	    local btn = gui.button(frame.saved)
 	    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-	    btn:SetWidth(80)
-	    btn:SetHeight(24)
 	    btn:SetText('Favorite')
 	    btn:SetScript('OnClick', function()
 	        local filters = filter_util.queries(search_box:GetText())
@@ -322,24 +314,21 @@ function create_frames()
 	    end)
 	end
 	do
-	    local btn1 = gui.button(frame.filter, 16)
+	    local btn1 = gui.button(frame.filter)
 	    btn1:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-	    gui.set_size(btn1, 80, 24)
 	    btn1:SetText('Search')
 	    btn1:SetScript('OnClick', function()
 	        export_filter_string()
 	        execute()
 	    end)
 
-	    local btn2 = gui.button(frame.filter, 16)
+	    local btn2 = gui.button(frame.filter)
 	    btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
-	    gui.set_size(btn2, 80, 24)
 	    btn2:SetText('Export')
 	    btn2:SetScript('OnClick', export_filter_string)
 
-	    local btn3 = gui.button(frame.filter, 16)
+	    local btn3 = gui.button(frame.filter)
 	    btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
-	    gui.set_size(btn3, 80, 24)
 	    btn3:SetText('Import')
 	    btn3:SetScript('OnClick', import_filter_string)
 	end
