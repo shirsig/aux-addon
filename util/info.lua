@@ -274,12 +274,12 @@ function public.tooltip(setter)
 
     local tooltip = t
     for i = 1, AuxTooltip:NumLines() do
-        tinsert(tooltip, {
-            left_text = _G['AuxTooltipTextLeft' .. i]:GetText(),
-            left_color = {_G['AuxTooltipTextLeft' .. i]:GetTextColor()},
-            right_text = _G['AuxTooltipTextRight' .. i]:IsVisible() and _G['AuxTooltipTextRight' .. i]:GetText(),
-            right_color = {_G['AuxTooltipTextRight' .. i]:GetTextColor()},
-        })
+        tinsert(tooltip, T(
+            'left_text', _G['AuxTooltipTextLeft' .. i]:GetText(),
+            'left_color', A(_G['AuxTooltipTextLeft' .. i]:GetTextColor()),
+            'right_text', _G['AuxTooltipTextRight' .. i]:IsVisible() and _G['AuxTooltipTextRight' .. i]:GetText(),
+            'right_color', A(_G['AuxTooltipTextRight' .. i]:GetTextColor())
+        ))
     end
 
     return tooltip, AuxTooltip.money
@@ -357,17 +357,17 @@ end
 function public.item(item_id, suffix_id)
     local itemstring = 'item:' .. (item_id or 0) .. ':0:' .. (suffix_id or 0) .. ':0'
     local name, itemstring, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
-    return name and {
-        name = name,
-        itemstring = itemstring,
-        quality = quality,
-        level = level,
-        class = class,
-        subclass = subclass,
-        slot = slot,
-        max_stack = max_stack,
-        texture = texture,
-    } or aux.cache.item_info(item_id)
+    return name and T(
+        'name', name,
+        'itemstring', itemstring,
+        'quality', quality,
+        'level', level,
+        'class', class,
+        'subclass', subclass,
+        'slot', slot,
+        'max_stack', max_stack,
+        'texture', texture
+    ) or aux.cache.item_info(item_id)
 end
 
 function public.item_class_index(item_class)
@@ -412,7 +412,7 @@ function public.inventory.get()
 		else
 			slot = slot + 1
 		end
-		if bag <= 4 then return {bag, slot}, bag_type(bag) end
+		if bag <= 4 then return A(bag, slot), bag_type(bag) end
 	end
 end
 

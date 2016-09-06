@@ -510,7 +510,7 @@ function create_frames()
 		input:SetPoint('CENTER', filter_dropdown, 'CENTER', 0, 0)
 		input:SetWidth(150)
 		input:SetScript('OnTabPressed', function() filter_parameter_input:SetFocus() end)
-		input.complete = completion.complete(function() return {'and', 'or', 'not', unpack(keys(filter_util.filters))} end)
+		input.complete = completion.complete(function() return temp-A('and', 'or', 'not', unpack(keys(filter_util.filters))) end)
 		input.char = function() this:complete() end
 		input.change = function()
 			local text = this:GetText()
