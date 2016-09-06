@@ -302,10 +302,10 @@ function public.editbox(parent)
     editbox:SetTextInsets(1.5, 1.5, 3, 3)
     editbox:SetMaxLetters(nil)
     editbox:SetHeight(24)
---    editbox:SetTextColor(0, 0, 0, 0)
+    editbox:SetTextColor(0, 0, 0, 0)
     set_content_style(editbox)
-    local function colorize() end -- this.display:SetText((this.colorizer or id)(this:GetText())) end
-    local function format() end-- this.display:SetText((this.formatter or this.colorizer or id)(this:GetText())) end
+    local function colorize() this.display:SetText((this.colorizer or id)(this:GetText())) end
+    local function format() this.display:SetText((this.formatter or this.colorizer or id)(this:GetText())) end
     editbox:SetScript('OnEscapePressed', function()
         this:ClearFocus()
 	    ;(this.escape or nop)()
