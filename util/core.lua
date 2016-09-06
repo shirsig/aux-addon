@@ -44,6 +44,13 @@ aux 'core'
 --	end
 --end
 
+public.select = vararg(function(arg)
+	for _ = 1, arg[1] do
+		tremove(arg, 1)
+	end
+	return unpack(arg)
+end)
+
 public.join = _G.table.concat
 
 function public.range(arg1, arg2)

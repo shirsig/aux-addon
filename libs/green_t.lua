@@ -1,24 +1,79 @@
 green_t = module
 --setglobal('green_t', green_t and error(nil) or module)
 
-local next, getn, setn, type, setmetatable = next, getn, table.setn, type, setmetatable
-local wipe, release, acquire, acquire_auto
+local next, getn, setn, tremove, type, setmetatable = next, getn, table.setn, tremove, type, setmetatable
 
--- TODO mandatory operation table mandate + comply/fulfill functions
-local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, { __mode='k' }), {}
+-- TODO recursive releasing with specified depth, maybe allow setting "release structure" on creation for easier releasing, mandatory operation table mandate + comply/fulfill functions to ensure something is being released?
 
-CreateFrame('Frame'):SetScript('OnUpdate', function()
-	for t in auto_release do release(t) end
-	wipe(auto_release)
-end)
+local wipe, acquire, release, set_auto_release
+do
+	local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, { __mode='k' }), {}
 
-function wipe(t)
-	setmetatable(t, nil)
-	for k in t do t[k] = nil end
-	t.reset, t.reset = nil, 1
-	setn(t, 0)
+	function wipe(t)
+		setmetatable(t, nil)
+		for k in t do t[k] = nil end
+		t.reset, t.reset = nil, 1
+		setn(t, 0)
+	end
+	public.wipe = wipe
+
+	CreateFrame('Frame'):SetScript('OnUpdate', function()
+		for t in auto_release do release(t) end
+		wipe(auto_release)
+	end)
+
+	function acquire()
+		if pool_size > 0 then
+			pool_size = pool_size - 1
+			return pool[pool_size + 1]
+		end
+		local t = next(overflow_pool)
+		if t then
+			overflow_pool[t] = nil
+			return t
+		end
+		return {}
+	end
+	public.acquire = acquire
+
+	function release(t)
+		wipe(t)
+		auto_release[t] = nil
+		if pool_size < 50 then
+			pool_size = pool_size + 1
+			pool[pool_size] = t
+		else
+			overflow_pool[t] = true
+		end
+	end
+	public.release = release
+
+	function set_auto_release(v, enable)
+		if type(v) ~= 'table' then return end
+		auto_release[v] = enable and true or nil
+	end
+	public.set_auto_release = set_auto_release
 end
-public.wipe = wipe
+
+public.t.get = acquire
+function public.tt.get()
+	local t = acquire()
+	set_auto_release(t, true)
+	return t
+end
+
+public.auto = setmetatable({}, {
+	__metatable = false,
+	__newindex = function(_, k, v) set_auto_release(k, v) end,
+})
+public.temp = setmetatable({}, {
+	__metatable = false,
+	__sub = function(_, v) set_auto_release(v, false); return v end,
+})
+public.perm = setmetatable({}, {
+	__metatable = false,
+	__sub = function(_, v) set_auto_release(v, true); return v end,
+})
 
 public.init = setmetatable({}, {
 	__metatable = false,
@@ -31,91 +86,25 @@ public.init = setmetatable({}, {
 	end
 })
 
-function release(t)
-	wipe(t)
-	auto_release[t] = nil
-	if pool_size < 50 then
-		pool_size = pool_size + 1
-		pool[pool_size] = t
-	else
-		overflow_pool[t] = true
-	end
-end
-public.release = release
-
-function public.ret(t)
-	if getn(t) > 0 then
-		return tremove(t, 1), ret(t)
-	else
-		release(t)
-	end
-end
-
-function acquire()
-	if pool_size > 0 then
-		pool_size = pool_size - 1
-		return pool[pool_size + 1]
-	end
-	local t = next(overflow_pool)
-	if t then
-		overflow_pool[t] = nil
-		return t
-	end
-	return {}
-end
-public.t.get = acquire
-
-function acquire_auto()
-	local t = acquire()
-	auto_release[t] = true
-	return t
-end
-public.tt.get = acquire_auto
-
-public.empty = setmetatable({}, { __newindex=nop })
-
 do
-	local function set_auto_release(v, enable)
-		if type(v) ~= 'table' then return end
-		auto_release[v] = enable and true or nil
+	local function ret(t)
+		if getn(t) > 0 then
+			return tremove(t, 1), ret(t)
+		else
+			release(t)
+		end
 	end
-	public.auto = setmetatable({}, {
-		__metatable = false,
-		__newindex = function(_, k, v) set_auto_release(k, v) end,
-	})
-	public.temp = setmetatable({}, {
-		__metatable = false,
-		__sub = function(_, v) set_auto_release(v, false); return v end,
-	})
-	public.perm = setmetatable({}, {
-		__metatable = false,
-		__sub = function(_, v) set_auto_release(v, true); return v end,
-	})
+	public.ret = ret
 end
 
-local function arg_chunk(k, n)
-	k = k or 1
-	n = n or 100
-	local str = k > n and '' or 'a' .. k
-	for i = k + 1, n do str = str .. ',a' .. i end
-	return str
-end
+public.empty = setmetatable({}, { __metatable=false, __newindex=nop })
 
-function public.pseudo_vararg_function(body, upvals)
-	local upval_chunk = ''
-	for k in upvals or empty do
-		upval_chunk = upval_chunk .. format('local %1$s = %1$s;', k)
-	end
-	local f = loadstring(format('%s return function(%s) %s end', upval_chunk, arg_chunk(), body)) or error()
-	setfenv(f, upvals or empty)
-	return f()
-end
-
+local vararg
 do
 	local MAXPARAMS = 100
 
 	local code = [[
-		local f, setn, acquire_auto = f, setn, acquire_auto
+		local f, setn, acquire, set_auto_release = f, setn, acquire, set_auto_release
 		return function(
 	]]
 	for i = 1, MAXPARAMS - 1 do
@@ -132,7 +121,8 @@ do
 	end
 	code = code .. [[
 		until true
-		local t = acquire_auto()
+		local t = acquire()
+		set_auto_release(t, true)
 		setn(t, n)
 		repeat
 	]]
@@ -145,60 +135,29 @@ do
 		end
 	]]
 
-	function public.vararg(f)
+	function vararg(f)
 		local chunk = loadstring(code)
-		setfenv(chunk, {f=f, setn=setn, acquire_auto=acquire_auto})
+		setfenv(chunk, {f=f, setn=setn, acquire=acquire, set_auto_release=set_auto_release})
 		return chunk()
 	end
+	public.vararg = vararg
 end
 
-local function insert_chunk(mode)
-	local body = 'repeat '
-	if mode == 'k' then
-		for i = 2, 99 do
-			body = body .. format('if a%1$d == nil then break end; a1[a%1$d] = true;', i)
-		end
-	elseif mode == 'v' then
-		body = body .. 'if a2 == nil then break end; a1[1] = a2;'
-		for i = 3, 99 do
-			body = body .. format('if a%1$d == nil then setn(a1, %d); break end; a1[%d] = a%1$d;', i, i-2, i-1)
-		end
-	elseif mode == 'v0' then
-		body = body .. 'setn(a1, 98);'
-		for i = 2, 99 do
-			body = body .. format('a1[%d] = a%d;', i-1, i)
-		end
-	elseif mode == 'kv' then
-		for i = 2, 98, 2 do
-			body = body .. format('if a%1$d == nil then break end; a1[a%1$d] = a%d;', i, i+1)
-		end
+public.A = vararg(function(arg)
+	set_auto_release(arg, false)
+	return arg
+end)
+public.S = vararg(function(arg)
+	local t = acquire()
+	for _, v in arg do
+		t[v] = true
 	end
-	return body .. 'if a100 ~= nil then error("Vararg overflow.") end until true;'
-end
-
-do
-	local function pseudo_table_literal(mode)
-		local upvals = {setmetatable=setmetatable, setn=setn, error=error}
-		local mt = {__call = pseudo_vararg_function(insert_chunk(mode) .. 'setmetatable(a1, nil); return a1', upvals)}
-		return function() return setmetatable(acquire(), mt) end
+	return t
+end)
+public.T = vararg(function(arg)
+	local t = acquire()
+	for i = 1, getn(arg), 2 do
+		t[arg[i]] = arg[i + 1]
 	end
-	public.S = vararg(function(arg)
-		local set = acquire()
-		for _, v in arg do
-			if v ~= nil then set[v] = true end
-		end
-		return set
-	end)
-	public.A.get = pseudo_table_literal('v')
-	public.A0.get = pseudo_table_literal('v0')
-	public.T.get = pseudo_table_literal('kv')
-end
-
-do
-	local body = ''
-	for i = 1, 99 do
-		body = body .. format('if a1 == %d then return %s end;', i, arg_chunk(i+1, 100))
-	end
-	public.select = pseudo_vararg_function(body)
-end
-
+	return t
+end)

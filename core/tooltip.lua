@@ -12,7 +12,7 @@ function LOAD()
 	        hook(name, GameTooltip, function(...) auto[arg] = true
 	            inside_hook = true
 	            game_tooltip_money = 0
-	            local ret = temp-A0(orig[GameTooltip][name](unpack(arg)))
+	            local ret = temp-A(orig[GameTooltip][name](unpack(arg)))
 	            inside_hook = false
 	            f(unpack(arg))
 	            return unpack(ret)
