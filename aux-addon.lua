@@ -67,7 +67,6 @@ do
 		function env.private.USE_ITEM.set(f) tab.USE_ITEM = f end
 		function env.private.CLICK_LINK.set(f) tab.CLICK_LINK = f end
 		function env.public.ACTIVE.get() return tab == active_tab end
-		p(tab)
 		tinsert(tab_info, tab)
 	end
 end

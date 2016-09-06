@@ -48,7 +48,11 @@ public.select = vararg(function(arg)
 	for _ = 1, arg[1] do
 		tremove(arg, 1)
 	end
-	return unpack(arg)
+	if getn(arg) == 0 then
+		return nil
+	else
+		return unpack(arg)
+	end
 end)
 
 public.join = _G.table.concat

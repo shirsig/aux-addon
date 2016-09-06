@@ -113,7 +113,7 @@ do
 	code = code .. [[
 		overflow)
 		if overflow ~= nil then error("Vararg overflow.") end
-		local n
+		local n = 0
 		repeat
 	]]
 	for i = MAXPARAMS - 1, 1, -1 do
