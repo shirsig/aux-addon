@@ -1,5 +1,4 @@
 green_t = module
---setglobal('green_t', green_t and error(nil) or module)
 
 local next, getn, setn, tremove, type, setmetatable = next, getn, table.setn, tremove, type, setmetatable
 
