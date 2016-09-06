@@ -134,7 +134,7 @@ function update_auction_listing()
                     {value=auction_record.own and color.yellow(auction_record.count) or auction_record.count},
                     {value=al.time_left(auction_record.duration)},
                     {value=auction_record.stack_size == stack_size and color.yellow(auction_record.stack_size) or auction_record.stack_size},
-                    {value=aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color) },
+                    {value=aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color)},
                     {value=historical_value and al.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'},
                     {value=auction_record.unit_buyout_price > 0 and aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'},
                     {value=auction_record.unit_buyout_price > 0 and historical_value and al.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---'},
@@ -144,20 +144,20 @@ function update_auction_listing()
         end
         sort(auction_rows, function(a, b)
             return sorting.multi_lt(
-                {
+                temp-A(
                     a.record.unit_buyout_price == 0 and huge or a.record.unit_buyout_price,
                     a.record.unit_blizzard_bid,
                     a.record.stack_size,
                     b.record.own and 1 or 0,
-                    a.record.duration,
-                },
-                {
+                    a.record.duration
+                ),
+                temp-A(
                     b.record.unit_buyout_price == 0 and huge or b.record.unit_buyout_price,
                     b.record.unit_blizzard_bid,
                     b.record.stack_size,
                     a.record.own and 1 or 0,
-                    b.record.duration,
-                }
+                    b.record.duration
+                )
             )
         end)
     end

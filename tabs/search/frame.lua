@@ -42,7 +42,7 @@ function create_frames()
 	        this.open = not this.open
 	    end)
 
-	    for _, offset in {14, 10, 6} do
+	    for _, offset in temp-A(14, 10, 6) do
 	        local fake_icon_part = btn:CreateFontString()
 	        fake_icon_part:SetFont([[Fonts\FRIZQT__.TTF]], 23)
 	        fake_icon_part:SetPoint('CENTER', 0, offset)
