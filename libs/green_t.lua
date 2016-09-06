@@ -1,8 +1,8 @@
 green_t = module
 --setglobal('green_t', green_t and error(nil) or module)
 
-local next, setn, type, setmetatable = next, table.setn, type, setmetatable
-local wipe, release, acquire, acquire_auto, empty
+local next, getn, setn, type, setmetatable = next, getn, table.setn, type, setmetatable
+local wipe, release, acquire, acquire_auto
 
 -- TODO mandatory operation table mandate + comply/fulfill functions
 local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, { __mode='k' }), {}
@@ -17,9 +17,19 @@ function wipe(t)
 	for k in t do t[k] = nil end
 	t.reset, t.reset = nil, 1
 	setn(t, 0)
-	return t
 end
 public.wipe = wipe
+
+public.init = setmetatable({}, {
+	__metatable = false,
+	__newindex = function(_, t, init)
+		wipe(t)
+		for k, v in init do
+			t[k] = v
+			setn(t, getn(init))
+		end
+	end
+})
 
 function release(t)
 	wipe(t)
@@ -32,6 +42,14 @@ function release(t)
 	end
 end
 public.release = release
+
+function public.ret(t)
+	if getn(t) > 0 then
+		return tremove(t, 1), ret(t)
+	else
+		release(t)
+	end
+end
 
 function acquire()
 	if pool_size > 0 then
@@ -54,40 +72,25 @@ function acquire_auto()
 end
 public.tt.get = acquire_auto
 
-function public.ret(t)
-	if getn(t) > 0 then
-		return tremove(t, 1), ret(t)
-	else
-		release(t)
-	end
-end
+public.empty = setmetatable({}, { __newindex=nop })
 
 do
-	local mt = { __newindex=nop }
-	function empty() return setmetatable(acquire_auto(), mt) end
-	public.empty.get = empty
-end
-
-do
-	local function apply(v, enable)
+	local function set_auto_release(v, enable)
 		if type(v) ~= 'table' then return end
 		auto_release[v] = enable and true or nil
 	end
-	local function define_modifier(name, enable)
-		local f = function(_, v) apply(v, enable); return v end
-		local mt = { __call=f, __sub=f }
-		public[name] { get=function() return setmetatable(acquire_auto(), mt) end, set=function(v) apply(v, enable) end }
-	end
-	define_modifier('temp', true)
-	define_modifier('perm', false)
-end
-
-do
-	local mt, key = {}, nil
-	function mt:__unm() local temp = mt.__index; mt.__index = nil; return temp end
-	function mt:__index(k) key = k; return self end
-	function mt:__call(v) self[key] = v; key = nil; return self end
-	function public.__(t) mt.__newindex = wipe(t); return setmetatable(acquire_auto(), mt) end
+	public.auto = setmetatable({}, {
+		__metatable = false,
+		__newindex=function(_, k, v) set_auto_release(k, v) end,
+	})
+	public.temp = setmetatable({}, {
+		__metatable=false,
+		__sub=function(_, v) set_auto_release(v, false); return v end,
+	})
+	public.perm = setmetatable({}, {
+		__metatable=false,
+		__sub=function(_, v) set_auto_release(v, true); return v end,
+	})
 end
 
 local function arg_chunk(k, n)
@@ -100,11 +103,11 @@ end
 
 function public.pseudo_vararg_function(body, upvals)
 	local upval_chunk = ''
-	for k in upvals or empty() do
+	for k in upvals or empty do
 		upval_chunk = upval_chunk .. format('local %1$s = %1$s;', k)
 	end
 	local f = loadstring(format('%s return function(%s) %s end', upval_chunk, arg_chunk(), body)) or error()
-	setfenv(f, upvals or empty())
+	setfenv(f, upvals or empty)
 	return f()
 end
 
@@ -160,15 +163,15 @@ local function insert_chunk(mode)
 end
 
 do
-	local function pseudo_literal(mode)
-		local upvals = {setmetatable=setmetatable, setn=table.setn, error=error}
+	local function pseudo_table_literal(mode)
+		local upvals = {setmetatable=setmetatable, setn=setn, error=error}
 		local mt = {__call = pseudo_vararg_function(insert_chunk(mode) .. 'setmetatable(a1, nil); return a1', upvals)}
 		return function() return setmetatable(acquire(), mt) end
 	end
-	public.S.get = pseudo_literal('k')
-	public.A.get = pseudo_literal('v')
-	public.A0.get = pseudo_literal('v0')
-	public.T.get = pseudo_literal('kv')
+	public.S.get = pseudo_table_literal('k')
+	public.A.get = pseudo_table_literal('v')
+	public.A0.get = pseudo_table_literal('v0')
+	public.T.get = pseudo_table_literal('kv')
 end
 
 do

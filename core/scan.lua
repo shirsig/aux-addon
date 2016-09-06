@@ -44,7 +44,7 @@ end
 
 function private.query.get() return state.params.queries[state.query_index] end
 
-function wait_for_callback(...) temp=arg
+function wait_for_callback(...) auto[arg] = true
 	local send_signal, signal_received = signal()
 	local suspended, ret
 

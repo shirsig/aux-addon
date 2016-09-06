@@ -9,7 +9,7 @@ function LOAD()
 		local inside_hook = false
 	    for name, f in game_tooltip_hooks do
 	        local name, f = name, f
-	        hook(name, GameTooltip, function(...) temp=arg
+	        hook(name, GameTooltip, function(...) auto[arg] = true
 	            inside_hook = true
 	            game_tooltip_money = 0
 	            local ret = temp-A0(orig[GameTooltip][name](unpack(arg)))
@@ -19,7 +19,7 @@ function LOAD()
 	        end)
 	    end
 	    local orig = GameTooltip:GetScript('OnTooltipAddMoney')
-	    GameTooltip:SetScript('OnTooltipAddMoney', function(...) temp=arg
+	    GameTooltip:SetScript('OnTooltipAddMoney', function(...) auto[arg] = true
 		    if inside_hook then
 			    game_tooltip_money = arg1
 		    else
@@ -28,7 +28,7 @@ function LOAD()
 	    end)
     end
     local orig = SetItemRef
-    setglobal('SetItemRef', function(...) temp=arg
+    setglobal('SetItemRef', function(...) auto[arg] = true
         local result = orig(unpack(arg))
         local name, _, quality = GetItemInfo(arg[1])
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
@@ -206,7 +206,7 @@ end
 function game_tooltip_hooks:SetAuctionSellItem()
     local name, _, quantity = GetAuctionSellItemInfo()
     if name then
-        for slot in info.inventory do temp=slot
+        for slot in info.inventory do auto[slot] = true
             local link = GetContainerItemLink(unpack(slot))
             if link and select(5, info.parse_link(link)) == name then
                 extend_tooltip(GameTooltip, link, quantity)

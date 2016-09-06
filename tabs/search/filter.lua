@@ -170,7 +170,7 @@ function clear_form()
 	UIDropDownMenu_ClearAll(quality_dropdown)
 	filter_parameter_input:ClearFocus()
 	wipe(post_filter)
-	wipe(filter_builder_state).selected = 0
+	init[filter_builder_state] = temp-T('selected', 0)
 	update_filter_display()
 end
 

@@ -914,7 +914,7 @@ local methods = {
         end
     end,
 
-    SetSort = function(self, ...) temp=arg
+    SetSort = function(self, ...) auto[arg] = true
         for k=1,arg.n do
             for i, sort in self.sorts do
                 if sort.index == abs(arg[k]) then

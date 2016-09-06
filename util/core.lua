@@ -97,7 +97,7 @@ do
 	end
 end
 
-function public.index(t, ...) temp=arg
+function public.index(t, ...) auto[arg] = true
 	for i = 1, arg.n do t = t and t[arg[i]] end return t
 end
 
@@ -134,7 +134,7 @@ function public.key(value, t)
 	for k, v in t do if v == value then return k end end
 end
 
-function public.keys(t) -- TODO recursive return instead of new table
+function public.keys(t)
 	local keys = M.t
 	for k in t do tinsert(keys, k) end
 	return keys

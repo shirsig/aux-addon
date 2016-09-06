@@ -186,10 +186,7 @@ function start_real_time_scan(query, search, continuation)
 			for _, record in new_records do
 				map[record.sniping_signature] = record
 			end
-			wipe(new_records)
-			for _, record in map do
-				tinsert(new_records, record)
-			end
+			init[new_records] = temp-values(map)
 
 			if getn(new_records) > 1000 then
 				StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
