@@ -18,7 +18,7 @@ do
 	frame:SetScript('OnDragStart', function() this:StartMoving() end)
 	frame:SetScript('OnDragStop', function() this:StopMovingOrSizing() end)
 	frame:SetScript('OnShow', function() PlaySound('AuctionWindowOpen') end)
-	frame:SetScript('OnHide', function() PlaySound('AuctionWindowClose') CloseAuctionHouse() end)
+	frame:SetScript('OnHide', function() PlaySound('AuctionWindowClose'); CloseAuctionHouse() end)
 	frame.content = CreateFrame('Frame', nil, frame)
 	frame.content:SetPoint('TOPLEFT', 4, -80)
 	frame.content:SetPoint('BOTTOMRIGHT', -4, 35)
