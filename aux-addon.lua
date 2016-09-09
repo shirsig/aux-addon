@@ -2,17 +2,17 @@
 --aux_character_settings = {}
 
 do  local modules = {}
-	local mt = {__metatable=false, __index=function(_, key) return modules[key].I end, __newindex=error}
+	local mt = {__metatable=false, __index=function(_, key) return modules[key]._I end, __newindex=error}
 	aux = function(name)
 		if not modules[name] then
 			(function()
-				modules[name] = module and M
+				modules[name] = module and _E
 				import (green_t)
 				private.aux = setmetatable(t, mt)
 				private.p.set = function(v) inspect(nil, v) end
 			end)()
 		end
-		modules[name].import (modules.core.I)
+		modules[name].import (modules.core._I)
 		modules[name].private()
 		setfenv(2, modules[name])
 	end
@@ -52,7 +52,7 @@ do
 			for _, f in handlers2 do f() end
 			print('v' .. version .. ' loaded.')
 		else
-			M[event]()
+			_E[event]()
 		end
 	end)
 end
@@ -61,7 +61,7 @@ tab_info = t
 do
 	for _, info in temp-A(temp-A('search_tab', 'Search'), temp-A('post_tab', 'Post'), temp-A('auctions_tab', 'Auctions'), temp-A('bids_tab', 'Bids')) do
 		local tab = T('name', info[2])
-		local env = (function() _G.aux(info[1]) return M end)()
+		local env = (function() _G.aux(info[1]) return _E end)()
 		function env.private.OPEN.set(f) tab.OPEN = f end
 		function env.private.CLOSE.set(f) tab.CLOSE = f end
 		function env.private.USE_ITEM.set(f) tab.USE_ITEM = f end

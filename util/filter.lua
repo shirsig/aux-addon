@@ -354,7 +354,7 @@ function public.query(filter_string)
         blizzard_query = blizzard_query(filter),
         validator = validator(filter),
         prettified = prettified_filter_string(filter),
-    }, M.suggestions(filter)
+    }, _E.suggestions(filter)
 end
 
 function public.queries(filter_string)

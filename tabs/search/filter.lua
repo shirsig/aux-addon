@@ -73,7 +73,7 @@ function update_form()
 
 	if blizzard_query.exact then
 		for key in temp-S('class', 'subclass', 'slot', 'quality') do
-			M[key .. '_dropdown'].button:Disable()
+			_E[key .. '_dropdown'].button:Disable()
 		end
 	else
 		class_dropdown.button:Enable()
@@ -81,9 +81,9 @@ function update_form()
 	end
 	for key in temp-S('min_level', 'max_level') do
 		if blizzard_query.exact then
-			M[key .. '_input']:Disable()
+			_E[key .. '_input']:Disable()
 		else
-			M[key .. '_input']:Enable()
+			_E[key .. '_input']:Enable()
 		end
 	end
 	if blizzard_query.exact then

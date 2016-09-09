@@ -26,7 +26,7 @@ aux 'core'
 --	--	end
 --	local function instantiate(methods, getters, setters, init, arg)
 --		local interface = setmetatable({}, mt)
---		local self = {I=interface}; init(self, unpack(arg))
+--		local self = {_I=interface}; init(self, unpack(arg))
 --		state[interface] = {class={methods=methods, getters=getters, setters=setters}, self=self}
 --		return interface
 --	end
@@ -81,7 +81,7 @@ do
 	for i = 1, 9 do
 		local key = '_' .. i
 		public[key] = t
-		formal_parameters[M[key]] = i
+		formal_parameters[_E[key]] = i
 	end
 	local function helper(f, arg1, arg2)
 		local params = t
@@ -98,7 +98,7 @@ do
 		if type(body) == 'function' then
 			local arg1 = arg
 			return function(...) return helper(body, arg1, arg) end
-		else
+		else -- TODO memoization
 --			body = gsub(body, '_([ab])', function(char) return '_' ..  end)
 --			local lambda = loadstring('return function(_1,_2,_3,_4,_5,_6,_7,_8,_9)' .. body .. ' end')
 			local lambda = loadstring('return ' .. body) or loadstring(body) or error()
@@ -129,7 +129,7 @@ do
 end
 
 function public.copy(t)
-	local copy = M.t
+	local copy = _E.t
 	for k, v in t do copy[k] = v end
 	table.setn(copy, getn(t))
 	return setmetatable(copy, getmetatable(t))
@@ -146,13 +146,13 @@ function public.key(value, t)
 end
 
 function public.keys(t)
-	local keys = M.t
+	local keys = _E.t
 	for k in t do tinsert(keys, k) end
 	return keys
 end
 
 function public.values(t)
-	local values = M.t
+	local values = _E.t
 	for _, v in t do tinsert(values, v) end
 	return values
 end

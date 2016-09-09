@@ -28,7 +28,7 @@ function LOAD()
 	event_listener('NEW_AUCTION_UPDATE', function()
 		for info in present(info.auction_sell_item()) do
 			for item_id in present(item_id(info.name)) do
-				_G.aux_merchant_sell[M.item_id(info.name)] = info.vendor_price / (aux.info.max_item_charges(item_id) or info.count)
+				_G.aux_merchant_sell[_E.item_id(info.name)] = info.vendor_price / (aux.info.max_item_charges(item_id) or info.count)
 			end
 		end
 	end)
