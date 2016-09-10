@@ -56,7 +56,7 @@ function global_mt:__index(key)
 	local module, environment, interface, definition_helper, accessors, mutators, fields, public_accessors, public_mutators, public_fields
 	environment, interface, definition_helper = {}, {}, setmetatable({}, definition_helper_mt)
 	accessors = { private=function() return definition_helper.private end, public=function() return definition_helper.public end }
-	mutators = setmetatable({}, { __index=function(_, k) return function(v) if v == interface and (_G[k] == nil or _G.error(nil)) then _G[k] = v else definition_helper.private[k] = v end end end})
+	mutators = setmetatable({_=nop}, { __index=function(_, k) return function(v) if v == interface and (_G[k] == nil or _G.error(nil)) then _G[k] = v else definition_helper.private[k] = v end end end})
 	fields = setmetatable(
 		{ _E=environment, _I=interface, _G=_G, import=function(interface) import(module, interface) end, error=error, nop=nop, id=id },
 		{ __index=function(_, key) local accessor = accessors[key]; if accessor then return accessor() else return _G[key] end end }
@@ -67,7 +67,7 @@ function global_mt:__index(key)
 	setmetatable(environment, proxy_mt(fields, mutators))
 	setmetatable(interface, proxy_mt(public_fields, public_mutators, interface_eq))
 	module = {
-		defined = { _E=true, _I=true, _G=true, import=true, error=true, _=true, nop=true, id=true, public=true, private=true },
+		defined = { _E=true, _I=true, _G=true, import=true, error=true, nop=true, id=true, public=true, private=true, ['_=']=true },
 		[ACCESSOR] = accessors,
 		[MUTATOR] = mutators,
 		[FIELD] = fields,
