@@ -4,11 +4,13 @@ _G.aux_auto_buy_filter = ''
 
 do
 	local id = 0
-	search_scan_id { get=function() return id end, set=function(v) id = v end }
+	function private.search_scan_id.get() return id end
+	function private.search_scan_id.set(v) id = v end
 end
 do
 	local validator
-	auto_buy_validator { get=function() return validator end, set=function(v) validator = v end }
+	function private.auto_buy_validator.get() return validator end
+	function private.auto_buy_validator.set(v) validator = v end
 end
 
 do

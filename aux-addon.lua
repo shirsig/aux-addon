@@ -13,7 +13,6 @@ do  local modules = {}
 			end)()
 		end
 		modules[name].import (modules.core._I)
-		modules[name].private()
 		setfenv(2, modules[name])
 	end
 end

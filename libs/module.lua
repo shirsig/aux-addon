@@ -1,9 +1,12 @@
 if getmetatable(getfenv(0)) == false then return end
 local tinsert, tremove, getn, setn, strfind, type, setmetatable, setfenv, _G = tinsert, tremove, getn, table.setn, strfind, type, setmetatable, setfenv, getfenv(0)
 
-local PUBLIC, FIELD, ACCESSOR, MUTATOR = 1, 2, 4, 6
+local PRIVATE, PUBLIC, FIELD, ACCESSOR, MUTATOR = 0, 1, 2, 4, 6
+local TYPES = { FIELD, ACCESSOR, MUTATOR }
 local READ, WRITE = '', '='
 local OPERATION = { [FIELD]=READ, [ACCESSOR]=READ, [MUTATOR]=WRITE }
+local ACCESS = { private=PRIVATE, public=PUBLIC }
+local META = { get=ACCESSOR, set=MUTATOR }
 
 local function error(msg, ...) return _G.error(format(msg or '', unpack(arg)) .. '\n' .. debugstack(), 0) end
 
@@ -23,30 +26,23 @@ function definition_helper_mt:__index(k)
 	tinsert(_modifiers[self], k)
 	return self
 end
-do
-	local PUBLIC, META = { public=PUBLIC, private=0 }, { get=ACCESSOR, set=MUTATOR }
-	function definition_helper_mt:__newindex(k, v) local module, modifiers = _module[self], _modifiers[self]
-		local public = PUBLIC[tremove(modifiers, 1)] or error('Invalid definition.')
-		local name = META[k] and (tremove(modifiers) or error('Invalid definition.')) or k
-		if type(name) ~= 'string' or not strfind(name, '^[_%a][_%w]*') then error('Invalid definition.') end
-		local type = META[k] or FIELD
-		module.defined[name..OPERATION[type]] = module.defined[name..OPERATION[type]] and error('"%s" already exists.', name) or true
-		for i = getn(modifiers), 1, -1 do v = module[FIELD][modifiers[i]](v) end
-		module[type][name], module[public+type][name] = v, v
-		setn(modifiers, 0)
-	end
+function definition_helper_mt:__newindex(k, v) local module, modifiers = _module[self], _modifiers[self]
+	local access = ACCESS[tremove(modifiers, 1)] or error('Invalid definition.')
+	local name = META[k] and (tremove(modifiers) or error('Invalid definition.')) or k
+	if type(name) ~= 'string' or not strfind(name, '^[_%a][_%w]*') then error('Invalid definition.') end
+	local type = META[k] or FIELD
+	module.defined[name..OPERATION[type]] = module.defined[name..OPERATION[type]] and error('"%s" already exists.', name) or true
+	for i = getn(modifiers), 1, -1 do v = module[FIELD][modifiers[i]](v) end
+	module[type][name], module[access+type][name] = v, v
+	setn(modifiers, 0)
 end
 
-local import
-do
-	local TYPES = { FIELD, ACCESSOR, MUTATOR }
-	function import(self, interface)
-		local module = (interface == INTERFACE or error('Import error.')) and _module[interface]
-		for _, type in TYPES do
-			for k, v in module[PUBLIC+type] do
-				if not self.defined[k..OPERATION[type]] then
-					self.defined[k..OPERATION[type]], self[type][k] = true, v
-				end
+local function import(self, interface)
+	local module = (interface == INTERFACE or error('Import error.')) and _module[interface]
+	for _, type in TYPES do
+		for k, v in module[PUBLIC+type] do
+			if not self.defined[k..OPERATION[type]] then
+				self.defined[k..OPERATION[type]], self[type][k] = true, v
 			end
 		end
 	end
@@ -60,7 +56,7 @@ function global_mt:__index(key)
 	local module, environment, interface, definition_helper, accessors, mutators, fields, public_accessors, public_mutators, public_fields
 	environment, interface, definition_helper = {}, {}, setmetatable({}, definition_helper_mt)
 	accessors = { private=function() return definition_helper.private end, public=function() return definition_helper.public end }
-	mutators = setmetatable({}, { __index=function(_, k) return function(v) if v == interface and (_G[k] == nil or error(nil)) then _G[k] = v end end end})
+	mutators = setmetatable({}, { __index=function(_, k) return function(v) if v == interface and (_G[k] == nil or _G.error(nil)) then _G[k] = v else definition_helper.private[k] = v end end end})
 	fields = setmetatable(
 		{ _E=environment, _I=interface, _G=_G, import=function(interface) import(module, interface) end, error=error, nop=nop, id=id },
 		{ __index=function(_, key) local accessor = accessors[key]; if accessor then return accessor() else return _G[key] end end }

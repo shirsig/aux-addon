@@ -1,10 +1,10 @@
 aux 'sorting'
 
-public()
+public.EQ = 0
+public.LT = 1
+public.GT = 2
 
-LT, EQ, GT = t, t, t
-
-function compare(a, b, desc)
+function public.compare(a, b, desc)
     if a < b then
         return desc and GT or LT
     elseif a > b then
@@ -14,7 +14,7 @@ function compare(a, b, desc)
     end
 end
 
-function multi_lt(xs, ys)
+function public.multi_lt(xs, ys)
     local i = 1
     while true do
         if xs[i] and ys[i] and xs[i] ~= ys[i] then

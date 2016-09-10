@@ -38,12 +38,16 @@ function refresh_button_click()
 	refresh = true
 end
 
-do local item
-	selected_item {get=function() return item end, set=function(v) item = v end}
+do
+	local item
+	function private.selected_item.get() return item end
+	function private.selected_item.set(v) item = v end
 end
 
-do local c = 0
-	refresh {get=function() return c end, set=function(v) c = v end}
+do
+	local c = 0
+	function private.refresh.get() return c end
+	function private.refresh.set(v) c = v end
 end
 
 function LOAD()
