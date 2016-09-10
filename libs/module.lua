@@ -1,120 +1,87 @@
 if getmetatable(getfenv(0)) == false then return end
-local setmetatable, setfenv, getglobal, _G = setmetatable, setfenv, getglobal, getfenv(0)
+local tinsert, tremove, getn, setn, strfind, type, setmetatable, setfenv, _G = tinsert, tremove, getn, table.setn, strfind, type, setmetatable, setfenv, getfenv(0)
 
-local PRIVATE, FIELD, PUBLIC, ACCESSOR, MUTATOR = 0, 0, 1, 2, 4
-local PUBLIC_FIELD, PUBLIC_ACCESSOR, PUBLIC_MUTATOR = PUBLIC+FIELD, PUBLIC+ACCESSOR, PUBLIC+MUTATOR
-local READ, WRITE = 0, 1
+local PUBLIC, FIELD, ACCESSOR, MUTATOR = 1, 2, 4, 6
+local READ, WRITE = '', '='
 local OPERATION = { [FIELD]=READ, [ACCESSOR]=READ, [MUTATOR]=WRITE }
 
 local function error(msg, ...) return _G.error(format(msg or '', unpack(arg)) .. '\n' .. debugstack(), 0) end
-local function import_error() error('Import error.') end
-local function definition_error() error('Invalid definition.') end
-local function collision_error(key) error('"%s" already exists.', key) end
 
 local nop, id = function() end, function(v) return v end
 
 local interface_eq = function() return true end
 local INTERFACE = setmetatable({}, { __eq=interface_eq })
 
-local function proxy_mt(values, mutators, eq)
-	return {
-		__metatable = false,
-		__index = values,
-		__newindex = function(_, k, v) return mutators[k](v) end,
-		__eq = eq,
-	}
+local function proxy_mt(fields, mutators, eq)
+	return { __metatable=false, __index=fields, __newindex=function(_, k, v) return mutators[k](v) end, __eq=eq }
 end
+
+local _module, _modifiers = {}, {}
 
 local definition_helper_mt = { __metatable=false }
 function definition_helper_mt:__index(k)
-	tinsert(self.definition_modifiers, k)
+	tinsert(_modifiers[self], k)
 	return self
 end
 do
-	local TYPE = { get=ACCESSOR, set=MUTATOR }
-	function definition_helper_mt:__newindex(k, v) self=__[self]
-		if type(k) ~= 'string' or not strfind(k, '^[_%a][_%w]*') then definition_error() end
-		if v ~= self.interface then
-			self.defined[OPERATION[type]..k] = self.defined[OPERATION[type]..k] and collision_error(k) or true
-			self[type], self[self.definition_access+type] = v, v
-		elseif _G[k] ~= nil or error(nil) then
-			_G[k] = v
-		end
-		self.definition_access, self.definition_modifiers = nil, nil
+	local PUBLIC, META = { public=PUBLIC, private=0 }, { get=ACCESSOR, set=MUTATOR }
+	function definition_helper_mt:__newindex(k, v) local module, modifiers = _module[self], _modifiers[self]
+		local public = PUBLIC[tremove(modifiers, 1)] or error('Invalid definition.')
+		local name = META[k] and (tremove(modifiers) or error('Invalid definition.')) or k
+		if type(name) ~= 'string' or not strfind(name, '^[_%a][_%w]*') then error('Invalid definition.') end
+		local type = META[k] or FIELD
+		module.defined[name..OPERATION[type]] = module.defined[name..OPERATION[type]] and error('"%s" already exists.', name) or true
+		for i = getn(modifiers), 1, -1 do v = module[FIELD][modifiers[i]](v) end
+		module[type][name], module[public+type][name] = v, v
+		setn(modifiers, 0)
 	end
 end
 
 local import
 do
-	local TYPES = {FIELD, ACCESSOR, MUTATOR}
+	local TYPES = { FIELD, ACCESSOR, MUTATOR }
 	function import(self, interface)
-		local module = (interface == INTERFACE or import_error()) and __[interface]
+		local module = (interface == INTERFACE or error('Import error.')) and _module[interface]
 		for _, type in TYPES do
 			for k, v in module[PUBLIC+type] do
-				if not self.defined[OPERATION[type]..k] then
-					self.defined[OPERATION[type]..k], self[type][k] = true, v
+				if not self.defined[k..OPERATION[type]] then
+					self.defined[k..OPERATION[type]], self[type][k] = true, v
 				end
 			end
 		end
 	end
 end
 
-local global_default_mt, nop_default_mt = { __index=getglobal }, { __index=nop }
+local nop_default_mt = { __index=function() return nop end }
 
 local global_mt = { __metatable=false }
 function global_mt:__index(key)
 	if key ~= 'module' then return end
-	local definition_helper = setmetatable({}, definition_helper_mt)
-	local environment, interface = {}, {}
-	local accessors = setmetatable(
-		{
-			private = function() self.definition_access = PRIVATE; return definition_helper end,
-			public = function() self.definition_access = PUBLIC; return definition_helper end,
-		},
-		global_default_mt
+	local module, environment, interface, definition_helper, accessors, mutators, fields, public_accessors, public_mutators, public_fields
+	environment, interface, definition_helper = {}, {}, setmetatable({}, definition_helper_mt)
+	accessors = { private=function() return definition_helper.private end, public=function() return definition_helper.public end }
+	mutators = setmetatable({}, { __index=function(_, k) return function(v) if v == interface and (_G[k] == nil or error(nil)) then _G[k] = v end end end})
+	fields = setmetatable(
+		{ _E=environment, _I=interface, _G=_G, import=function(interface) import(module, interface) end, error=error, nop=nop, id=id },
+		{ __index=function(_, key) local accessor = accessors[key]; if accessor then return accessor() else return _G[key] end end }
 	)
-	local public_accessors = {}
-	local mutators = setmetatable({}, nop_default_mt)
-	local public_mutators = setmetatable({}, nop_default_mt)
-	local fields = setmetatable(
-		{
-			_G = _G,
-			_I = interface,
-			_E = environment,
-			import = function(interface) import(self, interface) end,
-			error = error,
-			nop = nop,
-			id = id,
-		},
-		{ __index=function(_, key) return accessors[key]() end }
-	)
-	local public_fields = setmetatable(
-		{},
-		{ __index=function(_, key) return public_accessors[key]() end }
-	)
+	public_accessors = setmetatable({}, nop_default_mt)
+	public_mutators = setmetatable({}, nop_default_mt)
+	public_fields = setmetatable({}, { __index=function(_, key) return public_accessors[key]() end })
 	setmetatable(environment, proxy_mt(fields, mutators))
 	setmetatable(interface, proxy_mt(public_fields, public_mutators, interface_eq))
-	self = {
-		defined = {
-			[FIELD..'_G'] = true,
-			[FIELD..'_I'] = true,
-			[FIELD..'_E'] = true,
-			[FIELD..'import'] = true,
-			[FIELD..'_'] = true,
-			[FIELD..'error'] =true,
-			[FIELD..'nop'] = true,
-			[FIELD..'id'] = true,
-			[ACCESSOR..'public'] = true,
-			[ACCESSOR..'private'] = true,
-		},
-		[FIELD] = fields,
-		[PUBLIC_FIELD] = public_fields,
+	module = {
+		defined = { _E=true, _I=true, _G=true, import=true, error=true, _=true, nop=true, id=true, public=true, private=true },
 		[ACCESSOR] = accessors,
-		[PUBLIC_ACCESSOR] = public_accessors,
 		[MUTATOR] = mutators,
-		[PUBLIC_MUTATOR] = public_mutators,
+		[FIELD] = fields,
+		[PUBLIC+ACCESSOR] = public_accessors,
+		[PUBLIC+MUTATOR] = public_mutators,
+		[PUBLIC+FIELD] = public_fields,
 		interface = interface,
 	}
+	_module[definition_helper], _module[interface] = module, module
+	_modifiers[definition_helper] = {}
 	setfenv(2, environment)
 	return interface
 end
