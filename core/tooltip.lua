@@ -30,12 +30,13 @@ function LOAD()
     local orig = SetItemRef
     setglobal('SetItemRef', function(...) auto[arg] = true
         local name, _, quality = GetItemInfo(arg[1])
+        local ret = A(orig(unpack(arg)))
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
             local color_code = select(4, GetItemQualityColor(quality))
             local link = color_code ..  '|H' .. arg[1] .. '|h[' .. name .. ']|h' .. FONT_COLOR_CODE_CLOSE
             extend_tooltip(ItemRefTooltip, link, 1)
         end
-        return orig(unpack(arg))
+        return ret
     end)
 end
 
