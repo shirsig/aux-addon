@@ -270,8 +270,6 @@ function public.tooltip(setter)
     AuxTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
     AuxTooltip.money = 0
     setter(AuxTooltip)
-    AuxTooltip:Show()
-
     local tooltip = t
     for i = 1, AuxTooltip:NumLines() do
         tinsert(tooltip, T(
