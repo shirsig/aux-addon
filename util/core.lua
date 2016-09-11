@@ -44,7 +44,7 @@ aux 'core'
 --	end
 --end
 
-public.select = vararg(function(arg)
+function public.vararg.select(arg)
 	for _ = 1, arg[1] do
 		tremove(arg, 1)
 	end
@@ -53,7 +53,7 @@ public.select = vararg(function(arg)
 	else
 		return unpack(arg)
 	end
-end)
+end
 
 public.join = _G.table.concat
 
