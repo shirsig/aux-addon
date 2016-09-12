@@ -58,7 +58,7 @@ end
 
 function public.event_listener(event, cb)
 	local listener_id = unique_id
-	listeners[listener_id] = { event=event, cb=cb, kill=function(...) auto[arg] = true if arg.n == 0 or arg[1] then kill_listener(listener_id) end end }
+	listeners[listener_id] = { event=event, cb=cb, kill=vararg-function(arg) if getn(arg) == 0 or arg[1] then kill_listener(listener_id) end end }
 	event_frame:RegisterEvent(event)
 	return listener_id
 end

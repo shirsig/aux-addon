@@ -101,8 +101,9 @@ function public.vararg.partial(arg)
 	end)
 end
 
-function public.index(t, ...) auto[arg] = true
-	for i = 1, arg.n do t = t and t[arg[i]] end return t
+function public.vararg.index(arg)
+	local t = tremove(arg, 1)
+	for i = 1, getn(arg) do t = t and t[arg[i]] end return t
 end
 
 public.huge = 1.8 * 10 ^ 308
