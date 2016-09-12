@@ -78,7 +78,7 @@ do
 
                 cancel_button:SetScript('OnClick', function()
                     if test(record)(index) and listing:ContainsRecord(record) then
-                        cancel_auction(index, L(listing.RemoveAuctionRecord, listing, record))
+                        cancel_auction(index, partial(listing.RemoveAuctionRecord, listing, record))
                     end
                 end)
                 cancel_button:Enable()

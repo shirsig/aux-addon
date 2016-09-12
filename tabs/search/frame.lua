@@ -353,7 +353,7 @@ function create_frames()
 	        end
 	    end)
 	    editbox.change = update_form
-	    editbox.enter = L(editbox.ClearFocus, editbox)
+	    editbox.enter = partial(editbox.ClearFocus, editbox)
 	    local label = gui.label(editbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Name')
@@ -380,7 +380,7 @@ function create_frames()
 	            max_level_input:SetFocus()
 	        end
 	    end)
-	    editbox.enter = L(editbox.ClearFocus, editbox)
+	    editbox.enter = partial(editbox.ClearFocus, editbox)
 	    editbox.change = function()
 		    local valid_level = valid_level(this:GetText())
 		    if tostring(valid_level) ~= this:GetText() then
@@ -405,7 +405,7 @@ function create_frames()
 	            name_input:SetFocus()
 	        end
 	    end)
-	    editbox.enter = L(editbox.ClearFocus, editbox)
+	    editbox.enter = partial(editbox.ClearFocus, editbox)
 	    editbox.change = function()
 		    local valid_level = valid_level(this:GetText())
 		    if tostring(valid_level) ~= this:GetText() then

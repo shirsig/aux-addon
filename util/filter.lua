@@ -233,8 +233,8 @@ do
 			end
 			for _, parser in temp-A(
 				temp-A('class', info.item_class_index),
-				temp-A('subclass', L(info.item_subclass_index, index(self.class, 2) or 0)),
-				temp-A('slot', L(info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0)),
+				temp-A('subclass', partial(info.item_subclass_index, index(self.class, 2) or 0)),
+				temp-A('slot', partial(info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0)),
 				temp-A('quality', info.item_quality_index)
 			) do
 				if not self[parser[1]] then

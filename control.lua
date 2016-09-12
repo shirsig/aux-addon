@@ -58,7 +58,7 @@ end
 
 function public.event_listener(event, cb)
 	local listener_id = unique_id
-	listeners[listener_id] = {event=event, cb=cb, kill=function(...) auto[arg] = true if arg.n == 0 or arg[1] then kill_listener(listener_id) end end}
+	listeners[listener_id] = { event=event, cb=cb, kill=function(...) auto[arg] = true if arg.n == 0 or arg[1] then kill_listener(listener_id) end end }
 	event_frame:RegisterEvent(event)
 	return listener_id
 end
@@ -69,7 +69,7 @@ end
 
 function public.thread(k, ...) auto[arg] = true
 	local thread_id = unique_id
-	threads[thread_id] = T('k', L(k, unpack(arg)))
+	threads[thread_id] = T('k', partial(k, unpack(arg)))
 	return thread_id
 end
 
@@ -77,7 +77,7 @@ function public.wait(k, ...) auto[arg] = true
 	if type(k) == 'number' then
 		when(function() k = k - 1 return k <= 1 end, unpack(arg))
 	else
-		threads[thread_id].k = L(k, unpack(arg))
+		threads[thread_id].k = partial(k, unpack(arg))
 	end
 end
 

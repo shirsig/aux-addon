@@ -44,6 +44,18 @@ aux 'core'
 --	end
 --end
 
+do
+	local _state = setmetatable(t, T('__mode', 'kv'))
+	local __index = function(self, key)
+		return _state[self].handler({ public=self, private=_state[self].state }, key)
+	end
+	function public.index_function(state, handler) -- TODO rename table-accessor, use predicate to stop
+	local state, self = {handler=handler, state=state}, t
+	_state[self] = state
+	return setmetatable(self, { __metatable=false, __index=__index, state=state })
+	end
+end
+
 function public.vararg.select(arg)
 	for _ = 1, arg[1] do
 		tremove(arg, 1)
@@ -79,9 +91,9 @@ do
 	end
 end
 
-function public.vararg.L(arg)
+function public.vararg.partial(arg)
 	local f = tremove(arg, 1)
-	local arg1 = perm-arg
+	local arg1 = copy(arg)
 	return vararg(function(arg)
 		for i = 1, getn(arg) do
 			tinsert(arg1, arg[i])
@@ -97,18 +109,6 @@ end
 public.huge = 1.8 * 10 ^ 308
 
 function public.modified.get() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end
-
-do
-	local _state = setmetatable(t, T('__mode', 'kv'))
-	local __index = function(self, key)
-		return _state[self].handler({public=self, private=_state[self].state}, key)
-	end
-	function public.index_function(state, handler) -- TODO rename table-accessor, use predicate to stop
-		local state, self = {handler=handler, state=state}, t
-		_state[self] = state
-		return setmetatable(self, {__metatable=false, __index=__index, state=state})
-	end
-end
 
 function public.copy(t)
 	local copy = _E.t

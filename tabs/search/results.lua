@@ -165,7 +165,7 @@ function start_real_time_scan(query, search, continuation)
 			if not ignore_page then
 				if search.auto_buy then
 					ctrl.suspend()
-					place_bid('list', auction_record.index, auction_record.buyout_price, L(ctrl.resume, true))
+					place_bid('list', auction_record.index, auction_record.buyout_price, partial(ctrl.resume, true))
 					thread(when, later(GetTime(), 10), ctrl.resume, false)
 				else
 					tinsert(new_records, auction_record)
@@ -258,7 +258,7 @@ function start_search(queries, continuation)
 		on_auction = function(auction_record, ctrl)
 			if search.auto_buy then
 				ctrl.suspend()
-				place_bid('list', auction_record.index, auction_record.buyout_price, L(ctrl.resume, true))
+				place_bid('list', auction_record.index, auction_record.buyout_price, partial(ctrl.resume, true))
 				thread(when, later(GetTime(), 10), ctrl.resume, false)
 			elseif getn(search.records) < 1000 then
 				tinsert(search.records, auction_record)
@@ -411,7 +411,7 @@ do
 							place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
 								info.bid_update(record)
 								search.table:SetDatabase()
-							end or L(search.table.RemoveAuctionRecord, search.table, record))
+							end or partial(search.table.RemoveAuctionRecord, search.table, record))
 						end
 					end)
 					bid_button:Enable()
@@ -420,7 +420,7 @@ do
 				if record.buyout_price > 0 then
 					buyout_button:SetScript('OnClick', function()
 						if test(record)(index) and search.table:ContainsRecord(record) then
-							place_bid('list', index, record.buyout_price, L(search.table.RemoveAuctionRecord, search.table, record))
+							place_bid('list', index, record.buyout_price, partial(search.table.RemoveAuctionRecord, search.table, record))
 						end
 					end)
 					buyout_button:Enable()
