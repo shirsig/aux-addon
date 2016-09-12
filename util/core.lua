@@ -92,8 +92,7 @@ do
 end
 
 function public.vararg.partial(arg)
-	local f = tremove(arg, 1)
-	local arg1 = copy(arg)
+	local f, arg1 = tremove(arg, 1), perm-arg
 	return vararg(function(arg)
 		for i = 1, getn(arg) do
 			tinsert(arg1, arg[i])

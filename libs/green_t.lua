@@ -67,11 +67,11 @@ public.auto = setmetatable({}, {
 })
 public.temp = setmetatable({}, {
 	__metatable = false,
-	__sub = function(_, v) set_auto_release(v, false); return v end,
+	__sub = function(_, v) set_auto_release(v, true); return v end,
 })
 public.perm = setmetatable({}, {
 	__metatable = false,
-	__sub = function(_, v) set_auto_release(v, true); return v end,
+	__sub = function(_, v) set_auto_release(v, false); return v end,
 })
 
 public.init = setmetatable({}, {
