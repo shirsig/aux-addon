@@ -67,13 +67,15 @@ function public.on_next_event(event, callback)
 	event_listener(event, function(kill) callback(); kill() end)
 end
 
-function public.thread(k, ...) auto[arg] = true
+function public.vararg.thread(arg)
+	local k = tremove(arg, 1)
 	local thread_id = unique_id
 	threads[thread_id] = T('k', partial(k, unpack(arg)))
 	return thread_id
 end
 
-function public.wait(k, ...) auto[arg] = true
+function public.vararg.wait(arg)
+	local k = tremove(arg, 1)
 	if type(k) == 'number' then
 		when(function() k = k - 1 return k <= 1 end, unpack(arg))
 	else
@@ -81,7 +83,9 @@ function public.wait(k, ...) auto[arg] = true
 	end
 end
 
-function public.when(c, k, ...) auto[arg] = true
+function public.vararg.when(arg)
+	local c = tremove(arg, 1)
+	local k = tremove(arg, 1)
 	if c() then
 		return k(unpack(arg))
 	else
