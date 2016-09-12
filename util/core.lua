@@ -73,46 +73,28 @@ do
 		state = nil
 		return temp
 	end
-	function public.present(v) state = v; return f end
+	function public.present(v)
+		state = v
+		return f
+	end
 end
 
-do
-	local formal_parameters = t
-	for i = 1, 9 do
-		local key = '_' .. i
-		public[key] = t
-		formal_parameters[_E[key]] = i
-	end
-	local function helper(f, arg1, arg2)
-		local params = t
-		for i = 1, arg1.n do
-			if formal_parameters[arg1[i]] then
-				tinsert(params, arg2[formal_parameters[arg1[i]]])
-			else
-				tinsert(params, arg1[i])
-			end
+function public.vararg.L(arg)
+	local f = tremove(arg, 1)
+	local arg1 = perm-arg
+	return vararg(function(arg)
+		for i = 1, getn(arg) do
+			tinsert(arg1, arg[i])
 		end
-		return f(unpack(params))
-	end
-	function public.L(body, ...)
-		if type(body) == 'function' then
-			local arg1 = arg
-			return function(...) return helper(body, arg1, arg) end
-		else -- TODO memoization
---			body = gsub(body, '_([ab])', function(char) return '_' ..  end)
---			local lambda = loadstring('return function(_1,_2,_3,_4,_5,_6,_7,_8,_9)' .. body .. ' end')
-			local lambda = loadstring('return ' .. body) or loadstring(body) or error()
-			setfenv(lambda, getfenv(2))
-			return lambda
-		end
-	end
+		return f(unpack(arg1))
+	end)
 end
 
 function public.index(t, ...) auto[arg] = true
 	for i = 1, arg.n do t = t and t[arg[i]] end return t
 end
 
-public.huge = 1.8*10^308
+public.huge = 1.8 * 10 ^ 308
 
 function public.modified.get() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end
 
