@@ -116,9 +116,7 @@ public.filters = {
         input_type = 'number',
         validator = function(pct)
             return function(auction_record)
-                return auction_record.unit_buyout_price > 0
-                        and aux.history.value(auction_record.item_key)
-                        and auction_record.unit_buyout_price / aux.history.value(auction_record.item_key) * 100 <= pct
+                return aux.history.value(auction_record.item_key) and auction_record.unit_bid_price / aux.history.value(auction_record.item_key) * 100 <= pct
             end
         end
     },
