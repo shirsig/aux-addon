@@ -8,11 +8,11 @@ local HEAD_SPACE = 2
 
 function LOAD()
 	AUCTION_PCT_COLORS = {
-	    {color=inline_color.blue, value=50},
-	    {color=inline_color.green, value=80},
-	    {color=inline_color.yellow, value=110},
-	    {color=inline_color.orange, value=135},
-	    {color=inline_color.red, value=huge},
+	    { color=inline_color.blue, value=50 },
+	    { color=inline_color.green, value=80 },
+	    { color=inline_color.yellow, value=110 },
+	    { color=inline_color.orange, value=135 },
+	    { color=inline_color.red, value=huge },
 	}
 
 	TIME_LEFT_STRINGS = {
@@ -915,14 +915,14 @@ local methods = {
     end,
 
     SetSort = function(self, ...) auto[arg] = true
-        for k=1,arg.n do
+        for k = 1, arg.n do
             for i, sort in self.sorts do
                 if sort.index == abs(arg[k]) then
                     tremove(self.sorts, i)
                     break
                 end
             end
-            tinsert(self.sorts, 1, {index=abs(arg[k]), descending=arg[k] < 0 })
+            tinsert(self.sorts, 1, { index=abs(arg[k]), descending=arg[k] < 0 })
         end
 
         self.isSorted = nil
@@ -988,7 +988,7 @@ function public.CreateAuctionResultsTable(parent, config)
     rt.handlers = t
     rt.sorts = t
     rt.records = t
-    rt.rowInfo = {numDisplayRows=0}
+    rt.rowInfo = { numDisplayRows=0 }
 
     for name, func in methods do
         rt[name] = func
