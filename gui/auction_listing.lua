@@ -1095,7 +1095,7 @@ function public.CreateAuctionResultsTable(parent, config)
         row.rt = rt
 
         row.cells = t
-        for j=1, getn(rt.config) do
+        for j = 1, getn(rt.config) do
             local cell = CreateFrame('Button', nil, row)
             local text = cell:CreateFontString()
             text:SetFont(gui.font, min(14, rt.ROW_HEIGHT))
@@ -1120,7 +1120,7 @@ function public.CreateAuctionResultsTable(parent, config)
             end
 
             -- slightly different color for every alternating column
-            if mod(j,2) == 1 then
+            if mod(j, 2) == 1 then
                 local tex = cell:CreateTexture()
                 tex:SetAllPoints()
                 tex:SetTexture(.3, .3, .3, .2)
@@ -1135,7 +1135,7 @@ function public.CreateAuctionResultsTable(parent, config)
         end
 
         -- slightly different color for every alternating
-        if mod(i,2) == 0 then
+        if mod(i, 2) == 0 then
             local tex = row:CreateTexture()
             tex:SetAllPoints()
             tex:SetTexture(.3, .3, .3, .3)
