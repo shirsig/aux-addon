@@ -14,16 +14,15 @@ function public.compare(a, b, desc)
     end
 end
 
-function public.multi_lt(xs, ys)
-    local i = 1
-    while true do
-        if xs[i] and ys[i] and xs[i] ~= ys[i] then
-            return xs[i] < ys[i]
-        elseif not xs[i] and ys[i] then
+function public.vararg.multi_lt(arg)
+	for i = 1, getn(arg), 2 do
+        if arg[i] and arg[i + 1] and arg[i] ~= arg[i + 1] then
+            return arg[i] < arg[i + 1]
+        elseif not arg[i] and arg[i + 1] then
             return true
-        elseif not ys[i] then
+        elseif not arg[i + 1] then
             return false
         end
-        i = i + 1
-    end
+	end
+	return false
 end
