@@ -81,9 +81,9 @@ function update_form()
 	end
 	for key in temp-S('min_level', 'max_level') do
 		if blizzard_query.exact then
-			_E[key .. '_input']:Disable()
+			_E[key .. '_input']:EnableMouse(false)
 		else
-			_E[key .. '_input']:Enable()
+			_E[key .. '_input']:EnableMouse(true)
 		end
 	end
 	if blizzard_query.exact then

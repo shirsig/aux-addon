@@ -300,39 +300,30 @@ function public.editbox(parent)
     editbox:SetTextInsets(1.5, 1.5, 3, 3)
     editbox:SetMaxLetters(nil)
     editbox:SetHeight(24)
-    editbox:SetTextColor(0, 0, 0, 0)
     set_content_style(editbox)
-    local function colorize() this.display:SetText((this.colorizer or id)(this:GetText())) end
-    local function format() this.display:SetText((this.formatter or this.colorizer or id)(this:GetText())) end
     editbox:SetScript('OnEscapePressed', function()
         this:ClearFocus()
 	    ;(this.escape or nop)()
     end)
     editbox:SetScript('OnEnterPressed', function() (this.enter or nop)() end)
     editbox:SetScript('OnEditFocusGained', function()
-	    colorize()
+	    this.overlay:Hide()
+	    this:SetTextColor(color.text.enabled())
 	    this.focused = true
 	    this:HighlightText()
-	    this:SetScript('OnUpdate', function()
-			this.cursor:SetAlpha(mod(floor((GetTime() - this.cursor.last_change) * 2 + 1), 2))
-	    end)
 	    ;(this.focus_gain or nop)()
     end)
     editbox:SetScript('OnEditFocusLost', function()
-	    format()
+	    this.overlay:Show()
+	    this:SetTextColor(0, 0, 0, 0)
 	    this.focused = false
-	    this.cursor:SetAlpha(0)
 	    this:HighlightText(0, 0)
 	    this:SetScript('OnUpdate', nil)
 	    ;(this.focus_loss or nop)()
     end)
     editbox:SetScript('OnTextChanged', function()
-	    if this.focused then colorize() else format() end
-	    (this.change or nop)()
-    end)
-    editbox:SetScript('OnCursorChanged', function()
-	    this.cursor.last_change = GetTime()
-	    this.cursor:SetPoint(this:GetJustifyH(), this, this:GetJustifyH(), (arg1 > 0 and max or min)(0, arg1 - 1), 1.5)
+	    this.overlay:SetText((this.formatter or id)(this:GetText()))
+	    ;(this.change or nop)()
     end)
     editbox:SetScript('OnChar', function() (this.char or nop)() end)
     do
@@ -340,7 +331,6 @@ function public.editbox(parent)
         editbox:SetScript('OnMouseDown', function()
             local x, y = GetCursorPosition()
             -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
-            -- editbox:Insert'<ksejfkj>' TODO use insert with special tags to determine cursor position
             -- or use an overlay with itemlinks
             if GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
                 thread(function() editbox:HighlightText() end)
@@ -349,38 +339,21 @@ function public.editbox(parent)
             last_click.t = GetTime()
             last_click.x = x
             last_click.y = y
-            --            __(last_click) :t(GetTime()) :x(x) :y(y) TODO
-
         end)
-    end
-    function editbox:Enable()
-	    editbox:EnableMouse(true)
-	    editbox:SetTextColor(color.text.enabled())
-    end
-    function editbox:Disable()
-	    editbox:EnableMouse(false)
-	    editbox:SetTextColor(color.text.disabled())
-	    editbox:ClearFocus()
     end
     function editbox:SetAlignment(alignment)
 	    self:SetJustifyH(alignment)
-	    self.display:SetJustifyH(alignment)
+	    self.overlay:SetJustifyH(alignment)
     end
     function editbox:SetFontSize(size)
 	    self:SetFont(font, size)
-	    self.display:SetFont(font, size)
+	    self.overlay:SetFont(font, size)
     end
-    local display = label(editbox)
-    display:SetPoint('LEFT', 1.5, 0)
-    display:SetPoint('RIGHT', -1.5, 0)
-    display:SetTextColor(color.text.enabled())
-    editbox.display = display
-    local cursor = label(editbox, 17)
-    cursor:SetText('|')
-    cursor:SetTextColor(color.text.enabled())
-    cursor:SetAlpha(0)
-    cursor.last_change = 0
-    editbox.cursor = cursor
+    local overlay = label(editbox)
+    overlay:SetPoint('LEFT', 1.5, 0)
+    overlay:SetPoint('RIGHT', -1.5, 0)
+    overlay:SetTextColor(color.text.enabled())
+    editbox.overlay = overlay
     editbox:SetAlignment('LEFT')
     editbox:SetFontSize(font_size.medium)
     return editbox
