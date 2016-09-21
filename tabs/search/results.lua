@@ -118,7 +118,7 @@ end
 
 function update_auto_buy_filter()
 	if _G.aux_auto_buy_filter ~= '' then
-		local queries = aux.filter_util.queries(_G.aux_auto_buy_filter)
+		local queries, error = aux.filter_util.queries(_G.aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
 				print 'Error: The automatic buyout filter does not support multi-queries'
@@ -130,6 +130,8 @@ function update_auto_buy_filter()
 				auto_buy_filter_button:SetChecked(true)
 				return
 			end
+		else
+			print('Invalid auto buy filter:', error)
 		end
 	end
 	_G.aux_auto_buy_filter = ''
@@ -310,8 +312,9 @@ function public.execute(resume, real_time)
 	end
 	local filter_string = search_box:GetText()
 
-	local queries = aux.filter_util.queries(filter_string)
+	local queries, error = aux.filter_util.queries(filter_string)
 	if not queries then
+		print('Invalid filter:', error)
 		return
 	elseif real_time then
 		if getn(queries) > 1 then

@@ -226,6 +226,10 @@ function create_frames()
 	do
 	    local editbox = gui.editbox(controls)
 	    editbox:EnableMouse(1)
+	    editbox.formatter = function(str)
+		    local queries = aux.filter_util.queries(str)
+		    return queries and join(map(copy(queries), function(query) return query.prettified end), ';') or color.red(str)
+		end
 	    editbox.complete = completion.complete_filter
 	    editbox:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
 	    editbox:SetHeight(25)
@@ -303,12 +307,14 @@ function create_frames()
 	    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
 	    btn:SetText('Favorite')
 	    btn:SetScript('OnClick', function()
-	        local filters = filter_util.queries(search_box:GetText())
-	        if filters then
+	        local queries, error = filter_util.queries(search_box:GetText())
+	        if queries then
 	            tinsert(_G.aux_favorite_searches, 1, T(
 	                'filter_string', search_box:GetText(),
-	                'prettified', join(map(filters, function(filter) return filter.prettified end), ';')
+	                'prettified', join(map(queries, function(query) return query.prettified end), ';')
 	            ))
+	        else
+		        print('Invalid filter:', error)
 	        end
 	        update_search_listings()
 	    end)

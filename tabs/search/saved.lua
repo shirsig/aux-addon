@@ -19,7 +19,7 @@ function update_search_listings()
 	for i, recent_search in _G.aux_recent_searches do
 		local name = strsub(recent_search.prettified, 1, 250)
 		tinsert(recent_search_rows, {
-			cols = {{value=name}},
+			cols = {{ value=name }},
 			search = recent_search,
 			index = i,
 		})

@@ -362,8 +362,7 @@ function public.queries(filter_string)
         str = trim(str)
         local query, _, error = query(str)
         if not query then
-            print('Invalid filter:', error)
-            return
+	        return nil, error
         else
             tinsert(queries, query)
         end
