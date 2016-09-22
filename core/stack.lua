@@ -2,40 +2,40 @@ aux 'stack' local info = aux.info
 
 local state
 
-function stack_size(slot)
+function private.stack_size(slot)
     local container_item_info = info.container_item(unpack(slot))
     return container_item_info and container_item_info.count or 0
 end
 
-function charges(slot)
+function private.charges(slot)
     local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.charges
 end
 
-function max_stack(slot)
+function private.max_stack(slot)
 	local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.max_stack
 end
 
-function locked(slot)
+function private.locked(slot)
 	local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.locked
 end
 
-function find_item_slot(partial)
+function private.find_item_slot(papply)
 	for slot in info.inventory do
-		if matching_item(slot, partial) and not eq(slot, state.target_slot) then
+		if matching_item(slot, papply) and not eq(slot, state.target_slot) then
 			return slot
 		end
 	end
 end
 
-function matching_item(slot, partial)
+function private.matching_item(slot, papply)
 	local item_info = info.container_item(unpack(slot))
-	return item_info and item_info.item_key == state.item_key and info.auctionable(item_info.tooltip) and (not partial or item_info.count < item_info.max_stack)
+	return item_info and item_info.item_key == state.item_key and info.auctionable(item_info.tooltip) and (not papply or item_info.count < item_info.max_stack)
 end
 
-function find_empty_slot()
+function private.find_empty_slot()
 	for slot, type in info.inventory do
 		if type == 1 and not GetContainerItemInfo(unpack(slot)) then
 			return slot
@@ -43,7 +43,7 @@ function find_empty_slot()
 	end
 end
 
-function find_charge_item_slot()
+function private.find_charge_item_slot()
 	for slot in info.inventory do
 		if matching_item(slot) and charges(slot) == state.target_size then
 			return slot
@@ -51,7 +51,7 @@ function find_charge_item_slot()
 	end
 end
 
-function move_item(from_slot, to_slot, amount, k)
+function private.move_item(from_slot, to_slot, amount, k)
 	if locked(from_slot) or locked(to_slot) then
 		return wait(k)
 	end
@@ -66,15 +66,13 @@ function move_item(from_slot, to_slot, amount, k)
 	return when(function() return stack_size(to_slot) == expected_size end, k)
 end
 
-function process()
-
+function private.process()
 	if not state.target_slot or not matching_item(state.target_slot) then
 		state.target_slot = find_item_slot()
 		if not state.target_slot then
 			return stop()
 		end
 	end
-
 	if charges(state.target_slot) then
 		state.target_slot = find_charge_item_slot()
 		return stop()
@@ -109,16 +107,14 @@ function public.stop()
 		local callback, slot = state.callback, state.target_slot
 		slot = slot and matching_item(slot) and slot or nil
 		state = nil
-		(callback or nop)(slot)
+		do (callback or nop)(slot) end
 	end
 end
 
 function public.start(item_key, size, callback)
 	stop()
-
-	local thread_id = thread(process)
 	state = {
-		thread_id = thread_id,
+		thread_id = thread(process),
 		item_key = item_key,
 		target_size = size,
 		callback = callback,

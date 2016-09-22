@@ -1,6 +1,6 @@
 aux 'search_tab' local info, scan = aux.info, aux.scan
 
-_G.aux_auto_buy_filter = ''
+aux_auto_buy_filter = ''
 
 do
 	local id = 0
@@ -19,7 +19,7 @@ do
 
 	function private.current_search.get() return searches[search_index] end
 
-	function update_search(index)
+	function private.update_search(index)
 		searches[search_index].status_bar:Hide()
 		searches[search_index].table:Hide()
 		searches[search_index].table:SetSelectedRecord()
@@ -46,7 +46,7 @@ do
 		update_continuation()
 	end
 
-	function new_search(filter_string)
+	function private.new_search(filter_string)
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
@@ -71,26 +71,26 @@ do
 		update_search(getn(searches))
 	end
 
-	function previous_search()
+	function private.previous_search()
 		search_box:ClearFocus()
 		update_search(search_index - 1)
 		subtab = RESULTS
 	end
 
-	function next_search()
+	function private.next_search()
 		search_box:ClearFocus()
 		update_search(search_index + 1)
 		subtab = RESULTS
 	end
 end
 
-function close_settings()
+function private.close_settings()
 	if settings_button.open then
 		settings_button:Click()
 	end
 end
 
-function update_continuation()
+function private.update_continuation()
 	if current_search.continuation then
 		resume_button:Show()
 		search_box:SetPoint('RIGHT', resume_button, 'LEFT', -4, 0)
@@ -100,7 +100,7 @@ function update_continuation()
 	end
 end
 
-function discard_continuation()
+function private.discard_continuation()
 	scan.abort(search_scan_id)
 	current_search.continuation = nil
 	update_continuation()
@@ -116,9 +116,9 @@ function update_start_stop()
 	end
 end
 
-function update_auto_buy_filter()
-	if _G.aux_auto_buy_filter ~= '' then
-		local queries, error = aux.filter_util.queries(_G.aux_auto_buy_filter)
+function private.update_auto_buy_filter()
+	if aux_auto_buy_filter ~= '' then
+		local queries, error = aux.filter_util.queries(aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
 				print 'Error: The automatic buyout filter does not support multi-queries'
@@ -134,10 +134,10 @@ function update_auto_buy_filter()
 			print('Invalid auto buy filter:', error)
 		end
 	end
-	_G.aux_auto_buy_filter = ''
+	aux_auto_buy_filter = ''
 end
 
-function start_real_time_scan(query, search, continuation)
+function private.start_real_time_scan(query, search, continuation)
 
 	local ignore_page
 	if not search then
@@ -167,7 +167,7 @@ function start_real_time_scan(query, search, continuation)
 			if not ignore_page then
 				if search.auto_buy then
 					ctrl.suspend()
-					place_bid('list', auction_record.index, auction_record.buyout_price, partial(ctrl.resume, true))
+					place_bid('list', auction_record.index, auction_record.buyout_price, papply(ctrl.resume, true))
 					thread(when, later(GetTime(), 10), ctrl.resume, false)
 				else
 					tinsert(new_records, auction_record)
@@ -211,7 +211,7 @@ function start_real_time_scan(query, search, continuation)
 	}
 end
 
-function start_search(queries, continuation)
+function private.start_search(queries, continuation)
 	local current_query, current_page, total_queries, start_query, start_page
 
 	local search = current_search
@@ -260,7 +260,7 @@ function start_search(queries, continuation)
 		on_auction = function(auction_record, ctrl)
 			if search.auto_buy then
 				ctrl.suspend()
-				place_bid('list', auction_record.index, auction_record.buyout_price, partial(ctrl.resume, true))
+				place_bid('list', auction_record.index, auction_record.buyout_price, papply(ctrl.resume, true))
 				thread(when, later(GetTime(), 10), ctrl.resume, false)
 			elseif getn(search.records) < 1000 then
 				tinsert(search.records, auction_record)
@@ -368,7 +368,7 @@ function public.execute(resume, real_time)
 	end
 end
 
-function test(record)
+function private.test(record)
 	return function(index)
 		local auction_info = info.auction(index)
 		return auction_info and auction_info.search_signature == record.search_signature
@@ -381,7 +381,7 @@ do
 	local state = IDLE
 	local found_index
 
-	function find_auction(record)
+	function private.find_auction(record)
 		local search = current_search
 
 		if not search.table:ContainsRecord(record) or is_player(record.owner) then
@@ -414,7 +414,7 @@ do
 							place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
 								info.bid_update(record)
 								search.table:SetDatabase()
-							end or partial(search.table.RemoveAuctionRecord, search.table, record))
+							end or papply(search.table.RemoveAuctionRecord, search.table, record))
 						end
 					end)
 					bid_button:Enable()
@@ -423,7 +423,7 @@ do
 				if record.buyout_price > 0 then
 					buyout_button:SetScript('OnClick', function()
 						if test(record)(index) and search.table:ContainsRecord(record) then
-							place_bid('list', index, record.buyout_price, partial(search.table.RemoveAuctionRecord, search.table, record))
+							place_bid('list', index, record.buyout_price, papply(search.table.RemoveAuctionRecord, search.table, record))
 						end
 					end)
 					buyout_button:Enable()
@@ -432,7 +432,7 @@ do
 		)
 	end
 
-	function on_update()
+	function private.on_update()
 		if state == IDLE or state == SEARCHING then
 			buyout_button:Disable()
 			bid_button:Disable()

@@ -1,6 +1,6 @@
 aux 'auctions_tab' local scan = aux.scan
 
-auction_records = t
+private.auction_records = t
 
 function LOAD()
 	create_frames()
@@ -15,7 +15,7 @@ function CLOSE()
     frame:Hide()
 end
 
-function update_listing()
+function private.update_listing()
     if not ACTIVE then return end
     listing:SetDatabase(auction_records)
 end
@@ -29,7 +29,7 @@ function public.scan_auctions()
     update_listing()
     scan.start{
         type = 'owner',
-        queries = {{blizzard_query = t}},
+        queries = {{ blizzard_query = t }},
         on_page_loaded = function(page, total_pages)
             status_bar:update_status(100 * (page - 1) / total_pages, 0)
             status_bar:set_text(format('Scanning (Page %d / %d)', page, total_pages))
@@ -49,7 +49,7 @@ function public.scan_auctions()
     }
 end
 
-function test(record)
+function private.test(record)
     return function(index)
         local auction_info = aux.info.auction(index, 'owner')
         return auction_info and auction_info.search_signature == record.search_signature
@@ -62,7 +62,7 @@ do
     local state = IDLE
     local found_index
 
-    function find_auction(record)
+    function private.find_auction(record)
         if not listing:ContainsRecord(record) then return end
 
         scan.abort(scan_id)
@@ -78,7 +78,7 @@ do
 
                 cancel_button:SetScript('OnClick', function()
                     if test(record)(index) and listing:ContainsRecord(record) then
-                        cancel_auction(index, partial(listing.RemoveAuctionRecord, listing, record))
+                        cancel_auction(index, papply(listing.RemoveAuctionRecord, listing, record))
                     end
                 end)
                 cancel_button:Enable()
@@ -86,7 +86,7 @@ do
         )
     end
 
-    function on_update()
+    function private.on_update()
         if state == IDLE or state == SEARCHING then
             cancel_button:Disable()
         end

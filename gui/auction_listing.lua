@@ -1,29 +1,27 @@
 aux 'auction_listing' local gui, sorting, money, info = aux.gui, aux.sorting, aux.money, aux.info
 
-_G.aux_price_per_unit = false
+aux_price_per_unit = false
 
 local RT_COUNT = 1
 local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
 
-function LOAD()
-	AUCTION_PCT_COLORS = {
-	    { color=inline_color.blue, value=50 },
-	    { color=inline_color.green, value=80 },
-	    { color=inline_color.yellow, value=110 },
-	    { color=inline_color.orange, value=135 },
-	    { color=inline_color.red, value=huge },
-	}
+local AUCTION_PCT_COLORS = {
+    { color=inline_color.blue, value=50 },
+    { color=inline_color.green, value=80 },
+    { color=inline_color.yellow, value=110 },
+    { color=inline_color.orange, value=135 },
+    { color=inline_color.red, value=huge },
+}
 
-	TIME_LEFT_STRINGS = {
-		color.red '30m', -- Short
-		color.orange '2h', -- Medium
-		color.yellow '8h', -- Long
-		color.blue '24h', -- Very Long
-	}
-end
+local TIME_LEFT_STRINGS = {
+	color.red '30m', -- Short
+	color.orange '2h', -- Medium
+	color.yellow '8h', -- Long
+	color.blue '24h', -- Very Long
+}
 
-function item_column_init(rt, cell)
+function private.item_column_init(rt, cell)
     local spacer = CreateFrame('Frame', nil, cell)
     spacer:SetPoint('TOPLEFT', 0, 0)
     spacer:SetHeight(rt.ROW_HEIGHT)
@@ -166,24 +164,24 @@ public.search_config = {
             end
             local price
             if record.high_bidder then
-                price = _G.aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
+                price = aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
             else
-                price = _G.aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
+                price = aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
             end
             cell:SetText(money.to_string(price, true, false, nil, color))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a
             if record_a.high_bidder then
-                price_a = _G.aux_price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
+                price_a = aux_price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
             else
-                price_a = _G.aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
+                price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
             end
             local price_b
             if record_b.high_bidder then
-                price_b = _G.aux_price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
+                price_b = aux_price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
             else
-                price_b = _G.aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
+                price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end
             return sorting.compare(price_a, price_b, desc)
         end,
@@ -194,12 +192,12 @@ public.search_config = {
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
-            local price = _G.aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
+            local price = aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
             cell:SetText(price > 0 and money.to_string(price, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            local price_a = _G.aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
-            local price_b = _G.aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
+            local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
+            local price_b = aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
             price_a = price_a > 0 and price_a or (desc and -huge or huge)
             price_b = price_b > 0 and price_b or (desc and -huge or huge)
 
@@ -308,24 +306,24 @@ public.auctions_config = {
         fill = function(cell, record)
             local price
             if record.high_bidder then
-                price = _G.aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
+                price = aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
             else
-                price = _G.aux_price_per_unit and ceil(record.start_price / record.aux_quantity) or record.start_price
+                price = aux_price_per_unit and ceil(record.start_price / record.aux_quantity) or record.start_price
             end
             cell:SetText(money.to_string(price, true, false))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a
             if record_a.high_bidder then
-                price_a = _G.aux_price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
+                price_a = aux_price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
             else
-                price_a = _G.aux_price_per_unit and record_a.start_price / record_b.aux_quantity or record_a.start_price
+                price_a = aux_price_per_unit and record_a.start_price / record_b.aux_quantity or record_a.start_price
             end
             local price_b
             if record_b.high_bidder then
-                price_b = _G.aux_price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
+                price_b = aux_price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
             else
-                price_b = _G.aux_price_per_unit and record_b.start_price / record_b.aux_quantity or record_b.start_price
+                price_b = aux_price_per_unit and record_b.start_price / record_b.aux_quantity or record_b.start_price
             end
             return sorting.compare(price_a, price_b, desc)
         end,
@@ -336,12 +334,12 @@ public.auctions_config = {
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
-            local price = _G.aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
+            local price = aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
             cell:SetText(price > 0 and money.to_string(price, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            local price_a = _G.aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
-            local price_b = _G.aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
+            local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
+            local price_b = aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
             price_a = price_a > 0 and price_a or (desc and -huge or huge)
             price_b = price_b > 0 and price_b or (desc and -huge or huge)
 
@@ -461,24 +459,24 @@ public.bids_config = {
         fill = function(cell, record)
             local price
             if record.high_bidder then
-                price = _G.aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
+                price = aux_price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
             else
-                price = _G.aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
+                price = aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
             end
             cell:SetText(money.to_string(price))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a
             if record_a.high_bidder then
-                price_a = _G.aux_price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
+                price_a = aux_price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
             else
-                price_a = _G.aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
+                price_a = aux_price_per_unit and record_a.unit_bid_price or record_a.bid_price
             end
             local price_b
             if record_b.high_bidder then
-                price_b = _G.aux_price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
+                price_b = aux_price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
             else
-                price_b = _G.aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
+                price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end
             return sorting.compare(price_a, price_b, desc)
         end,
@@ -489,12 +487,12 @@ public.bids_config = {
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
-            local price = _G.aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
+            local price = aux_price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
             cell:SetText(price > 0 and money.to_string(price, true, false) or '---')
         end,
         cmp = function(record_a, record_b, desc)
-            local price_a = _G.aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
-            local price_b = _G.aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
+            local price_a = aux_price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
+            local price_b = aux_price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
             price_a = price_a > 0 and price_a or (desc and -huge or huge)
             price_b = price_b > 0 and price_b or (desc and -huge or huge)
 
@@ -520,7 +518,7 @@ public.bids_config = {
     },
 }
 
-function record_percentage(record)
+function private.record_percentage(record)
     if not record then return end
 
     local historical_value = aux.history.value(record.item_key) or 0
@@ -532,7 +530,7 @@ function record_percentage(record)
     end
 end
 
-function percentage_color(pct)
+function private.percentage_color(pct)
 	for i = 1, getn(AUCTION_PCT_COLORS) do
 		if pct < AUCTION_PCT_COLORS[i].value then
 			return AUCTION_PCT_COLORS[i].color
@@ -567,10 +565,10 @@ local methods = {
         if rt.disabled then return end
 
         if button == 'RightButton' and rt.headCells[this.columnIndex].info.isPrice then
-            _G.aux_price_per_unit = not _G.aux_price_per_unit
+            aux_price_per_unit = not aux_price_per_unit
             for _, cell in rt.headCells do
                 if cell.info.isPrice then
-                    cell:SetText(cell.info.title[_G.aux_price_per_unit and 1 or 2])
+                    cell:SetText(cell.info.title[aux_price_per_unit and 1 or 2])
                 end
             end
             rt:SetSort()
@@ -997,7 +995,7 @@ function public.CreateAuctionResultsTable(parent, config)
     rt:SetScript('OnShow', function()
         for _, cell in this.headCells do
             if cell.info.isPrice then
-                cell:SetText(cell.info.title[_G.aux_price_per_unit and 1 or 2])
+                cell:SetText(cell.info.title[aux_price_per_unit and 1 or 2])
             end
         end
     end)

@@ -1,6 +1,6 @@
 aux 'tooltip' local info, disenchant, cache, money, history = aux.info, aux.disenchant, aux.cache, aux.money, aux.history
 
-_G.aux_tooltip_value = true
+aux_tooltip_value = true
 
 local game_tooltip_hooks, game_tooltip_money = t, 0
 
@@ -43,8 +43,8 @@ end
 function extend_tooltip(tooltip, link, quantity)
     local item_id, suffix_id = info.parse_link(link)
     quantity = IsShiftKeyDown() and quantity or 1
-    if _G.aux_tooltip_disenchant_source then
-        local color = {r=.7, g=.7, b=.7}
+    if aux_tooltip_disenchant_source then
+        local color = { r=.7, g=.7, b=.7 }
         local type, range = disenchant.source(item_id)
         if type == 'CRYSTAL' then
             tooltip:AddLine(format('Can disenchant from level %s |cffa335eeEpic|r and |cff0070ddRare|r items.', range), color.r, color.g, color.b, true)
@@ -60,8 +60,8 @@ function extend_tooltip(tooltip, link, quantity)
     if item_info then
         local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
         if getn(distribution) > 0 then
-            if _G.aux_tooltip_disenchant_distribution then
-                local color = {r=.8, g=.8, b=.2}
+            if aux_tooltip_disenchant_distribution then
+                local color = { r=.8, g=.8, b=.2 }
 
                 tooltip:AddLine('Disenchants into:', color.r, color.g, color.b)
                 sort(distribution, function(a,b) return a.probability > b.probability end)
@@ -69,37 +69,37 @@ function extend_tooltip(tooltip, link, quantity)
                     tooltip:AddLine(format('  %s%% %s (%s-%s)', event.probability * 100, info.display_name(event.item_id, true) or 'item:' .. event.item_id, event.min_quantity, event.max_quantity), color.r, color.g, color.b)
                 end
             end
-            if _G.aux_tooltip_disenchant_value then
-                local color = {r=.1, g=.6, b=.6}
+            if aux_tooltip_disenchant_value then
+                local color = { r=.1, g=.6, b=.6 }
 
                 local disenchant_value = disenchant.value(item_info.slot, item_info.quality, item_info.level)
                 tooltip:AddLine('Disenchant Value: ' .. (disenchant_value and money.to_string2(disenchant_value) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
             end
         end
     end
-    if _G.aux_tooltip_vendor_buy then
-        local color = {r=.8, g=.5, b=.1}
+    if aux_tooltip_vendor_buy then
+        local color = { r=.8, g=.5, b=.1 }
         local _, price, limited = cache.merchant_info(item_id)
         if price then
             tooltip:AddLine('Vendor Buy ' .. (limited and '(limited): ' or ': ') .. money.to_string2(price * quantity), color.r, color.g, color.b)
         end
     end
-    if _G.aux_tooltip_vendor_sell then
-        local color = {r=.8, g=.5, b=.1}
+    if aux_tooltip_vendor_sell then
+        local color = { r=.8, g=.5, b=.1 }
         local price = cache.merchant_info(item_id)
         if price ~= 0 then
             tooltip:AddLine('Vendor Sell: ' .. (price and money.to_string2(price * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
     end
-    local color = {r=1, g=1, b=.6}
+    local color = { r=1, g=1, b=.6 }
     local auctionable = not item_info or info.auctionable(info.tooltip(function(tooltip) tooltip:SetHyperlink(item_info.itemstring) end), item_info.quality)
     local item_key = (item_id or 0) .. ':' .. (suffix_id or 0)
     local value = history.value(item_key)
     if auctionable then
-        if _G.aux_tooltip_value then
+        if aux_tooltip_value then
             tooltip:AddLine('Value: ' .. (value and money.to_string2(value * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
-        if _G.aux_tooltip_daily  then
+        if aux_tooltip_daily  then
             local market_value = history.market_value(item_key)
             tooltip:AddLine('Today: ' .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. aux.auction_listing.percentage_historical(round(market_value / value * 100)) .. ')' or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end

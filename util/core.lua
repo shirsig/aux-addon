@@ -67,7 +67,7 @@ function public.vararg.select(arg)
 	end
 end
 
-public.join = _G.table.concat
+public.join = table.concat
 
 function public.range(arg1, arg2)
 	local i, n = arg2 and arg1 or 1, arg2 or arg1
@@ -91,7 +91,7 @@ do
 	end
 end
 
-function public.vararg.partial(arg)
+function public.vararg.papply(arg)
 	local f, arg1 = tremove(arg, 1), perm-arg
 	return vararg(function(arg)
 		for i = 1, getn(arg) do

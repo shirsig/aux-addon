@@ -1,19 +1,19 @@
 aux 'cache' local info, persistence = aux.info, aux.persistence
 
-MIN_ITEM_ID = 1
-MAX_ITEM_ID = 30000
+local MIN_ITEM_ID = 1
+local MAX_ITEM_ID = 30000
 
 --items_schema = record '#' {name='string'} {quality='number'} {level='number'} {class='string'} {subclass='string'} {slot='string'} {max_stack='number'} {texture='string'} -- TODO
 
-items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
-merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'}}
+local items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
+local merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'}}
 
-_G.aux_items = t
-_G.aux_item_ids = t
-_G.aux_auctionable_items = t
-_G.aux_merchant_buy = t
-_G.aux_merchant_sell = t
-_G.aux_characters = t
+aux_items = t
+aux_item_ids = t
+aux_auctionable_items = t
+aux_merchant_buy = t
+aux_merchant_sell = t
+aux_characters = t
 
 function LOAD()
 	scan_wdb()
@@ -28,7 +28,7 @@ function LOAD()
 	event_listener('NEW_AUCTION_UPDATE', function()
 		for info in present(info.auction_sell_item()) do
 			for item_id in present(item_id(info.name)) do
-				_G.aux_merchant_sell[_E.item_id(info.name)] = info.vendor_price / (aux.info.max_item_charges(item_id) or info.count)
+				aux_merchant_sell[_E.item_id(info.name)] = info.vendor_price / (aux.info.max_item_charges(item_id) or info.count)
 			end
 		end
 	end)
@@ -36,25 +36,25 @@ end
 
 do
 	local sell_scan_countdown, incomplete_buy_data
-	function on_merchant_show()
+	function private.on_merchant_show()
 		merchant_sell_scan()
 		incomplete_buy_data = not merchant_buy_scan()
 	end
-	function on_merchant_closed()
+	function private.on_merchant_closed()
 		sell_scan_countdown = nil
 		incomplete_buy_data = false
 	end
-	function on_merchant_update()
+	function private.on_merchant_update()
 		if incomplete_buy_data then
 			incomplete_buy_data = not merchant_buy_scan()
 		end
 	end
-	function on_bag_update()
+	function private.on_bag_update()
 		if MerchantFrame:IsVisible() then
 			sell_scan_countdown = 10
 		end
 	end
-	function merchant_on_update()
+	function private.merchant_on_update()
 		if sell_scan_countdown == 0 then
 			sell_scan_countdown = nil
 			merchant_sell_scan()
@@ -64,7 +64,7 @@ do
 	end
 end
 
-function merchant_loaded()
+function private.merchant_loaded()
 	for i = 1, GetMerchantNumItems() do
 		if not GetMerchantItemLink(i) then
 			return false
@@ -75,15 +75,15 @@ end
 
 function public.merchant_info(item_id)
 	local buy_info
-	if _G.aux_merchant_buy[item_id] then
-		buy_info = persistence.read(merchant_buy_schema, _G.aux_merchant_buy[item_id])
+	if aux_merchant_buy[item_id] then
+		buy_info = persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
 	end
 
-	return _G.aux_merchant_sell[item_id], buy_info and buy_info.unit_price, buy_info and buy_info.limited
+	return aux_merchant_sell[item_id], buy_info and buy_info.unit_price, buy_info and buy_info.limited
 end
 
 function public.item_info(item_id)
-	local data_string = _G.aux_items[item_id]
+	local data_string = aux_items[item_id]
 	if data_string then
 		local cached_data = persistence.read(items_schema, data_string)
 		return T(
@@ -101,10 +101,10 @@ function public.item_info(item_id)
 end
 
 function public.item_id(item_name)
-	return _G.aux_item_ids[strlower(item_name)]
+	return aux_item_ids[strlower(item_name)]
 end
 
-function merchant_buy_scan()
+function private.merchant_buy_scan()
 
 	local incomplete_data
 	for i = 1, GetMerchantNumItems() do
@@ -113,8 +113,8 @@ function merchant_buy_scan()
 		if link then
 			local item_id = info.parse_link(link)
 			local new_unit_price, new_limited = price / count, stock >= 0
-			if _G.aux_merchant_buy[item_id] then
-				local buy_info = persistence.read(merchant_buy_schema, _G.aux_merchant_buy[item_id])
+			if aux_merchant_buy[item_id] then
+				local buy_info = persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
 
 				local unit_price
 				if buy_info.limited and not new_limited then
@@ -125,12 +125,12 @@ function merchant_buy_scan()
 					unit_price = min(buy_info.unit_price, new_unit_price)
 				end
 
-				_G.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, T(
+				aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, T(
 					'unit_price', unit_price,
 					'limited', buy_info.limited and new_limited
 				))
 			else
-				_G.aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, T(
+				aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, T(
 					'unit_price', new_unit_price,
 					'limited', new_limited
 				))
@@ -143,25 +143,25 @@ function merchant_buy_scan()
 	return not incomplete_data
 end
 
-function merchant_sell_scan()
+function private.merchant_sell_scan()
 	for slot in info.inventory do auto[slot] = true
 		local item_info = temp-info.container_item(unpack(slot))
 		if item_info then
-			_G.aux_merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity
+			aux_merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity
 		end
 	end
 end
 
-function scan_wdb(item_id)
+function private.scan_wdb(item_id)
 	item_id = item_id or MIN_ITEM_ID
 
 	local processed = 0
 	while processed <= 100 and item_id <= MAX_ITEM_ID do
 		local itemstring = 'item:' .. item_id
 		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
-		if name and not _G.aux_item_ids[strlower(name)] then
-			_G.aux_item_ids[strlower(name)] = item_id
-			_G.aux_items[item_id] = persistence.write(items_schema, T(
+		if name and not aux_item_ids[strlower(name)] then
+			aux_item_ids[strlower(name)] = item_id
+			aux_items[item_id] = persistence.write(items_schema, T(
 				'name', name,
 				'quality', quality,
 				'level', level,
@@ -173,7 +173,7 @@ function scan_wdb(item_id)
 			))
 			local tooltip = info.tooltip(function(tooltip) tooltip:SetHyperlink(itemstring) end)
 			if info.auctionable(tooltip, quality) then
-				tinsert(_G.aux_auctionable_items, strlower(name))
+				tinsert(aux_auctionable_items, strlower(name))
 			end
 			processed = processed + 1
 		end
@@ -183,7 +183,7 @@ function scan_wdb(item_id)
 	if item_id <= MAX_ITEM_ID then
 		thread(wait, 10, scan_wdb, item_id)
 	else
-		sort(_G.aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
+		sort(aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 	end
 end
 

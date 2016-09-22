@@ -19,7 +19,7 @@ StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
 }
 do
     local function action()
-        _G.aux_auto_buy_filter = _G[this:GetParent():GetName() .. 'EditBox']:GetText()
+        aux_auto_buy_filter = _G[this:GetParent():GetName() .. 'EditBox']:GetText()
         update_auto_buy_filter()
     end
 
@@ -47,7 +47,9 @@ do
     }
 end
 
-RESULTS, SAVED, FILTER = 1, 2, 3
+private.RESULTS = 1
+private.SAVED = 2
+private.FILTER = 3
 
 function LOAD()
 	create_frames()
@@ -113,7 +115,7 @@ function public.add_filter(filter_string)
     search_box:SetText(old_filter_string .. filter_string)
 end
 
-function blizzard_page_index(str)
+function private.blizzard_page_index(str)
     if tonumber(str) then
         return max(0, tonumber(str) - 1)
     end

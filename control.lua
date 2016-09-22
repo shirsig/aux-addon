@@ -12,7 +12,7 @@ function LOAD()
 	event_frame:SetScript('OnEvent', EVENT)
 end
 
-function EVENT()
+function private.EVENT()
 	for id, listener in listeners do
 		if listener.killed then
 			listeners[id] = nil
@@ -23,11 +23,15 @@ function EVENT()
 end
 
 do
-	function UPDATE()
+	function private.UPDATE()
 		for _, listener in listeners do
 			local event, needed = listener.event, false
-			for _, listener in listeners do needed = needed or listener.event == event and not listener.killed end
-			if not needed then event_frame:UnregisterEvent(event) end
+			for _, listener in listeners do
+				needed = needed or listener.event == event and not listener.killed
+			end
+			if not needed then
+				event_frame:UnregisterEvent(event)
+			end
 		end
 
 		for id, thread in threads do
@@ -44,21 +48,33 @@ do
 	end
 end
 
-do local id = 0
-	function private.unique_id.get() id = id + 1; return id end
+do
+	local id = 0
+	function private.unique_id.get()
+		id = id + 1
+		return id
+	end
 end
 
 function public.kill_listener(listener_id)
-	for listener in present(listeners[listener_id]) do listener.killed = true end
+	for listener in present(listeners[listener_id]) do
+		listener.killed = true
+	end
 end
 
 function public.kill_thread(thread_id)
-	for thread in present(threads[thread_id]) do thread.killed = true end
+	for thread in present(threads[thread_id]) do
+		thread.killed = true
+	end
 end
 
 function public.event_listener(event, cb)
 	local listener_id = unique_id
-	listeners[listener_id] = { event=event, cb=cb, kill=vararg-function(arg) if getn(arg) == 0 or arg[1] then kill_listener(listener_id) end end }
+	listeners[listener_id] = T(
+		'event', event,
+		'cb', cb,
+		'kill', vararg-function(arg) if getn(arg) == 0 or arg[1] then kill_listener(listener_id) end end
+	)
 	event_frame:RegisterEvent(event)
 	return listener_id
 end
@@ -70,7 +86,7 @@ end
 function public.vararg.thread(arg)
 	local k = tremove(arg, 1)
 	local thread_id = unique_id
-	threads[thread_id] = T('k', partial(k, unpack(arg)))
+	threads[thread_id] = T('k', papply(k, unpack(arg)))
 	return thread_id
 end
 
@@ -79,7 +95,7 @@ function public.vararg.wait(arg)
 	if type(k) == 'number' then
 		when(function() k = k - 1 return k <= 1 end, unpack(arg))
 	else
-		threads[thread_id].k = partial(k, unpack(arg))
+		threads[thread_id].k = papply(k, unpack(arg))
 	end
 end
 

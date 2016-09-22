@@ -1,6 +1,6 @@
 aux 'core'
 
-COLORS = {
+local COLORS = {
 	text = {enabled = {255, 254, 250, 1}, disabled = {147, 151, 139, 1}},
 	label = {enabled = {216, 225, 211, 1}, disabled = {150, 148, 140, 1}},
 	link = {153, 255, 255, 1},
@@ -31,9 +31,9 @@ do
 			return self.private.callback(color)
 		end
 	end
-	function color_accessor(callback)
+	function private.color_accessor(callback)
 		return function()
-			return index_function({callback=callback, table=COLORS}, index_handler)
+			return index_function({ callback=callback, table=COLORS }, index_handler)
 		end
 	end
 end

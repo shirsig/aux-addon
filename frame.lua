@@ -26,7 +26,7 @@ do
 	public.aux_frame = frame
 end
 do
-	tabs = gui.tabs(aux_frame, 'DOWN')
+	private.tabs = gui.tabs(aux_frame, 'DOWN')
 	tabs._on_select = on_tab_click
 	function public.tab.set(id) tabs:select(id) end
 end
@@ -35,7 +35,7 @@ do
 	btn:SetPoint('BOTTOMRIGHT', -5, 5)
 	gui.set_size(btn, 60, 24)
 	btn:SetText('Close')
-	btn:SetScript('OnClick', partial(aux_frame.Hide, aux_frame))
+	btn:SetScript('OnClick', papply(aux_frame.Hide, aux_frame))
 	public.close_button = btn
 end
 do

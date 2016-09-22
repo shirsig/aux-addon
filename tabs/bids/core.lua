@@ -1,6 +1,6 @@
 aux 'bids_tab' local scan = aux.scan
 
-auction_records = t
+private.auction_records = t
 
 function LOAD()
 	create_frames()
@@ -15,7 +15,7 @@ function CLOSE()
     frame:Hide()
 end
 
-function update_listing()
+function private.update_listing()
 	if not ACTIVE then return end
     listing:SetDatabase(auction_records)
 end
@@ -29,7 +29,7 @@ function public.scan_bids()
     update_listing()
     scan.start{
         type = 'bidder',
-        queries = {{blizzard_query=t}},
+        queries = {{ blizzard_query=t }},
         on_page_loaded = function(page, total_pages)
             status_bar:update_status(100 * (page - 1) / total_pages, 0)
             status_bar:set_text(format('Scanning (Page %d / %d)', page, total_pages))
@@ -49,7 +49,7 @@ function public.scan_bids()
     }
 end
 
-function test(record)
+function private.test(record)
     return function(index)
         local auction_info = aux.info.auction(index, 'bidder')
         return auction_info and auction_info.search_signature == record.search_signature
@@ -62,7 +62,7 @@ do
     local state = IDLE
     local found_index
 
-    function find_auction(record)
+    function private.find_auction(record)
         if not listing:ContainsRecord(record) then return end
 
         scan.abort(scan_id)
@@ -85,7 +85,7 @@ do
                             place_bid('bidder', index, record.bid_price, record.bid_price < record.buyout_price and function()
                                 aux.info.bid_update(record)
                                 listing:SetDatabase()
-                            end or partial(listing.RemoveAuctionRecord, listing, record))
+                            end or papply(listing.RemoveAuctionRecord, listing, record))
                         end
                     end)
                     bid_button:Enable()
@@ -94,7 +94,7 @@ do
                 if record.buyout_price > 0 then
                     buyout_button:SetScript('OnClick', function()
                         if test(record)(index) and listing:ContainsRecord(record) then
-                            place_bid('bidder', index, record.buyout_price, partial(listing.RemoveAuctionRecord, listing, record))
+                            place_bid('bidder', index, record.buyout_price, papply(listing.RemoveAuctionRecord, listing, record))
                         end
                     end)
                     buyout_button:Enable()
@@ -103,7 +103,7 @@ do
         )
     end
 
-    function on_update()
+    function private.on_update()
         if state == IDLE or state == SEARCHING then
             buyout_button:Disable()
             bid_button:Disable()

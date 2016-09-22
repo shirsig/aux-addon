@@ -1,7 +1,8 @@
 --aux_account_settings = {} -- TODO clean up the mess of savedvariables
 --aux_character_settings = {}
 
-do  local modules = {}
+do
+	local modules = {}
 	local mt = {__metatable=false, __index=function(_, key) return modules[key]._I end, __newindex=error}
 	aux = function(name)
 		if not modules[name] then
@@ -37,11 +38,15 @@ for event in temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION
 	event_frame:RegisterEvent(event)
 end
 
-ADDON_LOADED = t
+private.ADDON_LOADED = t
 do
 	local handlers, handlers2 = t, t
-	function public.LOAD.set(f) tinsert(handlers, f) end
-	function public.LOAD2.set(f) tinsert(handlers2, f) end
+	function public.LOAD.set(f)
+		tinsert(handlers, f)
+	end
+	function public.LOAD2.set(f)
+		tinsert(handlers2, f)
+	end
 	event_frame:SetScript('OnEvent', function()
 		if event == 'ADDON_LOADED' then
 			(ADDON_LOADED[arg1] or nop)()
@@ -56,7 +61,7 @@ do
 	end)
 end
 
-tab_info = t
+private.tab_info = t
 do
 	for _, info in temp-A(temp-A('search_tab', 'Search'), temp-A('post_tab', 'Post'), temp-A('auctions_tab', 'Auctions'), temp-A('bids_tab', 'Bids')) do
 		local tab = T('name', info[2])
@@ -74,13 +79,13 @@ do
 	local index
 	function private.active_tab.get() return tab_info[index] end
 	function on_tab_click(i)
-		(index and active_tab.CLOSE or nop)()
+		do (index and active_tab.CLOSE or nop)() end
 		index = i
-		;(index and active_tab.OPEN or nop)()
+		do (index and active_tab.OPEN or nop)() end
 	end
 end
 
-function SetItemRef(...) auto[arg] = true
+function private.SetItemRef(...) auto[arg] = true
 	if arg[3] ~= 'RightButton' or not index(active_tab, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
@@ -89,7 +94,7 @@ function SetItemRef(...) auto[arg] = true
 	end
 end
 
-function UseContainerItem(...) auto[arg] = true
+function private.UseContainerItem(...) auto[arg] = true
 	if modified or not index(active_tab, 'USE_ITEM') then
 		return orig.UseContainerItem(unpack(arg))
 	end
@@ -152,7 +157,7 @@ end
 
 function public.is_player(name, current)
 	local realm = GetCVar('realmName')
-	return not current and index(_G.aux_characters, realm, name) or UnitName('player') == name
+	return not current and index(aux_characters, realm, name) or UnitName('player') == name
 end
 
 function public.neutral_faction()
@@ -163,13 +168,13 @@ function public.min_bid_increment(current_bid)
 	return max(1, floor(current_bid / 100) * 5)
 end
 
-function AUCTION_HOUSE_SHOW()
+function private.AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
 	aux_frame:Show()
 	tab = 1
 end
 
-function AUCTION_HOUSE_CLOSED()
+function private.AUCTION_HOUSE_CLOSED()
 	bids_loaded = false
 	current_owner_page = nil
 	aux.post.stop()
@@ -179,18 +184,18 @@ function AUCTION_HOUSE_CLOSED()
 	aux_frame:Hide()
 end
 
-function AUCTION_BIDDER_LIST_UPDATE()
+function private.AUCTION_BIDDER_LIST_UPDATE()
 	bids_loaded = true
 end
 
 do
 	local last_owner_page_requested
-	function GetOwnerAuctionItems(...) auto[arg] = true
+	function private.GetOwnerAuctionItems(...) auto[arg] = true
 		local page = arg[1]
 		last_owner_page_requested = page
 		return orig.GetOwnerAuctionItems(unpack(arg))
 	end
-	function AUCTION_OWNED_LIST_UPDATE()
+	function private.AUCTION_OWNED_LIST_UPDATE()
 		current_owner_page = last_owner_page_requested or 0
 	end
 end
@@ -268,7 +273,7 @@ do
 	end
 end
 
-function AuctionFrameAuctions_OnEvent(...) auto[arg] = true
+function private.AuctionFrameAuctions_OnEvent(...) auto[arg] = true
     if AuctionFrameAuctions:IsVisible() then
 	    return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end

@@ -33,7 +33,7 @@ function LOAD()
 			return unpack(ret)
 		end)
 
-		function set_aux_dropdown_style(dropdown)
+		function private.set_aux_dropdown_style(dropdown)
 			DropDownList1Backdrop:SetBackdrop{}
 			aux_border:Show()
 			aux_background:Show()
@@ -62,7 +62,7 @@ function LOAD()
 			end
 		end
 
-		function set_blizzard_dropdown_style()
+		function private.set_blizzard_dropdown_style()
 			DropDownList1Backdrop:SetBackdrop(blizzard_backdrop)
 			aux_border:Hide()
 			aux_background:Hide()
@@ -201,7 +201,7 @@ function public.resize_tab(tab, width, padding)
 end
 
 do
-	local mt = {__index=t}
+	local mt = { __index=t }
 	function mt.__index:create_tab(text)
 		local id = getn(self._tabs) + 1
 
@@ -265,7 +265,7 @@ do
 	function mt.__index:select(id)
 		self._selected = id
 		self:update()
-		;(self._on_select or nop)(id)
+		do (self._on_select or nop)(id) end
 	end
 	function mt.__index:update()
 		for _, tab in self._tabs do
@@ -312,7 +312,7 @@ function public.editbox(parent)
 	    this:SetTextColor(color.text.enabled())
 	    this.focused = true
 	    this:HighlightText()
-	    ;(this.focus_gain or nop)()
+	    do (this.focus_gain or nop)() end
     end)
     editbox:SetScript('OnEditFocusLost', function()
 	    this.overlay:Show()
@@ -320,11 +320,11 @@ function public.editbox(parent)
 	    this.focused = false
 	    this:HighlightText(0, 0)
 	    this:SetScript('OnUpdate', nil)
-	    ;(this.focus_loss or nop)()
+	    do (this.focus_loss or nop)() end
     end)
     editbox:SetScript('OnTextChanged', function()
 	    this.overlay:SetText((this.formatter or id)(this:GetText()))
-	    ;(this.change or nop)()
+	    do (this.change or nop)() end
     end)
     editbox:SetScript('OnChar', function() (this.char or nop)() end)
     do

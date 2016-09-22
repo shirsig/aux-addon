@@ -2,7 +2,7 @@ aux 'history' local persistence = aux.persistence
 
 local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}} }
 
-value_cache = t
+local value_cache = t
 
 do
 	local cache
@@ -32,7 +32,7 @@ function private.new_record.get()
 	return T('next_push', next_push, 'data_points', t)
 end
 
-function read_record(item_key)
+function private.read_record(item_key)
 	local record = data[item_key] and persistence.read(history_schema, data[item_key]) or new_record
 	if record.next_push <= time() then
 		push_record(record)
@@ -41,7 +41,7 @@ function read_record(item_key)
 	return record
 end
 
-function write_record(item_key, record)
+function private.write_record(item_key, record)
 	value_cache[item_key] = nil
 	data[item_key] = persistence.write(history_schema, record)
 end
@@ -100,7 +100,7 @@ function calculate_market_value(item_record)
 	return item_record.daily_min_buyout and min(ceil(item_record.daily_min_buyout * 1.15), item_record.daily_max_price)
 end
 
-function weighted_median(list)
+function private.weighted_median(list)
 	sort(list, function(a,b) return a.value < b.value end)
 	local weight = 0
 	for _, element in list do
@@ -111,7 +111,7 @@ function weighted_median(list)
 	end
 end
 
-function push_record(item_record)
+function private.push_record(item_record)
 	for market_value in present(calculate_market_value(item_record)) do
 		tinsert(item_record.data_points, 1, T('market_value', market_value, 'time', item_record.next_push))
 		while getn(item_record.data_points) > 11 do

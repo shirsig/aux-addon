@@ -1,8 +1,8 @@
 aux 'post'
 
-local state = nil
+local state
 
-function process()
+function private.process()
 	if state.posted < state.count then
 
 		local stacking_complete
@@ -23,7 +23,7 @@ function process()
 	return stop()
 end
 
-function post_auction(slot, k)
+function private.post_auction(slot, k)
 	local item_info = aux.info.container_item(unpack(slot))
 	if item_info.item_key == state.item_key and aux.info.auctionable(item_info.tooltip) and item_info.aux_quantity == state.stack_size then
 
@@ -71,11 +71,8 @@ end
 
 function public.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, callback)
 	stop()
-
-	local thread_id = thread(process)
-
 	state = {
-		thread_id = thread_id,
+		thread_id = thread(process),
 		item_key = item_key,
 		stack_size = stack_size,
 		duration = duration,

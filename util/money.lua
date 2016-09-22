@@ -4,8 +4,8 @@ public.GOLD_TEXT = '|cffffd70ag|r'
 public.SILVER_TEXT = '|cffc7c7cfs|r'
 public.COPPER_TEXT = '|cffeda55fc|r'
 
-COPPER_PER_GOLD = 10000
-COPPER_PER_SILVER = 100
+local COPPER_PER_GOLD = 10000
+local COPPER_PER_SILVER = 100
 
 function public.to_gsc(money)
 	local gold = floor(money / COPPER_PER_GOLD)
