@@ -184,7 +184,7 @@ function private.start_real_time_scan(query, search, continuation)
 			end
 			init[new_records] = temp-values(map)
 
-			if getn(new_records) > 1000 then
+			if getn(new_records) > 2000 then
 				StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
 			else
 				search.records = new_records
@@ -262,9 +262,9 @@ function private.start_search(queries, continuation)
 				ctrl.suspend()
 				place_bid('list', auction_record.index, auction_record.buyout_price, papply(ctrl.resume, true))
 				thread(when, later(GetTime(), 10), ctrl.resume, false)
-			elseif getn(search.records) < 1000 then
+			elseif getn(search.records) < 2000 then
 				tinsert(search.records, auction_record)
-				if getn(search.records) == 1000 then
+				if getn(search.records) == 2000 then
 					StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
 				end
 			end
