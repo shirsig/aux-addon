@@ -78,7 +78,7 @@ end
 do
 	local index
 	function private.active_tab.get() return tab_info[index] end
-	function on_tab_click(i)
+	function private.on_tab_click(i)
 		do (index and active_tab.CLOSE or nop)() end
 		index = i
 		do (index and active_tab.OPEN or nop)() end
