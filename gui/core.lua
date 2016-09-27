@@ -97,7 +97,7 @@ do
 	orig = menu:GetScript('OnShow')
 	menu:SetScript('OnShow', function()
 		UIMenu_Initialize()
-		for i = 1, getn(structure) do
+		for i = 1, getn(structure or empty) do
 			UIMenu_AddButton(
 				structure[i][1],
 				structure[i],
