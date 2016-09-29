@@ -1,48 +1,24 @@
 aux 'core'
 
---do
---	local call_method, call_self
---	local function generic_call(...)
---		return call_method(call_self, unpack(arg))
---	end
---
---	local state = setmetatable({}, {__mode='k'})
---	local mt = {__metatable=false}
---	function mt:__index(self, key) self=state[self]
---	local getter = self.class.getters[key]
---	if getter then return getter(self.self) end
---	local method = self.class.methods[key]
---	if method then
---		call_method, call_self = method, self.self
---		return generic_call
---	end
---	end
---	function mt:__newindex(self, key, value) self=state[self]
---	local setter = self.class.setters[key]
---	if setter then return setter(self.self, value) end
---	end
---	--	function mt:__unm(self) self=state[self]
---	--		reclaim()
---	--	end
---	local function instantiate(methods, getters, setters, init, arg)
---		local interface = setmetatable({}, mt)
---		local self = {_I=interface}; init(self, unpack(arg))
---		state[interface] = {class={methods=methods, getters=getters, setters=setters}, self=self}
---		return interface
---	end
---	function public.class(methods, getters, setters, init)
---		return function(arg) instantiate(methods, getters, setters, init, arg) end
---	end
---end
---
---do
---	local state = {}
---	local mt = {__metatable=false, __newindex=error}
---	function mt:__index(key) return state[self][key] end
---	function public.immutable(t)
---		return class({}, t, {}, function() end, {})
---	end
---end
+do
+	local state = setmetatable({}, { __mode='k' })
+
+	function class(object, ...)
+		local interface = {}
+		for i = 1, arg.n do
+			local key = arg[i]
+			interface[key] = function(self, ...)
+				local object = state[self]
+				return object[key](object, unpack(arg))
+			end
+		end
+		return function()
+			local proxy = setmetatable({}, { __metatable=false, __index=interface })
+			state[proxy] = setmetatable({}, { __index=object })
+			return proxy
+		end
+	end
+end
 
 do
 	local _state = setmetatable(t, T('__mode', 'kv'))
@@ -50,9 +26,9 @@ do
 		return _state[self].handler({ public=self, private=_state[self].state }, key)
 	end
 	function public.index_function(state, handler) -- TODO rename table-accessor, use predicate to stop
-	local state, self = {handler=handler, state=state}, t
-	_state[self] = state
-	return setmetatable(self, { __metatable=false, __index=__index, state=state })
+		local state, self = { handler=handler, state=state }, t
+		_state[self] = state
+		return setmetatable(self, { __metatable=false, __index=__index, state=state })
 	end
 end
 
@@ -108,7 +84,9 @@ end
 
 public.huge = 1.8 * 10 ^ 308
 
-function public.modified.get() return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown() end
+function public.modified.get()
+	return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown()
+end
 
 function public.copy(t)
 	local copy = _E.t
@@ -184,7 +162,9 @@ function public.map(t, f)
 	return t
 end
 
-function public.trim(str) return gsub(str, '^%s*(.-)%s*$', '%1') end
+function public.trim(str)
+	return gsub(str, '^%s*(.-)%s*$', '%1')
+end
 
 function public.split(str, separator)
 	local parts = t
@@ -212,7 +192,9 @@ function public.bounded(lower_bound, upper_bound, number)
 	return max(lower_bound, min(upper_bound, number))
 end
 
-function public.round(x) return floor(x + .5) end
+function public.round(x)
+	return floor(x + .5)
+end
 
 function public.later(t0, t)
 	return function() return GetTime() - t0 > t end
