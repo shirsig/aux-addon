@@ -29,9 +29,9 @@ end
 function definition_helper_mt:__newindex(k, v) local module, modifiers = _module[self], _modifiers[self]
 	local access = ACCESS[tremove(modifiers, 1)] or error'Definition missing access modifier.'
 	local name = META[k] and (tremove(modifiers) or error'Definition missing identifier.') or k
-	if type(name) ~= 'string' or not strfind(name, '^[_%a][_%w]*') then error('"%s" is not a valid identifier.', name) end
+	if type(name) ~= 'string' or not strfind(name, '^[_%a][_%w]*') then error('Invalid identifier "%s".', name) end
 	local type = META[k] or FIELD
-	module.defined[name .. OPERATION[type]] = module.defined[name .. OPERATION[type]] and error('"%s" already exists.', name) or true
+	module.defined[name .. OPERATION[type]] = module.defined[name .. OPERATION[type]] and error('Duplicate identifier "%s".', name) or true
 	for i = getn(modifiers), 1, -1 do v = module[FIELD][modifiers[i]](v) end
 	module[type][name], module[access+type][name] = v, v
 	setn(modifiers, 0)
