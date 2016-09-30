@@ -31,8 +31,6 @@ do
 	end
 end
 
--- alternatively rely on module encapsulation, modifier "method" to declare methods
-
 do
 	local _state = setmetatable(t, T('__mode', 'kv'))
 	local __index = function(self, k)

@@ -254,7 +254,7 @@ do
 			end
 			if not self[str] and (str == 'usable' or str == 'exact' and self.name and size(self) == 1) then
 				self[str] = A(str, 1)
-				return A('blizzard', str, 1)
+				return A('blizzard', str, str, 1)
 			elseif i == 1 and strlen(str) <= 63 then
 				self.name = A(str, unquote(str))
 				return A('blizzard', 'name', str, unquote(str))
