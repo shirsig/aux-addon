@@ -1,21 +1,24 @@
-aux 'search_tab' local gui, completion, listing, auction_listing, filter_util = aux.gui, aux.completion, aux.listing, aux.auction_listing, aux.filter_util
+aux_search_tab_frame = module
 
-FILTER_SPACING = 28.5
+local gui, completion, listing, auction_listing, filter_util = aux_gui, aux_completion, aux_listing, aux_auction_listing, aux_filter_util
 
-function private.create_frames()
-	private.frame = CreateFrame('Frame', nil, aux_frame)
+local FILTER_SPACING = 28.5
+
+function public.create()
+	setfenv(1, getfenv(2))
+	private.frame = CreateFrame('Frame', nil, AuxFrame)
 	frame:SetAllPoints()
 	frame:SetScript('OnUpdate', on_update)
 	frame:Hide()
 
 	frame.filter = gui.panel(frame)
-	frame.filter:SetAllPoints(aux_frame.content)
+	frame.filter:SetAllPoints(AuxFrame.content)
 
 	frame.results = gui.panel(frame)
-	frame.results:SetAllPoints(aux_frame.content)
+	frame.results:SetAllPoints(AuxFrame.content)
 
 	frame.saved = CreateFrame('Frame', nil, frame)
-	frame.saved:SetAllPoints(aux_frame.content)
+	frame.saved:SetAllPoints(AuxFrame.content)
 
 	frame.saved.favorite = gui.panel(frame.saved)
 	frame.saved.favorite:SetWidth(378.5)
@@ -149,9 +152,9 @@ function private.create_frames()
 	    btn:SetScript('OnClick', function()
 	        if this:GetChecked() then
 	            this:SetChecked(false)
-	            aux_auto_buy_filter = nil
+	            aux_search_tab_results.aux_auto_buy_filter = nil
 	            this.prettified = nil
-	            auto_buy_validator = nil
+	            aux_search_tab_results.auto_buy_validator = nil
 	        else
 	            StaticPopup_Show('AUX_SEARCH_AUTO_BUY_FILTER')
 	        end
@@ -208,7 +211,7 @@ function private.create_frames()
 	    btn:SetHeight(25)
 	    btn:SetText('Stop')
 	    btn:SetScript('OnClick', function()
-	        aux.scan.abort(search_scan_id)
+	        aux_scan.abort(aux_search_tab_results.search_scan_id)
 	    end)
 	    private.stop_button = btn
 	end
@@ -227,7 +230,7 @@ function private.create_frames()
 	    local editbox = gui.editbox(controls)
 	    editbox:EnableMouse(1)
 	    editbox.formatter = function(str)
-		    local queries = aux.filter_util.queries(str)
+		    local queries = aux_filter_util.queries(str)
 		    return queries and join(map(copy(queries), function(query) return query.prettified end), ';') or color.red(str)
 		end
 	    editbox.complete = completion.complete_filter
@@ -247,7 +250,7 @@ function private.create_frames()
 	end
 	do
 	    local btn = gui.button(frame, gui.font_size.large)
-	    btn:SetPoint('BOTTOMLEFT', aux_frame.content, 'TOPLEFT', 10, 8)
+	    btn:SetPoint('BOTTOMLEFT', AuxFrame.content, 'TOPLEFT', 10, 8)
 	    btn:SetWidth(243)
 	    btn:SetHeight(22)
 	    btn:SetText('Search Results')
@@ -276,7 +279,7 @@ function private.create_frames()
 	    local frame = CreateFrame('Frame', nil, frame)
 	    frame:SetWidth(265)
 	    frame:SetHeight(25)
-	    frame:SetPoint('TOPLEFT', aux_frame.content, 'BOTTOMLEFT', 0, -6)
+	    frame:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
 	    private.status_bar_frame = frame
 	end
 	do
@@ -583,8 +586,8 @@ function private.create_frames()
 	    private.filter_display = scroll_child
 	end
 
-	private.status_bars = t
-	private.tables = t
+	public.status_bars = t
+	public.tables = t
 	for _ = 1, 5  do
 	    local status_bar = gui.status_bar(frame)
 	    status_bar:SetAllPoints(status_bar_frame)

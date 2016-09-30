@@ -1,4 +1,12 @@
-aux 'auction_listing' local gui, sorting, money, info = aux.gui, aux.sorting, aux.money, aux.info
+aux_auction_listing = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+local gui, sorting, money, info = aux_gui, aux_sorting, aux_money, aux_info
 
 aux_price_per_unit = false
 
@@ -521,7 +529,7 @@ public.bids_config = {
 function private.record_percentage(record)
     if not record then return end
 
-    local historical_value = aux.history.value(record.item_key) or 0
+    local historical_value = aux_history.value(record.item_key) or 0
     if historical_value > 0 then
         if record.unit_buyout_price > 0 then
             return round(100 * record.unit_buyout_price / historical_value, 1)
@@ -634,8 +642,8 @@ local methods = {
             ChatFrameEditBox:Insert(this.row.data.record.link)
         elseif not modified and button == 'RightButton' then -- TODO not when alt (how?)
             tab = 1
-            aux.search_tab.set_filter(strlower(info.item(this.row.data.record.item_id).name) .. '/exact')
-            aux.search_tab.execute(nil, false)
+            aux_search_tab.set_filter(strlower(info.item(this.row.data.record.item_id).name) .. '/exact')
+            aux_search_tab.execute(nil, false)
         else
             local selection = this.rt:GetSelection()
             if not selection or selection.record ~= this.row.data.record then

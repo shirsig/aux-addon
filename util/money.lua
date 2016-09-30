@@ -1,4 +1,10 @@
-aux 'money'
+aux_money = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
 
 public.GOLD_TEXT = '|cffffd70ag|r'
 public.SILVER_TEXT = '|cffc7c7cfs|r'

@@ -1,18 +1,21 @@
-aux 'bids_tab' local gui, auction_listing = aux.gui, aux.auction_listing
+aux_bids_tab_frame = module
 
-function private.create_frames()
-	private.frame = CreateFrame('Frame', nil, aux_frame)
+local gui, auction_listing = aux_gui, aux_auction_listing
+
+function public.create()
+	setfenv(1, getfenv(2))
+	private.frame = CreateFrame('Frame', nil, AuxFrame)
 	frame:SetAllPoints()
 	frame:SetScript('OnUpdate', on_update)
 	frame:Hide()
 
 	frame.listing = gui.panel(frame)
 	frame.listing:SetPoint('TOP', frame, 'TOP', 0, -8)
-	frame.listing:SetPoint('BOTTOMLEFT', aux_frame.content, 'BOTTOMLEFT', 0, 0)
-	frame.listing:SetPoint('BOTTOMRIGHT', aux_frame.content, 'BOTTOMRIGHT', 0, 0)
+	frame.listing:SetPoint('BOTTOMLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, 0)
+	frame.listing:SetPoint('BOTTOMRIGHT', AuxFrame.content, 'BOTTOMRIGHT', 0, 0)
 
 	private.listing = auction_listing.CreateAuctionResultsTable(frame.listing, auction_listing.bids_config)
-	listing:SetSort(1,2,3,4,5,6,7,8)
+	listing:SetSort(1, 2, 3, 4, 5, 6, 7, 8)
 	listing:Reset()
 	listing:SetHandler('OnCellClick', function(cell, button)
 	    if IsAltKeyDown() and listing:GetSelection().record == cell.row.data.record then
@@ -32,7 +35,7 @@ function private.create_frames()
 		private.status_bar = gui.status_bar(frame)
 	    status_bar:SetWidth(265)
 	    status_bar:SetHeight(25)
-	    status_bar:SetPoint('TOPLEFT', aux_frame.content, 'BOTTOMLEFT', 0, -6)
+	    status_bar:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 0)
 	    status_bar:set_text('')
 	end

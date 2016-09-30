@@ -1,29 +1,42 @@
-aux 'core'
+aux_util = module
+
+include (green_t)
+include (aux)
 
 do
-	local state = setmetatable({}, { __mode='k' })
-
-	function class(object, ...)
-		local interface = {}
-		for i = 1, arg.n do
-			local key = arg[i]
-			interface[key] = function(self, ...)
-				local object = state[self]
-				return object[key](object, unpack(arg))
-			end
+	local classes, interfaces, objects = {}, {}, setmetatable({}, { __mode='k' })
+	local private_mt = { __metatable=false }
+	function private_mt:__newindex(k, v)
+		classes[self][k] = v
+	end
+	local public_mt = { __metatable=false }
+	function public_mt:__newindex(k, v)
+		classes[self][k] = v
+		interfaces[self][k] = function(self, ...)
+			return classes[self][k](objects[self][k], unpack(arg))
 		end
-		return function()
-			local proxy = setmetatable({}, { __metatable=false, __index=interface })
-			state[proxy] = setmetatable({}, { __index=object })
-			return proxy
-		end
+	end
+	local proxy_mt = { __metatable=false }
+	function proxy_mt:__call()
+		local proxy = setmetatable({}, { __metatable=false, __index=interfaces[self] })
+		objects[proxy] = setmetatable({}, { __index=classes[self] })
+		return proxy
+	end
+	function public.class()
+		local class, interface = {}, {}
+		local private, public, proxy = setmetatable({}, private_mt), setmetatable({}, public_mt), setmetatable({}, proxy_mt)
+		classes[private], classes[public], classes[proxy] = class, class, class
+		interfaces[public], interfaces[proxy] = interface, interface
+		return private, public, proxy
 	end
 end
 
+-- alternatively rely on module encapsulation, modifier "method" to declare methods
+
 do
 	local _state = setmetatable(t, T('__mode', 'kv'))
-	local __index = function(self, key)
-		return _state[self].handler({ public=self, private=_state[self].state }, key)
+	local __index = function(self, k)
+		return _state[self].handler({ public=self, private=_state[self].state }, k)
 	end
 	function public.index_function(state, handler) -- TODO rename table-accessor, use predicate to stop
 		local state, self = { handler=handler, state=state }, t
@@ -89,7 +102,7 @@ function public.modified.get()
 end
 
 function public.copy(t)
-	local copy = _E.t
+	local copy = _M.t
 	for k, v in t do copy[k] = v end
 	table.setn(copy, getn(t))
 	return setmetatable(copy, getmetatable(t))
@@ -106,13 +119,13 @@ function public.key(value, t)
 end
 
 function public.keys(t)
-	local keys = _E.t
+	local keys = _M.t
 	for k in t do tinsert(keys, k) end
 	return keys
 end
 
 function public.values(t)
-	local values = _E.t
+	local values = _M.t
 	for _, v in t do tinsert(values, v) end
 	return values
 end

@@ -1,4 +1,12 @@
-aux 'history' local persistence = aux.persistence
+aux_history = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+local persistence = aux_persistence
 
 local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}} }
 

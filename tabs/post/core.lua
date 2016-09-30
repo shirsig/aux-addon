@@ -1,4 +1,14 @@
-aux 'post_tab' local scan, scan_util, history, info, persistence, item_listing, al, sorting = aux.scan, aux.scan_util, aux.history, aux.info, aux.persistence, aux.item_listing, aux.auction_listing, aux.sorting
+aux_post_tab = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+TAB 'Post'
+
+local scan, scan_util, history, info, persistence, item_listing, al, sorting = aux_scan, aux_scan_util, aux_history, aux_info, aux_persistence, aux_item_listing, aux_auction_listing, aux_sorting
 
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
@@ -33,7 +43,7 @@ end
 local scan_id, inventory_records, existing_auctions = 0, t, t
 
 function private.refresh_button_click()
-	aux.scan.abort(scan_id)
+	aux_scan.abort(scan_id)
 	refresh_entries()
 	refresh = true
 end
@@ -51,7 +61,7 @@ do
 end
 
 function LOAD()
-	create_frames()
+	aux_post_tab_frame.create()
 end
 
 function OPEN()
@@ -71,20 +81,20 @@ end
 
 function private.get_unit_start_price()
     local money_text = unit_start_price:GetText()
-    return aux.money.from_string(money_text) or 0
+    return aux_money.from_string(money_text) or 0
 end
 
 function private.set_unit_start_price(amount)
-    unit_start_price:SetText(aux.money.to_string(amount, true, nil, 3, nil, true))
+    unit_start_price:SetText(aux_money.to_string(amount, true, nil, 3, nil, true))
 end
 
 function private.get_unit_buyout_price()
     local money_text = unit_buyout_price:GetText()
-    return aux.money.from_string(money_text) or 0
+    return aux_money.from_string(money_text) or 0
 end
 
 function private.set_unit_buyout_price(amount)
-    unit_buyout_price:SetText(aux.money.to_string(amount, true, nil, 3, nil, true))
+    unit_buyout_price:SetText(aux_money.to_string(amount, true, nil, 3, nil, true))
 end
 
 function private.update_inventory_listing()
@@ -105,12 +115,12 @@ function private.update_auction_listing()
         for i, auction_record in existing_auctions[selected_item.key] or tt do
 
             local blizzard_bid_undercut, buyout_price_undercut = undercut(auction_record, stack_size_slider:GetValue())
-            blizzard_bid_undercut = aux.money.from_string(aux.money.to_string(blizzard_bid_undercut, true, nil, 3))
-            buyout_price_undercut = aux.money.from_string(aux.money.to_string(buyout_price_undercut, true, nil, 3))
+            blizzard_bid_undercut = aux_money.from_string(aux_money.to_string(blizzard_bid_undercut, true, nil, 3))
+            buyout_price_undercut = aux_money.from_string(aux_money.to_string(buyout_price_undercut, true, nil, 3))
 
             local stack_blizzard_bid_undercut, stack_buyout_price_undercut = undercut(auction_record, stack_size_slider:GetValue(), true)
-            stack_blizzard_bid_undercut = aux.money.from_string(aux.money.to_string(stack_blizzard_bid_undercut, true, nil, 3))
-            stack_buyout_price_undercut = aux.money.from_string(aux.money.to_string(stack_buyout_price_undercut, true, nil, 3))
+            stack_blizzard_bid_undercut = aux_money.from_string(aux_money.to_string(stack_blizzard_bid_undercut, true, nil, 3))
+            stack_buyout_price_undercut = aux_money.from_string(aux_money.to_string(stack_buyout_price_undercut, true, nil, 3))
 
             local stack_size = stack_size_slider:GetValue()
             local historical_value = history.value(selected_item.key)
@@ -138,9 +148,9 @@ function private.update_auction_listing()
                     {value=auction_record.own and color.yellow(auction_record.count) or auction_record.count},
                     {value=al.time_left(auction_record.duration)},
                     {value=auction_record.stack_size == stack_size and color.yellow(auction_record.stack_size) or auction_record.stack_size},
-                    {value=aux.money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color)},
+                    {value=aux_money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color)},
                     {value=historical_value and al.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'},
-                    {value=auction_record.unit_buyout_price > 0 and aux.money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'},
+                    {value=auction_record.unit_buyout_price > 0 and aux_money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'},
                     {value=auction_record.unit_buyout_price > 0 and historical_value and al.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---'},
                 },
                 record = auction_record,
@@ -214,7 +224,7 @@ function private.post_auctions()
             duration_code = 4
 		end
 
-		aux.post.start(
+		aux_post.start(
 			key,
 			stack_size,
 			duration,
@@ -307,7 +317,7 @@ function private.update_item_configuration()
             local deposit_factor = neutral_faction() and .25 or .05
             local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
-            deposit:SetText('Deposit: ' .. aux.money.to_string(amount, nil, nil, nil, inline_color.text.enabled))
+            deposit:SetText('Deposit: ' .. aux_money.to_string(amount, nil, nil, nil, inline_color.text.enabled))
         end
 
         refresh_button:Enable()
@@ -359,7 +369,7 @@ function private.update_historical_value_button()
     if selected_item then
         local historical_value = history.value(selected_item.key)
         historical_value_button.amount = historical_value
-        historical_value_button:SetText(historical_value and aux.money.to_string(historical_value, true, nil, 3) or '---')
+        historical_value_button:SetText(historical_value and aux_money.to_string(historical_value, true, nil, 3) or '---')
     end
 end
 
@@ -387,8 +397,8 @@ function private.set_item(item)
     stack_size_slider:SetValue(settings.stack_size)
     quantity_update(true)
 
-    unit_start_price:SetText(aux.money.to_string(settings.start_price, true, nil, 3, nil, true))
-    unit_buyout_price:SetText(aux.money.to_string(settings.buyout_price, true, nil, 3, nil, true))
+    unit_start_price:SetText(aux_money.to_string(settings.start_price, true, nil, 3, nil, true))
+    unit_buyout_price:SetText(aux_money.to_string(settings.buyout_price, true, nil, 3, nil, true))
 
     if not existing_auctions[selected_item.key] then
         refresh_entries()

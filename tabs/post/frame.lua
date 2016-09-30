@@ -1,15 +1,18 @@
-aux 'post_tab' local gui, listing, item_listing, money, search_tab = aux.gui, aux.listing, aux.item_listing, aux.money, aux.search_tab
+aux_post_tab_frame = module
 
-function private.create_frames()
-	private.frame = CreateFrame('Frame', nil, aux_frame)
+local gui, listing, item_listing, money, search_tab = aux_gui, aux_listing, aux_item_listing, aux_money, aux_search_tab
+
+function public.create()
+	setfenv(1, getfenv(2))
+	private.frame = CreateFrame('Frame', nil, AuxFrame)
 	frame:SetAllPoints()
 	frame:SetScript('OnUpdate', on_update)
 	frame:Hide()
 
 	frame.content = CreateFrame('Frame', nil, frame)
 	frame.content:SetPoint('TOP', frame, 'TOP', 0, -8)
-	frame.content:SetPoint('BOTTOMLEFT', aux_frame.content, 'BOTTOMLEFT', 0, 0)
-	frame.content:SetPoint('BOTTOMRIGHT', aux_frame.content, 'BOTTOMRIGHT', 0, 0)
+	frame.content:SetPoint('BOTTOMLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, 0)
+	frame.content:SetPoint('BOTTOMRIGHT', AuxFrame.content, 'BOTTOMRIGHT', 0, 0)
 
 	frame.inventory = gui.panel(frame.content)
 	frame.inventory:SetWidth(212)
@@ -47,7 +50,7 @@ function private.create_frames()
 	            set_item(this.item_record)
 	        elseif arg1 == 'RightButton' then
 	            tab = 1
-	            search_tab.set_filter(strlower(aux.info.item(this.item_record.item_id).name) .. '/exact')
+	            search_tab.set_filter(strlower(aux_info.item(this.item_record.item_id).name) .. '/exact')
 	            search_tab.execute(nil, false)
 	        end
 	    end,
@@ -84,7 +87,7 @@ function private.create_frames()
 		private.status_bar = gui.status_bar(frame)
 	    status_bar:SetWidth(265)
 	    status_bar:SetHeight(25)
-	    status_bar:SetPoint('TOPLEFT', aux_frame.content, 'BOTTOMLEFT', 0, -6)
+	    status_bar:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
 	    status_bar:update_status(100, 100)
 	    status_bar:set_text('')
 	end
@@ -107,7 +110,7 @@ function private.create_frames()
 	    item:SetPoint('TOPLEFT', 10, -6)
 	    item.button:SetScript('OnEnter', function()
 	        if selected_item then
-	            aux.info.set_tooltip(selected_item.itemstring, this, 'ANCHOR_RIGHT')
+	            aux_info.set_tooltip(selected_item.itemstring, this, 'ANCHOR_RIGHT')
 	        end
 	    end)
 	    item.button:SetScript('OnLeave', function()

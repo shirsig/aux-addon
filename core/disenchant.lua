@@ -1,4 +1,10 @@
-aux 'disenchant'
+aux_disenchant = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
 
 local UNCOMMON, RARE, EPIC = 2, 3, 4
 
@@ -69,7 +75,7 @@ local WEAPON = S(
 function public.value(slot, quality, level)
     local expectation
     for _, event in distribution(slot, quality, level) do
-        local value = aux.history.value(event.item_id .. ':' .. 0)
+        local value = aux_history.value(event.item_id .. ':' .. 0)
         if not value then
             return
         else

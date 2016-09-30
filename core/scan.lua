@@ -1,4 +1,12 @@
-aux 'scan' local info, history = aux.info, aux.history
+aux_scan = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+local info, history = aux_info, aux_history
 
 local PAGE_SIZE = 50
 

@@ -1,9 +1,19 @@
-aux 'bids_tab' local scan = aux.scan
+aux_bids_tab = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+TAB 'Bids'
+
+local scan = aux_scan
 
 private.auction_records = t
 
 function LOAD()
-	create_frames()
+	aux_bids_tab_frame.create()
 end
 
 function OPEN()
@@ -51,7 +61,7 @@ end
 
 function private.test(record)
     return function(index)
-        local auction_info = aux.info.auction(index, 'bidder')
+        local auction_info = aux_info.auction(index, 'bidder')
         return auction_info and auction_info.search_signature == record.search_signature
     end
 end
@@ -67,7 +77,7 @@ do
 
         scan.abort(scan_id)
         state = SEARCHING
-        scan_id = aux.scan_util.find(
+        scan_id = aux_scan_util.find(
             record,
             status_bar,
             function() state = IDLE end,
@@ -83,7 +93,7 @@ do
                     bid_button:SetScript('OnClick', function()
                         if test(record)(index) and listing:ContainsRecord(record) then
                             place_bid('bidder', index, record.bid_price, record.bid_price < record.buyout_price and function()
-                                aux.info.bid_update(record)
+                                aux_info.bid_update(record)
                                 listing:SetDatabase()
                             end or papply(listing.RemoveAuctionRecord, listing, record))
                         end

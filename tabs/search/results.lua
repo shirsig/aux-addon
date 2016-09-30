@@ -1,16 +1,24 @@
-aux 'search_tab' local info, scan = aux.info, aux.scan
+aux_search_tab_results = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+local info, scan = aux_info, aux_scan
 
 aux_auto_buy_filter = ''
 
 do
 	local id = 0
-	function private.search_scan_id.get() return id end
-	function private.search_scan_id.set(v) id = v end
+	function public.search_scan_id.get() return id end
+	function public.search_scan_id.set(v) id = v end
 end
 do
 	local validator
-	function private.auto_buy_validator.get() return validator end
-	function private.auto_buy_validator.set(v) validator = v end
+	function public.auto_buy_validator.get() return validator end
+	function public.auto_buy_validator.set(v) validator = v end
 end
 
 do
@@ -46,7 +54,7 @@ do
 		update_continuation()
 	end
 
-	function private.new_search(filter_string)
+	function public.new_search(filter_string)
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
@@ -54,16 +62,16 @@ do
 		tinsert(searches, search)
 		if getn(searches) > 5 then
 			tremove(searches, 1)
-			tinsert(status_bars, tremove(status_bars, 1))
-			tinsert(tables, tremove(tables, 1))
+			tinsert(aux_search_tab.status_bars, tremove(aux_search_tab.status_bars, 1))
+			tinsert(aux_search_tab.tables, tremove(aux_search_tab.tables, 1))
 			search_index = 4
 		end
 
-		search.status_bar = status_bars[getn(searches)]
+		search.status_bar = aux_search_tab.status_bars[getn(searches)]
 		search.status_bar:update_status(100, 100)
 		search.status_bar:set_text('')
 
-		search.table = tables[getn(searches)]
+		search.table = aux_search_tab.tables[getn(searches)]
 		search.table:SetSort(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		search.table:Reset()
 		search.table:SetDatabase(search.records)
@@ -116,9 +124,9 @@ function update_start_stop()
 	end
 end
 
-function private.update_auto_buy_filter()
+function public.update_auto_buy_filter()
 	if aux_auto_buy_filter ~= '' then
-		local queries, error = aux.filter_util.queries(aux_auto_buy_filter)
+		local queries, error = aux_filter_util.queries(aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
 				print 'Error: The automatic buyout filter does not support multi-queries'
@@ -312,7 +320,7 @@ function public.execute(resume, real_time)
 	end
 	local filter_string = search_box:GetText()
 
-	local queries, error = aux.filter_util.queries(filter_string)
+	local queries, error = aux_filter_util.queries(filter_string)
 	if not queries then
 		print('Invalid filter:', error)
 		return
@@ -338,7 +346,7 @@ function public.execute(resume, real_time)
 			else
 				new_search(filter_string)
 			end
-			new_recent_search(filter_string, join(map(copy(queries), function(filter) return filter.prettified end), ';'))
+			aux_search_tab_saved.new_recent_search(filter_string, join(map(copy(queries), function(filter) return filter.prettified end), ';'))
 		else
 			current_search.records = t
 			current_search.table:SetDatabase(current_search.records)
@@ -390,7 +398,7 @@ do
 
 		scan.abort(scan_id)
 		state = SEARCHING
-		scan_id = aux.scan_util.find(
+		scan_id = aux_scan_util.find(
 			record,
 			current_search.status_bar,
 			function()

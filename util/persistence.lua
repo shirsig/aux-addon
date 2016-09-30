@@ -1,4 +1,10 @@
-aux 'persistence'
+aux_persistence = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
 
 aux_datasets = t
 

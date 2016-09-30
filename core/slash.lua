@@ -1,4 +1,12 @@
-aux 'slash' local persistence = aux.persistence
+aux_slash = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+local persistence = aux_persistence
 
 aux_ignore_owner = true
 
@@ -27,7 +35,7 @@ function SlashCmdList.AUX(command)
 	    aux_auctionable_items = t
         print 'Item cache cleared.'
     elseif arguments[1] == 'populate' and arguments[2] == 'wdb' then
-        aux.cache.populate_wdb()
+        aux_cache.populate_wdb()
     elseif arguments[1] == 'tooltip' and arguments[2] == 'value' then
 	    aux_tooltip_value = not aux_tooltip_value
         print('Historical value in tooltip ' .. (aux_tooltip_value and 'enabled' or 'disabled') .. '.')

@@ -1,4 +1,10 @@
-aux 'post'
+aux_post = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
 
 local state
 
@@ -17,15 +23,15 @@ function private.process()
 			end
 		end)
 
-		return aux.stack.start(state.item_key, state.stack_size, send_signal)
+		return aux_stack.start(state.item_key, state.stack_size, send_signal)
 	end
 
 	return stop()
 end
 
 function private.post_auction(slot, k)
-	local item_info = aux.info.container_item(unpack(slot))
-	if item_info.item_key == state.item_key and aux.info.auctionable(item_info.tooltip) and item_info.aux_quantity == state.stack_size then
+	local item_info = aux_info.container_item(unpack(slot))
+	if item_info.item_key == state.item_key and aux_info.auctionable(item_info.tooltip) and item_info.aux_quantity == state.stack_size then
 
 		ClearCursor()
 		ClickAuctionSellItemButton()

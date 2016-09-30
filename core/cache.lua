@@ -1,4 +1,12 @@
-aux 'cache' local info, persistence = aux.info, aux.persistence
+aux_cache = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+local info, persistence = aux_info, aux_persistence
 
 local MIN_ITEM_ID = 1
 local MAX_ITEM_ID = 30000
@@ -28,7 +36,7 @@ function LOAD()
 	event_listener('NEW_AUCTION_UPDATE', function()
 		for info in present(info.auction_sell_item()) do
 			for item_id in present(item_id(info.name)) do
-				aux_merchant_sell[_E.item_id(info.name)] = info.vendor_price / (aux.info.max_item_charges(item_id) or info.count)
+				aux_merchant_sell[_M.item_id(info.name)] = info.vendor_price / (aux_info.max_item_charges(item_id) or info.count)
 			end
 		end
 	end)

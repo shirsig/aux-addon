@@ -1,4 +1,12 @@
-aux 'scan_util' local info , filter_util = aux.info, aux.filter_util
+aux_scan_util = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+local info , filter_util = aux_info, aux_filter_util
 
 function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
@@ -31,7 +39,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
     end
 
     local found
-    return aux.scan.start{
+    return aux_scan.start{
         type = auction_record.query_type,
         queries = queries,
         on_scan_start = function()

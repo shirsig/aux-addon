@@ -1,4 +1,12 @@
-aux 'listing' local gui = aux.gui
+aux_listing = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+local gui = aux_gui
 
 local ST_COUNT = 0
 

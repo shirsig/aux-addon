@@ -1,4 +1,10 @@
-aux 'gui'
+aux_gui = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
 
 public.font = [[Fonts\ARIALN.TTF]]
 
@@ -25,7 +31,7 @@ function LOAD()
 		hook('ToggleDropDownMenu', function(...) auto[arg] = true
 			local ret = temp-A(orig.ToggleDropDownMenu(unpack(arg)))
 			local dropdown = _G[arg[4] or ''] or this:GetParent()
-			if strfind(dropdown:GetName() or '', '^aux_frame%d+$') then
+			if strfind(dropdown:GetName() or '', '^AuxFrame%d+$') then
 				set_aux_dropdown_style(dropdown)
 			else
 				set_blizzard_dropdown_style()
@@ -87,7 +93,7 @@ do
 	local id = 1
 	function public.name.get()
 		id = id + 1
-		return 'aux_frame' .. id
+		return 'AuxFrame' .. id
 	end
 end
 

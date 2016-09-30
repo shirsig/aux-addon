@@ -1,4 +1,12 @@
-aux 'search_tab' local filter_util = aux.filter_util
+aux_search_tab_filter = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+local filter_util = aux_filter_util
 
 function private.valid_level(str)
 	local level = tonumber(str)
@@ -73,7 +81,7 @@ function private.update_form()
 
 	if blizzard_query.exact then
 		for key in temp-S('class', 'subclass', 'slot', 'quality') do
-			_E[key .. '_dropdown'].button:Disable()
+			_M[key .. '_dropdown'].button:Disable()
 		end
 	else
 		class_dropdown.button:Enable()
@@ -81,9 +89,9 @@ function private.update_form()
 	end
 	for key in temp-S('min_level', 'max_level') do
 		if blizzard_query.exact then
-			_E[key .. '_input']:EnableMouse(false)
+			_M[key .. '_input']:EnableMouse(false)
 		else
-			_E[key .. '_input']:EnableMouse(true)
+			_M[key .. '_input']:EnableMouse(true)
 		end
 	end
 	if blizzard_query.exact then
@@ -210,9 +218,9 @@ function public.formatted_post_filter(components)
 		elseif component[1] == 'filter' then
 			for parameter in present(component[3]) do
 				if component[2] == 'item' then
-					parameter = aux.info.display_name(aux.cache.item_id(parameter)) or '[' .. parameter .. ']'
+					parameter = aux_info.display_name(aux_cache.item_id(parameter)) or '[' .. parameter .. ']'
 				elseif filter_util.filters[component[2]].input_type == 'money' then
-					parameter = aux.money.to_string(aux.money.from_string(parameter), nil, true)
+					parameter = aux_money.to_string(aux_money.from_string(parameter), nil, true)
 				end
 				component_text = component_text .. filter_color(': ') .. parameter
 			end

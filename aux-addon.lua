@@ -1,26 +1,15 @@
+aux = module
+
+include (green_t)
+
 --aux_account_settings = {} -- TODO clean up the mess of savedvariables
 --aux_character_settings = {}
 
-do
-	local modules = {}
-	local mt = {__metatable=false, __index=function(_, key) return modules[key]._I end, __newindex=error}
-	aux = function(name)
-		if not modules[name] then
-			(function()
-				modules[name] = module and _E
-				import (green_t)
-				private.aux = setmetatable(t, mt)
-				private.p.set = function(v) inspect(nil, v) end
-			end)()
-		end
-		modules[name].import (modules.core._I)
-		setfenv(2, modules[name])
-	end
-end
-
-aux 'core'
-
 public.version = '5.0.0'
+
+function public.p.set(v)
+	inspect(nil, v)
+end
 
 function public.print(...) auto[arg] = true
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '[aux] ' .. join(map(arg, tostring), ' '))
@@ -56,23 +45,28 @@ do
 			for _, f in handlers2 do f() end
 			print('v' .. version .. ' loaded.')
 		else
-			_E[event]()
+			_M[event]()
 		end
 	end)
 end
 
+function LOAD()
+	include (aux_util)
+	include (aux_control)
+	include (aux_util_color)
+	aux_frame.create()
+end
+
 private.tab_info = t
-do
-	for _, info in temp-A(temp-A('search_tab', 'Search'), temp-A('post_tab', 'Post'), temp-A('auctions_tab', 'Auctions'), temp-A('bids_tab', 'Bids')) do
-		local tab = T('name', info[2])
-		local env = (function() _G.aux(info[1]) return _E end)()
-		function env.private.OPEN.set(f) tab.OPEN = f end
-		function env.private.CLOSE.set(f) tab.CLOSE = f end
-		function env.private.USE_ITEM.set(f) tab.USE_ITEM = f end
-		function env.private.CLICK_LINK.set(f) tab.CLICK_LINK = f end
-		function env.public.ACTIVE.get() return tab == active_tab end
-		tinsert(tab_info, tab)
-	end
+function public.TAB(name)
+	local tab = T('name', name)
+	local env = getfenv(2)
+	function env.private.OPEN.set(f) tab.OPEN = f end
+	function env.private.CLOSE.set(f) tab.CLOSE = f end
+	function env.private.USE_ITEM.set(f) tab.USE_ITEM = f end
+	function env.private.CLICK_LINK.set(f) tab.CLICK_LINK = f end
+	function env.public.ACTIVE.get() return tab == active_tab end
+	tinsert(tab_info, tab)
 end
 
 do
@@ -89,7 +83,7 @@ function private.SetItemRef(...) auto[arg] = true
 	if arg[3] ~= 'RightButton' or not index(active_tab, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
-	for item_info in present(aux.info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
+	for item_info in present(aux_info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
 		return active_tab.CLICK_LINK(item_info)
 	end
 end
@@ -98,7 +92,7 @@ function private.UseContainerItem(...) auto[arg] = true
 	if modified or not index(active_tab, 'USE_ITEM') then
 		return orig.UseContainerItem(unpack(arg))
 	end
-	for item_info in present(aux.info.container_item(arg[1], arg[2])) do
+	for item_info in present(aux_info.container_item(arg[1], arg[2])) do
 		return active_tab.USE_ITEM(item_info)
 	end
 end
@@ -170,18 +164,18 @@ end
 
 function private.AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
-	aux_frame:Show()
+	AuxFrame:Show()
 	tab = 1
 end
 
 function private.AUCTION_HOUSE_CLOSED()
 	bids_loaded = false
 	current_owner_page = nil
-	aux.post.stop()
-	aux.stack.stop()
-	aux.scan.abort()
+	aux_post.stop()
+	aux_stack.stop()
+	aux_scan.abort()
 	tab = nil
-	aux_frame:Hide()
+	AuxFrame:Hide()
 end
 
 function private.AUCTION_BIDDER_LIST_UPDATE()
@@ -213,7 +207,7 @@ end
 do
 	local function cost_label(cost)
 		local label = LIGHTYELLOW_FONT_COLOR_CODE .. '(Total Cost: ' .. FONT_COLOR_CODE_CLOSE
-		label = label .. (cost and aux.money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE)
+		label = label .. (cost and aux_money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE)
 		label = label .. LIGHTYELLOW_FONT_COLOR_CODE .. ')' .. FONT_COLOR_CODE_CLOSE
 		return label
 	end
@@ -229,10 +223,10 @@ do
 					total_cost = nil
 					break
 				end
-				local item_id, suffix_id = aux.info.parse_link(link)
+				local item_id, suffix_id = aux_info.parse_link(link)
 				local count = select(3, GetCraftReagentInfo(id, i))
-				local _, price, limited = aux.cache.merchant_info(item_id)
-				local value = price and not limited and price or aux.history.value(item_id .. ':' .. suffix_id)
+				local _, price, limited = aux_cache.merchant_info(item_id)
+				local value = price and not limited and price or aux_history.value(item_id .. ':' .. suffix_id)
 				if not value then
 					total_cost = nil
 					break
@@ -256,10 +250,10 @@ do
 					total_cost = nil
 					break
 				end
-				local item_id, suffix_id = aux.info.parse_link(link)
+				local item_id, suffix_id = aux_info.parse_link(link)
 				local count = select(3, GetTradeSkillReagentInfo(id, i))
-				local _, price, limited = aux.cache.merchant_info(item_id)
-				local value = price and not limited and price or aux.history.value(item_id .. ':' .. suffix_id)
+				local _, price, limited = aux_cache.merchant_info(item_id)
+				local value = price and not limited and price or aux_history.value(item_id .. ':' .. suffix_id)
 				if not value then
 					total_cost = nil
 					break

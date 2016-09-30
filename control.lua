@@ -1,4 +1,8 @@
-aux 'core'
+aux_control = module
+
+include (green_t)
+include (aux)
+include (aux_util)
 
 local event_frame = CreateFrame('Frame')
 

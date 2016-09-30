@@ -1,4 +1,10 @@
-aux 'sorting'
+aux_sorting = module
+
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
 
 public.EQ = 0
 public.LT = 1

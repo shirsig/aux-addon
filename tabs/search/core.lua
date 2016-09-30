@@ -1,13 +1,21 @@
-aux 'search_tab' local scan, scan_util = aux.scan, aux.scan_util
+aux_search_tab = module
 
-StaticPopupDialogs['AUX_SEARCH_TABLE_FULL'] = {
+include (green_t)
+include (aux)
+include (aux_util)
+include (aux_control)
+include (aux_util_color)
+
+TAB 'Search'
+
+StaticPopupDialogs.AUX_SEARCH_TABLE_FULL = {
     text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',
     button1 = 'Ok',
     showAlert = 1,
     timeout = 0,
     hideOnEscape = 1,
 }
-StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
+StaticPopupDialogs.AUX_SEARCH_AUTO_BUY = {
     text = 'Are you sure you want to activate automatic buyout?',
     button1 = 'Yes',
     button2 = 'No',
@@ -20,10 +28,10 @@ StaticPopupDialogs['AUX_SEARCH_AUTO_BUY'] = {
 do
     local function action()
         aux_auto_buy_filter = _G[this:GetParent():GetName() .. 'EditBox']:GetText()
-        update_auto_buy_filter()
+        aux_search_tab_results.update_auto_buy_filter()
     end
 
-    StaticPopupDialogs['AUX_SEARCH_AUTO_BUY_FILTER'] = {
+    StaticPopupDialogs.AUX_SEARCH_AUTO_BUY_FILTER = {
         text = 'Enter a filter for automatic buyout.',
         button1 = 'Accept',
         button2 = 'Cancel',
@@ -52,10 +60,10 @@ private.SAVED = 2
 private.FILTER = 3
 
 function LOAD()
-	create_frames()
+	aux_search_tab_frame.create()
 	subtab = SAVED
-	update_auto_buy_filter()
-	new_search('')
+	aux_search_tab_results.update_auto_buy_filter()
+	aux_search_tab_results.new_search('')
 	current_search.placeholder = true
 end
 
