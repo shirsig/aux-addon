@@ -26,9 +26,9 @@ StaticPopupDialogs.AUX_SEARCH_AUTO_BUY = {
     hideOnEscape = 1,
 }
 
-private.RESULTS = 1
-private.SAVED = 2
-private.FILTER = 3
+public.RESULTS = 1
+public.SAVED = 2
+public.FILTER = 3
 
 function LOAD()
 	aux_search_tab_frame.create()

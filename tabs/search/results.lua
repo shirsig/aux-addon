@@ -118,13 +118,13 @@ do
 		update_search(getn(searches))
 	end
 
-	function private.previous_search()
+	function public.previous_search()
 		search_box:ClearFocus()
 		update_search(search_index - 1)
 		subtab = RESULTS
 	end
 
-	function private.next_search()
+	function public.next_search()
 		search_box:ClearFocus()
 		update_search(search_index + 1)
 		subtab = RESULTS

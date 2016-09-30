@@ -177,7 +177,7 @@ function public.create()
 	    btn:SetWidth(30)
 	    btn:SetHeight(25)
 	    btn:SetText('<')
-	    btn:SetScript('OnClick', previous_search)
+	    btn:SetScript('OnClick', aux_search_tab_results.previous_search)
 	    public.previous_button = btn
 	end
 	do
@@ -186,7 +186,7 @@ function public.create()
 	    btn:SetWidth(30)
 	    btn:SetHeight(25)
 	    btn:SetText('>')
-	    btn:SetScript('OnClick', next_search)
+	    btn:SetScript('OnClick', aux_search_tab_results.next_search)
 	    public.next_button = btn
 	end
 	do
@@ -525,7 +525,7 @@ function public.create()
 			if filter_parameter_input:IsVisible() then
 				filter_parameter_input:SetFocus()
 			else
-				add_post_filter()
+				aux_search_tab_filter.add_post_filter()
 			end
 		end
 		public.filter_input = input
@@ -538,7 +538,7 @@ function public.create()
 		    filter_input:SetFocus()
 	    end)
 	    input.char = function() this:complete() end
-	    input.enter = add_post_filter
+	    input.enter = aux_search_tab_filter.add_post_filter
 	    input:Hide()
 	    public.filter_parameter_input = input
 	end
@@ -564,7 +564,7 @@ function public.create()
 			    local new_x_offset = this.x_offset + x - this.x
 			    local new_y_offset = this.y_offset + y - this.y
 
-			    set_filter_display_offset(new_x_offset - this.x_extra, new_y_offset - this.y_extra)
+			    aux_search_tab_filter.set_filter_display_offset(new_x_offset - this.x_extra, new_y_offset - this.y_extra)
 
 			    this.x_extra = max(this.x_extra, new_x_offset)
 			    this.y_extra = min(this.y_extra, new_y_offset)
@@ -580,7 +580,7 @@ function public.create()
 	    scroll_child:SetTextColor('p', color.label.enabled())
 	    scroll_child:SetWidth(1)
 	    scroll_child:SetHeight(1)
-	    scroll_child:SetScript('OnHyperlinkClick', data_link_click)
+	    scroll_child:SetScript('OnHyperlinkClick', aux_search_tab_filter.data_link_click)
 --	    scroll_child:SetHyperlinkFormat("format") TODO
 	    scroll_child.measure = scroll_child:CreateFontString()
 	    public.filter_display = scroll_child

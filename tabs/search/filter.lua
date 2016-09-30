@@ -249,7 +249,7 @@ end
 private.post_filter = t
 private.filter_builder_state = T('selected', 0)
 
-function private.data_link_click()
+function public.data_link_click()
 	local button = arg3
 	local index = tonumber(arg1)
 	if button == 'LeftButton' then
@@ -274,7 +274,7 @@ function private.add_component(component)
 	tinsert(post_filter, filter_builder_state.selected, component)
 end
 
-function private.add_post_filter()
+function public.add_post_filter()
 	for str in present(filter_input:GetText()) do
 		for filter in present(filter_util.filters[str]) do
 			if filter.input_type ~= '' then
@@ -316,7 +316,7 @@ do
 	end
 end
 
-function private.set_filter_display_offset(x_offset, y_offset)
+function public.set_filter_display_offset(x_offset, y_offset)
 	local scroll_frame = filter_display:GetParent()
 	x_offset, y_offset = x_offset or scroll_frame:GetHorizontalScroll(), y_offset or scroll_frame:GetVerticalScroll()
 	local width, height = filter_display_size()
