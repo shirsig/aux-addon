@@ -8,8 +8,9 @@ include (aux_util_color)
 
 function LOAD()
 	include (aux_search_tab)
-	update_auto_buy_filter()
 	new_search('')
+	current_search.dummy = true
+	update_auto_buy_filter()
 end
 
 local info, scan = aux_info, aux_scan
@@ -61,7 +62,9 @@ do
 	local searches = t
 	local search_index = 1
 
-	function private.current_search.get() return searches[search_index] end
+	function public.current_search.get()
+		return searches[search_index]
+	end
 
 	function private.update_search(index)
 		searches[search_index].status_bar:Hide()
@@ -128,7 +131,7 @@ do
 	end
 end
 
-function private.close_settings()
+function public.close_settings()
 	if settings_button.open then
 		settings_button:Click()
 	end
@@ -362,10 +365,10 @@ function public.execute(resume, real_time)
 		return
 	elseif real_time then
 		if getn(queries) > 1 then
-			print 'Error: The real time mode does not support multi-queries'
+			print('Error: The real time mode does not support multi-queries')
 			return
 		elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-			print 'Error: The real time mode does not support page ranges'
+			print('Error: The real time mode does not support page ranges')
 			return
 		end
 	end
@@ -375,10 +378,10 @@ function public.execute(resume, real_time)
 	if resume then
 		current_search.table:SetSelectedRecord()
 	else
-		if filter_string ~= current_search.filter_string or current_search.placeholder then
-			if current_search.placeholder then
+		if filter_string ~= current_search.filter_string or current_search.dummy then
+			if current_search.dummy then
 				current_search.filter_string = filter_string
-				current_search.placeholder = false
+				current_search.dummy = false
 			else
 				new_search(filter_string)
 			end
@@ -425,7 +428,7 @@ do
 	local state = IDLE
 	local found_index
 
-	function private.find_auction(record)
+	function public.find_auction(record)
 		local search = current_search
 
 		if not search.table:ContainsRecord(record) or is_player(record.owner) then

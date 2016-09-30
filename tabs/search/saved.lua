@@ -13,7 +13,7 @@ end
 aux_favorite_searches = t
 aux_recent_searches = t
 
-function private.update_search_listings()
+function public.update_search_listings()
 	local favorite_search_rows = t
 	for i, favorite_search in aux_favorite_searches do
 		local name = strsub(favorite_search.prettified, 1, 250)

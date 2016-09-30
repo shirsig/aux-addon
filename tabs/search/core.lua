@@ -33,17 +33,16 @@ private.FILTER = 3
 function LOAD()
 	aux_search_tab_frame.create()
 	subtab = SAVED
-	current_search.placeholder = true
 end
 
 function OPEN()
     frame:Show()
-    update_search_listings()
+    aux_search_tab_saved.update_search_listings()
 end
 
 function CLOSE()
-    close_settings()
-    current_search.table:SetSelectedRecord()
+	aux_search_tab_results.close_settings()
+    aux_search_tab_results.current_search.table:SetSelectedRecord()
     frame:Hide()
 end
 
@@ -55,6 +54,10 @@ end
 function USE_ITEM(item_info)
 	set_filter(strlower(item_info.name) .. '/exact')
 	execute(nil, false)
+end
+
+function public.execute(resume, real_time)
+	aux_search_tab_results.execute(resume, real_time)
 end
 
 function private.subtab.set(tab)
@@ -92,7 +95,7 @@ function public.add_filter(filter_string)
     search_box:SetText(old_filter_string .. filter_string)
 end
 
-function private.blizzard_page_index(str)
+function public.blizzard_page_index(str)
     if tonumber(str) then
         return max(0, tonumber(str) - 1)
     end

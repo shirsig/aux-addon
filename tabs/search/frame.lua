@@ -52,7 +52,7 @@ function public.create()
 	        fake_icon_part:SetText('_')
 	    end
 
-	    private.settings_button = btn
+	    public.settings_button = btn
 	end
 	do
 	    local panel = CreateFrame('Frame', nil, frame)
@@ -62,14 +62,14 @@ function public.create()
 	    panel:SetPoint('RIGHT', 0, 0)
 	    panel:SetHeight(42)
 	    panel:Hide()
-	    private.settings = panel
+	    public.settings = panel
 	end
 	do
 	    local panel = CreateFrame('Frame', nil, frame)
 	    panel:SetPoint('LEFT', settings_button, 'RIGHT', 0, 0)
 	    panel:SetPoint('RIGHT', 0, 1)
 	    panel:SetHeight(40)
-	    private.controls = panel
+	    public.controls = panel
 	end
 	do
 		local function change()
@@ -96,7 +96,7 @@ function public.create()
 		    label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
 		    label:SetText('Pages')
 		    label:SetTextColor(color.text.enabled())
-		    private.first_page_input = editbox
+		    public.first_page_input = editbox
 	    end
 		do
 		    local editbox = gui.editbox(settings)
@@ -110,7 +110,7 @@ function public.create()
 		    label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
 		    label:SetText('-')
 		    label:SetTextColor(color.text.enabled())
-		    private.last_page_input = editbox
+		    public.last_page_input = editbox
 		end
 	end
 	do
@@ -141,7 +141,7 @@ function public.create()
 	            StaticPopup_Show('AUX_SEARCH_AUTO_BUY')
 	        end
 	    end)
-	    private.auto_buy_button = btn
+	    public.auto_buy_button = btn
 	end
 	do
 	    local btn = gui.checkbutton(settings)
@@ -169,7 +169,7 @@ function public.create()
 	    btn:SetScript('OnLeave', function()
 	        GameTooltip:Hide()
 	    end)
-	    private.auto_buy_filter_button = btn
+	    public.auto_buy_filter_button = btn
 	end
 	do
 	    local btn = gui.button(controls, 25)
@@ -178,7 +178,7 @@ function public.create()
 	    btn:SetHeight(25)
 	    btn:SetText('<')
 	    btn:SetScript('OnClick', previous_search)
-	    private.previous_button = btn
+	    public.previous_button = btn
 	end
 	do
 	    local btn = gui.button(controls, 25)
@@ -187,7 +187,7 @@ function public.create()
 	    btn:SetHeight(25)
 	    btn:SetText('>')
 	    btn:SetScript('OnClick', next_search)
-	    private.next_button = btn
+	    public.next_button = btn
 	end
 	do
 	    local btn = gui.button(controls, gui.font_size.huge)
@@ -198,11 +198,11 @@ function public.create()
 	    btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
 	    btn:SetScript('OnClick', function()
 	        if arg1 == 'RightButton' then
-	            set_filter(current_search.filter_string)
+	            set_filter(aux_search_tab_results.current_search.filter_string)
 	        end
 	        execute()
 	    end)
-	    private.start_button = btn
+	    public.start_button = btn
 	end
 	do
 	    local btn = gui.button(controls, gui.font_size.huge)
@@ -213,7 +213,7 @@ function public.create()
 	    btn:SetScript('OnClick', function()
 	        aux_scan.abort(aux_search_tab_results.search_scan_id)
 	    end)
-	    private.stop_button = btn
+	    public.stop_button = btn
 	end
 	do
 	    local btn = gui.button(controls, gui.font_size.huge)
@@ -224,7 +224,7 @@ function public.create()
 	    btn:SetScript('OnClick', function()
 	        execute(true)
 	    end)
-	    private.resume_button = btn
+	    public.resume_button = btn
 	end
 	do
 	    local editbox = gui.editbox(controls)
@@ -243,7 +243,7 @@ function public.create()
 	        this:HighlightText(0, 0)
 	    end)
 	    editbox.enter = execute
-	    private.search_box = editbox
+	    public.search_box = editbox
 	end
 	do
 	    gui.horizontal_line(frame, -40)
@@ -255,7 +255,7 @@ function public.create()
 	    btn:SetHeight(22)
 	    btn:SetText('Search Results')
 	    btn:SetScript('OnClick', function() subtab = RESULTS end)
-	    private.search_results_button = btn
+	    public.search_results_button = btn
 	end
 	do
 	    local btn = gui.button(frame, gui.font_size.large)
@@ -264,7 +264,7 @@ function public.create()
 	    btn:SetHeight(22)
 	    btn:SetText('Saved Searches')
 	    btn:SetScript('OnClick', function() subtab = SAVED end)
-	    private.saved_searches_button = btn
+	    public.saved_searches_button = btn
 	end
 	do
 	    local btn = gui.button(frame, gui.font_size.large)
@@ -273,36 +273,36 @@ function public.create()
 	    btn:SetHeight(22)
 	    btn:SetText('Filter Builder')
 	    btn:SetScript('OnClick', function() subtab = FILTER end)
-	    private.new_filter_button = btn
+	    public.new_filter_button = btn
 	end
 	do
 	    local frame = CreateFrame('Frame', nil, frame)
 	    frame:SetWidth(265)
 	    frame:SetHeight(25)
 	    frame:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
-	    private.status_bar_frame = frame
+	    public.status_bar_frame = frame
 	end
 	do
 	    local btn = gui.button(frame.results)
 	    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
 	    btn:SetText('Bid')
 	    btn:Disable()
-	    private.bid_button = btn
+	    public.bid_button = btn
 	end
 	do
 	    local btn = gui.button(frame.results)
 	    btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
 	    btn:SetText('Buyout')
 	    btn:Disable()
-	    private.buyout_button = btn
+	    public.buyout_button = btn
 	end
 	do
 	    local btn = gui.button(frame.results)
 	    btn:SetPoint('TOPLEFT', buyout_button, 'TOPRIGHT', 5, 0)
 	    btn:SetText('Clear')
 	    btn:SetScript('OnClick', function()
-	        while tremove(current_search.records) do end
-	        current_search.table:SetDatabase()
+	        while tremove(aux_search_tab_results.current_search.records) do end
+	        aux_search_tab_results.current_search.table:SetDatabase()
 	    end)
 	end
 	do
@@ -319,7 +319,7 @@ function public.create()
 	        else
 		        print('Invalid filter:', error)
 	        end
-	        update_search_listings()
+	        aux_search_tab_saved.update_search_listings()
 	    end)
 	end
 	do
@@ -366,7 +366,7 @@ function public.create()
 	    local label = gui.label(editbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Name')
-	    private.name_input = editbox
+	    public.name_input = editbox
 	end
 	do
 	    local checkbox = gui.checkbox(frame.filter)
@@ -375,7 +375,7 @@ function public.create()
 	    local label = gui.label(checkbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Exact')
-	    private.exact_checkbox = checkbox
+	    public.exact_checkbox = checkbox
 	end
 	do
 	    local editbox = gui.editbox(frame.filter)
@@ -400,7 +400,7 @@ function public.create()
 	    local label = gui.label(editbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Level Range')
-	    private.min_level_input = editbox
+	    public.min_level_input = editbox
 	end
 	do
 	    local editbox = gui.editbox(frame.filter)
@@ -425,7 +425,7 @@ function public.create()
 	    local label = gui.label(editbox, gui.font_size.medium)
 	    label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
 	    label:SetText('-')
-	    private.max_level_input = editbox
+	    public.max_level_input = editbox
 	end
 	do
 	    local checkbox = gui.checkbox(frame.filter)
@@ -434,11 +434,11 @@ function public.create()
 	    local label = gui.label(checkbox, gui.font_size.small)
 	    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
 	    label:SetText('Usable')
-	    private.usable_checkbox = checkbox
+	    public.usable_checkbox = checkbox
 	end
 	do
 	    local dropdown = gui.dropdown(frame.filter)
-	    private.class_dropdown = dropdown
+	    public.class_dropdown = dropdown
 	    dropdown:SetPoint('TOPLEFT', min_level_input, 'BOTTOMLEFT', 0, 5 - FILTER_SPACING)
 	    dropdown:SetWidth(300)
 	    local label = gui.label(dropdown, gui.font_size.small)
@@ -451,7 +451,7 @@ function public.create()
 	end
 	do
 	    local dropdown = gui.dropdown(frame.filter)
-	    private.subclass_dropdown = dropdown
+	    public.subclass_dropdown = dropdown
 	    dropdown:SetPoint('TOPLEFT', class_dropdown, 'BOTTOMLEFT', 0, 10 - FILTER_SPACING)
 	    dropdown:SetWidth(300)
 	    local label = gui.label(dropdown, gui.font_size.small)
@@ -464,7 +464,7 @@ function public.create()
 	end
 	do
 	    local dropdown = gui.dropdown(frame.filter)
-	    private.slot_dropdown = dropdown
+	    public.slot_dropdown = dropdown
 	    dropdown:SetPoint('TOPLEFT', subclass_dropdown, 'BOTTOMLEFT', 0, 10 - FILTER_SPACING)
 	    dropdown:SetWidth(300)
 	    local label = gui.label(dropdown, gui.font_size.small)
@@ -477,7 +477,7 @@ function public.create()
 	end
 	do
 	    local dropdown = gui.dropdown(frame.filter)
-	    private.quality_dropdown = dropdown
+	    public.quality_dropdown = dropdown
 	    dropdown:SetPoint('TOPLEFT', slot_dropdown, 'BOTTOMLEFT', 0, 10 - FILTER_SPACING)
 	    dropdown:SetWidth(300)
 	    local label = gui.label(dropdown, gui.font_size.small)
@@ -501,7 +501,7 @@ function public.create()
 	    local label = gui.label(dropdown, gui.font_size.medium)
 	    label:SetPoint('RIGHT', dropdown, 'LEFT', -15, 0)
 	    label:SetText('Post Filter')
-	    private.filter_dropdown = dropdown
+	    public.filter_dropdown = dropdown
 	end
 	do
 		local input = gui.editbox(frame.filter)
@@ -528,7 +528,7 @@ function public.create()
 				add_post_filter()
 			end
 		end
-		private.filter_input = input
+		public.filter_input = input
 	end
 	do
 	    local input = gui.editbox(frame.filter)
@@ -540,7 +540,7 @@ function public.create()
 	    input.char = function() this:complete() end
 	    input.enter = add_post_filter
 	    input:Hide()
-	    private.filter_parameter_input = input
+	    public.filter_parameter_input = input
 	end
 	do
 	    local scroll_frame = CreateFrame('ScrollFrame', nil, frame.filter)
@@ -583,7 +583,7 @@ function public.create()
 	    scroll_child:SetScript('OnHyperlinkClick', data_link_click)
 --	    scroll_child:SetHyperlinkFormat("format") TODO
 	    scroll_child.measure = scroll_child:CreateFontString()
-	    private.filter_display = scroll_child
+	    public.filter_display = scroll_child
 	end
 
 	public.status_bars = t
@@ -596,7 +596,7 @@ function public.create()
 
 	    local table = auction_listing.CreateAuctionResultsTable(frame.results, auction_listing.search_config)
 	    table:SetHandler('OnCellClick', function(cell, button)
-	        if IsAltKeyDown() and current_search.table:GetSelection().record == cell.row.data.record then
+	        if IsAltKeyDown() and aux_search_tab_results.current_search.table:GetSelection().record == cell.row.data.record then
 	            if button == 'LeftButton' and buyout_button:IsEnabled() then
 	                buyout_button:Click()
 	            elseif button == 'RightButton' and bid_button:IsEnabled() then
@@ -606,7 +606,7 @@ function public.create()
 	    end)
 	    table:SetHandler('OnSelectionChanged', function(rt, datum)
 	        if not datum then return end
-	        find_auction(datum.record)
+	        aux_search_tab_results.find_auction(datum.record)
 	    end)
 	    table:Hide()
 	    tinsert(tables, table)
@@ -624,14 +624,14 @@ function public.create()
 	                local temp = aux_favorite_searches[data.index - 1]
 	                aux_favorite_searches[data.index - 1] = data.search
 	                aux_favorite_searches[data.index] = temp
-	                update_search_listings()
+	                aux_search_tab_saved.update_search_listings()
 	            end
 	        elseif button == 'RightButton' and IsControlKeyDown() then
 	            if st == favorite_searches_listing and data.index < getn(aux_favorite_searches) then
 	                local temp = aux_favorite_searches[data.index + 1]
 	                aux_favorite_searches[data.index + 1] = data.search
 	                aux_favorite_searches[data.index] = temp
-	                update_search_listings()
+	                aux_search_tab_saved.update_search_listings()
 	            end
 	        elseif button == 'LeftButton' then
 	            search_box:SetText(data.search.filter_string)
@@ -642,7 +642,7 @@ function public.create()
 	            elseif st == favorite_searches_listing then
 	                tremove(aux_favorite_searches, data.index)
 	            end
-	            update_search_listings()
+	            aux_search_tab_saved.update_search_listings()
 	        end
 	    end,
 	    OnEnter = function(st, data, self)
@@ -657,7 +657,7 @@ function public.create()
 	    end
 	}
 
-	private.recent_searches_listing = listing.CreateScrollingTable(frame.saved.recent)
+	public.recent_searches_listing = listing.CreateScrollingTable(frame.saved.recent)
 	recent_searches_listing:SetColInfo{{ name='Recent Searches', width=1 }}
 	recent_searches_listing:EnableSorting(false)
 	recent_searches_listing:DisableSelection(true)
@@ -665,7 +665,7 @@ function public.create()
 	recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
 	recent_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
 
-	private.favorite_searches_listing = listing.CreateScrollingTable(frame.saved.favorite)
+	public.favorite_searches_listing = listing.CreateScrollingTable(frame.saved.favorite)
 	favorite_searches_listing:SetColInfo{{ name='Favorite Searches', width=1 }}
 	favorite_searches_listing:EnableSorting(false)
 	favorite_searches_listing:DisableSelection(true)
