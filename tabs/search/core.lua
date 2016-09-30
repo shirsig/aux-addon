@@ -25,35 +25,6 @@ StaticPopupDialogs.AUX_SEARCH_AUTO_BUY = {
     timeout = 0,
     hideOnEscape = 1,
 }
-do
-    local function action()
-        aux_auto_buy_filter = _G[this:GetParent():GetName() .. 'EditBox']:GetText()
-        aux_search_tab_results.update_auto_buy_filter()
-    end
-
-    StaticPopupDialogs.AUX_SEARCH_AUTO_BUY_FILTER = {
-        text = 'Enter a filter for automatic buyout.',
-        button1 = 'Accept',
-        button2 = 'Cancel',
-        hasEditBox = 1,
-        OnShow = function()
-            local edit_box = _G[this:GetName() .. 'EditBox']
-            edit_box:SetMaxLetters(nil)
-            edit_box:SetFocus()
-            edit_box:HighlightText()
-        end,
-        OnAccept = action,
-        EditBoxOnEnterPressed = function()
-            action()
-            this:GetParent():Hide()
-        end,
-        EditBoxOnEscapePressed = function()
-            this:GetParent():Hide()
-        end,
-        timeout = 0,
-        hideOnEscape = 1,
-    }
-end
 
 private.RESULTS = 1
 private.SAVED = 2
@@ -62,8 +33,6 @@ private.FILTER = 3
 function LOAD()
 	aux_search_tab_frame.create()
 	subtab = SAVED
-	aux_search_tab_results.update_auto_buy_filter()
-	aux_search_tab_results.new_search('')
 	current_search.placeholder = true
 end
 

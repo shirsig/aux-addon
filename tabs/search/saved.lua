@@ -6,6 +6,10 @@ include (aux_util)
 include (aux_control)
 include (aux_util_color)
 
+function LOAD()
+	include (aux_search_tab)
+end
+
 aux_favorite_searches = t
 aux_recent_searches = t
 
@@ -19,7 +23,7 @@ function private.update_search_listings()
 			index = i,
 		})
 	end
-	aux_search_tab.favorite_searches_listing:SetData(favorite_search_rows)
+	favorite_searches_listing:SetData(favorite_search_rows)
 
 	local recent_search_rows = t
 	for i, recent_search in aux_recent_searches do
@@ -30,7 +34,7 @@ function private.update_search_listings()
 			index = i,
 		})
 	end
-	aux_search_tab.recent_searches_listing:SetData(recent_search_rows)
+	recent_searches_listing:SetData(recent_search_rows)
 end
 
 function public.new_recent_search(filter_string, prettified)

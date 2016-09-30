@@ -59,7 +59,7 @@ function private.query.get()
 	return state.params.queries[state.query_index]
 end
 
-function private.vararg.wait_for_callback(arg)
+private.wait_for_callback = vararg-function(arg)
 	local send_signal, signal_received = signal()
 	local suspended, ret
 
@@ -71,10 +71,6 @@ function private.vararg.wait_for_callback(arg)
 			'suspend', function() suspended = true end,
 			'resume', send_signal
 		))
---		tinsert(arg, -pairs TODO
---			:suspend (function() suspended = true end)
---			:resume (send_signal)
---		)
 		f(unpack(arg))
 	end
 	if not suspended then send_signal() end

@@ -20,7 +20,7 @@ function public.compare(a, b, desc)
     end
 end
 
-function public.vararg.multi_lt(arg)
+public.multi_lt = vararg-function(arg)
 	for i = 1, getn(arg), 2 do
         if arg[i] and arg[i + 1] and arg[i] ~= arg[i + 1] then
             return arg[i] < arg[i + 1]

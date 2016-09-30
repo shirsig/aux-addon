@@ -45,7 +45,7 @@ do
 	end
 end
 
-function public.vararg.select(arg)
+public.select = vararg-function(arg)
 	for _ = 1, arg[1] do
 		tremove(arg, 1)
 	end
@@ -80,17 +80,17 @@ do
 	end
 end
 
-function public.vararg.papply(arg)
+public.papply = vararg-function(arg)
 	local f, arg1 = tremove(arg, 1), perm-arg
-	return vararg(function(arg)
+	return vararg-function(arg)
 		for i = 1, getn(arg) do
 			tinsert(arg1, arg[i])
 		end
 		return f(unpack(arg1))
-	end)
+	end
 end
 
-function public.vararg.index(arg)
+public.index = vararg-function(arg)
 	local t = tremove(arg, 1)
 	for i = 1, getn(arg) do t = t and t[arg[i]] end return t
 end

@@ -141,7 +141,6 @@ do
 	end
 	public.vararg = setmetatable({}, {
 		__metatable = false,
-		__call = function(_, v) return vararg(v) end,
 		__sub = function(_, v) return vararg(v) end,
 	})
 end

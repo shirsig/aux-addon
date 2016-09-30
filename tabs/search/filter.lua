@@ -6,6 +6,10 @@ include (aux_util)
 include (aux_control)
 include (aux_util_color)
 
+function LOAD()
+	include (aux_search_tab)
+end
+
 local filter_util = aux_filter_util
 
 function private.valid_level(str)

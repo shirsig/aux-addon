@@ -18,21 +18,20 @@ local function proxy_mt(fields, mutators, lt)
 	return { __metatable=false, __index=fields, __newindex=function(_, k, v) return mutators[k](v) end, __lt=lt }
 end
 
-local _module, _access, _modifiers = {}, {}, {}
+local _module, _access, _name = {}, {}, {}
 
 local definition_helper_mt = { __metatable=false }
 function definition_helper_mt:__index(k)
-	tinsert(_modifiers[self], k)
+	_name[self] = _name[self] and error('Invalid modifier "%s".', k) or k
 	return self
 end
-function definition_helper_mt:__newindex(k, v) local module, modifiers = _module[self], _modifiers[self]
-	local name = META[k] and (tremove(modifiers) or error'Definition missing identifier.') or k
+function definition_helper_mt:__newindex(k, v) local module = _module[self]
+	local name = META[k] and (_name[self] or error'Definition missing identifier.') or k
 	if type(name) ~= 'string' or not strfind(name, '^[_%a][_%w]*') then error('Invalid identifier "%s".', name) end
 	local type = META[k] or FIELD
 	module.defined[name .. OPERATION[type]] = module.defined[name .. OPERATION[type]] and error('Duplicate identifier "%s".', name) or true
-	for i = getn(modifiers), 1, -1 do v = module[FIELD][modifiers[i]](v) end
 	module[type][name], module[_access[self]+type][name] = v, v
-	setn(modifiers, 0)
+	_access[self], _name[self] = nil, nil
 end
 
 local function include(self, interface)
@@ -53,7 +52,7 @@ local env = setmetatable({}, {
 	__newindex = function(_, k)
 		if _G[k] then _G.error(nil) end
 		local module, environment, interface, definition_helper, modifiers, accessors, mutators, fields, public_accessors, public_mutators, public_fields
-		environment, interface, definition_helper, modifiers = {}, {}, setmetatable({}, definition_helper_mt), {}
+		environment, interface, definition_helper = {}, {}, setmetatable({}, definition_helper_mt)
 		accessors = { private=function() _access[definition_helper] = PRIVATE; return definition_helper end, public=function() _access[definition_helper] = PUBLIC; return definition_helper end }
 		mutators = setmetatable({ _=nop }, { __index=function(_, k) return function(v) _G[k] = v end end })
 		fields = setmetatable(
@@ -75,7 +74,6 @@ local env = setmetatable({}, {
 			[PUBLIC+FIELD] = public_fields,
 		}
 		_module[definition_helper], _module[interface] = module, module
-		_modifiers[definition_helper] = modifiers
 		_G[k] = interface
 		setfenv(2, environment)
 	end,

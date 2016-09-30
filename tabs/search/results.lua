@@ -6,9 +6,45 @@ include (aux_util)
 include (aux_control)
 include (aux_util_color)
 
+function LOAD()
+	include (aux_search_tab)
+	update_auto_buy_filter()
+	new_search('')
+end
+
 local info, scan = aux_info, aux_scan
 
 aux_auto_buy_filter = ''
+
+do
+	local function action()
+		aux_auto_buy_filter = _G[this:GetParent():GetName() .. 'EditBox']:GetText()
+		update_auto_buy_filter()
+	end
+
+	StaticPopupDialogs.AUX_SEARCH_AUTO_BUY_FILTER = {
+		text = 'Enter a filter for automatic buyout.',
+		button1 = 'Accept',
+		button2 = 'Cancel',
+		hasEditBox = 1,
+		OnShow = function()
+			local edit_box = _G[this:GetName() .. 'EditBox']
+			edit_box:SetMaxLetters(nil)
+			edit_box:SetFocus()
+			edit_box:HighlightText()
+		end,
+		OnAccept = action,
+		EditBoxOnEnterPressed = function()
+			action()
+			this:GetParent():Hide()
+		end,
+		EditBoxOnEscapePressed = function()
+			this:GetParent():Hide()
+		end,
+		timeout = 0,
+		hideOnEscape = 1,
+	}
+end
 
 do
 	local id = 0
@@ -54,7 +90,7 @@ do
 		update_continuation()
 	end
 
-	function public.new_search(filter_string)
+	function private.new_search(filter_string)
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
@@ -62,16 +98,16 @@ do
 		tinsert(searches, search)
 		if getn(searches) > 5 then
 			tremove(searches, 1)
-			tinsert(aux_search_tab.status_bars, tremove(aux_search_tab.status_bars, 1))
-			tinsert(aux_search_tab.tables, tremove(aux_search_tab.tables, 1))
+			tinsert(status_bars, tremove(status_bars, 1))
+			tinsert(tables, tremove(tables, 1))
 			search_index = 4
 		end
 
-		search.status_bar = aux_search_tab.status_bars[getn(searches)]
+		search.status_bar = status_bars[getn(searches)]
 		search.status_bar:update_status(100, 100)
 		search.status_bar:set_text('')
 
-		search.table = aux_search_tab.tables[getn(searches)]
+		search.table = tables[getn(searches)]
 		search.table:SetSort(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		search.table:Reset()
 		search.table:SetDatabase(search.records)
@@ -124,7 +160,7 @@ function update_start_stop()
 	end
 end
 
-function public.update_auto_buy_filter()
+function private.update_auto_buy_filter()
 	if aux_auto_buy_filter ~= '' then
 		local queries, error = aux_filter_util.queries(aux_auto_buy_filter)
 		if queries then
