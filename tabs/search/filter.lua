@@ -12,12 +12,12 @@ end
 
 local filter_util = aux_filter_util
 
-function private.valid_level(str)
+function public.valid_level(str)
 	local level = tonumber(str)
 	return level and bounded(1, 60, level)
 end
 
-private.blizzard_query = setmetatable(t, {
+public.blizzard_query = setmetatable(t, {
 	__index = function(_, key)
 		if key == 'name' then
 			return name_input:GetText()
@@ -30,16 +30,16 @@ private.blizzard_query = setmetatable(t, {
 		elseif key == 'usable' then
 			return usable_checkbox:GetChecked()
 		elseif key == 'class' then
-			local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
+			local class_index = UIDropDownMenu_GetSelectedValue(aux_search_tab.class_dropdown)
 			return (class_index or 0) > 0 and class_index or nil
 		elseif key == 'subclass' then
-			local subclass_index = UIDropDownMenu_GetSelectedValue(subclass_dropdown)
+			local subclass_index = UIDropDownMenu_GetSelectedValue(aux_search_tab.subclass_dropdown)
 			return (subclass_index or 0) > 0 and subclass_index or nil
 		elseif key == 'slot' then
-			local slot_index = UIDropDownMenu_GetSelectedValue(slot_dropdown)
+			local slot_index = UIDropDownMenu_GetSelectedValue(aux_search_tab.slot_dropdown)
 			return (slot_index or 0) > 0 and slot_index or nil
 		elseif key == 'quality' then
-			local quality_code = UIDropDownMenu_GetSelectedValue(quality_dropdown)
+			local quality_code = UIDropDownMenu_GetSelectedValue(aux_search_tab.quality_dropdown)
 			return (quality_code or -1) >= 0 and quality_code or nil
 		end
 	end,
@@ -70,7 +70,7 @@ private.blizzard_query = setmetatable(t, {
 	end,
 })
 
-function private.update_form()
+function public.update_form()
 	if blizzard_query.class and GetAuctionItemSubClasses(blizzard_query.class) then
 		subclass_dropdown.button:Enable()
 	else
@@ -186,14 +186,14 @@ function private.clear_form()
 	update_filter_display()
 end
 
-function private.import_filter_string()
+function public.import_filter_string()
 	local filter, error = filter_util.parse_filter_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
 	if filter or print(error) then
 		set_form(filter)
 	end
 end
 
-function private.export_filter_string()
+function public.export_filter_string()
 	search_box:SetText(get_filter_builder_query())
 	filter_parameter_input:ClearFocus()
 end
@@ -296,7 +296,7 @@ end
 
 do
 	local text = ''
-	function private.update_filter_display()
+	function public.update_filter_display()
 		text = formatted_post_filter(post_filter)
 		filter_display:SetWidth(filter_display_size())
 		set_filter_display_offset()
@@ -328,7 +328,7 @@ function private.set_filter_display_offset(x_offset, y_offset)
 	scroll_frame:SetVerticalScroll(bounded(y_lower_bound, y_upper_bound, y_offset))
 end
 
-function private.initialize_filter_dropdown()
+function public.initialize_filter_dropdown()
 	for filter in temp-S('and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard') do
 		UIDropDownMenu_AddButton(T(
 			'text', filter,
@@ -348,7 +348,7 @@ function private.initialize_filter_dropdown()
 	end
 end
 
-function private.initialize_class_dropdown()
+function public.initialize_class_dropdown()
 	local function on_click()
 		if this.value ~= blizzard_query.class then
 			UIDropDownMenu_SetSelectedValue(class_dropdown, this.value)
@@ -365,7 +365,7 @@ function private.initialize_class_dropdown()
 	end
 end
 
-function private.initialize_subclass_dropdown()
+function public.initialize_subclass_dropdown()
 	local function on_click()
 		if this.value ~= blizzard_query.subclass then
 			UIDropDownMenu_SetSelectedValue(subclass_dropdown, this.value)
@@ -374,7 +374,7 @@ function private.initialize_subclass_dropdown()
 			update_form()
 		end
 	end
-	local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
+	local class_index = UIDropDownMenu_GetSelectedValue(aux_search_tab.class_dropdown)
 	if class_index and GetAuctionItemSubClasses(class_index) then
 		UIDropDownMenu_AddButton(T('text', ALL, 'value', 0, 'func', on_click))
 		for i, subclass in temp-A(GetAuctionItemSubClasses(class_index)) do
@@ -383,13 +383,13 @@ function private.initialize_subclass_dropdown()
 	end
 end
 
-function private.initialize_slot_dropdown()
+function public.initialize_slot_dropdown()
 	local function on_click()
 		UIDropDownMenu_SetSelectedValue(slot_dropdown, this.value)
 		update_form()
 	end
-	local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
-	local subclass_index = UIDropDownMenu_GetSelectedValue(subclass_dropdown)
+	local class_index = UIDropDownMenu_GetSelectedValue(aux_search_tab.class_dropdown)
+	local subclass_index = UIDropDownMenu_GetSelectedValue(aux_search_tab.subclass_dropdown)
 	if subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
 		UIDropDownMenu_AddButton(T('text', ALL, 'value', '', 'func', on_click))
 		for i, slot in temp-A(GetAuctionInvTypes(class_index, subclass_index)) do
@@ -398,7 +398,7 @@ function private.initialize_slot_dropdown()
 	end
 end
 
-function private.initialize_quality_dropdown()
+function public.initialize_quality_dropdown()
 	local function on_click()
 		UIDropDownMenu_SetSelectedValue(quality_dropdown, this.value)
 		update_form()

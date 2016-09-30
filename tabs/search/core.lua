@@ -60,7 +60,7 @@ function public.execute(resume, real_time)
 	aux_search_tab_results.execute(resume, real_time)
 end
 
-function private.subtab.set(tab)
+function public.subtab.set(tab)
     search_results_button:UnlockHighlight()
     saved_searches_button:UnlockHighlight()
     new_filter_button:UnlockHighlight()
