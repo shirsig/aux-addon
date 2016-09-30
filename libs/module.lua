@@ -2,7 +2,7 @@ if getmetatable(getfenv(0)) == false then return end
 local tinsert, tremove, getn, setn, strfind, type, setmetatable, setfenv, _G = tinsert, tremove, getn, table.setn, strfind, type, setmetatable, setfenv, getfenv(0)
 
 local PRIVATE, PUBLIC, FIELD, ACCESSOR, MUTATOR = 0, 1, 2, 4, 6
-local TYPES = { FIELD, ACCESSOR, MUTATOR }
+local MODES = { FIELD, ACCESSOR, MUTATOR }
 local READ, WRITE = '', '='
 local OPERATION = { [FIELD]=READ, [ACCESSOR]=READ, [MUTATOR]=WRITE }
 local META = { get=ACCESSOR, set=MUTATOR }
@@ -25,21 +25,22 @@ function definition_helper_mt:__index(k)
 	_name[self] = _name[self] and error('Invalid modifier "%s".', k) or k
 	return self
 end
-function definition_helper_mt:__newindex(k, v) local module = _module[self]
-	local name = META[k] and (_name[self] or error'Definition missing identifier.') or k
+function definition_helper_mt:__newindex(k, v)
+	local module, name, mode
+	module, name = _module[self], _name[self]
+	if name then mode = META[k] or error('Invalid modifier "%s"', k) else name, mode = k, FIELD end
 	if type(name) ~= 'string' or not strfind(name, '^[_%a][_%w]*') then error('Invalid identifier "%s".', name) end
-	local type = META[k] or FIELD
-	module.defined[name .. OPERATION[type]] = module.defined[name .. OPERATION[type]] and error('Duplicate identifier "%s".', name) or true
-	module[type][name], module[_access[self]+type][name] = v, v
+	module.defined[name .. OPERATION[mode]] = module.defined[name .. OPERATION[mode]] and error('Duplicate identifier "%s".', name) or true
+	module[mode][name], module[_access[self]+mode][name] = v, v
 	_access[self], _name[self] = nil, nil
 end
 
 local function include(self, interface)
 	local module = (interface < INTERFACE or error'Import error.') and _module[interface]
-	for _, type in TYPES do
-		for k, v in module[PUBLIC+type] do
-			if not self.defined[k .. OPERATION[type]] then
-				self.defined[k .. OPERATION[type]], self[type][k] = true, v
+	for _, mode in MODES do
+		for k, v in module[PUBLIC+mode] do
+			if not self.defined[k .. OPERATION[mode]] then
+				self.defined[k .. OPERATION[mode]], self[mode][k] = true, v
 			end
 		end
 	end
