@@ -1,5 +1,5 @@
 if getmetatable(getfenv(0)) == false then return end
-local tinsert, tremove, getn, setn, strfind, type, setmetatable, setfenv, _G = tinsert, tremove, getn, table.setn, strfind, type, setmetatable, setfenv, getfenv(0)
+local strfind, type, setmetatable, setfenv, _G = strfind, type, setmetatable, setfenv, getfenv(0)
 
 local PRIVATE, PUBLIC, FIELD, ACCESSOR, MUTATOR = 0, 1, 2, 4, 6
 local MODES = { FIELD, ACCESSOR, MUTATOR }
