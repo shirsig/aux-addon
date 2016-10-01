@@ -36,7 +36,7 @@ function definition_helper_mt:__newindex(k, v)
 end
 
 local function include(self, interface)
-	local module = (interface < INTERFACE or error'Import error.') and _module[interface]
+	local module = (interface < INTERFACE or error'Include error.') and _module[interface]
 	for _, mode in MODES do
 		for k, v in module[PUBLIC+mode] do
 			if not self.defined[k .. OPERATION[mode]] then
