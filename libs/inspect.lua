@@ -1,18 +1,31 @@
-local function print(msg)
+local format_key, format_value, print, print_pair, print_table
+
+function print(msg)
 	DEFAULT_CHAT_FRAME:AddMessage(msg, 1, 0, 0)
 end
 
-local function format_key(k)
+function format_key(k)
 	return type(k) == 'string' and k or '[' .. tostring(k) .. ']'
 end
 
-local function format_value(v)
+function format_value(v)
 	return type(v) == 'string' and '"' .. v .. '"' or tostring(v)
+end
+
+function print_table(t, depth)
+	for i = 1, getn(t) do
+		print_pair(i, t[i], depth)
+	end
+	for k, v in t do
+		if type(k) ~= 'number' or k < 1 or k > getn(t) then
+			print_pair(k, v, depth)
+		end
+	end
 end
 
 local max_depth
 
-local function print_pair(k, v, depth)
+function print_pair(k, v, depth)
 	local padding = strrep(' ', depth * 4)
 	if depth == max_depth then
 		print(padding .. '...')
@@ -23,17 +36,6 @@ local function print_pair(k, v, depth)
 		print(padding .. '{')
 		print_table(v, depth + 1)
 		print(padding .. '}')
-	end
-end
-
-local function print_table(t, depth)
-	for i = 1, getn(t) do
-		print_pair(i, t[i], depth)
-	end
-	for k, v in t do
-		if type(k) ~= 'number' or k < 1 or k > getn(t) then
-			print_pair(k, v, depth)
-		end
 	end
 end
 
