@@ -461,10 +461,10 @@ function private.prettified_filter_string(filter)
 			    prettified.append(color.blizzard(component[3]))
 		    end
         elseif component[1] == 'operator' then
-			prettified.append(color.aux(component[2] .. (component[2] ~= 'not' and tonumber(component[3]) or '')))
+			prettified.append(color.orange(component[2] .. (component[2] ~= 'not' and tonumber(component[3]) or '')))
         elseif component[1] == 'filter' then
             if component[2] ~= 'tooltip' then
-                prettified.append(color.aux(component[2]))
+                prettified.append(color.orange(component[2]))
             end
             for parameter in present(component[3]) do
 	            if component[2] == 'item' then
