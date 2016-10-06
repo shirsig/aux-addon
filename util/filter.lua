@@ -453,12 +453,12 @@ function private.prettified_filter_string(filter)
 	    if component[1] == 'blizzard' then
 		    if component[2] == 'name' then
 			    if filter.blizzard.exact then
-			        prettified.append(info.display_name(aux_cache.item_id(component[4])) or color.blizzard('[' .. component[4] .. ']'))
+			        prettified.append(info.display_name(aux_cache.item_id(component[4])) or color.orange('[' .. component[4] .. ']'))
 			    elseif component[4] ~= '' then
-				    prettified.append(color.blizzard(component[4]))
+				    prettified.append(color.orange(component[4]))
 			    end
 		    elseif component[2] ~= 'exact' then
-			    prettified.append(color.blizzard(component[3]))
+			    prettified.append(color.orange(component[3]))
 		    end
         elseif component[1] == 'operator' then
 			prettified.append(color.orange(component[2] .. (component[2] ~= 'not' and tonumber(component[3]) or '')))
@@ -480,7 +480,7 @@ function private.prettified_filter_string(filter)
         end
     end
     if prettified.get() == '' then
-        return color.blizzard'<>'
+        return color.orange'<>'
     else
         return prettified.get()
     end
