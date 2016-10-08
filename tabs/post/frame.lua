@@ -1,6 +1,6 @@
-aux_post_tab_frame = module
+module'aux.post_tab.frame'
 
-local gui, listing, item_listing, money, search_tab = aux_gui, aux_listing, aux_item_listing, aux_money, aux_search_tab
+local gui, listing, item_listing, money, search_tab = M'aux.gui', M'aux.listing', M'aux.item_listing', M'aux.money', M'aux.search_tab'
 
 function public.create()
 	setfenv(1, getfenv(2))

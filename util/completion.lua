@@ -1,12 +1,12 @@
-aux_completion = module
+module'aux.completion'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-local filter_util = aux_filter_util
+local filter_util = M'aux.filter_util'
 
 function public:complete_filter()
 	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution

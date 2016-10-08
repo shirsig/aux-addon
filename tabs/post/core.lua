@@ -1,14 +1,14 @@
-aux_post_tab = module
+module'aux.post_tab'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-TAB 'Post'
+TAB'Post'
 
-local scan, scan_util, history, info, persistence, item_listing, al, sorting = aux_scan, aux_scan_util, aux_history, aux_info, aux_persistence, aux_item_listing, aux_auction_listing, aux_sorting
+local scan, scan_util, history, info, persistence, item_listing, al, sorting = M'aux.scan', M'aux.scan_util', M'aux.history', M'aux.info', M'aux.persistence', M'aux.item_listing', M'aux.auction_listing', M'aux.sorting'
 
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440

@@ -1,5 +1,5 @@
 if module then return end
-local strfind, gfind, type, setmetatable, setfenv, _G = strfind, string.gfind, type, setmetatable, setfenv, getfenv(0)
+local strfind, type, setmetatable, setfenv, _G = strfind, type, setmetatable, setfenv, getfenv(0)
 
 local PRIVATE, PUBLIC, FIELD, ACCESSOR, MUTATOR = 0, 1, 2, 4, 6
 local MODES = { FIELD, ACCESSOR, MUTATOR }
@@ -32,25 +32,18 @@ function definition_helper_mt:__newindex(k, v)
 	_access[self], _name[self] = nil, nil
 end
 
-local function import(self, path)
-	local module_name, key
-	for part in gfind(path, '[^.]*') do
-		if module_name then key = part else module_name = part end
-	end
-	local _, _, module_name, key = strfind(path, '([^.]*)%.?(.*)')
-	local module = _module[module_name] or error('No module "%s".', module_name)
-	if not key then --define module
-
-		return
-	end
+local function include(self, name)
+	local module = name and _module[name] or error('No module "%s".', name)
 	for _, mode in MODES do
 		for k, v in module[PUBLIC + mode] do
-			if (key == '*' or key == k) and (not self.defined[k .. OPERATION[mode]] or error('Import conflict for "%s".', k)) then
+			if not self.defined[k .. OPERATION[mode]] or error('Import conflict for "%s".', k) then
 				self.defined[k .. OPERATION[mode]], self[mode][k] = true, v
 			end
 		end
 	end
 end
+
+local function fetch_interface(name) return _interface[name] end
 
 local nop_default_mt = { __index=function() return nop end }
 
@@ -61,7 +54,7 @@ function module(name)
 	accessors = { private=function() _access[definition_helper] = PRIVATE; return definition_helper end, public=function() _access[definition_helper] = PUBLIC; return definition_helper end }
 	mutators = setmetatable({ _=nop }, { __index=function(_, k) return function(v) _G[k] = v end end })
 	fields = setmetatable(
-		{ _M=environment, _G=_G, import=function(interface) import(module, interface) end, error=error, nop=nop, id=id },
+		{ _M=environment, _G=_G, M=fetch_interface, include=function(interface) include(module, interface) end, error=error, nop=nop, id=id },
 		{ __index=function(_, k) local accessor = accessors[k]; if accessor then return accessor() else return _G[k] end end }
 	)
 	public_accessors = setmetatable({}, nop_default_mt)
@@ -70,7 +63,7 @@ function module(name)
 	setmetatable(environment, proxy_mt(fields, mutators))
 	setmetatable(interface, proxy_mt(public_fields, public_mutators))
 	module = {
-		defined = { _M=true, _G=true, import=true, error=true, nop=true, id=true, public=true, private=true, ['_=']=true },
+		defined = { _M=true, _G=true, M=true, include=true, error=true, nop=true, id=true, public=true, private=true, ['_=']=true },
 		[ACCESSOR] = accessors,
 		[MUTATOR] = mutators,
 		[FIELD] = fields,

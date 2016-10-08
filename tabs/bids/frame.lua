@@ -1,6 +1,6 @@
-aux_bids_tab_frame = module
+module'aux.bids_tab.frame'
 
-local gui, auction_listing = aux_gui, aux_auction_listing
+local gui, auction_listing = M'aux.gui', M'aux.auction_listing'
 
 function public.create()
 	setfenv(1, getfenv(2))
@@ -42,21 +42,21 @@ function public.create()
 	do
 	    local btn = gui.button(frame)
 	    btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
-	    btn:SetText('Bid')
+	    btn:SetText'Bid'
 	    btn:Disable()
 	    private.bid_button = btn
 	end
 	do
 	    local btn = gui.button(frame)
 	    btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
-	    btn:SetText('Buyout')
+	    btn:SetText'Buyout'
 	    btn:Disable()
 	    private.buyout_button = btn
 	end
 	do
 	    local btn = gui.button(frame)
 	    btn:SetPoint('TOPLEFT', buyout_button, 'TOPRIGHT', 5, 0)
-	    btn:SetText('Refresh')
+	    btn:SetText'Refresh'
 	    btn:SetScript('OnClick', function()
 	        scan_bids()
 	    end)

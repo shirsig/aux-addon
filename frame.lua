@@ -1,12 +1,6 @@
-module 'aux.frame'
+module'aux.frame'
 
-use 'aux.frame'
-
-use 'aux_init'
-
-
-
-local gui = aux_gui
+local gui = M'aux.gui'
 
 function public.create()
 	setfenv(1, getfenv(2))
@@ -20,11 +14,11 @@ function public.create()
 		frame:SetMovable(true)
 		frame:EnableMouse(true)
 		frame:SetClampedToScreen(true)
-		frame:RegisterForDrag('LeftButton')
+		frame:RegisterForDrag'LeftButton'
 		frame:SetScript('OnDragStart', function() this:StartMoving() end)
 		frame:SetScript('OnDragStop', function() this:StopMovingOrSizing() end)
-		frame:SetScript('OnShow', function() PlaySound('AuctionWindowOpen') end)
-		frame:SetScript('OnHide', function() PlaySound('AuctionWindowClose'); CloseAuctionHouse() end)
+		frame:SetScript('OnShow', function() PlaySound'AuctionWindowOpen' end)
+		frame:SetScript('OnHide', function() PlaySound'AuctionWindowClose'; CloseAuctionHouse() end)
 		frame.content = CreateFrame('Frame', nil, frame)
 		frame.content:SetPoint('TOPLEFT', 4, -80)
 		frame.content:SetPoint('BOTTOMRIGHT', -4, 35)
@@ -40,7 +34,7 @@ function public.create()
 		local btn = gui.button(AuxFrame)
 		btn:SetPoint('BOTTOMRIGHT', -5, 5)
 		gui.set_size(btn, 60, 24)
-		btn:SetText('Close')
+		btn:SetText'Close'
 		btn:SetScript('OnClick', papply(AuxFrame.Hide, AuxFrame))
 		public.close_button = btn
 	end

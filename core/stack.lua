@@ -1,12 +1,12 @@
-aux_stack = module
+module'aux.stack'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-local info = aux_info
+local info = M'aux.info'
 
 local state
 

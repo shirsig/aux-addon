@@ -1,6 +1,6 @@
-module 'aux'
+module'aux'
 
-use 'green_t'
+include'green_t'
 
 --aux_account_settings = {} -- TODO clean up the mess of savedvariables
 --aux_character_settings = {}
@@ -21,7 +21,7 @@ function public.bids_loaded.get() return bids_loaded end
 local current_owner_page
 function public.current_owner_page.get() return current_owner_page end
 
-local event_frame = CreateFrame('Frame')
+local event_frame = CreateFrame'Frame'
 
 for event in temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
@@ -150,12 +150,12 @@ do
 end
 
 function public.is_player(name, current)
-	local realm = GetCVar('realmName')
-	return not current and index(aux_characters, realm, name) or UnitName('player') == name
+	local realm = GetCVar'realmName'
+	return not current and index(aux_characters, realm, name) or UnitName'player' == name
 end
 
 function public.neutral_faction()
-	return not UnitFactionGroup('npc')
+	return not UnitFactionGroup'npc'
 end
 
 function public.min_bid_increment(current_bid)
@@ -195,7 +195,7 @@ do
 end
 
 function ADDON_LOADED.Blizzard_AuctionUI()
-	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
+	AuctionFrame:UnregisterEvent'AUCTION_HOUSE_SHOW'
 	AuctionFrame:SetScript('OnHide', nil)
 	hook('ShowUIPanel', function(...) auto[arg] = true
 		if arg[1] == AuctionFrame then return AuctionFrame:Show() end

@@ -1,14 +1,12 @@
-module 'aux_cache'
+module'aux.cache'
 
-import 'aux.*'
-import 'aux_util.*'
-import 'aux_control.*'
-import 'aux_util_color.*'
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-import 'aux_info'
-import 'aux_persistence'
-
-local info, persistence = aux_info, aux_persistence
+local info, persistence = M'aux.info', M'aux.persistence'
 
 local MIN_ITEM_ID = 1
 local MAX_ITEM_ID = 30000
@@ -36,9 +34,9 @@ function LOAD()
 	CreateFrame('Frame', nil, MerchantFrame):SetScript('OnUpdate', merchant_on_update)
 
 	event_listener('NEW_AUCTION_UPDATE', function()
-		for info in present(info.auction_sell_item()) do
-			for item_id in present(item_id(info.name)) do
-				aux_merchant_sell[_M.item_id(info.name)] = info.vendor_price / (aux_info.max_item_charges(item_id) or info.count)
+		for data in present(info.auction_sell_item()) do
+			for item_id in present(item_id(data.name)) do
+				aux_merchant_sell[_M.item_id(data.name)] = data.vendor_price / (info.max_item_charges(item_id) or data.count)
 			end
 		end
 	end)

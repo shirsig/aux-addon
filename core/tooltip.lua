@@ -1,12 +1,12 @@
-aux_tooltip = module
+module'aux.tooltip'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-local info, disenchant, cache, money, history = aux_info, aux_disenchant, aux_cache, aux_money, aux_history
+local info, disenchant, cache, money, history = M'aux.info', M'aux.disenchant', M'aux.cache', M'aux.money', M'aux.history'
 
 aux_tooltip_value = true
 

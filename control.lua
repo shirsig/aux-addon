@@ -1,10 +1,10 @@
-module 'aux_control'
+module'aux.control'
 
-use 'green_t'
-use 'aux'
-use 'aux_util'
+include'green_t'
+include'aux'
+include'aux.util'
 
-local event_frame = CreateFrame('Frame')
+local event_frame = CreateFrame'Frame'
 
 local listeners, threads = t, t
 

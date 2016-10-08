@@ -1,14 +1,14 @@
-aux_auctions_tab = module
+module'aux.auctions_tab'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-TAB 'Auctions'
+TAB'Auctions'
 
-local scan = aux_scan
+local scan = M'aux.scan'
 
 private.auction_records = t
 
@@ -33,7 +33,7 @@ end
 function public.scan_auctions()
 
     status_bar:update_status(0,0)
-    status_bar:set_text('Scanning auctions...')
+    status_bar:set_text'Scanning auctions...'
 
     wipe(auction_records)
     update_listing()
@@ -49,12 +49,12 @@ function public.scan_auctions()
         end,
         on_complete = function()
             status_bar:update_status(100, 100)
-            status_bar:set_text('Scan complete')
+            status_bar:set_text'Scan complete'
             update_listing()
         end,
         on_abort = function()
             status_bar:update_status(100, 100)
-            status_bar:set_text('Scan aborted')
+            status_bar:set_text'Scan aborted'
         end,
     }
 end

@@ -1,12 +1,12 @@
-aux_filter_util = module
+module'aux.filter_util'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-local info = aux_info
+local info, history, disenchant, cache, money, filter_util = M'aux.info', M'aux.history', M'aux.disenchant', M'aux.cache', M'aux.money', M'aux.filter_util'
 
 function private.default_filter(str)
     return {
@@ -124,7 +124,7 @@ public.filters = {
         input_type = 'number',
         validator = function(pct)
             return function(auction_record)
-                return aux_history.value(auction_record.item_key) and auction_record.unit_bid_price / aux_history.value(auction_record.item_key) * 100 <= pct
+                return history.value(auction_record.item_key) and auction_record.unit_bid_price / history.value(auction_record.item_key) * 100 <= pct
             end
         end
     },
@@ -134,8 +134,8 @@ public.filters = {
         validator = function(pct)
             return function(auction_record)
                 return auction_record.unit_buyout_price > 0
-                        and aux_history.value(auction_record.item_key)
-                        and auction_record.unit_buyout_price / aux_history.value(auction_record.item_key) * 100 <= pct
+                        and history.value(auction_record.item_key)
+                        and auction_record.unit_buyout_price / history.value(auction_record.item_key) * 100 <= pct
             end
         end
     },
@@ -144,7 +144,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                return aux_history.value(auction_record.item_key) and aux_history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
+                return history.value(auction_record.item_key) and history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
             end
         end
     },
@@ -153,7 +153,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                return auction_record.buyout_price > 0 and aux_history.value(auction_record.item_key) and aux_history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
+                return auction_record.buyout_price > 0 and history.value(auction_record.item_key) and history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
             end
         end
     },
@@ -162,7 +162,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local disenchant_value = aux_disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
+                local disenchant_value = disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
                 return disenchant_value and disenchant_value - auction_record.bid_price >= amount
             end
         end
@@ -172,7 +172,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local disenchant_value = aux_disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
+                local disenchant_value = disenchant.value(auction_record.slot, auction_record.quality, auction_record.level)
                 return auction_record.buyout_price > 0 and disenchant_value and disenchant_value - auction_record.buyout_price >= amount
             end
         end
@@ -182,7 +182,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local vendor_price = aux_cache.merchant_info(auction_record.item_id)
+                local vendor_price = cache.merchant_info(auction_record.item_id)
                 return vendor_price and vendor_price * auction_record.aux_quantity - auction_record.bid_price >= amount
             end
         end
@@ -192,7 +192,7 @@ public.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                local vendor_price = aux_cache.merchant_info(auction_record.item_id)
+                local vendor_price = cache.merchant_info(auction_record.item_id)
                 return auction_record.buyout_price > 0 and vendor_price and vendor_price * auction_record.aux_quantity - auction_record.buyout_price >= amount
             end
         end
@@ -269,7 +269,7 @@ end
 
 function private.parse_parameter(input_type, str)
     if input_type == 'money' then
-        local money = aux_money.from_string(str)
+        local money = money.from_string(str)
         return money and money > 0 and money or nil
     elseif input_type == 'number' then
         local number = tonumber(str)
@@ -435,8 +435,8 @@ function public.filter_string(components)
         elseif component[1] == 'filter' then
             query_builder.append(component[2])
             for parameter in present(component[3]) do
-	            if aux_filter_util.filters[component[2]].input_type == 'money' then
-		            parameter = aux_money.to_string(aux_money.from_string(parameter), nil, true, nil, nil, true)
+	            if filter_util.filters[component[2]].input_type == 'money' then
+		            parameter = money.to_string(money.from_string(parameter), nil, true, nil, nil, true)
 	            end
                 query_builder.append(parameter)
             end
@@ -453,7 +453,7 @@ function private.prettified_filter_string(filter)
 	    if component[1] == 'blizzard' then
 		    if component[2] == 'name' then
 			    if filter.blizzard.exact then
-			        prettified.append(info.display_name(aux_cache.item_id(component[4])) or color.orange('[' .. component[4] .. ']'))
+			        prettified.append(info.display_name(cache.item_id(component[4])) or color.orange('[' .. component[4] .. ']'))
 			    elseif component[4] ~= '' then
 				    prettified.append(color.orange(component[4]))
 			    end
@@ -468,10 +468,10 @@ function private.prettified_filter_string(filter)
             end
             for parameter in present(component[3]) do
 	            if component[2] == 'item' then
-		            prettified.append(info.display_name(aux_cache.item_id(parameter)) or color.label.enabled('[' .. parameter .. ']'))
+		            prettified.append(info.display_name(cache.item_id(parameter)) or color.label.enabled('[' .. parameter .. ']'))
 	            else
 		            if filters[component[2]].input_type == 'money' then
-			            prettified.append(aux_money.to_string(aux_money.from_string(parameter), nil, true, nil, inline_color.label.enabled))
+			            prettified.append(money.to_string(money.from_string(parameter), nil, true, nil, inline_color.label.enabled))
 		            else
 			            prettified.append(color.label.enabled(parameter))
 		            end
@@ -498,7 +498,7 @@ function private.blizzard_query(filter)
     local filters = filter.blizzard
     local query = T('name', filters.name and filters.name[2])
     local item_info, class_index, subclass_index, slot_index
-    local item_id = filters.name and aux_cache.item_id(filters.name[2])
+    local item_id = filters.name and cache.item_id(filters.name[2])
     item_info = item_id and info.item(item_id)
     if filters.exact and item_info then
 	    item_info = info.item(item_id)

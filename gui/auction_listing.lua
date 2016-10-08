@@ -1,12 +1,12 @@
-aux_auction_listing = module
+module'aux.auction_listing'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-local gui, sorting, money, info = aux_gui, aux_sorting, aux_money, aux_info
+local gui, sorting, money, info = M'aux.gui', M'aux.sorting', M'aux.money', M'aux.info'
 
 aux_price_per_unit = false
 

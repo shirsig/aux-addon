@@ -1,14 +1,14 @@
-aux_bids_tab = module
+module'aux.bids_tab'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-TAB 'Bids'
+TAB'Bids'
 
-local scan = aux_scan
+local scan = M'aux.scan'
 
 private.auction_records = t
 

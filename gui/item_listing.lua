@@ -1,12 +1,12 @@
-aux_item_listing = module
+module'aux.item_listing'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-local gui, info = aux_gui, aux_info
+local gui, info = M'aux.gui', M'aux.info'
 
 local ROW_HEIGHT = 39
 

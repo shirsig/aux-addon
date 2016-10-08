@@ -1,10 +1,10 @@
-aux_scan = module
+module'aux.scan'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
 local info, history = aux_info, aux_history
 

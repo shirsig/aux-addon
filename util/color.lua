@@ -1,9 +1,9 @@
-aux_util_color = module
+module'aux.util.color'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
 
 local COLORS = {
 	text = {enabled = {255, 254, 250, 1}, disabled = {147, 151, 139, 1}},

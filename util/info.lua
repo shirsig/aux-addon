@@ -1,10 +1,12 @@
-aux_info = module
+module'aux.info'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
+
+local cache = M'aux.cache'
 
 CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
 AuxTooltip:SetScript('OnTooltipAddMoney', function()
@@ -371,7 +373,7 @@ function public.item(item_id, suffix_id)
         'slot', slot,
         'max_stack', max_stack,
         'texture', texture
-    ) or aux_cache.item_info(item_id)
+    ) or cache.item_info(item_id)
 end
 
 function public.item_class_index(item_class)

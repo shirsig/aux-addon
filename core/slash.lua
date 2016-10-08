@@ -1,12 +1,12 @@
-aux_slash = module
+module'aux.slash'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include'green_t'
+include'aux'
+include'aux.util'
+include'aux.control'
+include'aux.util.color'
 
-local persistence = aux_persistence
+local persistence = M'aux.persistence'
 
 aux_ignore_owner = true
 
