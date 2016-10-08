@@ -1,10 +1,12 @@
-aux_cache = module
+module 'aux_cache'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+import 'aux.*'
+import 'aux_util.*'
+import 'aux_control.*'
+import 'aux_util_color.*'
+
+import 'aux_info'
+import 'aux_persistence'
 
 local info, persistence = aux_info, aux_persistence
 

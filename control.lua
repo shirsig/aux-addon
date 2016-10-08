@@ -1,8 +1,8 @@
-aux_control = module
+module 'aux_control'
 
-include (green_t)
-include (aux)
-include (aux_util)
+use 'green_t'
+use 'aux'
+use 'aux_util'
 
 local event_frame = CreateFrame('Frame')
 

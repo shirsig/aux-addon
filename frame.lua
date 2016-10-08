@@ -1,4 +1,10 @@
-aux_frame = module
+module 'aux.frame'
+
+use 'aux.frame'
+
+use 'aux_init'
+
+
 
 local gui = aux_gui
 
