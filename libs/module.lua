@@ -1,5 +1,5 @@
 if module then return end
-local strfind, type, setmetatable, setfenv, _G = strfind, type, setmetatable, setfenv, getfenv(0)
+local strfind, gfind, type, setmetatable, setfenv, _G = strfind, string.gfind, type, setmetatable, setfenv, getfenv(0)
 
 local PRIVATE, PUBLIC, FIELD, ACCESSOR, MUTATOR = 0, 1, 2, 4, 6
 local MODES = { FIELD, ACCESSOR, MUTATOR }
@@ -33,11 +33,19 @@ function definition_helper_mt:__newindex(k, v)
 end
 
 local function import(self, path)
-	local _, _, module_name, name = strfind(path, '([^.]*)%.?(.*)')
+	local module_name, key
+	for part in gfind(path, '[^.]*') do
+		if module_name then key = part else module_name = part end
+	end
+	local _, _, module_name, key = strfind(path, '([^.]*)%.?(.*)')
 	local module = _module[module_name] or error('No module "%s".', module_name)
+	if not key then --define module
+
+		return
+	end
 	for _, mode in MODES do
 		for k, v in module[PUBLIC + mode] do
-			if not self.defined[k .. OPERATION[mode]] then
+			if (key == '*' or key == k) and (not self.defined[k .. OPERATION[mode]] or error('Import conflict for "%s".', k)) then
 				self.defined[k .. OPERATION[mode]], self[mode][k] = true, v
 			end
 		end
