@@ -2,9 +2,6 @@ module 'aux.core.tooltip'
 
 include 'green_t'
 include 'aux'
-include 'aux.util'
-include 'aux.control'
-include 'aux.util.color'
 
 local info = require 'aux.util.info'
 local money =  require 'aux.util.money'

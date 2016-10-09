@@ -2,9 +2,6 @@ module 'aux.core.scan'
 
 include 'green_t'
 include 'aux'
-include 'aux.util'
-include 'aux.control'
-include 'aux.util.color'
 
 local info = require 'aux.util.info'
 local history = require 'aux.core.history'

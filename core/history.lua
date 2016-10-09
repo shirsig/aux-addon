@@ -2,9 +2,6 @@ module 'aux.core.history'
 
 include 'green_t'
 include 'aux'
-include 'aux.util'
-include 'aux.control'
-include 'aux.util.color'
 
 local persistence = require 'aux.util.persistence'
 

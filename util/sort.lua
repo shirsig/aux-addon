@@ -2,9 +2,6 @@ module 'aux.util.sort'
 
 include 'green_t'
 include 'aux'
-include 'aux.util'
-include 'aux.control'
-include 'aux.util.color'
 
 public.EQ = 0
 public.LT = 1
