@@ -1,10 +1,10 @@
-module'aux.post_tab'
+module 'aux.tabs.post'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
 local info = require 'aux.util.info'
 local sort_util = require 'aux.util.sort'

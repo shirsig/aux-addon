@@ -1,4 +1,4 @@
-module 'aux.auctions_tab.frame'
+module 'aux.tabs.auctions.frame'
 
 local gui = require 'aux.gui'
 local auction_listing = require 'aux.gui.auction_listing'

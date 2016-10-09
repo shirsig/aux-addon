@@ -9,9 +9,9 @@ libs\module.lua
 libs\green_t.lua
 
 aux-addon.lua
-util\core.lua
+util.lua
 control.lua
-util\color.lua
+color.lua
 gui\core.lua
 frame.lua
 

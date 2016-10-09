@@ -1,9 +1,8 @@
-module 'aux.frame'
+module 'aux'
 
 local gui = require 'aux.gui'
 
-function public.create()
-	setfenv(1, getfenv(2))
+function private.create_frame()
 	do
 		local frame = CreateFrame('Frame', 'AuxFrame', UIParent)
 		tinsert(UISpecialFrames, 'AuxFrame')

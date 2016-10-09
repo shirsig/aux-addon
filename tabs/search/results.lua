@@ -1,19 +1,15 @@
-aux_search_tab_results = module
+module 'aux.tabs.search'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+local info = require 'aux.util.info'
+local filter_util = require 'aux.util.filter'
+local scan_util = require 'aux.util.scan'
+local scan = require 'aux.core.scan'
 
 function LOAD()
-	include (aux_search_tab)
-	new_search('')
+	new_search''
 	current_search.dummy = true
 	update_auto_buy_filter()
 end
-
-local info, scan = aux_info, aux_scan
 
 aux_auto_buy_filter = ''
 
@@ -49,20 +45,20 @@ end
 
 do
 	local id = 0
-	function public.search_scan_id.get() return id end
-	function public.search_scan_id.set(v) id = v end
+	function private.search_scan_id.get() return id end
+	function private.search_scan_id.set(v) id = v end
 end
 do
 	local validator
-	function public.auto_buy_validator.get() return validator end
-	function public.auto_buy_validator.set(v) validator = v end
+	function private.auto_buy_validator.get() return validator end
+	function private.auto_buy_validator.set(v) validator = v end
 end
 
 do
 	local searches = t
 	local search_index = 1
 
-	function public.current_search.get()
+	function private.current_search.get()
 		return searches[search_index]
 	end
 
@@ -118,20 +114,20 @@ do
 		update_search(getn(searches))
 	end
 
-	function public.previous_search()
+	function private.previous_search()
 		search_box:ClearFocus()
 		update_search(search_index - 1)
 		subtab = RESULTS
 	end
 
-	function public.next_search()
+	function private.next_search()
 		search_box:ClearFocus()
 		update_search(search_index + 1)
 		subtab = RESULTS
 	end
 end
 
-function public.close_settings()
+function private.close_settings()
 	if settings_button.open then
 		settings_button:Click()
 	end
@@ -165,7 +161,7 @@ end
 
 function private.update_auto_buy_filter()
 	if aux_auto_buy_filter ~= '' then
-		local queries, error = aux_filter_util.queries(aux_auto_buy_filter)
+		local queries, error = filter_util.queries(aux_auto_buy_filter)
 		if queries then
 			if getn(queries) > 1 then
 				print 'Error: The automatic buyout filter does not support multi-queries'
@@ -232,7 +228,7 @@ function private.start_real_time_scan(query, search, continuation)
 			init[new_records] = temp-values(map)
 
 			if getn(new_records) > 2000 then
-				StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
+				StaticPopup_Show'AUX_SEARCH_TABLE_FULL'
 			else
 				search.records = new_records
 				search.table:SetDatabase(search.records)
@@ -244,7 +240,7 @@ function private.start_real_time_scan(query, search, continuation)
 		end,
 		on_abort = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text('Scan paused')
+			search.status_bar:set_text'Scan paused'
 
 			search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
 
@@ -312,13 +308,13 @@ function private.start_search(queries, continuation)
 			elseif getn(search.records) < 2000 then
 				tinsert(search.records, auction_record)
 				if getn(search.records) == 2000 then
-					StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
+					StaticPopup_Show'AUX_SEARCH_TABLE_FULL'
 				end
 			end
 		end,
 		on_complete = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text('Scan complete')
+			search.status_bar:set_text'Scan complete'
 
 			if current_search == search and frame.results:IsVisible() and getn(search.records) == 0 then
 				subtab = SAVED
@@ -329,7 +325,7 @@ function private.start_search(queries, continuation)
 		end,
 		on_abort = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text('Scan paused')
+			search.status_bar:set_text'Scan paused'
 
 			if current_query then
 				search.continuation = {current_query, current_page + 1}
@@ -359,7 +355,7 @@ function public.execute(resume, real_time)
 	end
 	local filter_string = search_box:GetText()
 
-	local queries, error = aux_filter_util.queries(filter_string)
+	local queries, error = filter_util.queries(filter_string)
 	if not queries then
 		print('Invalid filter:', error)
 		return
@@ -385,7 +381,7 @@ function public.execute(resume, real_time)
 			else
 				new_search(filter_string)
 			end
-			aux_search_tab_saved.new_recent_search(filter_string, join(map(copy(queries), function(filter) return filter.prettified end), ';'))
+			new_recent_search(filter_string, join(map(copy(queries), function(filter) return filter.prettified end), ';'))
 		else
 			current_search.records = t
 			current_search.table:SetDatabase(current_search.records)
@@ -428,7 +424,7 @@ do
 	local state = IDLE
 	local found_index
 
-	function public.find_auction(record)
+	function private.find_auction(record)
 		local search = current_search
 
 		if not search.table:ContainsRecord(record) or is_player(record.owner) then
@@ -437,7 +433,7 @@ do
 
 		scan.abort(scan_id)
 		state = SEARCHING
-		scan_id = aux_scan_util.find(
+		scan_id = scan_util.find(
 			record,
 			current_search.status_bar,
 			function()

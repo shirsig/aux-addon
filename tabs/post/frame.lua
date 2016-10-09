@@ -1,4 +1,4 @@
-module'aux.post_tab.frame'
+module'aux.tabs.post.frame'
 
 local info = require 'aux.util.info'
 local money = require 'aux.util.money'

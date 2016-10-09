@@ -1,7 +1,4 @@
-module 'aux.util'
-
-include 'green_t'
-include 'aux'
+module 'aux'
 
 do
 	local classes, interfaces, objects = {}, {}, setmetatable({}, { __mode='k' })

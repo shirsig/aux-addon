@@ -1,10 +1,10 @@
-aux_search_tab = module
+module 'aux.tabs.search'
 
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
 TAB 'Search'
 
@@ -26,23 +26,23 @@ StaticPopupDialogs.AUX_SEARCH_AUTO_BUY = {
     hideOnEscape = 1,
 }
 
-public.RESULTS = 1
-public.SAVED = 2
-public.FILTER = 3
+private.RESULTS = 1
+private.SAVED = 2
+private.FILTER = 3
 
 function LOAD()
-	aux_search_tab_frame.create()
+--	aux_search_tab_frame.create()
 	subtab = SAVED
 end
 
 function OPEN()
     frame:Show()
-    aux_search_tab_saved.update_search_listings()
+    update_search_listings()
 end
 
 function CLOSE()
-	aux_search_tab_results.close_settings()
-    aux_search_tab_results.current_search.table:SetSelectedRecord()
+	close_settings()
+    current_search.table:SetSelectedRecord()
     frame:Hide()
 end
 
@@ -56,11 +56,7 @@ function USE_ITEM(item_info)
 	execute(nil, false)
 end
 
-function public.execute(resume, real_time)
-	aux_search_tab_results.execute(resume, real_time)
-end
-
-function public.subtab.set(tab)
+function private.subtab.set(tab)
     search_results_button:UnlockHighlight()
     saved_searches_button:UnlockHighlight()
     new_filter_button:UnlockHighlight()
@@ -80,11 +76,11 @@ function public.subtab.set(tab)
     end
 end
 
-function public.set_filter(filter_string)
+function private.set_filter(filter_string)
     search_box:SetText(filter_string)
 end
 
-function public.add_filter(filter_string)
+function private.add_filter(filter_string)
     local old_filter_string = search_box:GetText()
     old_filter_string = trim(old_filter_string)
 
@@ -95,7 +91,7 @@ function public.add_filter(filter_string)
     search_box:SetText(old_filter_string .. filter_string)
 end
 
-function public.blizzard_page_index(str)
+function private.blizzard_page_index(str)
     if tonumber(str) then
         return max(0, tonumber(str) - 1)
     end

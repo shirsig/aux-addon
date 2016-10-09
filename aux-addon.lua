@@ -50,13 +50,6 @@ do
 	end)
 end
 
-function LOAD()
-	include (aux_util)
-	include (aux_control)
-	include (aux_util_color)
-	aux_frame.create()
-end
-
 private.tab_info = t
 function public.TAB(name)
 	local tab = T('name', name)

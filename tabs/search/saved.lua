@@ -1,19 +1,9 @@
-aux_search_tab_saved = module
-
-include (green_t)
-include (aux)
-include (aux_util)
-include (aux_control)
-include (aux_util_color)
-
-function LOAD()
-	include (aux_search_tab)
-end
+module 'aux.tabs.search'
 
 aux_favorite_searches = t
 aux_recent_searches = t
 
-function public.update_search_listings()
+function private.update_search_listings()
 	local favorite_search_rows = t
 	for i, favorite_search in aux_favorite_searches do
 		local name = strsub(favorite_search.prettified, 1, 250)
@@ -37,7 +27,7 @@ function public.update_search_listings()
 	recent_searches_listing:SetData(recent_search_rows)
 end
 
-function public.new_recent_search(filter_string, prettified)
+function private.new_recent_search(filter_string, prettified)
 	tinsert(aux_recent_searches, 1, {
 		filter_string = filter_string,
 		prettified = prettified,

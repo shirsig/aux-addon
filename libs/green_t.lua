@@ -1,4 +1,4 @@
-green_t = module
+library 'green_t'
 
 local next, getn, setn, tremove, type, setmetatable = next, getn, table.setn, tremove, type, setmetatable
 
@@ -16,7 +16,7 @@ do
 	end
 	public.wipe = wipe
 
-	CreateFrame('Frame'):SetScript('OnUpdate', function()
+	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for t in auto_release do release(t) end
 		wipe(auto_release)
 	end)
