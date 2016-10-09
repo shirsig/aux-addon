@@ -6,15 +6,10 @@ include 'aux'
 local info = require 'aux.util.info'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
-local tab_frame = require 'aux.tabs.auctions.frame'
 
 TAB 'Auctions'
 
 private.auction_records = t
-
-function LOAD()
-	tab_frame.create()
-end
 
 function OPEN()
     frame:Show()

@@ -73,7 +73,7 @@ function private.subtab.set(tab)
     end
 end
 
-function private.set_filter(filter_string)
+function public.set_filter(filter_string)
     search_box:SetText(filter_string)
 end
 

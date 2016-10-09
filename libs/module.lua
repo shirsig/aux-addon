@@ -49,6 +49,7 @@ function include(self, name)
 end
 
 function create_module(name)
+	if type(name) ~= 'string' then error('Invalid module name "%s".', name) end
 	local P, environment, interface, definition_helper, modifiers, accessors, mutators, fields, public_accessors, public_mutators, public_fields
 	environment, interface, definition_helper = {}, {}, setmetatable({}, definition_helper_mt)
 	accessors = { private=function() _access[definition_helper] = PRIVATE; return definition_helper end, public=function() _access[definition_helper] = PUBLIC; return definition_helper end }

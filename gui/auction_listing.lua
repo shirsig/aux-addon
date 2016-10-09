@@ -643,7 +643,7 @@ local methods = {
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(this.row.data.record.link)
         elseif not modified and button == 'RightButton' then -- TODO not when alt (how?)
-            aux.tab = 1
+            tab = 1
             search_tab.set_filter(strlower(info.item(this.row.data.record.item_id).name) .. '/exact')
             search_tab.execute(nil, false)
         else

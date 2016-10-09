@@ -6,15 +6,10 @@ include 'aux'
 local info = require 'aux.util.info'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
-local tab_frame = require 'aux.tabs.bids.frame'
 
 TAB 'Bids'
 
 private.auction_records = t
-
-function LOAD()
-	tab_frame.create()
-end
 
 function OPEN()
     frame:Show()
@@ -33,7 +28,7 @@ end
 function public.scan_bids()
 
     status_bar:update_status(0,0)
-    status_bar:set_text('Scanning auctions...')
+    status_bar:set_text'Scanning auctions...'
 
     wipe(auction_records)
     update_listing()
@@ -49,12 +44,12 @@ function public.scan_bids()
         end,
         on_complete = function()
             status_bar:update_status(100, 100)
-            status_bar:set_text('Scan complete')
+            status_bar:set_text'Scan complete'
             update_listing()
         end,
         on_abort = function()
             status_bar:update_status(100, 100)
-            status_bar:set_text('Scan aborted')
+            status_bar:set_text'Scan aborted'
         end,
     }
 end

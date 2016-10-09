@@ -13,7 +13,6 @@ local scan = require 'aux.core.scan'
 local history = require 'aux.core.history'
 local item_listing = require 'aux.gui.item_listing'
 local al = require 'aux.gui.auction_listing'
-local tab_frame = require 'aux.tabs.post.frame'
 
 TAB 'Post'
 
@@ -64,10 +63,6 @@ do
 	local c = 0
 	function private.refresh.get() return c end
 	function private.refresh.set(v) c = v end
-end
-
-function LOAD()
-	tab_frame.create()
 end
 
 function OPEN()

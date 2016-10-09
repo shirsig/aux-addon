@@ -2,6 +2,12 @@ module 'aux'
 
 local gui = require 'aux.gui'
 
+function LOAD()
+	for _, info in tab_info do
+		tabs:create_tab(info.name)
+	end
+end
+
 do
 	local frame = CreateFrame('Frame', 'AuxFrame', UIParent)
 	tinsert(UISpecialFrames, 'AuxFrame')
@@ -44,7 +50,4 @@ do
 	btn:SetScript('OnClick',function()
 		if AuctionFrame:IsVisible() then HideUIPanel(AuctionFrame) else ShowUIPanel(AuctionFrame) end
 	end)
-end
-for _, info in tab_info do
-	tabs:create_tab(info.name)
 end
