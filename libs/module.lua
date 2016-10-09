@@ -15,9 +15,12 @@ local function proxy_mt(fields, mutators)
 	return { __metatable=false, __index=fields, __newindex=function(_, k, v) return mutators[k](v) end }
 end
 
+local nop_default_mt, definition_helper_mt, require, include, create_module
 local loaded, _interface, _environment, _access, _name = {}, {}, {}, {}, {}
 
-local definition_helper_mt = { __metatable=false }
+nop_default_mt = { __index=function() return nop end }
+
+definition_helper_mt = { __metatable=false }
 function definition_helper_mt:__index(k)
 	_name[self] = _name[self] and error('Invalid modifier "%s".', k) or k
 	return self
@@ -32,9 +35,9 @@ function definition_helper_mt:__newindex(k, v)
 	_access[self], _name[self] = nil, nil
 end
 
-local function require(name) return _interface[name] end
+function require(name) if not loaded[name] then create_module(name) end return _interface[name] end
 
-local function include(self, name)
+function include(self, name)
 	local module = name and loaded[name] or error('No module "%s".', name)
 	for _, mode in MODES do
 		for k, v in module[PUBLIC + mode] do
@@ -45,9 +48,7 @@ local function include(self, name)
 	end
 end
 
-local nop_default_mt = { __index=function() return nop end }
-
-local function create_module(name)
+function create_module(name)
 	local P, environment, interface, definition_helper, modifiers, accessors, mutators, fields, public_accessors, public_mutators, public_fields
 	environment, interface, definition_helper = {}, {}, setmetatable({}, definition_helper_mt)
 	accessors = { private=function() _access[definition_helper] = PRIVATE; return definition_helper end, public=function() _access[definition_helper] = PUBLIC; return definition_helper end }

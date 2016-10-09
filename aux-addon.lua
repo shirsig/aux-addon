@@ -2,6 +2,14 @@ module 'aux'
 
 include 'green_t'
 
+local info = require 'aux.util.info'
+local money = require 'aux.util.money'
+local cache = require 'aux.core.cache'
+local history = require 'aux.core.history'
+local stack = require 'aux.core.stack'
+local post = require 'aux.core.post'
+local scan = require 'aux.core.scan'
+
 --aux_account_settings = {} -- TODO clean up the mess of savedvariables
 --aux_character_settings = {}
 
@@ -76,7 +84,7 @@ function private.SetItemRef(...) auto[arg] = true
 	if arg[3] ~= 'RightButton' or not index(active_tab, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
-	for item_info in present(aux_info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
+	for item_info in present(info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
 		return active_tab.CLICK_LINK(item_info)
 	end
 end
@@ -85,7 +93,7 @@ function private.UseContainerItem(...) auto[arg] = true
 	if modified or not index(active_tab, 'USE_ITEM') then
 		return orig.UseContainerItem(unpack(arg))
 	end
-	for item_info in present(aux_info.container_item(arg[1], arg[2])) do
+	for item_info in present(info.container_item(arg[1], arg[2])) do
 		return active_tab.USE_ITEM(item_info)
 	end
 end
@@ -164,9 +172,9 @@ end
 function private.AUCTION_HOUSE_CLOSED()
 	bids_loaded = false
 	current_owner_page = nil
-	aux_post.stop()
-	aux_stack.stop()
-	aux_scan.abort()
+	post.stop()
+	stack.stop()
+	scan.abort()
 	tab = nil
 	AuxFrame:Hide()
 end
@@ -200,7 +208,7 @@ end
 do
 	local function cost_label(cost)
 		local label = LIGHTYELLOW_FONT_COLOR_CODE .. '(Total Cost: ' .. FONT_COLOR_CODE_CLOSE
-		label = label .. (cost and aux_money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE)
+		label = label .. (cost and money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE)
 		label = label .. LIGHTYELLOW_FONT_COLOR_CODE .. ')' .. FONT_COLOR_CODE_CLOSE
 		return label
 	end
@@ -216,10 +224,10 @@ do
 					total_cost = nil
 					break
 				end
-				local item_id, suffix_id = aux_info.parse_link(link)
+				local item_id, suffix_id = info.parse_link(link)
 				local count = select(3, GetCraftReagentInfo(id, i))
-				local _, price, limited = aux_cache.merchant_info(item_id)
-				local value = price and not limited and price or aux_history.value(item_id .. ':' .. suffix_id)
+				local _, price, limited = cache.merchant_info(item_id)
+				local value = price and not limited and price or history.value(item_id .. ':' .. suffix_id)
 				if not value then
 					total_cost = nil
 					break
@@ -243,10 +251,10 @@ do
 					total_cost = nil
 					break
 				end
-				local item_id, suffix_id = aux_info.parse_link(link)
+				local item_id, suffix_id = info.parse_link(link)
 				local count = select(3, GetTradeSkillReagentInfo(id, i))
-				local _, price, limited = aux_cache.merchant_info(item_id)
-				local value = price and not limited and price or aux_history.value(item_id .. ':' .. suffix_id)
+				local _, price, limited = cache.merchant_info(item_id)
+				local value = price and not limited and price or history.value(item_id .. ':' .. suffix_id)
 				if not value then
 					total_cost = nil
 					break
