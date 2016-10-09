@@ -1,6 +1,11 @@
 module'aux.post_tab.frame'
 
-local gui, listing, item_listing, money, search_tab = M'aux.gui', M'aux.listing', M'aux.item_listing', M'aux.money', M'aux.search_tab'
+local info = require 'aux.util.info'
+local money = require 'aux.util.money'
+local gui = require 'aux.gui'
+local listing = require 'aux.gui.listing'
+local item_listing = require 'aux.gui.item_listing'
+local search_tab = require 'aux.tabs.search'
 
 function public.create()
 	setfenv(1, getfenv(2))
@@ -50,7 +55,7 @@ function public.create()
 	            set_item(this.item_record)
 	        elseif arg1 == 'RightButton' then
 	            aux.tab = 1
-	            search_tab.set_filter(strlower(aux_info.item(this.item_record.item_id).name) .. '/exact')
+	            search_tab.set_filter(strlower(info.item(this.item_record.item_id).name) .. '/exact')
 	            search_tab.execute(nil, false)
 	        end
 	    end,
@@ -110,7 +115,7 @@ function public.create()
 	    item:SetPoint('TOPLEFT', 10, -6)
 	    item.button:SetScript('OnEnter', function()
 	        if selected_item then
-	            aux_info.set_tooltip(selected_item.itemstring, this, 'ANCHOR_RIGHT')
+	            info.set_tooltip(selected_item.itemstring, this, 'ANCHOR_RIGHT')
 	        end
 	    end)
 	    item.button:SetScript('OnLeave', function()

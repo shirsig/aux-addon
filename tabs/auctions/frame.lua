@@ -1,6 +1,7 @@
-module'aux.auctions_tab.frame'
+module 'aux.auctions_tab.frame'
 
-local gui, auction_listing = M'aux.gui', M'aux.auction_listing'
+local gui = require 'aux.gui'
+local auction_listing = require 'aux.gui.auction_listing'
 
 function public.create()
 	setfenv(1, getfenv(2))

@@ -1,12 +1,12 @@
-module'aux.history'
+module 'aux.core.history'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-local persistence = M'aux.persistence'
+local persistence = require 'aux.util.persistence'
 
 local history_schema = {'record', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'record', '@', {market_value='number'}, {time='number'}}}} }
 

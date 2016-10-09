@@ -1,12 +1,12 @@
-module'aux.stack'
+module 'aux.core.stack'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-local info = M'aux.info'
+local info = require 'aux.util.info'
 
 local state
 

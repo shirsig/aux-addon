@@ -1,10 +1,10 @@
-module'aux.gui'
+module 'aux.gui'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
 public.font = [[Fonts\ARIALN.TTF]]
 

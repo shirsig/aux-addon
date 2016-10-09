@@ -1,6 +1,6 @@
-module'aux.frame'
+module 'aux.frame'
 
-local gui = M'aux.gui'
+local gui = require 'aux.gui'
 
 function public.create()
 	setfenv(1, getfenv(2))

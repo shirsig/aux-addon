@@ -1,12 +1,12 @@
-module'aux.listing'
+module 'aux.gui.listing'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-local gui = M'aux.gui'
+local gui = require 'aux.gui'
 
 local ST_COUNT = 0
 

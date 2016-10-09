@@ -1,6 +1,6 @@
-module'aux'
+module 'aux'
 
-include'green_t'
+include 'green_t'
 
 --aux_account_settings = {} -- TODO clean up the mess of savedvariables
 --aux_character_settings = {}

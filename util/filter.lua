@@ -1,12 +1,17 @@
-module'aux.filter_util'
+module 'aux.util.filter'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-local info, history, disenchant, cache, money, filter_util = M'aux.info', M'aux.history', M'aux.disenchant', M'aux.cache', M'aux.money', M'aux.filter_util'
+local info = require 'aux.util.info'
+local money = require 'aux.util.money'
+local filter_util = require 'aux.util.filter'
+local cache = require 'aux.core.cache'
+local history = require 'aux.core.history'
+local disenchant = require 'aux.core.disenchant'
 
 function private.default_filter(str)
     return {

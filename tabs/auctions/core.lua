@@ -1,19 +1,22 @@
-module'aux.auctions_tab'
+module 'aux.tabs.auctions'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-TAB'Auctions'
+local info = require 'aux.util.info'
+local scan_util = require 'aux.util.scan'
+local scan = require 'aux.core.scan'
+local tab_frame = require 'aux.tabs.auctions.frame'
 
-local scan = M'aux.scan'
+TAB 'Auctions'
 
 private.auction_records = t
 
 function LOAD()
-	aux_auctions_tab_frame.create()
+	tab_frame.create()
 end
 
 function OPEN()
@@ -61,7 +64,7 @@ end
 
 function private.test(record)
     return function(index)
-        local auction_info = aux_info.auction(index, 'owner')
+        local auction_info = info.auction(index, 'owner')
         return auction_info and auction_info.search_signature == record.search_signature
     end
 end
@@ -77,7 +80,7 @@ do
 
         scan.abort(scan_id)
         state = SEARCHING
-        scan_id = aux_scan_util.find(
+        scan_id = scan_util.find(
             record,
             status_bar,
             function() state = IDLE end,

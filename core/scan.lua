@@ -1,12 +1,13 @@
-module'aux.scan'
+module 'aux.core.scan'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-local info, history = aux_info, aux_history
+local info = require 'aux.util.info'
+local history = require 'aux.core.history'
 
 local PAGE_SIZE = 50
 

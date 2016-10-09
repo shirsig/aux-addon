@@ -1,12 +1,14 @@
-module'aux.scan_util'
+module 'aux.util.scan'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-local info , filter_util, scan = M'aux.info', M'aux.filter_util', M'aux.scan'
+local info = require 'aux.util.info'
+local filter_util = require 'aux.util.filter'
+local scan = require 'aux.core.scan'
 
 function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
 

@@ -6,10 +6,19 @@ include'aux.util'
 include'aux.control'
 include'aux.util.color'
 
-TAB'Post'
+local info = require 'aux.util.info'
+local sort_util = require 'aux.util.sort'
+local persistence = require 'aux.util.persistence'
+local money = require 'aux.util.money'
+local scan_util = require 'aux.util.scan'
+local post = require 'aux.core.post'
+local scan = require 'aux.core.scan'
+local history = require 'aux.core.history'
+local item_listing = require 'aux.gui.item_listing'
+local al = require 'aux.gui.auction_listing'
+local tab_frame = require 'aux.tabs.post.frame'
 
-local scan, scan_util, history, info, persistence, item_listing, al, sorting = M'aux.scan', M'aux.scan_util', M'aux.history', M'aux.info', M'aux.persistence', M'aux.item_listing', M'aux.auction_listing', M'aux.sorting'
-
+TAB 'Post'
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
@@ -43,7 +52,7 @@ end
 local scan_id, inventory_records, existing_auctions = 0, t, t
 
 function private.refresh_button_click()
-	aux_scan.abort(scan_id)
+	scan.abort(scan_id)
 	refresh_entries()
 	refresh = true
 end
@@ -61,7 +70,7 @@ do
 end
 
 function LOAD()
-	aux_post_tab_frame.create()
+	tab_frame.create()
 end
 
 function OPEN()
@@ -81,20 +90,20 @@ end
 
 function private.get_unit_start_price()
     local money_text = unit_start_price:GetText()
-    return aux_money.from_string(money_text) or 0
+    return money.from_string(money_text) or 0
 end
 
 function private.set_unit_start_price(amount)
-    unit_start_price:SetText(aux_money.to_string(amount, true, nil, 3, nil, true))
+    unit_start_price:SetText(money.to_string(amount, true, nil, 3, nil, true))
 end
 
 function private.get_unit_buyout_price()
     local money_text = unit_buyout_price:GetText()
-    return aux_money.from_string(money_text) or 0
+    return money.from_string(money_text) or 0
 end
 
 function private.set_unit_buyout_price(amount)
-    unit_buyout_price:SetText(aux_money.to_string(amount, true, nil, 3, nil, true))
+    unit_buyout_price:SetText(money.to_string(amount, true, nil, 3, nil, true))
 end
 
 function private.update_inventory_listing()
@@ -115,12 +124,12 @@ function private.update_auction_listing()
         for i, auction_record in existing_auctions[selected_item.key] or tt do
 
             local blizzard_bid_undercut, buyout_price_undercut = undercut(auction_record, stack_size_slider:GetValue())
-            blizzard_bid_undercut = aux_money.from_string(aux_money.to_string(blizzard_bid_undercut, true, nil, 3))
-            buyout_price_undercut = aux_money.from_string(aux_money.to_string(buyout_price_undercut, true, nil, 3))
+            blizzard_bid_undercut = money.from_string(money.to_string(blizzard_bid_undercut, true, nil, 3))
+            buyout_price_undercut = money.from_string(money.to_string(buyout_price_undercut, true, nil, 3))
 
             local stack_blizzard_bid_undercut, stack_buyout_price_undercut = undercut(auction_record, stack_size_slider:GetValue(), true)
-            stack_blizzard_bid_undercut = aux_money.from_string(aux_money.to_string(stack_blizzard_bid_undercut, true, nil, 3))
-            stack_buyout_price_undercut = aux_money.from_string(aux_money.to_string(stack_buyout_price_undercut, true, nil, 3))
+            stack_blizzard_bid_undercut = money.from_string(money.to_string(stack_blizzard_bid_undercut, true, nil, 3))
+            stack_buyout_price_undercut = money.from_string(money.to_string(stack_buyout_price_undercut, true, nil, 3))
 
             local stack_size = stack_size_slider:GetValue()
             local historical_value = history.value(selected_item.key)
@@ -148,16 +157,16 @@ function private.update_auction_listing()
                     {value=auction_record.own and color.yellow(auction_record.count) or auction_record.count},
                     {value=al.time_left(auction_record.duration)},
                     {value=auction_record.stack_size == stack_size and color.yellow(auction_record.stack_size) or auction_record.stack_size},
-                    {value=aux_money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color)},
+                    {value=money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color)},
                     {value=historical_value and al.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'},
-                    {value=auction_record.unit_buyout_price > 0 and aux_money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'},
+                    {value=auction_record.unit_buyout_price > 0 and money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'},
                     {value=auction_record.unit_buyout_price > 0 and historical_value and al.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---'},
                 },
                 record = auction_record,
             })
         end
         sort(auction_rows, function(a, b)
-            return sorting.multi_lt(
+            return sort_util.multi_lt(
                     a.record.unit_buyout_price == 0 and huge or a.record.unit_buyout_price,
 	                b.record.unit_buyout_price == 0 and huge or b.record.unit_buyout_price,
 
@@ -224,7 +233,7 @@ function private.post_auctions()
             duration_code = 4
 		end
 
-		aux_post.start(
+		post.start(
 			key,
 			stack_size,
 			duration,
@@ -233,7 +242,7 @@ function private.post_auctions()
 			stack_count,
 			function(posted)
 				for i = 1, posted do
-                    record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName('player'))
+                    record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName'player')
                 end
                 update_inventory_records()
                 selected_item = nil
@@ -276,7 +285,7 @@ function private.update_item_configuration()
         item.texture:SetTexture(nil)
         item.count:SetText()
         item.name:SetTextColor(color.label.enabled())
-        item.name:SetText('No item selected')
+        item.name:SetText'No item selected'
 
         unit_start_price:Hide()
         unit_buyout_price:Hide()
@@ -317,7 +326,7 @@ function private.update_item_configuration()
             local deposit_factor = neutral_faction() and .25 or .05
             local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
-            deposit:SetText('Deposit: ' .. aux_money.to_string(amount, nil, nil, nil, inline_color.text.enabled))
+            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, nil, inline_color.text.enabled))
         end
 
         refresh_button:Enable()
@@ -369,7 +378,7 @@ function private.update_historical_value_button()
     if selected_item then
         local historical_value = history.value(selected_item.key)
         historical_value_button.amount = historical_value
-        historical_value_button:SetText(historical_value and aux_money.to_string(historical_value, true, nil, 3) or '---')
+        historical_value_button:SetText(historical_value and money.to_string(historical_value, true, nil, 3) or '---')
     end
 end
 
@@ -397,8 +406,8 @@ function private.set_item(item)
     stack_size_slider:SetValue(settings.stack_size)
     quantity_update(true)
 
-    unit_start_price:SetText(aux_money.to_string(settings.start_price, true, nil, 3, nil, true))
-    unit_buyout_price:SetText(aux_money.to_string(settings.buyout_price, true, nil, 3, nil, true))
+    unit_start_price:SetText(money.to_string(settings.start_price, true, nil, 3, nil, true))
+    unit_buyout_price:SetText(money.to_string(settings.buyout_price, true, nil, 3, nil, true))
 
     if not existing_auctions[selected_item.key] then
         refresh_entries()
@@ -453,7 +462,7 @@ function private.refresh_entries()
         existing_auctions[item_key] = nil
         local query = scan_util.item_query(item_id)
         status_bar:update_status(0,0)
-        status_bar:set_text('Scanning auctions...')
+        status_bar:set_text'Scanning auctions...'
 
 		scan_id = scan.start{
             type = 'list',
@@ -479,13 +488,13 @@ function private.refresh_entries()
 				existing_auctions[item_key] = nil
                 update_historical_value_button()
                 status_bar:update_status(100, 100)
-                status_bar:set_text('Scan aborted')
+                status_bar:set_text'Scan aborted'
 			end,
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or t
                 refresh = true
                 status_bar:update_status(100, 100)
-                status_bar:set_text('Scan complete')
+                status_bar:set_text'Scan complete'
             end,
 		}
 	end

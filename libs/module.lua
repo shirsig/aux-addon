@@ -15,7 +15,7 @@ local function proxy_mt(fields, mutators)
 	return { __metatable=false, __index=fields, __newindex=function(_, k, v) return mutators[k](v) end }
 end
 
-local _interface, _module, _access, _name = {}, {}, {}, {}
+local loaded, _module, _access, _name = {}, {}, {}, {}
 
 local definition_helper_mt = { __metatable=false }
 function definition_helper_mt:__index(k)
@@ -32,6 +32,8 @@ function definition_helper_mt:__newindex(k, v)
 	_access[self], _name[self] = nil, nil
 end
 
+local function require(name) return loaded[name] end
+
 local function include(self, name)
 	local module = name and _module[name] or error('No module "%s".', name)
 	for _, mode in MODES do
@@ -43,18 +45,16 @@ local function include(self, name)
 	end
 end
 
-local function fetch_interface(name) return _interface[name] end
-
 local nop_default_mt = { __index=function() return nop end }
 
 function module(name)
-	if _interface[name] then _G.error(nil) end
+--	if loaded[name] then _G.error(nil) end
 	local module, environment, interface, definition_helper, modifiers, accessors, mutators, fields, public_accessors, public_mutators, public_fields
 	environment, interface, definition_helper = {}, {}, setmetatable({}, definition_helper_mt)
 	accessors = { private=function() _access[definition_helper] = PRIVATE; return definition_helper end, public=function() _access[definition_helper] = PUBLIC; return definition_helper end }
 	mutators = setmetatable({ _=nop }, { __index=function(_, k) return function(v) _G[k] = v end end })
 	fields = setmetatable(
-		{ _M=environment, _G=_G, M=fetch_interface, include=function(interface) include(module, interface) end, error=error, nop=nop, id=id },
+		{ _M=environment, _G=_G, require=require, include=function(interface) include(module, interface) end, error=error, nop=nop, id=id },
 		{ __index=function(_, k) local accessor = accessors[k]; if accessor then return accessor() else return _G[k] end end }
 	)
 	public_accessors = setmetatable({}, nop_default_mt)
@@ -63,7 +63,7 @@ function module(name)
 	setmetatable(environment, proxy_mt(fields, mutators))
 	setmetatable(interface, proxy_mt(public_fields, public_mutators))
 	module = {
-		defined = { _M=true, _G=true, M=true, include=true, error=true, nop=true, id=true, public=true, private=true, ['_=']=true },
+		defined = { _M=true, _G=true, require=true, include=true, error=true, nop=true, id=true, public=true, private=true, ['_=']=true },
 		[ACCESSOR] = accessors,
 		[MUTATOR] = mutators,
 		[FIELD] = fields,
@@ -72,6 +72,6 @@ function module(name)
 		[PUBLIC + FIELD] = public_fields,
 	}
 	_module[name], _module[definition_helper] = module, module
-	_interface[name] = interface
+	loaded[name] = interface
 	setfenv(2, environment)
 end

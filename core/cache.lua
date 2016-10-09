@@ -1,12 +1,13 @@
-module'aux.cache'
+module 'aux.core.cache'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-local info, persistence = M'aux.info', M'aux.persistence'
+local info = require 'aux.util.info'
+local persistence = require 'aux.util.persistence'
 
 local MIN_ITEM_ID = 1
 local MAX_ITEM_ID = 30000

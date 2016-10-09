@@ -1,12 +1,17 @@
-module'aux.tooltip'
+module 'aux.core.tooltip'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-local info, disenchant, cache, money, history = M'aux.info', M'aux.disenchant', M'aux.cache', M'aux.money', M'aux.history'
+local info = require 'aux.util.info'
+local money =  require 'aux.util.money'
+local cache = require 'aux.core.cache'
+local disenchant = require 'aux.core.disenchant'
+local history = require 'aux.core.history'
+local auction_listing = require 'aux.gui.auction_listing'
 
 aux_tooltip_value = true
 
@@ -109,7 +114,7 @@ function extend_tooltip(tooltip, link, quantity)
         end
         if aux_tooltip_daily  then
             local market_value = history.market_value(item_key)
-            tooltip:AddLine('Today: ' .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. aux_auction_listing.percentage_historical(round(market_value / value * 100)) .. ')' or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Today: ' .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. auction_listing.percentage_historical(round(market_value / value * 100)) .. ')' or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
         end
     end
 

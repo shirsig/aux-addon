@@ -1,12 +1,12 @@
-module'aux.disenchant'
+module 'aux.core.disenchant'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-local history = M'aux.history'
+local history = require 'aux.core.history'
 
 local UNCOMMON, RARE, EPIC = 2, 3, 4
 

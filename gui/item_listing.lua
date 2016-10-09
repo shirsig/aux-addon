@@ -1,12 +1,13 @@
-module'aux.item_listing'
+module 'aux.gui.item_listing'
 
-include'green_t'
-include'aux'
-include'aux.util'
-include'aux.control'
-include'aux.util.color'
+include 'green_t'
+include 'aux'
+include 'aux.util'
+include 'aux.control'
+include 'aux.util.color'
 
-local gui, info = M'aux.gui', M'aux.info'
+local info = require 'aux.util.info'
+local gui = require 'aux.gui'
 
 local ROW_HEIGHT = 39
 
