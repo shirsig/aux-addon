@@ -7,7 +7,7 @@ local COLORS = {
 	window = {background = {24, 24, 24, .93}, border = {30, 30, 30, 1}},
 	panel = {background = {24, 24, 24, 1}, border = {255, 255, 255, .03}},
 	content = {background = {42, 42, 42, 1}, border = {0, 0, 0, 0}},
-	state = {enabled = {70, 180, 70, 1}, disabled = {190, 70, 70, 1}},
+	state = {enabled = {70, 140, 70, 1}, disabled = {140, 70, 70, 1}},
 
 	blue = {41, 146, 255, 1},
 	green = {22, 255, 22, 1},
