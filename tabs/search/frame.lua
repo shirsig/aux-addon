@@ -220,10 +220,10 @@ do
     end)
 end
 do
-    local btn = gui.button(frame.saved)
-    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-    btn:SetText'Favorite'
-    btn:SetScript('OnClick', function()
+    local btn1 = gui.button(frame.saved)
+    btn1:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
+    btn1:SetText'Favorite'
+    btn1:SetScript('OnClick', function()
         local queries, error = filter_util.queries(search_box:GetText())
         if queries then
             tinsert(aux_favorite_searches, 1, T(
@@ -235,6 +235,13 @@ do
         end
         update_search_listings()
     end)
+
+	local btn2 = gui.button(frame.saved)
+	btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
+	btn2:SetText'Auto Buy'
+	btn2:SetScript('OnClick', function()
+
+	end)
 end
 do
     local btn1 = gui.button(frame.filter)
