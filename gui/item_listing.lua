@@ -47,7 +47,7 @@ function public.create(parent, on_click, selected)
 	content:SetPoint('TOPLEFT', 0, -51)
 	content:SetPoint('BOTTOMRIGHT', -15, 0)
 
-	local scroll_frame = CreateFrame('ScrollFrame', gui.name .. 'ScrollFrame', parent, 'FauxScrollFrameTemplate')
+	local scroll_frame = CreateFrame('ScrollFrame', gui.unique_name .. 'ScrollFrame', parent, 'FauxScrollFrameTemplate')
 	scroll_frame:SetScript('OnVerticalScroll', function(self, offset)
 		FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() render(this.item_listing) end)
 	end)

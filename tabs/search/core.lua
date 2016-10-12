@@ -12,16 +12,16 @@ StaticPopupDialogs.AUX_SEARCH_TABLE_FULL = {
     timeout = 0,
     hideOnEscape = 1,
 }
-StaticPopupDialogs.AUX_SEARCH_AUTO_BUY = {
-    text = 'Are you sure you want to activate automatic buyout?',
-    button1 = 'Yes',
-    button2 = 'No',
-    OnAccept = function()
-        auto_buy_button:SetChecked(true)
-    end,
-    timeout = 0,
-    hideOnEscape = 1,
-}
+--StaticPopupDialogs.AUX_SEARCH_AUTO_BUY = {
+--    text = 'Are you sure you want to activate automatic buyout?',
+--    button1 = 'Yes',
+--    button2 = 'No',
+--    OnAccept = function()
+--        auto_buy_button:SetChecked(true)
+--    end,
+--    timeout = 0,
+--    hideOnEscape = 1,
+--}
 
 private.RESULTS = 1
 private.SAVED = 2
@@ -38,7 +38,6 @@ function OPEN()
 end
 
 function CLOSE()
-	close_settings()
     current_search.table:SetSelectedRecord()
     frame:Hide()
 end

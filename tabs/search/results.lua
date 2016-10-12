@@ -8,39 +8,6 @@ local scan = require 'aux.core.scan'
 function LOAD()
 	new_search''
 	current_search.dummy = true
-	update_auto_buy_filter()
-end
-
-aux_auto_buy_filter = ''
-
-do
-	local function action()
-		aux_auto_buy_filter = _G[this:GetParent():GetName() .. 'EditBox']:GetText()
-		update_auto_buy_filter()
-	end
-
-	StaticPopupDialogs.AUX_SEARCH_AUTO_BUY_FILTER = {
-		text = 'Enter a filter for automatic buyout.',
-		button1 = 'Accept',
-		button2 = 'Cancel',
-		hasEditBox = 1,
-		OnShow = function()
-			local edit_box = _G[this:GetName() .. 'EditBox']
-			edit_box:SetMaxLetters(nil)
-			edit_box:SetFocus()
-			edit_box:HighlightText()
-		end,
-		OnAccept = action,
-		EditBoxOnEnterPressed = function()
-			action()
-			this:GetParent():Hide()
-		end,
-		EditBoxOnEscapePressed = function()
-			this:GetParent():Hide()
-		end,
-		timeout = 0,
-		hideOnEscape = 1,
-	}
 end
 
 do
@@ -127,12 +94,6 @@ do
 	end
 end
 
-function private.close_settings()
-	if settings_button.open then
-		settings_button:Click()
-	end
-end
-
 function private.update_continuation()
 	if current_search.continuation then
 		resume_button:Show()
@@ -149,7 +110,7 @@ function private.discard_continuation()
 	update_continuation()
 end
 
-function update_start_stop()
+function private.update_start_stop()
 	if current_search.active then
 		stop_button:Show()
 		start_button:Hide()
@@ -169,8 +130,6 @@ function private.update_auto_buy_filter()
 				print 'Error: The automatic buyout filter does not support Blizzard filters'
 			else
 				auto_buy_validator = queries[1].validator
-				auto_buy_filter_button.prettified = queries[1].prettified
-				auto_buy_filter_button:SetChecked(true)
 				return
 			end
 		else
@@ -206,15 +165,9 @@ function private.start_real_time_scan(query, search, continuation)
 				ignore_page = false
 			end
 		end,
-		on_auction = function(auction_record, ctrl)
+		on_auction = function(auction_record)
 			if not ignore_page then
-				if search.auto_buy then
-					ctrl.suspend()
-					place_bid('list', auction_record.index, auction_record.buyout_price, papply(ctrl.resume, true))
-					thread(when, later(GetTime(), 10), ctrl.resume, false)
-				else
-					tinsert(new_records, auction_record)
-				end
+				tinsert(new_records, auction_record)
 			end
 		end,
 		on_complete = function()
@@ -301,11 +254,7 @@ function private.start_search(queries, continuation)
 			current_page = current_page and 0 or start_page - 1
 		end,
 		on_auction = function(auction_record, ctrl)
-			if search.auto_buy then
-				ctrl.suspend()
-				place_bid('list', auction_record.index, auction_record.buyout_price, papply(ctrl.resume, true))
-				thread(when, later(GetTime(), 10), ctrl.resume, false)
-			elseif getn(search.records) < 2000 then
+			if getn(search.records) < 2000 then
 				tinsert(search.records, auction_record)
 				if getn(search.records) == 2000 then
 					StaticPopup_Show'AUX_SEARCH_TABLE_FULL'
@@ -390,7 +339,6 @@ function public.execute(resume, real_time)
 			end
 		end
 		current_search.real_time = real_time_button:GetChecked()
-		current_search.auto_buy = auto_buy_button:GetChecked()
 		current_search.auto_buy_validator = auto_buy_validator
 	end
 

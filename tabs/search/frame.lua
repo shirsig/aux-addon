@@ -24,104 +24,23 @@ frame.saved = CreateFrame('Frame', nil, frame)
 frame.saved:SetAllPoints(AuxFrame.content)
 
 frame.saved.favorite = gui.panel(frame.saved)
-frame.saved.favorite:SetWidth(378.5)
-frame.saved.favorite:SetPoint('TOPLEFT', 0, 0)
-frame.saved.favorite:SetPoint('BOTTOMLEFT', 0, 0)
+frame.saved.favorite:SetWidth(252)
+frame.saved.favorite:SetPoint('TOP', 0, 0)
+frame.saved.favorite:SetPoint('BOTTOM', 0, 0)
+
+frame.saved.autobuy = gui.panel(frame.saved)
+frame.saved.autobuy:SetPoint('TOPRIGHT', frame.saved.favorite, 'TOPLEFT', -2.5, 0)
+frame.saved.autobuy:SetPoint('BOTTOMLEFT', 0, 0)
 
 frame.saved.recent = gui.panel(frame.saved)
-frame.saved.recent:SetWidth(378.5)
-frame.saved.recent:SetPoint('TOPRIGHT', 0, 0)
+frame.saved.recent:SetPoint('TOPLEFT', frame.saved.favorite, 'TOPRIGHT', 2.5, 0)
 frame.saved.recent:SetPoint('BOTTOMRIGHT', 0, 0)
 do
-    local btn = gui.button(frame)
-    btn:SetPoint('TOPLEFT', 0, 0)
-    btn:SetWidth(42)
-    btn:SetHeight(42)
-    btn:SetScript('OnClick', function()
-        if this.open then
-            settings:Hide()
-            controls:Show()
-        else
-            settings:Show()
-            controls:Hide()
-        end
-        this.open = not this.open
-    end)
-
-    for _, offset in temp-A(14, 10, 6) do
-        local fake_icon_part = btn:CreateFontString()
-        fake_icon_part:SetFont([[Fonts\FRIZQT__.TTF]], 23)
-        fake_icon_part:SetPoint('CENTER', 0, offset)
-        fake_icon_part:SetText('_')
-    end
-
-    private.settings_button = btn
-end
-do
-    local panel = CreateFrame('Frame', nil, frame)
-    panel:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]]}
-    panel:SetBackdropColor(color.content.background())
-    panel:SetPoint('LEFT', settings_button, 'RIGHT', 0, 0)
-    panel:SetPoint('RIGHT', 0, 0)
-    panel:SetHeight(42)
-    panel:Hide()
-    private.settings = panel
-end
-do
-    local panel = CreateFrame('Frame', nil, frame)
-    panel:SetPoint('LEFT', settings_button, 'RIGHT', 0, 0)
-    panel:SetPoint('RIGHT', 0, 1)
-    panel:SetHeight(40)
-    private.controls = panel
-end
-do
-	local function change()
-		local page = tonumber(this:GetText())
-		local valid_input = page and tostring(max(1, page)) or ''
-		if this:GetText() ~= valid_input then
-			this:SetText(valid_input)
-		end
-		if blizzard_page_index(this:GetText()) and not real_time_button:GetChecked() then
-			this:SetBackdropColor(color.state.enabled())
-		else
-			this:SetBackdropColor(color.state.disabled())
-		end
-	end
-	do
-	    local editbox = gui.editbox(settings)
-	    editbox:SetPoint('LEFT', 75, 0)
-	    editbox:SetWidth(50)
-	    editbox:SetNumeric(true)
-	    editbox:SetScript('OnTabPressed', function() last_page_input:SetFocus() end)
-	    editbox.enter = execute
-	    editbox.change = change
-	    local label = gui.label(editbox, 16)
-	    label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
-	    label:SetText'Pages'
-	    label:SetTextColor(color.text.enabled())
-	    private.first_page_input = editbox
-    end
-	do
-	    local editbox = gui.editbox(settings)
-	    editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 10, 0)
-	    editbox:SetWidth(50)
-	    editbox:SetNumeric(true)
-	    editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
-	    editbox.enter = execute
-	    editbox.change = change
-	    local label = gui.label(editbox, gui.font_size.medium)
-	    label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
-	    label:SetText'-'
-	    label:SetTextColor(color.text.enabled())
-	    private.last_page_input = editbox
-	end
-end
-do
-    local btn = gui.checkbutton(settings)
-    btn:SetPoint('LEFT', 230, 0)
-    btn:SetWidth(140)
+    local btn = gui.checkbutton(frame)
+    btn:SetPoint('TOPLEFT', 5, -10)
+    btn:SetWidth(100)
     btn:SetHeight(25)
-    btn:SetText'Real Time Mode'
+    btn:SetText'Real Time'
     btn:SetScript('OnClick', function()
         this:SetChecked(not this:GetChecked())
         this = first_page_input
@@ -132,51 +51,46 @@ do
     private.real_time_button = btn
 end
 do
-    local btn = gui.checkbutton(settings)
-    btn:SetPoint('LEFT', real_time_button, 'RIGHT', 15, 0)
-    btn:SetWidth(140)
-    btn:SetHeight(25)
-    btn:SetText'Auto Buyout Mode'
-    btn:SetScript('OnClick', function()
-        if this:GetChecked() then
-            this:SetChecked(false)
-        else
-            StaticPopup_Show'AUX_SEARCH_AUTO_BUY'
-        end
-    end)
-    private.auto_buy_button = btn
+	local function change()
+		local page = tonumber(this:GetText())
+		local valid_input = page and tostring(max(1, page)) or ''
+		if this:GetText() ~= valid_input then
+			this:SetText(valid_input)
+		end
+	end
+	do
+		local editbox = gui.editbox(frame)
+		editbox:SetPoint('LEFT', real_time_button, 'RIGHT', 5, 0)
+		editbox:SetWidth(50)
+		editbox:SetHeight(25)
+		editbox:SetNumeric(true)
+		editbox:SetScript('OnTabPressed', function() last_page_input:SetFocus() end)
+		editbox.enter = execute
+		editbox.change = change
+		local label = gui.label(editbox, 16)
+		label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
+		label:SetTextColor(color.text.enabled())
+		private.first_page_input = editbox
+	end
+	do
+		local editbox = gui.editbox(frame)
+		editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 10, 0)
+		editbox:SetWidth(50)
+		editbox:SetHeight(25)
+		editbox:SetNumeric(true)
+		editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
+		editbox.enter = execute
+		editbox.change = change
+		local label = gui.label(editbox, gui.font_size.medium)
+		label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
+		label:SetText'-'
+		label:SetTextColor(color.text.enabled())
+		private.last_page_input = editbox
+	end
 end
 do
-    local btn = gui.checkbutton(settings)
-    btn:SetPoint('LEFT', auto_buy_button, 'RIGHT', 15, 0)
-    btn:SetWidth(140)
-    btn:SetHeight(25)
-    btn:SetText'Auto Buyout Filter'
-    btn:SetScript('OnClick', function()
-        if this:GetChecked() then
-            this:SetChecked(false)
-            aux_auto_buy_filter = nil
-            this.prettified = nil
-            auto_buy_validator = nil
-        else
-            StaticPopup_Show'AUX_SEARCH_AUTO_BUY_FILTER'
-        end
-    end)
-    btn:SetScript('OnEnter', function()
-        if this.prettified then
-            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:AddLine(gsub(this.prettified, ';', '\n\n'), 255/255, 254/255, 250/255, true)
-            GameTooltip:Show()
-        end
-    end)
-    btn:SetScript('OnLeave', function()
-        GameTooltip:Hide()
-    end)
-    private.auto_buy_filter_button = btn
-end
-do
-    local btn = gui.button(controls, 25)
-    btn:SetPoint('LEFT', 5, 0)
+    local btn = gui.button(frame, 25)
+    btn:SetPoint('LEFT', last_page_input, 'RIGHT', 5, 0)
     btn:SetWidth(30)
     btn:SetHeight(25)
     btn:SetText'<'
@@ -184,7 +98,7 @@ do
     private.previous_button = btn
 end
 do
-    local btn = gui.button(controls, 25)
+    local btn = gui.button(frame, 25)
     btn:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
     btn:SetWidth(30)
     btn:SetHeight(25)
@@ -193,8 +107,8 @@ do
     private.next_button = btn
 end
 do
-    local btn = gui.button(controls, gui.font_size.huge)
-    btn:SetPoint('RIGHT', -5, 0)
+    local btn = gui.button(frame, gui.font_size.huge)
+    btn:SetPoint('TOPRIGHT', -5, -10)
     btn:SetWidth(70)
     btn:SetHeight(25)
     btn:SetText'Start'
@@ -208,8 +122,8 @@ do
     private.start_button = btn
 end
 do
-    local btn = gui.button(controls, gui.font_size.huge)
-    btn:SetPoint('RIGHT', -5, 0)
+    local btn = gui.button(frame, gui.font_size.huge)
+    btn:SetPoint('TOPRIGHT', -5, -10)
     btn:SetWidth(70)
     btn:SetHeight(25)
     btn:SetText'Stop'
@@ -219,7 +133,7 @@ do
     private.stop_button = btn
 end
 do
-    local btn = gui.button(controls, gui.font_size.huge)
+    local btn = gui.button(frame, gui.font_size.huge)
     btn:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
     btn:SetWidth(70)
     btn:SetHeight(25)
@@ -230,7 +144,7 @@ do
     private.resume_button = btn
 end
 do
-    local editbox = gui.editbox(controls)
+    local editbox = gui.editbox(frame)
     editbox:EnableMouse(1)
     editbox.formatter = function(str)
 	    local queries = filter_util.queries(str)
@@ -615,53 +529,16 @@ for _ = 1, 5  do
     tinsert(tables, table)
 end
 
-local handlers = {
-    OnClick = function(st, data, _, button)
-        if not data then return end
-        if button == 'LeftButton' and IsShiftKeyDown() then
-            search_box:SetText(data.search.filter_string)
-        elseif button == 'RightButton' and IsShiftKeyDown() then
-            add_filter(data.search.filter_string)
-        elseif button == 'LeftButton' and IsControlKeyDown() then
-            if st == favorite_searches_listing and data.index > 1 then
-                local temp = aux_favorite_searches[data.index - 1]
-                aux_favorite_searches[data.index - 1] = data.search
-                aux_favorite_searches[data.index] = temp
-                update_search_listings()
-            end
-        elseif button == 'RightButton' and IsControlKeyDown() then
-            if st == favorite_searches_listing and data.index < getn(aux_favorite_searches) then
-                local temp = aux_favorite_searches[data.index + 1]
-                aux_favorite_searches[data.index + 1] = data.search
-                aux_favorite_searches[data.index] = temp
-                update_search_listings()
-            end
-        elseif button == 'LeftButton' then
-            search_box:SetText(data.search.filter_string)
-            execute()
-        elseif button == 'RightButton' then
-            if st == recent_searches_listing then
-                tinsert(aux_favorite_searches, 1, data.search)
-            elseif st == favorite_searches_listing then
-                tremove(aux_favorite_searches, data.index)
-            end
-            update_search_listings()
-        end
-    end,
-    OnEnter = function(st, data, self)
-        if not data then return end
-        GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-        GameTooltip:AddLine(gsub(data.search.prettified, ';', '\n\n'), 255/255, 254/255, 250/255, true)
-        GameTooltip:Show()
-    end,
-    OnLeave = function()
-        GameTooltip:ClearLines()
-        GameTooltip:Hide()
-    end
-}
+private.autobuy_listing = listing.CreateScrollingTable(frame.saved.autobuy)
+autobuy_listing:SetColInfo{{name='Autobuy Filters', width=1}}
+autobuy_listing:EnableSorting(false)
+autobuy_listing:DisableSelection(true)
+autobuy_listing:SetHandler('OnClick', handlers.OnClick)
+autobuy_listing:SetHandler('OnEnter', handlers.OnEnter)
+autobuy_listing:SetHandler('OnLeave', handlers.OnLeave)
 
 private.recent_searches_listing = listing.CreateScrollingTable(frame.saved.recent)
-recent_searches_listing:SetColInfo{{ name='Recent Searches', width=1 }}
+recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}
 recent_searches_listing:EnableSorting(false)
 recent_searches_listing:DisableSelection(true)
 recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
@@ -669,7 +546,7 @@ recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
 recent_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
 
 private.favorite_searches_listing = listing.CreateScrollingTable(frame.saved.favorite)
-favorite_searches_listing:SetColInfo{{ name='Favorite Searches', width=1 }}
+favorite_searches_listing:SetColInfo{{name='Favorite Searches', width=1}}
 favorite_searches_listing:EnableSorting(false)
 favorite_searches_listing:DisableSelection(true)
 favorite_searches_listing:SetHandler('OnClick', handlers.OnClick)

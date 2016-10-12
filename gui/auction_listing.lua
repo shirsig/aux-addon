@@ -1017,7 +1017,7 @@ function public.CreateAuctionResultsTable(parent, config)
     rt.contentFrame = contentFrame
 
     -- frame to hold the header columns and the rows
-    local scrollFrame = CreateFrame('ScrollFrame', gui.name, rt, 'FauxScrollFrameTemplate')
+    local scrollFrame = CreateFrame('ScrollFrame', gui.unique_name, rt, 'FauxScrollFrameTemplate')
     scrollFrame:SetScript('OnVerticalScroll', function()
         if not rt.scrollDisabled then
             FauxScrollFrame_OnVerticalScroll(rt.ROW_HEIGHT, function() rt:UpdateRows() end)

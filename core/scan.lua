@@ -156,12 +156,7 @@ function private.scan_page(i)
 
 		history.process_auction(auction_info)
 
-		if (state.params.auto_buy_validator or nop)(auction_info) then
-			local send_signal, signal_received = signal()
-			when(signal_received, recurse)
-			place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, papply(send_signal, true))
-			return thread(when, later(GetTime(), 10), send_signal, false)
-		elseif not query.validator or query.validator(auction_info) then
+		if not query.validator or query.validator(auction_info) then
 			return wait_for_callback(state.params.on_auction, auction_info, function(removed)
 				if removed then
 					return recurse(true)

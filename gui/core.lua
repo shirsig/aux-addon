@@ -20,7 +20,7 @@ function LOAD()
 		aux_border:SetTexture(1, 1, 1, .02)
 		aux_border:SetPoint('TOPLEFT', DropDownList1Backdrop, 'TOPLEFT', -2, 2)
 		aux_border:SetPoint('BOTTOMRIGHT', DropDownList1Backdrop, 'BOTTOMRIGHT', 1.5, -1.5)
-		aux_border:SetBlendMode('ADD')
+		aux_border:SetBlendMode'ADD'
 		aux_background = DropDownList1:CreateTexture(nil, 'OVERLAY')
 		aux_background:SetTexture(color.content.background())
 		aux_background:SetAllPoints(DropDownList1Backdrop)
@@ -76,7 +76,7 @@ function LOAD()
 				text:SetShadowOffset(1, -1)
 				local highlight = _G['DropDownList1Button' .. i..'Highlight']
 				highlight:SetAllPoints()
-				highlight:SetDrawLayer('BACKGROUND')
+				highlight:SetDrawLayer'BACKGROUND'
 				local check = _G['DropDownList1Button' .. i..'Check']
 				check:SetWidth(24)
 				check:SetHeight(24)
@@ -88,30 +88,32 @@ end
 
 do
 	local id = 1
-	function public.name.get()
+	function public.unique_name.get()
 		id = id + 1
 		return 'AuxFrame' .. id
 	end
 end
 
 do
-	local menu, structure, orig
-	menu = CreateFrame('Frame', name, UIParent, 'UIMenuTemplate')
-	orig = menu:GetScript('OnShow')
+	local menu = CreateFrame('Frame', unique_name, UIParent, 'UIMenuTemplate')
+	local orig = menu:GetScript'OnShow'
+	local structure = t
 	menu:SetScript('OnShow', function()
 		UIMenu_Initialize()
-		for i = 1, getn(structure or empty) do
+		for i = 1, getn(structure), 2 do
 			UIMenu_AddButton(
-				structure[i][1],
 				structure[i],
-				type(structure[i]) == 'string' and structure[element[3]] or element[3]
+				nil,
+				structure[i + 1]
 			)
 		end
 		return orig()
 	end)
-	function public.menu(menu_structure)
-		structure = menu_structure
-		menu:SetPoint('BOTTOMLEFT', GetCursorPosition())
+	public.menu = vararg-function(arg)
+		structure = perm-arg
+		local x, y = GetCursorPosition()
+		menu:ClearAllPoints()
+		menu:SetPoint('BOTTOMLEFT', x + 75, y)
 		menu:Show()
 	end
 end
@@ -172,14 +174,14 @@ function public.button(parent, text_height)
     local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
     highlight:SetAllPoints()
     highlight:SetTexture(1, 1, 1, .2)
-    highlight:SetBlendMode('BLEND')
+    highlight:SetBlendMode'BLEND'
     button.highlight = highlight
     do
         local label = button:CreateFontString()
         label:SetFont(font, text_height)
         label:SetPoint('CENTER', 0, 0)
-        label:SetJustifyH('CENTER')
-        label:SetJustifyV('CENTER')
+        label:SetJustifyH'CENTER'
+        label:SetJustifyV'CENTER'
         label:SetHeight(text_height)
         label:SetTextColor(color.text.enabled())
         button:SetFontString(label)
@@ -198,17 +200,12 @@ function public.button(parent, text_height)
     return button
 end
 
-
-function public.resize_tab(tab, width, padding)
-    tab:SetWidth(width + padding + 10)
-end
-
 do
-	local mt = { __index=t }
+	local mt = {__index=t}
 	function mt.__index:create_tab(text)
 		local id = getn(self._tabs) + 1
 
-		local tab = CreateFrame('Button', name, self._frame)
+		local tab = CreateFrame('Button', unique_name, self._frame)
 		tab.id = id
 		tab.group = self
 		tab:SetHeight(24)
@@ -227,14 +224,14 @@ do
 		local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
 		highlight:SetAllPoints()
 		highlight:SetTexture(1, 1, 1, .2)
-		highlight:SetBlendMode('BLEND')
+		highlight:SetBlendMode'BLEND'
 		tab.highlight = highlight
 
 		tab.text = tab:CreateFontString()
 		tab.text:SetPoint('LEFT', 3, -1)
 		tab.text:SetPoint('RIGHT', -3, -1)
-		tab.text:SetJustifyH('CENTER')
-		tab.text:SetJustifyV('CENTER')
+		tab.text:SetJustifyH'CENTER'
+		tab.text:SetJustifyV'CENTER'
 		tab.text:SetFont(font, font_size.large)
 		tab:SetFontString(tab.text)
 
@@ -242,7 +239,7 @@ do
 
 		tab:SetScript('OnClick', function()
 			if this.id ~= this.group.selected then
-				PlaySound('igCharacterInfoTab')
+				PlaySound'igCharacterInfoTab'
 				this.group:select(this.id)
 			end
 		end)
@@ -261,7 +258,7 @@ do
 			end
 		end
 
-		resize_tab(tab, tab:GetFontString():GetStringWidth(), 4)
+		tab:SetWidth(tab:GetFontString():GetStringWidth() + 14)
 
 		tinsert(self._tabs, tab)
 	end
@@ -358,7 +355,7 @@ function public.editbox(parent)
     overlay:SetPoint('RIGHT', -1.5, 0)
     overlay:SetTextColor(color.text.enabled())
     editbox.overlay = overlay
-    editbox:SetAlignment('LEFT')
+    editbox:SetAlignment'LEFT'
     editbox:SetFontSize(font_size.medium)
     return editbox
 end
@@ -370,10 +367,10 @@ function public.status_bar(parent)
     do
         -- minor status bar (gray one)
         local status_bar = CreateFrame('STATUSBAR', nil, self, 'TextStatusBar')
-        status_bar:SetOrientation('HORIZONTAL')
+        status_bar:SetOrientation'HORIZONTAL'
         status_bar:SetMinMaxValues(0, 100)
         status_bar:SetAllPoints()
-        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
+        status_bar:SetStatusBarTexture[[Interface\Buttons\WHITE8X8]]
         status_bar:SetStatusBarColor(.42, .42, .42, .7)
         status_bar:SetFrameLevel(level + 2)
         status_bar:SetScript('OnUpdate', function()
@@ -388,10 +385,10 @@ function public.status_bar(parent)
     do
         -- major status bar (main blue one)
         local status_bar = CreateFrame('STATUSBAR', nil, self, 'TextStatusBar')
-        status_bar:SetOrientation('HORIZONTAL')
+        status_bar:SetOrientation'HORIZONTAL'
         status_bar:SetMinMaxValues(0, 100)
         status_bar:SetAllPoints()
-        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
+        status_bar:SetStatusBarTexture[[Interface\Buttons\WHITE8X8]]
         status_bar:SetStatusBarColor(.19, .22, .33, .9)
         status_bar:SetFrameLevel(level + 3)
         status_bar:SetScript('OnUpdate', function()
@@ -429,7 +426,7 @@ end
 function public.item(parent)
     local item = CreateFrame('Frame', nil, parent)
     set_size(item, 260, 40)
-    local btn = CreateFrame('CheckButton', name, item, 'ActionButtonTemplate')
+    local btn = CreateFrame('CheckButton', unique_name, item, 'ActionButtonTemplate')
     item.button = btn
     btn:SetPoint('LEFT', 2, .5)
     btn:SetHighlightTexture(nil)
@@ -479,7 +476,7 @@ function public.vertical_line(parent, x_offset, top_offset, bottom_offset, inver
 end
 
 function public.dropdown(parent)
-    local dropdown = CreateFrame('Frame', name, parent, 'UIDropDownMenuTemplate')
+    local dropdown = CreateFrame('Frame', unique_name, parent, 'UIDropDownMenuTemplate')
 	set_content_style(dropdown, 0, 0, 4, 4)
 
     _G[dropdown:GetName() .. 'Left']:Hide()
@@ -505,7 +502,7 @@ end
 function public.slider(parent)
 
     local slider = CreateFrame('Slider', nil, parent)
-    slider:SetOrientation('HORIZONTAL')
+    slider:SetOrientation'HORIZONTAL'
     slider:SetHeight(6)
     slider:SetHitRectInsets(0, 0, -12, -12)
     slider:SetValue(0)
@@ -530,7 +527,7 @@ function public.slider(parent)
     local editbox = editbox(slider)
     editbox:SetPoint('LEFT', slider, 'RIGHT', 5, 0)
     set_size(editbox, 45, 18)
-    editbox:SetAlignment('CENTER')
+    editbox:SetAlignment'CENTER'
     editbox:SetFontSize(17)
 
     slider.label = label
@@ -548,6 +545,6 @@ function public.checkbox(parent)
     checkbox:GetHighlightTexture():SetAllPoints()
     checkbox:GetHighlightTexture():SetTexture(1, 1, 1, .2)
     checkbox:GetCheckedTexture():SetTexCoord(.12, .88, .12, .88)
-    checkbox:GetHighlightTexture('BLEND')
+    checkbox:GetHighlightTexture'BLEND'
     return checkbox
 end
