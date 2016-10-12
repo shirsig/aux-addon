@@ -126,7 +126,7 @@ do
 	end
 	do
 		local editbox = gui.editbox(frame)
-		editbox:SetPoint('RIGHT', last_page_input, 'LEFT', -5.5, 0)
+		editbox:SetPoint('RIGHT', last_page_input, 'LEFT', -5.8, 0)
 		editbox:SetWidth(40)
 		editbox:SetHeight(25)
 		editbox:SetNumeric(true)
