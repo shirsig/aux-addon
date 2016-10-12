@@ -1,7 +1,7 @@
 ## Interface: 11200
 ## Title: aux
 ## Description: Auction House AddOn
-## SavedVariablesPerCharacter: aux_tooltip_value, aux_tooltip_daily, aux_tooltip_vendor_buy, aux_tooltip_vendor_sell, aux_tooltip_disenchant_value, aux_tooltip_disenchant_distribution, aux_tooltip_disenchant_source
+## SavedVariablesPerCharacter: aux_auto_buy_filters, aux_tooltip_value, aux_tooltip_daily, aux_tooltip_vendor_buy, aux_tooltip_vendor_sell, aux_tooltip_disenchant_value, aux_tooltip_disenchant_distribution, aux_tooltip_disenchant_source
 ## SavedVariables: aux_datasets, aux_items, aux_item_ids, aux_auctionable_items, aux_merchant_buy, aux_merchant_sell, aux_characters, aux_recent_searches, aux_favorite_searches, aux_ignore_owner, aux_price_per_unit
 
 libs\inspect.lua

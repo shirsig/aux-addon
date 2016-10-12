@@ -11,17 +11,6 @@ function LOAD()
 end
 
 do
-	local id = 0
-	function private.search_scan_id.get() return id end
-	function private.search_scan_id.set(v) id = v end
-end
-do
-	local validator
-	function private.auto_buy_validator.get() return validator end
-	function private.auto_buy_validator.set(v) validator = v end
-end
-
-do
 	local searches = t
 	local search_index = 1
 
@@ -47,10 +36,10 @@ do
 		end
 		if search_index == getn(searches) then
 			next_button:Hide()
-			search_box:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
+			first_page_input:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
 		else
 			next_button:Show()
-			search_box:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
+			first_page_input:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
 		end
 		update_start_stop()
 		update_continuation()
@@ -118,25 +107,6 @@ function private.update_start_stop()
 		start_button:Show()
 		stop_button:Hide()
 	end
-end
-
-function private.update_auto_buy_filter()
-	if aux_auto_buy_filter ~= '' then
-		local queries, error = filter_util.queries(aux_auto_buy_filter)
-		if queries then
-			if getn(queries) > 1 then
-				print 'Error: The automatic buyout filter does not support multi-queries'
-			elseif size(queries[1].blizzard_query) > 0 then
-				print 'Error: The automatic buyout filter does not support Blizzard filters'
-			else
-				auto_buy_validator = queries[1].validator
-				return
-			end
-		else
-			print('Invalid auto buy filter:', error)
-		end
-	end
-	aux_auto_buy_filter = ''
 end
 
 function private.start_real_time_scan(query, search, continuation)

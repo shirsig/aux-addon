@@ -37,8 +37,8 @@ frame.saved.recent:SetPoint('TOPLEFT', frame.saved.favorite, 'TOPRIGHT', 2.5, 0)
 frame.saved.recent:SetPoint('BOTTOMRIGHT', 0, 0)
 do
     local btn = gui.checkbutton(frame)
-    btn:SetPoint('TOPLEFT', 5, -10)
-    btn:SetWidth(100)
+    btn:SetPoint('TOPLEFT', 5, -9)
+    btn:SetWidth(90)
     btn:SetHeight(25)
     btn:SetText'Real Time'
     btn:SetScript('OnClick', function()
@@ -51,46 +51,8 @@ do
     private.real_time_button = btn
 end
 do
-	local function change()
-		local page = tonumber(this:GetText())
-		local valid_input = page and tostring(max(1, page)) or ''
-		if this:GetText() ~= valid_input then
-			this:SetText(valid_input)
-		end
-	end
-	do
-		local editbox = gui.editbox(frame)
-		editbox:SetPoint('LEFT', real_time_button, 'RIGHT', 5, 0)
-		editbox:SetWidth(50)
-		editbox:SetHeight(25)
-		editbox:SetNumeric(true)
-		editbox:SetScript('OnTabPressed', function() last_page_input:SetFocus() end)
-		editbox.enter = execute
-		editbox.change = change
-		local label = gui.label(editbox, 16)
-		label:SetPoint('RIGHT', editbox, 'LEFT', -6, 0)
-		label:SetTextColor(color.text.enabled())
-		private.first_page_input = editbox
-	end
-	do
-		local editbox = gui.editbox(frame)
-		editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 10, 0)
-		editbox:SetWidth(50)
-		editbox:SetHeight(25)
-		editbox:SetNumeric(true)
-		editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
-		editbox.enter = execute
-		editbox.change = change
-		local label = gui.label(editbox, gui.font_size.medium)
-		label:SetPoint('RIGHT', editbox, 'LEFT', -3.5, 0)
-		label:SetText'-'
-		label:SetTextColor(color.text.enabled())
-		private.last_page_input = editbox
-	end
-end
-do
     local btn = gui.button(frame, 25)
-    btn:SetPoint('LEFT', last_page_input, 'RIGHT', 5, 0)
+    btn:SetPoint('LEFT', real_time_button, 'RIGHT', 4, 0)
     btn:SetWidth(30)
     btn:SetHeight(25)
     btn:SetText'<'
@@ -107,8 +69,42 @@ do
     private.next_button = btn
 end
 do
+	local function change()
+		local page = tonumber(this:GetText())
+		local valid_input = page and tostring(max(1, page)) or ''
+		if this:GetText() ~= valid_input then
+			this:SetText(valid_input)
+		end
+	end
+	do
+		local editbox = gui.editbox(frame)
+		editbox:SetWidth(40)
+		editbox:SetHeight(25)
+		editbox:SetNumeric(true)
+		editbox:SetScript('OnTabPressed', function() last_page_input:SetFocus() end)
+		editbox.enter = execute
+		editbox.change = change
+		private.first_page_input = editbox
+	end
+	do
+		local editbox = gui.editbox(frame)
+		editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 7, 0)
+		editbox:SetWidth(40)
+		editbox:SetHeight(25)
+		editbox:SetNumeric(true)
+		editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
+		editbox.enter = execute
+		editbox.change = change
+		local label = gui.label(editbox, gui.font_size.medium)
+		label:SetPoint('RIGHT', editbox, 'LEFT', -2, 0)
+		label:SetText'-'
+		label:SetTextColor(color.label.enabled())
+		private.last_page_input = editbox
+	end
+end
+do
     local btn = gui.button(frame, gui.font_size.huge)
-    btn:SetPoint('TOPRIGHT', -5, -10)
+    btn:SetPoint('TOPRIGHT', -5, -9)
     btn:SetWidth(70)
     btn:SetHeight(25)
     btn:SetText'Start'
@@ -123,7 +119,7 @@ do
 end
 do
     local btn = gui.button(frame, gui.font_size.huge)
-    btn:SetPoint('TOPRIGHT', -5, -10)
+    btn:SetPoint('TOPRIGHT', -5, -9)
     btn:SetWidth(70)
     btn:SetHeight(25)
     btn:SetText'Stop'
@@ -151,6 +147,7 @@ do
 	    return queries and join(map(copy(queries), function(query) return query.prettified end), ';') or color.red(str)
 	end
     editbox.complete = completion.complete_filter
+    editbox:SetPoint('LEFT', last_page_input, 'RIGHT', 4, 0)
     editbox:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
     editbox:SetHeight(25)
     editbox.char = function()
@@ -530,7 +527,7 @@ for _ = 1, 5  do
 end
 
 private.autobuy_listing = listing.CreateScrollingTable(frame.saved.autobuy)
-autobuy_listing:SetColInfo{{name='Autobuy Filters', width=1}}
+autobuy_listing:SetColInfo{{name='Auto Buy Filters', width=1}}
 autobuy_listing:EnableSorting(false)
 autobuy_listing:DisableSelection(true)
 autobuy_listing:SetHandler('OnClick', handlers.OnClick)

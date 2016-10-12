@@ -1,12 +1,14 @@
 module 'aux.tabs.search'
 
-aux_autobuy_filters = t
+local filter_util = require 'aux.util.filter'
+
+aux_auto_buy_filters = t
 aux_favorite_searches = t
 aux_recent_searches = t
 
 function private.update_search_listings()
 	local autobuy_filter_rows = t
-	for i, autobuy_filter in aux_autobuy_filters do
+	for i, autobuy_filter in aux_auto_buy_filters do
 		local name = strsub(autobuy_filter.prettified, 1, 250)
 		tinsert(autobuy_filter_rows, {
 			cols = {{ value=name }},
@@ -73,7 +75,7 @@ private.handlers = {
 			end
 		elseif button == 'RightButton' and IsAltKeyDown() then
 			if st ~= autobuy_listing then
-				tinsert(aux_autobuy_filters, 1, data.search)
+				tinsert(aux_auto_buy_filters, 1, data.search)
 				update_search_listings()
 			end
 		elseif button == 'LeftButton' then
@@ -81,7 +83,7 @@ private.handlers = {
 			execute()
 		elseif button == 'RightButton' then
 			if st == autobuy_listing then
-				tremove(aux_autobuy_filters, data.index)
+				tremove(aux_auto_buy_filters, data.index)
 			elseif st == recent_searches_listing then
 				tinsert(aux_favorite_searches, 1, data.search)
 			elseif st == favorite_searches_listing then
@@ -101,3 +103,24 @@ private.handlers = {
 		GameTooltip:Hide()
 	end
 }
+
+function private.auto_buy_validator.get()
+	local validators = t
+	for _, filter in aux_auto_buy_filters do
+		local queries, error = filter_util.queries(filter.filter_string)
+		if queries then
+			if getn(queries) > 1 then
+				return nil, 'The automatic buyout filter does not support multi-queries'
+--			elseif size(queries[1].blizzard_query) > 0 then TODO allow exact
+--				return nil, 'The automatic buyout filter does not support Blizzard filters'
+			else
+				tinsert(validators, queries[1].validator)
+			end
+		else
+			print('Invalid auto buy filter:', error)
+		end
+	end
+	return function(record)
+		return any(validators, function(validator) return validator(record) end)
+	end
+end
