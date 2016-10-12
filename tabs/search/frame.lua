@@ -88,7 +88,7 @@ do
 	end
 	do
 		local editbox = gui.editbox(frame)
-		editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 7, 0)
+		editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 6, 0)
 		editbox:SetWidth(40)
 		editbox:SetHeight(25)
 		editbox:SetNumeric(true)
@@ -96,7 +96,9 @@ do
 		editbox.enter = execute
 		editbox.change = change
 		local label = gui.label(editbox, gui.font_size.medium)
-		label:SetPoint('RIGHT', editbox, 'LEFT', -2, 0)
+		label:SetPoint('LEFT', first_page_input, 'RIGHT', 0, 0)
+		label:SetPoint('RIGHT', editbox, 'LEFT', -1, 0)
+		label:SetJustifyH'CENTER'
 		label:SetText'-'
 		label:SetTextColor(color.label.enabled())
 		private.last_page_input = editbox
