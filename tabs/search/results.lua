@@ -6,8 +6,7 @@ local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
 
 function LOAD()
-	new_search''
-	current_search.dummy = true
+	new_search()
 end
 
 do
@@ -28,7 +27,9 @@ do
 		searches[search_index].status_bar:Show()
 		searches[search_index].table:Show()
 
-		search_box:SetText(searches[search_index].filter_string)
+		search_box:SetText(searches[search_index].filter_string or '')
+		first_page_input:SetText(searches[search_index].first_page and searches[search_index].first_page + 1 or '')
+		last_page_input:SetText(searches[search_index].last_page and searches[search_index].last_page + 1 or '')
 		if search_index == 1 then
 			previous_button:Disable()
 		else
@@ -45,11 +46,11 @@ do
 		update_continuation()
 	end
 
-	function private.new_search(filter_string)
+	function private.new_search(filter_string, first_page, last_page)
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
-		local search = T('filter_string', filter_string, 'records', t)
+		local search = T('records', t, 'filter_string', filter_string, 'first_page', first_page, 'last_page', last_page)
 		tinsert(searches, search)
 		if getn(searches) > 5 then
 			tremove(searches, 1)
@@ -60,7 +61,7 @@ do
 
 		search.status_bar = status_bars[getn(searches)]
 		search.status_bar:update_status(100, 100)
-		search.status_bar:set_text('')
+		search.status_bar:set_text''
 
 		search.table = tables[getn(searches)]
 		search.table:SetSort(1, 2, 3, 4, 5, 6, 7, 8, 9)
@@ -70,14 +71,20 @@ do
 		update_search(getn(searches))
 	end
 
-	function private.previous_search()
+	function private.clear_control_focus()
 		search_box:ClearFocus()
+		first_page_input:ClearFocus()
+		last_page_input:ClearFocus()
+	end
+
+	function private.previous_search()
+		clear_control_focus()
 		update_search(search_index - 1)
 		subtab = RESULTS
 	end
 
 	function private.next_search()
-		search_box:ClearFocus()
+		clear_control_focus()
 		update_search(search_index + 1)
 		subtab = RESULTS
 	end
@@ -127,7 +134,7 @@ function private.start_real_time_scan(query, search, continuation)
 		auto_buy_validator = search.auto_buy_validator,
 		on_scan_start = function()
 			search.status_bar:update_status(99.99, 99.99)
-			search.status_bar:set_text('Scanning last page ...')
+			search.status_bar:set_text'Scanning last page ...'
 		end,
 		on_page_loaded = function(_, _, last_page)
 			next_page = last_page
@@ -203,9 +210,9 @@ function private.start_search(queries, continuation)
 		on_scan_start = function()
 			search.status_bar:update_status(0,0)
 			if continuation then
-				search.status_bar:set_text('Resuming scan...')
+				search.status_bar:set_text'Resuming scan...'
 			else
-				search.status_bar:set_text('Scanning auctions...')
+				search.status_bar:set_text'Scanning auctions...'
 			end
 		end,
 		on_page_loaded = function(_, total_scan_pages)
@@ -272,7 +279,7 @@ function public.execute(resume, real_time)
 	if resume then
 		search_box:SetText(current_search.filter_string)
 	end
-	local filter_string = search_box:GetText()
+	local filter_string, first_page, last_page = search_box:GetText(), blizzard_page_index(first_page_input:GetText()), blizzard_page_index(last_page_input:GetText())
 
 	local queries, error = filter_util.queries(filter_string)
 	if not queries then
@@ -280,25 +287,26 @@ function public.execute(resume, real_time)
 		return
 	elseif real_time then
 		if getn(queries) > 1 then
-			print('Error: The real time mode does not support multi-queries')
+			print'Error: The real time mode does not support multi-queries'
 			return
 		elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-			print('Error: The real time mode does not support page ranges')
+			print'Error: The real time mode does not support page ranges'
 			return
 		end
 	end
 
-	search_box:ClearFocus()
+	clear_control_focus()
 
 	if resume then
 		current_search.table:SetSelectedRecord()
 	else
-		if filter_string ~= current_search.filter_string or current_search.dummy then
-			if current_search.dummy then
-				current_search.filter_string = filter_string
-				current_search.dummy = false
+		if filter_string ~= current_search.filter_string or current_search.first_page ~= first_page or current_search.last_page ~= last_page then
+			if current_search.filter_string then
+				new_search(filter_string, first_page, last_page)
 			else
-				new_search(filter_string)
+				current_search.filter_string = filter_string
+				current_search.first_page = first_page
+				current_search.last_page = last_page
 			end
 			new_recent_search(filter_string, join(map(copy(queries), function(filter) return filter.prettified end), ';'))
 		else
@@ -322,8 +330,8 @@ function public.execute(resume, real_time)
 		start_real_time_scan(queries[1], nil, continuation)
 	else
 		for _, query in queries do
-			query.blizzard_query.first_page = blizzard_page_index(first_page_input:GetText())
-			query.blizzard_query.last_page = blizzard_page_index(last_page_input:GetText())
+			query.blizzard_query.first_page = current_search.first_page
+			query.blizzard_query.last_page = current_search.last_page
 		end
 		start_search(queries, continuation)
 	end
