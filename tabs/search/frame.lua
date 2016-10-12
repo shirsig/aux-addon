@@ -69,42 +69,6 @@ do
     private.next_button = btn
 end
 do
-	local function change()
-		local page = tonumber(this:GetText())
-		local valid_input = page and tostring(max(1, page)) or ''
-		if this:GetText() ~= valid_input then
-			this:SetText(valid_input)
-		end
-	end
-	do
-		local editbox = gui.editbox(frame)
-		editbox:SetWidth(40)
-		editbox:SetHeight(25)
-		editbox:SetNumeric(true)
-		editbox:SetScript('OnTabPressed', function() last_page_input:SetFocus() end)
-		editbox.enter = execute
-		editbox.change = change
-		private.first_page_input = editbox
-	end
-	do
-		local editbox = gui.editbox(frame)
-		editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 6, 0)
-		editbox:SetWidth(40)
-		editbox:SetHeight(25)
-		editbox:SetNumeric(true)
-		editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
-		editbox.enter = execute
-		editbox.change = change
-		local label = gui.label(editbox, gui.font_size.medium)
-		label:SetPoint('LEFT', first_page_input, 'RIGHT', 0, 0)
-		label:SetPoint('RIGHT', editbox, 'LEFT', -1, 0)
-		label:SetJustifyH'CENTER'
-		label:SetText'-'
-		label:SetTextColor(color.label.enabled())
-		private.last_page_input = editbox
-	end
-end
-do
     local btn = gui.button(frame, gui.font_size.huge)
     btn:SetPoint('TOPRIGHT', -5, -9)
     btn:SetWidth(70)
@@ -142,24 +106,58 @@ do
     private.resume_button = btn
 end
 do
-    local editbox = gui.editbox(frame)
-    editbox:EnableMouse(1)
-    editbox.formatter = function(str)
-	    local queries = filter_util.queries(str)
-	    return queries and join(map(copy(queries), function(query) return query.prettified end), ';') or color.red(str)
+	local function change()
+		local page = tonumber(this:GetText())
+		local valid_input = page and tostring(max(1, page)) or ''
+		if this:GetText() ~= valid_input then
+			this:SetText(valid_input)
+		end
 	end
-    editbox.complete = completion.complete_filter
-    editbox:SetPoint('LEFT', last_page_input, 'RIGHT', 4, 0)
-    editbox:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
-    editbox:SetHeight(25)
-    editbox.char = function()
-        this:complete()
-    end
-    editbox:SetScript('OnTabPressed', function()
-        this:HighlightText(0, 0)
-    end)
-    editbox.enter = execute
-    private.search_box = editbox
+	do
+		local editbox = gui.editbox(frame)
+		editbox:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
+		editbox:SetWidth(40)
+		editbox:SetHeight(25)
+		editbox:SetNumeric(true)
+		editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
+		editbox.enter = execute
+		editbox.change = change
+		private.last_page_input = editbox
+	end
+	do
+		local editbox = gui.editbox(frame)
+		editbox:SetPoint('RIGHT', last_page_input, 'LEFT', -5.5, 0)
+		editbox:SetWidth(40)
+		editbox:SetHeight(25)
+		editbox:SetNumeric(true)
+		editbox:SetScript('OnTabPressed', function() last_page_input:SetFocus() end)
+		editbox.enter = execute
+		editbox.change = change
+		local label = gui.label(editbox, gui.font_size.medium)
+		label:SetPoint('LEFT', editbox, 'RIGHT', 0, 0)
+		label:SetTextColor(color.label.enabled())
+		label:SetText'-'
+		private.first_page_input = editbox
+	end
+end
+do
+	local editbox = gui.editbox(frame)
+	editbox:EnableMouse(1)
+	editbox.formatter = function(str)
+		local queries = filter_util.queries(str)
+		return queries and join(map(copy(queries), function(query) return query.prettified end), ';') or color.red(str)
+	end
+	editbox.complete = completion.complete_filter
+	editbox:SetPoint('RIGHT', first_page_input, 'LEFT', -4, 0)
+	editbox:SetHeight(25)
+	editbox.char = function()
+		this:complete()
+	end
+	editbox:SetScript('OnTabPressed', function()
+		this:HighlightText(0, 0)
+	end)
+	editbox.enter = execute
+	private.search_box = editbox
 end
 do
     gui.horizontal_line(frame, -40)

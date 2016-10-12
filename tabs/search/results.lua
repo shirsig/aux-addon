@@ -37,10 +37,10 @@ do
 		end
 		if search_index == getn(searches) then
 			next_button:Hide()
-			first_page_input:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
+			search_box:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
 		else
 			next_button:Show()
-			first_page_input:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
+			search_box:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
 		end
 		update_start_stop()
 		update_continuation()
@@ -93,10 +93,10 @@ end
 function private.update_continuation()
 	if current_search.continuation then
 		resume_button:Show()
-		search_box:SetPoint('RIGHT', resume_button, 'LEFT', -4, 0)
+		last_page_input:SetPoint('RIGHT', resume_button, 'LEFT', -4, 0)
 	else
 		resume_button:Hide()
-		search_box:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
+		last_page_input:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
 	end
 end
 
