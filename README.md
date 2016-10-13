@@ -72,21 +72,22 @@ Furthermore
 - Right-clicking item links will start a search.
 
 #### Search Results
-![Alt text](http://i.imgur.com/7SPm1Js.png)
+![Alt text](http://i.imgur.com/EQ8SILy.png)
 - Bid prices for your own active bids are colored in green.
 - Bid prices for other auctions with an active bid are colored in orange.
 
 #### Saved Searches
-![Alt text](http://i.imgur.com/Aih51u9.png)
+![Alt text](http://i.imgur.com/jHmGueI.png)
 - When hovering over an entry the tooltip shows a longer and more nicely formatted version.
 - Left-click on an entry will start a search.
 - Right-click on an entry will add/remove it to/from you favorites.
+- Alt-right-click on an entry will add/remove it to/from the auto buy filters.
 - Shift-left-click on an entry will copy a search to the search box.
 - Shift-right-click on an entry will add a search to the existing query in the search box.
 - Control-left/right-click will move an entry up/down in the favorites.
 
-#### New Filter
-![Alt text](http://i.imgur.com/eFgp9B2.png)
+#### Filter Builder
+![Alt text](http://i.imgur.com/coXD3H5.png)
 While it is faster to type filters directly into the search box this sub-tab serves as a tutorial to learn how to formulate queries.
 The filters on the left side are Blizzard filters which may reduce the number of pages to be scanned and those on the right side are post filters which do not affect the scan time but can be combined with logical operators to formulate very complex filters.
 ### Post
