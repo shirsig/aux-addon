@@ -16,7 +16,7 @@ function private.update_search_listings()
 			index = i,
 		})
 	end
-	autobuy_listing:SetData(autobuy_filter_rows)
+	auto_buy_listing:SetData(autobuy_filter_rows)
 
 	local favorite_search_rows = t
 	for i, favorite_search in aux_favorite_searches do
@@ -60,33 +60,34 @@ private.handlers = {
 		elseif button == 'RightButton' and IsShiftKeyDown() then
 			add_filter(data.search.filter_string)
 		elseif button == 'LeftButton' and IsControlKeyDown() then
-			if st == favorite_searches_listing and data.index > 1 then
-				local temp = aux_favorite_searches[data.index - 1]
-				aux_favorite_searches[data.index - 1] = data.search
-				aux_favorite_searches[data.index] = temp
-				update_search_listings()
+			if st == favorite_searches_listing then
+				move_up(aux_favorite_searches, data.index)
+			elseif st == auto_buy_listing then
+				move_up(aux_auto_buy_filters, data.index)
 			end
+			update_search_listings()
 		elseif button == 'RightButton' and IsControlKeyDown() then
-			if st == favorite_searches_listing and data.index < getn(aux_favorite_searches) then
-				local temp = aux_favorite_searches[data.index + 1]
-				aux_favorite_searches[data.index + 1] = data.search
-				aux_favorite_searches[data.index] = temp
-				update_search_listings()
+			if st == favorite_searches_listing then
+				move_down(aux_favorite_searches, data.index)
+			elseif st == auto_buy_listing then
+				move_down(aux_auto_buy_filters, data.index)
 			end
+			update_search_listings()
 		elseif button == 'RightButton' and IsAltKeyDown() then
-			if st ~= autobuy_listing then
+			if st == auto_buy_listing then
+				tremove(aux_auto_buy_filters, data.index)
+			else
 				add_auto_buy(data.search.filter_string)
 			end
+			update_search_listings()
 		elseif button == 'LeftButton' then
 			search_box:SetText(data.search.filter_string)
 			execute()
 		elseif button == 'RightButton' then
-			if st == autobuy_listing then
-				tremove(aux_auto_buy_filters, data.index)
-			elseif st == recent_searches_listing then
-				tinsert(aux_favorite_searches, 1, data.search)
-			elseif st == favorite_searches_listing then
+			if st == favorite_searches_listing then
 				tremove(aux_favorite_searches, data.index)
+			else
+				tinsert(aux_favorite_searches, 1, data.search)
 			end
 			update_search_listings()
 		end
@@ -136,16 +137,27 @@ function private.add_auto_buy(filter_string)
 	if queries then
 		if getn(queries) > 1 then
 			print'Error: The automatic buyout filter does not support multi-queries'
---		elseif size(queries[1].blizzard_query) > 0 then TODO allow exact
---			print'Error: The automatic buyout filter does not support Blizzard filters'
+		elseif size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(filter_string).blizzard.exact then
+			print'Error: The automatic buyout filter does not support Blizzard filters'
 		else
 			tinsert(aux_auto_buy_filters, 1, T(
 				'filter_string', filter_string,
 				'prettified', join(map(queries, function(query) return query.prettified end), ';')
 			))
-			update_search_listings()
 		end
 	else
 		print('Invalid filter:', error)
+	end
+end
+
+function private.move_up(list, index)
+	if list[index - 1] then
+		list[index], list[index - 1] = list[index - 1], list[index]
+	end
+end
+
+function private.move_down(list, index)
+	if list[index + 1] then
+		list[index], list[index + 1] = list[index + 1], list[index]
 	end
 end

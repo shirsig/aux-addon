@@ -37,7 +37,7 @@ frame.saved.recent:SetPoint('TOPLEFT', frame.saved.favorite, 'TOPRIGHT', 2.5, 0)
 frame.saved.recent:SetPoint('BOTTOMRIGHT', 0, 0)
 do
     local btn = gui.checkbutton(frame)
-    btn:SetPoint('TOPLEFT', 5, -9)
+    btn:SetPoint('TOPLEFT', 5, -8)
     btn:SetWidth(90)
     btn:SetHeight(25)
     btn:SetText'Real Time'
@@ -70,7 +70,7 @@ do
 end
 do
     local btn = gui.button(frame, gui.font_size.huge)
-    btn:SetPoint('TOPRIGHT', -5, -9)
+    btn:SetPoint('TOPRIGHT', -5, -8)
     btn:SetWidth(70)
     btn:SetHeight(25)
     btn:SetText'Start'
@@ -85,7 +85,7 @@ do
 end
 do
     local btn = gui.button(frame, gui.font_size.huge)
-    btn:SetPoint('TOPRIGHT', -5, -9)
+    btn:SetPoint('TOPRIGHT', -5, -8)
     btn:SetWidth(70)
     btn:SetHeight(25)
     btn:SetText'Stop'
@@ -232,6 +232,7 @@ do
 	btn2:SetText'Auto Buy'
 	btn2:SetScript('OnClick', function()
 		add_auto_buy(search_box:GetText())
+		update_search_listings()
 	end)
 end
 do
@@ -524,13 +525,13 @@ for _ = 1, 5  do
     tinsert(tables, table)
 end
 
-private.autobuy_listing = listing.CreateScrollingTable(frame.saved.autobuy)
-autobuy_listing:SetColInfo{{name='Auto Buy Filters', width=1}}
-autobuy_listing:EnableSorting(false)
-autobuy_listing:DisableSelection(true)
-autobuy_listing:SetHandler('OnClick', handlers.OnClick)
-autobuy_listing:SetHandler('OnEnter', handlers.OnEnter)
-autobuy_listing:SetHandler('OnLeave', handlers.OnLeave)
+private.auto_buy_listing = listing.CreateScrollingTable(frame.saved.autobuy)
+auto_buy_listing:SetColInfo{{name='Auto Buy Filters', width=1}}
+auto_buy_listing:EnableSorting(false)
+auto_buy_listing:DisableSelection(true)
+auto_buy_listing:SetHandler('OnClick', handlers.OnClick)
+auto_buy_listing:SetHandler('OnEnter', handlers.OnEnter)
+auto_buy_listing:SetHandler('OnLeave', handlers.OnLeave)
 
 private.recent_searches_listing = listing.CreateScrollingTable(frame.saved.recent)
 recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}
