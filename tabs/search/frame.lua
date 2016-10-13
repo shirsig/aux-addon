@@ -224,23 +224,14 @@ do
     btn1:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
     btn1:SetText'Favorite'
     btn1:SetScript('OnClick', function()
-        local queries, error = filter_util.queries(search_box:GetText())
-        if queries then
-            tinsert(aux_favorite_searches, 1, T(
-                'filter_string', search_box:GetText(),
-                'prettified', join(map(queries, function(query) return query.prettified end), ';')
-            ))
-        else
-	        print('Invalid filter:', error)
-        end
-        update_search_listings()
+        add_favorite(search_box:GetText())
     end)
 
 	local btn2 = gui.button(frame.saved)
 	btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
 	btn2:SetText'Auto Buy'
 	btn2:SetScript('OnClick', function()
-
+		add_auto_buy(search_box:GetText())
 	end)
 end
 do

@@ -75,8 +75,7 @@ private.handlers = {
 			end
 		elseif button == 'RightButton' and IsAltKeyDown() then
 			if st ~= autobuy_listing then
-				tinsert(aux_auto_buy_filters, 1, data.search)
-				update_search_listings()
+				add_auto_buy(data.search.filter_string)
 			end
 		elseif button == 'LeftButton' then
 			search_box:SetText(data.search.filter_string)
@@ -109,18 +108,44 @@ function private.auto_buy_validator.get()
 	for _, filter in aux_auto_buy_filters do
 		local queries, error = filter_util.queries(filter.filter_string)
 		if queries then
-			if getn(queries) > 1 then
-				return nil, 'The automatic buyout filter does not support multi-queries'
---			elseif size(queries[1].blizzard_query) > 0 then TODO allow exact
---				return nil, 'The automatic buyout filter does not support Blizzard filters'
-			else
-				tinsert(validators, queries[1].validator)
-			end
+			tinsert(validators, queries[1].validator)
 		else
 			print('Invalid auto buy filter:', error)
 		end
 	end
 	return function(record)
 		return any(validators, function(validator) return validator(record) end)
+	end
+end
+
+function private.add_favorite(filter_string)
+	local queries, error = filter_util.queries(filter_string)
+	if queries then
+		tinsert(aux_favorite_searches, 1, T(
+			'filter_string', filter_string,
+			'prettified', join(map(queries, function(query) return query.prettified end), ';')
+		))
+		update_search_listings()
+	else
+		print('Invalid filter:', error)
+	end
+end
+
+function private.add_auto_buy(filter_string)
+	local queries, error = filter_util.queries(filter_string)
+	if queries then
+		if getn(queries) > 1 then
+			print'Error: The automatic buyout filter does not support multi-queries'
+--		elseif size(queries[1].blizzard_query) > 0 then TODO allow exact
+--			print'Error: The automatic buyout filter does not support Blizzard filters'
+		else
+			tinsert(aux_auto_buy_filters, 1, T(
+				'filter_string', filter_string,
+				'prettified', join(map(queries, function(query) return query.prettified end), ';')
+			))
+			update_search_listings()
+		end
+	else
+		print('Invalid filter:', error)
 	end
 end
