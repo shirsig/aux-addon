@@ -113,6 +113,7 @@ do
 		editbox:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
 		editbox:SetWidth(40)
 		editbox:SetHeight(25)
+		editbox:SetAlignment'CENTER'
 		editbox:SetNumeric(true)
 		editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
 		editbox.enter = execute
@@ -124,6 +125,7 @@ do
 		editbox:SetPoint('RIGHT', last_page_input, 'LEFT', -5.8, 0)
 		editbox:SetWidth(40)
 		editbox:SetHeight(25)
+		editbox:SetAlignment'CENTER'
 		editbox:SetNumeric(true)
 		editbox:SetScript('OnTabPressed', function() last_page_input:SetFocus() end)
 		editbox.enter = execute
@@ -289,6 +291,7 @@ do
     local editbox = gui.editbox(frame.filter)
     editbox:SetPoint('TOPLEFT', name_input, 'BOTTOMLEFT', 0, -FILTER_SPACING)
     editbox:SetWidth(125)
+    editbox:SetAlignment'CENTER'
     editbox:SetNumeric(true)
     editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
@@ -314,6 +317,7 @@ do
     local editbox = gui.editbox(frame.filter)
     editbox:SetPoint('TOPLEFT', min_level_input, 'TOPRIGHT', 10, 0)
     editbox:SetWidth(125)
+    editbox:SetAlignment'CENTER'
     editbox:SetNumeric(true)
     editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then

@@ -307,6 +307,11 @@ function public.editbox(parent)
     end)
     editbox:SetScript('OnEnterPressed', function() (this.enter or nop)() end)
     editbox:SetScript('OnEditFocusGained', function()
+	    if this.block_focus then
+		    this.block_focus = false
+		    this:ClearFocus()
+		    return
+	    end
 	    this.overlay:Hide()
 	    this:SetTextColor(color.text.enabled())
 	    this.focused = true
@@ -329,16 +334,22 @@ function public.editbox(parent)
     do
         local last_click = T('t', 0)
         editbox:SetScript('OnMouseDown', function()
-            local x, y = GetCursorPosition()
-            -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
-            -- or use an overlay with itemlinks
-            if GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
-                thread(function() editbox:HighlightText() end)
-            end
-            wipe(last_click)
-            last_click.t = GetTime()
-            last_click.x = x
-            last_click.y = y
+	        if arg1 == 'RightButton' then
+		        this:SetText''
+		        this:ClearFocus()
+		        this.block_focus = true
+	        else
+	            local x, y = GetCursorPosition()
+	            -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
+	            -- or use an overlay with itemlinks
+	            if GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
+	                thread(function() editbox:HighlightText() end)
+	            end
+	            wipe(last_click)
+	            last_click.t = GetTime()
+	            last_click.x = x
+	            last_click.y = y
+	        end
         end)
     end
     function editbox:SetAlignment(alignment)
@@ -546,4 +557,12 @@ function public.checkbox(parent)
     checkbox:GetCheckedTexture():SetTexCoord(.12, .88, .12, .88)
     checkbox:GetHighlightTexture'BLEND'
     return checkbox
+end
+
+do
+	local editbox = CreateFrame'EditBox'
+	function public.clear_focus()
+		editbox:SetFocus()
+		editbox:ClearFocus()
+	end
 end

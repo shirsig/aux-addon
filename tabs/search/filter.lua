@@ -87,6 +87,7 @@ function private.update_form()
 	for key in temp-S('min_level', 'max_level') do
 		if blizzard_query.exact then
 			_M[key .. '_input']:EnableMouse(false)
+			_M[key .. '_input']:ClearFocus()
 		else
 			_M[key .. '_input']:EnableMouse(true)
 		end

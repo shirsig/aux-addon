@@ -305,8 +305,6 @@ function public.execute(resume, real_time)
 				new_search(filter_string, first_page, last_page)
 			else
 				current_search.filter_string = filter_string
-				current_search.first_page = first_page
-				current_search.last_page = last_page
 			end
 			new_recent_search(filter_string, join(map(copy(queries), function(filter) return filter.prettified end), ';'))
 		else
@@ -316,6 +314,8 @@ function public.execute(resume, real_time)
 				current_search.table:Reset()
 			end
 		end
+		current_search.first_page = first_page
+		current_search.last_page = last_page
 		current_search.real_time = real_time_button:GetChecked()
 		current_search.auto_buy_validator = auto_buy_validator
 	end
