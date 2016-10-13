@@ -3,7 +3,7 @@ module 'aux.tabs.bids'
 local gui = require 'aux.gui'
 local auction_listing = require 'aux.gui.auction_listing'
 
-private.frame = CreateFrame('Frame', nil, AuxFrame)
+frame = CreateFrame('Frame', nil, AuxFrame)
 frame:SetAllPoints()
 frame:SetScript('OnUpdate', on_update)
 frame:Hide()
@@ -13,7 +13,7 @@ frame.listing:SetPoint('TOP', frame, 'TOP', 0, -8)
 frame.listing:SetPoint('BOTTOMLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, 0)
 frame.listing:SetPoint('BOTTOMRIGHT', AuxFrame.content, 'BOTTOMRIGHT', 0, 0)
 
-private.listing = auction_listing.CreateAuctionResultsTable(frame.listing, auction_listing.bids_config)
+listing = auction_listing.CreateAuctionResultsTable(frame.listing, auction_listing.bids_config)
 listing:SetSort(1, 2, 3, 4, 5, 6, 7, 8)
 listing:Reset()
 listing:SetHandler('OnCellClick', function(cell, button)
@@ -31,7 +31,7 @@ listing:SetHandler('OnSelectionChanged', function(rt, datum)
 end)
 
 do
-	private.status_bar = gui.status_bar(frame)
+	status_bar = gui.status_bar(frame)
     status_bar:SetWidth(265)
     status_bar:SetHeight(25)
     status_bar:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
@@ -43,14 +43,14 @@ do
     btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
     btn:SetText'Bid'
     btn:Disable()
-    private.bid_button = btn
+    bid_button = btn
 end
 do
     local btn = gui.button(frame)
     btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
     btn:SetText'Buyout'
     btn:Disable()
-    private.buyout_button = btn
+    buyout_button = btn
 end
 do
     local btn = gui.button(frame)

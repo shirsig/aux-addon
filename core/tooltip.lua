@@ -10,7 +10,7 @@ local disenchant = require 'aux.core.disenchant'
 local history = require 'aux.core.history'
 local auction_listing = require 'aux.gui.auction_listing'
 
-aux_tooltip_value = true
+_G.aux_tooltip_value = true
 
 local game_tooltip_hooks, game_tooltip_money = t, 0
 

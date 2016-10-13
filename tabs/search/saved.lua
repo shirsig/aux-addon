@@ -2,11 +2,11 @@ module 'aux.tabs.search'
 
 local filter_util = require 'aux.util.filter'
 
-aux_auto_buy_filters = t
-aux_favorite_searches = t
-aux_recent_searches = t
+_G.aux_auto_buy_filters = t
+_G.aux_favorite_searches = t
+_G.aux_recent_searches = t
 
-function private.update_search_listings()
+function update_search_listings()
 	local autobuy_filter_rows = t
 	for i, autobuy_filter in aux_auto_buy_filters do
 		local name = strsub(autobuy_filter.prettified, 1, 250)
@@ -41,7 +41,7 @@ function private.update_search_listings()
 	recent_searches_listing:SetData(recent_search_rows)
 end
 
-function private.new_recent_search(filter_string, prettified)
+function new_recent_search(filter_string, prettified)
 	tinsert(aux_recent_searches, 1, {
 		filter_string = filter_string,
 		prettified = prettified,
@@ -52,7 +52,7 @@ function private.new_recent_search(filter_string, prettified)
 	update_search_listings()
 end
 
-private.handlers = {
+handlers = {
 	OnClick = function(st, data, _, button)
 		if not data then return end
 		if button == 'LeftButton' and IsShiftKeyDown() then
@@ -104,7 +104,7 @@ private.handlers = {
 	end
 }
 
-function private.auto_buy_validator.get()
+function get_auto_buy_validator()
 	local validators = t
 	for _, filter in aux_auto_buy_filters do
 		local queries, error = filter_util.queries(filter.filter_string)
@@ -119,7 +119,7 @@ function private.auto_buy_validator.get()
 	end
 end
 
-function private.add_favorite(filter_string)
+function add_favorite(filter_string)
 	local queries, error = filter_util.queries(filter_string)
 	if queries then
 		tinsert(aux_favorite_searches, 1, T(
@@ -132,7 +132,7 @@ function private.add_favorite(filter_string)
 	end
 end
 
-function private.add_auto_buy(filter_string)
+function add_auto_buy(filter_string)
 	local queries, error = filter_util.queries(filter_string)
 	if queries then
 		if getn(queries) > 1 then
@@ -150,13 +150,13 @@ function private.add_auto_buy(filter_string)
 	end
 end
 
-function private.move_up(list, index)
+function move_up(list, index)
 	if list[index - 1] then
 		list[index], list[index - 1] = list[index - 1], list[index]
 	end
 end
 
-function private.move_down(list, index)
+function move_down(list, index)
 	if list[index + 1] then
 		list[index], list[index + 1] = list[index + 1], list[index]
 	end

@@ -10,7 +10,7 @@ local cache = require 'aux.core.cache'
 local history = require 'aux.core.history'
 local disenchant = require 'aux.core.disenchant'
 
-function private.default_filter(str)
+function default_filter(str)
     return {
         input_type = '',
         validator = function()
@@ -210,7 +210,7 @@ public.filters = {
     },
 }
 
-function private.operator(str)
+function operator(str)
     local operator = str == 'not' and A('operator', 'not', 1)
     for name in temp-S('and', 'or') do
 	    for arity in present(select(3, strfind(str, '^'..name..'(%d*)$'))) do
@@ -264,12 +264,12 @@ do
 			end
 		end,
 	}
-	function private.blizzard_filter_parser()
+	function blizzard_filter_parser()
 	    return setmetatable(t, mt)
 	end
 end
 
-function private.parse_parameter(input_type, str)
+function parse_parameter(input_type, str)
     if input_type == 'money' then
         local money = money.from_string(str)
         return money and money > 0 and money or nil
@@ -380,7 +380,7 @@ function public.queries(filter_string)
     return queries
 end
 
-function private.suggestions(filter)
+function suggestions(filter)
     local suggestions = t
 
     if filter.blizzard.name and size(filter.blizzard) == 1 then tinsert(suggestions, 'exact') end
@@ -448,7 +448,7 @@ function public.filter_string(components)
     return query_builder.get()
 end
 
-function private.prettified_filter_string(filter)
+function prettified_filter_string(filter)
     local prettified = query_builder()
 
     for _, component in filter.components do
@@ -496,7 +496,7 @@ function public.unquote(name)
     return select(3, strfind(name, '^<(.*)>$')) or name
 end
 
-function private.blizzard_query(filter)
+function blizzard_query(filter)
     local filters = filter.blizzard
     local query = T('name', filters.name and filters.name[2])
     local item_info, class_index, subclass_index, slot_index
@@ -524,7 +524,7 @@ function private.blizzard_query(filter)
     return query
 end
 
-function private.validator(filter)
+function validator(filter)
 
     local validators = t
     for i, component in filter.post do

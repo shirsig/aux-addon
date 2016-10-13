@@ -19,13 +19,13 @@ TAB 'Post'
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
-function private.default_settings.get()
+function get_default_settings()
 	return T('duration', DURATION_8 , 'stack_size', 1, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
 end
 
 do
 	local data
-	function private.data.get()
+	function get_data()
 		if not data then
 			local dataset = persistence.dataset
 			data = dataset.post or t
@@ -35,19 +35,19 @@ do
 	end
 end
 
-function private.read_settings(item_key)
+function read_settings(item_key)
 	item_key = item_key or selected_item.key
 	return data[item_key] and persistence.read(settings_schema, data[item_key]) or default_settings
 end
 
-function private.write_settings(settings, item_key)
+function write_settings(settings, item_key)
 	item_key = item_key or selected_item.key
 	data[item_key] = persistence.write(settings_schema, settings)
 end
 
 local scan_id, inventory_records, existing_auctions = 0, t, t
 
-function private.refresh_button_click()
+function refresh_button_click()
 	scan.abort(scan_id)
 	refresh_entries()
 	refresh = true
@@ -55,14 +55,14 @@ end
 
 do
 	local item
-	function private.selected_item.get() return item end
-	function private.selected_item.set(v) item = v end
+	function get_selected_item() return item end
+	function set_selected_item(v) item = v end
 end
 
 do
 	local c = 0
-	function private.refresh.get() return c end
-	function private.refresh.set(v) c = v end
+	function get_refresh() return c end
+	function set_refresh(v) c = v end
 end
 
 function OPEN()
@@ -80,25 +80,25 @@ function USE_ITEM(item_info)
 	select_item(item_info.item_key)
 end
 
-function private.get_unit_start_price()
+function get_unit_start_price()
     local money_text = unit_start_price:GetText()
     return money.from_string(money_text) or 0
 end
 
-function private.set_unit_start_price(amount)
+function set_unit_start_price(amount)
     unit_start_price:SetText(money.to_string(amount, true, nil, 3, nil, true))
 end
 
-function private.get_unit_buyout_price()
+function get_unit_buyout_price()
     local money_text = unit_buyout_price:GetText()
     return money.from_string(money_text) or 0
 end
 
-function private.set_unit_buyout_price(amount)
+function set_unit_buyout_price(amount)
     unit_buyout_price:SetText(money.to_string(amount, true, nil, 3, nil, true))
 end
 
-function private.update_inventory_listing()
+function update_inventory_listing()
 	if not ACTIVE then return end
 	item_listing.populate(inventory_listing, values(filter(copy(inventory_records), function(record)
         local settings = read_settings(record.key)
@@ -106,7 +106,7 @@ function private.update_inventory_listing()
     end)))
 end
 
-function private.update_auction_listing()
+function update_auction_listing()
 	if not ACTIVE then return end
     local auction_rows = t
     if selected_item then
@@ -188,7 +188,7 @@ function public.select_item(item_key)
     end
 end
 
-function private.price_update()
+function price_update()
     if selected_item then
         local settings = read_settings()
 
@@ -206,7 +206,7 @@ function private.price_update()
     end
 end
 
-function private.post_auctions()
+function post_auctions()
 	if selected_item then
         local unit_start_price = get_unit_start_price()
         local unit_buyout_price = get_unit_buyout_price()
@@ -250,7 +250,7 @@ function private.post_auctions()
 	end
 end
 
-function private.validate_parameters()
+function validate_parameters()
     if not selected_item then
         post_button:Disable()
         return
@@ -270,7 +270,7 @@ function private.validate_parameters()
     post_button:Enable()
 end
 
-function private.update_item_configuration()
+function update_item_configuration()
 	if not selected_item then
         refresh_button:Disable()
 
@@ -325,7 +325,7 @@ function private.update_item_configuration()
 	end
 end
 
-function private.undercut(record, stack_size, stack)
+function undercut(record, stack_size, stack)
     local start_price = round(record.unit_blizzard_bid * (stack and record.stack_size or stack_size))
     local buyout_price = round(record.unit_buyout_price * (stack and record.stack_size or stack_size))
     if not record.own then
@@ -335,7 +335,7 @@ function private.undercut(record, stack_size, stack)
     return start_price / stack_size, buyout_price / stack_size
 end
 
-function private.quantity_update(max_count)
+function quantity_update(max_count)
     if selected_item then
         local max_stack_count = selected_item.max_charges and selected_item.availability[stack_size_slider:GetValue()] or floor(selected_item.availability[0] / stack_size_slider:GetValue())
         stack_count_slider:SetMinMaxValues(1, max_stack_count)
@@ -346,7 +346,7 @@ function private.quantity_update(max_count)
     refresh = true
 end
 
-function private.unit_vendor_price(item_key)
+function unit_vendor_price(item_key)
     for slot in info.inventory do auto[slot] = true
         local item_info = info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
@@ -366,7 +366,7 @@ function private.unit_vendor_price(item_key)
     end
 end
 
-function private.update_historical_value_button()
+function update_historical_value_button()
     if selected_item then
         local historical_value = history.value(selected_item.key)
         historical_value_button.amount = historical_value
@@ -374,7 +374,7 @@ function private.update_historical_value_button()
     end
 end
 
-function private.set_item(item)
+function set_item(item)
     local settings = read_settings(item.key)
 
     item.unit_vendor_price = unit_vendor_price(item.key)
@@ -409,7 +409,7 @@ function private.set_item(item)
     refresh = true
 end
 
-function private.update_inventory_records()
+function update_inventory_records()
     local auctionable_map = tt
     for slot in info.inventory do auto[slot] = true
         for item_info in present(info.container_item(unpack(slot))) do
@@ -447,7 +447,7 @@ function private.update_inventory_records()
     refresh = true
 end
 
-function private.refresh_entries()
+function refresh_entries()
 	if selected_item then
 		local item_id, suffix_id = selected_item.item_id, selected_item.suffix_id
         local item_key = item_id .. ':' .. suffix_id
@@ -492,7 +492,7 @@ function private.refresh_entries()
 	end
 end
 
-function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
+function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
     existing_auctions[key] = existing_auctions[key] or t
     local entry
     for _, record in existing_auctions[key] do
@@ -508,7 +508,7 @@ function private.record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyou
     return entry
 end
 
-function private.on_update()
+function on_update()
     if refresh then
         refresh = false
         price_update()
@@ -520,7 +520,7 @@ function private.on_update()
     validate_parameters()
 end
 
-function private.initialize_duration_dropdown()
+function initialize_duration_dropdown()
     local function on_click()
         UIDropDownMenu_SetSelectedValue(duration_dropdown, this.value)
         local settings = read_settings()

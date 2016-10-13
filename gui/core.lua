@@ -35,7 +35,7 @@ function LOAD()
 			return unpack(ret)
 		end)
 
-		function private.set_aux_dropdown_style(dropdown)
+		function set_aux_dropdown_style(dropdown)
 			DropDownList1Backdrop:SetBackdrop{}
 			aux_border:Show()
 			aux_background:Show()
@@ -64,7 +64,7 @@ function LOAD()
 			end
 		end
 
-		function private.set_blizzard_dropdown_style()
+		function set_blizzard_dropdown_style()
 			DropDownList1Backdrop:SetBackdrop(blizzard_backdrop)
 			aux_border:Hide()
 			aux_background:Hide()
@@ -87,7 +87,7 @@ end
 
 do
 	local id = 1
-	function public.unique_name.get()
+	function public.get_unique_name()
 		id = id + 1
 		return 'AuxFrame' .. id
 	end

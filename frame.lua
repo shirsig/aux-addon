@@ -30,9 +30,9 @@ do
 	public.AuxFrame = frame
 end
 do
-	private.tabs = gui.tabs(AuxFrame, 'DOWN')
+	tabs = gui.tabs(AuxFrame, 'DOWN')
 	tabs._on_select = on_tab_click
-	function public.tab.set(id) tabs:select(id) end
+	function public.set_tab(id) tabs:select(id) end
 end
 do
 	local btn = gui.button(AuxFrame)
@@ -40,7 +40,7 @@ do
 	gui.set_size(btn, 60, 24)
 	btn:SetText'Close'
 	btn:SetScript('OnClick', papply(AuxFrame.Hide, AuxFrame))
-	private.close_button = btn
+	close_button = btn
 end
 do
 	local btn = gui.button(AuxFrame, gui.font_size.small)

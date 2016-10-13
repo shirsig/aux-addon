@@ -8,7 +8,7 @@ local stack = require 'aux.core.stack'
 
 local state
 
-function private.process()
+function process()
 	if state.posted < state.count then
 
 		local stacking_complete
@@ -29,7 +29,7 @@ function private.process()
 	return stop()
 end
 
-function private.post_auction(slot, k)
+function post_auction(slot, k)
 	local item_info = info.container_item(unpack(slot))
 	if item_info.item_key == state.item_key and info.auctionable(item_info.tooltip) and item_info.aux_quantity == state.stack_size then
 

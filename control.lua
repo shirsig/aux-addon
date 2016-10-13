@@ -5,14 +5,14 @@ local event_frame = CreateFrame'Frame'
 local listeners, threads = t, t
 
 local thread_id
-function public.thread_id.get() return thread_id end
+function public.get_thread_id() return thread_id end
 
 function LOAD()
 	event_frame:SetScript('OnUpdate', UPDATE)
 	event_frame:SetScript('OnEvent', EVENT)
 end
 
-function private.EVENT()
+function EVENT()
 	for id, listener in listeners do
 		if listener.killed then
 			listeners[id] = nil
@@ -23,7 +23,7 @@ function private.EVENT()
 end
 
 do
-	function private.UPDATE()
+	function UPDATE()
 		for _, listener in listeners do
 			local event, needed = listener.event, false
 			for _, listener in listeners do
@@ -50,7 +50,7 @@ end
 
 do
 	local id = 0
-	function private.unique_id.get()
+	function get_unique_id()
 		id = id + 1
 		return id
 	end

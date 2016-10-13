@@ -92,7 +92,7 @@ end
 
 public.huge = 1.8 * 10 ^ 308
 
-function public.modified.get()
+function public.get_modified()
 	return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown()
 end
 

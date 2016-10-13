@@ -12,20 +12,10 @@ StaticPopupDialogs.AUX_SEARCH_TABLE_FULL = {
     timeout = 0,
     hideOnEscape = 1,
 }
---StaticPopupDialogs.AUX_SEARCH_AUTO_BUY = {
---    text = 'Are you sure you want to activate automatic buyout?',
---    button1 = 'Yes',
---    button2 = 'No',
---    OnAccept = function()
---        auto_buy_button:SetChecked(true)
---    end,
---    timeout = 0,
---    hideOnEscape = 1,
---}
 
-private.RESULTS = 1
-private.SAVED = 2
-private.FILTER = 3
+RESULTS = 1
+SAVED = 2
+FILTER = 3
 
 function LOAD()
 --	aux_search_tab_frame.create()
@@ -52,7 +42,7 @@ function USE_ITEM(item_info)
 	execute(nil, false)
 end
 
-function private.subtab.set(tab)
+function set_subtab(tab)
     search_results_button:UnlockHighlight()
     saved_searches_button:UnlockHighlight()
     new_filter_button:UnlockHighlight()
@@ -76,7 +66,7 @@ function public.set_filter(filter_string)
     search_box:SetText(filter_string)
 end
 
-function private.add_filter(filter_string)
+function add_filter(filter_string)
     local old_filter_string = search_box:GetText()
     old_filter_string = trim(old_filter_string)
 
@@ -87,7 +77,7 @@ function private.add_filter(filter_string)
     search_box:SetText(old_filter_string .. filter_string)
 end
 
-function private.blizzard_page_index(str)
+function blizzard_page_index(str)
     if tonumber(str) then
         return max(0, tonumber(str) - 1)
     end

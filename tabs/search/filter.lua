@@ -5,12 +5,12 @@ local money = require 'aux.util.money'
 local cache = require 'aux.core.cache'
 local filter_util = require 'aux.util.filter'
 
-function private.valid_level(str)
+function valid_level(str)
 	local level = tonumber(str)
 	return level and bounded(1, 60, level)
 end
 
-private.blizzard_query = setmetatable(t, {
+blizzard_query = setmetatable(t, {
 	__index = function(_, key)
 		if key == 'name' then
 			return name_input:GetText()
@@ -63,7 +63,7 @@ private.blizzard_query = setmetatable(t, {
 	end,
 })
 
-function private.update_form()
+function update_form()
 	if blizzard_query.class and GetAuctionItemSubClasses(blizzard_query.class) then
 		subclass_dropdown.button:Enable()
 	else
@@ -105,7 +105,7 @@ function private.update_form()
 	end
 end
 
-function private.get_filter_builder_query()
+function get_filter_builder_query()
 	local filter_string
 
 	local function add(part)
@@ -149,7 +149,7 @@ function private.get_filter_builder_query()
 	return filter_string or ''
 end
 
-function private.set_form(filter)
+function set_form(filter)
 	clear_form()
 	for _, component in filter.components do
 		if component[1] == 'blizzard' then
@@ -161,7 +161,7 @@ function private.set_form(filter)
 	update_filter_display()
 end
 
-function private.clear_form()
+function clear_form()
 	blizzard_query.name = ''
 	name_input:ClearFocus()
 	blizzard_query.exact = false
@@ -180,19 +180,19 @@ function private.clear_form()
 	update_filter_display()
 end
 
-function private.import_filter_string()
+function import_filter_string()
 	local filter, error = filter_util.parse_filter_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
 	if filter or print(error) then
 		set_form(filter)
 	end
 end
 
-function private.export_filter_string()
+function export_filter_string()
 	search_box:SetText(get_filter_builder_query())
 	filter_parameter_input:ClearFocus()
 end
 
-function private.formatted_post_filter(components)
+function formatted_post_filter(components)
 	local no_line_break
 	local stack = tt
 	local str = ''
@@ -236,14 +236,14 @@ function private.formatted_post_filter(components)
 	return '<html><body><p>' .. str .. '</p></body></html>'
 end
 
-function private.data_link(id, str)
+function data_link(id, str)
 	return '|H' .. id .. '|h' .. str .. '|h'
 end
 
-private.post_filter = t
-private.filter_builder_state = T('selected', 0)
+post_filter = t
+filter_builder_state = T('selected', 0)
 
-function private.data_link_click()
+function data_link_click()
 	local button = arg3
 	local index = tonumber(arg1)
 	if button == 'LeftButton' then
@@ -254,7 +254,7 @@ function private.data_link_click()
 	update_filter_display()
 end
 
-function private.remove_component(index)
+function remove_component(index)
 	index = index or filter_builder_state.selected
 	if filter_builder_state.selected >= index then
 		filter_builder_state.selected = max(filter_builder_state.selected - 1, min(1, getn(post_filter)))
@@ -263,12 +263,12 @@ function private.remove_component(index)
 	tremove(post_filter, index)
 end
 
-function private.add_component(component)
+function add_component(component)
 	filter_builder_state.selected = filter_builder_state.selected + 1
 	tinsert(post_filter, filter_builder_state.selected, component)
 end
 
-function private.add_post_filter()
+function add_post_filter()
 	for str in present(filter_input:GetText()) do
 		for filter in present(filter_util.filters[str]) do
 			if filter.input_type ~= '' then
@@ -290,13 +290,13 @@ end
 
 do
 	local text = ''
-	function private.update_filter_display()
+	function update_filter_display()
 		text = formatted_post_filter(post_filter)
 		filter_display:SetWidth(filter_display_size())
 		set_filter_display_offset()
 		filter_display:SetText(text)
 	end
-	function private.filter_display_size()
+	function filter_display_size()
 		local font, font_size = filter_display:GetFont()
 		filter_display.measure:SetFont(font, font_size)
 		local lines = 0
@@ -310,7 +310,7 @@ do
 	end
 end
 
-function private.set_filter_display_offset(x_offset, y_offset)
+function set_filter_display_offset(x_offset, y_offset)
 	local scroll_frame = filter_display:GetParent()
 	x_offset, y_offset = x_offset or scroll_frame:GetHorizontalScroll(), y_offset or scroll_frame:GetVerticalScroll()
 	local width, height = filter_display_size()
@@ -322,7 +322,7 @@ function private.set_filter_display_offset(x_offset, y_offset)
 	scroll_frame:SetVerticalScroll(bounded(y_lower_bound, y_upper_bound, y_offset))
 end
 
-function private.initialize_filter_dropdown()
+function initialize_filter_dropdown()
 	for filter in temp-S('and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard') do
 		UIDropDownMenu_AddButton(T(
 			'text', filter,
@@ -342,7 +342,7 @@ function private.initialize_filter_dropdown()
 	end
 end
 
-function private.initialize_class_dropdown()
+function initialize_class_dropdown()
 	local function on_click()
 		if this.value ~= blizzard_query.class then
 			UIDropDownMenu_SetSelectedValue(class_dropdown, this.value)
@@ -359,7 +359,7 @@ function private.initialize_class_dropdown()
 	end
 end
 
-function private.initialize_subclass_dropdown()
+function initialize_subclass_dropdown()
 	local function on_click()
 		if this.value ~= blizzard_query.subclass then
 			UIDropDownMenu_SetSelectedValue(subclass_dropdown, this.value)
@@ -377,7 +377,7 @@ function private.initialize_subclass_dropdown()
 	end
 end
 
-function private.initialize_slot_dropdown()
+function initialize_slot_dropdown()
 	local function on_click()
 		UIDropDownMenu_SetSelectedValue(slot_dropdown, this.value)
 		update_form()
@@ -392,7 +392,7 @@ function private.initialize_slot_dropdown()
 	end
 end
 
-function private.initialize_quality_dropdown()
+function initialize_quality_dropdown()
 	local function on_click()
 		UIDropDownMenu_SetSelectedValue(quality_dropdown, this.value)
 		update_form()

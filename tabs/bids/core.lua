@@ -9,7 +9,7 @@ local scan = require 'aux.core.scan'
 
 TAB 'Bids'
 
-private.auction_records = t
+auction_records = t
 
 function OPEN()
     frame:Show()
@@ -20,7 +20,7 @@ function CLOSE()
     frame:Hide()
 end
 
-function private.update_listing()
+function update_listing()
 	if not ACTIVE then return end
     listing:SetDatabase(auction_records)
 end
@@ -54,7 +54,7 @@ function public.scan_bids()
     }
 end
 
-function private.test(record)
+function test(record)
     return function(index)
         local auction_info = info.auction(index, 'bidder')
         return auction_info and auction_info.search_signature == record.search_signature
@@ -67,7 +67,7 @@ do
     local state = IDLE
     local found_index
 
-    function private.find_auction(record)
+    function find_auction(record)
         if not listing:ContainsRecord(record) then return end
 
         scan.abort(scan_id)
@@ -108,7 +108,7 @@ do
         )
     end
 
-    function private.on_update()
+    function on_update()
         if state == IDLE or state == SEARCHING then
             buyout_button:Disable()
             bid_button:Disable()

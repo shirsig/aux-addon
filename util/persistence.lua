@@ -3,11 +3,11 @@ module 'aux.util.persistence'
 include 'green_t'
 include 'aux'
 
-aux_datasets = t
+_G.aux_datasets = t
 
 do
 	local dataset
-	function public.dataset.get()
+	function public.get_dataset()
 		if not dataset then
 		    local dataset_key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
 		    dataset = aux_datasets[dataset_key] or t

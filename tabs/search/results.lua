@@ -9,7 +9,17 @@ function LOAD()
 	new_search()
 end
 
-function private.update_real_time(enable)
+do
+	local id = 0
+	function get_search_scan_id()
+		return id
+	end
+	function set_search_scan_id(v)
+		id = v
+	end
+end
+
+function update_real_time(enable)
 	if enable then
 		range_button:Hide()
 		real_time_button:Show()
@@ -25,11 +35,11 @@ do
 	local searches = t
 	local search_index = 1
 
-	function private.current_search.get()
+	function get_current_search()
 		return searches[search_index]
 	end
 
-	function private.update_search(index)
+	function update_search(index)
 		searches[search_index].status_bar:Hide()
 		searches[search_index].table:Hide()
 		searches[search_index].table:SetSelectedRecord()
@@ -61,7 +71,7 @@ do
 		update_continuation()
 	end
 
-	function private.new_search(filter_string, first_page, last_page, real_time)
+	function new_search(filter_string, first_page, last_page, real_time)
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
@@ -86,26 +96,26 @@ do
 		update_search(getn(searches))
 	end
 
-	function private.clear_control_focus()
+	function clear_control_focus()
 		search_box:ClearFocus()
 		first_page_input:ClearFocus()
 		last_page_input:ClearFocus()
 	end
 
-	function private.previous_search()
+	function previous_search()
 		clear_control_focus()
 		update_search(search_index - 1)
 		subtab = RESULTS
 	end
 
-	function private.next_search()
+	function next_search()
 		clear_control_focus()
 		update_search(search_index + 1)
 		subtab = RESULTS
 	end
 end
 
-function private.update_continuation()
+function update_continuation()
 	if current_search.continuation then
 		resume_button:Show()
 		search_box:SetPoint('RIGHT', resume_button, 'LEFT', -4, 0)
@@ -115,13 +125,13 @@ function private.update_continuation()
 	end
 end
 
-function private.discard_continuation()
+function discard_continuation()
 	scan.abort(search_scan_id)
 	current_search.continuation = nil
 	update_continuation()
 end
 
-function private.update_start_stop()
+function update_start_stop()
 	if current_search.active then
 		stop_button:Show()
 		start_button:Hide()
@@ -131,7 +141,7 @@ function private.update_start_stop()
 	end
 end
 
-function private.start_real_time_scan(query, search, continuation)
+function start_real_time_scan(query, search, continuation)
 
 	local ignore_page
 	if not search then
@@ -199,7 +209,7 @@ function private.start_real_time_scan(query, search, continuation)
 	}
 end
 
-function private.start_search(queries, continuation)
+function start_search(queries, continuation)
 	local current_query, current_page, total_queries, start_query, start_page
 
 	local search = current_search
@@ -349,7 +359,7 @@ function public.execute(resume, real_time)
 	end
 end
 
-function private.test(record)
+function test(record)
 	return function(index)
 		local auction_info = info.auction(index)
 		return auction_info and auction_info.search_signature == record.search_signature
@@ -362,7 +372,7 @@ do
 	local state = IDLE
 	local found_index
 
-	function private.find_auction(record)
+	function find_auction(record)
 		local search = current_search
 
 		if not search.table:ContainsRecord(record) or is_player(record.owner) then
@@ -413,7 +423,7 @@ do
 		)
 	end
 
-	function private.on_update()
+	function on_update()
 		if state == IDLE or state == SEARCHING then
 			buyout_button:Disable()
 			bid_button:Disable()

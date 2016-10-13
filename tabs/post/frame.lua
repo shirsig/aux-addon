@@ -7,7 +7,7 @@ local listing = require 'aux.gui.listing'
 local item_listing = require 'aux.gui.item_listing'
 local search_tab = require 'aux.tabs.search'
 
-private.frame = CreateFrame('Frame', nil, AuxFrame)
+frame = CreateFrame('Frame', nil, AuxFrame)
 frame:SetAllPoints()
 frame:SetScript('OnUpdate', on_update)
 frame:Hide()
@@ -41,12 +41,12 @@ do
     local label = gui.label(checkbox, gui.font_size.small)
     label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
     label:SetText('Show hidden items')
-    private.show_hidden_checkbox = checkbox
+    show_hidden_checkbox = checkbox
 end
 
 gui.horizontal_line(frame.inventory, -48)
 
-private.inventory_listing = item_listing.create(
+inventory_listing = item_listing.create(
     frame.inventory,
     function()
         if arg1 == 'LeftButton' then
@@ -62,7 +62,7 @@ private.inventory_listing = item_listing.create(
     end
 )
 
-private.auction_listing = listing.CreateScrollingTable(frame.auctions)
+auction_listing = listing.CreateScrollingTable(frame.auctions)
 auction_listing:SetColInfo{
     { name='Auctions', width=.12, align='CENTER' },
     { name='Left', width=.1, align='CENTER' },
@@ -87,7 +87,7 @@ auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
 end)
 
 do
-	private.status_bar = gui.status_bar(frame)
+	status_bar = gui.status_bar(frame)
     status_bar:SetWidth(265)
     status_bar:SetHeight(25)
     status_bar:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
@@ -99,17 +99,17 @@ do
     btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
     btn:SetText('Post')
     btn:SetScript('OnClick', post_auctions)
-    private.post_button = btn
+    post_button = btn
 end
 do
     local btn = gui.button(frame.parameters)
     btn:SetPoint('TOPLEFT', post_button, 'TOPRIGHT', 5, 0)
     btn:SetText('Refresh')
     btn:SetScript('OnClick', refresh_button_click)
-    private.refresh_button = btn
+    refresh_button = btn
 end
 do
-	private.item = gui.item(frame.parameters)
+	item = gui.item(frame.parameters)
     item:SetPoint('TOPLEFT', 10, -6)
     item.button:SetScript('OnEnter', function()
         if selected_item then
@@ -149,7 +149,7 @@ do
     slider.editbox:SetNumeric(true)
     slider.editbox:SetMaxLetters(3)
     slider.label:SetText('Stack Size')
-    private.stack_size_slider = slider
+    stack_size_slider = slider
 end
 do
     local slider = gui.slider(frame.parameters)
@@ -172,7 +172,7 @@ do
     end)
     slider.editbox:SetNumeric(true)
     slider.label:SetText('Stack Count')
-    private.stack_count_slider = slider
+    stack_count_slider = slider
 end
 do
     local dropdown = gui.dropdown(frame.parameters)
@@ -185,12 +185,12 @@ do
     dropdown:SetScript('OnShow', function()
         UIDropDownMenu_Initialize(this, initialize_duration_dropdown)
     end)
-    private.duration_dropdown = dropdown
+    duration_dropdown = dropdown
 end
 do
     local label = gui.label(frame.parameters, gui.font_size.medium)
     label:SetPoint('LEFT', duration_dropdown, 'RIGHT', 25, 0)
-    private.deposit = label
+    deposit = label
 end
 do
     local checkbox = gui.checkbox(frame.parameters)
@@ -204,7 +204,7 @@ do
     local label = gui.label(checkbox, gui.font_size.small)
     label:SetPoint('LEFT', checkbox, 'RIGHT', 4, 1)
     label:SetText('Hide this item')
-    private.hide_checkbox = checkbox
+    hide_checkbox = checkbox
 end
 do
     local editbox = gui.editbox(frame.parameters)
@@ -237,9 +237,9 @@ do
         label:SetPoint('LEFT', editbox, 'RIGHT', 8, 0)
         label:SetWidth(50)
         label:SetJustifyH('CENTER')
-        private.start_price_percentage = label
+        start_price_percentage = label
     end
-    private.unit_start_price = editbox
+    unit_start_price = editbox
 end
 do
     local editbox = gui.editbox(frame.parameters)
@@ -272,9 +272,9 @@ do
         label:SetPoint('LEFT', editbox, 'RIGHT', 8, 0)
         label:SetWidth(50)
         label:SetJustifyH('CENTER')
-        private.buyout_price_percentage = label
+        buyout_price_percentage = label
     end
-    private.unit_buyout_price = editbox
+    unit_buyout_price = editbox
 end
 do
     local btn = gui.button(frame.parameters, 14)
@@ -291,5 +291,5 @@ do
     local label = gui.label(btn, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
     label:SetText('Historical Value')
-    private.historical_value_button = btn
+    historical_value_button = btn
 end

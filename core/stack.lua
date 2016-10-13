@@ -7,27 +7,27 @@ local info = require 'aux.util.info'
 
 local state
 
-function private.stack_size(slot)
+function stack_size(slot)
     local container_item_info = info.container_item(unpack(slot))
     return container_item_info and container_item_info.count or 0
 end
 
-function private.charges(slot)
+function charges(slot)
     local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.charges
 end
 
-function private.max_stack(slot)
+function max_stack(slot)
 	local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.max_stack
 end
 
-function private.locked(slot)
+function locked(slot)
 	local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.locked
 end
 
-function private.find_item_slot(papply)
+function find_item_slot(papply)
 	for slot in info.inventory do
 		if matching_item(slot, papply) and not eq(slot, state.target_slot) then
 			return slot
@@ -35,12 +35,12 @@ function private.find_item_slot(papply)
 	end
 end
 
-function private.matching_item(slot, papply)
+function matching_item(slot, papply)
 	local item_info = info.container_item(unpack(slot))
 	return item_info and item_info.item_key == state.item_key and info.auctionable(item_info.tooltip) and (not papply or item_info.count < item_info.max_stack)
 end
 
-function private.find_empty_slot()
+function find_empty_slot()
 	for slot, type in info.inventory do
 		if type == 1 and not GetContainerItemInfo(unpack(slot)) then
 			return slot
@@ -48,7 +48,7 @@ function private.find_empty_slot()
 	end
 end
 
-function private.find_charge_item_slot()
+function find_charge_item_slot()
 	for slot in info.inventory do
 		if matching_item(slot) and charges(slot) == state.target_size then
 			return slot
@@ -56,7 +56,7 @@ function private.find_charge_item_slot()
 	end
 end
 
-function private.move_item(from_slot, to_slot, amount, k)
+function move_item(from_slot, to_slot, amount, k)
 	if locked(from_slot) or locked(to_slot) then
 		return wait(k)
 	end
@@ -71,7 +71,7 @@ function private.move_item(from_slot, to_slot, amount, k)
 	return when(function() return stack_size(to_slot) == expected_size end, k)
 end
 
-function private.process()
+function process()
 	if not state.target_slot or not matching_item(state.target_slot) then
 		state.target_slot = find_item_slot()
 		if not state.target_slot then

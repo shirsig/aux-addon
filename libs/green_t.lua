@@ -54,8 +54,8 @@ do
 	public.set_auto_release = set_auto_release
 end
 
-public.t.get = acquire
-function public.tt.get()
+public.get_t = acquire
+function public.get_tt()
 	local t = acquire()
 	set_auto_release(t, true)
 	return t

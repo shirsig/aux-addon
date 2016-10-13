@@ -37,14 +37,14 @@ do
 		end
 	end
 
-	function private.complete()
+	function complete()
 		local on_complete = state.params.on_complete
 		scan_states[state.params.type] = nil
 --		for _ in on_complete or nop do end TODO test performance
 		do (on_complete or nop)() end
 	end
 
-	function private.state.get()
+	function get_state()
 		for _, state in scan_states do
 			if state.id == thread_id then
 				return state
@@ -53,11 +53,11 @@ do
 	end
 end
 
-function private.query.get()
+function get_query()
 	return state.params.queries[state.query_index]
 end
 
-private.wait_for_callback = vararg-function(arg)
+wait_for_callback = vararg-function(arg)
 	local send_signal, signal_received = signal()
 	local suspended, ret
 
@@ -76,17 +76,17 @@ private.wait_for_callback = vararg-function(arg)
 	return when(signal_received, function() return k(unpack(signal_received())) end)
 end
 
-function private.total_pages(total_auctions)
+function total_pages(total_auctions)
     return ceil(total_auctions / PAGE_SIZE)
 end
 
-function private.last_page(total_auctions)
+function last_page(total_auctions)
     local last_page = max(total_pages(total_auctions) - 1, 0)
     local last_page_limit = query.blizzard_query and query.blizzard_query.last_page or last_page
     return min(last_page_limit, last_page)
 end
 
-function private.scan()
+function scan()
 	state.query_index = state.query_index and state.query_index + 1 or 1
 	if query and (index(query.blizzard_query, 'first_page') or 0) <= (index(query.blizzard_query, 'last_page') or huge) then
 		if query.blizzard_query then
@@ -100,11 +100,11 @@ function private.scan()
 	end
 end
 
-function private.process_query()
+function process_query()
 	return (query.blizzard_query and submit_query or scan_page)()
 end
 
-function private.submit_query()
+function submit_query()
 	when(function() return state.params.type ~= 'list' or CanSendAuctionQuery() end, function()
 		do (state.params.on_submit_query or nop)() end
 		state.last_query_time = GetTime()
@@ -130,7 +130,7 @@ function private.submit_query()
 	end)
 end
 
-function private.scan_page(i)
+function scan_page(i)
 	i = i or 1
 	local recurse = function(retry)
 		if i >= PAGE_SIZE then
@@ -175,7 +175,7 @@ function private.scan_page(i)
 	return recurse()
 end
 
-function private.wait_for_results()
+function wait_for_results()
 	local timeout = later(state.last_query_time, 10)
 	local send_signal, signal_received = signal()
 	when(signal_received, function()
@@ -204,7 +204,7 @@ function private.wait_for_results()
     end
 end
 
-function private.wait_for_owner_results(send_signal)
+function wait_for_owner_results(send_signal)
     if state.page == current_owner_page then
         return send_signal()
     else
@@ -212,7 +212,7 @@ function private.wait_for_owner_results(send_signal)
     end
 end
 
-function private.wait_for_list_results(send_signal, signal_received)
+function wait_for_list_results(send_signal, signal_received)
     local updated, last_update
     event_listener('AUCTION_ITEM_LIST_UPDATE', function(kill)
 	    kill(signal_received())
@@ -228,7 +228,7 @@ function private.wait_for_list_results(send_signal, signal_received)
     end, send_signal)
 end
 
-function private.owner_data_complete(type)
+function owner_data_complete(type)
     for i = 1, PAGE_SIZE do
         local auction_info = info.auction(i, type)
         if auction_info and not auction_info.owner then

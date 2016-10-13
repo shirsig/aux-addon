@@ -14,12 +14,12 @@ local MAX_ITEM_ID = 30000
 local items_schema = {'record', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
 local merchant_buy_schema = {'record', '#', {unit_price='number'}, {limited='boolean'}}
 
-aux_items = t
-aux_item_ids = t
-aux_auctionable_items = t
-aux_merchant_buy = t
-aux_merchant_sell = t
-aux_characters = t
+_G.aux_items = t
+_G.aux_item_ids = t
+_G.aux_auctionable_items = t
+_G.aux_merchant_buy = t
+_G.aux_merchant_sell = t
+_G.aux_characters = t
 
 function LOAD()
 	scan_wdb()
@@ -42,25 +42,25 @@ end
 
 do
 	local sell_scan_countdown, incomplete_buy_data
-	function private.on_merchant_show()
+	function on_merchant_show()
 		merchant_sell_scan()
 		incomplete_buy_data = not merchant_buy_scan()
 	end
-	function private.on_merchant_closed()
+	function on_merchant_closed()
 		sell_scan_countdown = nil
 		incomplete_buy_data = false
 	end
-	function private.on_merchant_update()
+	function on_merchant_update()
 		if incomplete_buy_data then
 			incomplete_buy_data = not merchant_buy_scan()
 		end
 	end
-	function private.on_bag_update()
+	function on_bag_update()
 		if MerchantFrame:IsVisible() then
 			sell_scan_countdown = 10
 		end
 	end
-	function private.merchant_on_update()
+	function merchant_on_update()
 		if sell_scan_countdown == 0 then
 			sell_scan_countdown = nil
 			merchant_sell_scan()
@@ -70,7 +70,7 @@ do
 	end
 end
 
-function private.merchant_loaded()
+function merchant_loaded()
 	for i = 1, GetMerchantNumItems() do
 		if not GetMerchantItemLink(i) then
 			return false
@@ -110,7 +110,7 @@ function public.item_id(item_name)
 	return aux_item_ids[strlower(item_name)]
 end
 
-function private.merchant_buy_scan()
+function merchant_buy_scan()
 
 	local incomplete_data
 	for i = 1, GetMerchantNumItems() do
@@ -149,7 +149,7 @@ function private.merchant_buy_scan()
 	return not incomplete_data
 end
 
-function private.merchant_sell_scan()
+function merchant_sell_scan()
 	for slot in info.inventory do auto[slot] = true
 		local item_info = temp-info.container_item(unpack(slot))
 		if item_info then
@@ -158,7 +158,7 @@ function private.merchant_sell_scan()
 	end
 end
 
-function private.scan_wdb(item_id)
+function scan_wdb(item_id)
 	item_id = item_id or MIN_ITEM_ID
 
 	local processed = 0

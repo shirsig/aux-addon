@@ -9,7 +9,7 @@ local auction_listing = require 'aux.gui.auction_listing'
 
 local FILTER_SPACING = 28.5
 
-private.frame = CreateFrame('Frame', nil, AuxFrame)
+frame = CreateFrame('Frame', nil, AuxFrame)
 frame:SetAllPoints()
 frame:SetScript('OnUpdate', on_update)
 frame:Hide()
@@ -42,7 +42,7 @@ do
     btn:SetHeight(25)
     btn:SetText'<'
     btn:SetScript('OnClick', previous_search)
-    private.previous_button = btn
+    previous_button = btn
 end
 do
     local btn = gui.button(frame, 25)
@@ -51,7 +51,7 @@ do
     btn:SetHeight(25)
     btn:SetText'>'
     btn:SetScript('OnClick', next_search)
-    private.next_button = btn
+    next_button = btn
 end
 do
 	local btn = gui.button(frame, gui.font_size.small)
@@ -61,7 +61,7 @@ do
 	btn:SetScript('OnClick', function()
 		update_real_time(true)
 	end)
-	private.range_button = btn
+	range_button = btn
 end
 do
 	local btn = gui.button(frame, gui.font_size.small)
@@ -72,7 +72,7 @@ do
 	btn:SetScript('OnClick', function()
 		update_real_time(false)
 	end)
-	private.real_time_button = btn
+	real_time_button = btn
 end
 do
 	local function change()
@@ -96,7 +96,7 @@ do
 		label:SetPoint('LEFT', editbox, 'RIGHT', 0, 0)
 		label:SetTextColor(color.label.enabled())
 		label:SetText'-'
-		private.first_page_input = editbox
+		first_page_input = editbox
 	end
 	do
 		local editbox = gui.editbox(range_button)
@@ -108,7 +108,7 @@ do
 		editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
 		editbox.enter = execute
 		editbox.change = change
-		private.last_page_input = editbox
+		last_page_input = editbox
 	end
 end
 do
@@ -122,7 +122,7 @@ do
         end
         execute()
     end)
-    private.start_button = btn
+    start_button = btn
 end
 do
     local btn = gui.button(frame)
@@ -131,7 +131,7 @@ do
     btn:SetScript('OnClick', function()
         scan.abort(search_scan_id)
     end)
-    private.stop_button = btn
+    stop_button = btn
 end
 do
     local btn = gui.button(frame)
@@ -141,7 +141,7 @@ do
     btn:SetScript('OnClick', function()
         execute(true)
     end)
-    private.resume_button = btn
+    resume_button = btn
 end
 do
 	local editbox = gui.editbox(frame)
@@ -159,7 +159,7 @@ do
 		this:HighlightText(0, 0)
 	end)
 	editbox.enter = execute
-	private.search_box = editbox
+	search_box = editbox
 end
 do
     gui.horizontal_line(frame, -40)
@@ -171,7 +171,7 @@ do
     btn:SetHeight(22)
     btn:SetText'Search Results'
     btn:SetScript('OnClick', function() subtab = RESULTS end)
-    private.search_results_button = btn
+    search_results_button = btn
 end
 do
     local btn = gui.button(frame, gui.font_size.large)
@@ -180,7 +180,7 @@ do
     btn:SetHeight(22)
     btn:SetText'Saved Searches'
     btn:SetScript('OnClick', function() subtab = SAVED end)
-    private.saved_searches_button = btn
+    saved_searches_button = btn
 end
 do
     local btn = gui.button(frame, gui.font_size.large)
@@ -189,28 +189,28 @@ do
     btn:SetHeight(22)
     btn:SetText'Filter Builder'
     btn:SetScript('OnClick', function() subtab = FILTER end)
-    private.new_filter_button = btn
+    new_filter_button = btn
 end
 do
     local frame = CreateFrame('Frame', nil, frame)
     frame:SetWidth(265)
     frame:SetHeight(25)
     frame:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
-    private.status_bar_frame = frame
+    status_bar_frame = frame
 end
 do
     local btn = gui.button(frame.results)
     btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
     btn:SetText'Bid'
     btn:Disable()
-    private.bid_button = btn
+    bid_button = btn
 end
 do
     local btn = gui.button(frame.results)
     btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
     btn:SetText'Buyout'
     btn:Disable()
-    private.buyout_button = btn
+    buyout_button = btn
 end
 do
     local btn = gui.button(frame.results)
@@ -281,7 +281,7 @@ do
     local label = gui.label(editbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
     label:SetText'Name'
-    private.name_input = editbox
+    name_input = editbox
 end
 do
     local checkbox = gui.checkbox(frame.filter)
@@ -290,7 +290,7 @@ do
     local label = gui.label(checkbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
     label:SetText'Exact'
-    private.exact_checkbox = checkbox
+    exact_checkbox = checkbox
 end
 do
     local editbox = gui.editbox(frame.filter)
@@ -316,7 +316,7 @@ do
     local label = gui.label(editbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
     label:SetText'Level Range'
-    private.min_level_input = editbox
+    min_level_input = editbox
 end
 do
     local editbox = gui.editbox(frame.filter)
@@ -342,7 +342,7 @@ do
     local label = gui.label(editbox, gui.font_size.medium)
     label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
     label:SetText'-'
-    private.max_level_input = editbox
+    max_level_input = editbox
 end
 do
     local checkbox = gui.checkbox(frame.filter)
@@ -351,11 +351,11 @@ do
     local label = gui.label(checkbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
     label:SetText'Usable'
-    private.usable_checkbox = checkbox
+    usable_checkbox = checkbox
 end
 do
     local dropdown = gui.dropdown(frame.filter)
-    private.class_dropdown = dropdown
+    class_dropdown = dropdown
     dropdown:SetPoint('TOPLEFT', min_level_input, 'BOTTOMLEFT', 0, 5 - FILTER_SPACING)
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
@@ -368,7 +368,7 @@ do
 end
 do
     local dropdown = gui.dropdown(frame.filter)
-    private.subclass_dropdown = dropdown
+    subclass_dropdown = dropdown
     dropdown:SetPoint('TOPLEFT', class_dropdown, 'BOTTOMLEFT', 0, 10 - FILTER_SPACING)
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
@@ -381,7 +381,7 @@ do
 end
 do
     local dropdown = gui.dropdown(frame.filter)
-    private.slot_dropdown = dropdown
+    slot_dropdown = dropdown
     dropdown:SetPoint('TOPLEFT', subclass_dropdown, 'BOTTOMLEFT', 0, 10 - FILTER_SPACING)
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
@@ -394,7 +394,7 @@ do
 end
 do
     local dropdown = gui.dropdown(frame.filter)
-    private.quality_dropdown = dropdown
+    quality_dropdown = dropdown
     dropdown:SetPoint('TOPLEFT', slot_dropdown, 'BOTTOMLEFT', 0, 10 - FILTER_SPACING)
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
@@ -418,7 +418,7 @@ do
     local label = gui.label(dropdown, gui.font_size.medium)
     label:SetPoint('RIGHT', dropdown, 'LEFT', -15, 0)
     label:SetText'Post Filter'
-    private.filter_dropdown = dropdown
+    filter_dropdown = dropdown
 end
 do
 	local input = gui.editbox(frame.filter)
@@ -445,7 +445,7 @@ do
 			add_post_filter()
 		end
 	end
-	private.filter_input = input
+	filter_input = input
 end
 do
     local input = gui.editbox(frame.filter)
@@ -457,7 +457,7 @@ do
     input.char = function() this:complete() end
     input.enter = add_post_filter
     input:Hide()
-    private.filter_parameter_input = input
+    filter_parameter_input = input
 end
 do
     local scroll_frame = CreateFrame('ScrollFrame', nil, frame.filter)
@@ -500,11 +500,11 @@ do
     scroll_child:SetScript('OnHyperlinkClick', data_link_click)
 --	    scroll_child:SetHyperlinkFormat("format") TODO
     scroll_child.measure = scroll_child:CreateFontString()
-    private.filter_display = scroll_child
+    filter_display = scroll_child
 end
 
-private.status_bars = t
-private.tables = t
+status_bars = t
+tables = t
 for _ = 1, 5  do
     local status_bar = gui.status_bar(frame)
     status_bar:SetAllPoints(status_bar_frame)
@@ -529,7 +529,7 @@ for _ = 1, 5  do
     tinsert(tables, table)
 end
 
-private.auto_buy_listing = listing.CreateScrollingTable(frame.saved.autobuy)
+auto_buy_listing = listing.CreateScrollingTable(frame.saved.autobuy)
 auto_buy_listing:SetColInfo{{name='Auto Buy Filters', width=1}}
 auto_buy_listing:EnableSorting(false)
 auto_buy_listing:DisableSelection(true)
@@ -537,7 +537,7 @@ auto_buy_listing:SetHandler('OnClick', handlers.OnClick)
 auto_buy_listing:SetHandler('OnEnter', handlers.OnEnter)
 auto_buy_listing:SetHandler('OnLeave', handlers.OnLeave)
 
-private.recent_searches_listing = listing.CreateScrollingTable(frame.saved.recent)
+recent_searches_listing = listing.CreateScrollingTable(frame.saved.recent)
 recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}
 recent_searches_listing:EnableSorting(false)
 recent_searches_listing:DisableSelection(true)
@@ -545,7 +545,7 @@ recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
 recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
 recent_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
 
-private.favorite_searches_listing = listing.CreateScrollingTable(frame.saved.favorite)
+favorite_searches_listing = listing.CreateScrollingTable(frame.saved.favorite)
 favorite_searches_listing:SetColInfo{{name='Favorite Searches', width=1}}
 favorite_searches_listing:EnableSorting(false)
 favorite_searches_listing:DisableSelection(true)

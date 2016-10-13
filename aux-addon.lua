@@ -15,7 +15,7 @@ local scan = require 'aux.core.scan'
 
 public.version = '5.0.0'
 
-function public.p.set(v)
+function public.set_p(v)
 	inspect(nil, v)
 end
 
@@ -24,10 +24,10 @@ function public.print(...) auto[arg] = true
 end
 
 local bids_loaded
-function public.bids_loaded.get() return bids_loaded end
+function public.get_bids_loaded() return bids_loaded end
 
 local current_owner_page
-function public.current_owner_page.get() return current_owner_page end
+function public.get_current_owner_page() return current_owner_page end
 
 local event_frame = CreateFrame'Frame'
 
@@ -35,13 +35,13 @@ for event in temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION
 	event_frame:RegisterEvent(event)
 end
 
-private.ADDON_LOADED = t
+ADDON_LOADED = t
 do
 	local handlers, handlers2 = t, t
-	function public.LOAD.set(f)
+	function public.set_LOAD(f)
 		tinsert(handlers, f)
 	end
-	function public.LOAD2.set(f)
+	function public.set_LOAD2(f)
 		tinsert(handlers2, f)
 	end
 	event_frame:SetScript('OnEvent', function()
@@ -58,29 +58,29 @@ do
 	end)
 end
 
-private.tab_info = t
+tab_info = t
 function public.TAB(name)
 	local tab = T('name', name)
 	local env = getfenv(2)
-	function env.private.OPEN.set(f) tab.OPEN = f end
-	function env.private.CLOSE.set(f) tab.CLOSE = f end
-	function env.private.USE_ITEM.set(f) tab.USE_ITEM = f end
-	function env.private.CLICK_LINK.set(f) tab.CLICK_LINK = f end
-	function env.public.ACTIVE.get() return tab == active_tab end
+	function env.set_OPEN(f) tab.OPEN = f end
+	function env.set_CLOSE(f) tab.CLOSE = f end
+	function env.set_USE_ITEM(f) tab.USE_ITEM = f end
+	function env.set_CLICK_LINK(f) tab.CLICK_LINK = f end
+	function env.public.get_ACTIVE() return tab == active_tab end
 	tinsert(tab_info, tab)
 end
 
 do
 	local index
-	function private.active_tab.get() return tab_info[index] end
-	function private.on_tab_click(i)
+	function get_active_tab() return tab_info[index] end
+	function on_tab_click(i)
 		do (index and active_tab.CLOSE or nop)() end
 		index = i
 		do (index and active_tab.OPEN or nop)() end
 	end
 end
 
-function private.SetItemRef(...) auto[arg] = true
+function SetItemRef(...) auto[arg] = true
 	if arg[3] ~= 'RightButton' or not index(active_tab, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
@@ -89,7 +89,7 @@ function private.SetItemRef(...) auto[arg] = true
 	end
 end
 
-function private.UseContainerItem(...) auto[arg] = true
+function UseContainerItem(...) auto[arg] = true
 	if modified or not index(active_tab, 'USE_ITEM') then
 		return orig.UseContainerItem(unpack(arg))
 	end
@@ -115,7 +115,7 @@ end
 
 do
 	local locked
-	function public.bid_in_progress.get() return locked end
+	function public.get_bid_in_progress() return locked end
 	function public.place_bid(type, index, amount, on_success)
 		if locked then return end
 		local money = GetMoney()
@@ -135,7 +135,7 @@ end
 
 do
 	local locked
-	function public.cancel_in_progress.get() return locked end
+	function public.get_cancel_in_progress() return locked end
 	function public.cancel_auction(index, on_success)
 		if locked then return end
 		locked = true
@@ -163,13 +163,13 @@ function public.min_bid_increment(current_bid)
 	return max(1, floor(current_bid / 100) * 5)
 end
 
-function private.AUCTION_HOUSE_SHOW()
+function AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
 	AuxFrame:Show()
 	tab = 1
 end
 
-function private.AUCTION_HOUSE_CLOSED()
+function AUCTION_HOUSE_CLOSED()
 	bids_loaded = false
 	current_owner_page = nil
 	post.stop()
@@ -179,18 +179,18 @@ function private.AUCTION_HOUSE_CLOSED()
 	AuxFrame:Hide()
 end
 
-function private.AUCTION_BIDDER_LIST_UPDATE()
+function AUCTION_BIDDER_LIST_UPDATE()
 	bids_loaded = true
 end
 
 do
 	local last_owner_page_requested
-	function private.GetOwnerAuctionItems(...) auto[arg] = true
+	function GetOwnerAuctionItems(...) auto[arg] = true
 		local page = arg[1]
 		last_owner_page_requested = page
 		return orig.GetOwnerAuctionItems(unpack(arg))
 	end
-	function private.AUCTION_OWNED_LIST_UPDATE()
+	function AUCTION_OWNED_LIST_UPDATE()
 		current_owner_page = last_owner_page_requested or 0
 	end
 end
@@ -268,7 +268,7 @@ do
 	end
 end
 
-function private.AuctionFrameAuctions_OnEvent(...) auto[arg] = true
+function AuctionFrameAuctions_OnEvent(...) auto[arg] = true
     if AuctionFrameAuctions:IsVisible() then
 	    return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end

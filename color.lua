@@ -31,7 +31,7 @@ do
 			return self.private.callback(color)
 		end
 	end
-	function private.color_accessor(callback)
+	function color_accessor(callback)
 		return function()
 			return index_function({ callback=callback, table=COLORS }, index_handler)
 		end
@@ -49,13 +49,13 @@ do
 			end
 		end
 	}
-	public.color.get = color_accessor(function(color)
+	public.get_color = color_accessor(function(color)
 		local r, g, b, a = unpack(color)
 		return setmetatable(A(r/255, g/255, b/255, a), mt)
 	end)
 end
 
-public.inline_color.get = color_accessor(function(color)
+public.get_inline_color = color_accessor(function(color)
 	local r, g, b, a = unpack(color)
 	return format('|c%02X%02X%02X%02X', a, r, g, b)
 end)
