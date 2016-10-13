@@ -9,7 +9,6 @@ public.font_size = {
 	small = 13,
 	medium = 15,
 	large = 18,
-	huge = 23,
 }
 
 function LOAD()

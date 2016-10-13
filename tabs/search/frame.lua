@@ -69,11 +69,9 @@ do
     private.next_button = btn
 end
 do
-    local btn = gui.button(frame, gui.font_size.huge)
+    local btn = gui.button(frame)
     btn:SetPoint('TOPRIGHT', -5, -8)
-    btn:SetWidth(70)
-    btn:SetHeight(25)
-    btn:SetText'Start'
+    btn:SetText'Search'
     btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
     btn:SetScript('OnClick', function()
         if arg1 == 'RightButton' then
@@ -84,22 +82,19 @@ do
     private.start_button = btn
 end
 do
-    local btn = gui.button(frame, gui.font_size.huge)
+    local btn = gui.button(frame)
     btn:SetPoint('TOPRIGHT', -5, -8)
-    btn:SetWidth(70)
-    btn:SetHeight(25)
-    btn:SetText'Stop'
+    btn:SetText'Pause'
     btn:SetScript('OnClick', function()
         scan.abort(search_scan_id)
     end)
     private.stop_button = btn
 end
 do
-    local btn = gui.button(frame, gui.font_size.huge)
+    local btn = gui.button(frame)
     btn:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
-    btn:SetWidth(70)
-    btn:SetHeight(25)
-    btn:SetText(color.green 'Resume')
+    btn:SetBackdropColor(color.state.enabled())
+    btn:SetText'Resume'
     btn:SetScript('OnClick', function()
         execute(true)
     end)

@@ -300,7 +300,7 @@ function public.execute(resume, real_time)
 	if resume then
 		current_search.table:SetSelectedRecord()
 	else
-		if filter_string ~= current_search.filter_string or current_search.first_page ~= first_page or current_search.last_page ~= last_page then
+		if filter_string ~= current_search.filter_string then
 			if current_search.filter_string then
 				new_search(filter_string, first_page, last_page)
 			else
