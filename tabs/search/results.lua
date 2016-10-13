@@ -9,6 +9,18 @@ function LOAD()
 	new_search()
 end
 
+function private.update_real_time(enable)
+	if enable then
+		range_button:Hide()
+		real_time_button:Show()
+		search_box:SetPoint('LEFT', real_time_button, 'RIGHT', 4, 0)
+	else
+		real_time_button:Hide()
+		range_button:Show()
+		search_box:SetPoint('LEFT', last_page_input, 'RIGHT', 4, 0)
+	end
+end
+
 do
 	local searches = t
 	local search_index = 1
@@ -37,20 +49,23 @@ do
 		end
 		if search_index == getn(searches) then
 			next_button:Hide()
-			search_box:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
+			range_button:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
+			real_time_button:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
 		else
 			next_button:Show()
-			search_box:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
+			range_button:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
+			real_time_button:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
 		end
+		update_real_time(searches[search_index].real_time)
 		update_start_stop()
 		update_continuation()
 	end
 
-	function private.new_search(filter_string, first_page, last_page)
+	function private.new_search(filter_string, first_page, last_page, real_time)
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
-		local search = T('records', t, 'filter_string', filter_string, 'first_page', first_page, 'last_page', last_page)
+		local search = T('records', t, 'filter_string', filter_string, 'first_page', first_page, 'last_page', last_page, 'real_time', real_time)
 		tinsert(searches, search)
 		if getn(searches) > 5 then
 			tremove(searches, 1)
@@ -93,10 +108,10 @@ end
 function private.update_continuation()
 	if current_search.continuation then
 		resume_button:Show()
-		last_page_input:SetPoint('RIGHT', resume_button, 'LEFT', -4, 0)
+		search_box:SetPoint('RIGHT', resume_button, 'LEFT', -4, 0)
 	else
 		resume_button:Hide()
-		last_page_input:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
+		search_box:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
 	end
 end
 
@@ -273,7 +288,7 @@ function public.execute(resume, real_time)
 	if resume then
 		real_time = current_search.real_time
 	elseif real_time == nil then
-		real_time = real_time_button:GetChecked()
+		real_time = real_time_button:IsShown()
 	end
 
 	if resume then
@@ -300,9 +315,9 @@ function public.execute(resume, real_time)
 	if resume then
 		current_search.table:SetSelectedRecord()
 	else
-		if filter_string ~= current_search.filter_string then
+		if filter_string ~= current_search.filter_string or first_page ~= current_search.first_page or last_page ~= current_search.last_page or real_time ~= current_search.real_time then
 			if current_search.filter_string then
-				new_search(filter_string, first_page, last_page)
+				new_search(filter_string, first_page, last_page, real_time)
 			else
 				current_search.filter_string = filter_string
 			end
@@ -310,13 +325,10 @@ function public.execute(resume, real_time)
 		else
 			current_search.records = t
 			current_search.table:SetDatabase(current_search.records)
-			if current_search.real_time ~= real_time then
-				current_search.table:Reset()
-			end
 		end
 		current_search.first_page = first_page
 		current_search.last_page = last_page
-		current_search.real_time = real_time_button:GetChecked()
+		current_search.real_time = real_time
 		current_search.auto_buy_validator = auto_buy_validator
 	end
 

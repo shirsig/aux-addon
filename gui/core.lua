@@ -561,6 +561,7 @@ end
 
 do
 	local editbox = CreateFrame'EditBox'
+	editbox:SetAutoFocus(false)
 	function public.clear_focus()
 		editbox:SetFocus()
 		editbox:ClearFocus()
