@@ -107,7 +107,6 @@ function public.auction(index, query_type)
         local item_info = item(item_id, suffix_id, unique_id, enchant_id)
 
         local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(query_type, index)
-        count = max(count, 1) -- maybe a kronos bug?
 
     	local duration = GetAuctionItemTimeLeft(query_type, index)
         local tooltip, tooltip_money = tooltip(function(tooltip) tooltip:SetAuctionItem(query_type, index) end)
@@ -298,7 +297,7 @@ function item_charges(tooltip)
 
         local charges = tonumber(left_charges_string) or tonumber(right_charges_string)
 		if charges then
-			return charges
+			return max(1, charges) -- kronos bug? should never be 0
 		end
     end
     return 1
