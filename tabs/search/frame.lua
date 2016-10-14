@@ -113,6 +113,7 @@ do
 end
 do
     local btn = gui.button(frame)
+    btn:SetHeight(25)
     btn:SetPoint('TOPRIGHT', -5, -8)
     btn:SetText'Search'
     btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
@@ -126,6 +127,7 @@ do
 end
 do
     local btn = gui.button(frame)
+    btn:SetHeight(25)
     btn:SetPoint('TOPRIGHT', -5, -8)
     btn:SetText'Pause'
     btn:SetScript('OnClick', function()
@@ -135,6 +137,7 @@ do
 end
 do
     local btn = gui.button(frame)
+    btn:SetHeight(25)
     btn:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
     btn:SetBackdropColor(color.state.enabled())
     btn:SetText'Resume'
