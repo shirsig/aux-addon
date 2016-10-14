@@ -297,7 +297,7 @@ function item_charges(tooltip)
 
         local charges = tonumber(left_charges_string) or tonumber(right_charges_string)
 		if charges then
-			return max(1, charges) -- kronos bug? should never be 0
+			return max(1, charges) -- TODO kronos bug? should never be 0
 		end
     end
     return 1

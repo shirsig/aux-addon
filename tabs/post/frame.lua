@@ -1,4 +1,4 @@
-module'aux.tabs.post'
+module 'aux.tabs.post'
 
 local info = require 'aux.util.info'
 local money = require 'aux.util.money'
@@ -265,13 +265,13 @@ do
     do
         local label = gui.label(editbox, gui.font_size.small)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText'Unit Buyout Price'
+        label:SetText('Unit Buyout Price')
     end
     do
         local label = gui.label(editbox, 14)
         label:SetPoint('LEFT', editbox, 'RIGHT', 8, 0)
         label:SetWidth(50)
-        label:SetJustifyH'CENTER'
+        label:SetJustifyH('CENTER')
         buyout_price_percentage = label
     end
     unit_buyout_price_input = editbox
@@ -290,6 +290,6 @@ do
     end)
     local label = gui.label(btn, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
-    label:SetText'Historical Value'
+    label:SetText('Historical Value')
     historical_value_button = btn
 end

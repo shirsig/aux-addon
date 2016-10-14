@@ -87,9 +87,13 @@ do
 		editbox:SetPoint('LEFT', range_button, 'RIGHT', 4, 0)
 		editbox:SetWidth(40)
 		editbox:SetHeight(25)
-		editbox:SetAlignment'CENTER'
+		editbox:SetAlignment('CENTER')
 		editbox:SetNumeric(true)
-		editbox:SetScript('OnTabPressed', function() last_page_input:SetFocus() end)
+		editbox:SetScript('OnTabPressed', function()
+            if not IsShiftKeyDown() then
+                last_page_input:SetFocus()
+            end
+        end)
 		editbox.enter = execute
 		editbox.change = change
 		local label = gui.label(editbox, gui.font_size.medium)
@@ -103,9 +107,15 @@ do
 		editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 5.8, 0)
 		editbox:SetWidth(40)
 		editbox:SetHeight(25)
-		editbox:SetAlignment'CENTER'
+		editbox:SetAlignment('CENTER')
 		editbox:SetNumeric(true)
-		editbox:SetScript('OnTabPressed', function() first_page_input:SetFocus() end)
+		editbox:SetScript('OnTabPressed', function()
+            if IsShiftKeyDown() then
+                first_page_input:SetFocus()
+            else
+                search_box:SetFocus()
+            end
+        end)
 		editbox.enter = execute
 		editbox.change = change
 		last_page_input = editbox
@@ -129,7 +139,7 @@ do
     local btn = gui.button(frame)
     btn:SetHeight(25)
     btn:SetPoint('TOPRIGHT', -5, -8)
-    btn:SetText'Pause'
+    btn:SetText('Pause')
     btn:SetScript('OnClick', function()
         scan.abort(search_scan_id)
     end)
@@ -140,7 +150,7 @@ do
     btn:SetHeight(25)
     btn:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
     btn:SetBackdropColor(color.state.enabled())
-    btn:SetText'Resume'
+    btn:SetText('Resume')
     btn:SetScript('OnClick', function()
         execute(true)
     end)
@@ -159,7 +169,11 @@ do
 		this:complete()
 	end
 	editbox:SetScript('OnTabPressed', function()
-		this:HighlightText(0, 0)
+        if IsShiftKeyDown() then
+            last_page_input:SetFocus()
+        else
+            this:HighlightText(0, 0)
+        end
 	end)
 	editbox.enter = execute
 	search_box = editbox
@@ -172,7 +186,7 @@ do
     btn:SetPoint('BOTTOMLEFT', AuxFrame.content, 'TOPLEFT', 10, 8)
     btn:SetWidth(243)
     btn:SetHeight(22)
-    btn:SetText'Search Results'
+    btn:SetText('Search Results')
     btn:SetScript('OnClick', function() subtab = RESULTS end)
     search_results_button = btn
 end
@@ -181,7 +195,7 @@ do
     btn:SetPoint('TOPLEFT', search_results_button, 'TOPRIGHT', 5, 0)
     btn:SetWidth(243)
     btn:SetHeight(22)
-    btn:SetText'Saved Searches'
+    btn:SetText('Saved Searches')
     btn:SetScript('OnClick', function() subtab = SAVED end)
     saved_searches_button = btn
 end
@@ -190,7 +204,7 @@ do
     btn:SetPoint('TOPLEFT', saved_searches_button, 'TOPRIGHT', 5, 0)
     btn:SetWidth(243)
     btn:SetHeight(22)
-    btn:SetText'Filter Builder'
+    btn:SetText('Filter Builder')
     btn:SetScript('OnClick', function() subtab = FILTER end)
     new_filter_button = btn
 end
@@ -204,14 +218,14 @@ end
 do
     local btn = gui.button(frame.results)
     btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-    btn:SetText'Bid'
+    btn:SetText('Bid')
     btn:Disable()
     bid_button = btn
 end
 do
     local btn = gui.button(frame.results)
     btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
-    btn:SetText'Buyout'
+    btn:SetText('Buyout')
     btn:Disable()
     buyout_button = btn
 end
@@ -227,14 +241,14 @@ end
 do
     local btn1 = gui.button(frame.saved)
     btn1:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-    btn1:SetText'Favorite'
+    btn1:SetText('Favorite')
     btn1:SetScript('OnClick', function()
         add_favorite(search_box:GetText())
     end)
 
 	local btn2 = gui.button(frame.saved)
 	btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
-	btn2:SetText'Auto Buy'
+	btn2:SetText('Auto Buy')
 	btn2:SetScript('OnClick', function()
 		add_auto_buy(search_box:GetText())
 		update_search_listings()
@@ -243,7 +257,7 @@ end
 do
     local btn1 = gui.button(frame.filter)
     btn1:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-    btn1:SetText'Search'
+    btn1:SetText('Search')
     btn1:SetScript('OnClick', function()
 	    export_filter_string()
         execute()
@@ -251,12 +265,12 @@ do
 
     local btn2 = gui.button(frame.filter)
     btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
-    btn2:SetText'Export'
+    btn2:SetText('Export')
     btn2:SetScript('OnClick', export_filter_string)
 
     local btn3 = gui.button(frame.filter)
     btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
-    btn3:SetText'Import'
+    btn3:SetText('Import')
     btn3:SetScript('OnClick', import_filter_string)
 end
 do
@@ -283,7 +297,7 @@ do
     editbox.enter = papply(editbox.ClearFocus, editbox)
     local label = gui.label(editbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-    label:SetText'Name'
+    label:SetText('Name')
     name_input = editbox
 end
 do
@@ -292,14 +306,14 @@ do
     checkbox:SetScript('OnClick', update_form)
     local label = gui.label(checkbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
-    label:SetText'Exact'
+    label:SetText('Exact')
     exact_checkbox = checkbox
 end
 do
     local editbox = gui.editbox(frame.filter)
     editbox:SetPoint('TOPLEFT', name_input, 'BOTTOMLEFT', 0, -FILTER_SPACING)
     editbox:SetWidth(125)
-    editbox:SetAlignment'CENTER'
+    editbox:SetAlignment('CENTER')
     editbox:SetNumeric(true)
     editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
@@ -318,14 +332,14 @@ do
     end
     local label = gui.label(editbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-    label:SetText'Level Range'
+    label:SetText('Level Range')
     min_level_input = editbox
 end
 do
     local editbox = gui.editbox(frame.filter)
     editbox:SetPoint('TOPLEFT', min_level_input, 'TOPRIGHT', 10, 0)
     editbox:SetWidth(125)
-    editbox:SetAlignment'CENTER'
+    editbox:SetAlignment('CENTER')
     editbox:SetNumeric(true)
     editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
@@ -353,7 +367,7 @@ do
     checkbox:SetScript('OnClick', update_form)
     local label = gui.label(checkbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
-    label:SetText'Usable'
+    label:SetText('Usable')
     usable_checkbox = checkbox
 end
 do
@@ -363,7 +377,7 @@ do
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
-    label:SetText'Item Class'
+    label:SetText('Item Class')
     UIDropDownMenu_Initialize(dropdown, initialize_class_dropdown)
     dropdown:SetScript('OnShow', function()
         UIDropDownMenu_Initialize(this, initialize_class_dropdown)
@@ -376,7 +390,7 @@ do
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
-    label:SetText'Item Subclass'
+    label:SetText('Item Subclass')
     UIDropDownMenu_Initialize(dropdown, initialize_subclass_dropdown)
     dropdown:SetScript('OnShow', function()
         UIDropDownMenu_Initialize(this, initialize_subclass_dropdown)
@@ -389,7 +403,7 @@ do
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
-    label:SetText'Item Slot'
+    label:SetText('Item Slot')
     UIDropDownMenu_Initialize(dropdown, initialize_slot_dropdown)
     dropdown:SetScript('OnShow', function()
         UIDropDownMenu_Initialize(this, initialize_slot_dropdown)
@@ -402,7 +416,7 @@ do
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
-    label:SetText'Min Quality'
+    label:SetText('Min Quality')
     UIDropDownMenu_Initialize(dropdown, initialize_quality_dropdown)
     dropdown:SetScript('OnShow', function()
         UIDropDownMenu_Initialize(this, initialize_quality_dropdown)
@@ -420,7 +434,7 @@ do
     _G[dropdown:GetName() .. 'Text']:Hide()
     local label = gui.label(dropdown, gui.font_size.medium)
     label:SetPoint('RIGHT', dropdown, 'LEFT', -15, 0)
-    label:SetText'Post Filter'
+    label:SetText('Post Filter')
     filter_dropdown = dropdown
 end
 do
