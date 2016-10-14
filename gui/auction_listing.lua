@@ -25,10 +25,10 @@ local AUCTION_PCT_COLORS = {
 }
 
 local TIME_LEFT_STRINGS = {
-	color.red '30m', -- Short
-	color.orange '2h', -- Medium
-	color.yellow '8h', -- Long
-	color.blue '24h', -- Very Long
+	color.red'30m', -- Short
+	color.orange'2h', -- Medium
+	color.yellow'8h', -- Long
+	color.blue'24h', -- Very Long
 }
 
 function item_column_init(rt, cell)
@@ -516,9 +516,9 @@ public.bids_config = {
         fill = function(cell, record)
             local status
             if record.high_bidder then
-                status = color.yellow('High Bidder')
+                status = color.yellow'High Bidder'
             else
-                status = color.red 'Outbid'
+                status = color.red'Outbid'
             end
             cell:SetText(status)
         end,

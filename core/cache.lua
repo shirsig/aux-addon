@@ -196,7 +196,7 @@ end
 function public.populate_wdb(item_id)
 	item_id = item_id or MIN_ITEM_ID
 	if item_id > MAX_ITEM_ID then
-		print 'Cache populated.'
+		print'Cache populated.'
 		return
 	end
 	if not GetItemInfo('item:' .. item_id) then
