@@ -399,7 +399,7 @@ end
 
 function public.item_quality_index(item_quality)
     for i = 0, 4 do
-        local quality = _G['ITEM_QUALITY' .. i..'_DESC']
+        local quality = _G['ITEM_QUALITY' .. i .. '_DESC']
         if strupper(item_quality) == strupper(quality) then
             return i, quality
         end

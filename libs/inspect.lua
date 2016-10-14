@@ -5,11 +5,11 @@ function print(msg)
 end
 
 function format_key(k)
-	return type(k) == 'string' and k or '['..tostring(k)..']'
+	return type(k) == 'string' and k or '[' .. tostring(k) .. ']'
 end
 
 function format_value(v)
-	return type(v) == 'string' and '"'..v..'"' or tostring(v)
+	return type(v) == 'string' and '"' .. v .. '"' or tostring(v)
 end
 
 function print_table(t, depth)
@@ -27,12 +27,12 @@ local max_depth
 
 function print_pair(k, v, depth)
 	local padding = strrep(' ', depth * 4)
-	print(padding..format_key(k)..' = '..format_value(v))
+	print(padding .. format_key(k) .. ' = ' .. format_value(v))
 	if type(v) == 'table' then
 		if next(v) then
-			print(padding..'{')
+			print(padding .. '{')
 			if depth == max_depth then
-				print(padding..'    ...')
+				print(padding .. '    ...')
 			else
 				print_table(v, depth + 1)
 			end
@@ -55,9 +55,9 @@ local function setting(v)
 	if type(v) == 'number' then
 		max_depth = v
 	elseif type(v) == 'function' then
-		print('#'..v())
+		print('#' .. v())
 	else
-		print('#'..v)
+		print('#' .. v)
 	end
 end
 

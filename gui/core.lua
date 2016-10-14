@@ -51,13 +51,13 @@ function LOAD()
 				text:SetFont(font, 14)
 				text:SetPoint('TOPLEFT', 18, 0)
 				text:SetPoint('BOTTOMRIGHT', -8, 0)
-				local highlight = _G['DropDownList1Button' .. i..'Highlight']
+				local highlight = _G['DropDownList1Button' .. i .. 'Highlight']
 				highlight:ClearAllPoints()
 				highlight:SetDrawLayer('OVERLAY')
 				highlight:SetHeight(14)
 				highlight:SetPoint('LEFT', 5, 0)
 				highlight:SetPoint('RIGHT', -3, 0)
-				local check = _G['DropDownList1Button' .. i..'Check']
+				local check = _G['DropDownList1Button' .. i .. 'Check']
 				check:SetWidth(16)
 				check:SetHeight(16)
 				check:SetPoint('LEFT', 3, -1)
@@ -73,10 +73,10 @@ function LOAD()
 				local text = button:GetFontString()
 				text:SetFont([[Fonts\FRIZQT__.ttf]], 10)
 				text:SetShadowOffset(1, -1)
-				local highlight = _G['DropDownList1Button' .. i..'Highlight']
+				local highlight = _G['DropDownList1Button' .. i .. 'Highlight']
 				highlight:SetAllPoints()
 				highlight:SetDrawLayer'BACKGROUND'
-				local check = _G['DropDownList1Button' .. i..'Check']
+				local check = _G['DropDownList1Button' .. i .. 'Check']
 				check:SetWidth(24)
 				check:SetHeight(24)
 				check:SetPoint('LEFT', 0, 0)

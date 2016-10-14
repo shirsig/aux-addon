@@ -399,6 +399,6 @@ function initialize_quality_dropdown()
 	end
 	UIDropDownMenu_AddButton(T('text', ALL, 'value', -1, 'func', on_click))
 	for i = 0, 4 do
-		UIDropDownMenu_AddButton(T('text', _G['ITEM_QUALITY' .. i..'_DESC'], 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton(T('text', _G['ITEM_QUALITY' .. i .. '_DESC'], 'value', i, 'func', on_click))
 	end
 end
