@@ -50,7 +50,7 @@ inventory_listing = item_listing.create(
     frame.inventory,
     function()
         if arg1 == 'LeftButton' then
-            set_item(this.item_record)
+            update_item(this.item_record)
         elseif arg1 == 'RightButton' then
             tab = 1
             search_tab.set_filter(strlower(info.item(this.item_record.item_id).name) .. '/exact')
@@ -139,11 +139,11 @@ do
     end
     slider.editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            unit_buyout_price:SetFocus()
+            unit_buyout_price_input:SetFocus()
         elseif stack_count_slider.editbox:IsVisible() then
             stack_count_slider.editbox:SetFocus()
         else
-            unit_start_price:SetFocus()
+            unit_start_price_input:SetFocus()
         end
     end)
     slider.editbox:SetNumeric(true)
@@ -167,7 +167,7 @@ do
         if IsShiftKeyDown() then
             stack_size_slider.editbox:SetFocus()
         else
-            unit_start_price:SetFocus()
+            unit_start_price_input:SetFocus()
         end
     end)
     slider.editbox:SetNumeric(true)
@@ -218,7 +218,7 @@ do
 	    if IsShiftKeyDown() then
 		    stack_count_slider.editbox:SetFocus()
 	    else
-		    unit_buyout_price:SetFocus()
+		    unit_buyout_price_input:SetFocus()
 	    end
     end)
     editbox.formatter = function() return money.to_string(get_unit_start_price(), true, nil, 3) end
@@ -239,19 +239,19 @@ do
         label:SetJustifyH('CENTER')
         start_price_percentage = label
     end
-    unit_start_price = editbox
+    unit_start_price_input = editbox
 end
 do
     local editbox = gui.editbox(frame.parameters)
     editbox.name = 'buy'
-    editbox:SetPoint('TOPRIGHT', unit_start_price, 'BOTTOMRIGHT', 0, -19)
+    editbox:SetPoint('TOPRIGHT', unit_start_price_input, 'BOTTOMRIGHT', 0, -19)
     editbox:SetWidth(180)
     editbox:SetHeight(22)
     editbox:SetAlignment('RIGHT')
     editbox:SetFontSize(17)
     editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            unit_start_price:SetFocus()
+            unit_start_price_input:SetFocus()
         else
             stack_size_slider.editbox:SetFocus()
         end
@@ -265,16 +265,16 @@ do
     do
         local label = gui.label(editbox, gui.font_size.small)
         label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-        label:SetText('Unit Buyout Price')
+        label:SetText'Unit Buyout Price'
     end
     do
         local label = gui.label(editbox, 14)
         label:SetPoint('LEFT', editbox, 'RIGHT', 8, 0)
         label:SetWidth(50)
-        label:SetJustifyH('CENTER')
+        label:SetJustifyH'CENTER'
         buyout_price_percentage = label
     end
-    unit_buyout_price = editbox
+    unit_buyout_price_input = editbox
 end
 do
     local btn = gui.button(frame.parameters, 14)
@@ -290,6 +290,6 @@ do
     end)
     local label = gui.label(btn, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
-    label:SetText('Historical Value')
+    label:SetText'Historical Value'
     historical_value_button = btn
 end

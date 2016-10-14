@@ -2,8 +2,6 @@ library 'green_t'
 
 local next, getn, setn, tremove, type, setmetatable = next, getn, table.setn, tremove, type, setmetatable
 
--- TODO recursive releasing with specified depth, maybe allow setting "release structure" on creation for easier releasing, mandatory operation table mandate + comply/fulfill functions to ensure something is being released?
-
 local wipe, acquire, release, set_auto_release
 do
 	local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, { __mode='k' }), {}
@@ -33,7 +31,6 @@ do
 		end
 		return {}
 	end
-	public.acquire = acquire
 
 	function release(t)
 		wipe(t)
@@ -55,6 +52,7 @@ do
 end
 
 public.get_t = acquire
+
 function public.get_tt()
 	local t = acquire()
 	set_auto_release(t, true)

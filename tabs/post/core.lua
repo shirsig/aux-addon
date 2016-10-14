@@ -81,21 +81,21 @@ function USE_ITEM(item_info)
 end
 
 function get_unit_start_price()
-    local money_text = unit_start_price:GetText()
+    local money_text = unit_start_price_input:GetText()
     return money.from_string(money_text) or 0
 end
 
 function set_unit_start_price(amount)
-    unit_start_price:SetText(money.to_string(amount, true, nil, 3, nil, true))
+    unit_start_price_input:SetText(money.to_string(amount, true, nil, 3, nil, true))
 end
 
 function get_unit_buyout_price()
-    local money_text = unit_buyout_price:GetText()
+    local money_text = unit_buyout_price_input:GetText()
     return money.from_string(money_text) or 0
 end
 
 function set_unit_buyout_price(amount)
-    unit_buyout_price:SetText(money.to_string(amount, true, nil, 3, nil, true))
+    unit_buyout_price_input:SetText(money.to_string(amount, true, nil, 3, nil, true))
 end
 
 function update_inventory_listing()
@@ -182,7 +182,7 @@ end
 function public.select_item(item_key)
     for _, inventory_record in filter(copy(inventory_records), function(record) return record.aux_quantity > 0 end) do
         if inventory_record.key == item_key then
-            set_item(inventory_record)
+            update_item(inventory_record)
             return
         end
     end
@@ -240,7 +240,7 @@ function post_auctions()
                 selected_item = nil
                 for _, record in inventory_records do
                     if record.key == key then
-                        set_item(record)
+                        update_item(record)
 	                    break
                     end
                 end
@@ -279,21 +279,17 @@ function update_item_configuration()
         item.name:SetTextColor(color.label.enabled())
         item.name:SetText'No item selected'
 
-        unit_start_price:Hide()
-        unit_buyout_price:Hide()
+        unit_start_price_input:Hide()
+        unit_buyout_price_input:Hide()
         stack_size_slider:Hide()
         stack_count_slider:Hide()
         deposit:Hide()
         duration_dropdown:Hide()
         historical_value_button:Hide()
         hide_checkbox:Hide()
-
---        deposit:SetText('Deposit: ' .. money.to_string(0, nil, nil, nil, gui.inline_color.text.enabled))
---        set_unit_start_price(0)
---        set_unit_buyout_price(0)
     else
-		unit_start_price:Show()
-        unit_buyout_price:Show()
+		unit_start_price_input:Show()
+        unit_buyout_price_input:Show()
         stack_size_slider:Show()
         stack_count_slider:Show()
         deposit:Show()
@@ -374,7 +370,7 @@ function update_historical_value_button()
     end
 end
 
-function set_item(item)
+function update_item(item)
     local settings = read_settings(item.key)
 
     item.unit_vendor_price = unit_vendor_price(item.key)
@@ -398,8 +394,8 @@ function set_item(item)
     stack_size_slider:SetValue(settings.stack_size)
     quantity_update(true)
 
-    unit_start_price:SetText(money.to_string(settings.start_price, true, nil, 3, nil, true))
-    unit_buyout_price:SetText(money.to_string(settings.buyout_price, true, nil, 3, nil, true))
+    unit_start_price_input:SetText(money.to_string(settings.start_price, true, nil, 3, nil, true))
+    unit_buyout_price_input:SetText(money.to_string(settings.buyout_price, true, nil, 3, nil, true))
 
     if not existing_auctions[selected_item.key] then
         refresh_entries()
