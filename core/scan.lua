@@ -40,7 +40,6 @@ do
 	function complete()
 		local on_complete = state.params.on_complete
 		scan_states[state.params.type] = nil
---		for _ in on_complete or nop do end TODO test performance
 		do (on_complete or nop)() end
 	end
 
