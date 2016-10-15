@@ -11,7 +11,6 @@ local ROW_HEIGHT = 39
 function public.render(item_listing)
 
 	FauxScrollFrame_Update(item_listing.scroll_frame, getn(item_listing.item_records), getn(item_listing.rows), ROW_HEIGHT)
-	item_listing.scroll_frame:Show()
 	local offset = FauxScrollFrame_GetOffset(item_listing.scroll_frame)
 
 	local rows = item_listing.rows
@@ -47,7 +46,7 @@ function public.create(parent, on_click, selected)
 	content:SetPoint('TOPLEFT', 0, -51)
 	content:SetPoint('BOTTOMRIGHT', -15, 0)
 
-	local scroll_frame = CreateFrame('ScrollFrame', gui.unique_name .. 'ScrollFrame', parent, 'FauxScrollFrameTemplate')
+	local scroll_frame = CreateFrame('ScrollFrame', gui.unique_name, parent, 'FauxScrollFrameTemplate')
 	scroll_frame:SetScript('OnVerticalScroll', function(self, offset)
 		FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() render(this.item_listing) end)
 	end)

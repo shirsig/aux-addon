@@ -195,19 +195,6 @@ local methods = {
         return st.sizes.numRows
     end,
 
-    SetScrollOffset = function(st, offset)
-        local maxOffset = max(getn(st.rowData) - st.sizes.numRows, 0)
-        if not offset or offset < 0 or offset > maxOffset then
-            return -- invalid offset
-        end
-
-        local scrollPercent = offset / maxOffset
-        local maxPixelOffset = st.scrollFrame:GetVerticalScrollRange() + ST_ROW_HEIGHT * 2
-        local pixelOffset = scrollPercent * maxPixelOffset
-        FauxScrollFrame_SetOffset(st.scrollFrame, offset)
-        st.scrollFrame:SetVerticalScroll(pixelOffset)
-    end,
-
     SetHighlighted = function(st, row)
         st.highlighted = row
         st:RefreshRows()
