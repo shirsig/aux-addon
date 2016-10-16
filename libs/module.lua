@@ -1,6 +1,6 @@
 if module then return end
 local strfind, type, setmetatable, setfenv, _G = strfind, type, setmetatable, setfenv, getfenv(0)
-local error, nop, id, define, include, require, create_module, nop_default_mt, public_modifier_mt, proxy_mt
+local error, nop, id, define, include, create_module, nop_default_mt, public_modifier_mt, proxy_mt
 local loaded, interfaces, environments = {}, {}, {}
 
 function error(msg, ...) return _G.error(format(msg or '', unpack(arg)) .. '\n' .. debugstack(), 0) end
@@ -25,8 +25,6 @@ function include(self, name)
 	for k, v in module.public_fields do define(self, k, v, true) end
 end
 
-function require(name) if not loaded[name] then create_module(name) end return interfaces[name] end
-
 public_modifier_mt = {__metatable=false, __newindex=define}
 
 nop_default_mt = {__index=function() return nop end}
@@ -42,7 +40,7 @@ function create_module(name)
 	accessors = {public=function() return public_modifier end}
 	mutators = setmetatable({_=nop}, {__index=function(_, k) return function(v) define(name, k, v, true) end end})
 	fields = setmetatable(
-		{_M=environment, _G=_G, require=require, include=function(interface) include(name, interface) end, error=error, nop=nop, id=id},
+		{_M=environment, _G=_G, include=function(interface) include(name, interface) end, error=error, nop=nop, id=id},
 		{__index=function(_, k) local accessor = accessors[k]; if accessor then return accessor() else return _G[k] end end}
 	)
 	public_accessors = setmetatable({}, nop_default_mt)
@@ -51,7 +49,7 @@ function create_module(name)
 	setmetatable(environment, proxy_mt(fields, mutators))
 	setmetatable(interface, proxy_mt(public_fields, public_mutators))
 	P = {
-		defined = {_M=true, _G=true, require=true, include=true, error=true, nop=true, id=true, public=true, get_public=true, set__=true},
+		defined = {_M=true, _G=true, include=true, error=true, nop=true, id=true, public=true, set__=true, require=true},
 		fields = fields, accessors = accessors, mutators = mutators,
 		public_fields = public_fields, public_accessors = public_accessors, public_mutators = public_mutators,
 	}
@@ -61,3 +59,4 @@ end
 
 function module(name) if not loaded[name] then create_module(name) end setfenv(2, environments[name]) end
 function library(name) if loaded[name] then _G.error(nil) end create_module(name) setfenv(2, environments[name]) end
+function require(name) if not loaded[name] then create_module(name) end return interfaces[name] end
