@@ -41,13 +41,13 @@ function LOAD()
 end
 
 do
-	local sell_scan_countdown, incomplete_buy_data
+	local sell_scan_queued, incomplete_buy_data
 	function on_merchant_show()
 		merchant_sell_scan()
 		incomplete_buy_data = not merchant_buy_scan()
 	end
 	function on_merchant_closed()
-		sell_scan_countdown = nil
+		sell_scan_queued = nil
 		incomplete_buy_data = false
 	end
 	function on_merchant_update()
@@ -57,15 +57,13 @@ do
 	end
 	function on_bag_update()
 		if MerchantFrame:IsVisible() then
-			sell_scan_countdown = 10
+			sell_scan_queued = true
 		end
 	end
 	function merchant_on_update()
-		if sell_scan_countdown == 0 then
-			sell_scan_countdown = nil
+		if sell_scan_queued then
+			sell_scan_queued = nil
 			merchant_sell_scan()
-		elseif sell_scan_countdown then
-			sell_scan_countdown = sell_scan_countdown - 1
 		end
 	end
 end
@@ -84,7 +82,6 @@ function public.merchant_info(item_id)
 	if aux_merchant_buy[item_id] then
 		buy_info = persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
 	end
-
 	return aux_merchant_sell[item_id], buy_info and buy_info.unit_price, buy_info and buy_info.limited
 end
 
@@ -111,7 +108,6 @@ function public.item_id(item_name)
 end
 
 function merchant_buy_scan()
-
 	local incomplete_data
 	for i = 1, GetMerchantNumItems() do
 		local _, _, price, count, stock = GetMerchantItemInfo(i)
