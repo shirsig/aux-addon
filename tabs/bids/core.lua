@@ -25,7 +25,7 @@ function update_listing()
     listing:SetDatabase(auction_records)
 end
 
-function public.scan_bids()
+function M.scan_bids()
 
     status_bar:update_status(0,0)
     status_bar:set_text'Scanning auctions...'

@@ -3,9 +3,9 @@ module 'aux.gui'
 include 'green_t'
 include 'aux'
 
-public.font = [[Fonts\ARIALN.TTF]]
+M.font = [[Fonts\ARIALN.TTF]]
 
-public.font_size = {
+M.font_size = {
 	small = 13,
 	medium = 15,
 	large = 18,
@@ -87,7 +87,7 @@ end
 
 do
 	local id = 1
-	function public.get_unique_name()
+	function M.get_unique_name()
 		id = id + 1
 		return 'AuxFrame' .. id
 	end
@@ -108,7 +108,7 @@ do
 		end
 		return orig()
 	end)
-	public.menu = vararg-function(arg)
+	M.menu = vararg-function(arg)
 		structure = perm-arg
 		local x, y = GetCursorPosition()
 		menu:ClearAllPoints()
@@ -117,36 +117,36 @@ do
 	end
 end
 
-function public.set_size(frame, width, height)
+function M.set_size(frame, width, height)
 	frame:SetWidth(width)
 	frame:SetHeight(height or width)
 end
 
-function public.set_frame_style(frame, backdrop_color, border_color, left, right, top, bottom)
+function M.set_frame_style(frame, backdrop_color, border_color, left, right, top, bottom)
 	frame:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5, tile=true, insets={left=left, right=right, top=top, bottom=bottom}}
 	frame:SetBackdropColor(backdrop_color())
 	frame:SetBackdropBorderColor(border_color())
 end
 
-function public.set_window_style(frame, left, right, top, bottom)
+function M.set_window_style(frame, left, right, top, bottom)
     set_frame_style(frame, color.window.background, color.window.border, left, right, top, bottom)
 end
 
-function public.set_panel_style(frame, left, right, top, bottom)
+function M.set_panel_style(frame, left, right, top, bottom)
     set_frame_style(frame, color.panel.background, color.panel.border, left, right, top, bottom)
 end
 
-function public.set_content_style(frame, left, right, top, bottom)
+function M.set_content_style(frame, left, right, top, bottom)
     set_frame_style(frame, color.content.background, color.content.border, left, right, top, bottom)
 end
 
-function public.panel(parent)
+function M.panel(parent)
     local panel = CreateFrame('Frame', nil, parent)
     set_panel_style(panel)
     return panel
 end
 
-function public.checkbutton(parent, text_height)
+function M.checkbutton(parent, text_height)
     local button = button(parent, text_height)
     button.state = false
     button:SetBackdropColor(color.state.disabled())
@@ -165,7 +165,7 @@ function public.checkbutton(parent, text_height)
     return button
 end
 
-function public.button(parent, text_height)
+function M.button(parent, text_height)
     text_height = text_height or font_size.large
     local button = CreateFrame('Button', nil, parent)
     set_size(button, 80, 24)
@@ -283,7 +283,7 @@ do
 			end
 		end
 	end
-	function public.tabs(parent, orientation)
+	function M.tabs(parent, orientation)
 		local self = {
 			_frame = parent,
 			_orientation = orientation,
@@ -293,7 +293,7 @@ do
 	end
 end
 
-function public.editbox(parent)
+function M.editbox(parent)
     local editbox = CreateFrame('EditBox', nil, parent)
     editbox:SetAutoFocus(false)
     editbox:SetTextInsets(1.5, 1.5, 3, 3)
@@ -370,7 +370,7 @@ function public.editbox(parent)
     return editbox
 end
 
-function public.status_bar(parent)
+function M.status_bar(parent)
     local self = CreateFrame('Frame', nil, parent)
     local level = parent:GetFrameLevel()
     self:SetFrameLevel(level + 1)
@@ -433,7 +433,7 @@ function public.status_bar(parent)
     return self
 end
 
-function public.item(parent)
+function M.item(parent)
     local item = CreateFrame('Frame', nil, parent)
     set_size(item, 260, 40)
     local btn = CreateFrame('CheckButton', unique_name, item, 'ActionButtonTemplate')
@@ -452,14 +452,14 @@ function public.item(parent)
     return item
 end
 
-function public.label(parent, size)
+function M.label(parent, size)
     local label = parent:CreateFontString()
     label:SetFont(font, size or font_size.small)
     label:SetTextColor(color.label.enabled())
     return label
 end
 
-function public.horizontal_line(parent, y_offset, inverted_color)
+function M.horizontal_line(parent, y_offset, inverted_color)
     local texture = parent:CreateTexture()
     texture:SetPoint('TOPLEFT', parent, 'TOPLEFT', 2, y_offset)
     texture:SetPoint('TOPRIGHT', parent, 'TOPRIGHT', -2, y_offset)
@@ -472,7 +472,7 @@ function public.horizontal_line(parent, y_offset, inverted_color)
     return texture
 end
 
-function public.vertical_line(parent, x_offset, top_offset, bottom_offset, inverted_color)
+function M.vertical_line(parent, x_offset, top_offset, bottom_offset, inverted_color)
     local texture = parent:CreateTexture()
     texture:SetPoint('TOPLEFT', parent, 'TOPLEFT', x_offset, top_offset or -2)
     texture:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', x_offset, bottom_offset or 2)
@@ -485,7 +485,7 @@ function public.vertical_line(parent, x_offset, top_offset, bottom_offset, inver
     return texture
 end
 
-function public.dropdown(parent)
+function M.dropdown(parent)
     local dropdown = CreateFrame('Frame', unique_name, parent, 'UIDropDownMenuTemplate')
 	set_content_style(dropdown, 0, 0, 4, 4)
 
@@ -509,7 +509,7 @@ function public.dropdown(parent)
     return dropdown
 end
 
-function public.slider(parent)
+function M.slider(parent)
 
     local slider = CreateFrame('Slider', nil, parent)
     slider:SetOrientation'HORIZONTAL'
@@ -545,7 +545,7 @@ function public.slider(parent)
     return slider
 end
 
-function public.checkbox(parent)
+function M.checkbox(parent)
     local checkbox = CreateFrame('CheckButton', nil, parent, 'UICheckButtonTemplate')
     checkbox:SetWidth(16)
     checkbox:SetHeight(16)
@@ -562,7 +562,7 @@ end
 do
 	local editbox = CreateFrame'EditBox'
 	editbox:SetAutoFocus(false)
-	function public.clear_focus()
+	function M.clear_focus()
 		editbox:SetFocus()
 		editbox:ClearFocus()
 	end

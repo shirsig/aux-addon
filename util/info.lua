@@ -37,12 +37,12 @@ do
 		INVTYPE_RANGEDRIGHT = {18},
 		INVTYPE_TABARD = {19},
 	}
-	function public.inventory_index(slot)
+	function M.inventory_index(slot)
 	    return unpack(inventory_index_map[slot] or tt)
 	end
 end
 
-function public.container_item(bag, slot)
+function M.container_item(bag, slot)
     for link in present(GetContainerItemLink(bag, slot)) do
 
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
@@ -86,7 +86,7 @@ function public.container_item(bag, slot)
     end
 end
 
-function public.auction_sell_item()
+function M.auction_sell_item()
 	for name, texture, count, quality, usable, vendor_price in GetAuctionSellItemInfo do
         return T(
 			'name', name,
@@ -99,7 +99,7 @@ function public.auction_sell_item()
 	end
 end
 
-function public.auction(index, query_type)
+function M.auction(index, query_type)
     query_type = query_type or 'list'
 
 	for link in present(GetAuctionItemLink(query_type, index)) do
@@ -162,7 +162,7 @@ function public.auction(index, query_type)
     end
 end
 
-function public.bid_update(auction_record)
+function M.bid_update(auction_record)
     auction_record.high_bid = auction_record.bid_price
     auction_record.blizzard_bid = auction_record.bid_price
     auction_record.min_increment = min_bid_increment(auction_record.bid_price)
@@ -173,12 +173,12 @@ function public.bid_update(auction_record)
     auction_record.search_signature = join(temp-A(auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, aux_ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')), ':')
 end
 
-function public.set_tooltip(itemstring, owner, anchor)
+function M.set_tooltip(itemstring, owner, anchor)
     GameTooltip:SetOwner(owner, anchor)
     GameTooltip:SetHyperlink(itemstring)
 end
 
-function public.set_shopping_tooltip(slot)
+function M.set_shopping_tooltip(slot)
     local index1, index2 = inventory_index(slot)
     local tooltips = tt
     if index1 then
@@ -211,7 +211,7 @@ function public.set_shopping_tooltip(slot)
     end
 end
 
-function public.tooltip_match(entry, tooltip)
+function M.tooltip_match(entry, tooltip)
     return any(tooltip, function(line)
         local left_match = line.left_text and strupper(line.left_text) == strupper(entry)
         local right_match = line.right_text and strupper(line.right_text) == strupper(entry)
@@ -219,7 +219,7 @@ function public.tooltip_match(entry, tooltip)
     end)
 end
 
-function public.tooltip_find(pattern, tooltip)
+function M.tooltip_find(pattern, tooltip)
     local count = 0
     for _, line in tooltip do
         if line.left_text and strfind(line.left_text, pattern) then
@@ -232,7 +232,7 @@ function public.tooltip_find(pattern, tooltip)
     return count
 end
 
-function public.load_tooltip(frame, tooltip)
+function M.load_tooltip(frame, tooltip)
     frame:ClearLines()
     for _, line in tooltip do
         if line.right_text then
@@ -247,7 +247,7 @@ function public.load_tooltip(frame, tooltip)
     end
 end
 
-function public.display_name(item_id, no_brackets, no_color)
+function M.display_name(item_id, no_brackets, no_color)
     for item_info in present(item(item_id)) do
         local name = item_info.name
         if not no_brackets then
@@ -260,7 +260,7 @@ function public.display_name(item_id, no_brackets, no_color)
     end
 end
 
-function public.auctionable(tooltip, quality, lootable)
+function M.auctionable(tooltip, quality, lootable)
     local durability, max_durability = durability(tooltip)
     return not lootable
             and (not quality or quality < 6)
@@ -271,7 +271,7 @@ function public.auctionable(tooltip, quality, lootable)
             and not (durability and durability < max_durability)
 end
 
-function public.tooltip(setter)
+function M.tooltip(setter)
     AuxTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
     AuxTooltip.money = 0
     setter(AuxTooltip)
@@ -325,12 +325,12 @@ do
 
 		-- ... TODO
 	}
-	function public.max_item_charges(item_id)
+	function M.max_item_charges(item_id)
 	    return data[item_id]
 	end
 end
 
-function public.durability(tooltip)
+function M.durability(tooltip)
     for _, line in tooltip do
         local pattern = '^' .. gsub(gsub(DURABILITY_TEMPLATE, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)') .. '$'
         local _, _, left_durability_string, left_max_durability_string = strfind(line.left_text or '', pattern)
@@ -343,21 +343,21 @@ function public.durability(tooltip)
     end
 end
 
-function public.item_key(link)
+function M.item_key(link)
     local item_id, suffix_id = parse_link(link)
     return item_id .. ':' .. suffix_id
 end
 
-function public.parse_link(link)
+function M.parse_link(link)
     local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(link, '|c%x%x%x%x%x%x%x%x|Hitem:(%d*):(%d*):(%d*):(%d*)[:0-9]*|h%[(.-)%]|h|r')
     return tonumber(item_id) or 0, tonumber(suffix_id) or 0, tonumber(unique_id) or 0, tonumber(enchant_id) or 0, name
 end
 
-function public.itemstring(item_id, suffix_id, unique_id, enchant_id)
+function M.itemstring(item_id, suffix_id, unique_id, enchant_id)
     return 'item:' .. (item_id or 0) .. ':' .. (enchant_id or 0) .. ':' .. (suffix_id or 0) .. ':' .. (unique_id or 0)
 end
 
-function public.item(item_id, suffix_id)
+function M.item(item_id, suffix_id)
     local itemstring = 'item:' .. (item_id or 0) .. ':0:' .. (suffix_id or 0) .. ':0'
     local name, itemstring, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
     return name and T(
@@ -373,7 +373,7 @@ function public.item(item_id, suffix_id)
     ) or cache.item_info(item_id)
 end
 
-function public.item_class_index(item_class)
+function M.item_class_index(item_class)
     for i, class in temp-A(GetAuctionItemClasses()) do
         if strupper(class) == strupper(item_class) then
             return i, class
@@ -381,7 +381,7 @@ function public.item_class_index(item_class)
     end
 end
 
-function public.item_subclass_index(class_index, item_subclass)
+function M.item_subclass_index(class_index, item_subclass)
     for i, subclass in temp-A(GetAuctionItemSubClasses(class_index)) do
         if strupper(subclass) == strupper(item_subclass) then
             return i, subclass
@@ -389,7 +389,7 @@ function public.item_subclass_index(class_index, item_subclass)
     end
 end
 
-function public.item_slot_index(class_index, subclass_index, slot_name)
+function M.item_slot_index(class_index, subclass_index, slot_name)
     for i, slot in temp-A(GetAuctionInvTypes(class_index, subclass_index)) do
         if strupper(_G[slot]) == strupper(slot_name) then
             return i, _G[slot]
@@ -397,7 +397,7 @@ function public.item_slot_index(class_index, subclass_index, slot_name)
     end
 end
 
-function public.item_quality_index(item_quality)
+function M.item_quality_index(item_quality)
     for i = 0, 4 do
         local quality = _G['ITEM_QUALITY' .. i .. '_DESC']
         if strupper(item_quality) == strupper(quality) then
@@ -406,7 +406,7 @@ function public.item_quality_index(item_quality)
     end
 end
 
-function public.get_inventory()
+function M.get_inventory()
 	local bag, slot = 0, 0
 	return function()
 		if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then
@@ -419,7 +419,7 @@ function public.get_inventory()
 	end
 end
 
-function public.bag_type(bag)
+function M.bag_type(bag)
 	if bag == 0 then return 1 end
 	for link in present(GetInventoryItemLink('player', ContainerIDToInventoryID(bag))) do
 		local item_id = parse_link(link)

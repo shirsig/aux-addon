@@ -11,7 +11,7 @@ local PAGE_SIZE = 50
 do
 	local scan_states = t
 
-	function public.start(params)
+	function M.start(params)
 		for old_state in present(scan_states[params.type]) do
 			abort(old_state.id)
 		end
@@ -23,7 +23,7 @@ do
 		return thread_id
 	end
 
-	function public.abort(scan_id)
+	function M.abort(scan_id)
 		local aborted = t
 		for type, state in scan_states do
 			if not scan_id or state.id == scan_id then

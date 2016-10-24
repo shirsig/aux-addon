@@ -77,7 +77,7 @@ function merchant_loaded()
 	return true
 end
 
-function public.merchant_info(item_id)
+function M.merchant_info(item_id)
 	local buy_info
 	if aux_merchant_buy[item_id] then
 		buy_info = persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
@@ -85,7 +85,7 @@ function public.merchant_info(item_id)
 	return aux_merchant_sell[item_id], buy_info and buy_info.unit_price, buy_info and buy_info.limited
 end
 
-function public.item_info(item_id)
+function M.item_info(item_id)
 	local data_string = aux_items[item_id]
 	if data_string then
 		local cached_data = persistence.read(items_schema, data_string)
@@ -103,7 +103,7 @@ function public.item_info(item_id)
 	end
 end
 
-function public.item_id(item_name)
+function M.item_id(item_name)
 	return aux_item_ids[strlower(item_name)]
 end
 
@@ -189,7 +189,7 @@ function scan_wdb(item_id)
 	end
 end
 
-function public.populate_wdb(item_id)
+function M.populate_wdb(item_id)
 	item_id = item_id or MIN_ITEM_ID
 	if item_id > MAX_ITEM_ID then
 		print'Cache populated.'

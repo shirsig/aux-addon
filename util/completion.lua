@@ -5,7 +5,7 @@ include 'aux'
 
 local filter_util = require 'aux.util.filter'
 
-function public:complete_filter()
+function M:complete_filter()
 	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
 		return
 	end
@@ -27,7 +27,7 @@ function public:complete_filter()
 	end
 end
 
-function public.complete(options)
+function M.complete(options)
 	return function(self)
 		if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
 			return

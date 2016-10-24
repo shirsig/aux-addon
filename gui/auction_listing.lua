@@ -60,7 +60,7 @@ function item_column_init(rt, cell)
     text:SetPoint('BOTTOMRIGHT', 0, 0)
 end
 
-public.search_config = {
+M.search_config = {
     {
         title = 'Item',
         width = .35,
@@ -230,7 +230,7 @@ public.search_config = {
     },
 }
 
-public.auctions_config = {
+M.auctions_config = {
     {
         title = 'Item',
         width = .35,
@@ -377,7 +377,7 @@ public.auctions_config = {
     },
 }
 
-public.bids_config = {
+M.bids_config = {
     {
         title = 'Item',
         width = .35,
@@ -548,11 +548,11 @@ function percentage_color(pct)
 	end
 end
 
-function public.percentage_historical(pct, bid)
+function M.percentage_historical(pct, bid)
     return (bid and inline_color.gray or percentage_color(pct)) .. (pct > 10000 and '>10000' or pct) .. '%' .. FONT_COLOR_CODE_CLOSE
 end
 
-function public.time_left(code)
+function M.time_left(code)
     return TIME_LEFT_STRINGS[code]
 end
 
@@ -984,7 +984,7 @@ local methods = {
     end,
 }
 
-function public.CreateAuctionResultsTable(parent, config)
+function M.CreateAuctionResultsTable(parent, config)
 
     RT_COUNT = RT_COUNT + 1
     local rt = CreateFrame('Frame', nil, parent)

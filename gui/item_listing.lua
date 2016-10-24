@@ -8,7 +8,7 @@ local gui = require 'aux.gui'
 
 local ROW_HEIGHT = 39
 
-function public.render(item_listing)
+function M.render(item_listing)
 
 	FauxScrollFrame_Update(item_listing.scroll_frame, getn(item_listing.item_records), getn(item_listing.rows), ROW_HEIGHT)
 	local offset = FauxScrollFrame_GetOffset(item_listing.scroll_frame)
@@ -41,7 +41,7 @@ function public.render(item_listing)
 	end
 end
 
-function public.create(parent, on_click, selected)
+function M.create(parent, on_click, selected)
 	local content = CreateFrame('Frame', nil, parent)
 	content:SetPoint('TOPLEFT', 0, -51)
 	content:SetPoint('BOTTOMRIGHT', -15, 0)
@@ -113,7 +113,7 @@ function public.create(parent, on_click, selected)
 	return item_listing
 end
 
-function public.populate(item_listing, item_records)
+function M.populate(item_listing, item_records)
 	item_listing.item_records = item_records
 	render(item_listing)
 end

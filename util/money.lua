@@ -3,25 +3,25 @@ module 'aux.util.money'
 include 'green_t'
 include 'aux'
 
-public.GOLD_TEXT = '|cffffd70ag|r'
-public.SILVER_TEXT = '|cffc7c7cfs|r'
-public.COPPER_TEXT = '|cffeda55fc|r'
+M.GOLD_TEXT = '|cffffd70ag|r'
+M.SILVER_TEXT = '|cffc7c7cfs|r'
+M.COPPER_TEXT = '|cffeda55fc|r'
 
 local COPPER_PER_GOLD = 10000
 local COPPER_PER_SILVER = 100
 
-function public.to_gsc(money)
+function M.to_gsc(money)
 	local gold = floor(money / COPPER_PER_GOLD)
 	local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
 	local copper = mod(money, COPPER_PER_SILVER)
 	return gold, silver, copper
 end
 
-function public.from_gsc(gold, silver, copper)
+function M.from_gsc(gold, silver, copper)
 	return gold * COPPER_PER_GOLD + silver * COPPER_PER_SILVER + copper
 end
 
-function public.to_string2(money, exact, color)
+function M.to_string2(money, exact, color)
 	color = color or FONT_COLOR_CODE_CLOSE
 
 	local TEXT_NONE = '0'
@@ -59,12 +59,12 @@ function public.to_string2(money, exact, color)
 	return str
 end
 
---function public.to_string(params) -- TODO
+--function M.to_string(params) -- TODO
 --	local gold, silver, copper = to_gsc(params.copper or 0 + )
 --	local settings = set(unpack(arg))
 --end
 
-function public.to_string(money, pad, trim, decimal_points, color, no_color)
+function M.to_string(money, pad, trim, decimal_points, color, no_color)
 	local is_negative = money < 0
 	money = abs(money)
 	local gold, silver, copper = to_gsc(money)
@@ -115,7 +115,7 @@ function public.to_string(money, pad, trim, decimal_points, color, no_color)
 	return text
 end
 
-function public.from_string(value)
+function M.from_string(value)
 	local number = tonumber(value)
 	if number and number >= 0 then
 		return number * COPPER_PER_GOLD
@@ -139,7 +139,7 @@ function public.from_string(value)
 	return from_gsc(gold or 0, silver or 0, copper or 0)
 end
 
-function public.format_number(num, pad, decimal_padding, color)
+function M.format_number(num, pad, decimal_padding, color)
 	local padding = pad and 2 + (decimal_padding and decimal_padding + 1 or 0) or 0
 	num = format('%0' .. padding .. '.0' .. (decimal_padding or 0) .. 'f', num)
 	if color then

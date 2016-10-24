@@ -38,7 +38,7 @@ do
 		20725, A('CRYSTAL', '51+')
 	)
 
-	function public.source(item_id)
+	function M.source(item_id)
 	    return unpack(data[item_id] or empty)
 	end
 end
@@ -71,7 +71,7 @@ local WEAPON = S(
 	'INVTYPE_RANGEDRIGHT'
 )
 
-function public.value(slot, quality, level)
+function M.value(slot, quality, level)
     local expectation
     for _, event in distribution(slot, quality, level) do
         local value = history.value(event.item_id .. ':' .. 0)
@@ -84,7 +84,7 @@ function public.value(slot, quality, level)
     return expectation
 end
 
-function public.distribution(slot, quality, level)
+function M.distribution(slot, quality, level)
     if not ARMOR[slot] and not WEAPON[slot] or level == 0 then
         return t
     end

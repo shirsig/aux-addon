@@ -23,7 +23,7 @@ function default_filter(str)
     }
 end
 
-public.filters = {
+M.filters = {
 
     ['utilizable'] = {
         input_type = '',
@@ -283,7 +283,7 @@ function parse_parameter(input_type, str)
     end
 end
 
-function public.parse_filter_string(str)
+function M.parse_filter_string(str)
     local filter, post_filter = t, t
     local blizzard_filter_parser = blizzard_filter_parser()
 
@@ -330,7 +330,7 @@ function public.parse_filter_string(str)
     return T('components', filter, 'blizzard', blizzard_filter_parser(), 'post', post_filter)
 end
 
-function public.query(filter_string)
+function M.query(filter_string)
     local filter, error, suggestions = parse_filter_string(filter_string)
 
     if not filter then
@@ -365,7 +365,7 @@ function public.query(filter_string)
     }, _M.suggestions(filter)
 end
 
-function public.queries(filter_string)
+function M.queries(filter_string)
     local parts = split(filter_string, ';')
     local queries = t
     for _, str in parts do
@@ -426,7 +426,7 @@ function suggestions(filter)
     return suggestions
 end
 
-function public.filter_string(components)
+function M.filter_string(components)
     local query_builder = query_builder()
 
     for _, component in components do
@@ -488,11 +488,11 @@ function prettified_filter_string(filter)
     end
 end
 
-function public.quote(name)
+function M.quote(name)
     return '<' .. name .. '>'
 end
 
-function public.unquote(name)
+function M.unquote(name)
     return select(3, strfind(name, '^<(.*)>$')) or name
 end
 
@@ -562,7 +562,7 @@ function validator(filter)
     end
 end
 
-function public.query_builder()
+function M.query_builder()
     local filter
     return T(
 		'append', function(part)

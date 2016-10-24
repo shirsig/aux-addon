@@ -5,7 +5,7 @@ local event_frame = CreateFrame'Frame'
 local listeners, threads = t, t
 
 local thread_id
-function public.get_thread_id() return thread_id end
+function M.get_thread_id() return thread_id end
 
 function LOAD()
 	event_frame:SetScript('OnUpdate', UPDATE)
@@ -56,19 +56,19 @@ do
 	end
 end
 
-function public.kill_listener(listener_id)
+function M.kill_listener(listener_id)
 	for listener in present(listeners[listener_id]) do
 		listener.killed = true
 	end
 end
 
-function public.kill_thread(thread_id)
+function M.kill_thread(thread_id)
 	for thread in present(threads[thread_id]) do
 		thread.killed = true
 	end
 end
 
-function public.event_listener(event, cb)
+function M.event_listener(event, cb)
 	local listener_id = unique_id
 	listeners[listener_id] = T(
 		'event', event,
@@ -79,18 +79,18 @@ function public.event_listener(event, cb)
 	return listener_id
 end
 
-function public.on_next_event(event, callback)
+function M.on_next_event(event, callback)
 	event_listener(event, function(kill) callback(); kill() end)
 end
 
-public.thread = vararg-function(arg)
+M.thread = vararg-function(arg)
 	local k = tremove(arg, 1)
 	local thread_id = unique_id
 	threads[thread_id] = T('k', papply(k, unpack(arg)))
 	return thread_id
 end
 
-public.wait = vararg-function(arg)
+M.wait = vararg-function(arg)
 	local k = tremove(arg, 1)
 	if type(k) == 'number' then
 		when(function() k = k - 1 return k <= 1 end, unpack(arg))
@@ -99,7 +99,7 @@ public.wait = vararg-function(arg)
 	end
 end
 
-public.when = vararg-function(arg)
+M.when = vararg-function(arg)
 	local c = tremove(arg, 1)
 	local k = tremove(arg, 1)
 	if c() then

@@ -7,7 +7,7 @@ local info = require 'aux.util.info'
 local filter_util = require 'aux.util.filter'
 local scan = require 'aux.core.scan'
 
-function public.find(auction_record, status_bar, on_abort, on_failure, on_success)
+function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
     local function test(index)
         local auction_info = info.auction(index, auction_record.query_type)
@@ -72,7 +72,7 @@ function public.find(auction_record, status_bar, on_abort, on_failure, on_succes
     }
 end
 
-function public.item_query(item_id, first_page, last_page)
+function M.item_query(item_id, first_page, last_page)
     for item_info in present(info.item(item_id)) do
         local query = filter_util.query(item_info.name .. '/exact')
         query.blizzard_query.first_page = first_page

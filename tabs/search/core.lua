@@ -62,7 +62,7 @@ function set_subtab(tab)
     end
 end
 
-function public.set_filter(filter_string)
+function M.set_filter(filter_string)
     search_box:SetText(filter_string)
 end
 

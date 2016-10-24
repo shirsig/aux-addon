@@ -179,7 +179,7 @@ function update_auction_listing()
     auction_listing:SetData(auction_rows)
 end
 
-function public.select_item(item_key)
+function M.select_item(item_key)
     for _, inventory_record in filter(copy(inventory_records), function(record) return record.aux_quantity > 0 end) do
         if inventory_record.key == item_key then
             update_item(inventory_record)

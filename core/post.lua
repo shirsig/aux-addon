@@ -60,7 +60,7 @@ function post_auction(slot, k)
 	end
 end
 
-function public.stop()
+function M.stop()
 	if state then
 		kill_thread(state.thread_id)
 
@@ -75,7 +75,7 @@ function public.stop()
 	end
 end
 
-function public.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, callback)
+function M.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, callback)
 	stop()
 	state = {
 		thread_id = thread(process),

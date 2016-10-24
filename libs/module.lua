@@ -37,7 +37,7 @@ function create_module(name)
 	if type(name) ~= 'string' then error('Invalid module name "%s".', name) end
 	local P, environment, interface, public_modifier, accessors, mutators, fields, public_accessors, public_mutators, public_fields
 	environment, interface, public_modifier = {}, {}, setmetatable({}, public_modifier_mt)
-	accessors = {public=function() return public_modifier end}
+	accessors = {M=function() return public_modifier end}
 	mutators = setmetatable({_=nop}, {__index=function(_, k) return function(v) define(name, k, v, true) end end})
 	fields = setmetatable(
 		{_M=environment, _G=_G, include=function(interface) include(name, interface) end, error=error, nop=nop, id=id},
@@ -49,7 +49,7 @@ function create_module(name)
 	setmetatable(environment, proxy_mt(fields, mutators))
 	setmetatable(interface, proxy_mt(public_fields, public_mutators))
 	P = {
-		defined = {_M=true, _G=true, include=true, error=true, nop=true, id=true, public=true, set__=true, require=true},
+		defined = {_M=true, _G=true, include=true, error=true, nop=true, id=true, M=true, set__=true, require=true},
 		fields = fields, accessors = accessors, mutators = mutators,
 		public_fields = public_fields, public_accessors = public_accessors, public_mutators = public_mutators,
 	}

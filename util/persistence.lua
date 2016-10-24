@@ -7,7 +7,7 @@ _G.aux_datasets = t
 
 do
 	local dataset
-	function public.get_dataset()
+	function M.get_dataset()
 		if not dataset then
 		    local dataset_key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
 		    dataset = aux_datasets[dataset_key] or t
@@ -17,7 +17,7 @@ do
 	end
 end
 
-function public.read(schema, str)
+function M.read(schema, str)
     if schema == 'string' then
         return str
     elseif schema == 'boolean' then
@@ -33,7 +33,7 @@ function public.read(schema, str)
     end
 end
 
-function public.write(schema, obj)
+function M.write(schema, obj)
     if schema == 'string' then
         return obj or ''
     elseif schema == 'boolean' then
@@ -49,7 +49,7 @@ function public.write(schema, obj)
     end
 end
 
-function public.read_list(schema, str)
+function M.read_list(schema, str)
     if str == '' then return t end
     local separator = schema[2]
     local element_type = schema[3]
@@ -58,7 +58,7 @@ function public.read_list(schema, str)
     end)
 end
 
-function public.write_list(schema, list)
+function M.write_list(schema, list)
     local separator = schema[2]
     local element_type = schema[3]
     local parts = map(copy(list), function(element)
@@ -67,7 +67,7 @@ function public.write_list(schema, list)
     return join(parts, separator)
 end
 
-function public.read_record(schema, str)
+function M.read_record(schema, str)
     local separator = schema[2]
     local record = t
     local parts = split(str, separator)
@@ -78,7 +78,7 @@ function public.read_record(schema, str)
     return record
 end
 
-function public.write_record(schema, record)
+function M.write_record(schema, record)
     local separator = schema[2]
     local parts = tt
     for i = 3 , getn(schema) do

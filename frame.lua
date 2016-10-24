@@ -27,12 +27,12 @@ do
 	frame.content:SetPoint('TOPLEFT', 4, -80)
 	frame.content:SetPoint('BOTTOMRIGHT', -4, 35)
 	frame:Hide()
-	public.AuxFrame = frame
+	M.AuxFrame = frame
 end
 do
 	tabs = gui.tabs(AuxFrame, 'DOWN')
 	tabs._on_select = on_tab_click
-	function public.set_tab(id) tabs:select(id) end
+	function M.set_tab(id) tabs:select(id) end
 end
 do
 	local btn = gui.button(AuxFrame)

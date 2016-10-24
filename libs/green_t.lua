@@ -12,7 +12,7 @@ do
 		t.reset, t.reset = nil, 1
 		setn(t, 0)
 	end
-	public.wipe = wipe
+	M.wipe = wipe
 
 	CreateFrame'Frame':SetScript('OnUpdate', function()
 		for t in auto_release do release(t) end
@@ -42,37 +42,37 @@ do
 			overflow_pool[t] = true
 		end
 	end
-	public.release = release
+	M.release = release
 
 	function set_auto_release(v, enable)
 		if type(v) ~= 'table' then return end
 		auto_release[v] = enable and true or nil
 	end
-	public.set_auto_release = set_auto_release
+	M.set_auto_release = set_auto_release
 end
 
-public.get_t = acquire
+M.get_t = acquire
 
-function public.get_tt()
+function M.get_tt()
 	local t = acquire()
 	set_auto_release(t, true)
 	return t
 end
 
-public.auto = setmetatable({}, {
+M.auto = setmetatable({}, {
 	__metatable = false,
 	__newindex = function(_, k, v) set_auto_release(k, v) end,
 })
-public.temp = setmetatable({}, {
+M.temp = setmetatable({}, {
 	__metatable = false,
 	__sub = function(_, v) set_auto_release(v, true); return v end,
 })
-public.perm = setmetatable({}, {
+M.perm = setmetatable({}, {
 	__metatable = false,
 	__sub = function(_, v) set_auto_release(v, false); return v end,
 })
 
-public.init = setmetatable({}, {
+M.init = setmetatable({}, {
 	__metatable = false,
 	__newindex = function(_, t, init)
 		wipe(t)
@@ -91,10 +91,10 @@ do
 			release(t)
 		end
 	end
-	public.ret = ret
+	M.ret = ret
 end
 
-public.empty = setmetatable({}, { __metatable=false, __newindex=nop })
+M.empty = setmetatable({}, { __metatable=false, __newindex=nop })
 
 local vararg
 do
@@ -137,24 +137,24 @@ do
 		setfenv(chunk, { f=f, setn=setn, acquire=acquire, set_auto_release=set_auto_release })
 		return chunk()
 	end
-	public.vararg = setmetatable({}, {
+	M.vararg = setmetatable({}, {
 		__metatable = false,
 		__sub = function(_, v) return vararg(v) end,
 	})
 end
 
-public.A = vararg(function(arg)
+M.A = vararg(function(arg)
 	set_auto_release(arg, false)
 	return arg
 end)
-public.S = vararg(function(arg)
+M.S = vararg(function(arg)
 	local t = acquire()
 	for _, v in arg do
 		t[v] = true
 	end
 	return t
 end)
-public.T = vararg(function(arg)
+M.T = vararg(function(arg)
 	local t = acquire()
 	for i = 1, getn(arg), 2 do
 		t[arg[i]] = arg[i + 1]

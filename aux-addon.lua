@@ -13,21 +13,21 @@ local scan = require 'aux.core.scan'
 --aux_account_settings = {} -- TODO clean up the mess of savedvariables
 --aux_character_settings = {}
 
-public.version = '5.0.0'
+M.version = '5.0.0'
 
-function public.set_p(v)
+function M.set_p(v)
 	inspect(nil, v)
 end
 
-function public.print(...) auto[arg] = true
+function M.print(...) auto[arg] = true
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '[aux] ' .. join(map(arg, tostring), ' '))
 end
 
 local bids_loaded
-function public.get_bids_loaded() return bids_loaded end
+function M.get_bids_loaded() return bids_loaded end
 
 local current_owner_page
-function public.get_current_owner_page() return current_owner_page end
+function M.get_current_owner_page() return current_owner_page end
 
 local event_frame = CreateFrame'Frame'
 
@@ -38,10 +38,10 @@ end
 ADDON_LOADED = t
 do
 	local handlers, handlers2 = t, t
-	function public.set_LOAD(f)
+	function M.set_LOAD(f)
 		tinsert(handlers, f)
 	end
-	function public.set_LOAD2(f)
+	function M.set_LOAD2(f)
 		tinsert(handlers2, f)
 	end
 	event_frame:SetScript('OnEvent', function()
@@ -59,14 +59,14 @@ do
 end
 
 tab_info = t
-function public.TAB(name)
+function M.TAB(name)
 	local tab = T('name', name)
 	local env = getfenv(2)
 	function env.set_OPEN(f) tab.OPEN = f end
 	function env.set_CLOSE(f) tab.CLOSE = f end
 	function env.set_USE_ITEM(f) tab.USE_ITEM = f end
 	function env.set_CLICK_LINK(f) tab.CLICK_LINK = f end
-	function env.public.get_ACTIVE() return tab == active_tab end
+	function env.M.get_ACTIVE() return tab == active_tab end
 	tinsert(tab_info, tab)
 end
 
@@ -98,8 +98,8 @@ function UseContainerItem(...) auto[arg] = true
 	end
 end
 
-public.orig = setmetatable({[_G]=t}, {__index=function(self, key) return self[_G][key] end})
-function public.hook(...) auto[arg] = true
+M.orig = setmetatable({[_G]=t}, {__index=function(self, key) return self[_G][key] end})
+function M.hook(...) auto[arg] = true
 	local name, object, handler
 	if arg.n == 3 then
 		name, object, handler = unpack(arg)
@@ -115,8 +115,8 @@ end
 
 do
 	local locked
-	function public.get_bid_in_progress() return locked end
-	function public.place_bid(type, index, amount, on_success)
+	function M.get_bid_in_progress() return locked end
+	function M.place_bid(type, index, amount, on_success)
 		if locked then return end
 		local money = GetMoney()
 		PlaceAuctionBid(type, index, amount)
@@ -135,8 +135,8 @@ end
 
 do
 	local locked
-	function public.get_cancel_in_progress() return locked end
-	function public.cancel_auction(index, on_success)
+	function M.get_cancel_in_progress() return locked end
+	function M.cancel_auction(index, on_success)
 		if locked then return end
 		locked = true
 		CancelAuction(index)
@@ -150,16 +150,16 @@ do
 	end
 end
 
-function public.is_player(name, current)
+function M.is_player(name, current)
 	local realm = GetCVar'realmName'
 	return not current and index(aux_characters, realm, name) or UnitName'player' == name
 end
 
-function public.neutral_faction()
+function M.neutral_faction()
 	return not UnitFactionGroup'npc'
 end
 
-function public.min_bid_increment(current_bid)
+function M.min_bid_increment(current_bid)
 	return max(1, floor(current_bid / 100) * 5)
 end
 

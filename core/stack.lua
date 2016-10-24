@@ -106,7 +106,7 @@ function process()
 	return stop()
 end
 
-function public.stop()
+function M.stop()
 	if state then
 		kill_thread(state.thread_id)
 		local callback, slot = state.callback, state.target_slot
@@ -116,7 +116,7 @@ function public.stop()
 	end
 end
 
-function public.start(item_key, size, callback)
+function M.start(item_key, size, callback)
 	stop()
 	state = {
 		thread_id = thread(process),

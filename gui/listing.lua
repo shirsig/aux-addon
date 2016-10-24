@@ -396,7 +396,7 @@ local methods = {
     end,
 }
 
-function public.CreateScrollingTable(parent)
+function M.CreateScrollingTable(parent)
     -- create the base frame
     ST_COUNT = ST_COUNT + 1
     local st = CreateFrame('Frame', 'TSMScrollingTable' .. ST_COUNT, parent)

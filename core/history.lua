@@ -51,7 +51,7 @@ function write_record(item_key, record)
 	data[item_key] = persistence.write(history_schema, record)
 end
 
-function public.process_auction(auction_record)
+function M.process_auction(auction_record)
 	local item_record = read_record(auction_record.item_key)
 	local unit_bid_price = ceil(auction_record.bid_price / auction_record.aux_quantity)
 	local unit_buyout_price = ceil(auction_record.buyout_price / auction_record.aux_quantity)
@@ -69,12 +69,12 @@ function public.process_auction(auction_record)
 	write_record(auction_record.item_key, item_record)
 end
 
-function public.price_data(item_key)
+function M.price_data(item_key)
 	local item_record = read_record(item_key)
 	return item_record.daily_min_buyout, item_record.daily_max_price, item_record.data_points
 end
 
-function public.value(item_key)
+function M.value(item_key)
 	if not value_cache[item_key] or value_cache[item_key].next_push <= time() then
 		local item_record, value
 		item_record = read_record(item_key)
@@ -97,7 +97,7 @@ function public.value(item_key)
 	return value_cache[item_key].value
 end
 
-function public.market_value(item_key)
+function M.market_value(item_key)
 	return calculate_market_value(read_record(item_key))
 end
 

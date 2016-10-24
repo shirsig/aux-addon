@@ -49,13 +49,13 @@ do
 			end
 		end
 	}
-	public.get_color = color_accessor(function(color)
+	M.get_color = color_accessor(function(color)
 		local r, g, b, a = unpack(color)
 		return setmetatable(A(r/255, g/255, b/255, a), mt)
 	end)
 end
 
-public.get_inline_color = color_accessor(function(color)
+M.get_inline_color = color_accessor(function(color)
 	local r, g, b, a = unpack(color)
 	return format('|c%02X%02X%02X%02X', a, r, g, b)
 end)
