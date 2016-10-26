@@ -24,10 +24,10 @@ blizzard_query = setmetatable(t, {
 			return usable_checkbox:GetChecked()
 		elseif key == 'class' then
 			local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
-			return (class_index or 0) > 0 and class_index or nil
+			return class_index or 0
 		elseif key == 'subclass' then
 			local subclass_index = UIDropDownMenu_GetSelectedValue(subclass_dropdown)
-			return (subclass_index or 0) > 0 and subclass_index or nil
+			return subclass_index or 0
 		elseif key == 'slot' then
 			local slot_index = UIDropDownMenu_GetSelectedValue(slot_dropdown)
 			return (slot_index or 0) > 0 and slot_index or nil
@@ -64,13 +64,13 @@ blizzard_query = setmetatable(t, {
 })
 
 function update_form()
-	if blizzard_query.class and GetAuctionItemSubClasses(blizzard_query.class) then
+	if GetAuctionItemSubClasses(blizzard_query.class) then
 		subclass_dropdown.button:Enable()
 	else
 		subclass_dropdown.button:Disable()
 	end
 
-	if blizzard_query.subclass and GetAuctionInvTypes(blizzard_query.class, blizzard_query.subclass) then
+	if blizzard_query.class == 2 then
 		slot_dropdown.button:Enable()
 	else
 		slot_dropdown.button:Disable()
@@ -125,17 +125,17 @@ function get_filter_builder_query()
 	add(blizzard_query.max_level)
 	add(blizzard_query.usable and 'usable')
 
-	for class_index in present(blizzard_query.class) do
-		local classes = temp-A(GetAuctionItemClasses())
-		add(strlower(classes[class_index]))
-		for subclass_index in present(blizzard_query.subclass) do
-			local subclasses = temp-A(GetAuctionItemSubClasses(class_index))
-			add(strlower(subclasses[subclass_index]))
-			for slot_index in present(blizzard_query.slot) do
-				local slots = temp-A(GetAuctionInvTypes(class_index, subclass_index))
-				add(strlower(_G[slots[slot_index]]))
-			end
-		end
+	local classes = temp-A(GetAuctionItemClasses())
+	if blizzard_query.class > 0 then
+		add(strlower(classes[blizzard_query.class]))
+	end
+	local subclasses = temp-A(GetAuctionItemSubClasses(blizzard_query.class))
+	if blizzard_query.subclass > 0 then
+		add(strlower(subclasses[blizzard_query.subclass]))
+	end
+	for slot_index in present(blizzard_query.slot) do
+		local slots = temp-A(GetAuctionInvTypes(blizzard_query.class, blizzard_query.subclass))
+		add(strlower(_G[slots[slot_index]]))
 	end
 
 	local quality = blizzard_query.quality
@@ -363,17 +363,12 @@ function initialize_subclass_dropdown()
 	local function on_click()
 		if this.value ~= blizzard_query.subclass then
 			UIDropDownMenu_SetSelectedValue(subclass_dropdown, this.value)
-			UIDropDownMenu_ClearAll(slot_dropdown)
-			UIDropDownMenu_Initialize(slot_dropdown, initialize_slot_dropdown)
 			update_form()
 		end
 	end
-	local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
-	if class_index and GetAuctionItemSubClasses(class_index) then
-		UIDropDownMenu_AddButton(T('text', ALL, 'value', 0, 'func', on_click))
-		for i, subclass in temp-A(GetAuctionItemSubClasses(class_index)) do
-			UIDropDownMenu_AddButton(T('text', subclass, 'value', i, 'func', on_click))
-		end
+	UIDropDownMenu_AddButton(T('text', ALL, 'value', 0, 'func', on_click))
+	for i, subclass in temp-A(GetAuctionItemSubClasses(blizzard_query.class)) do
+		UIDropDownMenu_AddButton(T('text', subclass, 'value', i, 'func', on_click))
 	end
 end
 
@@ -382,13 +377,9 @@ function initialize_slot_dropdown()
 		UIDropDownMenu_SetSelectedValue(slot_dropdown, this.value)
 		update_form()
 	end
-	local class_index = UIDropDownMenu_GetSelectedValue(class_dropdown)
-	local subclass_index = UIDropDownMenu_GetSelectedValue(subclass_dropdown)
-	if subclass_index and GetAuctionInvTypes(class_index, subclass_index) then
-		UIDropDownMenu_AddButton(T('text', ALL, 'value', '', 'func', on_click))
-		for i, slot in temp-A(GetAuctionInvTypes(class_index, subclass_index)) do
-			UIDropDownMenu_AddButton(T('text', _G[slot], 'value', i, 'func', on_click))
-		end
+	UIDropDownMenu_AddButton(T('text', ALL, 'value', '', 'func', on_click))
+	for i, slot in temp-A(GetAuctionInvTypes(blizzard_query.class == 2 and 2 or 0, blizzard_query.subclass)) do
+		UIDropDownMenu_AddButton(T('text', _G[slot], 'value', i, 'func', on_click))
 	end
 end
 

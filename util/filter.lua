@@ -242,7 +242,7 @@ do
 			for _, parser in temp-A(
 				temp-A('class', info.item_class_index),
 				temp-A('subclass', papply(info.item_subclass_index, index(self.class, 2) or 0)),
-				temp-A('slot', papply(info.item_slot_index, index(self.class, 2) or 0, index(self.subclass, 2) or 0)),
+				temp-A('slot', papply(info.item_slot_index, index(self.class, 2) == 2 and 2 or 0, index(self.subclass, 2) or 0)),
 				temp-A('quality', info.item_quality_index)
 			) do
 				if not self[parser[1]] then
@@ -403,7 +403,7 @@ function suggestions(filter)
 
     -- slots
     if not filter.blizzard.slot then
-        for _, invtype in temp-A(GetAuctionInvTypes(index(filter.blizzard.class, 2) or 0, index(filter.blizzard.subclass, 2) or 0)) do
+        for _, invtype in temp-A(GetAuctionInvTypes(index(filter.blizzard.class, 2) == 2 and 2 or 0, index(filter.blizzard.subclass, 2) or 0)) do
             tinsert(suggestions, _G[invtype])
         end
     end
