@@ -31,7 +31,7 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
             tinsert(queries, T('blizzard_query', blizzard_query2))
         end
 
-        local item_query = item_query(auction_record.item_id, 1, 1)
+        local item_query = item_query(auction_record.item_id, 0, 0)
         if not eq(auction_record.blizzard_query, item_query.blizzard_query) then
             tinsert(queries, item_query)
         end
