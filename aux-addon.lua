@@ -113,6 +113,23 @@ function M.hook(...) auto[arg] = true
 	return hook
 end
 
+purchased = t
+
+do
+	local f = CreateFrame('MessageFrame', nil, UIParent)
+	f:SetFrameStrata('HIGH')
+	f:SetPoint('TOP', 0, -20)
+	f:SetWidth(512)
+	f:SetHeight(40)
+	f:SetFontObject(GameFontNormalHuge)
+	
+	function M.show_receit(link)
+		if purchased[link] then
+			f:AddMessage(link .. 'x' .. purchased[link])
+		end
+	end
+end
+
 do
 	local locked
 	function M.get_bid_in_progress() return locked end
@@ -122,9 +139,13 @@ do
 		PlaceAuctionBid(type, index, amount)
 		if money >= amount then
 			locked = true
+			local link = GetAuctionItemLink(type, index)
+			local _, _, count = GetAuctionItemInfo(type, index)
 			event_listener('CHAT_MSG_SYSTEM', function(kill)
 				if arg1 == ERR_AUCTION_BID_PLACED then
-					(on_success or nop)()
+					purchased[link] = (purchased[link] or 0) + count
+					show_receit(link)
+					do (on_success or nop)() end
 					locked = false
 					kill()
 				end
@@ -142,7 +163,7 @@ do
 		CancelAuction(index)
 		event_listener('CHAT_MSG_SYSTEM', function(kill)
 			if arg1 == ERR_AUCTION_REMOVED then
-				(on_success or nop)()
+				do (on_success or nop)() end
 				locked = false
 				kill()
 			end
@@ -166,6 +187,7 @@ end
 function AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
 	AuxFrame:Show()
+	wipe(purchased)
 	tab = 1
 end
 
