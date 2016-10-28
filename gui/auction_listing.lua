@@ -841,12 +841,6 @@ local methods = {
         end
     end,
 
-
-
-    -- ============================================================================
-    -- General Results Table Methods
-    -- ============================================================================
-
     Reset = function(rt)
         wipe(rt.expanded)
         rt:UpdateRowInfo()
@@ -854,14 +848,10 @@ local methods = {
         rt:SetSelectedRecord()
     end,
 
-    SetDatabase = function(rt, database, filterFunc, filterHash)
+    SetDatabase = function(rt, database)
         if database and database ~= rt.records then
             rt.records = database
         end
-
---            rt.dbView:SetFilter(filterFunc, filterHash)
---        elseif filterFunc then
---            rt.dbView:SetFilter(filterFunc, filterHash) -- TODO
 
         -- get index of selected row
         local prevSelectedIndex
@@ -1016,7 +1006,6 @@ function M.CreateAuctionResultsTable(parent, config)
     local contentFrame = CreateFrame('Frame', nil, rt)
     contentFrame:SetPoint('TOPLEFT', 0, 0)
     contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
---    contentFrame:SetScript('OnSizeChanged', rt.OnContentSizeChanged)
     rt.contentFrame = contentFrame
 
     -- frame to hold the header columns and the rows
