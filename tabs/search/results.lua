@@ -409,6 +409,8 @@ do
 						end
 					end)
 					bid_button:Enable()
+				else
+					bid_button:Disable()
 				end
 
 				if record.buyout_price > 0 then
@@ -418,6 +420,8 @@ do
 						end
 					end)
 					buyout_button:Enable()
+				else
+					buyout_button:Disable()
 				end
 			end
 		)
