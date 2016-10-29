@@ -834,9 +834,6 @@ local methods = {
         end
 
         if not silent and self.handlers.OnSelectionChanged and not self.scrollDisabled then
-            if selectedData then
-                show_receit(selectedData.record.link)
-            end
             self.handlers.OnSelectionChanged(self, selectedData or nil)
         end
     end,

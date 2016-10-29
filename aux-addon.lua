@@ -128,9 +128,6 @@ do
 			f:AddMessage(link .. 'x' .. purchased[link])
 		end
 	end
-end
-
-do
 	local locked
 	function M.get_bid_in_progress() return locked end
 	function M.place_bid(type, index, amount, on_success)
@@ -139,12 +136,11 @@ do
 		PlaceAuctionBid(type, index, amount)
 		if money >= amount then
 			locked = true
-			local link = GetAuctionItemLink(type, index)
-			local _, _, count = GetAuctionItemInfo(type, index)
+			local record = info.auction(index, type)
 			event_listener('CHAT_MSG_SYSTEM', function(kill)
 				if arg1 == ERR_AUCTION_BID_PLACED then
-					purchased[link] = (purchased[link] or 0) + count
-					show_receit(link)
+					purchased[record.link] = (purchased[record.link] or 0) + record.aux_quantity
+					f:AddMessage(record.link .. 'x' .. purchased[record.link])
 					do (on_success or nop)() end
 					locked = false
 					kill()
