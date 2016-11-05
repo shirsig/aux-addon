@@ -4,7 +4,7 @@ local next, getn, setn, tremove, type, setmetatable = next, getn, table.setn, tr
 
 local wipe, acquire, release, set_auto_release
 do
-	local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, { __mode='k' }), {}
+	local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, {__mode='k'}), {}
 
 	function wipe(t)
 		setmetatable(t, nil)
@@ -31,6 +31,7 @@ do
 		end
 		return {}
 	end
+	M.acquire = acquire
 
 	function release(t)
 		wipe(t)
@@ -72,17 +73,6 @@ M.perm = setmetatable({}, {
 	__sub = function(_, v) set_auto_release(v, false); return v end,
 })
 
-M.init = setmetatable({}, {
-	__metatable = false,
-	__newindex = function(_, t, init)
-		wipe(t)
-		for k, v in init do
-			t[k] = v
-			setn(t, getn(init))
-		end
-	end
-})
-
 do
 	local function ret(t)
 		if getn(t) > 0 then
@@ -94,7 +84,7 @@ do
 	M.ret = ret
 end
 
-M.empty = setmetatable({}, { __metatable=false, __newindex=nop })
+M.empty = setmetatable({}, {__metatable=false, __newindex=nop})
 
 local vararg
 do
@@ -134,7 +124,7 @@ do
 
 	function vararg(f)
 		local chunk = loadstring(code)
-		setfenv(chunk, { f=f, setn=setn, acquire=acquire, set_auto_release=set_auto_release })
+		setfenv(chunk, {f=f, setn=setn, acquire=acquire, set_auto_release=set_auto_release})
 		return chunk()
 	end
 	M.vararg = setmetatable({}, {

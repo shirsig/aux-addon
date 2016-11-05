@@ -438,7 +438,8 @@ function update_inventory_records()
             end
         end
     end
-    init[inventory_records] = temp-values(auctionable_map)
+    release(inventory_records)
+    inventory_records = values(auctionable_map)
     sort(inventory_records, function(a, b) return a.name < b.name end)
     refresh = true
 end
