@@ -146,7 +146,7 @@ function merchant_buy_scan()
 end
 
 function merchant_sell_scan()
-	for slot in info.inventory do auto[slot] = true
+	for slot in info.inventory do auto_release(slot, true)
 		local item_info = temp-info.container_item(unpack(slot))
 		if item_info then
 			aux_merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity

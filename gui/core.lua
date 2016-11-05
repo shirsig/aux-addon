@@ -24,7 +24,7 @@ function LOAD()
 		aux_background:SetTexture(color.content.background())
 		aux_background:SetAllPoints(DropDownList1Backdrop)
 		blizzard_backdrop = DropDownList1Backdrop:GetBackdrop()
-		hook('ToggleDropDownMenu', function(...) auto[arg] = true
+		hook('ToggleDropDownMenu', function(...) auto_release(arg, true)
 			local ret = temp-A(orig.ToggleDropDownMenu(unpack(arg)))
 			local dropdown = _G[arg[4] or ''] or this:GetParent()
 			if strfind(dropdown:GetName() or '', '^AuxFrame%d+$') then
@@ -109,7 +109,7 @@ do
 		return orig()
 	end)
 	M.menu = vararg-function(arg)
-		structure = perm-arg
+		structure = static-arg
 		local x, y = GetCursorPosition()
 		menu:ClearAllPoints()
 		menu:SetPoint('BOTTOMLEFT', x + 75, y)

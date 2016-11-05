@@ -2,9 +2,9 @@ library 'green_t'
 
 local next, getn, setn, tremove, type, setmetatable = next, getn, table.setn, tremove, type, setmetatable
 
-local wipe, acquire, release, set_auto_release
+local wipe, acquire, release, auto_release
 do
-	local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, {__mode='k'}), {}
+	local pool, pool_size, overflow_pool, auto_release_queue = {}, 0, setmetatable({}, {__mode='k'}), {}
 
 	function wipe(t)
 		setmetatable(t, nil)
@@ -15,8 +15,8 @@ do
 	M.wipe = wipe
 
 	CreateFrame'Frame':SetScript('OnUpdate', function()
-		for t in auto_release do release(t) end
-		wipe(auto_release)
+		for t in auto_release_queue do release(t) end
+		wipe(auto_release_queue)
 	end)
 
 	function acquire()
@@ -35,7 +35,7 @@ do
 
 	function release(t)
 		wipe(t)
-		auto_release[t] = nil
+		auto_release_queue[t] = nil
 		if pool_size < 50 then
 			pool_size = pool_size + 1
 			pool[pool_size] = t
@@ -45,32 +45,30 @@ do
 	end
 	M.release = release
 
-	function set_auto_release(v, enable)
+	function auto_release(v, enable)
 		if type(v) ~= 'table' then return end
-		auto_release[v] = enable and true or nil
+		auto_release_queue[v] = enable and true or nil
 	end
-	M.set_auto_release = set_auto_release
+	M.auto_release = auto_release
 end
 
 M.get_t = acquire
 
 function M.get_tt()
 	local t = acquire()
-	set_auto_release(t, true)
+	auto_release(t, true)
 	return t
 end
 
-M.auto = setmetatable({}, {
-	__metatable = false,
-	__newindex = function(_, k, v) set_auto_release(k, v) end,
-})
 M.temp = setmetatable({}, {
 	__metatable = false,
-	__sub = function(_, v) set_auto_release(v, true); return v end,
+	__newindex = nop,
+	__sub = function(_, v) auto_release(v, true); return v end,
 })
-M.perm = setmetatable({}, {
+M.static = setmetatable({}, {
 	__metatable = false,
-	__sub = function(_, v) set_auto_release(v, false); return v end,
+	__newindex = nop,
+	__sub = function(_, v) auto_release(v, false); return v end,
 })
 
 do
@@ -91,7 +89,7 @@ do
 	local MAXPARAMS = 100
 
 	local code = [[
-		local f, setn, acquire, set_auto_release = f, setn, acquire, set_auto_release
+		local f, setn, acquire, auto_release = f, setn, acquire, auto_release
 		return function(
 	]]
 	for i = 1, MAXPARAMS - 1 do
@@ -109,7 +107,7 @@ do
 	code = code .. [[
 		until true
 		local t = acquire()
-		set_auto_release(t, true)
+		auto_release(t, true)
 		setn(t, n)
 		repeat
 	]]
@@ -124,7 +122,7 @@ do
 
 	function vararg(f)
 		local chunk = loadstring(code)
-		setfenv(chunk, {f=f, setn=setn, acquire=acquire, set_auto_release=set_auto_release})
+		setfenv(chunk, {f=f, setn=setn, acquire=acquire, auto_release=auto_release})
 		return chunk()
 	end
 	M.vararg = setmetatable({}, {
@@ -134,7 +132,7 @@ do
 end
 
 M.A = vararg(function(arg)
-	set_auto_release(arg, false)
+	auto_release(arg, false)
 	return arg
 end)
 M.S = vararg(function(arg)

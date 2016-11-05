@@ -76,7 +76,7 @@ do
 end
 
 M.papply = vararg-function(arg)
-	local f, arg1 = tremove(arg, 1), perm-arg
+	local f, arg1 = tremove(arg, 1), static-arg
 	return vararg-function(arg)
 		for i = 1, getn(arg) do
 			tinsert(arg1, arg[i])

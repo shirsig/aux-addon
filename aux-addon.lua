@@ -19,7 +19,7 @@ function M.set_p(v)
 	inspect(nil, v)
 end
 
-function M.print(...) auto[arg] = true
+function M.print(...) auto_release(arg, true)
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '[aux] ' .. join(map(arg, tostring), ' '))
 end
 
@@ -80,7 +80,7 @@ do
 	end
 end
 
-function SetItemRef(...) auto[arg] = true
+function SetItemRef(...) auto_release(arg, true)
 	if arg[3] ~= 'RightButton' or not index(active_tab, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
@@ -89,7 +89,7 @@ function SetItemRef(...) auto[arg] = true
 	end
 end
 
-function UseContainerItem(...) auto[arg] = true
+function UseContainerItem(...) auto_release(arg, true)
 	if modified or not index(active_tab, 'USE_ITEM') then
 		return orig.UseContainerItem(unpack(arg))
 	end
@@ -99,7 +99,7 @@ function UseContainerItem(...) auto[arg] = true
 end
 
 M.orig = setmetatable({[_G]=t}, {__index=function(self, key) return self[_G][key] end})
-function M.hook(...) auto[arg] = true
+function M.hook(...) auto_release(arg, true)
 	local name, object, handler
 	if arg.n == 3 then
 		name, object, handler = unpack(arg)
@@ -185,7 +185,7 @@ end
 
 do
 	local last_owner_page_requested
-	function GetOwnerAuctionItems(...) auto[arg] = true
+	function GetOwnerAuctionItems(...) auto_release(arg, true)
 		local page = arg[1]
 		last_owner_page_requested = page
 		return orig.GetOwnerAuctionItems(unpack(arg))
@@ -198,7 +198,7 @@ end
 function ADDON_LOADED.Blizzard_AuctionUI()
 	AuctionFrame:UnregisterEvent'AUCTION_HOUSE_SHOW'
 	AuctionFrame:SetScript('OnHide', nil)
-	hook('ShowUIPanel', function(...) auto[arg] = true
+	hook('ShowUIPanel', function(...) auto_release(arg, true)
 		if arg[1] == AuctionFrame then return AuctionFrame:Show() end
 		return orig.ShowUIPanel(unpack(arg))
 	end)
@@ -213,7 +213,7 @@ do
 		return label
 	end
 	function ADDON_LOADED.Blizzard_CraftUI()
-		hook('CraftFrame_SetSelection', function(...) auto[arg] = true
+		hook('CraftFrame_SetSelection', function(...) auto_release(arg, true)
 			local ret = temp-A(orig.CraftFrame_SetSelection(unpack(arg)))
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
@@ -240,7 +240,7 @@ do
 		end)
 	end
 	function ADDON_LOADED.Blizzard_TradeSkillUI()
-		hook('TradeSkillFrame_SetSelection', function(...) auto[arg] = true
+		hook('TradeSkillFrame_SetSelection', function(...) auto_release(arg, true)
 			local ret = temp-A(orig.TradeSkillFrame_SetSelection(unpack(arg)))
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
@@ -268,7 +268,7 @@ do
 	end
 end
 
-function AuctionFrameAuctions_OnEvent(...) auto[arg] = true
+function AuctionFrameAuctions_OnEvent(...) auto_release(arg, true)
     if AuctionFrameAuctions:IsVisible() then
 	    return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end

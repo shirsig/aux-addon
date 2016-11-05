@@ -343,7 +343,7 @@ function quantity_update(max_count)
 end
 
 function unit_vendor_price(item_key)
-    for slot in info.inventory do auto[slot] = true
+    for slot in info.inventory do auto_release(slot, true)
         local item_info = info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
@@ -407,7 +407,7 @@ end
 
 function update_inventory_records()
     local auctionable_map = tt
-    for slot in info.inventory do auto[slot] = true
+    for slot in info.inventory do auto_release(slot, true)
         for item_info in present(info.container_item(unpack(slot))) do
             local charge_class = item_info.charges or 0
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
