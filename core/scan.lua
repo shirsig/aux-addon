@@ -39,8 +39,7 @@ do
 	end
 
 	function M.stop()
-		state.params.queries = {{}}
-		state.query_index = 1
+		state.stopped = true
 	end
 
 	function complete()
@@ -74,7 +73,7 @@ end
 
 function scan()
 	state.query_index = state.query_index and state.query_index + 1 or 1
-	if query then
+	if query and not state.stopped then
 		do (state.params.on_start_query or nop)(state.query_index) end
 		if query.blizzard_query then
 			if (query.blizzard_query.first_page or 0) <= (query.blizzard_query.last_page or huge) then
@@ -113,6 +112,7 @@ do
 		return wait_for_results()
 	end
 	function submit_query()
+		if state.stopped then return end
 		if state.params.type ~= 'list' then
 			return submit()
 		else
