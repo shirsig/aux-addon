@@ -91,7 +91,7 @@ do
     status_bar:SetWidth(265)
     status_bar:SetHeight(25)
     status_bar:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
-    status_bar:update_status(100, 100)
+    status_bar:update_status(1, 1)
     status_bar:set_text('')
 end
 do

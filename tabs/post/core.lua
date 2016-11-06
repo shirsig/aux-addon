@@ -458,7 +458,7 @@ function refresh_entries()
             ignore_owner = true,
 			queries = A(query),
 			on_page_loaded = function(page, total_pages)
-                status_bar:update_status(100 * (page - 1) / total_pages, 0) -- TODO
+                status_bar:update_status((page - 1) / total_pages, 0) -- TODO
                 status_bar:set_text(format('Scanning Page %d / %d', page, total_pages))
 			end,
 			on_auction = function(auction_record)
@@ -476,13 +476,13 @@ function refresh_entries()
 			on_abort = function()
 				existing_auctions[item_key] = nil
                 update_historical_value_button()
-                status_bar:update_status(100, 100)
+                status_bar:update_status(1, 1)
                 status_bar:set_text('Scan aborted')
 			end,
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or t
                 refresh = true
-                status_bar:update_status(100, 100)
+                status_bar:update_status(1, 1)
                 status_bar:set_text('Scan complete')
             end,
 		}

@@ -370,67 +370,62 @@ function M.editbox(parent)
     return editbox
 end
 
-function M.status_bar(parent)
-    local self = CreateFrame('Frame', nil, parent)
-    local level = parent:GetFrameLevel()
-    self:SetFrameLevel(level + 1)
-    do
-        -- minor status bar (gray one)
-        local status_bar = CreateFrame('STATUSBAR', nil, self, 'TextStatusBar')
-        status_bar:SetOrientation('HORIZONTAL')
-        status_bar:SetMinMaxValues(0, 100)
-        status_bar:SetAllPoints()
-        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
-        status_bar:SetStatusBarColor(.42, .42, .42, .7)
-        status_bar:SetFrameLevel(level + 2)
-        status_bar:SetScript('OnUpdate', function()
-            if this:GetValue() < 100 then
-                this:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
-            else
-                this:SetAlpha(1)
-            end
-        end)
-        self.minor_status_bar = status_bar
-    end
-    do
-        -- major status bar (main blue one)
-        local status_bar = CreateFrame('STATUSBAR', nil, self, 'TextStatusBar')
-        status_bar:SetOrientation('HORIZONTAL')
-        status_bar:SetMinMaxValues(0, 100)
-        status_bar:SetAllPoints()
-        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
-        status_bar:SetStatusBarColor(.19, .22, .33, .9)
-        status_bar:SetFrameLevel(level + 3)
-        status_bar:SetScript('OnUpdate', function()
-            if this:GetValue() < 100 then
-	            this:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
-            else
-                this:SetAlpha(1)
-            end
-        end)
-        self.major_status_bar = status_bar
-    end
-    do
-        local text_frame = CreateFrame('Frame', nil, self)
-        text_frame:SetFrameLevel(level + 4)
-        text_frame:SetAllPoints(self)
-        local text = label(text_frame, font_size.medium)
-        text:SetTextColor(color.text.enabled())
-        text:SetPoint('CENTER', 0, 0)
-        self.text = text
-    end
-    function self:update_status(major_status, minor_status)
-        if major_status then
-            self.major_status_bar:SetValue(major_status)
-        end
-        if minor_status then
-            self.minor_status_bar:SetValue(minor_status)
-        end
-    end
-    function self:set_text(text)
-        self.text:SetText(text)
-    end
-    return self
+do
+	local function update_bar()
+		if this:GetValue() < 1 then
+			this:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
+		else
+			this:SetAlpha(1)
+		end
+	end
+	function M.status_bar(parent)
+	    local self = CreateFrame('Frame', nil, parent)
+	    local level = parent:GetFrameLevel()
+	    self:SetFrameLevel(level + 1)
+	    do
+	        local status_bar = CreateFrame('StatusBar', nil, self, 'TextStatusBar')
+	        status_bar:SetOrientation('HORIZONTAL')
+	        status_bar:SetMinMaxValues(0, 1)
+	        status_bar:SetAllPoints()
+	        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
+	        status_bar:SetStatusBarColor(.42, .42, .42, .7)
+	        status_bar:SetFrameLevel(level + 2)
+	        status_bar:SetScript('OnUpdate', update_bar)
+	        self.secondary_status_bar = status_bar
+	    end
+	    do
+	        local status_bar = CreateFrame('StatusBar', nil, self, 'TextStatusBar')
+	        status_bar:SetOrientation('HORIZONTAL')
+	        status_bar:SetMinMaxValues(0, 1)
+	        status_bar:SetAllPoints()
+	        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
+	        status_bar:SetStatusBarColor(.19, .22, .33, .9)
+	        status_bar:SetFrameLevel(level + 3)
+	        status_bar:SetScript('OnUpdate', update_bar)
+	        self.primary_status_bar = status_bar
+	    end
+	    do
+	        local text_frame = CreateFrame('Frame', nil, self)
+	        text_frame:SetFrameLevel(level + 4)
+	        text_frame:SetAllPoints(self)
+	        local text = label(text_frame, font_size.medium)
+	        text:SetTextColor(color.text.enabled())
+	        text:SetPoint('CENTER', 0, 0)
+	        self.text = text
+	    end
+	    function self:update_status(primary_status, secondary_status)
+	        if primary_status then
+	            self.primary_status_bar:SetValue(primary_status)
+	        end
+	        if secondary_status then
+	            self.secondary_status_bar:SetValue(secondary_status)
+	        end
+	    end
+	    function self:set_text(text)
+	        self.text:SetText(text)
+	    end
+	    return self
+	end
 end
 
 function M.item(parent)

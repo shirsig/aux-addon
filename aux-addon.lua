@@ -122,10 +122,15 @@ do
 		PlaceAuctionBid(type, index, amount)
 		if money >= amount then
 			locked = true
+			local send_signal, signal_received = signal()
+			thread(when, signal_received, function()
+				do (on_success or nop)() end
+				locked = false
+			end)
+			thread(when, later(GetTime(), 5), send_signal)
 			event_listener('CHAT_MSG_SYSTEM', function(kill)
 				if arg1 == ERR_AUCTION_BID_PLACED then
-					do (on_success or nop)() end
-					locked = false
+					send_signal()
 					kill()
 				end
 			end)
@@ -140,10 +145,15 @@ do
 		if locked then return end
 		locked = true
 		CancelAuction(index)
+		local send_signal, signal_received = signal()
+		thread(when, signal_received, function()
+			do (on_success or nop)() end
+			locked = false
+		end)
+		thread(when, later(GetTime(), 5), send_signal)
 		event_listener('CHAT_MSG_SYSTEM', function(kill)
 			if arg1 == ERR_AUCTION_REMOVED then
-				do (on_success or nop)() end
-				locked = false
+				send_signal()
 				kill()
 			end
 		end)

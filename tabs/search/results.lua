@@ -85,7 +85,7 @@ do
 		end
 
 		search.status_bar = status_bars[getn(searches)]
-		search.status_bar:update_status(100, 100)
+		search.status_bar:update_status(1, 1)
 		search.status_bar:set_text('')
 
 		search.table = tables[getn(searches)]
@@ -158,7 +158,7 @@ function start_real_time_scan(query, search, continuation)
 		queries = {query},
 		auto_buy_validator = search.auto_buy_validator,
 		on_scan_start = function()
-			search.status_bar:update_status(99.99, 99.99)
+			search.status_bar:update_status(.9999, .9999)
 			search.status_bar:set_text('Scanning last page ...')
 		end,
 		on_page_loaded = function(_, _, last_page)
@@ -195,7 +195,7 @@ function start_real_time_scan(query, search, continuation)
 			start_real_time_scan(query, search)
 		end,
 		on_abort = function()
-			search.status_bar:update_status(100, 100)
+			search.status_bar:update_status(1, 1)
 			search.status_bar:set_text('Scan paused')
 
 			search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
@@ -234,7 +234,7 @@ function start_search(queries, continuation)
 		queries = queries,
 		auto_buy_validator = search.auto_buy_validator,
 		on_scan_start = function()
-			search.status_bar:update_status(0,0)
+			search.status_bar:update_status(0, 0)
 			if continuation then
 				search.status_bar:set_text('Resuming scan...')
 			else
@@ -246,7 +246,7 @@ function start_search(queries, continuation)
 			total_scan_pages = total_scan_pages + (start_page - 1)
 			total_scan_pages = max(total_scan_pages, 1)
 			current_page = min(current_page, total_scan_pages)
-			search.status_bar:update_status(100 * (current_query - 1) / getn(queries), 100 * (current_page - 1) / total_scan_pages)
+			search.status_bar:update_status((current_query - 1) / getn(queries), (current_page - 1) / total_scan_pages)
 			search.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_scan_pages))
 		end,
 		on_page_scanned = function()
@@ -265,7 +265,7 @@ function start_search(queries, continuation)
 			end
 		end,
 		on_complete = function()
-			search.status_bar:update_status(100, 100)
+			search.status_bar:update_status(1, 1)
 			search.status_bar:set_text('Scan complete')
 
 			if current_search == search and frame.results:IsVisible() and getn(search.records) == 0 then
@@ -276,7 +276,7 @@ function start_search(queries, continuation)
 			update_start_stop()
 		end,
 		on_abort = function()
-			search.status_bar:update_status(100, 100)
+			search.status_bar:update_status(1, 1)
 			search.status_bar:set_text('Scan paused')
 
 			if current_query then
