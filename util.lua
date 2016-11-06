@@ -209,10 +209,12 @@ function M.round(x)
 	return floor(x + .5)
 end
 
-function M.later(t0, t)
+function M.later(t, t0)
+	t0 = t0 or GetTime()
 	return function() return GetTime() - t0 > t end
 end
 
-function M.signal() local params
-	return function(...) params = arg end, function() return params end
+function M.signal()
+	local params
+	return vararg-function(arg) params = static-arg end, function() return params end
 end

@@ -156,7 +156,7 @@ function scan_page(i)
 end
 
 function wait_for_results()
-	local timeout = later(state.last_query_time, 10)
+	local timeout = later(5, state.last_query_time)
 	local send_signal, signal_received = signal()
 	when(signal_received, function()
         if timeout() then
@@ -181,7 +181,7 @@ function wait_for_results()
     elseif state.params.type == 'owner' then
         return wait_for_owner_results(send_signal)
     elseif state.params.type == 'list' then
-        return wait_for_list_results(send_signal, signal_received)
+        return wait_for_list_results(send_signal, signal_received, timeout)
     end
 end
 
@@ -193,7 +193,7 @@ function wait_for_owner_results(send_signal)
     end
 end
 
-function wait_for_list_results(send_signal, signal_received)
+function wait_for_list_results(send_signal, signal_received, timeout)
     local updated, last_update
     event_listener('AUCTION_ITEM_LIST_UPDATE', function(kill)
 	    kill(signal_received())
@@ -203,7 +203,7 @@ function wait_for_list_results(send_signal, signal_received)
     local ignore_owner = state.params.ignore_owner or aux_ignore_owner
     return thread(when, function()
         -- short circuiting order important, owner_data_complete must be called iif an update has happened.
-        local ok = updated and (ignore_owner or owner_data_complete()) or last_update and GetTime() - last_update > 5
+        local ok = updated and (ignore_owner or owner_data_complete() or timeout())
         updated = false
         return ok
     end, send_signal)
