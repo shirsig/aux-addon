@@ -10,42 +10,42 @@ function update_search_listings()
 	local autobuy_filter_rows = t
 	for i, autobuy_filter in aux_auto_buy_filters do
 		local name = strsub(autobuy_filter.prettified, 1, 250)
-		tinsert(autobuy_filter_rows, {
-			cols = {{value=name}},
-			search = autobuy_filter,
-			index = i,
-		})
+		tinsert(autobuy_filter_rows, T(
+			'cols', A(T('value', name)),
+			'search', autobuy_filter,
+			'index', i
+		))
 	end
 	auto_buy_listing:SetData(autobuy_filter_rows)
 
 	local favorite_search_rows = t
 	for i, favorite_search in aux_favorite_searches do
 		local name = strsub(favorite_search.prettified, 1, 250)
-		tinsert(favorite_search_rows, {
-			cols = {{value=name}},
-			search = favorite_search,
-			index = i,
-		})
+		tinsert(favorite_search_rows, T(
+			'cols', A(T('value', name)),
+			'search', favorite_search,
+			'index', i
+		))
 	end
 	favorite_searches_listing:SetData(favorite_search_rows)
 
 	local recent_search_rows = t
 	for i, recent_search in aux_recent_searches do
 		local name = strsub(recent_search.prettified, 1, 250)
-		tinsert(recent_search_rows, {
-			cols = {{value=name}},
-			search = recent_search,
-			index = i,
-		})
+		tinsert(recent_search_rows, T(
+			'cols', A(T('value', name)),
+			'search', recent_search,
+			'index', i
+		))
 	end
 	recent_searches_listing:SetData(recent_search_rows)
 end
 
 function new_recent_search(filter_string, prettified)
-	tinsert(aux_recent_searches, 1, {
-		filter_string = filter_string,
-		prettified = prettified,
-	})
+	tinsert(aux_recent_searches, 1, T(
+		'filter_string', filter_string,
+		'prettified', prettified
+	))
 	while getn(aux_recent_searches) > 50 do
 		tremove(aux_recent_searches)
 	end

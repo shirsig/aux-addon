@@ -677,33 +677,39 @@ local methods = {
     -- ============================================================================
 
     UpdateRowInfo = function(self)
+	    for _, info in self.rowInfo do
+		    if type(info) == 'table' then
+			    for _, child in info.children do release(child) end
+			    release(info.children)
+			    release(info)
+		    end
+	    end
         wipe(self.rowInfo)
         self.rowInfo.numDisplayRows = 0
         self.isSorted = nil
         self:SetSelectedRecord(nil, true)
 
-        sort(self.records, function(a, b) return a.search_signature < b.search_signature or a.search_signature == b.search_signature and tostring(a) < tostring(b) end)
-
-        local records = self.records
-        if getn(records) == 0 then return end
+	    local records = self.records
+	    if getn(records) == 0 then return end
+        sort(records, function(a, b) return a.search_signature < b.search_signature or a.search_signature == b.search_signature and tostring(a) < tostring(b) end)
 
         -- Populate the row info from the database by combining identical auctions and auctions
         -- of the same base item. Also, get the number of rows which will be shown.
         for i = 1, getn(records) do
             local record = records[i]
-            local prevRecord = records[i-1]
+            local prevRecord = records[i - 1]
             if prevRecord and record.search_signature == prevRecord.search_signature then
                 -- it's an identical auction to the previous row so increment the number of auctions
                 self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].numAuctions = self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].numAuctions + 1
             elseif prevRecord and record.item_key == prevRecord.item_key then
                 -- it's the same base item as the previous row so insert a new auction
-                tinsert(self.rowInfo[getn(self.rowInfo)].children, {numAuctions=1, record=record})
+                tinsert(self.rowInfo[getn(self.rowInfo)].children, T('numAuctions', 1, 'record', record))
                 if self.expanded[self.rowInfo[getn(self.rowInfo)].expandKey] then
                     self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
                 end
             else
                 -- it's a different base item from the previous row
-                tinsert(self.rowInfo, {item_key=record.item_key, expandKey=record.item_key, children={{numAuctions=1, record=record}}})
+                tinsert(self.rowInfo, T('item_key', record.item_key, 'expandKey', record.item_key, 'children', A(T('numAuctions', 1, 'record', record))))
                 self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
             end
         end

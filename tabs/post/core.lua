@@ -144,18 +144,18 @@ function update_auction_listing()
                 buyout_color = inline_color.yellow
             end
 
-            tinsert(auction_rows, {
-                cols = {
+            tinsert(auction_rows, T(
+                'cols', A(
                     {value=auction_record.own and color.yellow(auction_record.count) or auction_record.count},
                     {value=al.time_left(auction_record.duration)},
                     {value=auction_record.stack_size == stack_size and color.yellow(auction_record.stack_size) or auction_record.stack_size},
                     {value=money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color)},
                     {value=historical_value and al.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'},
                     {value=auction_record.unit_buyout_price > 0 and money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'},
-                    {value=auction_record.unit_buyout_price > 0 and historical_value and al.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---'},
-                },
-                record = auction_record,
-            })
+                    {value=auction_record.unit_buyout_price > 0 and historical_value and al.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---'}
+                ),
+                'record', auction_record
+            ))
         end
         sort(auction_rows, function(a, b)
             return sort_util.multi_lt(
