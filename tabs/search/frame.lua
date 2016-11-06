@@ -40,7 +40,7 @@ do
     btn:SetPoint('TOPLEFT', 5, -8)
     btn:SetWidth(30)
     btn:SetHeight(25)
-    btn:SetText'<'
+    btn:SetText('<')
     btn:SetScript('OnClick', previous_search)
     previous_button = btn
 end
@@ -49,7 +49,7 @@ do
     btn:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
     btn:SetWidth(30)
     btn:SetHeight(25)
-    btn:SetText'>'
+    btn:SetText('>')
     btn:SetScript('OnClick', next_search)
     next_button = btn
 end
@@ -99,7 +99,7 @@ do
 		local label = gui.label(editbox, gui.font_size.medium)
 		label:SetPoint('LEFT', editbox, 'RIGHT', 0, 0)
 		label:SetTextColor(color.label.enabled())
-		label:SetText'-'
+		label:SetText('-')
 		first_page_input = editbox
 	end
 	do
@@ -125,7 +125,7 @@ do
     local btn = gui.button(frame)
     btn:SetHeight(25)
     btn:SetPoint('TOPRIGHT', -5, -8)
-    btn:SetText'Search'
+    btn:SetText('Search')
     btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
     btn:SetScript('OnClick', function()
         if arg1 == 'RightButton' then
@@ -358,7 +358,7 @@ do
     end
     local label = gui.label(editbox, gui.font_size.medium)
     label:SetPoint('RIGHT', editbox, 'LEFT', -3, 0)
-    label:SetText'-'
+    label:SetText('-')
     max_level_input = editbox
 end
 do
@@ -488,7 +488,7 @@ do
 	    child:SetFont('p', [[Fonts\ARIALN.TTF]], bounded(11, 23, select(2, child:GetFont()) + arg1*2))
 	    update_filter_display()
     end)
-    scroll_frame:RegisterForDrag'LeftButton'
+    scroll_frame:RegisterForDrag('LeftButton')
     scroll_frame:SetScript('OnDragStart', function()
 	    this.x, this.y = GetCursorPosition()
 	    this.x_offset, this.y_offset = this:GetHorizontalScroll(), this:GetVerticalScroll()

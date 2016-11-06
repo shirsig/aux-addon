@@ -11,7 +11,7 @@ function update_search_listings()
 	for i, autobuy_filter in aux_auto_buy_filters do
 		local name = strsub(autobuy_filter.prettified, 1, 250)
 		tinsert(autobuy_filter_rows, {
-			cols = {{ value=name }},
+			cols = {{value=name}},
 			search = autobuy_filter,
 			index = i,
 		})
@@ -22,7 +22,7 @@ function update_search_listings()
 	for i, favorite_search in aux_favorite_searches do
 		local name = strsub(favorite_search.prettified, 1, 250)
 		tinsert(favorite_search_rows, {
-			cols = {{ value=name }},
+			cols = {{value=name}},
 			search = favorite_search,
 			index = i,
 		})
@@ -33,7 +33,7 @@ function update_search_listings()
 	for i, recent_search in aux_recent_searches do
 		local name = strsub(recent_search.prettified, 1, 250)
 		tinsert(recent_search_rows, {
-			cols = {{ value=name }},
+			cols = {{value=name}},
 			search = recent_search,
 			index = i,
 		})
@@ -136,9 +136,9 @@ function add_auto_buy(filter_string)
 	local queries, error = filter_util.queries(filter_string)
 	if queries then
 		if getn(queries) > 1 then
-			print'Error: The automatic buyout filter does not support multi-queries'
+			print('Error: The automatic buyout filter does not support multi-queries')
 		elseif size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(filter_string).blizzard.exact then
-			print'Error: The automatic buyout filter does not support Blizzard filters'
+			print('Error: The automatic buyout filter does not support Blizzard filters')
 		else
 			tinsert(aux_auto_buy_filters, 1, T(
 				'filter_string', filter_string,

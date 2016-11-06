@@ -17,7 +17,7 @@ local al = require 'aux.gui.auction_listing'
 TAB 'Post'
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
-local settings_schema = {'record', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
+local settings_schema = {'tuple', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
 function get_default_settings()
 	return T('duration', DURATION_8 , 'stack_size', 1, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
@@ -277,7 +277,7 @@ function update_item_configuration()
         item.texture:SetTexture(nil)
         item.count:SetText()
         item.name:SetTextColor(color.label.enabled())
-        item.name:SetText'No item selected'
+        item.name:SetText('No item selected')
 
         unit_start_price_input:Hide()
         unit_buyout_price_input:Hide()
@@ -451,7 +451,7 @@ function refresh_entries()
         existing_auctions[item_key] = nil
         local query = scan_util.item_query(item_id)
         status_bar:update_status(0,0)
-        status_bar:set_text'Scanning auctions...'
+        status_bar:set_text('Scanning auctions...')
 
 		scan_id = scan.start{
             type = 'list',
@@ -477,13 +477,13 @@ function refresh_entries()
 				existing_auctions[item_key] = nil
                 update_historical_value_button()
                 status_bar:update_status(100, 100)
-                status_bar:set_text'Scan aborted'
+                status_bar:set_text('Scan aborted')
 			end,
 			on_complete = function()
 				existing_auctions[item_key] = existing_auctions[item_key] or t
                 refresh = true
                 status_bar:update_status(100, 100)
-                status_bar:set_text'Scan complete'
+                status_bar:set_text('Scan complete')
             end,
 		}
 	end

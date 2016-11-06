@@ -1,22 +1,22 @@
 module 'aux'
 
 do
-	local classes, interfaces, objects = {}, {}, setmetatable({}, { __mode='k' })
-	local private_mt = { __metatable=false }
+	local classes, interfaces, objects = {}, {}, setmetatable({}, {__mode='k'})
+	local private_mt = {__metatable=false}
 	function private_mt:__newindex(k, v)
 		classes[self][k] = v
 	end
-	local public_mt = { __metatable=false }
+	local public_mt = {__metatable=false}
 	function public_mt:__newindex(k, v)
 		classes[self][k] = v
 		interfaces[self][k] = function(self, ...)
 			return classes[self][k](objects[self][k], unpack(arg))
 		end
 	end
-	local proxy_mt = { __metatable=false }
+	local proxy_mt = {__metatable=false}
 	function proxy_mt:__call()
-		local proxy = setmetatable({}, { __metatable=false, __index=interfaces[self] })
-		objects[proxy] = setmetatable({}, { __index=classes[self] })
+		local proxy = setmetatable({}, {__metatable=false, __index=interfaces[self]})
+		objects[proxy] = setmetatable({}, {__index=classes[self]})
 		return proxy
 	end
 	function M.class()
@@ -31,12 +31,12 @@ end
 do
 	local _state = setmetatable(t, T('__mode', 'kv'))
 	local __index = function(self, k)
-		return _state[self].handler({ public=self, private=_state[self].state }, k)
+		return _state[self].handler({public=self, private=_state[self].state}, k)
 	end
 	function M.index_function(state, handler) -- TODO rename table-accessor, use predicate to stop
-		local state, self = { handler=handler, state=state }, t
+		local state, self = {handler=handler, state=state}, t
 		_state[self] = state
-		return setmetatable(self, { __metatable=false, __index=__index, state=state })
+		return setmetatable(self, {__metatable=false, __index=__index, state=state})
 	end
 end
 

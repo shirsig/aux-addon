@@ -1,6 +1,6 @@
 module 'aux'
 
-local event_frame = CreateFrame'Frame'
+local event_frame = CreateFrame('Frame')
 
 local listeners, threads = t, t
 

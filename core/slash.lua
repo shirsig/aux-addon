@@ -9,29 +9,29 @@ local cache = require 'aux.core.cache'
 _G.aux_ignore_owner = true
 
 _G.SLASH_AUX1 = '/aux'
-function _G.SlashCmdList.AUX(command)
+function SlashCmdList.AUX(command)
 	if not command then return end
 	local arguments = tokenize(command)
     if arguments[1] == 'clear' and arguments[2] == 'history' then
-        persistence.dataset = nil
-        print'History cleared.'
+        persistence.dataset.history = nil
+        print('History cleared.')
     elseif arguments[1] == 'clear' and arguments[2] == 'post' then
         persistence.dataset.post = nil
-        print'Post settings cleared.'
+        print('Post settings cleared.')
     elseif arguments[1] == 'clear' and arguments[2] == 'datasets' then
 	    _G.aux_datasets = t
-        print'Datasets cleared.'
+        print('Datasets cleared.')
     elseif arguments[1] == 'clear' and arguments[2] == 'merchant' and arguments[3] == 'buy' then
 	    _G.aux_merchant_buy = t
-        print'Merchant buy prices cleared.'
+        print('Merchant buy prices cleared.')
     elseif arguments[1] == 'clear' and arguments[2] == 'merchant' and arguments[3] == 'sell' then
 	    _G.aux_merchant_sell = t
-        print'Merchant sell prices cleared.'
+        print('Merchant sell prices cleared.')
     elseif arguments[1] == 'clear' and arguments[2] == 'item' and arguments[3] == 'cache' then
 	    _G.aux_items = t
 	    _G.aux_item_ids = t
 	    _G.aux_auctionable_items = t
-        print'Item cache cleared.'
+        print('Item cache cleared.')
     elseif arguments[1] == 'populate' and arguments[2] == 'wdb' then
 	    cache.populate_wdb()
     elseif arguments[1] == 'tooltip' and arguments[2] == 'value' then
@@ -59,7 +59,7 @@ function _G.SlashCmdList.AUX(command)
 	    _G.aux_ignore_owner = not aux_ignore_owner
         print('Ignoring of owner ' .. (aux_ignore_owner and 'enabled' or 'disabled') .. '.')
     elseif arguments[1] == 'chars' and arguments[2] == 'add' then
-		local realm = GetCVar('realmName')
+		local realm = GetCVar'realmName'
 		aux_characters[realm] = aux_characters[realm] or t
 		for i = 3, getn(arguments) do
 			local name = gsub(strlower(arguments[i]), '^%l', strupper)
@@ -69,7 +69,7 @@ function _G.SlashCmdList.AUX(command)
 			end
 		end
 	elseif arguments[1] == 'chars' and arguments[2] == 'remove' then
-		local realm = GetCVar('realmName')
+		local realm = GetCVar'realmName'
 		if not aux_characters[realm] then
 			return
 		end
@@ -81,7 +81,7 @@ function _G.SlashCmdList.AUX(command)
 			end
 		end
 	elseif arguments[1] == 'chars' then
-		local realm = GetCVar('realmName')
+		local realm = GetCVar'realmName'
 		local chars = t
 		for name in aux_characters[realm] or t do
 			tinsert(chars, name)

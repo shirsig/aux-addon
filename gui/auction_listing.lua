@@ -17,11 +17,11 @@ local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
 
 local AUCTION_PCT_COLORS = {
-    { color=inline_color.blue, value=50 },
-    { color=inline_color.green, value=80 },
-    { color=inline_color.yellow, value=110 },
-    { color=inline_color.orange, value=135 },
-    { color=inline_color.red, value=huge },
+    {color=inline_color.blue, value=50},
+    {color=inline_color.green, value=80},
+    {color=inline_color.yellow, value=110},
+    {color=inline_color.orange, value=135},
+    {color=inline_color.red, value=huge},
 }
 
 local TIME_LEFT_STRINGS = {
@@ -168,9 +168,9 @@ M.search_config = {
         fill = function(cell, record)
             local color
             if record.high_bidder then
-                color = AUCTION_PCT_COLORS[2].color
+                color = inline_color.green
             elseif record.high_bid ~= 0 then
-                color = AUCTION_PCT_COLORS[4].color
+                color = inline_color.orange
             end
             local price
             if record.high_bidder then
@@ -920,7 +920,7 @@ local methods = {
                     break
                 end
             end
-            tinsert(self.sorts, 1, { index=abs(arg[k]), descending=arg[k] < 0 })
+            tinsert(self.sorts, 1, {index=abs(arg[k]), descending=arg[k] < 0})
         end
 
         self.isSorted = nil
@@ -986,7 +986,7 @@ function M.CreateAuctionResultsTable(parent, config)
     rt.handlers = t
     rt.sorts = t
     rt.records = t
-    rt.rowInfo = { numDisplayRows=0 }
+    rt.rowInfo = {numDisplayRows=0}
 
     for name, func in methods do
         rt[name] = func
@@ -1047,8 +1047,8 @@ function M.CreateAuctionResultsTable(parent, config)
         cell:SetScript('OnClick', rt.OnHeadColumnClick)
 
         local text = cell:CreateFontString()
-        text:SetJustifyH'CENTER'
-        text:SetJustifyV'CENTER'
+        text:SetJustifyH('CENTER')
+        text:SetJustifyV('CENTER')
         text:SetFont(gui.font, 12)
         text:SetTextColor(color.label.enabled())
         cell:SetFontString(text)
@@ -1057,14 +1057,14 @@ function M.CreateAuctionResultsTable(parent, config)
 
         local tex = cell:CreateTexture()
         tex:SetAllPoints()
-        tex:SetTexture[[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]]
+        tex:SetTexture([[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]])
         tex:SetTexCoord(.017, 1, .083, .909)
         tex:SetAlpha(.5)
         cell:SetNormalTexture(tex)
 
         local tex = cell:CreateTexture()
         tex:SetAllPoints()
-        tex:SetTexture[[Interface\Buttons\UI-Listbox-Highlight]]
+        tex:SetTexture([[Interface\Buttons\UI-Listbox-Highlight]])
         tex:SetTexCoord(.025, .957, .087, .931)
         tex:SetAlpha(.2)
         cell:SetHighlightTexture(tex)
@@ -1097,7 +1097,7 @@ function M.CreateAuctionResultsTable(parent, config)
             local text = cell:CreateFontString()
             text:SetFont(gui.font, min(14, rt.ROW_HEIGHT))
             text:SetJustifyH(rt.config[j].align or 'LEFT')
-            text:SetJustifyV'CENTER'
+            text:SetJustifyV('CENTER')
             text:SetPoint('TOPLEFT', 1, -1)
             text:SetPoint('BOTTOMRIGHT', -1, 1)
             cell:SetFontString(text)

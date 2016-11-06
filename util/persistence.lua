@@ -26,8 +26,8 @@ function M.read(schema, str)
         return tonumber(str)
     elseif type(schema) == 'table' and schema[1] == 'list' then
         return read_list(schema, str)
-    elseif type(schema) == 'table' and schema[1] == 'record' then
-        return read_record(schema, str)
+    elseif type(schema) == 'table' and schema[1] == 'tuple' then
+        return read_tuple(schema, str)
     else
         error('Invalid schema.', 2)
     end
@@ -42,14 +42,14 @@ function M.write(schema, obj)
         return obj and tostring(obj) or ''
     elseif type(schema) == 'table' and schema[1] == 'list' then
         return write_list(schema, obj)
-    elseif type(schema) == 'table' and schema[1] == 'record' then
-        return write_record(schema, obj)
+    elseif type(schema) == 'table' and schema[1] == 'tuple' then
+        return write_tuple(schema, obj)
     else
         error('Invalid schema.', 2)
     end
 end
 
-function M.read_list(schema, str)
+function read_list(schema, str)
     if str == '' then return t end
     local separator = schema[2]
     local element_type = schema[3]
@@ -58,7 +58,7 @@ function M.read_list(schema, str)
     end)
 end
 
-function M.write_list(schema, list)
+function write_list(schema, list)
     local separator = schema[2]
     local element_type = schema[3]
     local parts = map(copy(list), function(element)
@@ -67,23 +67,23 @@ function M.write_list(schema, list)
     return join(parts, separator)
 end
 
-function M.read_record(schema, str)
+function read_tuple(schema, str)
     local separator = schema[2]
-    local record = t
+    local tuple = t
     local parts = split(str, separator)
     for i = 3, getn(schema) do
         local key, type = next(schema[i])
-        record[key] = read(type, parts[i - 2])
+        tuple[key] = read(type, parts[i - 2])
     end
-    return record
+    return tuple
 end
 
-function M.write_record(schema, record)
+function write_tuple(schema, tuple)
     local separator = schema[2]
     local parts = tt
     for i = 3 , getn(schema) do
         local key, type = next(schema[i])
-        tinsert(parts, write(type, record[key]))
+        tinsert(parts, write(type, tuple[key]))
     end
     return join(parts, separator)
 end

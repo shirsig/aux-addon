@@ -86,7 +86,7 @@ do
 
 		search.status_bar = status_bars[getn(searches)]
 		search.status_bar:update_status(100, 100)
-		search.status_bar:set_text''
+		search.status_bar:set_text('')
 
 		search.table = tables[getn(searches)]
 		search.table:SetSort(1, 2, 3, 4, 5, 6, 7, 8, 9)
@@ -159,7 +159,7 @@ function start_real_time_scan(query, search, continuation)
 		auto_buy_validator = search.auto_buy_validator,
 		on_scan_start = function()
 			search.status_bar:update_status(99.99, 99.99)
-			search.status_bar:set_text'Scanning last page ...'
+			search.status_bar:set_text('Scanning last page ...')
 		end,
 		on_page_loaded = function(_, _, last_page)
 			next_page = last_page
@@ -184,7 +184,7 @@ function start_real_time_scan(query, search, continuation)
 			new_records = values(map)
 
 			if getn(new_records) > 2000 then
-				StaticPopup_Show'AUX_SEARCH_TABLE_FULL'
+				StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
 			else
 				search.records = new_records
 				search.table:SetDatabase(search.records)
@@ -196,7 +196,7 @@ function start_real_time_scan(query, search, continuation)
 		end,
 		on_abort = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text'Scan paused'
+			search.status_bar:set_text('Scan paused')
 
 			search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
 
@@ -236,9 +236,9 @@ function start_search(queries, continuation)
 		on_scan_start = function()
 			search.status_bar:update_status(0,0)
 			if continuation then
-				search.status_bar:set_text'Resuming scan...'
+				search.status_bar:set_text('Resuming scan...')
 			else
-				search.status_bar:set_text'Scanning auctions...'
+				search.status_bar:set_text('Scanning auctions...')
 			end
 		end,
 		on_page_loaded = function(_, total_scan_pages)
@@ -260,13 +260,13 @@ function start_search(queries, continuation)
 			if getn(search.records) < 2000 then
 				tinsert(search.records, auction_record)
 				if getn(search.records) == 2000 then
-					StaticPopup_Show'AUX_SEARCH_TABLE_FULL'
+					StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
 				end
 			end
 		end,
 		on_complete = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text'Scan complete'
+			search.status_bar:set_text('Scan complete')
 
 			if current_search == search and frame.results:IsVisible() and getn(search.records) == 0 then
 				subtab = SAVED
@@ -277,7 +277,7 @@ function start_search(queries, continuation)
 		end,
 		on_abort = function()
 			search.status_bar:update_status(100, 100)
-			search.status_bar:set_text'Scan paused'
+			search.status_bar:set_text('Scan paused')
 
 			if current_query then
 				search.continuation = {current_query, current_page + 1}
@@ -313,10 +313,10 @@ function M.execute(resume, real_time)
 		return
 	elseif real_time then
 		if getn(queries) > 1 then
-			print'Error: The real time mode does not support multi-queries'
+			print('Error: The real time mode does not support multi-queries')
 			return
 		elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-			print'Error: The real time mode does not support page ranges'
+			print('Error: The real time mode does not support page ranges')
 			return
 		end
 	end

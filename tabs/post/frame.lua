@@ -64,13 +64,13 @@ inventory_listing = item_listing.create(
 
 auction_listing = listing.CreateScrollingTable(frame.auctions)
 auction_listing:SetColInfo{
-    { name='Auctions', width=.12, align='CENTER' },
-    { name='Left', width=.1, align='CENTER' },
-    { name='Qty', width=.08, align='CENTER' },
-    { name='Bid/ea', width=.22, align='RIGHT' },
-    { name='Bid Pct', width=.13, align='CENTER' },
-    { name='Buy/ea', width=.22, align='RIGHT' },
-    { name='Buy Pct', width=.13, align='CENTER' },
+    {name='Auctions', width=.12, align='CENTER'},
+    {name='Left', width=.1, align='CENTER'},
+    {name='Qty', width=.08, align='CENTER'},
+    {name='Bid/ea', width=.22, align='RIGHT'},
+    {name='Bid Pct', width=.13, align='CENTER'},
+    {name='Buy/ea', width=.22, align='RIGHT'},
+    {name='Buy Pct', width=.13, align='CENTER'},
 }
 auction_listing:EnableSorting(false)
 auction_listing:DisableSelection(true)

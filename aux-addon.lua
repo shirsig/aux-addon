@@ -29,7 +29,7 @@ function M.get_bids_loaded() return bids_loaded end
 local current_owner_page
 function M.get_current_owner_page() return current_owner_page end
 
-local event_frame = CreateFrame'Frame'
+local event_frame = CreateFrame('Frame')
 
 for event in temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
@@ -196,7 +196,7 @@ do
 end
 
 function ADDON_LOADED.Blizzard_AuctionUI()
-	AuctionFrame:UnregisterEvent'AUCTION_HOUSE_SHOW'
+	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
 	AuctionFrame:SetScript('OnHide', nil)
 	hook('ShowUIPanel', function(...) auto_release(arg, true)
 		if arg[1] == AuctionFrame then return AuctionFrame:Show() end
