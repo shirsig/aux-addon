@@ -1,6 +1,6 @@
 module 'aux.util.money'
 
-include 'green_T'
+include 'T'
 include 'aux'
 
 M.GOLD_TEXT = '|cffffd70ag|r'

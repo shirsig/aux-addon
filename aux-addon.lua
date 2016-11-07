@@ -1,6 +1,6 @@
 module 'aux'
 
-include 'green_T'
+include 'T'
 
 local info = require 'aux.util.info'
 local money = require 'aux.util.money'

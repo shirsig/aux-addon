@@ -1,6 +1,6 @@
 module 'aux.gui.listing'
 
-include 'green_T'
+include 'T'
 include 'aux'
 
 local gui = require 'aux.gui'

@@ -1,6 +1,6 @@
 module 'aux.gui.item_listing'
 
-include 'green_T'
+include 'T'
 include 'aux'
 
 local info = require 'aux.util.info'

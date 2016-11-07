@@ -1,6 +1,6 @@
 module 'aux.util.info'
 
-include 'green_T'
+include 'T'
 include 'aux'
 
 local cache = require 'aux.core.cache'

@@ -1,6 +1,6 @@
 module 'aux.tabs.search'
 
-include 'green_T'
+include 'T'
 include 'aux'
 
 TAB 'Search'

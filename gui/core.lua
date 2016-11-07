@@ -1,6 +1,6 @@
 module 'aux.gui'
 
-include 'green_T'
+include 'T'
 include 'aux'
 
 M.font = [[Fonts\ARIALN.TTF]]

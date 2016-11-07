@@ -1,6 +1,6 @@
 module 'aux.tabs.post'
 
-include 'green_T'
+include 'T'
 include 'aux'
 
 local info = require 'aux.util.info'

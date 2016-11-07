@@ -1,6 +1,6 @@
 module 'aux.core.slash'
 
-include 'green_T'
+include 'T'
 include 'aux'
 
 local persistence = require 'aux.util.persistence'

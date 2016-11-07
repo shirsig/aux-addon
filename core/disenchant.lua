@@ -1,6 +1,6 @@
 module 'aux.core.disenchant'
 
-include 'green_T'
+include 'T'
 include 'aux'
 
 local history = require 'aux.core.history'
