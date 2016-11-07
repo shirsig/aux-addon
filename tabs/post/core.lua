@@ -100,10 +100,12 @@ end
 
 function update_inventory_listing()
 	if not ACTIVE then return end
-	item_listing.populate(inventory_listing, values(filter(copy(inventory_records), function(record)
-        local settings = read_settings(record.key)
-        return record.aux_quantity > 0 and (not settings.hidden or show_hidden_checkbox:GetChecked())
-    end)))
+	local records = values(filter(copy(inventory_records), function(record)
+		local settings = read_settings(record.key)
+		return record.aux_quantity > 0 and (not settings.hidden or show_hidden_checkbox:GetChecked())
+	end))
+	sort(records, function(a, b) return a.name < b.name end)
+	item_listing.populate(inventory_listing, records)
 end
 
 function update_auction_listing()
@@ -441,7 +443,6 @@ function update_inventory_records()
     end
     release(inventory_records)
     inventory_records = values(auctionable_map)
-    sort(inventory_records, function(a, b) return a.name < b.name end)
     refresh = true
 end
 
