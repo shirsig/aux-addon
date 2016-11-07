@@ -1,6 +1,6 @@
 module 'aux.gui.item_listing'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local info = require 'aux.util.info'
@@ -63,7 +63,7 @@ function M.create(parent, on_click, selected)
 	_G[scrollBar:GetName() .. 'ScrollUpButton']:Hide()
 	_G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
 
-	local rows = t
+	local rows = T
 	local row_index = 1
 	local max_height = content:GetHeight()
 	local total_height = 0

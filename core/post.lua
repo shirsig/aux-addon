@@ -1,6 +1,6 @@
 module 'aux.core.post'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local info = require 'aux.util.info'

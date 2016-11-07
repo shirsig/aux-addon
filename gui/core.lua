@@ -1,6 +1,6 @@
 module 'aux.gui'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 M.font = [[Fonts\ARIALN.TTF]]
@@ -24,7 +24,8 @@ function LOAD()
 		aux_background:SetTexture(color.content.background())
 		aux_background:SetAllPoints(DropDownList1Backdrop)
 		blizzard_backdrop = DropDownList1Backdrop:GetBackdrop()
-		hook('ToggleDropDownMenu', function(...) auto_release(arg, true)
+		hook('ToggleDropDownMenu', function(...)
+			auto_release(arg, true)
 			local ret = temp-A(orig.ToggleDropDownMenu(unpack(arg)))
 			local dropdown = _G[arg[4] or ''] or this:GetParent()
 			if strfind(dropdown:GetName() or '', '^AuxFrame%d+$') then
@@ -96,7 +97,7 @@ end
 do
 	local menu = CreateFrame('Frame', unique_name, UIParent, 'UIMenuTemplate')
 	local orig = menu:GetScript'OnShow'
-	local structure = t
+	local structure = T
 	menu:SetScript('OnShow', function()
 		UIMenu_Initialize()
 		for i = 1, getn(structure), 2 do
@@ -203,7 +204,7 @@ function M.button(parent, text_height)
 end
 
 do
-	local mt = {__index=t}
+	local mt = {__index=T}
 	function mt.__index:create_tab(text)
 		local id = getn(self._tabs) + 1
 
@@ -290,7 +291,7 @@ do
 		local self = {
 			_frame = parent,
 			_orientation = orientation,
-			_tabs = t,
+			_tabs = T,
 		}
 	    return setmetatable(self, mt)
 	end
@@ -335,7 +336,7 @@ function M.editbox(parent)
     end)
     editbox:SetScript('OnChar', function() (this.char or nop)() end)
     do
-        local last_click = T('t', 0)
+        local last_click = O('t', 0)
         editbox:SetScript('OnMouseDown', function()
 	        if arg1 == 'RightButton' then
 		        this:SetText('')

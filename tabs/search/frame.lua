@@ -520,8 +520,8 @@ do
     filter_display = scroll_child
 end
 
-status_bars = t
-tables = t
+status_bars = T
+tables = T
 for _ = 1, 5  do
     local status_bar = gui.status_bar(frame)
     status_bar:SetAllPoints(status_bar_frame)

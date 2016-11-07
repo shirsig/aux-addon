@@ -1,6 +1,6 @@
 module 'aux.gui.listing'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local gui = require 'aux.gui'
@@ -442,11 +442,11 @@ function M.CreateScrollingTable(parent)
 
     -- setup default values
     st.isTSMScrollingTable = true
-    st.sizes = t
-    st.headCols = t
-    st.rows = t
-    st.handlers = t
-    st.sortInfo = t
+    st.sizes = T
+    st.headCols = T
+    st.rows = T
+    st.handlers = T
+    st.sortInfo = T
     st.colInfo = DEFAULT_COL_INFO
 
     return st

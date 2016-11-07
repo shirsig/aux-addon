@@ -1,6 +1,6 @@
 module 'aux.core.tooltip'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local info = require 'aux.util.info'
@@ -20,7 +20,7 @@ local color = {
 
 _G.aux_tooltip_value = true
 
-local game_tooltip_hooks, game_tooltip_money = t, 0
+local game_tooltip_hooks, game_tooltip_money = T, 0
 
 function LOAD()
 	do

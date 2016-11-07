@@ -1,6 +1,6 @@
 module 'aux.util.info'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local cache = require 'aux.core.cache'
@@ -38,7 +38,7 @@ do
 		INVTYPE_TABARD = {19},
 	}
 	function M.inventory_index(slot)
-	    return unpack(inventory_index_map[slot] or tt)
+	    return unpack(inventory_index_map[slot] or temp-T)
 	end
 end
 
@@ -53,7 +53,7 @@ function M.container_item(bag, slot)
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
         local aux_quantity = charges or count
-        return T(
+        return O(
             'item_id', item_id,
             'suffix_id', suffix_id,
             'unique_id', unique_id,
@@ -88,7 +88,7 @@ end
 
 function M.auction_sell_item()
 	for name, texture, count, quality, usable, vendor_price in GetAuctionSellItemInfo do
-        return T(
+        return O(
 			'name', name,
 			'texture', texture,
             'quality', quality,
@@ -116,7 +116,7 @@ function M.auction(index, query_type)
         local blizzard_bid = high_bid > 0 and high_bid or start_price
         local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
 
-        return T(
+        return O(
             'item_id', item_id,
             'suffix_id', suffix_id,
             'unique_id', unique_id,
@@ -180,7 +180,7 @@ end
 
 function M.set_shopping_tooltip(slot)
     local index1, index2 = inventory_index(slot)
-    local tooltips = tt
+    local tooltips = temp-T
     if index1 then
         local tooltip = tooltip('inventory', 'player', index1)
         if getn(tooltip) > 0 then
@@ -195,7 +195,7 @@ function M.set_shopping_tooltip(slot)
     end
 
     if tooltips[1] then
-        tinsert(tooltips[1], 1, temp-T('left_text', 'Currently Equipped', 'left_color', temp-A(.5, .5, .5)))
+        tinsert(tooltips[1], 1, temp-O('left_text', 'Currently Equipped', 'left_color', temp-A(.5, .5, .5)))
         ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
         load_tooltip(ShoppingTooltip1, tooltips[1])
         ShoppingTooltip1:Show()
@@ -203,7 +203,7 @@ function M.set_shopping_tooltip(slot)
     end
 
     if tooltips[2] then
-        tinsert(tooltips[2], 1, temp-T('left_text', 'Currently Equipped', 'left_color', temp-A(.5, .5, .5)))
+        tinsert(tooltips[2], 1, temp-O('left_text', 'Currently Equipped', 'left_color', temp-A(.5, .5, .5)))
         ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
         load_tooltip(ShoppingTooltip2, tooltips[2])
         ShoppingTooltip2:Show()
@@ -283,9 +283,9 @@ function M.tooltip(setter, arg1, arg2)
     elseif setter == 'link' then
 	    AuxTooltip:SetHyperlink(arg1)
     end
-    local tooltip = t
+    local tooltip = T
     for i = 1, AuxTooltip:NumLines() do
-        tinsert(tooltip, weak-T(
+        tinsert(tooltip, weak-O(
             'left_text', _G['AuxTooltipTextLeft' .. i]:GetText(),
             'left_color', weak-A(_G['AuxTooltipTextLeft' .. i]:GetTextColor()),
             'right_text', _G['AuxTooltipTextRight' .. i]:IsVisible() and _G['AuxTooltipTextRight' .. i]:GetText(),
@@ -367,7 +367,7 @@ end
 function M.item(item_id, suffix_id)
     local itemstring = 'item:' .. (item_id or 0) .. ':0:' .. (suffix_id or 0) .. ':0'
     local name, itemstring, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
-    return name and T(
+    return name and O(
         'name', name,
         'itemstring', itemstring,
         'quality', quality,

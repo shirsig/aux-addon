@@ -1,6 +1,6 @@
 module 'aux.tabs.bids'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local info = require 'aux.util.info'
@@ -9,7 +9,7 @@ local scan = require 'aux.core.scan'
 
 TAB 'Bids'
 
-auction_records = t
+auction_records = T
 
 function OPEN()
     frame:Show()
@@ -34,7 +34,7 @@ function M.scan_bids()
     update_listing()
     scan.start{
         type = 'bidder',
-        queries = A(T('blizzard_query', t)),
+        queries = A(O('blizzard_query', T)),
         on_page_loaded = function(page, total_pages)
             status_bar:update_status((page - 1) / total_pages, 0)
             status_bar:set_text(format('Scanning (Page %d / %d)', page, total_pages))

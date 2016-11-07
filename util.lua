@@ -34,14 +34,24 @@ do
 end
 
 do
-	local _state = setmetatable(t, T('__mode', 'kv'))
+	local _state = setmetatable({}, {__mode='kv'})
 	local __index = function(self, k)
 		return _state[self].handler({public=self, private=_state[self].state}, k)
 	end
 	function M.index_function(state, handler) -- TODO rename table-accessor, use predicate to stop
-		local state, self = {handler=handler, state=state}, t
+		local state, self = {handler=handler, state=state}, T
 		_state[self] = state
 		return setmetatable(self, {__metatable=false, __index=__index, state=state})
+	end
+end
+
+do
+	local mt = {__metatable=false, __newindex=nop}
+	function mt:__sub(table)
+		return setmetatable(T, O('__metatable', false, '__newindex', nop, '__index', table))
+	end
+	function M.wrapper()
+		return setmetatable(T, mt)
 	end
 end
 
@@ -92,7 +102,7 @@ function M.get_modified()
 end
 
 function M.copy(t)
-	local copy = _M.t
+	local copy = T
 	for k, v in t do copy[k] = v end
 	table.setn(copy, getn(t))
 	return setmetatable(copy, getmetatable(t))
@@ -109,13 +119,13 @@ function M.key(value, t)
 end
 
 function M.keys(t)
-	local keys = _M.t
+	local keys = T
 	for k in t do tinsert(keys, k) end
 	return keys
 end
 
 function M.values(t)
-	local values = _M.t
+	local values = T
 	for _, v in t do tinsert(values, v) end
 	return values
 end
@@ -170,7 +180,7 @@ function M.trim(str)
 end
 
 function M.split(str, separator)
-	local parts = t
+	local parts = T
 	while true do
 		local start_index = strfind(str, separator, 1, true)
 		if start_index then
@@ -186,7 +196,7 @@ function M.split(str, separator)
 end
 
 function M.tokenize(str)
-	local tokens = t
+	local tokens = T
 	for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
 	return tokens
 end

@@ -32,7 +32,7 @@ function update_real_time(enable)
 end
 
 do
-	local searches = t
+	local searches = T
 	local search_index = 1
 
 	function get_current_search()
@@ -75,7 +75,7 @@ do
 		while getn(searches) > search_index do
 			tremove(searches)
 		end
-		local search = T('records', t, 'filter_string', filter_string, 'first_page', first_page, 'last_page', last_page, 'real_time', real_time)
+		local search = O('records', T, 'filter_string', filter_string, 'first_page', first_page, 'last_page', last_page, 'real_time', real_time)
 		tinsert(searches, search)
 		if getn(searches) > 5 then
 			tremove(searches, 1)
@@ -152,7 +152,7 @@ function start_real_time_scan(query, search, continuation)
 	end
 
 	local next_page
-	local new_records = t
+	local new_records = T
 	search_scan_id = scan.start{
 		type = 'list',
 		queries = {query},
@@ -173,7 +173,7 @@ function start_real_time_scan(query, search, continuation)
 			end
 		end,
 		on_complete = function()
-			local map = tt
+			local map = temp-T
 			for _, record in search.records do
 				map[record.sniping_signature] = record
 			end
@@ -334,7 +334,7 @@ function M.execute(resume, real_time)
 			end
 			new_recent_search(filter_string, join(map(copy(queries), function(filter) return filter.prettified end), ';'))
 		else
-			current_search.records = t
+			current_search.records = T
 			current_search.table:SetDatabase(current_search.records)
 		end
 		current_search.first_page = first_page
@@ -362,7 +362,7 @@ end
 
 do
 	local scan_id = 0
-	local IDLE, SEARCHING, FOUND = t, t, t
+	local IDLE, SEARCHING, FOUND = T, T, T
 	local state = IDLE
 	local found_index
 

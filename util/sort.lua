@@ -1,6 +1,6 @@
 module 'aux.util.sort'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 M.EQ = 0

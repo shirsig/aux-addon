@@ -1,6 +1,6 @@
 module 'aux.core.disenchant'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local history = require 'aux.core.history'
@@ -8,7 +8,7 @@ local history = require 'aux.core.history'
 local UNCOMMON, RARE, EPIC = 2, 3, 4
 
 do
-	local data = T(
+	local data = O(
 		10940, A('DUST', '1-20'),
 		11083, A('DUST', '21-30'),
 		11137, A('DUST', '31-40'),
@@ -86,7 +86,7 @@ end
 
 function M.distribution(slot, quality, level)
     if not ARMOR[slot] and not WEAPON[slot] or level == 0 then
-        return t
+        return T
     end
 
     local function p(probability_armor, probability_weapon)
@@ -100,102 +100,102 @@ function M.distribution(slot, quality, level)
     if quality == UNCOMMON then
         if level <= 10 then
             return A(
-                weak-T('item_id', 10940, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.8, .2)),
-	            weak-T('item_id', 10938, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .8))
+                weak-O('item_id', 10940, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.8, .2)),
+	            weak-O('item_id', 10938, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .8))
             )
         elseif level <= 15 then
             return A(
-	            weak-T('item_id', 10940, 'min_quantity', 2, 'max_quantity', 3, 'probability', p(.75, .2)),
-	            weak-T('item_id', 10939, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            weak-T('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
+	            weak-O('item_id', 10940, 'min_quantity', 2, 'max_quantity', 3, 'probability', p(.75, .2)),
+	            weak-O('item_id', 10939, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            weak-O('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
             )
         elseif level <= 20 then
             return A(
-	            weak-T('item_id', 10940, 'min_quantity', 4, 'max_quantity', 6, 'probability', p(.75, .15)),
-	            weak-T('item_id', 10998, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.15, .75)),
-	            weak-T('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', .10)
+	            weak-O('item_id', 10940, 'min_quantity', 4, 'max_quantity', 6, 'probability', p(.75, .15)),
+	            weak-O('item_id', 10998, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.15, .75)),
+	            weak-O('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', .10)
             )
         elseif level <= 25 then
             return A(
-	            weak-T('item_id', 11083, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
-	            weak-T('item_id', 11082, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            weak-T('item_id', 11084, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
+	            weak-O('item_id', 11083, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
+	            weak-O('item_id', 11082, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            weak-O('item_id', 11084, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
 			)
         elseif level <= 30 then
             return A(
-	            weak-T('item_id', 11083, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .2)),
-	            weak-T('item_id', 11134, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            weak-T('item_id', 11138, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
+	            weak-O('item_id', 11083, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .2)),
+	            weak-O('item_id', 11134, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            weak-O('item_id', 11138, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
             )
         elseif level <= 35 then
             return A(
-	            weak-T('item_id', 11137, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
-	            weak-T('item_id', 11135, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            weak-T('item_id', 11139, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
+	            weak-O('item_id', 11137, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
+	            weak-O('item_id', 11135, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            weak-O('item_id', 11139, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
             )
         elseif level <= 40 then
             return A(
-	            weak-T('item_id', 11137, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .2)),
-	            weak-T('item_id', 11174, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            weak-T('item_id', 11177, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
+	            weak-O('item_id', 11137, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .2)),
+	            weak-O('item_id', 11174, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            weak-O('item_id', 11177, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
             )
         elseif level <= 45 then
             return A(
-	            weak-T('item_id', 11176, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
-	            weak-T('item_id', 11175, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            weak-T('item_id', 11178, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
+	            weak-O('item_id', 11176, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
+	            weak-O('item_id', 11175, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            weak-O('item_id', 11178, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
             )
         elseif level <= 50 then
             return A(
-	            weak-T('item_id', 11176, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .22)),
-	            weak-T('item_id', 16202, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            weak-T('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
+	            weak-O('item_id', 11176, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .22)),
+	            weak-O('item_id', 16202, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            weak-O('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
             )
         elseif level <= 55 then
             return A(
-	            weak-T('item_id', 16204, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .22)),
-	            weak-T('item_id', 16203, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            weak-T('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
+	            weak-O('item_id', 16204, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .22)),
+	            weak-O('item_id', 16203, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            weak-O('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
 			)
         elseif level <= 60 then
             return A(
-	            weak-T('item_id', 16204, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .22)),
-	            weak-T('item_id', 16203, 'min_quantity', 2, 'max_quantity', 3, 'probability', p(.2, .75)),
-	            weak-T('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
+	            weak-O('item_id', 16204, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .22)),
+	            weak-O('item_id', 16203, 'min_quantity', 2, 'max_quantity', 3, 'probability', p(.2, .75)),
+	            weak-O('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
 			)
         end
     elseif quality == RARE then
         if level <= 20 then
-            return A(weak-T('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return A(weak-O('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 25 then
-            return A(weak-T('item_id', 11084, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return A(weak-O('item_id', 11084, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 30 then
-            return A(weak-T('item_id', 11138, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return A(weak-O('item_id', 11138, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 35 then
-            return A(weak-T('item_id', 11139, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return A(weak-O('item_id', 11139, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 40 then
-            return A(weak-T('item_id', 11177, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return A(weak-O('item_id', 11177, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 45 then
-            return A(weak-T('item_id', 11178, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return A(weak-O('item_id', 11178, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 50 then
-            return A(weak-T('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return A(weak-O('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 55 then
-            return A(weak-T('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), T('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
+            return A(weak-O('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), O('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
         elseif level <= 60 then
-            return A(weak-T('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), T('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
+            return A(weak-O('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), O('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
         end
     elseif quality == EPIC then
         if level <= 40 then
-            return A(weak-T('item_id', 11177, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
+            return A(weak-O('item_id', 11177, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
         elseif level <= 45 then
-            return A(weak-T('item_id', 11178, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
+            return A(weak-O('item_id', 11178, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
         elseif level <= 50 then
-            return A(weak-T('item_id', 14343, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
+            return A(weak-O('item_id', 14343, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
         elseif level <= 55 then
-            return A(weak-T('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return A(weak-O('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 60 then
-            return A(weak-T('item_id', 20725, 'min_quantity', 1, 'max_quantity', 2, 'probability', 1))
+            return A(weak-O('item_id', 20725, 'min_quantity', 1, 'max_quantity', 2, 'probability', 1))
         end
     end
-    return t
+    return T
 end

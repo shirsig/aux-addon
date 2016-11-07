@@ -1,6 +1,6 @@
 module 'aux.util.completion'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local filter_util = require 'aux.util.filter'

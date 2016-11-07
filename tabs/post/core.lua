@@ -1,6 +1,6 @@
 module 'aux.tabs.post'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local info = require 'aux.util.info'
@@ -20,7 +20,7 @@ local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'tuple', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
 function get_default_settings()
-	return T('duration', DURATION_8 , 'stack_size', 1, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
+	return O('duration', DURATION_8 , 'stack_size', 1, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
 end
 
 do
@@ -28,7 +28,7 @@ do
 	function get_data()
 		if not data then
 			local dataset = persistence.dataset
-			data = dataset.post or t
+			data = dataset.post or T
 			dataset.post = data
 		end
 		return data
@@ -45,7 +45,7 @@ function write_settings(settings, item_key)
 	data[item_key] = persistence.write(settings_schema, settings)
 end
 
-local scan_id, inventory_records, existing_auctions = 0, t, t
+local scan_id, inventory_records, existing_auctions = 0, T, T
 
 function refresh_button_click()
 	scan.abort(scan_id)
@@ -108,12 +108,12 @@ end
 
 function update_auction_listing()
 	if not ACTIVE then return end
-    local auction_rows = t
+    local auction_rows = T
     if selected_item then
         local unit_start_price = get_unit_start_price()
         local unit_buyout_price = get_unit_buyout_price()
 
-        for i, auction_record in existing_auctions[selected_item.key] or tt do
+        for i, auction_record in existing_auctions[selected_item.key] or temp-T do
 
             local blizzard_bid_undercut, buyout_price_undercut = undercut(auction_record, stack_size_slider:GetValue())
             blizzard_bid_undercut = money.from_string(money.to_string(blizzard_bid_undercut, true, nil, 3))
@@ -144,15 +144,15 @@ function update_auction_listing()
                 buyout_color = inline_color.yellow
             end
 
-            tinsert(auction_rows, T(
+            tinsert(auction_rows, O(
                 'cols', A(
-                    T('value', auction_record.own and color.yellow(auction_record.count) or auction_record.count),
-		            T('value', al.time_left(auction_record.duration)),
-		            T('value', auction_record.stack_size == stack_size and color.yellow(auction_record.stack_size) or auction_record.stack_size),
-		            T('value', money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color)),
-		            T('value', historical_value and al.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'),
-		            T('value', auction_record.unit_buyout_price > 0 and money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'),
-		            T('value', auction_record.unit_buyout_price > 0 and historical_value and al.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---')
+                    O('value', auction_record.own and color.yellow(auction_record.count) or auction_record.count),
+		            O('value', al.time_left(auction_record.duration)),
+		            O('value', auction_record.stack_size == stack_size and color.yellow(auction_record.stack_size) or auction_record.stack_size),
+		            O('value', money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color)),
+		            O('value', historical_value and al.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'),
+		            O('value', auction_record.unit_buyout_price > 0 and money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'),
+		            O('value', auction_record.unit_buyout_price > 0 and historical_value and al.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---')
                 ),
                 'record', auction_record
             ))
@@ -407,18 +407,18 @@ function update_item(item)
 end
 
 function update_inventory_records()
-    local auctionable_map = tt
+    local auctionable_map = temp-T
     for slot in info.inventory do auto_release(slot, true)
         for item_info in present(temp-info.container_item(unpack(slot))) do
             local charge_class = item_info.charges or 0
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
                 if not auctionable_map[item_info.item_key] then
-                    local availability = t
+                    local availability = T
                     for i = 0, 10 do
                         availability[i] = 0
                     end
                     availability[charge_class] = item_info.count
-                    auctionable_map[item_info.item_key] = T(
+                    auctionable_map[item_info.item_key] = O(
 	                    'item_id', item_info.item_id,
 	                    'suffix_id', item_info.suffix_id,
 	                    'key', item_info.item_key,
@@ -481,7 +481,7 @@ function refresh_entries()
                 status_bar:set_text('Scan aborted')
 			end,
 			on_complete = function()
-				existing_auctions[item_key] = existing_auctions[item_key] or t
+				existing_auctions[item_key] = existing_auctions[item_key] or T
                 refresh = true
                 status_bar:update_status(1, 1)
                 status_bar:set_text('Scan complete')
@@ -491,7 +491,7 @@ function refresh_entries()
 end
 
 function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
-    existing_auctions[key] = existing_auctions[key] or t
+    existing_auctions[key] = existing_auctions[key] or T
     local entry
     for _, record in existing_auctions[key] do
         if unit_blizzard_bid == record.unit_blizzard_bid and unit_buyout_price == record.unit_buyout_price and aux_quantity == record.stack_size and duration == record.duration and is_player(owner) == record.own then
@@ -499,7 +499,7 @@ function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price,
         end
     end
     if not entry then
-        entry = T('stack_size', aux_quantity, 'unit_blizzard_bid', unit_blizzard_bid, 'unit_buyout_price', unit_buyout_price, 'duration', duration, 'own', is_player(owner), 'count', 0)
+        entry = O('stack_size', aux_quantity, 'unit_blizzard_bid', unit_blizzard_bid, 'unit_buyout_price', unit_buyout_price, 'duration', duration, 'own', is_player(owner), 'count', 0)
         tinsert(existing_auctions[key], entry)
     end
     entry.count = entry.count + 1

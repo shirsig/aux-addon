@@ -2,7 +2,7 @@ module 'aux'
 
 local event_frame = CreateFrame('Frame')
 
-local listeners, threads = t, t
+local listeners, threads = T, T
 
 local thread_id
 function M.get_thread_id() return thread_id end
@@ -70,7 +70,7 @@ end
 
 function M.event_listener(event, cb)
 	local listener_id = unique_id
-	listeners[listener_id] = T(
+	listeners[listener_id] = O(
 		'event', event,
 		'cb', cb,
 		'kill', vararg-function(arg) if getn(arg) == 0 or arg[1] then kill_listener(listener_id) end end
@@ -95,7 +95,7 @@ do
 		auto_release(arg, false)
 		arg.f = tremove(arg, 1)
 		local thread_id = unique_id
-		threads[thread_id] = T('k', setmetatable(arg, mt))
+		threads[thread_id] = O('k', setmetatable(arg, mt))
 		return thread_id
 	end
 

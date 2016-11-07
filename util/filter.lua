@@ -1,6 +1,6 @@
 module 'aux.util.filter'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local info = require 'aux.util.info'
@@ -265,7 +265,7 @@ do
 		end,
 	}
 	function blizzard_filter_parser()
-	    return setmetatable(t, mt)
+	    return setmetatable(T, mt)
 	end
 end
 
@@ -284,10 +284,10 @@ function parse_parameter(input_type, str)
 end
 
 function M.parse_filter_string(str)
-    local filter, post_filter = t, t
+    local filter, post_filter = T, T
     local blizzard_filter_parser = blizzard_filter_parser()
 
-    local parts = str and map(split(str, '/'), function(part) return strlower(trim(part)) end) or t
+    local parts = str and map(split(str, '/'), function(part) return strlower(trim(part)) end) or T
 
     local i = 1
     while parts[i] do
@@ -327,14 +327,14 @@ function M.parse_filter_string(str)
         i = i + 1
     end
 
-    return T('components', filter, 'blizzard', blizzard_filter_parser(), 'post', post_filter)
+    return O('components', filter, 'blizzard', blizzard_filter_parser(), 'post', post_filter)
 end
 
 function M.query(filter_string)
     local filter, error, suggestions = parse_filter_string(filter_string)
 
     if not filter then
-        return nil, suggestions or t, error
+        return nil, suggestions or T, error
     end
 
     local polish_notation_counter = 0
@@ -348,7 +348,7 @@ function M.query(filter_string)
     end
 
     if polish_notation_counter > 0 then
-        local suggestions = t
+        local suggestions = T
         for key in filters do
             tinsert(suggestions, strlower(key))
         end
@@ -367,7 +367,7 @@ end
 
 function M.queries(filter_string)
     local parts = split(filter_string, ';')
-    local queries = t
+    local queries = T
     for _, str in parts do
         str = trim(str)
         local query, _, error = query(str)
@@ -381,7 +381,7 @@ function M.queries(filter_string)
 end
 
 function suggestions(filter)
-    local suggestions = t
+    local suggestions = T
 
     if filter.blizzard.name and size(filter.blizzard) == 1 then tinsert(suggestions, 'exact') end
 
@@ -498,7 +498,7 @@ end
 
 function blizzard_query(filter)
     local filters = filter.blizzard
-    local query = T('name', filters.name and filters.name[2])
+    local query = O('name', filters.name and filters.name[2])
     local item_info, class_index, subclass_index, slot_index
     local item_id = filters.name and cache.item_id(filters.name[2])
     item_info = item_id and info.item(item_id)
@@ -526,7 +526,7 @@ end
 
 function validator(filter)
 
-    local validators = t
+    local validators = T
     for i, component in filter.post do
 	    local type, name, param = unpack(component)
         if type == 'filter' then
@@ -538,11 +538,11 @@ function validator(filter)
         if filter.blizzard.exact and strlower(info.item(record.item_id).name) ~= filter.blizzard.name[2] then
             return false
         end
-        local stack = tt
+        local stack = temp-T
         for i = getn(filter.post), 1, -1 do
             local type, name, param = unpack(filter.post[i])
             if type == 'operator' then
-                local args = tt
+                local args = temp-T
                 while (not param or param > 0) and getn(stack) > 0 do
                     tinsert(args, tremove(stack))
                     param = param and param - 1
@@ -564,7 +564,7 @@ end
 
 function M.query_builder()
     local filter
-    return T(
+    return O(
 		'append', function(part)
             filter = not filter and part or filter .. '/' .. part
         end,

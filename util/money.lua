@@ -1,6 +1,6 @@
 module 'aux.util.money'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 M.GOLD_TEXT = '|cffffd70ag|r'
@@ -83,7 +83,7 @@ function M.to_string(money, pad, trim, decimal_points, color, no_color)
 
 	local text
 	if trim then
-		local parts = tt
+		local parts = temp-T
 		if gold > 0 then
 			tinsert(parts, format_number(gold, false, nil, color) .. gold_text)
 		end

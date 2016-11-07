@@ -1,6 +1,6 @@
 module 'aux.gui.auction_listing'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local info = require 'aux.util.info'
@@ -703,13 +703,13 @@ local methods = {
                 self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].numAuctions = self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].numAuctions + 1
             elseif prevRecord and record.item_key == prevRecord.item_key then
                 -- it's the same base item as the previous row so insert a new auction
-                tinsert(self.rowInfo[getn(self.rowInfo)].children, T('numAuctions', 1, 'record', record))
+                tinsert(self.rowInfo[getn(self.rowInfo)].children, O('numAuctions', 1, 'record', record))
                 if self.expanded[self.rowInfo[getn(self.rowInfo)].expandKey] then
                     self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
                 end
             else
                 -- it's a different base item from the previous row
-                tinsert(self.rowInfo, T('item_key', record.item_key, 'expandKey', record.item_key, 'children', A(T('numAuctions', 1, 'record', record))))
+                tinsert(self.rowInfo, O('item_key', record.item_key, 'expandKey', record.item_key, 'children', A(O('numAuctions', 1, 'record', record))))
                 self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
             end
         end
@@ -918,7 +918,8 @@ local methods = {
         end
     end,
 
-    SetSort = function(self, ...) auto_release(arg, true)
+    SetSort = function(self, ...)
+	    auto_release(arg, true)
         for k = 1, arg.n do
             for i, sort in self.sorts do
                 if sort.index == abs(arg[k]) then
@@ -988,10 +989,10 @@ function M.CreateAuctionResultsTable(parent, config)
     local numRows = 16
     rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / numRows
     rt.scrollDisabled = nil
-    rt.expanded = t
-    rt.handlers = t
-    rt.sorts = t
-    rt.records = t
+    rt.expanded = T
+    rt.handlers = T
+    rt.sorts = T
+    rt.records = T
     rt.rowInfo = {numDisplayRows=0}
 
     for name, func in methods do
@@ -1036,7 +1037,7 @@ function M.CreateAuctionResultsTable(parent, config)
     _G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
 
     -- create the header cells
-    rt.headCells = t
+    rt.headCells = T
     for i, column_config in rt.config do
         local cell = CreateFrame('Button', nil, rt.contentFrame)
         cell:SetHeight(HEAD_HEIGHT)
@@ -1079,7 +1080,7 @@ function M.CreateAuctionResultsTable(parent, config)
     end
 
     -- create the rows
-    rt.rows = t
+    rt.rows = T
     for i = 1, numRows do
         local row = CreateFrame('Frame', nil, rt.contentFrame)
         row:SetHeight(rt.ROW_HEIGHT)
@@ -1097,7 +1098,7 @@ function M.CreateAuctionResultsTable(parent, config)
         row.highlight = highlight
         row.rt = rt
 
-        row.cells = t
+        row.cells = T
         for j = 1, getn(rt.config) do
             local cell = CreateFrame('Button', nil, row)
             local text = cell:CreateFontString()

@@ -2,38 +2,38 @@ module 'aux.tabs.search'
 
 local filter_util = require 'aux.util.filter'
 
-_G.aux_auto_buy_filters = t
-_G.aux_favorite_searches = t
-_G.aux_recent_searches = t
+_G.aux_auto_buy_filters = T
+_G.aux_favorite_searches = T
+_G.aux_recent_searches = T
 
 function update_search_listings()
-	local autobuy_filter_rows = t
+	local autobuy_filter_rows = T
 	for i, autobuy_filter in aux_auto_buy_filters do
 		local name = strsub(autobuy_filter.prettified, 1, 250)
-		tinsert(autobuy_filter_rows, T(
-			'cols', A(T('value', name)),
+		tinsert(autobuy_filter_rows, O(
+			'cols', A(O('value', name)),
 			'search', autobuy_filter,
 			'index', i
 		))
 	end
 	auto_buy_listing:SetData(autobuy_filter_rows)
 
-	local favorite_search_rows = t
+	local favorite_search_rows = T
 	for i, favorite_search in aux_favorite_searches do
 		local name = strsub(favorite_search.prettified, 1, 250)
-		tinsert(favorite_search_rows, T(
-			'cols', A(T('value', name)),
+		tinsert(favorite_search_rows, O(
+			'cols', A(O('value', name)),
 			'search', favorite_search,
 			'index', i
 		))
 	end
 	favorite_searches_listing:SetData(favorite_search_rows)
 
-	local recent_search_rows = t
+	local recent_search_rows = T
 	for i, recent_search in aux_recent_searches do
 		local name = strsub(recent_search.prettified, 1, 250)
-		tinsert(recent_search_rows, T(
-			'cols', A(T('value', name)),
+		tinsert(recent_search_rows, O(
+			'cols', A(O('value', name)),
 			'search', recent_search,
 			'index', i
 		))
@@ -42,7 +42,7 @@ function update_search_listings()
 end
 
 function new_recent_search(filter_string, prettified)
-	tinsert(aux_recent_searches, 1, T(
+	tinsert(aux_recent_searches, 1, O(
 		'filter_string', filter_string,
 		'prettified', prettified
 	))
@@ -105,7 +105,7 @@ handlers = {
 }
 
 function get_auto_buy_validator()
-	local validators = t
+	local validators = T
 	for _, filter in aux_auto_buy_filters do
 		local queries, error = filter_util.queries(filter.filter_string)
 		if queries then
@@ -122,7 +122,7 @@ end
 function add_favorite(filter_string)
 	local queries, error = filter_util.queries(filter_string)
 	if queries then
-		tinsert(aux_favorite_searches, 1, T(
+		tinsert(aux_favorite_searches, 1, O(
 			'filter_string', filter_string,
 			'prettified', join(map(queries, function(query) return query.prettified end), ';')
 		))
@@ -140,7 +140,7 @@ function add_auto_buy(filter_string)
 		elseif size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(filter_string).blizzard.exact then
 			print('Error: The automatic buyout filter does not support Blizzard filters')
 		else
-			tinsert(aux_auto_buy_filters, 1, T(
+			tinsert(aux_auto_buy_filters, 1, O(
 				'filter_string', filter_string,
 				'prettified', join(map(queries, function(query) return query.prettified end), ';')
 			))

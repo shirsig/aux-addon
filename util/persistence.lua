@@ -1,16 +1,16 @@
 module 'aux.util.persistence'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
-_G.aux_datasets = t
+_G.aux_datasets = T
 
 do
 	local dataset
 	function M.get_dataset()
 		if not dataset then
 		    local dataset_key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
-		    dataset = aux_datasets[dataset_key] or t
+		    dataset = aux_datasets[dataset_key] or T
 		    aux_datasets[dataset_key] = dataset
 	    end
 	    return dataset
@@ -50,7 +50,7 @@ function M.write(schema, obj)
 end
 
 function read_list(schema, str)
-    if str == '' then return t end
+    if str == '' then return T end
     local separator = schema[2]
     local element_type = schema[3]
     return map(split(str, separator), function(part)
@@ -69,7 +69,7 @@ end
 
 function read_tuple(schema, str)
     local separator = schema[2]
-    local tuple = t
+    local tuple = T
     local parts = temp-split(str, separator)
     for i = 3, getn(schema) do
         local key, type = next(schema[i])
@@ -80,7 +80,7 @@ end
 
 function write_tuple(schema, tuple)
     local separator = schema[2]
-    local parts = tt
+    local parts = temp-T
     for i = 3 , getn(schema) do
         local key, type = next(schema[i])
         tinsert(parts, write(type, tuple[key]))

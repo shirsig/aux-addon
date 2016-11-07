@@ -10,7 +10,7 @@ function valid_level(str)
 	return level and bounded(1, 60, level)
 end
 
-blizzard_query = setmetatable(t, {
+blizzard_query = setmetatable(T, {
 	__index = function(_, key)
 		if key == 'name' then
 			return name_input:GetText()
@@ -195,7 +195,7 @@ end
 
 function formatted_post_filter(components)
 	local no_line_break
-	local stack = tt
+	local stack = temp-T
 	local str = ''
 
 	for i, component in components do
@@ -241,8 +241,8 @@ function data_link(id, str)
 	return '|H' .. id .. '|h' .. str .. '|h'
 end
 
-post_filter = t
-filter_builder_state = T('selected', 0)
+post_filter = T
+filter_builder_state = O('selected', 0)
 
 function data_link_click()
 	local button = arg3
@@ -325,7 +325,7 @@ end
 
 function initialize_filter_dropdown()
 	for filter in temp-S('and', 'or', 'not', 'min-unit-bid', 'min-unit-buy', 'max-unit-bid', 'max-unit-buy', 'bid-profit', 'buy-profit', 'bid-vend-profit', 'buy-vend-profit', 'bid-dis-profit', 'buy-dis-profit', 'bid-pct', 'buy-pct', 'item', 'tooltip', 'min-lvl', 'max-lvl', 'rarity', 'left', 'utilizable', 'discard') do
-		UIDropDownMenu_AddButton(T(
+		UIDropDownMenu_AddButton(O(
 			'text', filter,
 			'value', filter,
 			'func', function()
@@ -354,9 +354,9 @@ function initialize_class_dropdown()
 			update_form()
 		end
 	end
-	UIDropDownMenu_AddButton(T('text', ALL, 'value', 0, 'func', on_click))
+	UIDropDownMenu_AddButton(O('text', ALL, 'value', 0, 'func', on_click))
 	for i, class in temp-A(GetAuctionItemClasses()) do
-		UIDropDownMenu_AddButton(T('text', class, 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton(O('text', class, 'value', i, 'func', on_click))
 	end
 end
 
@@ -367,9 +367,9 @@ function initialize_subclass_dropdown()
 			update_form()
 		end
 	end
-	UIDropDownMenu_AddButton(T('text', ALL, 'value', 0, 'func', on_click))
+	UIDropDownMenu_AddButton(O('text', ALL, 'value', 0, 'func', on_click))
 	for i, subclass in temp-A(GetAuctionItemSubClasses(blizzard_query.class or 0)) do
-		UIDropDownMenu_AddButton(T('text', subclass, 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton(O('text', subclass, 'value', i, 'func', on_click))
 	end
 end
 
@@ -378,9 +378,9 @@ function initialize_slot_dropdown()
 		UIDropDownMenu_SetSelectedValue(slot_dropdown, this.value)
 		update_form()
 	end
-	UIDropDownMenu_AddButton(T('text', ALL, 'value', '', 'func', on_click))
+	UIDropDownMenu_AddButton(O('text', ALL, 'value', '', 'func', on_click))
 	for i, slot in temp-A(GetAuctionInvTypes(blizzard_query.class == 2 and 2 or 0, blizzard_query.subclass or 0)) do
-		UIDropDownMenu_AddButton(T('text', _G[slot], 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton(O('text', _G[slot], 'value', i, 'func', on_click))
 	end
 end
 
@@ -389,8 +389,8 @@ function initialize_quality_dropdown()
 		UIDropDownMenu_SetSelectedValue(quality_dropdown, this.value)
 		update_form()
 	end
-	UIDropDownMenu_AddButton(T('text', ALL, 'value', -1, 'func', on_click))
+	UIDropDownMenu_AddButton(O('text', ALL, 'value', -1, 'func', on_click))
 	for i = 0, 4 do
-		UIDropDownMenu_AddButton(T('text', _G['ITEM_QUALITY' .. i .. '_DESC'], 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton(O('text', _G['ITEM_QUALITY' .. i .. '_DESC'], 'value', i, 'func', on_click))
 	end
 end

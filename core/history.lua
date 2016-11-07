@@ -1,20 +1,20 @@
 module 'aux.core.history'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local persistence = require 'aux.util.persistence'
 
 local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'tuple', '@', {market_value='number'}, {time='number'}}}}}
 
-local value_cache = t
+local value_cache = T
 
 do
 	local cache
 	function get_data()
 		if not cache then
 			local dataset = persistence.dataset
-			cache = dataset.history or t
+			cache = dataset.history or T
 			dataset.history = cache
 		end
 		return cache
@@ -34,7 +34,7 @@ do
 end
 
 function get_new_record()
-	return T('next_push', next_push, 'data_points', t)
+	return O('next_push', next_push, 'data_points', T)
 end
 
 function read_record(item_key)
@@ -79,11 +79,11 @@ function M.value(item_key)
 		local item_record, value
 		item_record = read_record(item_key)
 		if getn(item_record.data_points) > 0 then
-			local total_weight, weighted_values = 0, tt
+			local total_weight, weighted_values = 0, temp-T
 			for _, data_point in item_record.data_points do
 				local weight = .99 ^ round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
 				total_weight = total_weight + weight
-				tinsert(weighted_values, T('value', data_point.market_value, 'weight', weight))
+				tinsert(weighted_values, O('value', data_point.market_value, 'weight', weight))
 			end
 			for _, weighted_value in weighted_values do
 				weighted_value.weight = weighted_value.weight / total_weight
@@ -92,7 +92,7 @@ function M.value(item_key)
 		else
 			value = calculate_market_value(item_record)
 		end
-		value_cache[item_key] = T('value', value, 'next_push', item_record.next_push)
+		value_cache[item_key] = O('value', value, 'next_push', item_record.next_push)
 	end
 	return value_cache[item_key].value
 end
@@ -118,7 +118,7 @@ end
 
 function push_record(item_record)
 	for market_value in present(calculate_market_value(item_record)) do
-		tinsert(item_record.data_points, 1, weak-T('market_value', market_value, 'time', item_record.next_push))
+		tinsert(item_record.data_points, 1, weak-O('market_value', market_value, 'time', item_record.next_push))
 		while getn(item_record.data_points) > 11 do
 			release(item_record.data_points[getn(item_record.data_points)])
 			tremove(item_record.data_points)

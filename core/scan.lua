@@ -1,6 +1,6 @@
 module 'aux.core.scan'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local info = require 'aux.util.info'
@@ -9,7 +9,7 @@ local history = require 'aux.core.history'
 local PAGE_SIZE = 50
 
 do
-	local scan_states = t
+	local scan_states = T
 
 	function M.start(params)
 		for old_state in present(scan_states[params.type]) do
@@ -25,7 +25,7 @@ do
 	end
 
 	function M.abort(scan_id)
-		local aborted = t
+		local aborted = T
 		for type, state in scan_states do
 			if not scan_id or state.id == scan_id then
 				kill_thread(state.id)
@@ -96,7 +96,7 @@ do
 		elseif state.params.type == 'owner' then
 			GetOwnerAuctionItems(state.page)
 		else
-			local blizzard_query = query.blizzard_query or t
+			local blizzard_query = query.blizzard_query or T
 			QueryAuctionItems(
 				blizzard_query.name,
 				blizzard_query.min_level,

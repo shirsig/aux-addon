@@ -1,6 +1,6 @@
 module 'aux.core.cache'
 
-include 'green_t'
+include 'green_T'
 include 'aux'
 
 local info = require 'aux.util.info'
@@ -12,12 +12,12 @@ local MAX_ITEM_ID = 30000
 local items_schema = {'tuple', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
 local merchant_buy_schema = {'tuple', '#', {unit_price='number'}, {limited='boolean'}}
 
-_G.aux_items = t
-_G.aux_item_ids = t
-_G.aux_auctionable_items = t
-_G.aux_merchant_buy = t
-_G.aux_merchant_sell = t
-_G.aux_characters = t
+_G.aux_items = T
+_G.aux_item_ids = T
+_G.aux_auctionable_items = T
+_G.aux_merchant_buy = T
+_G.aux_merchant_sell = T
+_G.aux_characters = T
 
 function LOAD()
 	scan_wdb()
@@ -87,7 +87,7 @@ function M.item_info(item_id)
 	local data_string = aux_items[item_id]
 	if data_string then
 		local cached_data = temp-persistence.read(items_schema, data_string)
-		return T(
+		return O(
 			'name', cached_data.name,
 			'itemstring', 'item:' .. item_id .. ':0:0:0',
 			'quality', cached_data.quality,
@@ -125,12 +125,12 @@ function merchant_buy_scan()
 					unit_price = min(buy_info.unit_price, new_unit_price)
 				end
 
-				aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, T(
+				aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, O(
 					'unit_price', unit_price,
 					'limited', buy_info.limited and new_limited
 				))
 			else
-				aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, T(
+				aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, O(
 					'unit_price', new_unit_price,
 					'limited', new_limited
 				))
@@ -161,7 +161,7 @@ function scan_wdb(item_id)
 		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 		if name and not aux_item_ids[strlower(name)] then
 			aux_item_ids[strlower(name)] = item_id
-			aux_items[item_id] = persistence.write(items_schema, T(
+			aux_items[item_id] = persistence.write(items_schema, O(
 				'name', name,
 				'quality', quality,
 				'level', level,
