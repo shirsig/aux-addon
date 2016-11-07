@@ -25,9 +25,9 @@ function M.read(schema, str)
     elseif schema == 'number' then
         return tonumber(str)
     elseif type(schema) == 'table' and schema[1] == 'list' then
-        return read_list(schema, str)
+        return weak-read_list(schema, str)
     elseif type(schema) == 'table' and schema[1] == 'tuple' then
-        return read_tuple(schema, str)
+        return weak-read_tuple(schema, str)
     else
         error('Invalid schema.', 2)
     end
@@ -61,7 +61,7 @@ end
 function write_list(schema, list)
     local separator = schema[2]
     local element_type = schema[3]
-    local parts = map(copy(list), function(element)
+    local parts = map(temp-copy(list), function(element)
         return write(element_type, element)
     end)
     return join(parts, separator)
@@ -70,7 +70,7 @@ end
 function read_tuple(schema, str)
     local separator = schema[2]
     local tuple = t
-    local parts = split(str, separator)
+    local parts = temp-split(str, separator)
     for i = 3, getn(schema) do
         local key, type = next(schema[i])
         tuple[key] = read(type, parts[i - 2])

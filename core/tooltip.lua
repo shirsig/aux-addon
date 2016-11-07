@@ -30,10 +30,10 @@ function LOAD()
 	        hook(name, GameTooltip, vararg-function(arg)
 	            inside_hook = true
 	            game_tooltip_money = 0
-	            local ret = temp-A(orig[GameTooltip][name](unpack(arg)))
+	            local tmp = A(orig[GameTooltip][name](unpack(arg)))
 	            inside_hook = false
 	            f(unpack(arg))
-	            return unpack(ret)
+	            return ret(tmp)
 	        end)
 	    end
 	    local orig = GameTooltip:GetScript('OnTooltipAddMoney')
@@ -48,13 +48,13 @@ function LOAD()
     local orig = SetItemRef
     setglobal('SetItemRef', vararg-function(arg)
         local name, _, quality = GetItemInfo(arg[1])
-        local ret = A(orig(unpack(arg)))
+        local tmp = A(orig(unpack(arg)))
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
             local color_code = select(4, GetItemQualityColor(quality))
             local link = color_code ..  '|H' .. arg[1] .. '|h[' .. name .. ']|h' .. FONT_COLOR_CODE_CLOSE
             extend_tooltip(ItemRefTooltip, link, 1)
         end
-        return ret
+        return ret(tmp)
     end)
 end
 
@@ -76,7 +76,7 @@ function extend_tooltip(tooltip, link, quantity)
     end
     local item_info = temp-info.item(item_id)
     if item_info then
-        local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
+        local distribution = temp-disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
         if getn(distribution) > 0 then
             if aux_tooltip_disenchant_distribution then
                 tooltip:AddLine('Disenchants into:', unpack(color.disenchant_distribution))
@@ -103,7 +103,7 @@ function extend_tooltip(tooltip, link, quantity)
             tooltip:AddLine('Vendor Sell: ' .. (price and money.to_string2(price * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), unpack(color.merchant))
         end
     end
-    local auctionable = not item_info or info.auctionable(info.tooltip('link', item_info.itemstring), item_info.quality)
+    local auctionable = not item_info or info.auctionable(temp-info.tooltip('link', item_info.itemstring), item_info.quality)
     local item_key = (item_id or 0) .. ':' .. (suffix_id or 0)
     local value = history.value(item_key)
     if auctionable then

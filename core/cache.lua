@@ -78,7 +78,7 @@ end
 function M.merchant_info(item_id)
 	local buy_info
 	if aux_merchant_buy[item_id] then
-		buy_info = persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
+		buy_info = temp-persistence.read(merchant_buy_schema, aux_merchant_buy[item_id])
 	end
 	return aux_merchant_sell[item_id], buy_info and buy_info.unit_price, buy_info and buy_info.limited
 end
@@ -86,7 +86,7 @@ end
 function M.item_info(item_id)
 	local data_string = aux_items[item_id]
 	if data_string then
-		local cached_data = persistence.read(items_schema, data_string)
+		local cached_data = temp-persistence.read(items_schema, data_string)
 		return T(
 			'name', cached_data.name,
 			'itemstring', 'item:' .. item_id .. ':0:0:0',

@@ -21,8 +21,7 @@ do
 		for t in is_auto_release do release(t) end
 		wipe(is_auto_release)
 	end)
-
-	local kek = 0
+	
 	function acquire()
 		if pool_size > 0 then
 			pool_size = pool_size - 1
@@ -33,8 +32,6 @@ do
 			overflow_pool[t] = nil
 			return t
 		end
-		kek = kek + 1
-		if mod(kek, 100) == 0 then p(kek, debugstack()) end
 		return {}
 	end
 	M.acquire = acquire

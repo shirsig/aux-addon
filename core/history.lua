@@ -38,7 +38,7 @@ function get_new_record()
 end
 
 function read_record(item_key)
-	local record = data[item_key] and persistence.read(history_schema, data[item_key]) or new_record
+	local record = temp-(data[item_key] and persistence.read(history_schema, data[item_key]) or new_record)
 	if record.next_push <= time() then
 		push_record(record)
 		write_record(item_key, record)
@@ -118,8 +118,9 @@ end
 
 function push_record(item_record)
 	for market_value in present(calculate_market_value(item_record)) do
-		tinsert(item_record.data_points, 1, T('market_value', market_value, 'time', item_record.next_push))
+		tinsert(item_record.data_points, 1, weak-T('market_value', market_value, 'time', item_record.next_push))
 		while getn(item_record.data_points) > 11 do
+			release(item_record.data_points[getn(item_record.data_points)])
 			tremove(item_record.data_points)
 		end
 	end
