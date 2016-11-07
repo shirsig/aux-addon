@@ -21,7 +21,7 @@ do
 		for t in is_auto_release do release(t) end
 		wipe(is_auto_release)
 	end)
-	
+
 	function acquire()
 		if pool_size > 0 then
 			pool_size = pool_size - 1
