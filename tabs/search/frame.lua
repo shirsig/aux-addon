@@ -294,7 +294,7 @@ do
         end
     end)
     editbox.change = update_form
-    editbox.enter = papply(editbox.ClearFocus, editbox)
+    editbox.enter = function() editbox:ClearFocus() end
     local label = gui.label(editbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
     label:SetText('Name')
@@ -322,7 +322,7 @@ do
             max_level_input:SetFocus()
         end
     end)
-    editbox.enter = papply(editbox.ClearFocus, editbox)
+    editbox.enter = function() editbox:ClearFocus() end
     editbox.change = function()
 	    local valid_level = valid_level(this:GetText())
 	    if tostring(valid_level) ~= this:GetText() then
@@ -348,7 +348,7 @@ do
             name_input:SetFocus()
         end
     end)
-    editbox.enter = papply(editbox.ClearFocus, editbox)
+    editbox.enter = function() editbox:ClearFocus() end
     editbox.change = function()
 	    local valid_level = valid_level(this:GetText())
 	    if tostring(valid_level) ~= this:GetText() then
@@ -531,9 +531,9 @@ for _ = 1, 5  do
     local table = auction_listing.CreateAuctionResultsTable(frame.results, auction_listing.search_config)
     table:SetHandler('OnCellClick', function(cell, button)
         if IsAltKeyDown() and current_search.table:GetSelection().record == cell.row.data.record then
-            if button == 'LeftButton' and buyout_button:IsEnabled() then
+            if button == 'LeftButton' then
                 buyout_button:Click()
-            elseif button == 'RightButton' and bid_button:IsEnabled() then
+            elseif button == 'RightButton' then
                 bid_button:Click()
             end
         end

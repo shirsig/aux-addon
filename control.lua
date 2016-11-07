@@ -83,19 +83,26 @@ function M.on_next_event(event, callback)
 	event_listener(event, function(kill) callback(); kill() end)
 end
 
-M.thread = vararg-function(arg)
-	local k = tremove(arg, 1)
-	local thread_id = unique_id
-	threads[thread_id] = T('k', papply(k, unpack(arg)))
-	return thread_id
-end
+do
+	local mt = {
+		__call = function(self)
+			auto_release(self, true)
+			return self.f(unpack(self))
+		end,
+	}
 
-M.wait = vararg-function(arg)
-	local k = tremove(arg, 1)
-	if type(k) == 'number' then
-		when(function() k = k - 1 return k <= 1 end, unpack(arg))
-	else
-		threads[thread_id].k = papply(k, unpack(arg))
+	M.thread = vararg-function(arg)
+		auto_release(arg, false)
+		arg.f = tremove(arg, 1)
+		local thread_id = unique_id
+		threads[thread_id] = T('k', setmetatable(arg, mt))
+		return thread_id
+	end
+
+	M.wait = vararg-function(arg)
+		auto_release(arg, false)
+		arg.f = tremove(arg, 1)
+		threads[thread_id].k = setmetatable(arg, mt)
 	end
 end
 

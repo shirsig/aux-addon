@@ -360,13 +360,6 @@ function M.execute(resume, real_time)
 	end
 end
 
-function test(record)
-	return function(index)
-		local auction_info = info.auction(index)
-		return auction_info and auction_info.search_signature == record.search_signature
-	end
-end
-
 do
 	local scan_id = 0
 	local IDLE, SEARCHING, FOUND = t, t, t
@@ -402,11 +395,11 @@ do
 
 				if not record.high_bidder then
 					bid_button:SetScript('OnClick', function()
-						if test(record)(index) and search.table:ContainsRecord(record) then
+						if scan_util.test(record, index) and search.table:ContainsRecord(record) then
 							place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
 								info.bid_update(record)
 								search.table:SetDatabase()
-							end or papply(search.table.RemoveAuctionRecord, search.table, record))
+							end or function() search.table:RemoveAuctionRecord(record) end)
 						end
 					end)
 					bid_button:Enable()
@@ -416,8 +409,8 @@ do
 
 				if record.buyout_price > 0 then
 					buyout_button:SetScript('OnClick', function()
-						if test(record)(index) and search.table:ContainsRecord(record) then
-							place_bid('list', index, record.buyout_price, papply(search.table.RemoveAuctionRecord, search.table, record))
+						if scan_util.test(record, index) and search.table:ContainsRecord(record) then
+							place_bid('list', index, record.buyout_price, function() search.table:RemoveAuctionRecord(record) end)
 						end
 					end)
 					buyout_button:Enable()
@@ -441,7 +434,7 @@ do
 			state = IDLE
 		elseif selection and state == IDLE then
 			find_auction(selection.record)
-		elseif state == FOUND and not test(selection.record)(found_index) then
+		elseif state == FOUND and not scan_util.test(selection.record, found_index) then
 			buyout_button:Disable()
 			bid_button:Disable()
 			if not bid_in_progress then

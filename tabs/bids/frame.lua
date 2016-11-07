@@ -18,9 +18,9 @@ listing:SetSort(1, 2, 3, 4, 5, 6, 7, 8)
 listing:Reset()
 listing:SetHandler('OnCellClick', function(cell, button)
     if IsAltKeyDown() and listing:GetSelection().record == cell.row.data.record then
-        if button == 'LeftButton' and buyout_button:IsEnabled() then
+        if button == 'LeftButton' then
             buyout_button:Click()
-        elseif button == 'RightButton' and bid_button:IsEnabled() then
+        elseif button == 'RightButton' then
             bid_button:Click()
         end
     end

@@ -80,16 +80,6 @@ do
 	end
 end
 
-M.papply = vararg-function(arg)
-	local f, arg1 = tremove(arg, 1), static-arg
-	return vararg-function(arg)
-		for i = 1, getn(arg) do
-			tinsert(arg1, arg[i])
-		end
-		return f(unpack(arg1))
-	end
-end
-
 M.index = vararg-function(arg)
 	local t = tremove(arg, 1)
 	for i = 1, getn(arg) do t = t and t[arg[i]] end return t
@@ -216,5 +206,10 @@ end
 
 function M.signal()
 	local params
-	return vararg-function(arg) params = static-arg end, function() return params end
+	return vararg-function(arg)
+		auto_release(arg, false)
+		params = arg
+	end, function()
+		return params
+	end
 end

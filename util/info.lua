@@ -46,10 +46,10 @@ function M.container_item(bag, slot)
     for link in present(GetContainerItemLink(bag, slot)) do
 
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
-        local item_info = item(item_id, suffix_id, unique_id, enchant_id)
+        local item_info = temp-item(item_id, suffix_id, unique_id, enchant_id)
 
         local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
-        local tooltip, tooltip_money = tooltip(function(tooltip) tooltip:SetBagItem(bag, slot) end)
+        local tooltip, tooltip_money = tooltip('bag', bag, slot)
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
         local aux_quantity = charges or count
@@ -77,7 +77,7 @@ function M.container_item(bag, slot)
             'readable', readable,
             'lootable', lootable,
 
-            'tooltip', tooltip,
+            'tooltip', weak-tooltip,
     	    'tooltip_money', tooltip_money,
             'max_charges', max_charges,
             'charges', charges,
@@ -104,12 +104,12 @@ function M.auction(index, query_type)
 
 	for link in present(GetAuctionItemLink(query_type, index)) do
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
-        local item_info = item(item_id, suffix_id, unique_id, enchant_id)
+        local item_info = temp-item(item_id, suffix_id, unique_id, enchant_id)
 
         local name, texture, count, quality, usable, level, start_price, min_increment, buyout_price, high_bid, high_bidder, owner, sale_status = GetAuctionItemInfo(query_type, index)
 
     	local duration = GetAuctionItemTimeLeft(query_type, index)
-        local tooltip, tooltip_money = tooltip(function(tooltip) tooltip:SetAuctionItem(query_type, index) end)
+        local tooltip, tooltip_money = tooltip('auction', query_type, index)
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
         local aux_quantity = charges or count
@@ -153,7 +153,7 @@ function M.auction(index, query_type)
             'duration', duration,
             'usable', usable,
 
-            'tooltip', tooltip,
+            'tooltip', weak-tooltip,
     	    'tooltip_money', tooltip_money,
             'max_charges', max_charges,
             'charges', charges,
@@ -182,13 +182,13 @@ function M.set_shopping_tooltip(slot)
     local index1, index2 = inventory_index(slot)
     local tooltips = tt
     if index1 then
-        local tooltip = tooltip(function(tooltip) tooltip:SetInventoryItem('player', index1) end)
+        local tooltip = tooltip('inventory', 'player', index1)
         if getn(tooltip) > 0 then
             tinsert(tooltips, tooltip)
         end
     end
     if index2 then
-        local tooltip = tooltip(function(tooltip) tooltip:SetInventoryItem('player', index2) end)
+        local tooltip = tooltip('inventory', 'player', index2)
         if getn(tooltip) > 0 then
             tinsert(tooltips, tooltip)
         end
@@ -271,20 +271,27 @@ function M.auctionable(tooltip, quality, lootable)
             and not (durability and durability < max_durability)
 end
 
-function M.tooltip(setter)
+function M.tooltip(setter, arg1, arg2)
     AuxTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
     AuxTooltip.money = 0
-    setter(AuxTooltip)
+    if setter == 'auction' then
+	    AuxTooltip:SetAuctionItem(arg1, arg2)
+    elseif setter == 'bag' then
+	    AuxTooltip:SetBagItem(arg1, arg2)
+    elseif setter == 'inventory' then
+	    AuxTooltip:SetInventoryItem(arg1, arg2)
+    elseif setter == 'link' then
+	    AuxTooltip:SetHyperlink(arg1)
+    end
     local tooltip = t
     for i = 1, AuxTooltip:NumLines() do
-        tinsert(tooltip, T(
+        tinsert(tooltip, weak-T(
             'left_text', _G['AuxTooltipTextLeft' .. i]:GetText(),
-            'left_color', A(_G['AuxTooltipTextLeft' .. i]:GetTextColor()),
+            'left_color', weak-A(_G['AuxTooltipTextLeft' .. i]:GetTextColor()),
             'right_text', _G['AuxTooltipTextRight' .. i]:IsVisible() and _G['AuxTooltipTextRight' .. i]:GetText(),
-            'right_color', A(_G['AuxTooltipTextRight' .. i]:GetTextColor())
+            'right_color', weak-A(_G['AuxTooltipTextRight' .. i]:GetTextColor())
         ))
     end
-
     return tooltip, AuxTooltip.money
 end
 

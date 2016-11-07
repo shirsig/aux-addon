@@ -10,6 +10,14 @@ local disenchant = require 'aux.core.disenchant'
 local history = require 'aux.core.history'
 local auction_listing = require 'aux.gui.auction_listing'
 
+local color = {
+	value = {1, 1, .6},
+	merchant = {.8, .5, .1},
+	disenchant_source = {.7, .7, .7},
+	disenchant_distribution = {.8, .8, .2},
+	disenchant_value = {.1, .6, .6},
+}
+
 _G.aux_tooltip_value = true
 
 local game_tooltip_hooks, game_tooltip_money = t, 0
@@ -19,7 +27,7 @@ function LOAD()
 		local inside_hook = false
 	    for name, f in game_tooltip_hooks do
 	        local name, f = name, f
-	        hook(name, GameTooltip, function(...) auto_release(arg, true)
+	        hook(name, GameTooltip, vararg-function(arg)
 	            inside_hook = true
 	            game_tooltip_money = 0
 	            local ret = temp-A(orig[GameTooltip][name](unpack(arg)))
@@ -29,7 +37,7 @@ function LOAD()
 	        end)
 	    end
 	    local orig = GameTooltip:GetScript('OnTooltipAddMoney')
-	    GameTooltip:SetScript('OnTooltipAddMoney', function(...) auto_release(arg, true)
+	    GameTooltip:SetScript('OnTooltipAddMoney', vararg-function(arg)
 		    if inside_hook then
 			    game_tooltip_money = arg1
 		    else
@@ -38,7 +46,7 @@ function LOAD()
 	    end)
     end
     local orig = SetItemRef
-    setglobal('SetItemRef', function(...) auto_release(arg, true)
+    setglobal('SetItemRef', vararg-function(arg)
         local name, _, quality = GetItemInfo(arg[1])
         local ret = A(orig(unpack(arg)))
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
@@ -54,64 +62,57 @@ function extend_tooltip(tooltip, link, quantity)
     local item_id, suffix_id = info.parse_link(link)
     quantity = IsShiftKeyDown() and quantity or 1
     if aux_tooltip_disenchant_source then
-        local color = {r=.7, g=.7, b=.7}
+        local color = color.disenchant_source
         local type, range = disenchant.source(item_id)
         if type == 'CRYSTAL' then
-            tooltip:AddLine(format('Can disenchant from level %s |cffa335eeEpic|r and |cff0070ddRare|r items.', range), color.r, color.g, color.b, true)
+            tooltip:AddLine(format('Can disenchant from level %s |cffa335eeEpic|r and |cff0070ddRare|r items.', range), color[1], color[2], color[3], true)
         elseif type == 'SHARD' then
-            tooltip:AddLine(format('Can disenchant from level %s |cff0070ddRare|r and |cff1eff00Uncommon|r items.', range), color.r, color.g, color.b, true)
+            tooltip:AddLine(format('Can disenchant from level %s |cff0070ddRare|r and |cff1eff00Uncommon|r items.', range), color[1], color[2], color[3], true)
         elseif type == 'ESSENCE' then
-            tooltip:AddLine(format('Can disenchant from level %s |cff1eff00Uncommon|r items.', range), color.r, color.g, color.b, true)
+            tooltip:AddLine(format('Can disenchant from level %s |cff1eff00Uncommon|r items.', range), color[1], color[2], color[3], true)
         elseif type == 'DUST' then
-            tooltip:AddLine(format('Can disenchant from level %s |cff1eff00Uncommon|r items.', range), color.r, color.g, color.b, true)
+            tooltip:AddLine(format('Can disenchant from level %s |cff1eff00Uncommon|r items.', range), color[1], color[2], color[3], true)
         end
     end
-    local item_info = info.item(item_id)
+    local item_info = temp-info.item(item_id)
     if item_info then
         local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
         if getn(distribution) > 0 then
             if aux_tooltip_disenchant_distribution then
-                local color = {r=.8, g=.8, b=.2}
-
-                tooltip:AddLine('Disenchants into:', color.r, color.g, color.b)
+                tooltip:AddLine('Disenchants into:', unpack(color.disenchant_distribution))
                 sort(distribution, function(a,b) return a.probability > b.probability end)
                 for _, event in distribution do
-                    tooltip:AddLine(format('  %s%% %s (%s-%s)', event.probability * 100, info.display_name(event.item_id, true) or 'item:' .. event.item_id, event.min_quantity, event.max_quantity), color.r, color.g, color.b)
+                    tooltip:AddLine(format('  %s%% %s (%s-%s)', event.probability * 100, info.display_name(event.item_id, true) or 'item:' .. event.item_id, event.min_quantity, event.max_quantity), unpack(color.disenchant_distribution))
                 end
             end
             if aux_tooltip_disenchant_value then
-                local color = {r=.1, g=.6, b=.6}
-
                 local disenchant_value = disenchant.value(item_info.slot, item_info.quality, item_info.level)
-                tooltip:AddLine('Disenchant Value: ' .. (disenchant_value and money.to_string2(disenchant_value) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+                tooltip:AddLine('Disenchant Value: ' .. (disenchant_value and money.to_string2(disenchant_value) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), unpack(color.disenchant_value))
             end
         end
     end
     if aux_tooltip_vendor_buy then
-        local color = {r=.8, g=.5, b=.1}
         local _, price, limited = cache.merchant_info(item_id)
         if price then
-            tooltip:AddLine('Vendor Buy ' .. (limited and '(limited): ' or ': ') .. money.to_string2(price * quantity), color.r, color.g, color.b)
+            tooltip:AddLine('Vendor Buy ' .. (limited and '(limited): ' or ': ') .. money.to_string2(price * quantity), unpack(color.merchant))
         end
     end
     if aux_tooltip_vendor_sell then
-        local color = {r=.8, g=.5, b=.1}
         local price = cache.merchant_info(item_id)
         if price ~= 0 then
-            tooltip:AddLine('Vendor Sell: ' .. (price and money.to_string2(price * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Vendor Sell: ' .. (price and money.to_string2(price * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), unpack(color.merchant))
         end
     end
-    local color = {r=1, g=1, b=.6}
-    local auctionable = not item_info or info.auctionable(info.tooltip(function(tooltip) tooltip:SetHyperlink(item_info.itemstring) end), item_info.quality)
+    local auctionable = not item_info or info.auctionable(info.tooltip('link', item_info.itemstring), item_info.quality)
     local item_key = (item_id or 0) .. ':' .. (suffix_id or 0)
     local value = history.value(item_key)
     if auctionable then
         if aux_tooltip_value then
-            tooltip:AddLine('Value: ' .. (value and money.to_string2(value * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Value: ' .. (value and money.to_string2(value * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), unpack(color.value))
         end
         if aux_tooltip_daily  then
             local market_value = history.market_value(item_key)
-            tooltip:AddLine('Today: ' .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. auction_listing.percentage_historical(round(market_value / value * 100)) .. ')' or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.r, color.g, color.b)
+            tooltip:AddLine('Today: ' .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. auction_listing.percentage_historical(round(market_value / value * 100)) .. ')' or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), unpack(color.value))
         end
     end
 

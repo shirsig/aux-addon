@@ -17,7 +17,7 @@ listing = auction_listing.CreateAuctionResultsTable(frame.listing, auction_listi
 listing:SetSort(1, 2, 3, 4, 5, 6, 7, 8)
 listing:Reset()
 listing:SetHandler('OnCellClick', function(cell, button)
-    if IsAltKeyDown() and listing:GetSelection().record == cell.row.data.record and cancel_button:IsEnabled() then
+    if IsAltKeyDown() and listing:GetSelection().record == cell.row.data.record then
         cancel_button:Click()
     end
 end)

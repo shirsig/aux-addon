@@ -241,8 +241,8 @@ do
 			end
 			for _, parser in temp-A(
 				temp-A('class', info.item_class_index),
-				temp-A('subclass', papply(info.item_subclass_index, index(self.class, 2) or 0)),
-				temp-A('slot', papply(info.item_slot_index, index(self.class, 2) == 2 and 2 or 0, index(self.subclass, 2) or 0)),
+				temp-A('subclass', vararg-function(arg) return info.item_subclass_index(index(self.class, 2) or 0, unpack(arg)) end),
+				temp-A('slot', vararg-function(arg) return info.item_slot_index(index(self.class, 2) == 2 and 2 or 0, index(self.subclass, 2) or 0, unpack(arg)) end),
 				temp-A('quality', info.item_quality_index)
 			) do
 				if not self[parser[1]] then

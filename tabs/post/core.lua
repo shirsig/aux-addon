@@ -146,13 +146,13 @@ function update_auction_listing()
 
             tinsert(auction_rows, T(
                 'cols', A(
-                    {value=auction_record.own and color.yellow(auction_record.count) or auction_record.count},
-                    {value=al.time_left(auction_record.duration)},
-                    {value=auction_record.stack_size == stack_size and color.yellow(auction_record.stack_size) or auction_record.stack_size},
-                    {value=money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color)},
-                    {value=historical_value and al.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'},
-                    {value=auction_record.unit_buyout_price > 0 and money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'},
-                    {value=auction_record.unit_buyout_price > 0 and historical_value and al.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---'}
+                    T('value', auction_record.own and color.yellow(auction_record.count) or auction_record.count),
+		            T('value', al.time_left(auction_record.duration)),
+		            T('value', auction_record.stack_size == stack_size and color.yellow(auction_record.stack_size) or auction_record.stack_size),
+		            T('value', money.to_string(auction_record.unit_blizzard_bid, true, nil, 3, bid_color)),
+		            T('value', historical_value and al.percentage_historical(round(auction_record.unit_blizzard_bid / historical_value * 100)) or '---'),
+		            T('value', auction_record.unit_buyout_price > 0 and money.to_string(auction_record.unit_buyout_price, true, nil, 3, buyout_color) or '---'),
+		            T('value', auction_record.unit_buyout_price > 0 and historical_value and al.percentage_historical(round(auction_record.unit_buyout_price / historical_value * 100)) or '---')
                 ),
                 'record', auction_record
             ))
@@ -343,14 +343,15 @@ function quantity_update(max_count)
 end
 
 function unit_vendor_price(item_key)
-    for slot in info.inventory do auto_release(slot, true)
-        local item_info = info.container_item(unpack(slot))
+    for slot in info.inventory do
+	    auto_release(slot, true)
+        local item_info = temp-info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
                 ClearCursor()
                 PickupContainerItem(unpack(slot))
                 ClickAuctionSellItemButton()
-                local auction_sell_item = info.auction_sell_item()
+                local auction_sell_item = temp-info.auction_sell_item()
                 ClearCursor()
                 ClickAuctionSellItemButton()
                 ClearCursor()
@@ -408,7 +409,7 @@ end
 function update_inventory_records()
     local auctionable_map = tt
     for slot in info.inventory do auto_release(slot, true)
-        for item_info in present(info.container_item(unpack(slot))) do
+        for item_info in present(temp-info.container_item(unpack(slot))) do
             local charge_class = item_info.charges or 0
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
                 if not auctionable_map[item_info.item_key] then

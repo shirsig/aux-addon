@@ -36,7 +36,7 @@ function LOAD()
 		end)
 
 		function set_aux_dropdown_style(dropdown)
-			DropDownList1Backdrop:SetBackdrop{}
+			DropDownList1Backdrop:SetBackdrop(empty)
 			aux_border:Show()
 			aux_background:Show()
 			DropDownList1:SetWidth(dropdown:GetWidth() * .9)
@@ -109,7 +109,8 @@ do
 		return orig()
 	end)
 	M.menu = vararg-function(arg)
-		structure = static-arg
+		auto_release(arg, false)
+		structure = arg
 		local x, y = GetCursorPosition()
 		menu:ClearAllPoints()
 		menu:SetPoint('BOTTOMLEFT', x + 75, y)
@@ -187,11 +188,13 @@ function M.button(parent, text_height)
     end
     button.default_Enable = button.Enable
     function button:Enable()
+	    if self:IsEnabled() == 1 then return end
         self:GetFontString():SetTextColor(color.text.enabled())
         return self:default_Enable()
     end
     button.default_Disable = button.Disable
     function button:Disable()
+	    if self:IsEnabled() == 0 then return end
         self:GetFontString():SetTextColor(color.text.disabled())
         return self:default_Disable()
     end

@@ -39,7 +39,7 @@ do
 	btn:SetPoint('BOTTOMRIGHT', -5, 5)
 	gui.set_size(btn, 60, 24)
 	btn:SetText('Close')
-	btn:SetScript('OnClick', papply(AuxFrame.Hide, AuxFrame))
+	btn:SetScript('OnClick', function() AuxFrame:Hide() end)
 	close_button = btn
 end
 do

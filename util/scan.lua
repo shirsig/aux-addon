@@ -7,18 +7,16 @@ local info = require 'aux.util.info'
 local filter_util = require 'aux.util.filter'
 local scan = require 'aux.core.scan'
 
+function M.test(record, index)
+	local auction_record = temp-info.auction(index, record.query_type)
+	return auction_record and auction_record.search_signature == record.search_signature
+end
+
 function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
-    local function test(index)
-        local auction_info = info.auction(index, auction_record.query_type)
-        return auction_info and auction_info.search_signature == auction_record.search_signature
-    end
-
-    local queries = t
-    tinsert(queries, t)
+    local queries = A(t)
 
     if auction_record.blizzard_query then
-
         local blizzard_query1 = copy(auction_record.blizzard_query)
         blizzard_query1.first_page = auction_record.page
         blizzard_query1.last_page = auction_record.page
@@ -48,13 +46,13 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
         on_start_query = function(query_index)
             status_bar:update_status((query_index - 1) / getn(queries), 0)
         end,
-        on_auction = function(auction_record)
-            if test(auction_record.index) then
+        on_auction = function(record)
+            if test(auction_record, record.index) then
                 found = true
                 scan.stop()
                 status_bar:update_status(1, 1)
                 status_bar:set_text('Auction found')
-                return on_success(auction_record.index)
+                return on_success(record.index)
             end
         end,
         on_abort = function()

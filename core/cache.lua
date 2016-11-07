@@ -171,7 +171,7 @@ function scan_wdb(item_id)
 				'max_stack', max_stack,
 				'texture', texture
 			))
-			local tooltip = info.tooltip(function(tooltip) tooltip:SetHyperlink(itemstring) end)
+			local tooltip = info.tooltip('link', itemstring)
 			if info.auctionable(tooltip, quality) then
 				tinsert(aux_auctionable_items, strlower(name))
 			end
@@ -181,7 +181,7 @@ function scan_wdb(item_id)
 	end
 
 	if item_id <= MAX_ITEM_ID then
-		thread(wait, 10, scan_wdb, item_id)
+		thread(when, later(.5), scan_wdb, item_id)
 	else
 		sort(aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 	end

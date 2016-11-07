@@ -8,36 +8,36 @@ local info = require 'aux.util.info'
 local state
 
 function stack_size(slot)
-    local container_item_info = info.container_item(unpack(slot))
+    local container_item_info = temp-info.container_item(unpack(slot))
     return container_item_info and container_item_info.count or 0
 end
 
 function charges(slot)
-    local container_item_info = info.container_item(unpack(slot))
+    local container_item_info = temp-info.container_item(unpack(slot))
 	return container_item_info and container_item_info.charges
 end
 
 function max_stack(slot)
-	local container_item_info = info.container_item(unpack(slot))
+	local container_item_info = temp-info.container_item(unpack(slot))
 	return container_item_info and container_item_info.max_stack
 end
 
 function locked(slot)
-	local container_item_info = info.container_item(unpack(slot))
+	local container_item_info = temp-info.container_item(unpack(slot))
 	return container_item_info and container_item_info.locked
 end
 
-function find_item_slot(papply)
+function find_item_slot(partial)
 	for slot in info.inventory do
-		if matching_item(slot, papply) and not eq(slot, state.target_slot) then
+		if matching_item(slot, partial) and not eq(slot, state.target_slot) then
 			return slot
 		end
 	end
 end
 
-function matching_item(slot, papply)
-	local item_info = info.container_item(unpack(slot))
-	return item_info and item_info.item_key == state.item_key and info.auctionable(item_info.tooltip) and (not papply or item_info.count < item_info.max_stack)
+function matching_item(slot, partial)
+	local item_info = temp-info.container_item(unpack(slot))
+	return item_info and item_info.item_key == state.item_key and info.auctionable(item_info.tooltip) and (not partial or item_info.count < item_info.max_stack)
 end
 
 function find_empty_slot()

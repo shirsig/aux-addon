@@ -143,6 +143,11 @@ local methods = {
     end,
 
     SetData = function(st, rowData)
+	    for _, row in st.rowData or empty do
+		    for _, col in row.cols do release(col) end
+		    release(row.cols)
+		    release(row)
+	    end
         st.rowData = rowData
         st.updateSort = true
         st:RefreshRows()

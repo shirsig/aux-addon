@@ -54,13 +54,6 @@ function M.scan_auctions()
     }
 end
 
-function test(record)
-    return function(index)
-        local auction_info = info.auction(index, 'owner')
-        return auction_info and auction_info.search_signature == record.search_signature
-    end
-end
-
 do
     local scan_id = 0
     local IDLE, SEARCHING, FOUND = t, t, t
@@ -82,8 +75,8 @@ do
                 found_index = index
 
                 cancel_button:SetScript('OnClick', function()
-                    if test(record)(index) and listing:ContainsRecord(record) then
-                        cancel_auction(index, papply(listing.RemoveAuctionRecord, listing, record))
+                    if scan_util.test(record, index) and listing:ContainsRecord(record) then
+                        cancel_auction(index, function() listing:RemoveAuctionRecord(record) end)
                     end
                 end)
                 cancel_button:Enable()
@@ -103,7 +96,7 @@ do
             state = IDLE
         elseif selection and state == IDLE then
             find_auction(selection.record)
-        elseif state == FOUND and not test(selection.record)(found_index) then
+        elseif state == FOUND and not scan_util.test(selection.record, found_index) then
             cancel_button:Disable()
             if not cancel_in_progress then state = IDLE end
         end
