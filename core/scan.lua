@@ -90,12 +90,12 @@ end
 
 do
 	local function submit()
-		state.last_query_time = GetTime()
 		if state.params.type == 'bidder' then
 			GetBidderAuctionItems(state.page)
 		elseif state.params.type == 'owner' then
 			GetOwnerAuctionItems(state.page)
 		else
+			state.last_list_query = GetTime()
 			local blizzard_query = query.blizzard_query or T
 			QueryAuctionItems(
 				blizzard_query.name,
@@ -156,57 +156,65 @@ function scan_page(i)
 end
 
 function wait_for_results()
-	local timeout = later(5, state.last_query_time)
-	local send_signal, signal_received = signal()
-	when(signal_received, function()
-        if timeout() then
-            return submit_query()
-        else
-            _,  state.total_auctions = GetNumAuctionItems(state.params.type)
-            do
-	            (state.params.on_page_loaded or nop)(
-		            state.page - (query.blizzard_query.first_page or 0) + 1,
-		            last_page(state.total_auctions) - (query.blizzard_query.first_page or 0) + 1,
-		            total_pages(state.total_auctions) - 1
-	            )
-            end
-            return scan_page()
-        end
-    end)
-
-    thread(when, timeout, send_signal)
-
     if state.params.type == 'bidder' then
-        return thread(when, function() return bids_loaded end, send_signal)
+        return when(function() return bids_loaded end, accept_results)
     elseif state.params.type == 'owner' then
-        return wait_for_owner_results(send_signal)
+        return wait_for_owner_results()
     elseif state.params.type == 'list' then
-        return wait_for_list_results(send_signal, signal_received, timeout)
+        return wait_for_list_results()
     end
 end
 
-function wait_for_owner_results(send_signal)
+function accept_results()
+	_,  state.total_auctions = GetNumAuctionItems(state.params.type)
+	do
+		(state.params.on_page_loaded or nop)(
+			state.page - (query.blizzard_query.first_page or 0) + 1,
+			last_page(state.total_auctions) - (query.blizzard_query.first_page or 0) + 1,
+			total_pages(state.total_auctions) - 1
+		)
+	end
+	return scan_page()
+end
+
+function wait_for_owner_results()
     if state.page == current_owner_page then
-        return send_signal()
+	    return accept_results()
     else
-        return on_next_event('AUCTION_OWNED_LIST_UPDATE', send_signal)
+	    local updated
+        on_next_event('AUCTION_OWNED_LIST_UPDATE', function() updated = true end)
+	    return when(function() return updated end, accept_results)
     end
 end
 
-function wait_for_list_results(send_signal, signal_received, timeout)
+function wait_for_list_results()
     local updated, last_update
-    event_listener('AUCTION_ITEM_LIST_UPDATE', function(kill)
-	    kill(signal_received())
+    local listener_id = event_listener('AUCTION_ITEM_LIST_UPDATE', function()
         last_update = GetTime()
         updated = true
     end)
+    local timeout = later(5, state.last_list_query)
     local ignore_owner = state.params.ignore_owner or aux_ignore_owner
-    return thread(when, function()
-        -- short circuiting order important, owner_data_complete must be called iif an update has happened.
-        local ok = updated and (ignore_owner or owner_data_complete() or timeout())
-        updated = false
-        return ok
-    end, send_signal)
+	return when(function()
+		if not last_update and timeout() then
+			return true
+		end
+		if last_update and GetTime() - last_update > 5 then
+			return true
+		end
+		-- short circuiting order important, owner_data_complete must be called iif an update has happened.
+		if updated and (ignore_owner or owner_data_complete()) then
+			return true
+		end
+		updated = false
+	end, function()
+		kill_listener(listener_id)
+		if not last_update and timeout() then
+			return submit_query()
+		else
+			return accept_results()
+		end
+	end)
 end
 
 function owner_data_complete()
