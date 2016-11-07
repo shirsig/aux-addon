@@ -48,9 +48,11 @@ end
 do
 	local mt = {__metatable=false, __newindex=nop}
 	function mt:__sub(table)
-		return setmetatable(T, O('__metatable', false, '__newindex', nop, '__index', table))
+		local proxy = setmetatable(T, O('__metatable', false, '__newindex', nop, '__index', table))
+		self[proxy] = table
+		return proxy
 	end
-	function M.wrapper()
+	function M.wrapper() -- TODO replace index function
 		return setmetatable(T, mt)
 	end
 end
