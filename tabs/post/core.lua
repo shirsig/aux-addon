@@ -130,20 +130,20 @@ function update_auction_listing()
 
             local bid_color
             if blizzard_bid_undercut < unit_start_price and stack_blizzard_bid_undercut < unit_start_price then
-                bid_color = inline_color.red
+                bid_color = color.red
             elseif blizzard_bid_undercut < unit_start_price then
-                bid_color = inline_color.orange
+                bid_color = color.orange
             elseif stack_blizzard_bid_undercut < unit_start_price then
-                bid_color = inline_color.yellow
+                bid_color = color.yellow
             end
 
             local buyout_color
             if buyout_price_undercut < unit_buyout_price and stack_buyout_price_undercut < unit_buyout_price then
-                buyout_color = inline_color.red
+                buyout_color = color.red
             elseif buyout_price_undercut < unit_buyout_price then
-                buyout_color = inline_color.orange
+                buyout_color = color.orange
             elseif stack_buyout_price_undercut < unit_buyout_price then
-                buyout_color = inline_color.yellow
+                buyout_color = color.yellow
             end
 
             tinsert(auction_rows, O(
@@ -301,8 +301,10 @@ function update_item_configuration()
 
         item.texture:SetTexture(selected_item.texture)
         item.name:SetText('[' .. selected_item.name .. ']')
-        local color = ITEM_QUALITY_COLORS[selected_item.quality]
-        item.name:SetTextColor(color.r, color.g, color.b)
+		do
+	        local color = ITEM_QUALITY_COLORS[selected_item.quality]
+	        item.name:SetTextColor(color.r, color.g, color.b)
+        end
 		if selected_item.aux_quantity > 1 then
             item.count:SetText(selected_item.aux_quantity)
 		else
@@ -316,7 +318,7 @@ function update_item_configuration()
             local deposit_factor = neutral_faction() and .25 or .05
             local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
-            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, nil, inline_color.text.enabled))
+            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, nil, color.text.enabled))
         end
 
         refresh_button:Enable()

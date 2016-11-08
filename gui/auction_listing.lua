@@ -17,11 +17,11 @@ local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
 
 local AUCTION_PCT_COLORS = {
-    {color=inline_color.blue, value=50},
-    {color=inline_color.green, value=80},
-    {color=inline_color.yellow, value=110},
-    {color=inline_color.orange, value=135},
-    {color=inline_color.red, value=huge},
+    {color=color.blue, value=50},
+    {color=color.green, value=80},
+    {color=color.yellow, value=110},
+    {color=color.orange, value=135},
+    {color=color.red, value=huge},
 }
 
 local TIME_LEFT_STRINGS = {
@@ -168,9 +168,9 @@ M.search_config = {
         fill = function(cell, record)
             local color
             if record.high_bidder then
-                color = inline_color.green
+                color = color.green
             elseif record.high_bid ~= 0 then
-                color = inline_color.orange
+                color = color.orange
             end
             local price
             if record.high_bidder then
@@ -270,7 +270,7 @@ M.auctions_config = {
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and inline_color.link .. count .. FONT_COLOR_CODE_CLOSE or count
+            local numAuctionsText = expandable and color.link(count) or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -404,7 +404,7 @@ M.bids_config = {
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and inline_color.link .. count .. FONT_COLOR_CODE_CLOSE or count
+            local numAuctionsText = expandable and color.link(count) or count
             cell:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -549,7 +549,7 @@ function percentage_color(pct)
 end
 
 function M.percentage_historical(pct, bid)
-    return (bid and inline_color.gray or percentage_color(pct)) .. (pct > 10000 and '>10000' or pct) .. '%' .. FONT_COLOR_CODE_CLOSE
+    return (bid and color.gray or percentage_color(pct)) .. (pct > 10000 and '>10000' or pct) .. '%' .. FONT_COLOR_CODE_CLOSE
 end
 
 function M.time_left(code)

@@ -473,7 +473,7 @@ function prettified_filter_string(filter)
 		            prettified.append(info.display_name(cache.item_id(parameter)) or color.label.enabled('[' .. parameter .. ']'))
 	            else
 		            if filters[component[2]].input_type == 'money' then
-			            prettified.append(money.to_string(money.from_string(parameter), nil, true, nil, inline_color.label.enabled))
+			            prettified.append(money.to_string(money.from_string(parameter), nil, true, nil, color.label.enabled))
 		            else
 			            prettified.append(color.label.enabled(parameter))
 		            end

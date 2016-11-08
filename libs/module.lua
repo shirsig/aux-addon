@@ -11,9 +11,12 @@ function define(self, k, v, private)
 	if type(k) ~= 'string' or not strfind(k, '^[_%a][_%w]*') then error('Invalid identifier "%s".', k) end
 	local _, _, prefix, suffix = strfind(k, '^(.?.?.?.?)([_%a].*)')
 	local module = loaded[self]
-	module.defined[k] = module.defined[k] and error('Duplicate identifier "%s".', k) or true
-	module.fields[k] = v
-	if prefix == 'get_' then module.accessors[suffix] = v elseif prefix == 'set_' then module.mutators[suffix] = v end
+	local signature = (private and '-' or '+') .. k
+	module.defined[signature] = module.defined[signature] and error('Duplicate identifier "%s".', signature) or true
+	if private or not module.defined['-' .. k] then
+		module.fields[k] = v
+		if prefix == 'get_' then module.accessors[suffix] = v elseif prefix == 'set_' then module.mutators[suffix] = v end
+	end
 	if not private then
 		module.public_fields[k] = v
 		if prefix == 'get_' then module.public_accessors[suffix] = v elseif prefix == 'set_' then module.public_mutators[suffix] = v end

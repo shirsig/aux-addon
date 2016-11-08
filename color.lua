@@ -1,61 +1,40 @@
 module 'aux'
 
-local COLORS = {
-	text = {enabled = {255, 254, 250, 1}, disabled = {147, 151, 139, 1}},
-	label = {enabled = {216, 225, 211, 1}, disabled = {150, 148, 140, 1}},
-	link = {153, 255, 255, 1},
-	window = {background = {24, 24, 24, .93}, border = {30, 30, 30, 1}},
-	panel = {background = {24, 24, 24, 1}, border = {255, 255, 255, .03}},
-	content = {background = {42, 42, 42, 1}, border = {0, 0, 0, 0}},
-	state = {enabled = {70, 140, 70, 1}, disabled = {140, 70, 70, 1}},
-
-	blue = {41, 146, 255, 1},
-	green = {22, 255, 22, 1},
-	yellow = {255, 255, 0, 1},
-	orange = {255, 146, 24, 1},
-	red = {255, 0, 0, 1},
-	gray = {187, 187, 187, 1},
-
-	blizzard = {0, 180, 255, 1},
-	aux = {255, 255, 154, 1},
-}
-
-do
-	local function index_handler(self, key)
-		self.private.table = self.private.table[key]
-		if getn(self.private.table) == 0 then
-			return self.public
+function C(r, g, b, a)
+	local mt = O('__metatable', false, '__newindex', nop, 'color', A(r, g, b, a))
+	function mt:__call(text)
+		local r, g, b, a = unpack(mt.color)
+		if text then
+			return format('|c%02X%02X%02X%02X', a, r, g, b) .. text .. FONT_COLOR_CODE_CLOSE
 		else
-			local color = copy(self.private.table)
-			self.private.table = COLORS
-			return self.private.callback(color)
+			return r/255, g/255, b/255, a
 		end
 	end
-	function color_accessor(callback)
-		return function()
-			return index_function({callback=callback, table=COLORS}, index_handler)
-		end
+	function mt:__concat(text)
+		local r, g, b, a = unpack(mt.color)
+		return format('|c%02X%02X%02X%02X', a, r, g, b) .. text
 	end
+	return setmetatable(T, mt)
 end
 
-do
-	local mt = {
-		__call = function(self, text)
-			local r, g, b, a = unpack(self)
-			if text then
-				return format('|c%02X%02X%02X%02X', a, r*255, g*255, b*255) .. text .. FONT_COLOR_CODE_CLOSE
-			else
-				return r, g, b, a
-			end
-		end
-	}
-	M.get_color = color_accessor(function(color)
-		local r, g, b, a = unpack(color)
-		return setmetatable(A(r/255, g/255, b/255, a), mt)
-	end)
-end
+W = wrapper
 
-M.get_inline_color = color_accessor(function(color)
-	local r, g, b, a = unpack(color)
-	return format('|c%02X%02X%02X%02X', a, r, g, b)
-end)
+M.color = W-{
+	text = W-{enabled = C(255, 254, 250, 1), disabled = C(147, 151, 139, 1)},
+	label = W-{enabled = C(216, 225, 211, 1), disabled = C(150, 148, 140, 1)},
+	link = C(153, 255, 255, 1),
+	window = W-{background = C(24, 24, 24, .93), border = C(30, 30, 30, 1)},
+	panel = W-{background = C(24, 24, 24, 1), border = C(255, 255, 255, .03)},
+	content = W-{background = C(42, 42, 42, 1), border = C(0, 0, 0, 0)},
+	state = W-{enabled = C(70, 140, 70, 1), disabled = C(140, 70, 70, 1)},
+
+	blue = C(41, 146, 255, 1),
+	green = C(22, 255, 22, 1),
+	yellow = C(255, 255, 0, 1),
+	orange = C(255, 146, 24, 1),
+	red = C(255, 0, 0, 1),
+	gray = C(187, 187, 187, 1),
+
+	blizzard = C(0, 180, 255, 1),
+	aux = C(255, 255, 154, 1),
+}

@@ -90,7 +90,7 @@ function M.value(item_key)
 			end
 			value = weighted_median(weighted_values)
 		else
-			value = calculate_market_value(item_record)
+			value = market_value(item_record)
 		end
 		value_cache[item_key] = O('value', value, 'next_push', item_record.next_push)
 	end
@@ -98,10 +98,10 @@ function M.value(item_key)
 end
 
 function M.market_value(item_key)
-	return calculate_market_value(read_record(item_key))
+	return market_value(read_record(item_key))
 end
 
-function calculate_market_value(item_record)
+function market_value(item_record)
 	return item_record.daily_min_buyout and min(ceil(item_record.daily_min_buyout * 1.15), item_record.daily_max_price)
 end
 
@@ -117,7 +117,7 @@ function weighted_median(list)
 end
 
 function push_record(item_record)
-	for market_value in present(calculate_market_value(item_record)) do
+	for market_value in present(market_value(item_record)) do
 		tinsert(item_record.data_points, 1, weak-O('market_value', market_value, 'time', item_record.next_push))
 		while getn(item_record.data_points) > 11 do
 			release(item_record.data_points[getn(item_record.data_points)])

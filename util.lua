@@ -1,58 +1,13 @@
 module 'aux'
 
 do
-	local classes, constructors, interfaces, objects = {}, {}, {}, setmetatable({}, {__mode='k'})
-	local private_mt = {__metatable=false}
-	function private_mt:__newindex(k, v)
-		classes[self][k] = v
-	end
-	local public_mt = {__metatable=false}
-	function public_mt:__newindex(k, v)
-		classes[self][k] = v
-		interfaces[self][k] = function(self, ...)
-			return classes[self][k](objects[self], unpack(arg))
-		end
-	end
-	local proxy_mt = {__metatable=false, __newindex=nop}
-	function proxy_mt:__call()
-		local object = setmetatable({}, {__metatable=false, __newindex=nop, __index=interfaces[self]})
-		classes[object] = classes[self]
-		objects[object] = setmetatable({}, {__index=classes[self]})
-		constructors[self](objects[object])
-		return object
-	end
-	function M.class()
-		local class, interface = {}, {}
-		local private, public, proxy = setmetatable({}, private_mt), setmetatable({}, public_mt), setmetatable({}, proxy_mt)
-		classes[private], classes[public], classes[proxy] = class, class, class
-		interfaces[public], interfaces[proxy] = interface, interface
-		return private, public, function(constructor)
-			constructors[proxy] = constructor or nop
-			return proxy
-		end
-	end
-end
-
-do
-	local _state = setmetatable({}, {__mode='kv'})
-	local __index = function(self, k)
-		return _state[self].handler({public=self, private=_state[self].state}, k)
-	end
-	function M.index_function(state, handler) -- TODO rename table-accessor, use predicate to stop
-		local state, self = {handler=handler, state=state}, T
-		_state[self] = state
-		return setmetatable(self, {__metatable=false, __index=__index, state=state})
-	end
-end
-
-do
-	local mt = {__metatable=false, __newindex=nop}
+	local mt = {__metatable=false, __newindex=nop, __mode='k'}
 	function mt:__sub(table)
 		local proxy = setmetatable(T, O('__metatable', false, '__newindex', nop, '__index', table))
 		self[proxy] = table
 		return proxy
 	end
-	function M.wrapper() -- TODO replace index function
+	function M.get_wrapper()
 		return setmetatable(T, mt)
 	end
 end
