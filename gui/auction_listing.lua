@@ -919,7 +919,7 @@ local methods = {
     end,
 
     SetSort = function(self, ...)
-	    auto_release(arg, true)
+	    temp(arg)
         for k = 1, arg.n do
             for i, sort in self.sorts do
                 if sort.index == abs(arg[k]) then

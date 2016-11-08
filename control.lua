@@ -86,13 +86,13 @@ end
 do
 	local mt = {
 		__call = function(self)
-			auto_release(self, true)
+			temp(self)
 			return self.f(unpack(self))
 		end,
 	}
 
 	M.thread = vararg-function(arg)
-		auto_release(arg, false)
+		static(arg)
 		arg.f = tremove(arg, 1)
 		local thread_id = unique_id
 		threads[thread_id] = O('k', setmetatable(arg, mt))
@@ -100,7 +100,7 @@ do
 	end
 
 	M.wait = vararg-function(arg)
-		auto_release(arg, false)
+		static(arg)
 		arg.f = tremove(arg, 1)
 		threads[thread_id].k = setmetatable(arg, mt)
 	end

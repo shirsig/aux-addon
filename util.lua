@@ -174,7 +174,7 @@ end
 function M.signal()
 	local params
 	return vararg-function(arg)
-		auto_release(arg, false)
+		static(arg)
 		params = arg
 	end, function()
 		return params

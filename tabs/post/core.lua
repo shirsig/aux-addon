@@ -348,7 +348,7 @@ end
 
 function unit_vendor_price(item_key)
     for slot in info.inventory do
-	    auto_release(slot, true)
+	    temp(slot)
         local item_info = temp-info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
@@ -412,7 +412,8 @@ end
 
 function update_inventory_records()
     local auctionable_map = temp-T
-    for slot in info.inventory do auto_release(slot, true)
+    for slot in info.inventory do
+	    temp(slot)
         for item_info in present(temp-info.container_item(unpack(slot))) do
             local charge_class = item_info.charges or 0
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then

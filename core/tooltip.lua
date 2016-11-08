@@ -209,7 +209,8 @@ end
 function game_tooltip_hooks:SetAuctionSellItem()
     local name, _, quantity = GetAuctionSellItemInfo()
     if name then
-        for slot in info.inventory do auto_release(slot, true)
+        for slot in info.inventory do
+	        temp(slot)
             local link = GetContainerItemLink(unpack(slot))
             if link and select(5, info.parse_link(link)) == name then
                 extend_tooltip(GameTooltip, link, quantity)

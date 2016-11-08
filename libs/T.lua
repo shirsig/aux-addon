@@ -1,79 +1,71 @@
 library 'T'
 
-local next, getn, setn, tremove, type, setmetatable = next, getn, table.setn, tremove, type, setmetatable
+local next, getn, setn, tremove, setmetatable = next, getn, table.setn, tremove, setmetatable
 
-local wipe, acquire, release, auto_release, dep_release
+local wipe, acquire, release
+local pool, pool_size, overflow_pool, auto_release, dep_release = {}, 0, setmetatable({}, {__mode='k'}), {}, setmetatable({}, {__mode='k'})
+
+function wipe(t)
+	setmetatable(t, nil)
+	for k, v in t do
+		if dep_release[v] then release(v) end
+		t[k] = nil
+	end
+	t.reset, t.reset = nil, 1
+	setn(t, 0)
+end
+M.wipe = wipe
+
+CreateFrame'Frame':SetScript('OnUpdate', function()
+	for t in auto_release do release(t) end
+	wipe(auto_release)
+end)
+
+function acquire()
+	if pool_size > 0 then
+		pool_size = pool_size - 1
+		return pool[pool_size + 1]
+	end
+	local t = next(overflow_pool)
+	if t then
+		overflow_pool[t] = nil
+		return t
+	end
+	return {}
+end
+M.acquire = acquire
+
+function release(t)
+	wipe(t)
+	auto_release[t] = nil
+	dep_release[t] = nil
+	if pool_size < 50 then
+		pool_size = pool_size + 1
+		pool[pool_size] = t
+	else
+		overflow_pool[t] = true
+	end
+end
+M.release = release
+
 do
-	local pool, pool_size, overflow_pool, is_auto_release, is_dep_release = {}, 0, setmetatable({}, {__mode='k'}), {}, setmetatable({}, {__mode='k'})
-
-	function wipe(t)
-		setmetatable(t, nil)
-		for k, v in t do
-			if is_dep_release[v] then release(v) end
-			t[k] = nil
-		end
-		t.reset, t.reset = nil, 1
-		setn(t, 0)
-	end
-	M.wipe = wipe
-
-	CreateFrame'Frame':SetScript('OnUpdate', function()
-		for t in is_auto_release do release(t) end
-		wipe(is_auto_release)
-	end)
-
-	function acquire()
-		if pool_size > 0 then
-			pool_size = pool_size - 1
-			return pool[pool_size + 1]
-		end
-		local t = next(overflow_pool)
-		if t then
-			overflow_pool[t] = nil
-			return t
-		end
-		return {}
-	end
-	M.acquire = acquire
-
-	function release(t)
-		wipe(t)
-		is_auto_release[t] = nil
-		is_dep_release[t] = nil
-		if pool_size < 50 then
-			pool_size = pool_size + 1
-			pool[pool_size] = t
-		else
-			overflow_pool[t] = true
-		end
-	end
-	M.release = release
-
-	function auto_release(v, enable)
-		if type(v) ~= 'table' then return end
-		is_auto_release[v] = enable and true or nil
-	end
-	M.auto_release = auto_release
-
-	function dep_release(v, enable)
-		if type(v) ~= 'table' then return end
-		is_dep_release[v] = enable and true or nil
-	end
-	M.dep_release = dep_release
+	local function f(_, v) if v then auto_release[v] = true; return v end end
+	M.temp = setmetatable({}, {__metatable=false, __newindex=nop, __call=f, __sub=f})
+end
+do
+	local function f(_, v) if v then auto_release[v] = nil; return v end end
+	M.static = setmetatable({}, {__metatable=false, __newindex=nop, __call=f, __sub=f})
+end
+do
+	local function f(_, v) if v then dep_release[v] = true; return v end end
+	M.weak = setmetatable({}, {__metatable=false, __newindex=nop, __call=f, __sub=f})
+end
+do
+	local function f(_, v) if v then dep_release[v] = nil; return v end end
+	M.strong = setmetatable({}, {__metatable=false, __newindex=nop, __call=f, __sub=f})
 end
 
 M.get_T = acquire
-
-M.temp = setmetatable({}, {
-	__metatable = false,
-	__newindex = nop,
-	__sub = function(_, v) auto_release(v, true); return v end,
-})
-M.weak = setmetatable({}, {
-	__metatable = false,
-	__newindex = nop,
-	__sub = function(_, v) dep_release(v, true); return v end,
-})
 
 do
 	local function ret(t)
@@ -111,7 +103,7 @@ do
 	code = code .. [[
 		until true
 		local t = acquire()
-		auto_release(t, true)
+		auto_release[t] = true
 		setn(t, n)
 		repeat
 	]]
@@ -136,7 +128,7 @@ do
 end
 
 M.A = vararg(function(arg)
-	auto_release(arg, false)
+	auto_release[arg] = nil
 	return arg
 end)
 M.S = vararg(function(arg)
