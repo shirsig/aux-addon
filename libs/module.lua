@@ -52,7 +52,7 @@ function create_module(name)
 	setmetatable(environment, proxy_mt(fields, mutators))
 	setmetatable(interface, proxy_mt(public_fields, public_mutators))
 	P = {
-		defined = {_M=true, _G=true, include=true, error=true, nop=true, id=true, M=true, set__=true, require=true},
+		defined = {['-_M']=true, ['-_G']=true, ['-include']=true, ['-error']=true, ['-nop']=true, ['-id']=true, ['-M']=true, ['-set__']=true, ['-require']=true},
 		fields = fields, accessors = accessors, mutators = mutators,
 		public_fields = public_fields, public_accessors = public_accessors, public_mutators = public_mutators,
 	}
