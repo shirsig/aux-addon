@@ -166,11 +166,11 @@ M.search_config = {
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
-            local color
+            local price_color
             if record.high_bidder then
-                color = color.green
+	            price_color = color.green
             elseif record.high_bid ~= 0 then
-                color = color.orange
+	            price_color = color.orange
             end
             local price
             if record.high_bidder then
@@ -178,7 +178,7 @@ M.search_config = {
             else
                 price = aux_price_per_unit and ceil(record.unit_bid_price) or record.bid_price
             end
-            cell:SetText(money.to_string(price, true, false, nil, color))
+            cell:SetText(money.to_string(price, true, false, nil, price_color))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a

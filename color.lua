@@ -28,6 +28,16 @@ M.color = W-{
 	content = W-{background = C(42, 42, 42, 1), border = C(0, 0, 0, 0)},
 	state = W-{enabled = C(70, 140, 70, 1), disabled = C(140, 70, 70, 1)},
 
+	tooltip = W-{
+		value = C(255, 255, 154, 1),
+		merchant = C(204, 127, 25, 1),
+		disenchant = W-{
+			value = C(25, 153, 153, 1),
+			distribution = C(204, 204, 51, 1),
+			source = C(178, 178, 178, 1),
+		}
+	},
+
 	blue = C(41, 146, 255, 1),
 	green = C(22, 255, 22, 1),
 	yellow = C(255, 255, 0, 1),
@@ -36,5 +46,4 @@ M.color = W-{
 	gray = C(187, 187, 187, 1),
 
 	blizzard = C(0, 180, 255, 1),
-	aux = C(255, 255, 154, 1),
 }
