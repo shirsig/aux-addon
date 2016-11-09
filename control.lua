@@ -57,13 +57,15 @@ do
 end
 
 function M.kill_listener(listener_id)
-	for listener in present(listeners[listener_id]) do
+	local listener = listeners[listener_id]
+	if listener then
 		listener.killed = true
 	end
 end
 
 function M.kill_thread(thread_id)
-	for thread in present(threads[thread_id]) do
+	local thread = threads[thread_id]
+	if thread then
 		thread.killed = true
 	end
 end

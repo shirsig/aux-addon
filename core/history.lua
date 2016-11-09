@@ -108,7 +108,7 @@ end
 function weighted_median(list)
 	sort(list, function(a,b) return a.value < b.value end)
 	local weight = 0
-	for _, element in list do
+	for _, element in ipairs(list) do
 		weight = weight + element.weight
 		if weight >= .5 then
 			return element.value
@@ -117,7 +117,8 @@ function weighted_median(list)
 end
 
 function push_record(item_record)
-	for market_value in present(market_value(item_record)) do
+	local market_value = market_value(item_record)
+	if market_value then
 		tinsert(item_record.data_points, 1, weak-O('market_value', market_value, 'time', item_record.next_push))
 		while getn(item_record.data_points) > 11 do
 			release(item_record.data_points[getn(item_record.data_points)])

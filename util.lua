@@ -34,19 +34,6 @@ function M.replicate(count, value)
 	if count > 0 then return value, replicate(count - 1, value) end
 end
 
-do
-	local state
-	local function f()
-		local temp = state
-		state = nil
-		return temp
-	end
-	function M.present(v)
-		state = v
-		return f
-	end
-end
-
 M.index = vararg-function(arg)
 	local t = tremove(arg, 1)
 	for i = 1, getn(arg) do t = t and t[arg[i]] end return t

@@ -73,7 +73,8 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
 end
 
 function M.item_query(item_id, first_page, last_page)
-    for item_info in present(info.item(item_id)) do
+	local item_info = info.item(item_id)
+    if item_info then
         local query = filter_util.query(item_info.name .. '/exact')
         query.blizzard_query.first_page = first_page
         query.blizzard_query.last_page = last_page

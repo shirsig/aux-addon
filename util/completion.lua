@@ -18,7 +18,7 @@ function M:complete_filter()
 	local start_index, _, current_modifier = strfind(filter_string, '([^/;]*)$')
 	current_modifier = current_modifier or ''
 
-	for _, suggestion in suggestions do
+	for _, suggestion in ipairs(suggestions) do
 		if strsub(strupper(suggestion), 1, strlen(current_modifier)) == strupper(current_modifier) then
 			this:SetText(strlower(strsub(filter_string, 1, start_index - 1) ..  suggestion))
 			this:HighlightText(strlen(filter_string), -1)
@@ -35,7 +35,7 @@ function M.complete(options)
 
 		local text = self:GetText()
 
-		for _, item_name in options() do
+		for _, item_name in ipairs(options()) do
 			if strsub(strupper(item_name), 1, strlen(text)) == strupper(text) then
 				self:SetText(strlower(item_name))
 				self:HighlightText(strlen(text), -1)

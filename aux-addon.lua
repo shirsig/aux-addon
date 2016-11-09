@@ -83,7 +83,8 @@ function SetItemRef(...)
 	if arg[3] ~= 'RightButton' or not index(active_tab, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
-	for item_info in present(info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))) do
+	local item_info = info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))
+	if item_info then
 		return active_tab.CLICK_LINK(item_info)
 	end
 end
@@ -93,7 +94,8 @@ function UseContainerItem(...)
 	if modified or not index(active_tab, 'USE_ITEM') then
 		return orig.UseContainerItem(unpack(arg))
 	end
-	for item_info in present(info.container_item(arg[1], arg[2])) do
+	local item_info = info.container_item(arg[1], arg[2])
+	if item_info then
 		return active_tab.USE_ITEM(item_info)
 	end
 end

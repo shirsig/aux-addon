@@ -124,38 +124,44 @@ function game_tooltip_hooks:SetHyperlink(itemstring)
 end
 
 function game_tooltip_hooks:SetAuctionItem(type, index)
-    for link in present(GetAuctionItemLink(type, index)) do
+	local link = GetAuctionItemLink(type, index)
+    if link then
         extend_tooltip(GameTooltip, link, select(3, GetAuctionItemInfo(type, index)))
     end
 end
 
 function game_tooltip_hooks:SetLootItem(slot)
-    for link in present(GetLootSlotLink(slot)) do
+	local link = GetLootSlotLink(slot)
+    if link then
         extend_tooltip(GameTooltip, link, select(3, GetLootSlotInfo(slot)))
     end
 end
 
 function game_tooltip_hooks:SetQuestItem(qtype, slot)
-    for link in present(GetQuestItemLink(qtype, slot)) do
+	local link = GetQuestItemLink(qtype, slot)
+    if link then
         extend_tooltip(GameTooltip, link, select(3, GetQuestItemInfo(qtype, slot)))
     end
 end
 
 function game_tooltip_hooks:SetQuestLogItem(qtype, slot)
-    for link in present(GetQuestLogItemLink(qtype, slot)) do
+	local link = GetQuestLogItemLink(qtype, slot)
+    if link then
         extend_tooltip(GameTooltip, link, select(3, GetQuestLogRewardInfo(slot)))
     end
 end
 
 function game_tooltip_hooks:SetBagItem(bag, slot)
-    for link in present(GetContainerItemLink(bag, slot)) do
+	local link = GetContainerItemLink(bag, slot)
+    if link then
         extend_tooltip(GameTooltip, link, select(2, GetContainerItemInfo(bag, slot)))
     end
 end
 
 function game_tooltip_hooks:SetInboxItem(index)
     local name, _, quantity = GetInboxItem(index)
-    for id in present(name and cache.item_id(name)) do
+    local id = name and cache.item_id(name)
+    if id then
         local _, itemstring, quality = GetItemInfo(id)
         local hex = select(4, GetItemQualityColor(tonumber(quality)))
         local link = hex ..  '|H' .. itemstring .. '|h[' .. name .. ']|h' .. FONT_COLOR_CODE_CLOSE
@@ -164,13 +170,15 @@ function game_tooltip_hooks:SetInboxItem(index)
 end
 
 function game_tooltip_hooks:SetInventoryItem(unit, slot)
-    for link in present(GetInventoryItemLink(unit, slot)) do
+	local link = GetInventoryItemLink(unit, slot)
+    if link then
         extend_tooltip(GameTooltip, link, 1)
     end
 end
 
 function game_tooltip_hooks:SetMerchantItem(slot)
-    for link in present(GetMerchantItemLink(slot)) do
+	local link = GetMerchantItemLink(slot)
+    if link then
         local quantity = select(4, GetMerchantItemInfo(slot))
         extend_tooltip(GameTooltip, link, quantity)
     end
@@ -189,7 +197,8 @@ function game_tooltip_hooks:SetCraftItem(skill, slot)
 end
 
 function game_tooltip_hooks:SetCraftSpell(slot)
-    for link in present(GetCraftItemLink(slot)) do
+	local link = GetCraftItemLink(slot)
+    if link then
         extend_tooltip(GameTooltip, link, 1)
     end
 end

@@ -115,7 +115,7 @@ function update_auction_listing()
         local unit_start_price = get_unit_start_price()
         local unit_buyout_price = get_unit_buyout_price()
 
-        for i, auction_record in existing_auctions[selected_item.key] or temp-T do
+        for i, auction_record in ipairs(existing_auctions[selected_item.key] or empty) do
 
             local blizzard_bid_undercut, buyout_price_undercut = undercut(auction_record, stack_size_slider:GetValue())
             blizzard_bid_undercut = money.from_string(money.to_string(blizzard_bid_undercut, true, nil, 3))
@@ -414,7 +414,8 @@ function update_inventory_records()
     local auctionable_map = temp-T
     for slot in info.inventory do
 	    temp(slot)
-        for item_info in present(temp-info.container_item(unpack(slot))) do
+	    local item_info = temp-info.container_item(unpack(slot))
+        if item_info then
             local charge_class = item_info.charges or 0
             if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
                 if not auctionable_map[item_info.item_key] then

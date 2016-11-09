@@ -859,9 +859,9 @@ local methods = {
         -- get index of selected row
         local prevSelectedIndex
         if rt.selected then
-            for index, row in rt.rows do
+            for i, row in rt.rows do
                 if row:IsVisible() and row.data and row.data.record == rt.selected then
-                    prevSelectedIndex = index
+                    prevSelectedIndex = i
                 end
             end
         end
@@ -1038,7 +1038,7 @@ function M.CreateAuctionResultsTable(parent, config)
 
     -- create the header cells
     rt.headCells = T
-    for i, column_config in rt.config do
+    for i, column_config in ipairs(rt.config) do
         local cell = CreateFrame('Button', nil, rt.contentFrame)
         cell:SetHeight(HEAD_HEIGHT)
         if i == 1 then

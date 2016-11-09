@@ -213,7 +213,8 @@ M.filters = {
 function operator(str)
     local operator = str == 'not' and A('operator', 'not', 1)
     for name in temp-S('and', 'or') do
-	    for arity in present(select(3, strfind(str, '^' .. name .. '(%d*)$'))) do
+	    local arity = select(3, strfind(str, '^' .. name .. '(%d*)$'))
+	    if arity then
 		    arity = tonumber(arity)
 		    operator = not (arity and arity < 2) and A('operator', name, arity)
 	    end
@@ -229,9 +230,10 @@ do
 				return self
 			end
 			if self.exact then return end
-			for number in present(tonumber(select(3, strfind(str, '^(%d+)$')))) do
+			local number = tonumber(select(3, strfind(str, '^(%d+)$')))
+			if number then
 				if number >= 1 and number <= 60 then
-					for _, key in temp-A('min_level', 'max_level') do
+					for _, key in ipairs(temp-A('min_level', 'max_level')) do
 						if not self[key] then
 							self[key] = A(str, number)
 							return A('blizzard', key, str, number)
@@ -338,7 +340,7 @@ function M.query(filter_string)
     end
 
     local polish_notation_counter = 0
-    for _, component in filter.post do
+    for _, component in ipairs(filter.post) do
         if component[1] == 'operator' then
             polish_notation_counter = max(polish_notation_counter, 1)
             polish_notation_counter = polish_notation_counter + (tonumber(component[2]) or 1) - 1
@@ -368,7 +370,7 @@ end
 function M.queries(filter_string)
     local parts = split(filter_string, ';')
     local queries = T
-    for _, str in parts do
+    for _, str in ipairs(parts) do
         str = trim(str)
         local query, _, error = query(str)
         if not query then
@@ -391,19 +393,19 @@ function suggestions(filter)
 
     -- classes
     if not filter.blizzard.class then
-        for _, class in temp-A(GetAuctionItemClasses()) do tinsert(suggestions, class) end
+        for _, class in ipairs(temp-A(GetAuctionItemClasses())) do tinsert(suggestions, class) end
     end
 
     -- subclasses
     if not filter.blizzard.subclass then
-        for _, subclass in temp-A(GetAuctionItemSubClasses(index(filter.blizzard.class, 2) or 0)) do
+        for _, subclass in ipairs(temp-A(GetAuctionItemSubClasses(index(filter.blizzard.class, 2) or 0))) do
             tinsert(suggestions, subclass)
         end
     end
 
     -- slots
     if not filter.blizzard.slot then
-        for _, invtype in temp-A(GetAuctionInvTypes(index(filter.blizzard.class, 2) == 2 and 2 or 0, index(filter.blizzard.subclass, 2) or 0)) do
+        for _, invtype in ipairs(temp-A(GetAuctionInvTypes(index(filter.blizzard.class, 2) == 2 and 2 or 0, index(filter.blizzard.subclass, 2) or 0))) do
             tinsert(suggestions, _G[invtype])
         end
     end
@@ -418,7 +420,7 @@ function suggestions(filter)
 
     -- item names
     if getn(filter.components) == 0 then
-        for _, name in aux_auctionable_items do
+        for _, name in ipairs(aux_auctionable_items) do
             tinsert(suggestions, name .. '/exact')
         end
     end
@@ -429,14 +431,15 @@ end
 function M.filter_string(components)
     local query_builder = query_builder()
 
-    for _, component in components do
+    for _, component in ipairs(components) do
 	    if component[1] == 'blizzard' then
 		    query_builder.append(filter[4] or filter[3])
         elseif component[1] == 'operator' then
             query_builder.append(component[2] .. (component[2] ~= 'not' and tonumber(component[3]) or ''))
         elseif component[1] == 'filter' then
             query_builder.append(component[2])
-            for parameter in present(component[3]) do
+            local parameter = component[3]
+            if parameter then
 	            if filter_util.filters[component[2]].input_type == 'money' then
 		            parameter = money.to_string(money.from_string(parameter), nil, true, nil, nil, true)
 	            end
@@ -451,7 +454,7 @@ end
 function prettified_filter_string(filter)
     local prettified = query_builder()
 
-    for _, component in filter.components do
+    for _, component in ipairs(filter.components) do
 	    if component[1] == 'blizzard' then
 		    if component[2] == 'name' then
 			    if filter.blizzard.exact then
@@ -468,7 +471,8 @@ function prettified_filter_string(filter)
             if component[2] ~= 'tooltip' then
                 prettified.append(color.orange(component[2]))
             end
-            for parameter in present(component[3]) do
+            local parameter = component[3]
+            if parameter then
 	            if component[2] == 'item' then
 		            prettified.append(info.display_name(cache.item_id(parameter)) or color.label.enabled('[' .. parameter .. ']'))
 	            else

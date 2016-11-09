@@ -13,13 +13,6 @@ local ST_HEAD_HEIGHT = 26.3
 local ST_HEAD_SPACE = 2
 local DEFAULT_COL_INFO = {{width=1}}
 
-
-local function GetTableIndex(tbl, value)
-    for i, v in tbl do
-        if value == v then return i end
-    end
-end
-
 local function OnColumnClick()
     local button = arg1
     if this.st.sortInfo.enabled and button == 'LeftButton' then
@@ -55,7 +48,7 @@ local defaultColScripts = {
     OnLeave = function()
         this.row.mouseover = false
         if not this.row.data then return end
-        if this.st.selectionDisabled or not this.st.selected or this.st.selected ~= GetTableIndex(this.st.rowData, this.row.data) then
+        if this.st.selectionDisabled or not this.st.selected or this.st.selected ~= key(this.st.rowData, this.row.data) then
             this.row.highlight:Hide()
         end
 
@@ -68,7 +61,7 @@ local defaultColScripts = {
     OnClick = function()
         if not this.row.data then return end
         this.st:ClearSelection()
-        this.st.selected = GetTableIndex(this.st.rowData, this.row.data)
+        this.st.selected = key(this.st.rowData, this.row.data)
         this.row.highlight:Show()
 
         local handler = this.st.handlers.OnClick
@@ -119,8 +112,8 @@ local methods = {
                 if not data then break end
                 st.rows[i].data = data
 
-                if (st.selected == GetTableIndex(st.rowData, data) and not st.selectionDisabled)
-                        or (st.highlighted and st.highlighted == GetTableIndex(st.rowData, data))
+                if (st.selected == key(st.rowData, data) and not st.selectionDisabled)
+                        or (st.highlighted and st.highlighted == key(st.rowData, data))
                         or st.rows[i].mouseover
                 then
                     st.rows[i].highlight:Show()
@@ -128,9 +121,9 @@ local methods = {
                     st.rows[i].highlight:Hide()
                 end
 
-                for colNum, col in st.rows[i].cols do
-                    if st.colInfo[colNum] then
-                        local colData = data.cols[colNum]
+                for j, col in st.rows[i].cols do
+                    if st.colInfo[j] then
+                        local colData = data.cols[j]
                         if type(colData.value) == 'function' then
                             col:SetText(colData.value(unpack(colData.args)))
                         else
@@ -244,13 +237,13 @@ local methods = {
         end
 
         -- adjust head col widths
-        for colNum, col in st.headCols do
-            if st.colInfo[colNum] then
+        for i, col in st.headCols do
+            if st.colInfo[i] then
                 col:Show()
-                col:SetWidth(st.colInfo[colNum].width * width)
+                col:SetWidth(st.colInfo[i].width * width)
                 col:SetHeight(st.sizes.headHeight)
-                col:SetText(st.colInfo[colNum].name or "")
-                col.text:SetJustifyH(st.colInfo[colNum].headAlign or 'CENTER')
+                col:SetText(st.colInfo[i].name or "")
+                col.text:SetJustifyH(st.colInfo[i].headAlign or 'CENTER')
             else
                 col:Hide()
             end
@@ -262,21 +255,21 @@ local methods = {
         end
 
         -- adjust rows widths
-        for rowNum, row in st.rows do
-            if rowNum > st.sizes.numRows then
+        for i, row in st.rows do
+            if i > st.sizes.numRows then
                 row.data = nil
                 row:Hide()
             else
                 row:Show()
                 -- add any missing cols
                 while getn(row.cols) < getn(st.colInfo) do
-                    st:AddRowCol(rowNum)
+                    st:AddRowCol(i)
                 end
-                for colNum, col in row.cols do
-                    if st.headCols[colNum] and st.colInfo[colNum] then
+                for j, col in row.cols do
+                    if st.headCols[j] and st.colInfo[j] then
                         col:Show()
-                        col:SetWidth(st.colInfo[colNum].width * width)
-                        col.text:SetJustifyH(st.colInfo[colNum].align or 'LEFT')
+                        col:SetWidth(st.colInfo[j].width * width)
+                        col.text:SetJustifyH(st.colInfo[j].align or 'LEFT')
                     else
                         col:Hide()
                     end
@@ -318,9 +311,9 @@ local methods = {
         tinsert(st.headCols, col)
 
         -- add new cells to the rows
-        for rowNum, row in st.rows do
+        for i, row in st.rows do
             while getn(row.cols) < getn(st.headCols) do
-                st:AddRowCol(rowNum)
+                st:AddRowCol(i)
             end
         end
     end,

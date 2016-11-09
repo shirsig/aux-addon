@@ -30,8 +30,10 @@ function LOAD()
 	CreateFrame('Frame', nil, MerchantFrame):SetScript('OnUpdate', merchant_on_update)
 
 	event_listener('NEW_AUCTION_UPDATE', function()
-		for data in present(info.auction_sell_item()) do
-			for item_id in present(item_id(data.name)) do
+		local data = info.auction_sell_item()
+		if data then
+			local item_id = item_id(data.name)
+			if item_id then
 				aux_merchant_sell[_M.item_id(data.name)] = data.vendor_price / (info.max_item_charges(item_id) or data.count)
 			end
 		end

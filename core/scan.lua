@@ -12,7 +12,8 @@ do
 	local scan_states = T
 
 	function M.start(params)
-		for old_state in present(scan_states[params.type]) do
+		local old_state = scan_states[params.type]
+		if old_state then
 			abort(old_state.id)
 		end
 		do (params.on_scan_start or nop)() end

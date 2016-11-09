@@ -43,8 +43,8 @@ do
 end
 
 function M.container_item(bag, slot)
-    for link in present(GetContainerItemLink(bag, slot)) do
-
+	local link = GetContainerItemLink(bag, slot)
+    if link then
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = temp-item(item_id, suffix_id, unique_id, enchant_id)
 
@@ -102,7 +102,8 @@ end
 function M.auction(index, query_type)
     query_type = query_type or 'list'
 
-	for link in present(GetAuctionItemLink(query_type, index)) do
+    local link = GetAuctionItemLink(query_type, index)
+	if link then
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = temp-item(item_id, suffix_id, unique_id, enchant_id)
 
@@ -248,7 +249,8 @@ function M.load_tooltip(frame, tooltip)
 end
 
 function M.display_name(item_id, no_brackets, no_color)
-    for item_info in present(item(item_id)) do
+	local item_info = item(item_id)
+    if item_info then
         local name = item_info.name
         if not no_brackets then
             name = '[' .. name .. ']'
@@ -428,7 +430,8 @@ end
 
 function M.bag_type(bag)
 	if bag == 0 then return 1 end
-	for link in present(GetInventoryItemLink('player', ContainerIDToInventoryID(bag))) do
+	local link = GetInventoryItemLink('player', ContainerIDToInventoryID(bag))
+	if link then
 		local item_id = parse_link(link)
 		local item_info = item(item_id)
 		return item_subclass_index(3, item_info.subclass)

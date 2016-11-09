@@ -133,7 +133,8 @@ function get_filter_builder_query()
 	if blizzard_query.subclass and blizzard_query.subclass > 0 then
 		add(strlower(subclasses[blizzard_query.subclass]))
 	end
-	for slot_index in present(blizzard_query.slot) do
+	local slot_index = blizzard_query.slot
+	if slot_index then
 		local slots = temp-A(GetAuctionInvTypes(blizzard_query.class or 0, blizzard_query.subclass or 0))
 		add(strlower(_G[slots[slot_index]]))
 	end
@@ -151,7 +152,7 @@ end
 
 function set_form(filter)
 	clear_form()
-	for _, component in filter.components do
+	for _, component in ipairs(filter.components) do
 		if component[1] == 'blizzard' then
 			blizzard_query[component[2]] = component[4]
 		else
@@ -198,7 +199,7 @@ function formatted_post_filter(components)
 	local stack = temp-T
 	local str = ''
 
-	for i, component in components do
+	for i, component in ipairs(components) do
 		if no_line_break then
 			str = str .. ' '
 		elseif i > 1 then
@@ -215,7 +216,8 @@ function formatted_post_filter(components)
 			component_text = component_text .. filter_color(tonumber(component[3]) or '')
 			tinsert(stack, component[3])
 		elseif component[1] == 'filter' then
-			for parameter in present(component[3]) do
+			local parameter = component[3]
+			if parameter then
 				if component[2] == 'item' then
 					parameter = info.display_name(cache.item_id(parameter)) or '[' .. parameter .. ']'
 				elseif filter_util.filters[component[2]].input_type == 'money' then
@@ -270,8 +272,10 @@ function add_component(component)
 end
 
 function add_post_filter()
-	for str in present(filter_input:GetText()) do
-		for filter in present(filter_util.filters[str]) do
+	local str = filter_input:GetText()
+	if str then
+		local filter = filter_util.filters[str]
+		if filter then
 			if filter.input_type ~= '' then
 				str = str .. '/' .. filter_parameter_input:GetText()
 			end
@@ -355,7 +359,7 @@ function initialize_class_dropdown()
 		end
 	end
 	UIDropDownMenu_AddButton(O('text', ALL, 'value', 0, 'func', on_click))
-	for i, class in temp-A(GetAuctionItemClasses()) do
+	for i, class in ipairs(temp-A(GetAuctionItemClasses())) do
 		UIDropDownMenu_AddButton(O('text', class, 'value', i, 'func', on_click))
 	end
 end
@@ -368,7 +372,7 @@ function initialize_subclass_dropdown()
 		end
 	end
 	UIDropDownMenu_AddButton(O('text', ALL, 'value', 0, 'func', on_click))
-	for i, subclass in temp-A(GetAuctionItemSubClasses(blizzard_query.class or 0)) do
+	for i, subclass in ipairs(temp-A(GetAuctionItemSubClasses(blizzard_query.class or 0))) do
 		UIDropDownMenu_AddButton(O('text', subclass, 'value', i, 'func', on_click))
 	end
 end
@@ -379,7 +383,7 @@ function initialize_slot_dropdown()
 		update_form()
 	end
 	UIDropDownMenu_AddButton(O('text', ALL, 'value', '', 'func', on_click))
-	for i, slot in temp-A(GetAuctionInvTypes(blizzard_query.class == 2 and 2 or 0, blizzard_query.subclass or 0)) do
+	for i, slot in ipairs(temp-A(GetAuctionInvTypes(blizzard_query.class == 2 and 2 or 0, blizzard_query.subclass or 0))) do
 		UIDropDownMenu_AddButton(O('text', _G[slot], 'value', i, 'func', on_click))
 	end
 end
