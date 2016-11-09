@@ -210,7 +210,7 @@ function formatted_post_filter(components)
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
 
-		local filter_color = (filter_builder_state.selected == i and color.aux or color.orange)
+		local filter_color = (filter_builder_state.selected == i and color.gold or color.orange)
 		local component_text = filter_color(component[2])
 		if component[1] == 'operator' and component[2] ~= 'not' then
 			component_text = component_text .. filter_color(tonumber(component[3]) or '')
