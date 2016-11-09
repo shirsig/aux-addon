@@ -534,9 +534,9 @@ function record_percentage(record)
     local historical_value = history.value(record.item_key) or 0
     if historical_value > 0 then
         if record.unit_buyout_price > 0 then
-            return round(100 * record.unit_buyout_price / historical_value, 1)
+            return round(100 * record.unit_buyout_price / historical_value)
         end
-        return nil, round(100 * record.unit_bid_price / historical_value, 1)
+        return nil, round(100 * record.unit_bid_price / historical_value)
     end
 end
 
@@ -793,7 +793,7 @@ local methods = {
         for _, info in ipairs(self.rowInfo) do
             if self.expanded[info.expandKey] then
                 -- show each of the rows for this base item since it's expanded
-                for i, childInfo in info.children do
+                for i, childInfo in ipairs(info.children) do
                     self:SetRowInfo(rowIndex, childInfo.record, childInfo.numAuctions, 0, i > 1, false, info.expandKey, childInfo.numAuctions)
                     rowIndex = rowIndex + 1
                 end
