@@ -1,6 +1,7 @@
 module 'aux.tabs.search'
 
 local filter_util = require 'aux.util.filter'
+local gui = require 'aux.gui'
 
 _G.aux_auto_buy_filters = T
 _G.aux_favorite_searches = T
@@ -59,37 +60,31 @@ handlers = {
 			search_box:SetText(data.search.filter_string)
 		elseif button == 'RightButton' and IsShiftKeyDown() then
 			add_filter(data.search.filter_string)
-		elseif button == 'LeftButton' and IsControlKeyDown() then
-			if st == favorite_searches_listing then
-				move_up(aux_favorite_searches, data.index)
-			elseif st == auto_buy_listing then
-				move_up(aux_auto_buy_filters, data.index)
-			end
-			update_search_listings()
-		elseif button == 'RightButton' and IsControlKeyDown() then
-			if st == favorite_searches_listing then
-				move_down(aux_favorite_searches, data.index)
-			elseif st == auto_buy_listing then
-				move_down(aux_auto_buy_filters, data.index)
-			end
-			update_search_listings()
-		elseif button == 'RightButton' and IsAltKeyDown() then
-			if st == auto_buy_listing then
-				tremove(aux_auto_buy_filters, data.index)
-			else
-				add_auto_buy(data.search.filter_string)
-			end
-			update_search_listings()
 		elseif button == 'LeftButton' then
 			search_box:SetText(data.search.filter_string)
 			execute()
 		elseif button == 'RightButton' then
-			if st == favorite_searches_listing then
-				tremove(aux_favorite_searches, data.index)
-			else
-				tinsert(aux_favorite_searches, 1, data.search)
+			local u = update_search_listings
+			if st == recent_searches_listing then
+				gui.menu(
+					'Favorite', function() tinsert(aux_favorite_searches, 1, data.search); u() end,
+					'Auto Buy', function() add_auto_buy(data.search.filter_string); u() end
+				)
+			elseif st == favorite_searches_listing then
+				gui.menu(
+					'Auto Buy', function() add_auto_buy(data.search.filter_string); u() end,
+					'Move Up', function() move_up(aux_favorite_searches, data.index); u() end,
+					'Move Down', function() move_down(aux_favorite_searches, data.index); u() end,
+					'Delete', function() tremove(aux_favorite_searches, data.index); u() end
+				)
+			elseif st == auto_buy_listing then
+				gui.menu(
+					'Favorite', function() tinsert(aux_favorite_searches, 1, data.search); u() end,
+					'Move Up', function() move_up(aux_auto_buy_filters, data.index); u() end,
+					'Move Down', function() move_down(aux_auto_buy_filters, data.index); u() end,
+					'Delete', function() tremove(aux_auto_buy_filters, data.index); u() end
+				)
 			end
-			update_search_listings()
 		end
 	end,
 	OnEnter = function(st, data, self)

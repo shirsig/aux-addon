@@ -95,27 +95,15 @@ do
 end
 
 do
-	local menu = CreateFrame('Frame', unique_name, UIParent, 'UIMenuTemplate')
-	local orig = menu:GetScript'OnShow'
-	local structure = T
-	menu:SetScript('OnShow', function()
-		UIMenu_Initialize()
-		for i = 1, getn(structure), 2 do
-			UIMenu_AddButton(
-				structure[i],
-				nil,
-				structure[i + 1]
-			)
-		end
-		return orig()
-	end)
+	local menu = CreateFrame('Frame', unique_name, UIParent, 'UIDropDownMenuTemplate')
 	M.menu = vararg-function(arg)
-		static(arg)
-		structure = arg
-		local x, y = GetCursorPosition()
-		menu:ClearAllPoints()
-		menu:SetPoint('BOTTOMLEFT', x + 75, y)
-		menu:Show()
+		HideDropDownMenu(1)
+		UIDropDownMenu_Initialize(menu, function()
+			for i = 1, getn(arg), 2 do
+				UIDropDownMenu_AddButton(O('text', arg[i], 'notCheckable', true, 'func', arg[i + 1]))
+			end
+		end, 'MENU')
+		ToggleDropDownMenu(1, nil, menu, 'cursor')
 	end
 end
 
