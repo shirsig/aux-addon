@@ -80,11 +80,9 @@ Furthermore
 ![Alt text](http://i.imgur.com/jHmGueI.png)
 - When hovering over an entry the tooltip shows a longer and more nicely formatted version.
 - Left-click on an entry will start a search.
-- Right-click on an entry will add/remove it to/from you favorites.
-- Alt-right-click on an entry will add/remove it to/from the auto buy filters.
+- Right-click on an entry will show a menu with various options, including toggling Auto Buy.
 - Shift-left-click on an entry will copy a search to the search box.
 - Shift-right-click on an entry will add a search to the existing query in the search box.
-- Control-left/right-click will move an entry up/down in the favorites.
 
 #### Filter Builder
 ![Alt text](http://i.imgur.com/coXD3H5.png)
