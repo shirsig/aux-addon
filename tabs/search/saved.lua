@@ -3,28 +3,16 @@ module 'aux.tabs.search'
 local filter_util = require 'aux.util.filter'
 local gui = require 'aux.gui'
 
-_G.aux_auto_buy_filters = T
 _G.aux_favorite_searches = T
 _G.aux_recent_searches = T
 
 function update_search_listings()
-	local autobuy_filter_rows = T
-	for i, autobuy_filter in ipairs(aux_auto_buy_filters) do
-		local name = strsub(autobuy_filter.prettified, 1, 250)
-		tinsert(autobuy_filter_rows, O(
-			'cols', A(O('value', name)),
-			'search', autobuy_filter,
-			'index', i
-		))
-	end
-	auto_buy_listing:SetData(autobuy_filter_rows)
-
 	local favorite_search_rows = T
-	for i, favorite_search in ipairs(aux_favorite_searches) do
-		local name = strsub(favorite_search.prettified, 1, 250)
+	for i, search in ipairs(aux_favorite_searches) do
+		local name = strsub(search.prettified, 1, 250)
 		tinsert(favorite_search_rows, O(
-			'cols', A(O('value', name)),
-			'search', favorite_search,
+			'cols', A(O('value', search.auto_buy and color.red'A' or ''), O('value', name)),
+			'search', search,
 			'index', i
 		))
 	end
@@ -67,22 +55,15 @@ handlers = {
 			local u = update_search_listings
 			if st == recent_searches_listing then
 				gui.menu(
-					'Favorite', function() tinsert(aux_favorite_searches, 1, data.search); u() end,
-					'Auto Buy', function() add_auto_buy(data.search.filter_string); u() end
+					'Favorite', function() tinsert(aux_favorite_searches, 1, data.search); u() end
 				)
 			elseif st == favorite_searches_listing then
+				local auto_buy = data.search.auto_buy
 				gui.menu(
-					'Auto Buy', function() add_auto_buy(data.search.filter_string); u() end,
+					(auto_buy and 'Disable' or 'Enable') .. ' Auto Buy', function() if auto_buy then data.search.auto_buy = nil else enable_auto_buy(data.search) end u() end,
 					'Move Up', function() move_up(aux_favorite_searches, data.index); u() end,
 					'Move Down', function() move_down(aux_favorite_searches, data.index); u() end,
 					'Delete', function() tremove(aux_favorite_searches, data.index); u() end
-				)
-			elseif st == auto_buy_listing then
-				gui.menu(
-					'Favorite', function() tinsert(aux_favorite_searches, 1, data.search); u() end,
-					'Move Up', function() move_up(aux_auto_buy_filters, data.index); u() end,
-					'Move Down', function() move_down(aux_auto_buy_filters, data.index); u() end,
-					'Delete', function() tremove(aux_auto_buy_filters, data.index); u() end
 				)
 			end
 		end
@@ -101,12 +82,14 @@ handlers = {
 
 function get_auto_buy_validator()
 	local validators = T
-	for _, filter in aux_auto_buy_filters do
-		local queries, error = filter_util.queries(filter.filter_string)
-		if queries then
-			tinsert(validators, queries[1].validator)
-		else
-			print('Invalid auto buy filter:', error)
+	for _, search in aux_favorite_searches do
+		if search.auto_buy then
+			local queries, error = filter_util.queries(search.filter_string)
+			if queries then
+				tinsert(validators, queries[1].validator)
+			else
+				print('Invalid auto buy filter:', error)
+			end
 		end
 	end
 	return function(record)
@@ -127,18 +110,15 @@ function add_favorite(filter_string)
 	end
 end
 
-function add_auto_buy(filter_string)
-	local queries, error = filter_util.queries(filter_string)
+function enable_auto_buy(search)
+	local queries, error = filter_util.queries(search.filter_string)
 	if queries then
 		if getn(queries) > 1 then
-			print('Error: The automatic buyout filter does not support multi-queries')
-		elseif size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(filter_string).blizzard.exact then
-			print('Error: The automatic buyout filter does not support Blizzard filters')
+			print('Error: Auto Buy does not support multi-queries')
+		elseif size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(search.filter_string).blizzard.exact then
+			print('Error: Auto Buy does not support Blizzard filters')
 		else
-			tinsert(aux_auto_buy_filters, 1, O(
-				'filter_string', filter_string,
-				'prettified', join(map(queries, function(query) return query.prettified end), ';')
-			))
+			search.auto_buy = true
 		end
 	else
 		print('Invalid filter:', error)

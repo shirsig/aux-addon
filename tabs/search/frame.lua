@@ -24,16 +24,13 @@ frame.saved = CreateFrame('Frame', nil, frame)
 frame.saved:SetAllPoints(AuxFrame.content)
 
 frame.saved.favorite = gui.panel(frame.saved)
-frame.saved.favorite:SetWidth(252)
-frame.saved.favorite:SetPoint('TOP', 0, 0)
-frame.saved.favorite:SetPoint('BOTTOM', 0, 0)
-
-frame.saved.autobuy = gui.panel(frame.saved)
-frame.saved.autobuy:SetPoint('TOPRIGHT', frame.saved.favorite, 'TOPLEFT', -2.5, 0)
-frame.saved.autobuy:SetPoint('BOTTOMLEFT', 0, 0)
+frame.saved.favorite:SetWidth(395)
+frame.saved.favorite:SetPoint('TOPLEFT', 0, 0)
+frame.saved.favorite:SetPoint('BOTTOMLEFT', 0, 0)
 
 frame.saved.recent = gui.panel(frame.saved)
-frame.saved.recent:SetPoint('TOPLEFT', frame.saved.favorite, 'TOPRIGHT', 2.5, 0)
+frame.saved.recent:SetWidth(362.5)
+frame.saved.recent:SetPoint('TOPRIGHT', 0, 0)
 frame.saved.recent:SetPoint('BOTTOMRIGHT', 0, 0)
 do
     local btn = gui.button(frame, 25)
@@ -239,20 +236,12 @@ do
     end)
 end
 do
-    local btn1 = gui.button(frame.saved)
-    btn1:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-    btn1:SetText('Favorite')
-    btn1:SetScript('OnClick', function()
+    local btn = gui.button(frame.saved)
+    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
+    btn:SetText('Favorite')
+    btn:SetScript('OnClick', function()
         add_favorite(search_box:GetText())
     end)
-
-	local btn2 = gui.button(frame.saved)
-	btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
-	btn2:SetText('Auto Buy')
-	btn2:SetScript('OnClick', function()
-		add_auto_buy(search_box:GetText())
-		update_search_listings()
-	end)
 end
 do
     local btn1 = gui.button(frame.filter)
@@ -515,14 +504,13 @@ do
     scroll_child:SetWidth(1)
     scroll_child:SetHeight(1)
     scroll_child:SetScript('OnHyperlinkClick', data_link_click)
---	    scroll_child:SetHyperlinkFormat("format") TODO
     scroll_child.measure = scroll_child:CreateFontString()
     filter_display = scroll_child
 end
 
 status_bars = T
 tables = T
-for _ = 1, 5  do
+for _ = 1, 5 do
     local status_bar = gui.status_bar(frame)
     status_bar:SetAllPoints(status_bar_frame)
     status_bar:Hide()
@@ -546,26 +534,16 @@ for _ = 1, 5  do
     tinsert(tables, table)
 end
 
-auto_buy_listing = listing.CreateScrollingTable(frame.saved.autobuy)
-auto_buy_listing:SetColInfo{{name='Auto Buy Filters', width=1}}
-auto_buy_listing:EnableSorting(false)
-auto_buy_listing:DisableSelection(true)
-auto_buy_listing:SetHandler('OnClick', handlers.OnClick)
-auto_buy_listing:SetHandler('OnEnter', handlers.OnEnter)
-auto_buy_listing:SetHandler('OnLeave', handlers.OnLeave)
+favorite_searches_listing = listing.CreateScrollingTable(frame.saved.favorite)
+favorite_searches_listing:SetColInfo{{width=.05, align='CENTER'}, {name='Favorite Searches', width=.95}}
 
 recent_searches_listing = listing.CreateScrollingTable(frame.saved.recent)
 recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}
-recent_searches_listing:EnableSorting(false)
-recent_searches_listing:DisableSelection(true)
-recent_searches_listing:SetHandler('OnClick', handlers.OnClick)
-recent_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
-recent_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
 
-favorite_searches_listing = listing.CreateScrollingTable(frame.saved.favorite)
-favorite_searches_listing:SetColInfo{{name='Favorite Searches', width=1}}
-favorite_searches_listing:EnableSorting(false)
-favorite_searches_listing:DisableSelection(true)
-favorite_searches_listing:SetHandler('OnClick', handlers.OnClick)
-favorite_searches_listing:SetHandler('OnEnter', handlers.OnEnter)
-favorite_searches_listing:SetHandler('OnLeave', handlers.OnLeave)
+for listing in temp-S(favorite_searches_listing, recent_searches_listing) do
+	listing:EnableSorting(false)
+	listing:DisableSelection(true)
+	for k, v in handlers do
+		listing:SetHandler(k, v)
+	end
+end

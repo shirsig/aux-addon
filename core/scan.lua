@@ -146,8 +146,8 @@ function scan_page(i)
 
 		if (state.params.auto_buy_validator or nop)(auction_info) then
 			local send_signal, signal_received = signal()
-			when(signal_received, scan_page, i + 1)
-			place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
+			when(signal_received, scan_page, i)
+			return place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
 		elseif not query.validator or query.validator(auction_info) then
 			do (state.params.on_auction or nop)(auction_info) end
 		end
