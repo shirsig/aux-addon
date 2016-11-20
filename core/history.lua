@@ -5,7 +5,7 @@ include 'aux'
 
 local persistence = require 'aux.util.persistence'
 
-local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='number'}, {daily_max_price='number'}, {data_points={'list', ';', {'tuple', '@', {market_value='number'}, {time='number'}}}}}
+local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='number'}, {data_points={'list', ';', {'tuple', '@', {value='number'}, {time='number'}}}}}
 
 local value_cache = T
 
@@ -47,31 +47,24 @@ function read_record(item_key)
 end
 
 function write_record(item_key, record)
-	value_cache[item_key] = nil
 	data[item_key] = persistence.write(history_schema, record)
+	if value_cache[item_key] then
+		release(value_cache[item_key])
+		value_cache[item_key] = nil
+	end
 end
 
 function M.process_auction(auction_record)
 	local item_record = read_record(auction_record.item_key)
-	local unit_bid_price = ceil(auction_record.bid_price / auction_record.aux_quantity)
 	local unit_buyout_price = ceil(auction_record.buyout_price / auction_record.aux_quantity)
-	local max_unit_price = max(unit_buyout_price, unit_bid_price)
-	local changed
 	if unit_buyout_price > 0 and unit_buyout_price < (item_record.daily_min_buyout or huge) then
 		item_record.daily_min_buyout = unit_buyout_price
-		changed = true
+		write_record(auction_record.item_key, item_record)
 	end
-	if max_unit_price > (item_record.daily_max_price or 0) then
-		item_record.daily_max_price = max_unit_price
-		changed = true
-	end
-	if not changed then return end
-	write_record(auction_record.item_key, item_record)
 end
 
-function M.price_data(item_key)
-	local item_record = read_record(item_key)
-	return item_record.daily_min_buyout, item_record.daily_max_price, item_record.data_points
+function M.data_points(item_key)
+	return read_record(item_key).data_points
 end
 
 function M.value(item_key)
@@ -83,14 +76,14 @@ function M.value(item_key)
 			for _, data_point in item_record.data_points do
 				local weight = .99 ^ round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
 				total_weight = total_weight + weight
-				tinsert(weighted_values, O('value', data_point.market_value, 'weight', weight))
+				tinsert(weighted_values, O('value', data_point.value, 'weight', weight))
 			end
 			for _, weighted_value in weighted_values do
 				weighted_value.weight = weighted_value.weight / total_weight
 			end
 			value = weighted_median(weighted_values)
 		else
-			value = market_value(item_record)
+			value = item_record.daily_min_buyout
 		end
 		value_cache[item_key] = O('value', value, 'next_push', item_record.next_push)
 	end
@@ -98,11 +91,7 @@ function M.value(item_key)
 end
 
 function M.market_value(item_key)
-	return market_value(read_record(item_key))
-end
-
-function market_value(item_record)
-	return item_record.daily_min_buyout and min(ceil(item_record.daily_min_buyout * 1.15), item_record.daily_max_price)
+	return read_record(item_key).daily_min_buyout
 end
 
 function weighted_median(list)
@@ -117,13 +106,12 @@ function weighted_median(list)
 end
 
 function push_record(item_record)
-	local market_value = market_value(item_record)
-	if market_value then
-		tinsert(item_record.data_points, 1, weak-O('market_value', market_value, 'time', item_record.next_push))
+	if item_record.daily_min_buyout then
+		tinsert(item_record.data_points, 1, weak-O('value', item_record.daily_min_buyout, 'time', item_record.next_push))
 		while getn(item_record.data_points) > 11 do
 			release(item_record.data_points[getn(item_record.data_points)])
 			tremove(item_record.data_points)
 		end
 	end
-	item_record.next_push, item_record.daily_min_buyout, item_record.daily_max_price = next_push, nil, nil
+	item_record.next_push, item_record.daily_min_buyout = next_push, nil
 end

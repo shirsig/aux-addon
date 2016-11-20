@@ -18,7 +18,6 @@ SAVED = 2
 FILTER = 3
 
 function LOAD()
---	aux_search_tab_frame.create()
 	subtab = SAVED
 end
 
