@@ -5,6 +5,9 @@ local money = require 'aux.util.money'
 local cache = require 'aux.core.cache'
 local filter_util = require 'aux.util.filter'
 
+local post_filter = T
+local post_filter_index = 0
+
 function valid_level(str)
 	local level = tonumber(str)
 	return level and bounded(1, 60, level)
@@ -177,8 +180,7 @@ function clear_form()
 	UIDropDownMenu_ClearAll(quality_dropdown)
 	filter_parameter_input:ClearFocus()
 	wipe(post_filter)
-	wipe(filter_builder_state)
-	filter_builder_state.selected = 0
+	post_filter_index = 0
 	update_filter_display()
 end
 
@@ -202,15 +204,14 @@ function formatted_post_filter(components)
 	for i, component in ipairs(components) do
 		if no_line_break then
 			str = str .. ' '
-		elseif i > 1 then
-			str = str .. '</p><p>'
-			for _ = 1, getn(stack) do
-				str = str .. color.content.background('----')
-			end
+		end
+		str = str .. '</p><p>'
+		for _ = 1, getn(stack) + 1 do
+			str = str .. color.content.background('----')
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
 
-		local filter_color = (filter_builder_state.selected == i and color.gold or color.orange)
+		local filter_color = (post_filter_index == i and color.gold or color.orange)
 		local component_text = filter_color(component[2])
 		if component[1] == 'operator' and component[2] ~= 'not' then
 			component_text = component_text .. filter_color(tonumber(component[3]) or '')
@@ -236,42 +237,37 @@ function formatted_post_filter(components)
 		str = str .. data_link(i, component_text)
 	end
 
-	return '<html><body><p>' .. str .. '</p></body></html>'
+	return '<html><body><p>' .. data_link(0, 'Post Filter:') .. '</p><p>' .. str .. '</p></body></html>'
 end
 
 function data_link(id, str)
-	return '|H' .. id .. '|h' .. str .. '|h'
+	return format('<a href="%s">%s</a>', id, str)
 end
-
-post_filter = T
-filter_builder_state = O('selected', 0)
 
 function data_link_click()
 	local button = arg3
 	local index = tonumber(arg1)
 	if button == 'LeftButton' then
-		filter_builder_state.selected = index
-	elseif button == 'RightButton' then
+		post_filter_index = index
+	elseif button == 'RightButton' and index > 0 then
 		remove_component(index)
 	end
 	update_filter_display()
 end
 
 function remove_component(index)
-	index = index or filter_builder_state.selected
-	if filter_builder_state.selected >= index then
-		filter_builder_state.selected = max(filter_builder_state.selected - 1, min(1, getn(post_filter)))
-	end
-	filter_builder_state[post_filter[index]] = nil
 	tremove(post_filter, index)
+	if post_filter_index >= index then
+		post_filter_index = max(post_filter_index - 1, min(1, getn(post_filter)))
+	end
 end
 
 function add_component(component)
-	filter_builder_state.selected = filter_builder_state.selected + 1
-	tinsert(post_filter, filter_builder_state.selected, component)
+	post_filter_index = post_filter_index + 1
+	tinsert(post_filter, post_filter_index, component)
 end
 
-function add_post_filter()
+function add_form_component()
 	local str = filter_input:GetText()
 	if str then
 		local filter = filter_util.filters[str]
@@ -280,7 +276,7 @@ function add_post_filter()
 				str = str .. '/' .. filter_parameter_input:GetText()
 			end
 		end
-		local components, error, suggestions = filter_util.parse_filter_string(str)
+		local components, error = filter_util.parse_filter_string(str)
 		if components and getn(components.blizzard) == 0 and getn(components.post) == 1 then
 			add_component(components.post[1])
 			update_filter_display()
@@ -335,7 +331,7 @@ function initialize_filter_dropdown()
 			'func', function()
 				filter_input:SetText(this.value)
 				if index(filter_util.filters[this.value], 'input_type') == '' or this.value == 'not' then
-					add_post_filter()
+					add_form_component()
 				elseif filter_util.filters[this.value] then
 					filter_parameter_input:Show()
 					filter_parameter_input:SetFocus()

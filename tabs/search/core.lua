@@ -25,6 +25,7 @@ end
 function OPEN()
     frame:Show()
     update_search_listings()
+    update_filter_display()
 end
 
 function CLOSE()

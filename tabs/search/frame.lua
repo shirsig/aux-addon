@@ -434,7 +434,7 @@ do
     _G[dropdown:GetName() .. 'Text']:Hide()
     local label = gui.label(dropdown, gui.font_size.medium)
     label:SetPoint('RIGHT', dropdown, 'LEFT', -15, 0)
-    label:SetText('Post Filter')
+    label:SetText('Component')
     filter_dropdown = dropdown
 end
 do
@@ -459,7 +459,7 @@ do
 		if filter_parameter_input:IsVisible() then
 			filter_parameter_input:SetFocus()
 		else
-			add_post_filter()
+			add_form_component()
 		end
 	end
 	filter_input = input
@@ -472,7 +472,7 @@ do
 	    filter_input:SetFocus()
     end)
     input.char = function() this:complete() end
-    input.enter = add_post_filter
+    input.enter = add_form_component
     input:Hide()
     filter_parameter_input = input
 end
