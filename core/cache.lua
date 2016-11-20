@@ -34,7 +34,7 @@ function LOAD()
 		if data then
 			local item_id = item_id(data.name)
 			if item_id then
-				aux_merchant_sell[_M.item_id(data.name)] = data.vendor_price / (info.max_item_charges(item_id) or data.count)
+				aux_merchant_sell[item_id] = data.vendor_price / (info.max_item_charges(item_id) or data.count)
 			end
 		end
 	end)
