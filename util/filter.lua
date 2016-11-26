@@ -422,6 +422,7 @@ function suggestions(filter)
     -- item names
     if getn(filter.components) == 0 then
 	    for i = 1, getn(aux_auctionable_items) do
+		    p'kek'
             tinsert(suggestions, aux_auctionable_items[i] .. '/exact')
         end
     end

@@ -35,7 +35,7 @@ function M.complete(candidates)
 
 		local text = self:GetText()
 
-		local t = temp-candidates()
+		local t = candidates()
 		for i = 1, getn(t) do
 			if strsub(strupper(t[i]), 1, strlen(text)) == strupper(text) then
 				self:SetText(strlower(t[i]))
