@@ -17,7 +17,6 @@ _G.aux_item_ids = T
 _G.aux_auctionable_items = T
 _G.aux_merchant_buy = T
 _G.aux_merchant_sell = T
-_G.aux_characters = T
 
 function LOAD()
 	scan_wdb()

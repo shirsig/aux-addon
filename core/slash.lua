@@ -58,39 +58,6 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'ignore' and arguments[2] == 'owner' then
 	    _G.aux_ignore_owner = not aux_ignore_owner
         print('Ignoring of owner ' .. (aux_ignore_owner and 'enabled' or 'disabled') .. '.')
-    elseif arguments[1] == 'chars' and arguments[2] == 'add' then
-		local realm = GetCVar'realmName'
-		aux_characters[realm] = aux_characters[realm] or T
-		for i = 3, getn(arguments) do
-			local name = gsub(strlower(arguments[i]), '^%l', strupper)
-			if not aux_characters[realm][name] then
-				aux_characters[realm][name] = true
-				print('Character "' .. name .. '" added.')
-			end
-		end
-	elseif arguments[1] == 'chars' and arguments[2] == 'remove' then
-		local realm = GetCVar'realmName'
-		if not aux_characters[realm] then
-			return
-		end
-		for i = 3, getn(arguments) do
-			local name = gsub(strlower(arguments[i]), '^%l', strupper)
-			if aux_characters[realm][name] then
-				aux_characters[realm][name] = nil
-				print('Character "' .. name .. '" removed.')
-			end
-		end
-	elseif arguments[1] == 'chars' then
-		local realm = GetCVar'realmName'
-		local chars = T
-		for name in aux_characters[realm] or empty do
-			tinsert(chars, name)
-		end
-		if getn(chars) > 0 then
-			print('Your characters: "' .. join(chars, ', ') .. '".')
-		else
-			print('You don\'t have any additional characters. To add your characters type "/aux chars add NAME1 NAME2 NAME3...".')
-		end
 	else
 		print('Unknown command: "' .. command .. '"')
 	end

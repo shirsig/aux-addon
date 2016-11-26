@@ -10,6 +10,7 @@ local stack = require 'aux.core.stack'
 local post = require 'aux.core.post'
 local scan = require 'aux.core.scan'
 
+_G.aux_characters = T
 --aux_account_settings = {} -- TODO clean up the mess of savedvariables
 --aux_character_settings = {}
 
@@ -163,9 +164,20 @@ do
 	end
 end
 
-function M.is_player(name, current)
-	local realm = GetCVar'realmName'
-	return not current and index(aux_characters, realm, name) or UnitName'player' == name
+function M.is_player(name)
+	local key = GetCVar'realmName' .. '|' .. UnitFactionGroup'player'
+	return index(aux_characters, key, name)
+end
+
+function LOAD2()
+	local key = GetCVar'realmName' .. '|' .. UnitFactionGroup'player'
+	aux_characters[key] = aux_characters[key] or {}
+	for char, lastSeen in aux_characters[key] do
+		if GetTime() - lastSeen > 60 * 60 * 24 * 30 then
+			aux_characters[key][char] = nil
+		end
+	end
+	aux_characters[key][UnitName'player'] = GetTime()
 end
 
 function M.neutral_faction()
