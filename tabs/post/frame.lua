@@ -27,10 +27,15 @@ frame.parameters:SetHeight(173)
 frame.parameters:SetPoint('TOPLEFT', frame.inventory, 'TOPRIGHT', 2.5, 0)
 frame.parameters:SetPoint('TOPRIGHT', 0, 0)
 
-frame.auctions = gui.panel(frame.content)
-frame.auctions:SetHeight(228)
-frame.auctions:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
-frame.auctions:SetPoint('BOTTOMRIGHT', 0, 0)
+frame.bid_listing = gui.panel(frame.content)
+frame.bid_listing:SetHeight(228)
+frame.bid_listing:SetWidth(271.25)
+frame.bid_listing:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
+
+frame.buyout_listing = gui.panel(frame.content)
+frame.buyout_listing:SetHeight(228)
+frame.buyout_listing:SetWidth(271.25)
+frame.buyout_listing:SetPoint('BOTTOMRIGHT', 0, 0)
 
 do
     local checkbox = gui.checkbox(frame.inventory)
@@ -62,28 +67,44 @@ inventory_listing = item_listing.create(
     end
 )
 
-auction_listing = listing.CreateScrollingTable(frame.auctions)
-auction_listing:SetColInfo{
-    {name='Auctions', width=.12, align='CENTER'},
-    {name='Left', width=.1, align='CENTER'},
-    {name='Qty', width=.08, align='CENTER'},
-    {name='Bid/ea', width=.22, align='RIGHT'},
-    {name='Bid Pct', width=.13, align='CENTER'},
-    {name='Buy/ea', width=.22, align='RIGHT'},
-    {name='Buy Pct', width=.13, align='CENTER'},
+bid_listing = listing.CreateScrollingTable(frame.bid_listing)
+bid_listing:SetColInfo{
+    {name='#', width=.15, align='CENTER'},
+    {name='Left', width=.11, align='CENTER'},
+    {name='Qty', width=.11, align='CENTER'},
+    {name='Bid/ea', width=.4, align='RIGHT'},
+    {name='Pct', width=.23, align='CENTER'},
 }
-auction_listing:EnableSorting(false)
-auction_listing:DisableSelection(true)
-auction_listing:SetHandler('OnClick', function(table, row_data, column, button)
+bid_listing:EnableSorting(false)
+bid_listing:DisableSelection(true)
+bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
     local column_index = key(column, column.row.cols)
-    local unit_start_price, unit_buyout_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
+    local unit_start_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
     if column_index == 3 then
         stack_size_slider:SetValue(row_data.record.stack_size)
     elseif column_index == 4 then
         set_unit_start_price(unit_start_price)
-    elseif column_index == 6 then
-        set_unit_buyout_price(unit_buyout_price)
     end
+end)
+
+buyout_listing = listing.CreateScrollingTable(frame.buyout_listing)
+buyout_listing:SetColInfo{
+	{name='#', width=.15, align='CENTER'},
+	{name='Left', width=.11, align='CENTER'},
+	{name='Qty', width=.11, align='CENTER'},
+	{name='Buy/ea', width=.4, align='RIGHT'},
+	{name='Pct', width=.23, align='CENTER'},
+}
+buyout_listing:EnableSorting(false)
+buyout_listing:DisableSelection(true)
+buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)
+	local column_index = key(column, column.row.cols)
+	local unit_buyout_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
+	if column_index == 3 then
+		stack_size_slider:SetValue(row_data.record.stack_size)
+	elseif column_index == 4 then
+		set_unit_buyout_price(unit_buyout_price)
+	end
 end)
 
 do

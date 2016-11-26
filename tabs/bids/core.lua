@@ -21,7 +21,6 @@ function CLOSE()
 end
 
 function update_listing()
-	if not ACTIVE then return end
     listing:SetDatabase(auction_records)
 end
 
