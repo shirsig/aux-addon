@@ -155,7 +155,8 @@ end
 
 function set_form(filter)
 	clear_form()
-	for _, component in ipairs(filter.components) do
+	for i = 1, getn(filter.components) do
+		local component = filter.components[i]
 		if component[1] == 'blizzard' then
 			blizzard_query[component[2]] = component[4]
 		else
@@ -201,13 +202,14 @@ function formatted_post_filter(components)
 	local stack = temp-T
 	local str = ''
 
-	for i, component in ipairs(components) do
+	for i = 1, getn(components) do
+		local component = components[i]
 		if no_line_break then
 			str = str .. ' '
 		end
 		str = str .. '</p><p>'
 		for _ = 1, getn(stack) + 1 do
-			str = str .. color.content.background('----')
+			str = str .. color.content.background'----'
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
 

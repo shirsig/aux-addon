@@ -340,7 +340,8 @@ function M.query(filter_string)
     end
 
     local polish_notation_counter = 0
-    for _, component in ipairs(filter.post) do
+    for i = 1, getn(filter.post) do
+	    local component = filter.post[i]
         if component[1] == 'operator' then
             polish_notation_counter = max(polish_notation_counter, 1)
             polish_notation_counter = polish_notation_counter + (tonumber(component[2]) or 1) - 1
@@ -370,8 +371,8 @@ end
 function M.queries(filter_string)
     local parts = split(filter_string, ';')
     local queries = T
-    for _, str in ipairs(parts) do
-        str = trim(str)
+    for i = 1, getn(parts) do
+        local str = trim(parts[i])
         local query, _, error = query(str)
         if not query then
 	        return nil, error

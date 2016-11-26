@@ -115,8 +115,8 @@ function update_auction_listing()
         local unit_start_price = get_unit_start_price()
         local unit_buyout_price = get_unit_buyout_price()
 
-        for i, auction_record in ipairs(existing_auctions[selected_item.key] or empty) do
-
+        for i = 1, getn(existing_auctions[selected_item.key] or empty) do
+	        local auction_record = existing_auctions[selected_item.key][i]
             local blizzard_bid_undercut, buyout_price_undercut = undercut(auction_record, stack_size_slider:GetValue())
             blizzard_bid_undercut = money.from_string(money.to_string(blizzard_bid_undercut, true, nil, 3))
             buyout_price_undercut = money.from_string(money.to_string(buyout_price_undercut, true, nil, 3))

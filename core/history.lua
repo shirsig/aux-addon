@@ -97,10 +97,10 @@ end
 function weighted_median(list)
 	sort(list, function(a,b) return a.value < b.value end)
 	local weight = 0
-	for _, element in ipairs(list) do
-		weight = weight + element.weight
+	for i = 1, getn(list) do
+		weight = weight + list[i].weight
 		if weight >= .5 then
-			return element.value
+			return list[i].value
 		end
 	end
 end

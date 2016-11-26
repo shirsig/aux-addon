@@ -8,7 +8,8 @@ _G.aux_recent_searches = T
 
 function update_search_listings()
 	local favorite_search_rows = T
-	for i, search in ipairs(aux_favorite_searches) do
+	for i = 1, getn(aux_favorite_searches) do
+		local search = aux_favorite_searches[i]
 		local name = strsub(search.prettified, 1, 250)
 		tinsert(favorite_search_rows, O(
 			'cols', A(O('value', search.auto_buy and color.red'A' or ''), O('value', name)),
@@ -19,11 +20,12 @@ function update_search_listings()
 	favorite_searches_listing:SetData(favorite_search_rows)
 
 	local recent_search_rows = T
-	for i, recent_search in ipairs(aux_recent_searches) do
-		local name = strsub(recent_search.prettified, 1, 250)
+	for i = 1, getn(aux_recent_searches) do
+		local search = aux_recent_searches[i]
+		local name = strsub(search.prettified, 1, 250)
 		tinsert(recent_search_rows, O(
 			'cols', A(O('value', name)),
-			'search', recent_search,
+			'search', search,
 			'index', i
 		))
 	end

@@ -18,16 +18,16 @@ function M:complete_filter()
 	local start_index, _, current_modifier = strfind(filter_string, '([^/;]*)$')
 	current_modifier = current_modifier or ''
 
-	for _, suggestion in ipairs(suggestions) do
-		if strsub(strupper(suggestion), 1, strlen(current_modifier)) == strupper(current_modifier) then
-			this:SetText(strlower(strsub(filter_string, 1, start_index - 1) ..  suggestion))
+	for i = 1, getn(suggestions) do
+		if strsub(strupper(suggestions[i]), 1, strlen(current_modifier)) == strupper(current_modifier) then
+			this:SetText(strlower(strsub(filter_string, 1, start_index - 1) ..  suggestions[i]))
 			this:HighlightText(strlen(filter_string), -1)
 			return
 		end
 	end
 end
 
-function M.complete(options)
+function M.complete(candidates)
 	return function(self)
 		if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
 			return
@@ -35,9 +35,10 @@ function M.complete(options)
 
 		local text = self:GetText()
 
-		for _, item_name in ipairs(options()) do
-			if strsub(strupper(item_name), 1, strlen(text)) == strupper(text) then
-				self:SetText(strlower(item_name))
+		local t = temp-candidates()
+		for i = 1, getn(t) do
+			if strsub(strupper(t[i]), 1, strlen(text)) == strupper(text) then
+				self:SetText(strlower(t[i]))
 				self:HighlightText(strlen(text), -1)
 				return
 			end

@@ -12,7 +12,6 @@ local search_tab = require 'aux.tabs.search'
 
 _G.aux_price_per_unit = false
 
-local RT_COUNT = 1
 local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
 
@@ -714,7 +713,8 @@ local methods = {
             end
         end
 
-        for _, info in ipairs(self.rowInfo) do
+	    for i = 1, getn(self.rowInfo) do
+		    local info = self.rowInfo[i]
             local totalAuctions, totalPlayerAuctions = 0, 0
             for _, childInfo in info.children do
                 totalAuctions = totalAuctions + childInfo.numAuctions
@@ -781,8 +781,8 @@ local methods = {
                 return tostring(a) < tostring(b)
             end
 
-            for _, info in ipairs(self.rowInfo) do
-                sort(info.children, sort_helper)
+            for i = 1, getn(self.rowInfo) do
+                sort(self.rowInfo[i].children, sort_helper)
             end
             sort(self.rowInfo, sort_helper)
             self.isSorted = true
@@ -790,11 +790,13 @@ local methods = {
 
         -- update all the rows
         local rowIndex = 1 - FauxScrollFrame_GetOffset(self.scrollFrame)
-        for _, info in ipairs(self.rowInfo) do
+        for i = 1, getn(self.rowInfo) do
+	        local info = self.rowInfo[i]
             if self.expanded[info.expandKey] then
                 -- show each of the rows for this base item since it's expanded
-                for i, childInfo in ipairs(info.children) do
-                    self:SetRowInfo(rowIndex, childInfo.record, childInfo.numAuctions, 0, i > 1, false, info.expandKey, childInfo.numAuctions)
+                for j = 1, getn(info.children) do
+	                local childInfo = info.children[j]
+                    self:SetRowInfo(rowIndex, childInfo.record, childInfo.numAuctions, 0, j > 1, false, info.expandKey, childInfo.numAuctions)
                     rowIndex = rowIndex + 1
                 end
             else
@@ -959,8 +961,8 @@ local methods = {
     GetSelection = function(self)
         if not self.selected then return end
         local selectedData
-        for _, info in ipairs(self.rowInfo) do
-            for _, childInfo in info.children do
+        for i = 1, getn(self.rowInfo) do
+            for _, childInfo in self.rowInfo[i].children do
                 if childInfo.record.search_signature == self.selected.search_signature then
                     selectedData = childInfo
                     break
@@ -972,8 +974,8 @@ local methods = {
 
     GetTotalAuctions = function(self)
         local numResults = 0
-        for _, info in ipairs(self.rowInfo) do
-            for _, childInfo in info.children do
+        for i = 1, getn(self.rowInfo) do
+            for _, childInfo in self.rowInfo[i].children do
                 numResults = numResults + childInfo.numAuctions
             end
         end
@@ -982,8 +984,6 @@ local methods = {
 }
 
 function M.CreateAuctionResultsTable(parent, config)
-
-    RT_COUNT = RT_COUNT + 1
     local rt = CreateFrame('Frame', nil, parent)
     rt.config = config
     local numRows = 16
@@ -1038,7 +1038,8 @@ function M.CreateAuctionResultsTable(parent, config)
 
     -- create the header cells
     rt.headCells = T
-    for i, column_config in ipairs(rt.config) do
+    for i = 1, getn(rt.config) do
+	    local column_config = rt.config[i]
         local cell = CreateFrame('Button', nil, rt.contentFrame)
         cell:SetHeight(HEAD_HEIGHT)
         if i == 1 then
