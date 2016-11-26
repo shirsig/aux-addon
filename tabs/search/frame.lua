@@ -24,12 +24,12 @@ frame.saved = CreateFrame('Frame', nil, frame)
 frame.saved:SetAllPoints(AuxFrame.content)
 
 frame.saved.favorite = gui.panel(frame.saved)
-frame.saved.favorite:SetWidth(395)
+frame.saved.favorite:SetWidth(415)
 frame.saved.favorite:SetPoint('TOPLEFT', 0, 0)
 frame.saved.favorite:SetPoint('BOTTOMLEFT', 0, 0)
 
 frame.saved.recent = gui.panel(frame.saved)
-frame.saved.recent:SetWidth(362.5)
+frame.saved.recent:SetWidth(342.5)
 frame.saved.recent:SetPoint('TOPRIGHT', 0, 0)
 frame.saved.recent:SetPoint('BOTTOMRIGHT', 0, 0)
 do
@@ -535,7 +535,7 @@ for _ = 1, 5 do
 end
 
 favorite_searches_listing = listing.CreateScrollingTable(frame.saved.favorite)
-favorite_searches_listing:SetColInfo{{width=.05, align='CENTER'}, {name='Favorite Searches', width=.95}}
+favorite_searches_listing:SetColInfo{{name='Auto', width=.1, align='CENTER'}, {name='Favorite Searches', width=.9}}
 
 recent_searches_listing = listing.CreateScrollingTable(frame.saved.recent)
 recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}

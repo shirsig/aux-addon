@@ -12,7 +12,7 @@ function update_search_listings()
 		local search = aux_favorite_searches[i]
 		local name = strsub(search.prettified, 1, 250)
 		tinsert(favorite_search_rows, O(
-			'cols', A(O('value', search.auto_buy and color.red'A' or ''), O('value', name)),
+			'cols', A(O('value', search.auto_buy and color.red'X' or ''), O('value', name)),
 			'search', search,
 			'index', i
 		))
@@ -56,9 +56,8 @@ handlers = {
 		elseif button == 'RightButton' then
 			local u = update_search_listings
 			if st == recent_searches_listing then
-				gui.menu(
-					'Favorite', function() tinsert(aux_favorite_searches, 1, data.search); u() end
-				)
+				tinsert(aux_favorite_searches, 1, data.search)
+				u(d)
 			elseif st == favorite_searches_listing then
 				local auto_buy = data.search.auto_buy
 				gui.menu(
