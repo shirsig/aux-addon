@@ -166,7 +166,7 @@ end
 
 function M.is_player(name)
 	local key = GetCVar'realmName' .. '|' .. UnitFactionGroup'player'
-	return index(aux_characters, key, name) and true or false
+	return name and index(aux_characters, key, name) and true or false
 end
 
 function LOAD2()
