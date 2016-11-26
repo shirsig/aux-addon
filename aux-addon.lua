@@ -166,7 +166,7 @@ end
 
 function M.is_player(name)
 	local key = GetCVar'realmName' .. '|' .. UnitFactionGroup'player'
-	return index(aux_characters, key, name)
+	return index(aux_characters, key, name) ~= nil
 end
 
 function LOAD2()
