@@ -421,8 +421,8 @@ function suggestions(filter)
 
     -- item names
     if getn(filter.components) == 0 then
-        for _, name in ipairs(aux_auctionable_items) do
-            tinsert(suggestions, name .. '/exact')
+	    for i = 1, getn(aux_auctionable_items) do
+            tinsert(suggestions, aux_auctionable_items[i] .. '/exact')
         end
     end
 
@@ -432,7 +432,8 @@ end
 function M.filter_string(components)
     local query_builder = query_builder()
 
-    for _, component in ipairs(components) do
+    for i = 1, getn(components) do
+	    local component = components[i]
 	    if component[1] == 'blizzard' then
 		    query_builder.append(filter[4] or filter[3])
         elseif component[1] == 'operator' then
@@ -455,7 +456,8 @@ end
 function prettified_filter_string(filter)
     local prettified = query_builder()
 
-    for _, component in ipairs(filter.components) do
+    for i = 1, getn(filter.components) do
+	    local component = filter.components[i]
 	    if component[1] == 'blizzard' then
 		    if component[2] == 'name' then
 			    if filter.blizzard.exact then
