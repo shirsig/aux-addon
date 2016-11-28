@@ -1,4 +1,4 @@
-library 'T'
+if module 'T' then return end
 
 local next, getn, setn, tremove, setmetatable = next, getn, table.setn, tremove, setmetatable
 

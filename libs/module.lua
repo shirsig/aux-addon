@@ -60,6 +60,5 @@ function create_module(name)
 	loaded[name], loaded[public_modifier] = P, P
 end
 
-function module(name) if not loaded[name] then create_module(name) end setfenv(2, environments[name]) end
-function library(name) if loaded[name] then _G.error(nil) end create_module(name) setfenv(2, environments[name]) end
+function module(name) local loaded = loaded[name] if not loaded then create_module(name) end setfenv(2, environments[name]); return loaded end
 function require(name) if not loaded[name] then create_module(name) end return interfaces[name] end
