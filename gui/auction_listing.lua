@@ -238,11 +238,11 @@ M.auctions_config = {
             if indented then
                 cell.spacer:SetWidth(10)
                 cell.icon:SetAlpha(.5)
-                cell:GetFontString():SetAlpha(.7)
+                cell.text:SetAlpha(.7)
             else
                 cell.spacer:SetWidth(1)
                 cell.icon:SetAlpha(1)
-                cell:GetFontString():SetAlpha(1)
+                cell.text:SetAlpha(1)
             end
             cell.text:SetText(gsub(record.link, '[%[%]]', ''))
         end,
@@ -385,11 +385,11 @@ M.bids_config = {
             if indented then
                 cell.spacer:SetWidth(10)
                 cell.icon:SetAlpha(.5)
-                cell:GetFontString():SetAlpha(.7)
+                cell.text:SetAlpha(.7)
             else
                 cell.spacer:SetWidth(1)
                 cell.icon:SetAlpha(1)
-                cell:GetFontString():SetAlpha(1)
+                cell.text:SetAlpha(1)
             end
             cell.text:SetText(gsub(record.link, '[%[%]]', ''))
         end,
