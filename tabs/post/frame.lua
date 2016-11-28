@@ -29,12 +29,12 @@ frame.parameters:SetPoint('TOPRIGHT', 0, 0)
 
 frame.bid_listing = gui.panel(frame.content)
 frame.bid_listing:SetHeight(228)
-frame.bid_listing:SetWidth(271.25)
+frame.bid_listing:SetWidth(271.5)
 frame.bid_listing:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
 
 frame.buyout_listing = gui.panel(frame.content)
 frame.buyout_listing:SetHeight(228)
-frame.buyout_listing:SetWidth(271.25)
+frame.buyout_listing:SetWidth(271.5)
 frame.buyout_listing:SetPoint('BOTTOMRIGHT', 0, 0)
 
 do
