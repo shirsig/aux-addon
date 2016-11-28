@@ -1,7 +1,7 @@
 if module then return end
 local strfind, type, setmetatable, setfenv, _G = strfind, type, setmetatable, setfenv, getfenv(0)
 local error, nop, id, define, include, create_module, nop_default_mt, public_modifier_mt, proxy_mt
-local loaded, interfaces, environments = {}, {}, {}
+local loaded, defined, interfaces, environments = {}, {}, {}, {}
 
 function error(msg, ...) return _G.error(format(msg or '', unpack(arg)) .. '\n' .. debugstack(), 0) end
 
@@ -60,5 +60,6 @@ function create_module(name)
 	loaded[name], loaded[public_modifier] = P, P
 end
 
-function module(name) local loaded = loaded[name] if not loaded then create_module(name) end setfenv(2, environments[name]); return loaded end
+function module(name) if not loaded[name] then create_module(name) end defined[name] = true; setfenv(2, environments[name]) end
 function require(name) if not loaded[name] then create_module(name) end return interfaces[name] end
+function _G.defined(name) return defined[name] end

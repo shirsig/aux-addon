@@ -1,4 +1,5 @@
-if module 'T' then return end
+if defined 'T' then return end
+module 'T'
 
 local next, getn, setn, tremove, setmetatable = next, getn, table.setn, tremove, setmetatable
 
