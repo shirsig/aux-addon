@@ -670,11 +670,6 @@ local methods = {
         end
     end,
 
-
-    -- ============================================================================
-    -- Internal Results Table Methods
-    -- ============================================================================
-
     UpdateRowInfo = function(self)
 	    for _, info in self.rowInfo do
 		    if type(info) == 'table' then
