@@ -75,7 +75,6 @@ bid_listing:SetColInfo{
     {name='Bid/ea', width=.4, align='RIGHT'},
     {name='Pct', width=.23, align='CENTER'},
 }
-bid_listing:EnableSorting(false)
 bid_listing:DisableSelection(true)
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
     unit_start_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
@@ -89,7 +88,6 @@ buyout_listing:SetColInfo{
 	{name='Buy/ea', width=.4, align='RIGHT'},
 	{name='Pct', width=.23, align='CENTER'},
 }
-buyout_listing:EnableSorting(false)
 buyout_listing:DisableSelection(true)
 buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)
 	unit_buyout_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')

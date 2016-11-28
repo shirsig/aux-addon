@@ -60,22 +60,6 @@ local methods = {
         local offset = FauxScrollFrame_GetOffset(st.scrollFrame)
         st.offset = offset
 
-        -- do sorting if enabled
-        if st.sortInfo.enabled and st.sortInfo.col and st.updateSort then
-            local function SortHelper(rowA, rowB)
-                local sortArgA = rowA.cols[st.sortInfo.col].sortArg
-                local sortArgB = rowB.cols[st.sortInfo.col].sortArg
-
-                if st.sortInfo.ascending then
-                    return sortArgA < sortArgB
-                else
-                    return sortArgA > sortArgB
-                end
-            end
-            sort(st.rowData, SortHelper)
-            st.updateSort = nil
-        end
-
         for i = 1, st.sizes.numRows do
             st.rows[i].data = nil
             if i > getn(st.rowData) then
@@ -144,21 +128,6 @@ local methods = {
         st.selectionDisabled = value
     end,
 
-    EnableSorting = function(st, value, defaultCol)
-        st.sortInfo.enabled = value
-        st.sortInfo.col = abs(defaultCol or 1)
-        st.sortInfo.ascending = not defaultCol or defaultCol > 0
-        st.updateSort = true
-        for _, headCol in st.headCols do
-            if value then
-                headCol:EnableMouse(true)
-            else
-                headCol:EnableMouse(false)
-            end
-        end
-        st:RefreshRows()
-    end,
-
     DisableHighlight = function(st, value)
         st.highlightDisabled = value
     end,
@@ -177,15 +146,12 @@ local methods = {
         local height = st:GetHeight()
 
         if getn(st.colInfo) > 1 or st.colInfo[1].name then
-            -- there is a header row
             st.sizes.headHeight = st.sizes.headFontSize and (st.sizes.headFontSize + 4) or ST_HEAD_HEIGHT
         else
-            -- no header row
             st.sizes.headHeight = 0
         end
         st.sizes.numRows = max(floor((st:GetParent():GetHeight() - st.sizes.headHeight - ST_HEAD_SPACE) / ST_ROW_HEIGHT), 0)
 
-        -- update the frame
         st.scrollBar:ClearAllPoints()
         st.scrollBar:SetPoint('BOTTOMRIGHT', st, -1, 1)
         st.scrollBar:SetPoint('TOPRIGHT', st, -1, -st.sizes.headHeight - ST_HEAD_SPACE - 1)
@@ -199,18 +165,15 @@ local methods = {
             st.headLine:Hide()
         end
 
-        -- update the first row
         if st.rows and st.rows[1] then
             st.rows[1]:SetPoint('TOPLEFT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE))
             st.rows[1]:SetPoint('TOPRIGHT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE))
         end
 
-        -- add header columns if necessary
         while getn(st.headCols) < getn(st.colInfo) do
             st:AddColumn()
         end
 
-        -- adjust head col widths
         for i, col in st.headCols do
             if st.colInfo[i] then
                 col:Show()
@@ -223,19 +186,16 @@ local methods = {
             end
         end
 
-        -- add more rows if necessary
         while getn(st.rows) < st.sizes.numRows do
             st:AddRow()
         end
 
-        -- adjust rows widths
         for i, row in st.rows do
             if i > st.sizes.numRows then
                 row.data = nil
                 row:Hide()
             else
                 row:Show()
-                -- add any missing cols
                 while getn(row.cols) < getn(st.colInfo) do
                     st:AddRowCol(i)
                 end
@@ -340,7 +300,6 @@ local methods = {
 
     SetHeadFontSize = function(st, size)
         st.sizes.headFontSize = size
-        -- update the text size of the head cols
         for _, col in st.headCols do
             if st.sizes.headFontSize then
                 col.text:SetFont(gui.font, st.sizes.headFontSize)
@@ -359,18 +318,15 @@ local methods = {
 }
 
 function M.CreateScrollingTable(parent)
-    -- create the base frame
     ST_COUNT = ST_COUNT + 1
     local st = CreateFrame('Frame', 'TSMScrollingTable' .. ST_COUNT, parent)
     st:SetAllPoints()
---    st:SetScript('OnSizeChanged', function() st:Redraw() end)
 
     local contentFrame = CreateFrame('Frame', nil, st)
     contentFrame:SetPoint('TOPLEFT', 0, 0)
     contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
     st.contentFrame = contentFrame
 
-    -- frame to hold the header columns and the rows
     local scrollFrame = CreateFrame('ScrollFrame', st:GetName() .. 'ScrollFrame', st, 'FauxScrollFrameTemplate')
     scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
         FauxScrollFrame_OnVerticalScroll(ST_ROW_HEIGHT, function() st:RefreshRows() end)
@@ -389,21 +345,17 @@ function M.CreateScrollingTable(parent)
     _G[scrollBar:GetName() .. 'ScrollUpButton']:Hide()
     _G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
 
-    -- create head line at default position
     st.headLine = gui.horizontal_line(st, 0)
 
-    -- add all the methods
     for name, func in methods do
         st[name] = func
     end
 
-    -- setup default values
     st.isTSMScrollingTable = true
     st.sizes = T
     st.headCols = T
     st.rows = T
     st.handlers = T
-    st.sortInfo = T
     st.colInfo = DEFAULT_COL_INFO
 
     return st

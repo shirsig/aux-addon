@@ -20,7 +20,7 @@ function M.render(item_listing)
 
         if item_record then
 			row.item_record = item_record
-			if item_listing.selected and item_listing.selected(item_record) then
+			if item_listing.selected and item_listing.selected(item_record) or row.mouseover then
 				row.highlight:Show()
 			elseif not row.mouse_over then
 				row.highlight:Hide()
@@ -75,9 +75,11 @@ function M.create(parent, on_click, selected)
 			row:EnableMouse(true)
 			row:SetScript('OnMouseDown', on_click)
 			row:SetScript('OnEnter', function()
+				row.mouseover = true
 				row.highlight:Show()
 			end)
 			row:SetScript('OnLeave', function()
+				row.mouseover = false
 				if not selected(row.item_record) then
 					row.highlight:Hide()
 				end
