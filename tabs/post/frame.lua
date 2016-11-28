@@ -78,13 +78,7 @@ bid_listing:SetColInfo{
 bid_listing:EnableSorting(false)
 bid_listing:DisableSelection(true)
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
-    local column_index = key(column, column.row.cols)
-    local unit_start_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
-    if column_index == 3 then
-        stack_size_slider:SetValue(row_data.record.stack_size)
-    elseif column_index == 4 then
-        set_unit_start_price(unit_start_price)
-    end
+    unit_start_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
 end)
 
 buyout_listing = listing.CreateScrollingTable(frame.buyout_listing)
@@ -98,13 +92,7 @@ buyout_listing:SetColInfo{
 buyout_listing:EnableSorting(false)
 buyout_listing:DisableSelection(true)
 buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)
-	local column_index = key(column, column.row.cols)
-	local unit_buyout_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
-	if column_index == 3 then
-		stack_size_slider:SetValue(row_data.record.stack_size)
-	elseif column_index == 4 then
-		set_unit_buyout_price(unit_buyout_price)
-	end
+	unit_buyout_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
 end)
 
 do
@@ -242,11 +230,11 @@ do
 		    unit_buyout_price_input:SetFocus()
 	    end
     end)
-    editbox.formatter = function() return money.to_string(get_unit_start_price(), true, nil, 3) end
+    editbox.formatter = function() return money.to_string(unit_start_price, true, nil, 3) end
     editbox.change = function() refresh = true end
     editbox.enter = function() this:ClearFocus() end
     editbox.focus_loss = function()
-	    this:SetText(money.to_string(get_unit_start_price(), true, nil, 3, nil, true))
+	    this:SetText(money.to_string(unit_start_price, true, nil, 3, nil, true))
     end
     do
         local label = gui.label(editbox, gui.font_size.small)
@@ -305,8 +293,8 @@ do
     btn:GetFontString():SetPoint('RIGHT', -2, 0)
     btn:SetScript('OnClick', function()
         if this.amount then
-            set_unit_start_price(this.amount)
-            set_unit_buyout_price(this.amount)
+            unit_start_price = this.amount
+            unit_buyout_price = this.amount
         end
     end)
     local label = gui.label(btn, gui.font_size.small)

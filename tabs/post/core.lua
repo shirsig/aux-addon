@@ -107,104 +107,61 @@ function update_inventory_listing()
 	item_listing.populate(inventory_listing, records)
 end
 
+function price_color(record, reference)
+	local unit_undercut = undercut(record, stack_size_slider:GetValue())
+	unit_undercut = money.from_string(money.to_string(unit_undercut, true, nil, 3))
+
+	local stack_undercut = undercut(record, stack_size_slider:GetValue(), true)
+	stack_undercut = money.from_string(money.to_string(stack_undercut, true, nil, 3))
+
+	if unit_undercut < reference and stack_undercut < reference then
+		return color.red
+	elseif unit_undercut < reference then
+		return color.orange
+	elseif stack_undercut < reference then
+		return color.yellow
+	end
+end
+
+function update_auction_listing(listing, records, reference)
+	local rows = T
+	if selected_item then
+		local historical_value = history.value(selected_item.key)
+		for i = 1, getn(records[selected_item.key] or empty) do
+			local record = records[selected_item.key][i]
+			tinsert(rows, O(
+				'cols', A(
+				O('value', record.own and color.yellow(record.count) or record.count),
+				O('value', al.time_left(record.duration)),
+				O('value', record.stack_size == stack_size and color.yellow(record.stack_size) or record.stack_size),
+				O('value', money.to_string(record.unit_price, true, nil, 3, price_color(record, reference, stack_size_slider:GetValue()))),
+				O('value', historical_value and al.percentage_historical(round(record.unit_price / historical_value * 100)) or '---')
+			),
+				'record', record
+			))
+		end
+		sort(rows, function(a, b)
+			return sort_util.multi_lt(
+				a.record.unit_price,
+				b.record.unit_price,
+
+				a.record.stack_size,
+				b.record.stack_size,
+
+				b.record.own and 1 or 0,
+				a.record.own and 1 or 0,
+
+				a.record.duration,
+				b.record.duration
+			)
+		end)
+	end
+	listing:SetData(rows)
+end
+
 function update_auction_listings()
-	if not ACTIVE then return end
-    local bid_rows, buyout_rows = T, T
-    if selected_item then
-        local unit_start_price = get_unit_start_price()
-        local unit_buyout_price = get_unit_buyout_price()
-        local stack_size = stack_size_slider:GetValue()
-        local historical_value = history.value(selected_item.key)
-
-        for i = 1, getn(bid_records[selected_item.key] or empty) do
-	        local record = bid_records[selected_item.key][i]
-            local blizzard_bid_undercut = undercut(record, stack_size)
-            blizzard_bid_undercut = money.from_string(money.to_string(blizzard_bid_undercut, true, nil, 3))
-
-            local stack_blizzard_bid_undercut = undercut(record, stack_size, true)
-            stack_blizzard_bid_undercut = money.from_string(money.to_string(stack_blizzard_bid_undercut, true, nil, 3))
-
-            local bid_color
-            if blizzard_bid_undercut < unit_start_price and stack_blizzard_bid_undercut < unit_start_price then
-                bid_color = color.red
-            elseif blizzard_bid_undercut < unit_start_price then
-                bid_color = color.orange
-            elseif stack_blizzard_bid_undercut < unit_start_price then
-                bid_color = color.yellow
-            end
-
-            tinsert(bid_rows, O(
-                'cols', A(
-                    O('value', record.own and color.yellow(record.count) or record.count),
-		            O('value', al.time_left(record.duration)),
-		            O('value', record.stack_size == stack_size and color.yellow(record.stack_size) or record.stack_size),
-		            O('value', money.to_string(record.unit_price, true, nil, 3, bid_color)),
-		            O('value', historical_value and al.percentage_historical(round(record.unit_price / historical_value * 100)) or '---')
-                ),
-                'record', record
-            ))
-        end
-        sort(bid_rows, function(a, b)
-            return sort_util.multi_lt(
-                    a.record.unit_price,
-	                b.record.unit_price,
-
-                    a.record.stack_size,
-	                b.record.stack_size,
-
-                    b.record.own and 1 or 0,
-	                a.record.own and 1 or 0,
-
-                    a.record.duration,
-                    b.record.duration
-            )
-        end)
-        for i = 1, getn(buyout_records[selected_item.key] or empty) do
-	        local record = buyout_records[selected_item.key][i]
-	        local buyout_price_undercut = undercut(record, stack_size)
-	        buyout_price_undercut = money.from_string(money.to_string(buyout_price_undercut, true, nil, 3))
-
-	        local stack_buyout_price_undercut = undercut(record, stack_size, true)
-	        stack_buyout_price_undercut = money.from_string(money.to_string(stack_buyout_price_undercut, true, nil, 3))
-
-	        local buyout_color
-	        if buyout_price_undercut < unit_buyout_price and stack_buyout_price_undercut < unit_buyout_price then
-		        buyout_color = color.red
-	        elseif buyout_price_undercut < unit_buyout_price then
-		        buyout_color = color.orange
-	        elseif stack_buyout_price_undercut < unit_buyout_price then
-		        buyout_color = color.yellow
-	        end
-
-	        tinsert(buyout_rows, O(
-		        'cols', A(
-		        O('value', record.own and color.yellow(record.count) or record.count),
-		        O('value', al.time_left(record.duration)),
-		        O('value', record.stack_size == stack_size and color.yellow(record.stack_size) or record.stack_size),
-		        O('value', money.to_string(record.unit_price, true, nil, 3, buyout_color)),
-		        O('value', historical_value and al.percentage_historical(round(record.unit_price / historical_value * 100)))
-	        ),
-		        'record', record
-	        ))
-        end
-        sort(buyout_rows, function(a, b)
-	        return sort_util.multi_lt(
-		        a.record.unit_price,
-		        b.record.unit_price,
-
-		        a.record.stack_size,
-		        b.record.stack_size,
-
-		        b.record.own and 1 or 0,
-		        a.record.own and 1 or 0,
-
-		        a.record.duration,
-		        b.record.duration
-	        )
-        end)
-    end
-    bid_listing:SetData(bid_rows)
-    buyout_listing:SetData(buyout_rows)
+	update_auction_listing(bid_listing, bid_records, unit_start_price)
+	update_auction_listing(buyout_listing, buyout_records, unit_buyout_price)
 end
 
 function M.select_item(item_key)
@@ -220,15 +177,13 @@ function price_update()
     if selected_item then
         local settings = read_settings()
 
-        local start_price_input = get_unit_start_price()
-        settings.start_price = start_price_input
         local historical_value = history.value(selected_item.key)
-        start_price_percentage:SetText(historical_value and al.percentage_historical(round(start_price_input / historical_value * 100)) or '---')
 
-        local buyout_price_input = get_unit_buyout_price()
-        settings.buyout_price = buyout_price_input
-        local historical_value = history.value(selected_item.key)
-        buyout_price_percentage:SetText(historical_value and al.percentage_historical(round(buyout_price_input / historical_value * 100)) or '---')
+        settings.start_price = unit_start_price
+        start_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_start_price / historical_value * 100)) or '---')
+
+        settings.buyout_price = unit_buyout_price
+        buyout_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_buyout_price / historical_value * 100)) or '---')
 
         write_settings(settings)
     end
@@ -236,8 +191,8 @@ end
 
 function post_auctions()
 	if selected_item then
-        local unit_start_price = get_unit_start_price()
-        local unit_buyout_price = get_unit_buyout_price()
+        local unit_start_price = unit_start_price
+        local unit_buyout_price = unit_buyout_price
         local stack_size = stack_size_slider:GetValue()
         local stack_count
         stack_count = stack_count_slider:GetValue()
@@ -283,11 +238,11 @@ function validate_parameters()
         post_button:Disable()
         return
     end
-    if get_unit_buyout_price() > 0 and get_unit_start_price() > get_unit_buyout_price() then
+    if unit_buyout_price > 0 and unit_start_price > unit_buyout_price then
         post_button:Disable()
         return
     end
-    if get_unit_start_price() == 0 then
+    if unit_start_price == 0 then
         post_button:Disable()
         return
     end

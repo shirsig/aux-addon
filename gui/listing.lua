@@ -13,25 +13,7 @@ local ST_HEAD_HEIGHT = 26.3
 local ST_HEAD_SPACE = 2
 local DEFAULT_COL_INFO = {{width=1}}
 
-local function OnColumnClick()
-    local button = arg1
-    if this.st.sortInfo.enabled and button == 'LeftButton' then
-        if this.st.sortInfo.col == this.colNum then
-            this.st.sortInfo.ascending = not this.st.sortInfo.ascending
-        else
-            this.st.sortInfo.col = this.colNum
-            this.st.sortInfo.ascending = true
-        end
-        this.st.updateSort = true
-        this.st:RefreshRows()
-    end
-    if this.st.handlers.OnColumnClick then
-        this.st.handlers.OnColumnClick(this, button)
-    end
-end
-
-
-local defaultColScripts = {
+local handlers = {
     OnEnter = function()
         this.row.mouseover = true
         if not this.row.data then return end
@@ -58,21 +40,13 @@ local defaultColScripts = {
         end
     end,
 
-    OnClick = function()
+    OnMouseDown = function()
         if not this.row.data then return end
         this.st:ClearSelection()
         this.st.selected = key(this.st.rowData, this.row.data)
         this.row.highlight:Show()
 
         local handler = this.st.handlers.OnClick
-        if handler then
-            handler(this.st, this.row.data, this, arg1)
-        end
-    end,
-
-    OnDoubleClick = function()
-        if not this.row.data then return end
-        local handler = this.st.handlers.OnDoubleClick
         if handler then
             handler(this.st, this.row.data, this, arg1)
         end
@@ -125,9 +99,9 @@ local methods = {
                     if st.colInfo[j] then
                         local colData = data.cols[j]
                         if type(colData.value) == 'function' then
-                            col:SetText(colData.value(unpack(colData.args)))
+	                        col.text:SetText(colData.value(unpack(colData.args)))
                         else
-                            col:SetText(colData.value)
+                            col.text:SetText(colData.value)
                         end
                     end
                 end
@@ -242,7 +216,7 @@ local methods = {
                 col:Show()
                 col:SetWidth(st.colInfo[i].width * width)
                 col:SetHeight(st.sizes.headHeight)
-                col:SetText(st.colInfo[i].name or "")
+                col.text:SetText(st.colInfo[i].name or "")
                 col.text:SetJustifyH(st.colInfo[i].headAlign or 'CENTER')
             else
                 col:Hide()
@@ -282,7 +256,7 @@ local methods = {
 
     AddColumn = function(st)
         local colNum = getn(st.headCols) + 1
-        local col = CreateFrame('Button', st:GetName() .. 'HeadCol' .. colNum, st.contentFrame)
+        local col = CreateFrame('Frame', st:GetName() .. 'HeadCol' .. colNum, st.contentFrame)
         if colNum == 1 then
             col:SetPoint('TOPLEFT', 0, -1)
         else
@@ -290,23 +264,14 @@ local methods = {
         end
         col.st = st
         col.colNum = colNum
-        col:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-        col:SetScript('OnClick', OnColumnClick)
 
         local text = col:CreateFontString()
+        text:SetAllPoints()
         text:SetJustifyV('CENTER')
         text:SetFont(gui.font, 16)
         text:SetTextColor(color.text.enabled())
         text:SetAllPoints()
         col.text = text
-        col:SetFontString(text)
-
-        local tex = col:CreateTexture()
-        tex:SetAllPoints()
-        tex:SetTexture([[Interface\Buttons\UI-Listbox-Highlight]])
-        tex:SetTexCoord(.025, .957, .087, .931)
-        tex:SetAlpha(.2)
-        col:SetHighlightTexture(tex)
 
         tinsert(st.headCols, col)
 
@@ -321,17 +286,16 @@ local methods = {
     AddRowCol = function(st, rowNum)
         local row = st.rows[rowNum]
         local colNum = getn(row.cols) + 1
-        local col = CreateFrame('Button', nil, row)
+        local col = CreateFrame('Frame', nil, row)
         local text = col:CreateFontString()
+        col.text = text
         text:SetFont(gui.font, ST_ROW_TEXT_SIZE)
         text:SetJustifyV('CENTER')
         text:SetPoint('TOPLEFT', 1, -1)
         text:SetPoint('BOTTOMRIGHT', -1, 1)
-        col.text = text
-        col:SetFontString(text)
         col:SetHeight(ST_ROW_HEIGHT)
-        col:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-        for name, func in defaultColScripts do
+        col:EnableMouse(true)
+        for name, func in handlers do
             col:SetScript(name, func)
         end
         col.st = st
@@ -363,7 +327,7 @@ local methods = {
         row.highlight = highlight
         row.st = st
 
-        row.cols = {}
+        row.cols = T
         st.rows[rowNum] = row
         for i = 1, getn(st.colInfo) do
             st:AddRowCol(rowNum)

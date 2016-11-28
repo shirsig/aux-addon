@@ -65,7 +65,6 @@ function M.TAB(name)
 	function env.set_CLOSE(f) tab.CLOSE = f end
 	function env.set_USE_ITEM(f) tab.USE_ITEM = f end
 	function env.set_CLICK_LINK(f) tab.CLICK_LINK = f end
-	function env.M.get_ACTIVE() return tab == active_tab end
 	tinsert(tab_info, tab)
 end
 
