@@ -199,15 +199,6 @@ M.filters = {
             end
         end
     },
-
-    ['discard'] = {
-        input_type = '',
-        validator = function()
-            return function()
-                return false
-            end
-        end
-    },
 }
 
 function operator(str)
