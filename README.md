@@ -141,7 +141,7 @@ This will scan the auction house for cloth armor which has a requirement of at l
 ## Historical Value
 
 aux condenses the prices you've scanned during a day (midnight to midnight) into a single value, similarly to retail Auctioneer's "stat-simple" module.
-This daily value is calculated as the minimum buyout of the day, increased by 15% if lower than the highest price of the day, which in practice gives a very similar value to that of retail TSM while using much less memory.
+This daily value is calculated as the minimum buyout of the day which in practice gives a similar enough value to that of retail TSM while using much less memory.
 Limiting the memory usage is important because like Auctioneer and unlike TSM aux is using a day based instead of scan based interval and thus has to store the daily progress in the savedvariables.
 Finally these daily values are collected in a list of the last 11 of them from which the market value is taken as the median. The values are weighted by their age but it doesn't have a large effect unless they're older than a month.
 
