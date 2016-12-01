@@ -96,8 +96,7 @@ The filters on the left side are Blizzard filters which may reduce the number of
 - Right-clicking an item in the inventory listing will start a search.
 - Dragging an inventory item to the item slot in the top or right-clicking it will select it in the listing.
 - In the listing of existing auctions a red price is undercutting both the unit and the stack price you have selected, an orange one only the unit and a yellow one only the stack price.
-- Clicking a bid/buyout price in the listing of existing auctions will undercut with your bid/buyout. Left click will undercut the unit and right-click the stack price.
-- Clicking a stack size in the listing of existing auctions will match it for your own auction.
+- Clicking an entry in the in the listings of bids/buyouts of existing auctions will undercut with your bid/buyout. Left click will undercut the unit and right-click the stack price.
 
 ### Auctions
 ![Alt text](http://i.imgur.com/3oZUtw8.png)
