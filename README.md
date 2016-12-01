@@ -72,12 +72,12 @@ Furthermore
 - Right-clicking item links will start a search.
 
 #### Search Results
-![Alt text](http://i.imgur.com/EQ8SILy.png)
+![Alt text](http://i.imgur.com/vEHtUp6.png)
 - Bid prices for your own active bids are colored in green.
 - Bid prices for other auctions with an active bid are colored in orange.
 
 #### Saved Searches
-![Alt text](http://i.imgur.com/jHmGueI.png)
+![Alt text](http://i.imgur.com/N8Gbcro.png)
 - When hovering over an entry the tooltip shows a longer and more nicely formatted version.
 - Left-click on an entry will start a search.
 - Right-click on an entry will show a menu with various options, including toggling Auto Buy.
@@ -85,11 +85,11 @@ Furthermore
 - Shift-right-click on an entry will add a search to the existing query in the search box.
 
 #### Filter Builder
-![Alt text](http://i.imgur.com/coXD3H5.png)
+![Alt text](http://i.imgur.com/8hilZc9.png)
 While it is faster to type filters directly into the search box this sub-tab serves as a tutorial to learn how to formulate queries.
 The filters on the left side are Blizzard filters which may reduce the number of pages to be scanned and those on the right side are post filters which do not affect the scan time but can be combined with logical operators to formulate very complex filters.
 ### Post
-![Alt text](http://i.imgur.com/eydxjoH.png)
+![Alt text](http://i.imgur.com/WqasxXL.png)
 - When entering prices **g**, **s** and **c** denote gold, silver and copper respectively.
 - A price value without explicit denotations will count as gold. (e.g., 10.5 = 10g50s)
 - Price values can contain decimals. (e.g., 1.5g = 1g50s)
