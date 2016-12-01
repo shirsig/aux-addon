@@ -94,7 +94,7 @@ The filters on the left side are Blizzard filters which may reduce the number of
 - A price value without explicit denotations will count as gold. (e.g., 10.5 = 10g50s)
 - Price values can contain decimals. (e.g., 1.5g = 1g50s)
 - Right-clicking an item in the inventory listing will start a search.
-- Dragging an inventory item to the item slot in the top or right-clicking it will select it in the listing.
+- Right-clicking a bag item will select it in the listing.
 - In the listing of existing auctions a red price is undercutting both the unit and the stack price you have selected, an orange one only the unit and a yellow one only the stack price.
 - Clicking an entry in the in the listings of bids/buyouts of existing auctions will undercut with your bid/buyout. Left click will undercut the unit and right-click the stack price.
 
