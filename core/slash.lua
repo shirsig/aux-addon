@@ -3,7 +3,6 @@ module 'aux.core.slash'
 include 'T'
 include 'aux'
 
-local persistence = require 'aux.util.persistence'
 local cache = require 'aux.core.cache'
 
 _G.aux_ignore_owner = true
