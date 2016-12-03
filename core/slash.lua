@@ -12,22 +12,7 @@ _G.SLASH_AUX1 = '/aux'
 function SlashCmdList.AUX(command)
 	if not command then return end
 	local arguments = tokenize(command)
-    if arguments[1] == 'clear' and arguments[2] == 'history' then
-        persistence.dataset.history = nil
-        print('History cleared.')
-    elseif arguments[1] == 'clear' and arguments[2] == 'post' then
-        persistence.dataset.post = nil
-        print('Post settings cleared.')
-    elseif arguments[1] == 'clear' and arguments[2] == 'datasets' then
-	    _G.aux_datasets = T
-        print('Datasets cleared.')
-    elseif arguments[1] == 'clear' and arguments[2] == 'merchant' and arguments[3] == 'buy' then
-	    _G.aux_merchant_buy = T
-        print('Merchant buy prices cleared.')
-    elseif arguments[1] == 'clear' and arguments[2] == 'merchant' and arguments[3] == 'sell' then
-	    _G.aux_merchant_sell = T
-        print('Merchant sell prices cleared.')
-    elseif arguments[1] == 'clear' and arguments[2] == 'item' and arguments[3] == 'cache' then
+    if arguments[1] == 'clear' and arguments[2] == 'item' and arguments[3] == 'cache' then
 	    _G.aux_items = T
 	    _G.aux_item_ids = T
 	    _G.aux_auctionable_items = T
