@@ -667,7 +667,9 @@ local methods = {
         self:SetSelectedRecord(nil, true)
 
 	    local records = self.records
-	    if getn(records) == 0 then return end
+
+	    local single_item = all(records, function(record) return record.item_key == records[1].item_key end)
+
         sort(records, function(a, b) return a.search_signature < b.search_signature or a.search_signature == b.search_signature and tostring(a) < tostring(b) end)
 
         for i = 1, getn(records) do
@@ -676,7 +678,7 @@ local methods = {
             if prevRecord and record.search_signature == prevRecord.search_signature then
                 -- it's an identical auction to the previous row so increment the number of auctions
                 self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].numAuctions = self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].numAuctions + 1
-            elseif prevRecord and record.item_key == prevRecord.item_key then
+            elseif not single_item and prevRecord and record.item_key == prevRecord.item_key then
                 -- it's the same base item as the previous row so insert a new auction
                 tinsert(self.rowInfo[getn(self.rowInfo)].children, O('numAuctions', 1, 'record', record))
                 if self.expanded[self.rowInfo[getn(self.rowInfo)].expandKey] then
