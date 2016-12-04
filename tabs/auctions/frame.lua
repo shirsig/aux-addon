@@ -13,7 +13,7 @@ frame.listing:SetPoint('TOP', frame, 'TOP', 0, -8)
 frame.listing:SetPoint('BOTTOMLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, 0)
 frame.listing:SetPoint('BOTTOMRIGHT', AuxFrame.content, 'BOTTOMRIGHT', 0, 0)
 
-listing = auction_listing.CreateAuctionResultsTable(frame.listing, auction_listing.auctions_config)
+listing = auction_listing.new(frame.listing, auction_listing.auctions_config)
 listing:SetSort(1, 2, 3, 4, 5, 6, 7, 8)
 listing:Reset()
 listing:SetHandler('OnCellClick', function(cell, button)

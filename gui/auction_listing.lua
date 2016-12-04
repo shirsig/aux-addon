@@ -58,24 +58,26 @@ function item_column_init(rt, cell)
     cell.text:SetPoint('BOTTOMRIGHT', 0, 0)
 end
 
+function item_column_fill(cell, record, _, _, _, indented)
+	cell.icon:SetTexture(record.texture)
+	if indented then
+		cell.spacer:SetWidth(10)
+		cell.icon:SetAlpha(.5)
+		cell.text:SetAlpha(.7)
+	else
+		cell.spacer:SetWidth(1)
+		cell.icon:SetAlpha(1)
+		cell.text:SetAlpha(1)
+	end
+	cell.text:SetText(gsub(record.link, '[%[%]]', ''))
+end
+
 M.search_config = {
     {
         title = 'Item',
         width = .35,
         init = item_column_init,
-        fill = function(cell, record, _, _, _, indented)
-            cell.icon:SetTexture(record.texture)
-            if indented then
-                cell.spacer:SetWidth(10)
-                cell.icon:SetAlpha(.5)
-                cell.text:SetAlpha(.7)
-            else
-                cell.spacer:SetWidth(1)
-                cell.icon:SetAlpha(1)
-                cell.text:SetAlpha(1)
-            end
-            cell.text:SetText(gsub(record.link, '[%[%]]', ''))
-        end,
+        fill = item_column_fill,
         cmp = function(record_a, record_b, desc)
             return sort_util.compare(record_a.name, record_b.name, desc)
         end,
@@ -118,7 +120,7 @@ M.search_config = {
         end,
     },
     {
-        title = 'Stack Size',
+        title = 'Stack\nSize',
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
@@ -129,7 +131,7 @@ M.search_config = {
         end,
     },
     {
-        title = 'Time Left',
+        title = 'Time\nLeft',
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
@@ -191,6 +193,18 @@ M.search_config = {
             else
                 price_b = aux_price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end
+            if record_a.high_bidder and not record_b.high_bidder then
+	            return sort_util.GT
+            elseif record_b.high_bidder and not record_a.high_bidder then
+	            return sort_util.LT
+            end
+            if price_a == price_b then
+				if record_a.high_bid == 0 and record_b.high_bid ~= 0 then
+		            return sort_util.GT
+	            elseif record_b.high_bid == 0 and record_a.high_bid ~= 0 then
+		            return sort_util.LT
+	            end
+            end
             return sort_util.compare(price_a, price_b, desc)
         end,
     },
@@ -213,7 +227,7 @@ M.search_config = {
         end,
     },
     {
-        title = '% Hist. Value',
+        title = '% Hist.\nValue',
         width = .08,
         align = 'CENTER',
         fill = function(cell, record)
@@ -233,19 +247,7 @@ M.auctions_config = {
         title = 'Item',
         width = .35,
         init = item_column_init,
-        fill = function(cell, record, _, _, _, indented)
-            cell.icon:SetTexture(record.texture)
-            if indented then
-                cell.spacer:SetWidth(10)
-                cell.icon:SetAlpha(.5)
-                cell.text:SetAlpha(.7)
-            else
-                cell.spacer:SetWidth(1)
-                cell.icon:SetAlpha(1)
-                cell.text:SetAlpha(1)
-            end
-            cell.text:SetText(gsub(record.link, '[%[%]]', ''))
-        end,
+        fill = item_column_fill,
         cmp = function(record_a, record_b, desc)
             return sort_util.compare(record_a.name, record_b.name, desc)
         end,
@@ -285,7 +287,7 @@ M.auctions_config = {
         end,
     },
     {
-        title = 'Stack Size',
+        title = 'Stack\nSize',
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
@@ -296,7 +298,7 @@ M.auctions_config = {
         end,
     },
     {
-        title = 'Time Left',
+        title = 'Time\nLeft',
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
@@ -380,19 +382,7 @@ M.bids_config = {
         title = 'Item',
         width = .35,
         init = item_column_init,
-        fill = function(cell, record, _, _, _, indented)
-            cell.icon:SetTexture(record.texture)
-            if indented then
-                cell.spacer:SetWidth(10)
-                cell.icon:SetAlpha(.5)
-                cell.text:SetAlpha(.7)
-            else
-                cell.spacer:SetWidth(1)
-                cell.icon:SetAlpha(1)
-                cell.text:SetAlpha(1)
-            end
-            cell.text:SetText(gsub(record.link, '[%[%]]', ''))
-        end,
+        fill = item_column_fill,
         cmp = function(record_a, record_b, desc)
             return sort_util.compare(record_a.name, record_b.name, desc)
         end,
@@ -419,7 +409,7 @@ M.bids_config = {
         end,
     },
     {
-        title = 'Stack Size',
+        title = 'Stack\nSize',
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
@@ -430,7 +420,7 @@ M.bids_config = {
         end,
     },
     {
-        title = 'Time Left',
+        title = 'Time\nLeft',
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
@@ -556,7 +546,8 @@ end
 
 local methods = {
 
-    OnContentSizeChanged = function(self, width)
+    OnContentSizeChanged = function(self)
+	    local width = self.contentFrame:GetRight() - self.contentFrame:GetLeft()
         for _, cell in self.headCells do
             cell:SetWidth(cell.info.width * width)
         end
@@ -570,7 +561,6 @@ local methods = {
     OnHeadColumnClick = function()
         local button = arg1
         local rt = this.rt
-        if rt.disabled then return end
 
         if button == 'RightButton' and rt.headCells[this.columnIndex].info.isPrice then
             _G.aux_price_per_unit = not aux_price_per_unit
@@ -608,7 +598,6 @@ local methods = {
     OnCellEnter = function()
         local rt = this.rt
         local row = this.row
-        if rt.disabled then return end
         if this ~= row.cells[1] or not rt.isShowingItemTooltip then
             if rt.expanded[row.data.expandKey] then
                 GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
@@ -633,7 +622,6 @@ local methods = {
 
     OnCellClick = function()
         local button = arg1
-        if this.rt.disabled then return end
         if IsControlKeyDown() then
             DressUpItemLink(this.row.data.record.link)
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
@@ -656,7 +644,6 @@ local methods = {
         local rt = this.rt
         local rowData = this.row.data
         local expand = not rt.expanded[rowData.expandKey]
-        if rt.disabled or expand and not rowData.expandable then return end
 
         rt.expanded[rowData.expandKey] = expand
         rt:UpdateRowInfo()
@@ -702,6 +689,12 @@ local methods = {
             end
         end
 
+--	    -- if there's only one item in the result, expand it TODO
+--	    if getn(self.rowInfo) == 1 and self.expanded[self.rowInfo[1].expandKey] == nil then
+--		    self.expanded[self.rowInfo[1].expandKey] = true
+--		    self.rowInfo.numDisplayRows = getn(self.rowInfo[1].children)
+--	    end
+
 	    for i = 1, getn(self.rowInfo) do
 		    local info = self.rowInfo[i]
             local totalAuctions, totalPlayerAuctions = 0, 0
@@ -713,11 +706,23 @@ local methods = {
             end
             info.totalAuctions = totalAuctions
             info.totalPlayerAuctions = totalPlayerAuctions
-        end
+	    end
     end,
 
     UpdateRows = function(self)
-        for _, row in self.rows do row:Hide() end
+	    if self.rowInfo.numDisplayRows > getn(self.rows) then
+		    self.contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
+	    else
+		    self.contentFrame:SetPoint('BOTTOMRIGHT', 0, 0)
+	    end
+	    self:OnContentSizeChanged()
+
+	    FauxScrollFrame_Update(self.scrollFrame, self.rowInfo.numDisplayRows, getn(self.rows), self.ROW_HEIGHT)
+
+	    local maxOffset = max(self.rowInfo.numDisplayRows - getn(self.rows), 0)
+	    if FauxScrollFrame_GetOffset(self.scrollFrame) > maxOffset then
+		    FauxScrollFrame_SetOffset(self.scrollFrame, maxOffset)
+	    end
 
         for _, cell in self.headCells do
             local tex = cell:GetNormalTexture()
@@ -733,13 +738,6 @@ local methods = {
             else
                 self.headCells[last_sort.index]:GetNormalTexture():SetTexture(.6, .8, 1, .8)
             end
-        end
-
-        FauxScrollFrame_Update(self.scrollFrame, self.rowInfo.numDisplayRows, getn(self.rows), self.ROW_HEIGHT)
-
-        local maxOffset = max(self.rowInfo.numDisplayRows - getn(self.rows), 0)
-        if FauxScrollFrame_GetOffset(self.scrollFrame) > maxOffset then
-            FauxScrollFrame_SetOffset(self.scrollFrame, maxOffset)
         end
 
         if not self.isSorted then
@@ -774,6 +772,7 @@ local methods = {
             self.isSorted = true
         end
 
+	    for _, row in self.rows do row:Hide() end
         local rowIndex = 1 - FauxScrollFrame_GetOffset(self.scrollFrame)
         for i = 1, getn(self.rowInfo) do
 	        local info = self.rowInfo[i]
@@ -807,8 +806,6 @@ local methods = {
     end,
 
     SetSelectedRecord = function(self, record, silent)
-        if self.disabled then return end
-
         self.selected = record
         local selectedData = self:GetSelection()
         self.selected = selectedData and self.selected or nil
@@ -821,47 +818,46 @@ local methods = {
             end
         end
 
-        if not silent and self.handlers.OnSelectionChanged and not self.scrollDisabled then
+        if not silent and self.handlers.OnSelectionChanged then
             self.handlers.OnSelectionChanged(self, selectedData or nil)
         end
     end,
 
-    Reset = function(rt)
-        wipe(rt.expanded)
-        rt:UpdateRowInfo()
-        rt:UpdateRows()
-        rt:SetSelectedRecord()
+    Reset = function(self)
+        wipe(self.expanded)
+        self:UpdateRowInfo()
+        self:UpdateRows()
+        self:SetSelectedRecord()
     end,
 
-    SetDatabase = function(rt, database)
-        if database and database ~= rt.records then
-            rt.records = database
+    SetDatabase = function(self, database)
+        if database and database ~= self.records then
+            self.records = database
         end
 
-        -- get index of selected row
         local prevSelectedIndex
-        if rt.selected then
-            for i, row in rt.rows do
-                if row:IsVisible() and row.data and row.data.record == rt.selected then
+        if self.selected then
+            for i, row in self.rows do
+                if row:IsVisible() and row.data and row.data.record == self.selected then
                     prevSelectedIndex = i
                 end
             end
         end
 
-        rt:UpdateRowInfo()
-        rt:UpdateRows()
+        self:UpdateRowInfo()
+        self:UpdateRows()
 
-        if not rt.selected and prevSelectedIndex then
+        if not self.selected and prevSelectedIndex then
             -- try to select the same row
-            local row = rt.rows[prevSelectedIndex]
+            local row = self.rows[prevSelectedIndex]
             if row and row:IsVisible() and row.data and row.data.record then
-                rt:SetSelectedRecord(row.data.record)
+                self:SetSelectedRecord(row.data.record)
             end
-            if not rt.selected then
+            if not self.selected then
                 -- select the first row
-                row = rt.rows[1]
+                row = self.rows[1]
                 if row and row:IsVisible() and row.data and row.data.record then
-                    rt:SetSelectedRecord(row.data.record)
+                    self:SetSelectedRecord(row.data.record)
                 end
             end
         end
@@ -875,27 +871,8 @@ local methods = {
         self:SetDatabase()
     end,
 
-    RemoveSelectedRecord = function(self, count)
-        count = count or 1
-        for i = 1, count do
-            local index = key(self.selected, self.records)
-            if index then
-                tremove(self.records, index)
-            end
-        end
-        self:SetDatabase()
-    end,
-
-    InsertAuctionRecord = function(self, record, count)
-        count = count or 1
-        for i = 1, count do
-            tinsert(self.records, record)
-        end
-        self:SetDatabase()
-    end,
-
-    ContainsRecord = function(rt, record)
-        if key(record, rt.records) then
+    ContainsRecord = function(self, record)
+        if key(record, self.records) then
             return true
         end
     end,
@@ -916,26 +893,8 @@ local methods = {
         self:UpdateRows()
     end,
 
-    SetScrollDisabled = function(self, disabled)
-        self.scrollDisabled = disabled
-    end,
-
     SetHandler = function(self, event, handler)
         self.handlers[event] = handler
-    end,
-
-    SetDisabled = function(self, disabled)
-        self.disabled = disabled
-        if not disabled then
-            -- if there's only one item in the result, expand it
-            if getn(self.rowInfo) == 1 and self.expanded[self.rowInfo[1].expandKey] == nil then
-                self.expanded[self.rowInfo[1].expandKey] = true
-                self.rowInfo.numDisplayRows = getn(self.rowInfo[1].children)
-            end
-            self:UpdateRows()
-            -- select the first row
-            self:SetSelectedRecord(getn(self.rowInfo) > 0 and self.rowInfo[1].children[1].record)
-        end
     end,
 
     GetSelection = function(self)
@@ -951,24 +910,13 @@ local methods = {
         end
         return selectedData
     end,
-
-    GetTotalAuctions = function(self)
-        local numResults = 0
-        for i = 1, getn(self.rowInfo) do
-            for _, childInfo in self.rowInfo[i].children do
-                numResults = numResults + childInfo.numAuctions
-            end
-        end
-        return numResults
-    end,
 }
 
-function M.CreateAuctionResultsTable(parent, config)
+function M.new(parent, config)
     local rt = CreateFrame('Frame', nil, parent)
     rt.config = config
     local numRows = 16
     rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / numRows
-    rt.scrollDisabled = nil
     rt.expanded = T
     rt.handlers = T
     rt.sorts = T
@@ -989,14 +937,12 @@ function M.CreateAuctionResultsTable(parent, config)
 
     local contentFrame = CreateFrame('Frame', nil, rt)
     contentFrame:SetPoint('TOPLEFT', 0, 0)
-    contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
+    contentFrame:SetPoint('BOTTOMRIGHT', 0, 0)
     rt.contentFrame = contentFrame
 
     local scrollFrame = CreateFrame('ScrollFrame', gui.unique_name, rt, 'FauxScrollFrameTemplate')
     scrollFrame:SetScript('OnVerticalScroll', function()
-        if not rt.scrollDisabled then
-            FauxScrollFrame_OnVerticalScroll(rt.ROW_HEIGHT, function() rt:UpdateRows() end)
-        end
+	    FauxScrollFrame_OnVerticalScroll(rt.ROW_HEIGHT, function() rt:UpdateRows() end)
     end)
     scrollFrame:SetAllPoints(contentFrame)
     rt.scrollFrame = scrollFrame
@@ -1125,6 +1071,6 @@ function M.CreateAuctionResultsTable(parent, config)
 
     rt:SetAllPoints()
     --TODO change, maybe use for resize without scrollbar?
-    rt:OnContentSizeChanged(contentFrame:GetWidth())
+    rt:OnContentSizeChanged()
     return rt
 end

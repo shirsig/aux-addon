@@ -54,33 +54,93 @@ local handlers = {
 }
 
 local methods = {
-    RefreshRows = function(st)
-        if not st.rowData then return end
-        FauxScrollFrame_Update(st.scrollFrame, getn(st.rowData), st.sizes.numRows, ST_ROW_HEIGHT)
-        local offset = FauxScrollFrame_GetOffset(st.scrollFrame)
-        st.offset = offset
+    Update = function(self)
+	    if getn(self.colInfo) > 1 or self.colInfo[1].name then
+		    self.sizes.headHeight = ST_HEAD_HEIGHT
+	    else
+		    self.sizes.headHeight = 0
+	    end
+	    self.sizes.numRows = max(floor((self:GetParent():GetHeight() - self.sizes.headHeight - ST_HEAD_SPACE) / ST_ROW_HEIGHT), 0)
 
-        for i = 1, st.sizes.numRows do
-            st.rows[i].data = nil
-            if i > getn(st.rowData) then
-                st.rows[i]:Hide()
+	    self.scrollBar:ClearAllPoints()
+	    self.scrollBar:SetPoint('BOTTOMRIGHT', self, -1, 1)
+	    self.scrollBar:SetPoint('TOPRIGHT', self, -1, -self.sizes.headHeight - ST_HEAD_SPACE - 1)
+
+	    if getn(self.rowData or empty) > self.sizes.numRows then
+		    self.contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
+	    else
+		    self.contentFrame:SetPoint('BOTTOMRIGHT', 0, 0)
+	    end
+
+	    local width = self.contentFrame:GetRight() - self.contentFrame:GetLeft()
+
+	    while getn(self.headCols) < getn(self.colInfo) do
+		    self:AddColumn()
+	    end
+
+	    for i, col in self.headCols do
+		    if self.colInfo[i] then
+			    col:Show()
+			    col:SetWidth(self.colInfo[i].width * width)
+			    col:SetHeight(self.sizes.headHeight)
+			    col.text:SetText(self.colInfo[i].name or '')
+			    col.text:SetJustifyH(self.colInfo[i].headAlign or 'CENTER')
+		    else
+			    col:Hide()
+		    end
+	    end
+
+	    while getn(self.rows) < self.sizes.numRows do
+		    self:AddRow()
+	    end
+
+	    for i, row in self.rows do
+		    if i > self.sizes.numRows then
+			    row.data = nil
+			    row:Hide()
+		    else
+			    row:Show()
+			    while getn(row.cols) < getn(self.colInfo) do
+				    self:AddRowCol(i)
+			    end
+			    for j, col in row.cols do
+				    if self.headCols[j] and self.colInfo[j] then
+					    col:Show()
+					    col:SetWidth(self.colInfo[j].width * width)
+					    col.text:SetJustifyH(self.colInfo[j].align or 'LEFT')
+				    else
+					    col:Hide()
+				    end
+			    end
+		    end
+	    end
+	    
+        if not self.rowData then return end
+        FauxScrollFrame_Update(self.scrollFrame, getn(self.rowData), self.sizes.numRows, ST_ROW_HEIGHT)
+        local offset = FauxScrollFrame_GetOffset(self.scrollFrame)
+        self.offset = offset
+
+        for i = 1, self.sizes.numRows do
+            self.rows[i].data = nil
+            if i > getn(self.rowData) then
+                self.rows[i]:Hide()
             else
-                st.rows[i]:Show()
-                local data = st.rowData[i + offset]
+                self.rows[i]:Show()
+                local data = self.rowData[i + offset]
                 if not data then break end
-                st.rows[i].data = data
+                self.rows[i].data = data
 
-                if (st.selected == key(st.rowData, data) and not st.selectionDisabled)
-                        or (st.highlighted and st.highlighted == key(st.rowData, data))
-                        or st.rows[i].mouseover
+                if (self.selected == key(self.rowData, data) and not self.selectionDisabled)
+                        or (self.highlighted and self.highlighted == key(self.rowData, data))
+                        or self.rows[i].mouseover
                 then
-                    st.rows[i].highlight:Show()
+                    self.rows[i].highlight:Show()
                 else
-                    st.rows[i].highlight:Hide()
+                    self.rows[i].highlight:Hide()
                 end
 
-                for j, col in st.rows[i].cols do
-                    if st.colInfo[j] then
+                for j, col in self.rows[i].cols do
+                    if self.colInfo[j] then
                         local colData = data.cols[j]
                         if type(colData.value) == 'function' then
 	                        col.text:SetText(colData.value(unpack(colData.args)))
@@ -93,126 +153,50 @@ local methods = {
         end
     end,
 
-    SetData = function(st, rowData)
-	    for _, row in st.rowData or empty do
+    SetData = function(self, rowData)
+	    for _, row in self.rowData or empty do
 		    for _, col in row.cols do release(col) end
 		    release(row.cols)
 		    release(row)
 	    end
-        st.rowData = rowData
-        st.updateSort = true
-        st:RefreshRows()
+        self.rowData = rowData
+        self.updateSort = true
+        self:Update()
     end,
 
-    SetSelection = function(st, predicate)
-        st:ClearSelection()
-        for i, rowDatum in st.rowData do
+    SetSelection = function(self, predicate)
+        self:ClearSelection()
+        for i, rowDatum in self.rowData do
             if predicate(rowDatum) then
-                    st.selected = i
-                    st:RefreshRows()
+                    self.selected = i
+                    self:Update()
                 break
             end
         end
     end,
 
-    GetSelection = function(st)
-        return st.selected
+    GetSelection = function(self)
+        return self.selected
     end,
 
-    ClearSelection = function(st)
-        st.selected = nil
-        st:RefreshRows()
+    ClearSelection = function(self)
+        self.selected = nil
+        self:Update()
     end,
 
-    DisableSelection = function(st, value)
-        st.selectionDisabled = value
+    DisableSelection = function(self, value)
+        self.selectionDisabled = value
     end,
 
-    DisableHighlight = function(st, value)
-        st.highlightDisabled = value
-    end,
-
-    GetNumRows = function(st)
-        return st.sizes.numRows
-    end,
-
-    SetHighlighted = function(st, row)
-        st.highlighted = row
-        st:RefreshRows()
-    end,
-
-    Redraw = function(st)
-        local width = st:GetWidth() - 14
-
-        if getn(st.colInfo) > 1 or st.colInfo[1].name then
-            st.sizes.headHeight = ST_HEAD_HEIGHT
-        else
-            st.sizes.headHeight = 0
-        end
-        st.sizes.numRows = max(floor((st:GetParent():GetHeight() - st.sizes.headHeight - ST_HEAD_SPACE) / ST_ROW_HEIGHT), 0)
-
-        st.scrollBar:ClearAllPoints()
-        st.scrollBar:SetPoint('BOTTOMRIGHT', st, -1, 1)
-        st.scrollBar:SetPoint('TOPRIGHT', st, -1, -st.sizes.headHeight - ST_HEAD_SPACE - 1)
-
-        if st.rows and st.rows[1] then
-            st.rows[1]:SetPoint('TOPLEFT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE))
-            st.rows[1]:SetPoint('TOPRIGHT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE))
-        end
-
-        while getn(st.headCols) < getn(st.colInfo) do
-            st:AddColumn()
-        end
-
-        for i, col in st.headCols do
-            if st.colInfo[i] then
-                col:Show()
-                col:SetWidth(st.colInfo[i].width * width)
-                col:SetHeight(st.sizes.headHeight)
-                col.text:SetText(st.colInfo[i].name or '')
-                col.text:SetJustifyH(st.colInfo[i].headAlign or 'CENTER')
-            else
-                col:Hide()
-            end
-        end
-
-        while getn(st.rows) < st.sizes.numRows do
-            st:AddRow()
-        end
-
-        for i, row in st.rows do
-            if i > st.sizes.numRows then
-                row.data = nil
-                row:Hide()
-            else
-                row:Show()
-                while getn(row.cols) < getn(st.colInfo) do
-                    st:AddRowCol(i)
-                end
-                for j, col in row.cols do
-                    if st.headCols[j] and st.colInfo[j] then
-                        col:Show()
-                        col:SetWidth(st.colInfo[j].width * width)
-                        col.text:SetJustifyH(st.colInfo[j].align or 'LEFT')
-                    else
-                        col:Hide()
-                    end
-                end
-            end
-        end
-
-        st:RefreshRows()
-    end,
-
-    AddColumn = function(st)
-        local colNum = getn(st.headCols) + 1
-        local col = CreateFrame('Frame', st:GetName() .. 'HeadCol' .. colNum, st.contentFrame)
+    AddColumn = function(self)
+        local colNum = getn(self.headCols) + 1
+        local col = CreateFrame('Frame', self:GetName() .. 'HeadCol' .. colNum, self.contentFrame)
         if colNum == 1 then
             col:SetPoint('TOPLEFT', 0, 0)
         else
-            col:SetPoint('TOPLEFT', st.headCols[colNum - 1], 'TOPRIGHT')
+            col:SetPoint('TOPLEFT', self.headCols[colNum - 1], 'TOPRIGHT')
         end
-        col.st = st
+        col.st = self
         col.colNum = colNum
 
 	    local text = col:CreateFontString()
@@ -227,18 +211,18 @@ local methods = {
 	    tex:SetTexCoord(.017, 1, .083, .909)
 	    tex:SetAlpha(.5)
 
-        tinsert(st.headCols, col)
+        tinsert(self.headCols, col)
 
         -- add new cells to the rows
-        for i, row in st.rows do
-            while getn(row.cols) < getn(st.headCols) do
-                st:AddRowCol(i)
+        for i, row in self.rows do
+            while getn(row.cols) < getn(self.headCols) do
+                self:AddRowCol(i)
             end
         end
     end,
 
-    AddRowCol = function(st, rowNum)
-        local row = st.rows[rowNum]
+    AddRowCol = function(self, rowNum)
+        local row = self.rows[rowNum]
         local colNum = getn(row.cols) + 1
         local col = CreateFrame('Frame', nil, row)
         local text = col:CreateFontString()
@@ -252,7 +236,7 @@ local methods = {
         for name, func in handlers do
             col:SetScript(name, func)
         end
-        col.st = st
+        col.st = self
         col.row = row
 
         if colNum == 1 then
@@ -263,28 +247,28 @@ local methods = {
         tinsert(row.cols, col)
     end,
 
-    AddRow = function(st)
-        local row = CreateFrame('Frame', nil, st.contentFrame)
+    AddRow = function(self)
+        local row = CreateFrame('Frame', nil, self.contentFrame)
         row:SetHeight(ST_ROW_HEIGHT)
-        local rowNum = getn(st.rows) + 1
+        local rowNum = getn(self.rows) + 1
         if rowNum == 1 then
-            row:SetPoint('TOPLEFT', 2, -(st.sizes.headHeight + ST_HEAD_SPACE))
-            row:SetPoint('TOPRIGHT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE))
+            row:SetPoint('TOPLEFT', 2, -(self.sizes.headHeight + ST_HEAD_SPACE))
+            row:SetPoint('TOPRIGHT', 0, -(self.sizes.headHeight + ST_HEAD_SPACE))
         else
-            row:SetPoint('TOPLEFT', 2, -(st.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
-            row:SetPoint('TOPRIGHT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
+            row:SetPoint('TOPLEFT', 2, -(self.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
+            row:SetPoint('TOPRIGHT', 0, -(self.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
         end
         local highlight = row:CreateTexture()
         highlight:SetAllPoints()
         highlight:SetTexture(1, .9, .9, .1)
         highlight:Hide()
         row.highlight = highlight
-        row.st = st
+        row.st = self
 
         row.cols = T
-        st.rows[rowNum] = row
-        for i = 1, getn(st.colInfo) do
-            st:AddRowCol(rowNum)
+        self.rows[rowNum] = row
+        for i = 1, getn(self.colInfo) do
+            self:AddRowCol(rowNum)
         end
     end,
 
@@ -295,23 +279,23 @@ local methods = {
     SetColInfo = function(st, colInfo)
         colInfo = colInfo or DEFAULT_COL_INFO
         st.colInfo = colInfo
-        st:Redraw()
+        st:Update()
     end,
 }
 
-function M.CreateScrollingTable(parent)
+function M.new(parent)
     ST_COUNT = ST_COUNT + 1
     local st = CreateFrame('Frame', 'TSMScrollingTable' .. ST_COUNT, parent)
     st:SetAllPoints()
 
     local contentFrame = CreateFrame('Frame', nil, st)
     contentFrame:SetPoint('TOPLEFT', 0, 0)
-    contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
+    contentFrame:SetPoint('BOTTOMRIGHT', 0, 0)
     st.contentFrame = contentFrame
 
     local scrollFrame = CreateFrame('ScrollFrame', st:GetName() .. 'ScrollFrame', st, 'FauxScrollFrameTemplate')
     scrollFrame:SetScript('OnVerticalScroll', function()
-        FauxScrollFrame_OnVerticalScroll(ST_ROW_HEIGHT, function() st:RefreshRows() end)
+        FauxScrollFrame_OnVerticalScroll(ST_ROW_HEIGHT, function() st:Update() end)
     end)
     scrollFrame:SetAllPoints(contentFrame)
     st.scrollFrame = scrollFrame

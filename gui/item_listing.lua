@@ -41,7 +41,7 @@ function M.render(item_listing)
 	end
 end
 
-function M.create(parent, on_click, selected)
+function M.new(parent, on_click, selected)
 	local content = CreateFrame('Frame', nil, parent)
 	content:SetPoint('TOPLEFT', 0, -51)
 	content:SetPoint('BOTTOMRIGHT', -15, 0)

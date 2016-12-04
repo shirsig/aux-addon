@@ -24,12 +24,12 @@ frame.saved = CreateFrame('Frame', nil, frame)
 frame.saved:SetAllPoints(AuxFrame.content)
 
 frame.saved.favorite = gui.panel(frame.saved)
-frame.saved.favorite:SetWidth(415)
+frame.saved.favorite:SetWidth(393)
 frame.saved.favorite:SetPoint('TOPLEFT', 0, 0)
 frame.saved.favorite:SetPoint('BOTTOMLEFT', 0, 0)
 
 frame.saved.recent = gui.panel(frame.saved)
-frame.saved.recent:SetWidth(342.5)
+frame.saved.recent:SetWidth(364.5)
 frame.saved.recent:SetPoint('TOPRIGHT', 0, 0)
 frame.saved.recent:SetPoint('BOTTOMRIGHT', 0, 0)
 do
@@ -516,7 +516,7 @@ for _ = 1, 5 do
     status_bar:Hide()
     tinsert(status_bars, status_bar)
 
-    local table = auction_listing.CreateAuctionResultsTable(frame.results, auction_listing.search_config)
+    local table = auction_listing.new(frame.results, auction_listing.search_config)
     table:SetHandler('OnCellClick', function(cell, button)
         if IsAltKeyDown() and current_search.table:GetSelection().record == cell.row.data.record then
             if button == 'LeftButton' then
@@ -534,10 +534,10 @@ for _ = 1, 5 do
     tinsert(tables, table)
 end
 
-favorite_searches_listing = listing.CreateScrollingTable(frame.saved.favorite)
+favorite_searches_listing = listing.new(frame.saved.favorite)
 favorite_searches_listing:SetColInfo{{name='Auto Buy', width=.07, align='CENTER'}, {name='Favorite Searches', width=.93}}
 
-recent_searches_listing = listing.CreateScrollingTable(frame.saved.recent)
+recent_searches_listing = listing.new(frame.saved.recent)
 recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}
 
 for listing in temp-S(favorite_searches_listing, recent_searches_listing) do

@@ -51,7 +51,7 @@ end
 
 gui.horizontal_line(frame.inventory, -48)
 
-inventory_listing = item_listing.create(
+inventory_listing = item_listing.new(
     frame.inventory,
     function()
         if arg1 == 'LeftButton' then
@@ -67,26 +67,26 @@ inventory_listing = item_listing.create(
     end
 )
 
-bid_listing = listing.CreateScrollingTable(frame.bid_listing)
+bid_listing = listing.new(frame.bid_listing)
 bid_listing:SetColInfo{
     {name='Auctions', width=.17, align='CENTER'},
-    {name='Time Left', width=.11, align='CENTER'},
-    {name='Stack Size', width=.11, align='CENTER'},
-    {name='Auction Bid|n (per item)', width=.4, align='RIGHT'},
-    {name='% Hist. Value', width=.21, align='CENTER'},
+    {name='Time\nLeft', width=.11, align='CENTER'},
+    {name='Stack\nSize', width=.11, align='CENTER'},
+    {name='Auction Bid\n(per item)', width=.4, align='RIGHT'},
+    {name='% Hist.\nValue', width=.21, align='CENTER'},
 }
 bid_listing:DisableSelection(true)
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
     unit_start_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
 end)
 
-buyout_listing = listing.CreateScrollingTable(frame.buyout_listing)
+buyout_listing = listing.new(frame.buyout_listing)
 buyout_listing:SetColInfo{
 	{name='Auctions', width=.17, align='CENTER'},
-	{name='Time Left', width=.11, align='CENTER'},
-	{name='Stack Size', width=.12, align='CENTER'},
-	{name='Auction Buyout|n (per item)', width=.4, align='RIGHT'},
-	{name='% Hist. Value', width=.20, align='CENTER'},
+	{name='Time\nLeft', width=.11, align='CENTER'},
+	{name='Stack\nSize', width=.12, align='CENTER'},
+	{name='Auction Buyout\n(per item)', width=.4, align='RIGHT'},
+	{name='% Hist.\nValue', width=.20, align='CENTER'},
 }
 buyout_listing:DisableSelection(true)
 buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)
