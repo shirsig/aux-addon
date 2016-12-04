@@ -335,6 +335,7 @@ function M.execute(resume, real_time)
 			new_recent_search(filter_string, join(map(copy(queries), function(filter) return filter.prettified end), ';'))
 		else
 			current_search.records = T
+			current_search.table:Reset()
 			current_search.table:SetDatabase(current_search.records)
 		end
 		current_search.first_page = first_page
