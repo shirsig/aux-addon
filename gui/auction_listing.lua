@@ -952,8 +952,8 @@ function M.new(parent, config)
 
     local scrollBar = _G[scrollFrame:GetName() .. 'ScrollBar']
     scrollBar:ClearAllPoints()
-    scrollBar:SetPoint('BOTTOMRIGHT', rt, -4, 4)
     scrollBar:SetPoint('TOPRIGHT', rt, -4, -HEAD_HEIGHT)
+    scrollBar:SetPoint('BOTTOMRIGHT', rt, -4, 4)
     scrollBar:SetWidth(10)
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)

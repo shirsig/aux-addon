@@ -39,7 +39,7 @@ frame.buyout_listing:SetPoint('BOTTOMRIGHT', 0, 0)
 
 do
     local checkbox = gui.checkbox(frame.inventory)
-    checkbox:SetPoint('TOPLEFT', 49, -16)
+    checkbox:SetPoint('TOPLEFT', 49, -15)
     checkbox:SetScript('OnClick', function()
         refresh = true
     end)
@@ -49,23 +49,28 @@ do
     show_hidden_checkbox = checkbox
 end
 
-gui.horizontal_line(frame.inventory, -48)
+gui.horizontal_line(frame.inventory, -46)
 
-inventory_listing = item_listing.new(
-    frame.inventory,
-    function()
-        if arg1 == 'LeftButton' then
-            update_item(this.item_record)
-        elseif arg1 == 'RightButton' then
-            tab = 1
-            search_tab.set_filter(strlower(info.item(this.item_record.item_id).name) .. '/exact')
-            search_tab.execute(nil, false)
-        end
-    end,
-    function(item_record)
-        return item_record == selected_item
-    end
-)
+do
+	local f = CreateFrame('Frame', nil, frame.inventory)
+	f:SetPoint('TOPLEFT', 0, -51)
+	f:SetPoint('BOTTOMRIGHT', 0, 0)
+	inventory_listing = item_listing.new(
+		f,
+	    function()
+	        if arg1 == 'LeftButton' then
+	            update_item(this.item_record)
+	        elseif arg1 == 'RightButton' then
+	            tab = 1
+	            search_tab.set_filter(strlower(info.item(this.item_record.item_id).name) .. '/exact')
+	            search_tab.execute(nil, false)
+	        end
+	    end,
+	    function(item_record)
+	        return item_record == selected_item
+	    end
+	)
+end
 
 bid_listing = listing.new(frame.bid_listing)
 bid_listing:SetColInfo{

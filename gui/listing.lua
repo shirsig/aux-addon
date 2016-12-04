@@ -5,12 +5,10 @@ include 'aux'
 
 local gui = require 'aux.gui'
 
-local ST_COUNT = 0
-
-local ST_ROW_HEIGHT = 15
-local ST_ROW_TEXT_SIZE = 14
-local ST_HEAD_HEIGHT = 27
-local ST_HEAD_SPACE = 2
+local ROW_HEIGHT = 15
+local ROW_TEXT_SIZE = 14
+local HEAD_HEIGHT = 27
+local HEAD_SPACE = 2
 local DEFAULT_COL_INFO = {{width=1}}
 
 local handlers = {
@@ -56,17 +54,17 @@ local handlers = {
 local methods = {
     Update = function(self)
 	    if getn(self.colInfo) > 1 or self.colInfo[1].name then
-		    self.sizes.headHeight = ST_HEAD_HEIGHT
+		    self.headHeight = HEAD_HEIGHT
 	    else
-		    self.sizes.headHeight = 0
+		    self.headHeight = 0
 	    end
-	    self.sizes.numRows = max(floor((self:GetParent():GetHeight() - self.sizes.headHeight - ST_HEAD_SPACE) / ST_ROW_HEIGHT), 0)
+	    self.numRows = max(floor((self:GetParent():GetHeight() - self.headHeight - HEAD_SPACE) / ROW_HEIGHT), 0)
 
 	    self.scrollBar:ClearAllPoints()
 	    self.scrollBar:SetPoint('BOTTOMRIGHT', self, -1, 1)
-	    self.scrollBar:SetPoint('TOPRIGHT', self, -1, -self.sizes.headHeight - ST_HEAD_SPACE - 1)
+	    self.scrollBar:SetPoint('TOPRIGHT', self, -1, -self.headHeight - HEAD_SPACE - 1)
 
-	    if getn(self.rowData or empty) > self.sizes.numRows then
+	    if getn(self.rowData or empty) > self.numRows then
 		    self.contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
 	    else
 		    self.contentFrame:SetPoint('BOTTOMRIGHT', 0, 0)
@@ -82,7 +80,7 @@ local methods = {
 		    if self.colInfo[i] then
 			    col:Show()
 			    col:SetWidth(self.colInfo[i].width * width)
-			    col:SetHeight(self.sizes.headHeight)
+			    col:SetHeight(self.headHeight)
 			    col.text:SetText(self.colInfo[i].name or '')
 			    col.text:SetJustifyH(self.colInfo[i].headAlign or 'CENTER')
 		    else
@@ -90,12 +88,12 @@ local methods = {
 		    end
 	    end
 
-	    while getn(self.rows) < self.sizes.numRows do
+	    while getn(self.rows) < self.numRows do
 		    self:AddRow()
 	    end
 
 	    for i, row in self.rows do
-		    if i > self.sizes.numRows then
+		    if i > self.numRows then
 			    row.data = nil
 			    row:Hide()
 		    else
@@ -116,11 +114,11 @@ local methods = {
 	    end
 	    
         if not self.rowData then return end
-        FauxScrollFrame_Update(self.scrollFrame, getn(self.rowData), self.sizes.numRows, ST_ROW_HEIGHT)
+        FauxScrollFrame_Update(self.scrollFrame, getn(self.rowData), self.numRows, ROW_HEIGHT)
         local offset = FauxScrollFrame_GetOffset(self.scrollFrame)
         self.offset = offset
 
-        for i = 1, self.sizes.numRows do
+        for i = 1, self.numRows do
             self.rows[i].data = nil
             if i > getn(self.rowData) then
                 self.rows[i]:Hide()
@@ -227,11 +225,11 @@ local methods = {
         local col = CreateFrame('Frame', nil, row)
         local text = col:CreateFontString()
         col.text = text
-        text:SetFont(gui.font, ST_ROW_TEXT_SIZE)
+        text:SetFont(gui.font, ROW_TEXT_SIZE)
         text:SetJustifyV('CENTER')
         text:SetPoint('TOPLEFT', 1, -1)
         text:SetPoint('BOTTOMRIGHT', -1, 1)
-        col:SetHeight(ST_ROW_HEIGHT)
+        col:SetHeight(ROW_HEIGHT)
         col:EnableMouse(true)
         for name, func in handlers do
             col:SetScript(name, func)
@@ -249,14 +247,14 @@ local methods = {
 
     AddRow = function(self)
         local row = CreateFrame('Frame', nil, self.contentFrame)
-        row:SetHeight(ST_ROW_HEIGHT)
+        row:SetHeight(ROW_HEIGHT)
         local rowNum = getn(self.rows) + 1
         if rowNum == 1 then
-            row:SetPoint('TOPLEFT', 2, -(self.sizes.headHeight + ST_HEAD_SPACE))
-            row:SetPoint('TOPRIGHT', 0, -(self.sizes.headHeight + ST_HEAD_SPACE))
+            row:SetPoint('TOPLEFT', 0, -(self.headHeight + HEAD_SPACE))
+            row:SetPoint('TOPRIGHT', 0, -(self.headHeight + HEAD_SPACE))
         else
-            row:SetPoint('TOPLEFT', 2, -(self.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
-            row:SetPoint('TOPRIGHT', 0, -(self.sizes.headHeight + ST_HEAD_SPACE + (rowNum - 1) * ST_ROW_HEIGHT))
+            row:SetPoint('TOPLEFT', 0, -(self.headHeight + HEAD_SPACE + (rowNum - 1) * ROW_HEIGHT))
+            row:SetPoint('TOPRIGHT', 0, -(self.headHeight + HEAD_SPACE + (rowNum - 1) * ROW_HEIGHT))
         end
         local highlight = row:CreateTexture()
         highlight:SetAllPoints()
@@ -267,7 +265,7 @@ local methods = {
 
         row.cols = T
         self.rows[rowNum] = row
-        for i = 1, getn(self.colInfo) do
+        for _ = 1, getn(self.colInfo) do
             self:AddRowCol(rowNum)
         end
     end,
@@ -284,8 +282,7 @@ local methods = {
 }
 
 function M.new(parent)
-    ST_COUNT = ST_COUNT + 1
-    local st = CreateFrame('Frame', 'TSMScrollingTable' .. ST_COUNT, parent)
+    local st = CreateFrame('Frame', gui.unique_name, parent)
     st:SetAllPoints()
 
     local contentFrame = CreateFrame('Frame', nil, st)
@@ -295,28 +292,29 @@ function M.new(parent)
 
     local scrollFrame = CreateFrame('ScrollFrame', st:GetName() .. 'ScrollFrame', st, 'FauxScrollFrameTemplate')
     scrollFrame:SetScript('OnVerticalScroll', function()
-        FauxScrollFrame_OnVerticalScroll(ST_ROW_HEIGHT, function() st:Update() end)
+        FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() st:Update() end)
     end)
     scrollFrame:SetAllPoints(contentFrame)
     st.scrollFrame = scrollFrame
 
-    local scrollBar = _G[scrollFrame:GetName() .. 'ScrollBar']
-    scrollBar:SetWidth(12)
-    st.scrollBar = scrollBar
-    local thumbTex = scrollBar:GetThumbTexture()
+    local scroll_bar = _G[scrollFrame:GetName() .. 'ScrollBar']
+    st.scrollBar = scroll_bar
+    scroll_bar:ClearAllPoints()
+    scroll_bar:SetPoint('TOPRIGHT', st, -4, -HEAD_HEIGHT)
+    scroll_bar:SetPoint('BOTTOMRIGHT', st, -4, 4)
+    scroll_bar:SetWidth(10)
+    local thumbTex = scroll_bar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
     thumbTex:SetTexture(color.content.background())
-    thumbTex:SetHeight(50)
-    thumbTex:SetWidth(12)
-    _G[scrollBar:GetName() .. 'ScrollUpButton']:Hide()
-    _G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
+    thumbTex:SetHeight(150)
+    thumbTex:SetWidth(scroll_bar:GetWidth())
+    _G[scroll_bar:GetName() .. 'ScrollUpButton']:Hide()
+    _G[scroll_bar:GetName() .. 'ScrollDownButton']:Hide()
 
     for name, func in methods do
         st[name] = func
     end
-
-    st.isTSMScrollingTable = true
-    st.sizes = T
+    
     st.headCols = T
     st.rows = T
     st.handlers = T
