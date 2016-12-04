@@ -49,7 +49,7 @@ do
     show_hidden_checkbox = checkbox
 end
 
-gui.horizontal_line(frame.inventory, -46)
+gui.horizontal_line(frame.inventory, -45)
 
 do
 	local f = CreateFrame('Frame', nil, frame.inventory)
