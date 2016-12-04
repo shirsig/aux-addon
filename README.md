@@ -99,10 +99,10 @@ The filters on the left side are Blizzard filters which may reduce the number of
 - Clicking an entry in the in the listings of bids/buyouts of existing auctions will undercut with your bid/buyout. Left click will undercut the unit and right-click the stack price.
 
 ### Auctions
-![Alt text](http://i.imgur.com/3oZUtw8.png)
+![Alt text](http://i.imgur.com/6HjaIo2.png)
 
 ### Bids
-![Alt text](http://i.imgur.com/wrYwgZS.png)
+![Alt text](http://i.imgur.com/NOjPKNW.png)
 
 ## Search Filters
 AddOns do not have any additional Blizzard filters available to them beyond the ones in the default auction house interface, nor do they have any other ways to combine them.
