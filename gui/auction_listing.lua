@@ -73,6 +73,7 @@ function item_column_fill(cell, record, _, _, _, indented)
 end
 
 M.search_config = {
+	rows = 16,
     {
         title = 'Item',
         width = .35,
@@ -243,6 +244,7 @@ M.search_config = {
 }
 
 M.auctions_config = {
+	rows = 20,
     {
         title = 'Item',
         width = .35,
@@ -378,6 +380,7 @@ M.auctions_config = {
 }
 
 M.bids_config = {
+	rows = 20,
     {
         title = 'Item',
         width = .35,
@@ -691,12 +694,6 @@ local methods = {
             end
         end
 
---	    -- if there's only one item in the result, expand it TODO
---	    if getn(self.rowInfo) == 1 and self.expanded[self.rowInfo[1].expandKey] == nil then
---		    self.expanded[self.rowInfo[1].expandKey] = true
---		    self.rowInfo.numDisplayRows = getn(self.rowInfo[1].children)
---	    end
-
 	    for i = 1, getn(self.rowInfo) do
 		    local info = self.rowInfo[i]
             local totalAuctions, totalPlayerAuctions = 0, 0
@@ -802,7 +799,7 @@ local methods = {
         end
         row.data = {record=record, expandable=expandable, indented=indented, numAuctions=numAuctions, expandKey=expandKey}
 
-        for i, column_config in self.config do
+        for i, column_config in ipairs(self.config) do
             column_config.fill(row.cells[i], record, displayNumAuctions, numPlayerAuctions, expandable, indented)
         end
     end,
@@ -917,8 +914,7 @@ local methods = {
 function M.new(parent, config)
     local rt = CreateFrame('Frame', nil, parent)
     rt.config = config
-    local numRows = 16
-    rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / numRows
+    rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / config.rows
     rt.expanded = T
     rt.handlers = T
     rt.sorts = T
@@ -948,7 +944,7 @@ function M.new(parent, config)
     end)
     scrollFrame:SetAllPoints(contentFrame)
     rt.scrollFrame = scrollFrame
-    FauxScrollFrame_Update(rt.scrollFrame, 0, numRows, rt.ROW_HEIGHT)
+    FauxScrollFrame_Update(rt.scrollFrame, 0, config.rows, rt.ROW_HEIGHT)
 
     local scrollBar = _G[scrollFrame:GetName() .. 'ScrollBar']
     scrollBar:ClearAllPoints()
@@ -1006,15 +1002,15 @@ function M.new(parent, config)
     end
 
     rt.rows = T
-    for i = 1, numRows do
+    for i = 1, config.rows do
         local row = CreateFrame('Frame', nil, rt.contentFrame)
         row:SetHeight(rt.ROW_HEIGHT)
         if i == 1 then
-            row:SetPoint('TOPLEFT', 0, -(HEAD_HEIGHT + HEAD_SPACE))
-            row:SetPoint('TOPRIGHT', 0, -(HEAD_HEIGHT + HEAD_SPACE))
+	        row:SetPoint('TOPLEFT', 0, -(HEAD_HEIGHT + HEAD_SPACE))
+	        row:SetPoint('TOPRIGHT', 0, -(HEAD_HEIGHT + HEAD_SPACE))
         else
-            row:SetPoint('TOPLEFT', rt.rows[i-1], 'BOTTOMLEFT')
-            row:SetPoint('TOPRIGHT', rt.rows[i-1], 'BOTTOMRIGHT')
+	        row:SetPoint('TOPLEFT', 0, -(HEAD_HEIGHT + HEAD_SPACE + (i - 1) * rt.ROW_HEIGHT))
+	        row:SetPoint('TOPRIGHT', 0, -(HEAD_HEIGHT + HEAD_SPACE + (i - 1) * rt.ROW_HEIGHT))
         end
         local highlight = row:CreateTexture()
         highlight:SetAllPoints()
@@ -1045,7 +1041,7 @@ function M.new(parent, config)
             if j == 1 then
                 cell:SetPoint('TOPLEFT', 0, 0)
             else
-                cell:SetPoint('TOPLEFT', row.cells[j-1], 'TOPRIGHT')
+                cell:SetPoint('TOPLEFT', row.cells[j - 1], 'TOPRIGHT')
             end
 
             if mod(j, 2) == 1 then

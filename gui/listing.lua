@@ -58,11 +58,6 @@ local methods = {
 	    else
 		    self.headHeight = 0
 	    end
-	    self.numRows = max(floor((self:GetParent():GetHeight() - self.headHeight - HEAD_SPACE) / ROW_HEIGHT), 0)
-
-	    self.scrollBar:ClearAllPoints()
-	    self.scrollBar:SetPoint('BOTTOMRIGHT', self, -1, 1)
-	    self.scrollBar:SetPoint('TOPRIGHT', self, -1, -self.headHeight - HEAD_SPACE - 1)
 
 	    if getn(self.rowData or empty) > self.numRows then
 		    self.contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
@@ -270,20 +265,22 @@ local methods = {
         end
     end,
 
-    SetHandler = function(st, event, handler)
-        st.handlers[event] = handler
+    SetHandler = function(self, event, handler)
+	    self.handlers[event] = handler
     end,
 
-    SetColInfo = function(st, colInfo)
+    SetColInfo = function(self, colInfo)
         colInfo = colInfo or DEFAULT_COL_INFO
-        st.colInfo = colInfo
-        st:Update()
+        self.colInfo = colInfo
+        self:Update()
     end,
 }
 
 function M.new(parent)
     local st = CreateFrame('Frame', gui.unique_name, parent)
     st:SetAllPoints()
+
+    st.numRows = max(floor((parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / ROW_HEIGHT), 0)
 
     local contentFrame = CreateFrame('Frame', nil, st)
     contentFrame:SetPoint('TOPLEFT', 0, 0)
@@ -298,7 +295,6 @@ function M.new(parent)
     st.scrollFrame = scrollFrame
 
     local scroll_bar = _G[scrollFrame:GetName() .. 'ScrollBar']
-    st.scrollBar = scroll_bar
     scroll_bar:ClearAllPoints()
     scroll_bar:SetPoint('TOPRIGHT', st, -4, -HEAD_HEIGHT)
     scroll_bar:SetPoint('BOTTOMRIGHT', st, -4, 4)
