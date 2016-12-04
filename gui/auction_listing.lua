@@ -1023,7 +1023,7 @@ function M.CreateAuctionResultsTable(parent, config)
         if i == 1 then
             cell:SetPoint('TOPLEFT', 0, 0)
         else
-            cell:SetPoint('TOPLEFT', rt.headCells[i-1], 'TOPRIGHT')
+            cell:SetPoint('TOPLEFT', rt.headCells[i - 1], 'TOPRIGHT')
         end
         cell.info = column_config
         cell.rt = rt
@@ -1034,7 +1034,6 @@ function M.CreateAuctionResultsTable(parent, config)
 
         local text = cell:CreateFontString()
         text:SetJustifyH('CENTER')
-        text:SetJustifyV('CENTER')
         text:SetFont(gui.font, 12)
         text:SetTextColor(color.label.enabled())
         cell:SetFontString(text)

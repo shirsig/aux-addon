@@ -535,7 +535,7 @@ for _ = 1, 5 do
 end
 
 favorite_searches_listing = listing.CreateScrollingTable(frame.saved.favorite)
-favorite_searches_listing:SetColInfo{{name='Auto', width=.1, align='CENTER'}, {name='Favorite Searches', width=.9}}
+favorite_searches_listing:SetColInfo{{name='Auto Buy', width=.07, align='CENTER'}, {name='Favorite Searches', width=.93}}
 
 recent_searches_listing = listing.CreateScrollingTable(frame.saved.recent)
 recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}

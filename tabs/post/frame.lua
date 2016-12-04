@@ -69,11 +69,11 @@ inventory_listing = item_listing.create(
 
 bid_listing = listing.CreateScrollingTable(frame.bid_listing)
 bid_listing:SetColInfo{
-    {name='#', width=.15, align='CENTER'},
-    {name='Left', width=.11, align='CENTER'},
-    {name='Qty', width=.11, align='CENTER'},
-    {name='Bid/ea', width=.4, align='RIGHT'},
-    {name='Pct', width=.23, align='CENTER'},
+    {name='Auctions', width=.17, align='CENTER'},
+    {name='Time Left', width=.11, align='CENTER'},
+    {name='Stack Size', width=.11, align='CENTER'},
+    {name='Auction Bid|n (per item)', width=.4, align='RIGHT'},
+    {name='% Hist. Value', width=.21, align='CENTER'},
 }
 bid_listing:DisableSelection(true)
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
@@ -82,11 +82,11 @@ end)
 
 buyout_listing = listing.CreateScrollingTable(frame.buyout_listing)
 buyout_listing:SetColInfo{
-	{name='#', width=.15, align='CENTER'},
-	{name='Left', width=.11, align='CENTER'},
-	{name='Qty', width=.11, align='CENTER'},
-	{name='Buy/ea', width=.4, align='RIGHT'},
-	{name='Pct', width=.23, align='CENTER'},
+	{name='Auctions', width=.17, align='CENTER'},
+	{name='Time Left', width=.11, align='CENTER'},
+	{name='Stack Size', width=.12, align='CENTER'},
+	{name='Auction Buyout|n (per item)', width=.4, align='RIGHT'},
+	{name='% Hist. Value', width=.20, align='CENTER'},
 }
 buyout_listing:DisableSelection(true)
 buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)

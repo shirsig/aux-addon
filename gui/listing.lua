@@ -9,7 +9,7 @@ local ST_COUNT = 0
 
 local ST_ROW_HEIGHT = 15
 local ST_ROW_TEXT_SIZE = 14
-local ST_HEAD_HEIGHT = 26.3
+local ST_HEAD_HEIGHT = 27
 local ST_HEAD_SPACE = 2
 local DEFAULT_COL_INFO = {{width=1}}
 
@@ -143,10 +143,9 @@ local methods = {
 
     Redraw = function(st)
         local width = st:GetWidth() - 14
-        local height = st:GetHeight()
 
         if getn(st.colInfo) > 1 or st.colInfo[1].name then
-            st.sizes.headHeight = st.sizes.headFontSize and (st.sizes.headFontSize + 4) or ST_HEAD_HEIGHT
+            st.sizes.headHeight = ST_HEAD_HEIGHT
         else
             st.sizes.headHeight = 0
         end
@@ -155,15 +154,6 @@ local methods = {
         st.scrollBar:ClearAllPoints()
         st.scrollBar:SetPoint('BOTTOMRIGHT', st, -1, 1)
         st.scrollBar:SetPoint('TOPRIGHT', st, -1, -st.sizes.headHeight - ST_HEAD_SPACE - 1)
-
-        if st.sizes.headHeight > 0 then
-            st.headLine:Show()
-            st.headLine:ClearAllPoints()
-            st.headLine:SetPoint('TOPLEFT', 2, -st.sizes.headHeight)
-            st.headLine:SetPoint('TOPRIGHT', -2, -st.sizes.headHeight)
-        else
-            st.headLine:Hide()
-        end
 
         if st.rows and st.rows[1] then
             st.rows[1]:SetPoint('TOPLEFT', 0, -(st.sizes.headHeight + ST_HEAD_SPACE))
@@ -179,7 +169,7 @@ local methods = {
                 col:Show()
                 col:SetWidth(st.colInfo[i].width * width)
                 col:SetHeight(st.sizes.headHeight)
-                col.text:SetText(st.colInfo[i].name or "")
+                col.text:SetText(st.colInfo[i].name or '')
                 col.text:SetJustifyH(st.colInfo[i].headAlign or 'CENTER')
             else
                 col:Hide()
@@ -218,20 +208,24 @@ local methods = {
         local colNum = getn(st.headCols) + 1
         local col = CreateFrame('Frame', st:GetName() .. 'HeadCol' .. colNum, st.contentFrame)
         if colNum == 1 then
-            col:SetPoint('TOPLEFT', 0, -1)
+            col:SetPoint('TOPLEFT', 0, 0)
         else
             col:SetPoint('TOPLEFT', st.headCols[colNum - 1], 'TOPRIGHT')
         end
         col.st = st
         col.colNum = colNum
 
-        local text = col:CreateFontString()
-        text:SetAllPoints()
-        text:SetJustifyV('CENTER')
-        text:SetFont(gui.font, 16)
-        text:SetTextColor(color.text.enabled())
-        text:SetAllPoints()
+	    local text = col:CreateFontString()
+	    text:SetAllPoints()
+	    text:SetFont(gui.font, 12)
+	    text:SetTextColor(color.label.enabled())
         col.text = text
+
+	    local tex = col:CreateTexture()
+	    tex:SetAllPoints()
+	    tex:SetTexture([[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]])
+	    tex:SetTexCoord(.017, 1, .083, .909)
+	    tex:SetAlpha(.5)
 
         tinsert(st.headCols, col)
 
@@ -298,18 +292,6 @@ local methods = {
         st.handlers[event] = handler
     end,
 
-    SetHeadFontSize = function(st, size)
-        st.sizes.headFontSize = size
-        for _, col in st.headCols do
-            if st.sizes.headFontSize then
-                col.text:SetFont(gui.font, st.sizes.headFontSize)
-            else
-                col.text:SetFont(gui.font, gui.font_size.medium)
-            end
-        end
-        st:Redraw()
-    end,
-
     SetColInfo = function(st, colInfo)
         colInfo = colInfo or DEFAULT_COL_INFO
         st.colInfo = colInfo
@@ -328,7 +310,7 @@ function M.CreateScrollingTable(parent)
     st.contentFrame = contentFrame
 
     local scrollFrame = CreateFrame('ScrollFrame', st:GetName() .. 'ScrollFrame', st, 'FauxScrollFrameTemplate')
-    scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
+    scrollFrame:SetScript('OnVerticalScroll', function()
         FauxScrollFrame_OnVerticalScroll(ST_ROW_HEIGHT, function() st:RefreshRows() end)
     end)
     scrollFrame:SetAllPoints(contentFrame)
@@ -344,8 +326,6 @@ function M.CreateScrollingTable(parent)
     thumbTex:SetWidth(12)
     _G[scrollBar:GetName() .. 'ScrollUpButton']:Hide()
     _G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
-
-    st.headLine = gui.horizontal_line(st, 0)
 
     for name, func in methods do
         st[name] = func
