@@ -80,25 +80,22 @@ function update_form()
 	end
 
 	if blizzard_query.exact then
+		usable_checkbox:Disable()
+		for key in temp-S('min_level', 'max_level') do
+			_M[key .. '_input']:EnableMouse(false)
+			_M[key .. '_input']:ClearFocus()
+		end
 		for key in temp-S('class', 'subclass', 'slot', 'quality') do
 			_M[key .. '_dropdown'].button:Disable()
 		end
-	else
-		class_dropdown.button:Enable()
-		quality_dropdown.button:Enable()
-	end
-	for key in temp-S('min_level', 'max_level') do
-		if blizzard_query.exact then
-			_M[key .. '_input']:EnableMouse(false)
-			_M[key .. '_input']:ClearFocus()
-		else
-			_M[key .. '_input']:EnableMouse(true)
-		end
-	end
-	if blizzard_query.exact then
-		usable_checkbox:Disable()
+		CloseDropDownMenus()
 	else
 		usable_checkbox:Enable()
+		for key in temp-S('min_level', 'max_level') do
+			_M[key .. '_input']:EnableMouse(true)
+		end
+		class_dropdown.button:Enable()
+		quality_dropdown.button:Enable()
 	end
 
 	if any(temp-A('min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'), function(key) return blizzard_query[key] end) then
