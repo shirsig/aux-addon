@@ -12,6 +12,14 @@ do
 	end
 end
 
+M.immutable = setmetatable(T, {
+	__metatable = false,
+	__newindex = nop,
+	__sub = function(_, t)
+		return setmetatable(T, O('__metatable', false, '__newindex', nop, '__index', t))
+	end
+})
+
 M.select = vararg-function(arg)
 	for _ = 1, arg[1] do
 		tremove(arg, 1)
