@@ -43,6 +43,7 @@ function USE_ITEM(item_info)
 end
 
 function set_subtab(tab)
+	CloseDropDownMenus()
     search_results_button:UnlockHighlight()
     saved_searches_button:UnlockHighlight()
     new_filter_button:UnlockHighlight()
