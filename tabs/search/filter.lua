@@ -190,6 +190,7 @@ function import_filter_string()
 	if filter or print(error) then
 		set_form(filter)
 	end
+	update_form()
 end
 
 function export_filter_string()
