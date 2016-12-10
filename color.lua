@@ -17,21 +17,19 @@ function C(r, g, b, a)
 	return setmetatable(T, mt)
 end
 
-W = wrapper
-
-M.color = W-{
-	text = W-{enabled = C(255, 254, 250, 1), disabled = C(147, 151, 139, 1)},
-	label = W-{enabled = C(216, 225, 211, 1), disabled = C(150, 148, 140, 1)},
+M.color = immutable-{
+	text = immutable-{enabled = C(255, 254, 250, 1), disabled = C(147, 151, 139, 1)},
+	label = immutable-{enabled = C(216, 225, 211, 1), disabled = C(150, 148, 140, 1)},
 	link = C(153, 255, 255, 1),
-	window = W-{background = C(24, 24, 24, .93), border = C(30, 30, 30, 1)},
-	panel = W-{background = C(24, 24, 24, 1), border = C(255, 255, 255, .03)},
-	content = W-{background = C(42, 42, 42, 1), border = C(0, 0, 0, 0)},
-	state = W-{enabled = C(70, 140, 70, 1), disabled = C(140, 70, 70, 1)},
+	window = immutable-{background = C(24, 24, 24, .93), border = C(30, 30, 30, 1)},
+	panel = immutable-{background = C(24, 24, 24, 1), border = C(255, 255, 255, .03)},
+	content = immutable-{background = C(42, 42, 42, 1), border = C(0, 0, 0, 0)},
+	state = immutable-{enabled = C(70, 140, 70, 1), disabled = C(140, 70, 70, 1)},
 
-	tooltip = W-{
+	tooltip = immutable-{
 		value = C(255, 255, 154, 1),
 		merchant = C(204, 127, 25, 1),
-		disenchant = W-{
+		disenchant = immutable-{
 			value = C(25, 153, 153, 1),
 			distribution = C(204, 204, 51, 1),
 			source = C(178, 178, 178, 1),

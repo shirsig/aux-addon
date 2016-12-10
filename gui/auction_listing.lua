@@ -73,7 +73,6 @@ function item_column_fill(cell, record, _, _, _, indented)
 end
 
 M.search_config = {
-	rows = 16,
     {
         title = 'Item',
         width = .35,
@@ -244,7 +243,6 @@ M.search_config = {
 }
 
 M.auctions_config = {
-	rows = 20,
     {
         title = 'Item',
         width = .35,
@@ -380,7 +378,6 @@ M.auctions_config = {
 }
 
 M.bids_config = {
-	rows = 20,
     {
         title = 'Item',
         width = .35,
@@ -799,7 +796,7 @@ local methods = {
         end
         row.data = {record=record, expandable=expandable, indented=indented, numAuctions=numAuctions, expandKey=expandKey}
 
-        for i, column_config in ipairs(self.config) do
+        for i, column_config in self.config do
             column_config.fill(row.cells[i], record, displayNumAuctions, numPlayerAuctions, expandable, indented)
         end
     end,
@@ -911,10 +908,10 @@ local methods = {
     end,
 }
 
-function M.new(parent, config)
+function M.new(parent, rows, config)
     local rt = CreateFrame('Frame', nil, parent)
     rt.config = config
-    rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / config.rows
+    rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / rows
     rt.expanded = T
     rt.handlers = T
     rt.sorts = T
@@ -944,7 +941,7 @@ function M.new(parent, config)
     end)
     scrollFrame:SetAllPoints(contentFrame)
     rt.scrollFrame = scrollFrame
-    FauxScrollFrame_Update(rt.scrollFrame, 0, config.rows, rt.ROW_HEIGHT)
+    FauxScrollFrame_Update(rt.scrollFrame, 0, rows, rt.ROW_HEIGHT)
 
     local scrollBar = _G[scrollFrame:GetName() .. 'ScrollBar']
     scrollBar:ClearAllPoints()
@@ -1002,7 +999,7 @@ function M.new(parent, config)
     end
 
     rt.rows = T
-    for i = 1, config.rows do
+    for i = 1, rows do
         local row = CreateFrame('Frame', nil, rt.contentFrame)
         row:SetHeight(rt.ROW_HEIGHT)
         if i == 1 then
