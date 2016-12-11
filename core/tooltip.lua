@@ -84,13 +84,13 @@ function extend_tooltip(tooltip, link, quantity)
             end
         end
     end
-    if aux_tooltip_vendor_buy then
+    if aux_tooltip_merchant_buy then
         local _, price, limited = cache.merchant_info(item_id)
         if price then
             tooltip:AddLine('Vendor Buy ' .. (limited and '(limited): ' or ': ') .. money.to_string2(price * quantity), color.tooltip.merchant())
         end
     end
-    if aux_tooltip_vendor_sell then
+    if aux_tooltip_merchant_sell then
         local price = cache.merchant_info(item_id)
         if price ~= 0 then
             tooltip:AddLine('Vendor Sell: ' .. (price and money.to_string2(price * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.tooltip.merchant())
