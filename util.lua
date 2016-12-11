@@ -1,17 +1,5 @@
 module 'aux'
 
-do
-	local mt = {__metatable=false, __newindex=nop, __mode='k'}
-	function mt:__sub(table)
-		local proxy = setmetatable(T, O('__metatable', false, '__newindex', nop, '__index', table))
-		self[proxy] = table
-		return proxy
-	end
-	function M.get_wrapper()
-		return setmetatable(T, mt)
-	end
-end
-
 M.immutable = setmetatable(T, {
 	__metatable = false,
 	__newindex = nop,
