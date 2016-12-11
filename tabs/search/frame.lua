@@ -516,7 +516,7 @@ for _ = 1, 5 do
     status_bar:Hide()
     tinsert(status_bars, status_bar)
 
-    local table = auction_listing.new(frame.results, 16, auction_listing.search_config)
+    local table = auction_listing.new(frame.results, 16, auction_listing.search_columns)
     table:SetHandler('OnCellClick', function(cell, button)
         if IsAltKeyDown() and current_search.table:GetSelection().record == cell.row.data.record then
             if button == 'LeftButton' then

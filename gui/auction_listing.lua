@@ -72,7 +72,7 @@ function item_column_fill(cell, record, _, _, _, indented)
 	cell.text:SetText(gsub(record.link, '[%[%]]', ''))
 end
 
-M.search_config = {
+M.search_columns = {
     {
         title = 'Item',
         width = .35,
@@ -242,7 +242,7 @@ M.search_config = {
     },
 }
 
-M.auctions_config = {
+M.auctions_columns = {
     {
         title = 'Item',
         width = .35,
@@ -377,7 +377,7 @@ M.auctions_config = {
     },
 }
 
-M.bids_config = {
+M.bids_columns = {
     {
         title = 'Item',
         width = .35,
@@ -744,7 +744,7 @@ local methods = {
                 end
 
                 for _, sort in self.sorts do
-                    local ordering = self.config[sort.index].cmp and self.config[sort.index].cmp(record_a, record_b, sort.descending) or sort_util.EQ
+                    local ordering = self.columns[sort.index].cmp and self.columns[sort.index].cmp(record_a, record_b, sort.descending) or sort_util.EQ
 
                     if ordering == sort_util.LT then
                         return true
@@ -791,8 +791,8 @@ local methods = {
         end
         row.data = {record=record, expandable=expandable, indented=indented, numAuctions=numAuctions, expandKey=expandKey}
 
-        for i, column_config in self.config do
-            column_config.fill(row.cells[i], record, displayNumAuctions, numPlayerAuctions, expandable, indented)
+        for i, column in self.columns do
+	        column.fill(row.cells[i], record, displayNumAuctions, numPlayerAuctions, expandable, indented)
         end
     end,
 
@@ -903,9 +903,9 @@ local methods = {
     end,
 }
 
-function M.new(parent, rows, config)
+function M.new(parent, rows, columns)
     local rt = CreateFrame('Frame', nil, parent)
-    rt.config = config
+    rt.columns = columns
     rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / rows
     rt.expanded = {}
     rt.handlers = {}
@@ -952,8 +952,8 @@ function M.new(parent, rows, config)
     _G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
 
     rt.headCells = {}
-    for i = 1, getn(rt.config) do
-	    local column_config = rt.config[i]
+    for i = 1, getn(rt.columns) do
+	    local column = rt.columns[i]
         local cell = CreateFrame('Button', nil, rt.contentFrame)
         cell:SetHeight(HEAD_HEIGHT)
         if i == 1 then
@@ -961,7 +961,7 @@ function M.new(parent, rows, config)
         else
             cell:SetPoint('TOPLEFT', rt.headCells[i - 1], 'TOPRIGHT')
         end
-        cell.info = column_config
+        cell.info = column
         cell.rt = rt
         cell.columnIndex = i
         cell:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
@@ -973,7 +973,7 @@ function M.new(parent, rows, config)
         text:SetFont(gui.font, 12)
         text:SetTextColor(color.label.enabled())
         cell:SetFontString(text)
-        if not column_config.isPrice then cell:SetText(column_config.title or '') end -- TODO
+        if not column.isPrice then cell:SetText(column.title or '') end -- TODO
         text:SetAllPoints()
 
         local tex = cell:CreateTexture()
@@ -1017,12 +1017,12 @@ function M.new(parent, rows, config)
         row.rt = rt
 
         row.cells = {}
-        for j = 1, getn(rt.config) do
+        for j = 1, getn(rt.columns) do
             local cell = CreateFrame('Frame', nil, row)
             local text = cell:CreateFontString()
             cell.text = text
             text:SetFont(gui.font, min(14, rt.ROW_HEIGHT))
-            text:SetJustifyH(rt.config[j].align or 'LEFT')
+            text:SetJustifyH(rt.columns[j].align or 'LEFT')
             text:SetJustifyV('CENTER')
             text:SetPoint('TOPLEFT', 1, -1)
             text:SetPoint('BOTTOMRIGHT', -1, 1)
@@ -1042,8 +1042,8 @@ function M.new(parent, rows, config)
                 tex:SetTexture(.3, .3, .3, .2)
             end
 
-            if rt.config[j].init then
-                rt.config[j].init(rt, cell)
+            if rt.columns[j].init then
+                rt.columns[j].init(rt, cell)
             end
 
             tinsert(row.cells, cell)
