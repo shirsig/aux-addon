@@ -496,10 +496,11 @@ function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price,
 	    entry.count = entry.count + 1
     end
     buyout_records[key] = buyout_records[key] or T
+    if unit_buyout_price == 0 then return end
     do
 	    local entry
 	    for _, record in buyout_records[key] do
-		    if unit_buyout_price > 0 and unit_buyout_price == record.unit_price and aux_quantity == record.stack_size and duration == record.duration and is_player(owner) == record.own then
+		    if unit_buyout_price == record.unit_price and aux_quantity == record.stack_size and duration == record.duration and is_player(owner) == record.own then
 			    entry = record
 		    end
 	    end
