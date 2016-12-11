@@ -546,7 +546,7 @@ end
 
 local methods = {
 
-    OnContentSizeChanged = function(self)
+    ResizeColumns = function(self)
 	    local width = self.contentFrame:GetRight() - self.contentFrame:GetLeft()
         for _, cell in self.headCells do
             cell:SetWidth(cell.info.width * width)
@@ -706,7 +706,7 @@ local methods = {
 	    else
 		    self.contentFrame:SetPoint('BOTTOMRIGHT', 0, 0)
 	    end
-	    self:OnContentSizeChanged()
+	    self:ResizeColumns()
 
 	    FauxScrollFrame_Update(self.scrollFrame, self.rowInfo.numDisplayRows, getn(self.rows), self.ROW_HEIGHT)
 
@@ -996,6 +996,7 @@ function M.new(parent, rows, columns)
     rt.rows = {}
     for i = 1, rows do
         local row = CreateFrame('Button', nil, rt.contentFrame)
+        row.rt = rt
         row:SetHeight(rt.ROW_HEIGHT)
         row:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
         row:SetScript('OnEnter', rt.OnEnter)
@@ -1014,7 +1015,6 @@ function M.new(parent, rows, columns)
         highlight:SetTexture(1, .9, 0, .5)
         highlight:Hide()
         row.highlight = highlight
-        row.rt = rt
 
         row.cells = {}
         for j = 1, getn(rt.columns) do
@@ -1059,7 +1059,6 @@ function M.new(parent, rows, columns)
     end
 
     rt:SetAllPoints()
-    --TODO change, maybe use for resize without scrollbar?
-    rt:OnContentSizeChanged()
+    rt:ResizeColumns()
     return rt
 end
