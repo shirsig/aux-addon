@@ -3,6 +3,13 @@ module 'aux.util.persistence'
 include 'T'
 include 'aux'
 
+-- TODO clean up the mess of savedvariables
+--aux_account_db = {
+    --datasets
+-- }
+--aux_character_db = {}
+-- _G.aux_faction_db = {}
+
 _G.aux_datasets = T
 
 do

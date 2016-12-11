@@ -127,6 +127,7 @@ function update_auction_listing(listing, records, reference)
 	local rows = T
 	if selected_item then
 		local historical_value = history.value(selected_item.key)
+		local stack_size = stack_size_slider:GetValue()
 		for i = 1, getn(records[selected_item.key] or empty) do
 			local record = records[selected_item.key][i]
 			tinsert(rows, O(
@@ -134,16 +135,31 @@ function update_auction_listing(listing, records, reference)
 				O('value', record.own and color.yellow(record.count) or record.count),
 				O('value', al.time_left(record.duration)),
 				O('value', record.stack_size == stack_size and color.yellow(record.stack_size) or record.stack_size),
-				O('value', money.to_string(record.unit_price, true, nil, 3, price_color(record, reference, stack_size_slider:GetValue()))),
+				O('value', money.to_string(record.unit_price, true, nil, 3, price_color(record, reference, stack_size))),
 				O('value', historical_value and al.percentage_historical(round(record.unit_price / historical_value * 100)) or '---')
 			),
 				'record', record
+			))
+		end
+		if historical_value then
+			tinsert(rows, O(
+				'cols', A(
+				O('value', '---'),
+				O('value', '---'),
+				O('value', '---'),
+				O('value', money.to_string(historical_value, true, nil, 3, color.green)),
+				O('value', historical_value and al.percentage_historical(100) or '---')
+			),
+				'record', O('historical_value', true, 'stack_size', stack_size, 'unit_price', historical_value, 'own', true)
 			))
 		end
 		sort(rows, function(a, b)
 			return sort_util.multi_lt(
 				a.record.unit_price,
 				b.record.unit_price,
+
+				a.record.historical_value and 1 or 0,
+				b.record.historical_value and 1 or 0,
 
 				a.record.stack_size,
 				b.record.stack_size,
@@ -268,7 +284,6 @@ function update_item_configuration()
         stack_count_slider:Hide()
         deposit:Hide()
         duration_dropdown:Hide()
-        historical_value_button:Hide()
         hide_checkbox:Hide()
     else
 		unit_start_price_input:Show()
@@ -277,7 +292,6 @@ function update_item_configuration()
         stack_count_slider:Show()
         deposit:Show()
         duration_dropdown:Show()
-        historical_value_button:Show()
         hide_checkbox:Show()
 
         item.texture:SetTexture(selected_item.texture)
@@ -343,14 +357,6 @@ function unit_vendor_price(item_key)
                 end
             end
         end
-    end
-end
-
-function update_historical_value_button()
-    if selected_item then
-        local historical_value = history.value(selected_item.key)
-        historical_value_button.amount = historical_value
-        historical_value_button:SetText(historical_value and money.to_string(historical_value, true, nil, 3) or '---')
     end
 end
 
@@ -460,7 +466,6 @@ function refresh_entries()
 			end,
 			on_abort = function()
 				bid_records[item_key], buyout_records[item_key]= nil, nil
-                update_historical_value_button()
                 status_bar:update_status(1, 1)
                 status_bar:set_text('Scan aborted')
 			end,
@@ -510,7 +515,6 @@ function on_update()
     if refresh then
         refresh = false
         price_update()
-        update_historical_value_button()
         update_item_configuration()
         update_inventory_listing()
         update_auction_listings()

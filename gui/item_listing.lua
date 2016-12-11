@@ -81,7 +81,7 @@ function M.new(parent, on_click, selected)
 		row:SetPoint('TOPLEFT', content_frame, 0, -((row_index - 1) * ROW_HEIGHT))
 		row:SetPoint('TOPRIGHT', content_frame, 0, -((row_index - 1) * ROW_HEIGHT))
 		row:EnableMouse(true)
-		row:SetScript('OnMouseDown', on_click)
+		row:SetScript('OnMouseUp', on_click)
 		row:SetScript('OnEnter', function()
 			row.mouseover = true
 			row.highlight:Show()

@@ -84,6 +84,10 @@ bid_listing:DisableSelection(true)
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
     unit_start_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
 end)
+bid_listing:SetHandler('OnDoubleClick', function(table, row_data, column, button)
+	stack_size_slider:SetValue(row_data.record.stack_size)
+	unit_start_price = undercut(row_data.record, stack_size_slider:GetValue())
+end)
 
 buyout_listing = listing.new(frame.buyout_listing)
 buyout_listing:SetColInfo{
@@ -96,6 +100,10 @@ buyout_listing:SetColInfo{
 buyout_listing:DisableSelection(true)
 buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)
 	unit_buyout_price = undercut(row_data.record, stack_size_slider:GetValue(), button == 'RightButton')
+end)
+buyout_listing:SetHandler('OnDoubleClick', function(table, row_data, column, button)
+	stack_size_slider:SetValue(row_data.record.stack_size)
+	unit_buyout_price = undercut(row_data.record, stack_size_slider:GetValue())
 end)
 
 do
@@ -200,11 +208,6 @@ do
     duration_dropdown = dropdown
 end
 do
-    local label = gui.label(frame.parameters, gui.font_size.medium)
-    label:SetPoint('LEFT', duration_dropdown, 'RIGHT', 25, 0)
-    deposit = label
-end
-do
     local checkbox = gui.checkbox(frame.parameters)
     checkbox:SetPoint('TOPRIGHT', -83, -6)
     checkbox:SetScript('OnClick', function()
@@ -289,19 +292,7 @@ do
     unit_buyout_price_input = editbox
 end
 do
-    local btn = gui.button(frame.parameters, 14)
-    btn:SetPoint('TOPRIGHT', -10, -146)
-    gui.set_size(btn, 150, 20)
-    btn:GetFontString():SetJustifyH('RIGHT')
-    btn:GetFontString():SetPoint('RIGHT', -2, 0)
-    btn:SetScript('OnClick', function()
-        if this.amount then
-            unit_start_price = this.amount
-            unit_buyout_price = this.amount
-        end
-    end)
-    local label = gui.label(btn, gui.font_size.small)
-    label:SetPoint('BOTTOMLEFT', btn, 'TOPLEFT', -2, 1)
-    label:SetText('Historical Value')
-    historical_value_button = btn
+	local label = gui.label(frame.parameters, gui.font_size.medium)
+	label:SetPoint('TOPLEFT', unit_buyout_price_input, 'BOTTOMLEFT', 0, -24)
+	deposit = label
 end

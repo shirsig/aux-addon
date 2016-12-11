@@ -11,8 +11,6 @@ local post = require 'aux.core.post'
 local scan = require 'aux.core.scan'
 
 _G.aux_characters = T
---aux_account_settings = {} -- TODO clean up the mess of savedvariables
---aux_character_settings = {}
 
 function M.set_p(v)
 	inspect(nil, v)

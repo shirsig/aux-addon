@@ -13,42 +13,51 @@ local DEFAULT_COL_INFO = {{width=1}}
 
 local handlers = {
     OnEnter = function()
-        this.row.mouseover = true
-        if not this.row.data then return end
+        this.mouseover = true
+        if not this.data then return end
         if not this.st.highlightDisabled then
-            this.row.highlight:Show()
+            this.highlight:Show()
         end
 
         local handler = this.st.handlers.OnEnter
         if handler then
-            handler(this.st, this.row.data, this)
+            handler(this.st, this.data, this)
         end
     end,
 
     OnLeave = function()
-        this.row.mouseover = false
-        if not this.row.data then return end
-        if this.st.selectionDisabled or not this.st.selected or this.st.selected ~= key(this.st.rowData, this.row.data) then
-            this.row.highlight:Hide()
+        this.mouseover = false
+        if not this.data then return end
+        if this.st.selectionDisabled or not this.st.selected or this.st.selected ~= key(this.st.rowData, this.data) then
+            this.highlight:Hide()
         end
 
         local handler = this.st.handlers.OnLeave
         if handler then
-            handler(this.st, this.row.data, this)
+            handler(this.st, this.data, this)
         end
     end,
 
-    OnMouseDown = function()
-        if not this.row.data then return end
+    OnClick = function()
+        if not this.data then return end
         this.st:ClearSelection()
-        this.st.selected = key(this.st.rowData, this.row.data)
-        this.row.highlight:Show()
+        this.st.selected = key(this.st.rowData, this.data)
+        this.highlight:Show()
 
         local handler = this.st.handlers.OnClick
         if handler then
-            handler(this.st, this.row.data, this, arg1)
+            handler(this.st, this.data, this, arg1)
         end
     end,
+
+	OnDoubleClick = function()
+		if not this.data then return end
+
+		local handler = this.st.handlers.OnDoubleClick
+		if handler then
+			handler(this.st, this.data, this, arg1)
+		end
+	end,
 }
 
 local methods = {
@@ -225,12 +234,7 @@ local methods = {
         text:SetPoint('TOPLEFT', 1, -1)
         text:SetPoint('BOTTOMRIGHT', -1, 1)
         col:SetHeight(ROW_HEIGHT)
-        col:EnableMouse(true)
-        for name, func in handlers do
-            col:SetScript(name, func)
-        end
         col.st = self
-        col.row = row
 
         if colNum == 1 then
             col:SetPoint('TOPLEFT', 0, 0)
@@ -241,8 +245,12 @@ local methods = {
     end,
 
     AddRow = function(self)
-        local row = CreateFrame('Frame', nil, self.contentFrame)
+        local row = CreateFrame('Button', nil, self.contentFrame)
         row:SetHeight(ROW_HEIGHT)
+        row:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
+        for name, func in handlers do
+	        row:SetScript(name, func)
+        end
         local rowNum = getn(self.rows) + 1
         if rowNum == 1 then
             row:SetPoint('TOPLEFT', 0, -(self.headHeight + HEAD_SPACE))

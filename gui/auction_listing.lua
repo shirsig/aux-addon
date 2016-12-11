@@ -586,70 +586,65 @@ local methods = {
         if rowData and rowData.record then
             info.set_tooltip(rowData.record.itemstring, this, 'ANCHOR_RIGHT')
             info.set_shopping_tooltip(rowData.record.slot)
-            rt.isShowingItemTooltip = true
         end
     end,
 
     OnIconLeave = function()
         GameTooltip:Hide()
-        this:GetParent().row.rt.isShowingItemTooltip = nil
     end,
 
-    OnCellEnter = function()
+    OnEnter = function()
         local rt = this.rt
-        local row = this.row
-        if this ~= row.cells[1] or not rt.isShowingItemTooltip then
-            if rt.expanded[row.data.expandKey] then
-                GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-                GameTooltip:AddLine('Double-click to collapse this item and show only the cheapest auction.', 1, 1, 1, true)
-                GameTooltip:Show()
-            elseif row.data.expandable then
-                GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-                GameTooltip:AddLine('Double-click to expand this item and show all the auctions.', 1, 1, 1, true)
-                GameTooltip:Show()
-            end
+        if rt.expanded[this.data.expandKey] then
+            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+            GameTooltip:AddLine('Double-click to collapse this item and show only the cheapest auction.', 1, 1, 1, true)
+            GameTooltip:Show()
+        elseif this.data.expandable then
+            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+            GameTooltip:AddLine('Double-click to expand this item and show all the auctions.', 1, 1, 1, true)
+            GameTooltip:Show()
         end
 
-        this.row.highlight:Show()
+        this.highlight:Show()
     end,
 
-    OnCellLeave = function()
+    OnLeave = function()
         GameTooltip:Hide()
-        if not this.rt.selected or this.rt.selected.search_signature ~= this.row.data.record.search_signature then
-            this.row.highlight:Hide()
+        if not this.rt.selected or this.rt.selected.search_signature ~= this.data.record.search_signature then
+            this.highlight:Hide()
         end
     end,
 
-    OnCellClick = function()
+    OnClick = function()
         local button = arg1
         if IsControlKeyDown() then
-            DressUpItemLink(this.row.data.record.link)
+            DressUpItemLink(this.data.record.link)
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
-            ChatFrameEditBox:Insert(this.row.data.record.link)
+            ChatFrameEditBox:Insert(this.data.record.link)
         elseif not modified and button == 'RightButton' then -- TODO not when alt (how?)
             tab = 1
-            search_tab.set_filter(strlower(info.item(this.row.data.record.item_id).name) .. '/exact')
+            search_tab.set_filter(strlower(info.item(this.data.record.item_id).name) .. '/exact')
             search_tab.execute(nil, false)
         else
             local selection = this.rt:GetSelection()
-            if not selection or selection.record ~= this.row.data.record then
-                this.rt:SetSelectedRecord(this.row.data.record)
+            if not selection or selection.record ~= this.data.record then
+                this.rt:SetSelectedRecord(this.data.record)
             elseif this.rt.handlers.OnCellClick then
                 this.rt.handlers.OnCellClick(this, button)
             end
         end
     end,
 
-    OnCellDoubleClick = function()
+    OnDoubleClick = function()
         local rt = this.rt
-        local rowData = this.row.data
+        local rowData = this.data
         local expand = not rt.expanded[rowData.expandKey]
 
         rt.expanded[rowData.expandKey] = expand
         rt:UpdateRowInfo()
         rt:UpdateRows()
         if not rowData.indented then
-            rt:SetSelectedRecord(this.row.data.record)
+            rt:SetSelectedRecord(this.data.record)
         end
     end,
 
@@ -912,10 +907,10 @@ function M.new(parent, rows, config)
     local rt = CreateFrame('Frame', nil, parent)
     rt.config = config
     rt.ROW_HEIGHT = (parent:GetHeight() - HEAD_HEIGHT - HEAD_SPACE) / rows
-    rt.expanded = T
-    rt.handlers = T
-    rt.sorts = T
-    rt.records = T
+    rt.expanded = {}
+    rt.handlers = {}
+    rt.sorts = {}
+    rt.records = {}
     rt.rowInfo = {numDisplayRows=0}
 
     for name, func in methods do
@@ -956,7 +951,7 @@ function M.new(parent, rows, config)
     _G[scrollBar:GetName() .. 'ScrollUpButton']:Hide()
     _G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
 
-    rt.headCells = T
+    rt.headCells = {}
     for i = 1, getn(rt.config) do
 	    local column_config = rt.config[i]
         local cell = CreateFrame('Button', nil, rt.contentFrame)
@@ -998,10 +993,15 @@ function M.new(parent, rows, config)
         tinsert(rt.headCells, cell)
     end
 
-    rt.rows = T
+    rt.rows = {}
     for i = 1, rows do
-        local row = CreateFrame('Frame', nil, rt.contentFrame)
+        local row = CreateFrame('Button', nil, rt.contentFrame)
         row:SetHeight(rt.ROW_HEIGHT)
+        row:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
+        row:SetScript('OnEnter', rt.OnEnter)
+        row:SetScript('OnLeave', rt.OnLeave)
+        row:SetScript('OnClick', rt.OnClick)
+        row:SetScript('OnDoubleClick', rt.OnDoubleClick)
         if i == 1 then
 	        row:SetPoint('TOPLEFT', 0, -(HEAD_HEIGHT + HEAD_SPACE))
 	        row:SetPoint('TOPRIGHT', 0, -(HEAD_HEIGHT + HEAD_SPACE))
@@ -1016,9 +1016,9 @@ function M.new(parent, rows, config)
         row.highlight = highlight
         row.rt = rt
 
-        row.cells = T
+        row.cells = {}
         for j = 1, getn(rt.config) do
-            local cell = CreateFrame('Button', nil, row)
+            local cell = CreateFrame('Frame', nil, row)
             local text = cell:CreateFontString()
             cell.text = text
             text:SetFont(gui.font, min(14, rt.ROW_HEIGHT))
@@ -1027,11 +1027,6 @@ function M.new(parent, rows, config)
             text:SetPoint('TOPLEFT', 1, -1)
             text:SetPoint('BOTTOMRIGHT', -1, 1)
             cell:SetHeight(rt.ROW_HEIGHT)
-            cell:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-            cell:SetScript('OnEnter', rt.OnCellEnter)
-            cell:SetScript('OnLeave', rt.OnCellLeave)
-            cell:SetScript('OnClick', rt.OnCellClick)
-            cell:SetScript('OnDoubleClick', rt.OnCellDoubleClick)
             cell.rt = rt
             cell.row = row
 
@@ -1045,7 +1040,6 @@ function M.new(parent, rows, config)
                 local tex = cell:CreateTexture()
                 tex:SetAllPoints()
                 tex:SetTexture(.3, .3, .3, .2)
-                cell:SetNormalTexture(tex)
             end
 
             if rt.config[j].init then
