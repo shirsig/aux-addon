@@ -197,18 +197,18 @@ function M.set_shopping_tooltip(slot)
 
     if tooltips[1] then
         tinsert(tooltips[1], 1, temp-O('left_text', 'Currently Equipped', 'left_color', temp-A(.5, .5, .5)))
-        ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_BOTTOMRIGHT')
+        ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_NONE')
+        ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
         load_tooltip(ShoppingTooltip1, tooltips[1])
         ShoppingTooltip1:Show()
-        ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
     end
 
     if tooltips[2] then
         tinsert(tooltips[2], 1, temp-O('left_text', 'Currently Equipped', 'left_color', temp-A(.5, .5, .5)))
-        ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_BOTTOMRIGHT')
+        ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_NONE')
+        ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
         load_tooltip(ShoppingTooltip2, tooltips[2])
         ShoppingTooltip2:Show()
-        ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
     end
 end
 
