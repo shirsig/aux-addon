@@ -33,12 +33,12 @@ function CLOSE()
 end
 
 function CLICK_LINK(item_info)
-	set_filter(strlower(item_info.name) .. '/exact')
+	filter = strlower(item_info.name) .. '/exact'
 	execute(nil, false)
 end
 
 function USE_ITEM(item_info)
-	set_filter(strlower(item_info.name) .. '/exact')
+	filter = strlower(item_info.name) .. '/exact'
 	execute(nil, false)
 end
 
@@ -64,6 +64,7 @@ function set_subtab(tab)
 end
 
 function M.set_filter(filter_string)
+	search_box:SetFocus()
     search_box:SetText(filter_string)
 end
 
@@ -75,7 +76,7 @@ function add_filter(filter_string)
         old_filter_string = old_filter_string .. ';'
     end
 
-    search_box:SetText(old_filter_string .. filter_string)
+    filter = old_filter_string .. filter_string
 end
 
 function blizzard_page_index(str)

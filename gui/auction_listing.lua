@@ -623,7 +623,7 @@ local methods = {
             ChatFrameEditBox:Insert(this.data.record.link)
         elseif not modified and button == 'RightButton' then -- TODO not when alt (how?)
             tab = 1
-            search_tab.set_filter(strlower(info.item(this.data.record.item_id).name) .. '/exact')
+            search_tab.filter = strlower(info.item(this.data.record.item_id).name) .. '/exact'
             search_tab.execute(nil, false)
         else
             local selection = this.rt:GetSelection()

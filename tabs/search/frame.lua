@@ -126,7 +126,7 @@ do
     btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
     btn:SetScript('OnClick', function()
         if arg1 == 'RightButton' then
-            set_filter(current_search.filter_string)
+            filter = current_search.filter_string
         end
         execute()
     end)

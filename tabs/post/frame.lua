@@ -62,7 +62,7 @@ do
 	            update_item(this.item_record)
 	        elseif arg1 == 'RightButton' then
 	            tab = 1
-	            search_tab.set_filter(strlower(info.item(this.item_record.item_id).name) .. '/exact')
+	            search_tab.filter = strlower(info.item(this.item_record.item_id).name) .. '/exact'
 	            search_tab.execute(nil, false)
 	        end
 	    end,

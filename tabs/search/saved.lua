@@ -47,13 +47,11 @@ handlers = {
 	OnClick = function(st, data, _, button)
 		if not data then return end
 		if button == 'LeftButton' and IsShiftKeyDown() then
-			search_box:SetFocus()
-			search_box:SetText(data.search.filter_string)
+			filter = data.search.filter_string
 		elseif button == 'RightButton' and IsShiftKeyDown() then
-			search_box:SetFocus()
 			add_filter(data.search.filter_string)
 		elseif button == 'LeftButton' then
-			search_box:SetText(data.search.filter_string)
+			filter = data.search.filter_string
 			execute()
 		elseif button == 'RightButton' then
 			local u = update_search_listings
