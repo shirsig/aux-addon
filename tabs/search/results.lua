@@ -321,8 +321,6 @@ function M.execute(resume, real_time)
 		end
 	end
 
-	clear_control_focus()
-
 	if resume then
 		current_search.table:SetSelectedRecord()
 	else
@@ -348,7 +346,7 @@ function M.execute(resume, real_time)
 	discard_continuation()
 	current_search.active = true
 	update_start_stop()
-
+	clear_control_focus()
 	subtab = RESULTS
 	if real_time then
 		start_real_time_scan(queries[1], nil, continuation)

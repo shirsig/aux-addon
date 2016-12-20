@@ -161,6 +161,7 @@ do
 		return queries and join(map(copy(queries), function(query) return query.prettified end), ';') or color.red(str)
 	end
 	editbox.complete = completion.complete_filter
+    editbox.focus_loss = function() this:SetText(current_search.filter_string or '') end
 	editbox:SetHeight(25)
 	editbox.char = function()
 		this:complete()
