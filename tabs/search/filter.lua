@@ -191,8 +191,8 @@ function import_filter_string()
 end
 
 function export_filter_string()
+	search_box:SetFocus()
 	search_box:SetText(get_filter_builder_query())
-	filter_parameter_input:ClearFocus()
 end
 
 function formatted_post_filter(components)
