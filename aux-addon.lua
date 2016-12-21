@@ -49,7 +49,7 @@ do
 			for _, f in handlers do f() end
 		elseif event == 'PLAYER_LOGIN' then
 			for _, f in handlers2 do f() end
-			print('aux loaded - /aux')
+			print('loaded - /aux')
 		else
 			_M[event]()
 		end
