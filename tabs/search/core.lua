@@ -3,6 +3,8 @@ module 'aux.tabs.search'
 include 'T'
 include 'aux'
 
+local info = require 'aux.util.info'
+
 TAB 'Search'
 
 StaticPopupDialogs.AUX_SEARCH_TABLE_FULL = {
@@ -38,7 +40,7 @@ function CLICK_LINK(item_info)
 end
 
 function USE_ITEM(item_info)
-	filter = strlower(item_info.name) .. '/exact'
+	filter = strlower(info.item(item_info.item_id).name) .. '/exact'
 	execute(nil, false)
 end
 
