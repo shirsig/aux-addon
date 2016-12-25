@@ -68,7 +68,7 @@ M.filters = {
         end
     },
 
-    ['min-lvl'] = {
+    ['min-level'] = {
         input_type = 'number',
         validator = function(level)
             return function(auction_record)
@@ -77,7 +77,7 @@ M.filters = {
         end
     },
 
-    ['max-lvl'] = {
+    ['max-level'] = {
         input_type = 'number',
         validator = function(level)
             return function(auction_record)
@@ -86,25 +86,7 @@ M.filters = {
         end
     },
 
-    ['min-unit-bid'] = {
-        input_type = 'money',
-        validator = function(amount)
-            return function(auction_record)
-                return auction_record.unit_bid_price >= amount
-            end
-        end
-    },
-
-    ['min-unit-buy'] = {
-        input_type = 'money',
-        validator = function(amount)
-            return function(auction_record)
-                return auction_record.unit_buyout_price >= amount
-            end
-        end
-    },
-
-    ['max-unit-bid'] = {
+    ['bid-price'] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -113,7 +95,7 @@ M.filters = {
         end
     },
 
-    ['max-unit-buy'] = {
+    ['price'] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -122,7 +104,7 @@ M.filters = {
         end
     },
 
-    ['bid-pct'] = {
+    ['bid-percent'] = {
         input_type = 'number',
         validator = function(pct)
             return function(auction_record)
@@ -131,7 +113,7 @@ M.filters = {
         end
     },
 
-    ['buy-pct'] = {
+    ['percent'] = {
         input_type = 'number',
         validator = function(pct)
             return function(auction_record)
@@ -151,7 +133,7 @@ M.filters = {
         end
     },
 
-    ['buy-profit'] = {
+    ['profit'] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -160,7 +142,7 @@ M.filters = {
         end
     },
 
-    ['bid-dis-profit'] = {
+    ['bid-disenchant-profit'] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -170,7 +152,7 @@ M.filters = {
         end
     },
 
-    ['buy-dis-profit'] = {
+    ['disenchant-profit'] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -190,7 +172,7 @@ M.filters = {
         end
     },
 
-    ['buy-vend-profit'] = {
+    ['vend-profit'] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
