@@ -377,7 +377,7 @@ function initialize_slot_dropdown()
 		UIDropDownMenu_SetSelectedValue(slot_dropdown, this.value)
 		update_form()
 	end
-	UIDropDownMenu_AddButton(O('text', ALL, 'value', '', 'func', on_click))
+	UIDropDownMenu_AddButton(O('text', ALL, 'value', 0, 'func', on_click))
 	for i, slot in ipairs(temp-A(GetAuctionInvTypes(blizzard_query.class == 2 and 2 or 0, blizzard_query.subclass or 0))) do
 		UIDropDownMenu_AddButton(O('text', _G[slot], 'value', i, 'func', on_click))
 	end
