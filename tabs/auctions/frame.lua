@@ -16,8 +16,8 @@ frame.listing:SetPoint('BOTTOMRIGHT', AuxFrame.content, 'BOTTOMRIGHT', 0, 0)
 listing = auction_listing.new(frame.listing, 20, auction_listing.auctions_columns)
 listing:SetSort(1, 2, 3, 4, 5, 6, 7, 8)
 listing:Reset()
-listing:SetHandler('OnCellClick', function(cell, button)
-    if IsAltKeyDown() and listing:GetSelection().record == cell.row.data.record then
+listing:SetHandler('OnClick', function(row, button)
+    if IsAltKeyDown() and listing:GetSelection().record == row.data.record then
         cancel_button:Click()
     end
 end)

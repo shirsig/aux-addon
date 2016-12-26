@@ -629,8 +629,8 @@ local methods = {
             local selection = this.rt:GetSelection()
             if not selection or selection.record ~= this.data.record then
                 this.rt:SetSelectedRecord(this.data.record)
-            elseif this.rt.handlers.OnCellClick then
-                this.rt.handlers.OnCellClick(this, button)
+            elseif this.rt.handlers.OnClick then
+                this.rt.handlers.OnClick(this, button)
             end
         end
     end,
