@@ -180,9 +180,9 @@ function M.distribution(slot, quality, level)
         elseif level <= 50 then
             return A(weak-O('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
         elseif level <= 55 then
-            return A(weak-O('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), O('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
+            return A(weak-O('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), weak-O('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
         elseif level <= 60 then
-            return A(weak-O('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), O('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
+            return A(weak-O('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), weak-O('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
         end
     elseif quality == EPIC then
         if level <= 40 then
