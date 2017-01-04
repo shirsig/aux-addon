@@ -82,7 +82,7 @@ function extend_tooltip(tooltip, link, quantity)
             end
             if aux_tooltip_disenchant_value then
                 local disenchant_value = disenchant.value(item_info.slot, item_info.quality, item_info.level)
-                tooltip:AddLine('Disenchant Value: ' .. (disenchant_value and money.to_string2(disenchant_value) or UNKNOWN), color.tooltip.disenchant.value())
+                tooltip:AddLine('Disenchant: ' .. (disenchant_value and money.to_string2(disenchant_value) or UNKNOWN), color.tooltip.disenchant.value())
             end
         end
     end
@@ -95,7 +95,7 @@ function extend_tooltip(tooltip, link, quantity)
     if aux_tooltip_merchant_sell then
         local price = cache.merchant_info(item_id)
         if price ~= 0 then
-            tooltip:AddLine((aux_tooltip_merchant_buy and 'Vendor Sell: ' or 'Vendor: ') .. (price and money.to_string2(price * quantity) or UNKNOWN), color.tooltip.merchant())
+            tooltip:AddLine('Vendor: ' .. (price and money.to_string2(price * quantity) or UNKNOWN), color.tooltip.merchant())
         end
     end
     local auctionable = not item_info or info.auctionable(temp-info.tooltip('link', item_info.itemstring), item_info.quality)
