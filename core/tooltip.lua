@@ -93,7 +93,7 @@ function extend_tooltip(tooltip, link, quantity)
     if aux_tooltip_merchant_sell then
         local price = cache.merchant_info(item_id)
         if price ~= 0 then
-            tooltip:AddLine('Vendor Sell: ' .. (price and money.to_string2(price * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.tooltip.merchant())
+            tooltip:AddLine((aux_tooltip_merchant_buy and 'Vendor Sell: ' or 'Vendor: ') .. (price and money.to_string2(price * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.tooltip.merchant())
         end
     end
     local auctionable = not item_info or info.auctionable(temp-info.tooltip('link', item_info.itemstring), item_info.quality)
