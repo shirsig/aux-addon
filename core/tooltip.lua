@@ -10,6 +10,8 @@ local disenchant = require 'aux.core.disenchant'
 local history = require 'aux.core.history'
 local auction_listing = require 'aux.gui.auction_listing'
 
+local UNKNOWN = GRAY_FONT_COLOR_CODE .. '?' .. FONT_COLOR_CODE_CLOSE
+
 _G.aux_tooltip_value = true
 
 local game_tooltip_hooks, game_tooltip_money = T, 0
@@ -80,7 +82,7 @@ function extend_tooltip(tooltip, link, quantity)
             end
             if aux_tooltip_disenchant_value then
                 local disenchant_value = disenchant.value(item_info.slot, item_info.quality, item_info.level)
-                tooltip:AddLine('Disenchant Value: ' .. (disenchant_value and money.to_string2(disenchant_value) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.tooltip.disenchant.value())
+                tooltip:AddLine('Disenchant Value: ' .. (disenchant_value and money.to_string2(disenchant_value) or UNKNOWN), color.tooltip.disenchant.value())
             end
         end
     end
@@ -93,7 +95,7 @@ function extend_tooltip(tooltip, link, quantity)
     if aux_tooltip_merchant_sell then
         local price = cache.merchant_info(item_id)
         if price ~= 0 then
-            tooltip:AddLine((aux_tooltip_merchant_buy and 'Vendor Sell: ' or 'Vendor: ') .. (price and money.to_string2(price * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.tooltip.merchant())
+            tooltip:AddLine((aux_tooltip_merchant_buy and 'Vendor Sell: ' or 'Vendor: ') .. (price and money.to_string2(price * quantity) or UNKNOWN), color.tooltip.merchant())
         end
     end
     local auctionable = not item_info or info.auctionable(temp-info.tooltip('link', item_info.itemstring), item_info.quality)
@@ -101,11 +103,11 @@ function extend_tooltip(tooltip, link, quantity)
     local value = history.value(item_key)
     if auctionable then
         if aux_tooltip_value then
-            tooltip:AddLine('Value: ' .. (value and money.to_string2(value * quantity) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.tooltip.value())
+            tooltip:AddLine('Value: ' .. (value and money.to_string2(value * quantity) or UNKNOWN), color.tooltip.value())
         end
         if aux_tooltip_daily  then
             local market_value = history.market_value(item_key)
-            tooltip:AddLine('Today: ' .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. auction_listing.percentage_historical(round(market_value / value * 100)) .. ')' or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE), color.tooltip.value())
+            tooltip:AddLine('Today: ' .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. auction_listing.percentage_historical(round(market_value / value * 100)) .. ')' or UNKNOWN), color.tooltip.value())
         end
     end
 

@@ -135,7 +135,7 @@ M.search_columns = {
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
+            cell.text:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '?')
         end,
         cmp = function(record_a, record_b, desc)
             return sort_util.compare(record_a.duration, record_b.duration, desc)
@@ -146,7 +146,7 @@ M.search_columns = {
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '---'))
+            cell.text:SetText(is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -232,7 +232,7 @@ M.search_columns = {
         align = 'CENTER',
         fill = function(cell, record)
             local pct, bidPct = record_percentage(record)
-            cell.text:SetText((pct or bidPct) and percentage_historical(pct or bidPct, not pct) or '---')
+            cell.text:SetText((pct or bidPct) and percentage_historical(pct or bidPct, not pct) or '?')
         end,
         cmp = function(record_a, record_b, desc)
             local pct_a = record_percentage(record_a) or (desc and -huge or huge)
@@ -302,7 +302,7 @@ M.auctions_columns = {
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
+            cell.text:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '?')
         end,
         cmp = function(record_a, record_b, desc)
             return sort_util.compare(record_a.duration, record_b.duration, desc)
@@ -424,7 +424,7 @@ M.bids_columns = {
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '---')
+            cell.text:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '?')
         end,
         cmp = function(record_a, record_b, desc)
             return sort_util.compare(record_a.duration, record_b.duration, desc)
@@ -435,7 +435,7 @@ M.bids_columns = {
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '---'))
+            cell.text:SetText(is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
