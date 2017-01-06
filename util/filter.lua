@@ -404,7 +404,6 @@ end
 
 function M.filter_string(components)
     local query_builder = query_builder()
-
     for i = 1, getn(components) do
 	    local component = components[i]
 	    if component[1] == 'blizzard' then
@@ -422,13 +421,11 @@ function M.filter_string(components)
             end
         end
     end
-
     return query_builder.get()
 end
 
 function prettified_filter_string(filter)
     local prettified = query_builder()
-
     for i = 1, getn(filter.components) do
 	    local component = filter.components[i]
 	    if component[1] == 'blizzard' then
@@ -436,7 +433,7 @@ function prettified_filter_string(filter)
 			    if filter.blizzard.exact then
 			        prettified.append(info.display_name(cache.item_id(component[4])) or color.orange('[' .. component[4] .. ']'))
 			    elseif component[4] ~= '' then
-				    prettified.append(color.orange(component[4]))
+				    prettified.append(color.label.enabled(component[4]))
 			    end
 		    elseif component[2] ~= 'exact' then
 			    prettified.append(color.orange(component[3]))
@@ -505,7 +502,6 @@ function blizzard_query(filter)
 end
 
 function validator(filter)
-
     local validators = T
     for i, component in filter.post do
 	    local type, name, param = unpack(component)
@@ -513,7 +509,6 @@ function validator(filter)
             validators[i] = filters[name].validator(parse_parameter(filters[name].input_type, param))
         end
     end
-
     return function(record)
         if filter.blizzard.exact and strlower(info.item(record.item_id).name) ~= filter.blizzard.name[2] then
             return false
