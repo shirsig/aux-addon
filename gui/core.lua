@@ -168,10 +168,9 @@ function M.button(parent, text_height)
     do
         local label = button:CreateFontString()
         label:SetFont(font, text_height)
-        label:SetPoint('CENTER', 0, 0)
+        label:SetAllPoints(button)
         label:SetJustifyH('CENTER')
         label:SetJustifyV('CENTER')
-        label:SetHeight(text_height)
         label:SetTextColor(color.text.enabled())
         button:SetFontString(label)
     end
