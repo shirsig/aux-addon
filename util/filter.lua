@@ -162,7 +162,7 @@ M.filters = {
         end
     },
 
-    ['bid-vend-profit'] = {
+    ['bid-vendor-profit'] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -172,7 +172,7 @@ M.filters = {
         end
     },
 
-    ['vend-profit'] = {
+    ['vendor-profit'] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)

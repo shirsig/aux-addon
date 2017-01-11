@@ -323,7 +323,7 @@ function set_filter_display_offset(x_offset, y_offset)
 end
 
 function initialize_filter_dropdown()
-	for _, filter in ipairs(temp-A('and', 'or', 'not', 'price', 'profit', 'vend-profit', 'disenchant-profit', 'percent', 'bid-price', 'bid-profit', 'bid-vend-profit', 'bid-disenchant-profit', 'bid-percent', 'item', 'tooltip', 'min-level', 'max-level', 'rarity', 'left', 'utilizable')) do
+	for _, filter in ipairs(temp-A('and', 'or', 'not', 'price', 'profit', 'vendor-profit', 'disenchant-profit', 'percent', 'bid-price', 'bid-profit', 'bid-vendor-profit', 'bid-disenchant-profit', 'bid-percent', 'item', 'tooltip', 'min-level', 'max-level', 'rarity', 'left', 'utilizable')) do
 		UIDropDownMenu_AddButton(O(
 			'text', filter,
 			'value', filter,
