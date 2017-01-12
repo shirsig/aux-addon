@@ -332,6 +332,10 @@ do
 		[4381] = 10,
 		[18637] = 10,
 
+        -- deflector
+        [4376] = 5,
+        [4386] = 5,
+
 		-- ... TODO
 	}
 	function M.max_item_charges(item_id)
