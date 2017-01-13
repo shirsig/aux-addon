@@ -126,12 +126,12 @@ function merchant_buy_scan()
 					unit_price = min(buy_info.unit_price, new_unit_price)
 				end
 
-				aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, O(
+				aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, temp-O(
 					'unit_price', unit_price,
 					'limited', buy_info.limited and new_limited
 				))
 			else
-				aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, O(
+				aux_merchant_buy[item_id] = persistence.write(merchant_buy_schema, temp-O(
 					'unit_price', new_unit_price,
 					'limited', new_limited
 				))
@@ -163,7 +163,7 @@ function scan_wdb(item_id)
 		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 		if name and not aux_item_ids[strlower(name)] then
 			aux_item_ids[strlower(name)] = item_id
-			aux_items[item_id] = persistence.write(items_schema, O(
+			aux_items[item_id] = persistence.write(items_schema, temp-O(
 				'name', name,
 				'quality', quality,
 				'level', level,
