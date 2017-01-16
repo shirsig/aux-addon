@@ -107,7 +107,7 @@ end
 
 function push_record(item_record)
 	if item_record.daily_min_buyout then
-		tinsert(item_record.data_points, 1, weak-O('value', item_record.daily_min_buyout, 'time', item_record.next_push))
+		tinsert(item_record.data_points, 1, O('value', item_record.daily_min_buyout, 'time', item_record.next_push))
 		while getn(item_record.data_points) > 11 do
 			release(item_record.data_points[getn(item_record.data_points)])
 			tremove(item_record.data_points)

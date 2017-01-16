@@ -77,7 +77,7 @@ function M.container_item(bag, slot)
             'readable', readable,
             'lootable', lootable,
 
-            'tooltip', weak-tooltip,
+            'tooltip', tooltip,
     	    'tooltip_money', tooltip_money,
             'max_charges', max_charges,
             'charges', charges,
@@ -154,7 +154,7 @@ function M.auction(index, query_type)
             'duration', duration,
             'usable', usable,
 
-            'tooltip', weak-tooltip,
+            'tooltip', tooltip,
     	    'tooltip_money', tooltip_money,
             'max_charges', max_charges,
             'charges', charges,
@@ -287,11 +287,11 @@ function M.tooltip(setter, arg1, arg2)
     end
     local tooltip = T
     for i = 1, AuxTooltip:NumLines() do
-        tinsert(tooltip, weak-O(
+        tinsert(tooltip, O(
             'left_text', _G['AuxTooltipTextLeft' .. i]:GetText(),
-            'left_color', weak-A(_G['AuxTooltipTextLeft' .. i]:GetTextColor()),
+            'left_color', A(_G['AuxTooltipTextLeft' .. i]:GetTextColor()),
             'right_text', _G['AuxTooltipTextRight' .. i]:IsVisible() and _G['AuxTooltipTextRight' .. i]:GetText(),
-            'right_color', weak-A(_G['AuxTooltipTextRight' .. i]:GetTextColor())
+            'right_color', A(_G['AuxTooltipTextRight' .. i]:GetTextColor())
         ))
     end
     return tooltip, AuxTooltip.money

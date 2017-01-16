@@ -4,12 +4,11 @@ module 'T'
 local next, getn, setn, tremove, setmetatable = next, getn, table.setn, tremove, setmetatable
 
 local wipe, acquire, release
-local pool, pool_size, overflow_pool, auto_release, dep_release = {}, 0, setmetatable({}, {__mode='k'}), {}, setmetatable({}, {__mode='k'})
+local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, {__mode='k'}), {}
 
 function wipe(t)
 	setmetatable(t, nil)
 	for k, v in t do
-		if dep_release[v] then release(v) end
 		t[k] = nil
 	end
 	t.reset, t.reset = nil, 1
@@ -39,7 +38,6 @@ M.acquire = acquire
 function release(t)
 	wipe(t)
 	auto_release[t] = nil
-	dep_release[t] = nil
 	if pool_size < 50 then
 		pool_size = pool_size + 1
 		pool[pool_size] = t
@@ -56,14 +54,6 @@ end
 do
 	local function f(_, v) if v then auto_release[v] = nil; return v end end
 	M.static = setmetatable({}, {__metatable=false, __newindex=nop, __call=f, __sub=f})
-end
-do
-	local function f(_, v) if v then dep_release[v] = true; return v end end
-	M.weak = setmetatable({}, {__metatable=false, __newindex=nop, __call=f, __sub=f})
-end
-do
-	local function f(_, v) if v then dep_release[v] = nil; return v end end
-	M.strong = setmetatable({}, {__metatable=false, __newindex=nop, __call=f, __sub=f})
 end
 
 M.get_T = acquire

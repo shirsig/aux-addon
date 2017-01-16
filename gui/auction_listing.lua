@@ -584,7 +584,9 @@ local methods = {
         local rt = this:GetParent().row.rt
         local rowData = this:GetParent().row.data
         if rowData and rowData.record then
-            info.set_tooltip(rowData.record.itemstring, this, 'ANCHOR_RIGHT')
+	        GameTooltip:SetOwner(this, 'ANCHOR_RIGHT')
+            info.load_tooltip(GameTooltip, rowData.record.tooltip)
+	        GameTooltip:Show()
             info.set_shopping_tooltip(rowData.record.slot)
         end
     end,

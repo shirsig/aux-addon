@@ -70,7 +70,7 @@ function extend_tooltip(tooltip, link, quantity)
     end
     local item_info = temp-info.item(item_id)
     if item_info then
-        local distribution = temp-disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
+        local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
         if getn(distribution) > 0 then
             if aux_tooltip_disenchant_distribution then
                 tooltip:AddLine('Disenchants into:', color.tooltip.disenchant.distribution())
