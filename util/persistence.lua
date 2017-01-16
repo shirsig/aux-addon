@@ -25,9 +25,9 @@ function M.read(schema, str)
     elseif schema == 'number' then
         return tonumber(str)
     elseif type(schema) == 'table' and schema[1] == 'list' then
-        return read_list(schema, str)
+        return temp-read_list(schema, str)
     elseif type(schema) == 'table' and schema[1] == 'tuple' then
-        return read_tuple(schema, str)
+        return temp-read_tuple(schema, str)
     else
         error('Invalid schema.', 2)
     end
