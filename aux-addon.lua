@@ -9,6 +9,7 @@ local history = require 'aux.core.history'
 local stack = require 'aux.core.stack'
 local post = require 'aux.core.post'
 local scan = require 'aux.core.scan'
+local search_tab = require 'aux.tabs.search'
 
 _G.aux_characters = T
 
@@ -265,6 +266,22 @@ do
 			CraftReagentLabel:SetText(SPELL_REAGENTS .. ' ' .. cost_label(total_cost))
 			return unpack(ret)
 		end)
+		for i = 1, 8 do
+			local f = _G['CraftReagent' .. i]
+			f:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
+			local orig = f:GetScript'OnClick'
+			f:SetScript('OnClick', function()
+				if arg1 == 'RightButton' then
+					if active_tab then
+						tab = 1
+						search_tab.filter = strlower(GetCraftReagentInfo(GetCraftSelectionIndex(), this:GetID())) .. '/exact'
+						search_tab.execute(nil, false)
+					end
+				else
+					orig() -- TODO weird bug with upvalue, somehow always the same function?
+				end
+			end)
+		end
 	end
 	function ADDON_LOADED.Blizzard_TradeSkillUI()
 		hook('TradeSkillFrame_SetSelection', function(...)
@@ -293,6 +310,22 @@ do
 			TradeSkillReagentLabel:SetText(SPELL_REAGENTS .. ' ' .. cost_label(total_cost))
 			return unpack(ret)
 		end)
+		for i = 1, 8 do
+			local f = _G['TradeSkillReagent' .. i]
+			f:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
+			local orig = f:GetScript'OnClick'
+			f:SetScript('OnClick', function()
+				if arg1 == 'RightButton' then
+					if active_tab then
+						tab = 1
+						search_tab.filter = strlower(GetTradeSkillReagentInfo(GetTradeSkillSelectionIndex(), this:GetID())) .. '/exact'
+						search_tab.execute(nil, false)
+					end
+				else
+					orig() -- TODO weird bug with upvalue, somehow always the same function?
+				end
+			end)
+		end
 	end
 end
 
