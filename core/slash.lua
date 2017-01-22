@@ -16,7 +16,11 @@ function SlashCmdList.AUX(command)
 	if not command then return end
 	local arguments = tokenize(command)
 
-    if arguments[1] == 'ignore' and arguments[2] == 'owner' then
+    if arguments[1] == 'scale' and tonumber(arguments[2]) then
+    	local scale = tonumber(arguments[2])
+	    AuxFrame:SetScale(scale)
+	    _G.aux_scale = scale
+    elseif arguments[1] == 'ignore' and arguments[2] == 'owner' then
 	    _G.aux_ignore_owner = not aux_ignore_owner
         print('ignore owner ' .. status(aux_ignore_owner))
     elseif arguments[1] == 'tooltip' and arguments[2] == 'value' then
@@ -49,6 +53,7 @@ function SlashCmdList.AUX(command)
 	    cache.populate_wdb()
 	else
 		print('Usage:')
+		print('- scale [' .. color.blue(aux_scale) .. ']')
 		print('- ignore owner [' .. status(aux_ignore_owner) .. ']')
 		print('- tooltip value [' .. status(aux_tooltip_value) .. ']')
 		print('- tooltip daily [' .. status(aux_tooltip_daily) .. ']')

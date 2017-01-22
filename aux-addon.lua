@@ -11,7 +11,8 @@ local post = require 'aux.core.post'
 local scan = require 'aux.core.scan'
 local search_tab = require 'aux.tabs.search'
 
-_G.aux_characters = T
+_G.aux_scale = 1
+_G.aux_characters = {}
 
 function M.set_p(v)
 	inspect(nil, v)
@@ -34,9 +35,9 @@ for event in temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION
 	event_frame:RegisterEvent(event)
 end
 
-ADDON_LOADED = T
+ADDON_LOADED = {}
 do
-	local handlers, handlers2 = T, T
+	local handlers, handlers2 = {}, {}
 	function M.set_LOAD(f)
 		tinsert(handlers, f)
 	end
@@ -57,7 +58,7 @@ do
 	end)
 end
 
-tab_info = T
+tab_info = {}
 function M.TAB(name)
 	local tab = O('name', name)
 	local env = getfenv(2)
@@ -178,6 +179,7 @@ function LOAD2()
 		end
 	end
 	aux_characters[key][UnitName'player'] = GetTime()
+	AuxFrame:SetScale(aux_scale)
 end
 
 function M.neutral_faction()

@@ -218,8 +218,7 @@ do
 		tab.highlight = highlight
 
 		tab.text = tab:CreateFontString()
-		tab.text:SetPoint('LEFT', 3, -1)
-		tab.text:SetPoint('RIGHT', -3, -1)
+		tab.text:SetAllPoints()
 		tab.text:SetJustifyH('CENTER')
 		tab.text:SetJustifyV('CENTER')
 		tab.text:SetFont(font, font_size.large)
