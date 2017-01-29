@@ -344,7 +344,7 @@ function unit_vendor_price(item_key)
 	    temp(slot)
         local item_info = temp-info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
-            if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
+            if info.auctionable(item_info.tooltip, nil, true) and not item_info.lootable then
                 ClearCursor()
                 PickupContainerItem(unpack(slot))
                 ClickAuctionSellItemButton()
@@ -402,7 +402,7 @@ function update_inventory_records()
 	    local item_info = temp-info.container_item(unpack(slot))
         if item_info then
             local charge_class = item_info.charges or 0
-            if info.auctionable(item_info.tooltip, nil, item_info.lootable) then
+            if info.auctionable(item_info.tooltip, nil, true) and not item_info.lootable then
                 if not auctionable_map[item_info.item_key] then
                     local availability = T
                     for i = 0, 10 do

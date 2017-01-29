@@ -37,7 +37,7 @@ end
 
 function matching_item(slot, partial)
 	local item_info = temp-info.container_item(unpack(slot))
-	return item_info and item_info.item_key == state.item_key and info.auctionable(item_info.tooltip) and (not partial or item_info.count < item_info.max_stack)
+	return item_info and item_info.item_key == state.item_key and info.auctionable(item_info.tooltip, nil, true) and (not partial or item_info.count < item_info.max_stack)
 end
 
 function find_empty_slot()
