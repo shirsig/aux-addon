@@ -51,7 +51,7 @@ M.filters = {
     },
 
     ['left'] = {
-        input_type = A('30m', '2h', '8h', '24h'),
+        input_type = A(SHORT, MEDIUM, LONG, VARY_LONG),
         validator = function(index)
             return function(auction_record)
                 return auction_record.duration == index
@@ -275,11 +275,11 @@ function M.parse_filter_string(str)
             if input_type ~= '' then
                 if not parts[i + 1] or not parse_parameter(input_type, parts[i + 1]) then
                     if parts[i] == 'item' then
-                        return nil, 'Invalid item name', aux_auctionable_items
+                        return nil, INVALID_ITEM_NAME, aux_auctionable_items
                     elseif type(input_type) == 'table' then
-                        return nil, 'Invalid choice for ' .. parts[i], input_type
+                        return nil, INVALID_CHOICE .. parts[i], input_type
                     else
-                        return nil, 'Invalid input for ' .. parts[i] .. '. Expecting: ' .. input_type
+                        return nil, INVALID_INPUT .. parts[i] .. EXPECTING .. input_type
                     end
                 end
                 tinsert(post_filter, A('filter', parts[i], parts[i + 1]))
@@ -296,7 +296,7 @@ function M.parse_filter_string(str)
 		        tinsert(post_filter, A('filter', 'tooltip', parts[i]))
 		        tinsert(filter, post_filter[getn(post_filter)])
 	        else
-	            return nil, 'Empty modifier'
+	            return nil, EMPTY_MODIFIER
 	        end
         end
         i = i + 1
@@ -331,7 +331,7 @@ function M.query(filter_string)
         tinsert(suggestions, 'and')
         tinsert(suggestions, 'or')
         tinsert(suggestions, 'not')
-        return nil, suggestions, 'Malformed expression'
+        return nil, suggestions, MALFORMED_EXPRESSION
     end
 
     return {

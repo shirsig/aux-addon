@@ -53,8 +53,8 @@ end
 do
 	local btn = gui.button(frame, gui.font_size.small)
 	btn:SetHeight(25)
-	btn:SetWidth(60)
-	btn:SetText(color.label.enabled'Range:')
+	btn:SetWidth(70)
+	btn:SetText(color.label.enabled(RANGE_1))
 	btn:SetScript('OnClick', function()
 		update_real_time(true)
 	end)
@@ -65,7 +65,7 @@ do
 	btn:SetHeight(25)
 	btn:SetWidth(60)
 	btn:Hide()
-	btn:SetText(color.label.enabled'Real Time')
+	btn:SetText(color.label.enabled(REAL_TIME))
 	btn:SetScript('OnClick', function()
 		update_real_time(false)
 	end)
@@ -122,7 +122,7 @@ do
     local btn = gui.button(frame)
     btn:SetHeight(25)
     btn:SetPoint('TOPRIGHT', -5, -8)
-    btn:SetText('Search')
+    btn:SetText(SEARCH)
     btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
     btn:SetScript('OnClick', function()
         if arg1 == 'RightButton' then
@@ -136,7 +136,7 @@ do
     local btn = gui.button(frame)
     btn:SetHeight(25)
     btn:SetPoint('TOPRIGHT', -5, -8)
-    btn:SetText('Pause')
+    btn:SetText(PAUSE)
     btn:SetScript('OnClick', function()
         scan.abort(search_scan_id)
     end)
@@ -145,9 +145,10 @@ end
 do
     local btn = gui.button(frame)
     btn:SetHeight(25)
+	btn:SetWidth(120)
     btn:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
     btn:SetBackdropColor(color.state.enabled())
-    btn:SetText('Resume')
+    btn:SetText(RESUME)
     btn:SetScript('OnClick', function()
         execute(true)
     end)
@@ -184,7 +185,7 @@ do
     btn:SetPoint('BOTTOMLEFT', AuxFrame.content, 'TOPLEFT', 10, 8)
     btn:SetWidth(243)
     btn:SetHeight(22)
-    btn:SetText('Search Results')
+    btn:SetText(SEARCH_RESULTS)
     btn:SetScript('OnClick', function() subtab = RESULTS end)
     search_results_button = btn
 end
@@ -193,7 +194,7 @@ do
     btn:SetPoint('TOPLEFT', search_results_button, 'TOPRIGHT', 5, 0)
     btn:SetWidth(243)
     btn:SetHeight(22)
-    btn:SetText('Saved Searches')
+    btn:SetText(SAVED_SEARCHES)
     btn:SetScript('OnClick', function() subtab = SAVED end)
     saved_searches_button = btn
 end
@@ -202,13 +203,13 @@ do
     btn:SetPoint('TOPLEFT', saved_searches_button, 'TOPRIGHT', 5, 0)
     btn:SetWidth(243)
     btn:SetHeight(22)
-    btn:SetText('Filter Builder')
+    btn:SetText(FILTER_BUILDER)
     btn:SetScript('OnClick', function() subtab = FILTER end)
     new_filter_button = btn
 end
 do
     local frame = CreateFrame('Frame', nil, frame)
-    frame:SetWidth(265)
+    frame:SetWidth(280)
     frame:SetHeight(25)
     frame:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
     status_bar_frame = frame
@@ -216,21 +217,22 @@ end
 do
     local btn = gui.button(frame.results)
     btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-    btn:SetText('Bid')
+    btn:SetText(BID)
     btn:Disable()
     bid_button = btn
 end
 do
     local btn = gui.button(frame.results)
     btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
-    btn:SetText('Buyout')
+    btn:SetText(BUYOUT)
     btn:Disable()
     buyout_button = btn
 end
 do
     local btn = gui.button(frame.results)
     btn:SetPoint('TOPLEFT', buyout_button, 'TOPRIGHT', 5, 0)
-    btn:SetText('Clear')
+    btn:SetText(CLEAR)
+	btn:SetWidth(100)
     btn:SetScript('OnClick', function()
         while tremove(current_search.records) do end
         current_search.table:SetDatabase()
@@ -239,7 +241,8 @@ end
 do
     local btn = gui.button(frame.saved)
     btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-    btn:SetText('Favorite')
+    btn:SetText(FAVORITE)
+	btn:SetWidth(100)
     btn:SetScript('OnClick', function()
         add_favorite(search_box:GetText())
     end)
@@ -247,7 +250,7 @@ end
 do
     local btn1 = gui.button(frame.filter)
     btn1:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
-    btn1:SetText('Search')
+    btn1:SetText(SEARCH)
     btn1:SetScript('OnClick', function()
 	    export_filter_string()
         execute()
@@ -255,12 +258,12 @@ do
 
     local btn2 = gui.button(frame.filter)
     btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
-    btn2:SetText('Export')
+    btn2:SetText(EXPORT)
     btn2:SetScript('OnClick', export_filter_string)
 
     local btn3 = gui.button(frame.filter)
     btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
-    btn3:SetText('Import')
+    btn3:SetText(IMPORT)
     btn3:SetScript('OnClick', import_filter_string)
 end
 do
@@ -287,16 +290,16 @@ do
     editbox.enter = function() editbox:ClearFocus() end
     local label = gui.label(editbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-    label:SetText('Name')
+    label:SetText(NAME)
     name_input = editbox
 end
 do
     local checkbox = gui.checkbox(frame.filter)
-    checkbox:SetPoint('TOPLEFT', name_input, 'TOPRIGHT', 16, 0)
+    checkbox:SetPoint('LEFT', name_input, 'RIGHT', 16, 25)
     checkbox:SetScript('OnClick', update_form)
     local label = gui.label(checkbox, gui.font_size.small)
-    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
-    label:SetText('Exact')
+    label:SetPoint('RIGHT', checkbox, 'LEFT', -6, 1)
+    label:SetText(EXACT)
     exact_checkbox = checkbox
 end
 do
@@ -322,7 +325,7 @@ do
     end
     local label = gui.label(editbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-    label:SetText('Level Range')
+    label:SetText(LEVEL_RANGE)
     min_level_input = editbox
 end
 do
@@ -353,11 +356,11 @@ do
 end
 do
     local checkbox = gui.checkbox(frame.filter)
-    checkbox:SetPoint('TOPLEFT', max_level_input, 'TOPRIGHT', 16, 0)
+    checkbox:SetPoint('LEFT', max_level_input, 'RIGHT', 16, 25)
     checkbox:SetScript('OnClick', update_form)
     local label = gui.label(checkbox, gui.font_size.small)
-    label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
-    label:SetText('Usable')
+    label:SetPoint('RIGHT', checkbox, 'LEFT', -6, 1)
+    label:SetText(USABLE)
     usable_checkbox = checkbox
 end
 do
@@ -367,7 +370,7 @@ do
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
-    label:SetText('Item Class')
+    label:SetText(ITEM_CLASS)
     UIDropDownMenu_Initialize(dropdown, initialize_class_dropdown)
     dropdown:SetScript('OnShow', function()
         UIDropDownMenu_Initialize(this, initialize_class_dropdown)
@@ -380,7 +383,7 @@ do
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
-    label:SetText('Item Subclass')
+    label:SetText(ITEM_SUBCLASS)
     UIDropDownMenu_Initialize(dropdown, initialize_subclass_dropdown)
     dropdown:SetScript('OnShow', function()
         UIDropDownMenu_Initialize(this, initialize_subclass_dropdown)
@@ -393,7 +396,7 @@ do
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
-    label:SetText('Item Slot')
+    label:SetText(ITEM_SLOT)
     UIDropDownMenu_Initialize(dropdown, initialize_slot_dropdown)
     dropdown:SetScript('OnShow', function()
         UIDropDownMenu_Initialize(this, initialize_slot_dropdown)
@@ -406,7 +409,7 @@ do
     dropdown:SetWidth(300)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
-    label:SetText('Min Quality')
+    label:SetText(MIN_QUALITY)
     UIDropDownMenu_Initialize(dropdown, initialize_quality_dropdown)
     dropdown:SetScript('OnShow', function()
         UIDropDownMenu_Initialize(this, initialize_quality_dropdown)
@@ -424,7 +427,7 @@ do
     _G[dropdown:GetName() .. 'Text']:Hide()
     local label = gui.label(dropdown, gui.font_size.medium)
     label:SetPoint('RIGHT', dropdown, 'LEFT', -15, 0)
-    label:SetText('Component')
+    label:SetText(COMPONENT)
     filter_dropdown = dropdown
 end
 do
@@ -536,10 +539,10 @@ for _ = 1, 5 do
 end
 
 favorite_searches_listing = listing.new(frame.saved.favorite)
-favorite_searches_listing:SetColInfo{{name='Auto Buy', width=.07, align='CENTER'}, {name='Favorite Searches', width=.93}}
+favorite_searches_listing:SetColInfo{{name=AUTO_BUY, width=.13, align='CENTER'}, {name=FAVORITE_SEARCHES, width=.87}}
 
 recent_searches_listing = listing.new(frame.saved.recent)
-recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}
+recent_searches_listing:SetColInfo{{name=RECENT_SEARCHES, width=1}}
 
 for listing in temp-S(favorite_searches_listing, recent_searches_listing) do
 	listing:DisableSelection(true)

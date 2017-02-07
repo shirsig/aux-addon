@@ -37,15 +37,15 @@ end
 do
 	local btn = gui.button(AuxFrame)
 	btn:SetPoint('BOTTOMRIGHT', -5, 5)
-	gui.set_size(btn, 60, 24)
-	btn:SetText('Close')
+	gui.set_size(btn, 80, 24)
+	btn:SetText(CLOSE)
 	btn:SetScript('OnClick', function() AuxFrame:Hide() end)
 	close_button = btn
 end
 do
 	local btn = gui.button(AuxFrame, gui.font_size.small)
 	btn:SetPoint('RIGHT', close_button, 'LEFT' , -5, 0)
-	gui.set_size(btn, 60, 24)
+	gui.set_size(btn, 80, 24)
 	btn:SetText(color.blizzard'Blizzard UI')
 	btn:SetScript('OnClick',function()
 		if AuctionFrame:IsVisible() then HideUIPanel(AuctionFrame) else ShowUIPanel(AuctionFrame) end

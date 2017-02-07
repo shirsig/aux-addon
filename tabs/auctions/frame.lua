@@ -28,7 +28,7 @@ end)
 
 do
 	status_bar = gui.status_bar(frame)
-    status_bar:SetWidth(265)
+    status_bar:SetWidth(280)
     status_bar:SetHeight(25)
     status_bar:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
     status_bar:update_status(1, 1)
@@ -37,14 +37,15 @@ end
 do
     local btn = gui.button(frame)
     btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
-    btn:SetText('Cancel')
+    btn:SetText(CANCEL)
     btn:Disable()
     cancel_button = btn
 end
 do
     local btn = gui.button(frame)
     btn:SetPoint('TOPLEFT', cancel_button, 'TOPRIGHT', 5, 0)
-    btn:SetText('Refresh')
+    btn:SetText(REFRESH)
+	btn:SetWidth(100)
     btn:SetScript('OnClick', function()
         scan_auctions()
     end)

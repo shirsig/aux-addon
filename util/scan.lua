@@ -41,7 +41,7 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
         queries = queries,
         on_scan_start = function()
             status_bar:update_status(0, 0)
-            status_bar:set_text('Searching auction...')
+            status_bar:set_text(SEARCHING_AUCTIONS)
         end,
         on_start_query = function(query_index)
             status_bar:update_status((query_index - 1) / getn(queries), 0)
@@ -51,21 +51,21 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
                 found = true
                 scan.stop()
                 status_bar:update_status(1, 1)
-                status_bar:set_text('Auction found')
+                status_bar:set_text(AUCTION_FOUND)
                 return on_success(record.index)
             end
         end,
         on_abort = function()
             if not found then
                 status_bar:update_status(1, 1)
-                status_bar:set_text('Auction not found')
+                status_bar:set_text(AUCTION_NOT_FOUND)
                 return on_abort()
             end
         end,
         on_complete = function()
 	        if not found then
 	            status_bar:update_status(1, 1)
-	            status_bar:set_text('Auction not found')
+	            status_bar:set_text(AUCTION_NOT_FOUND)
 	            return on_failure()
 	        end
         end,

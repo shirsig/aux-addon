@@ -59,13 +59,13 @@ function extend_tooltip(tooltip, link, quantity)
         local r, g, b = color.tooltip.disenchant.source()
         local type, range = disenchant.source(item_id)
         if type == 'CRYSTAL' then
-            tooltip:AddLine(format('Can disenchant from level %s |cffa335eeEpic|r and |cff0070ddRare|r items.', range), r, g, b, true)
+            tooltip:AddLine(format(DISENCHANT_MSG_1, range), r, g, b, true)
         elseif type == 'SHARD' then
-            tooltip:AddLine(format('Can disenchant from level %s |cff0070ddRare|r and |cff1eff00Uncommon|r items.', range), r, g, b, true)
+            tooltip:AddLine(format(DISENCHANT_MSG_2, range), r, g, b, true)
         elseif type == 'ESSENCE' then
-            tooltip:AddLine(format('Can disenchant from level %s |cff1eff00Uncommon|r items.', range), r, g, b, true)
+            tooltip:AddLine(format(DISENCHANT_MSG_3, range), r, g, b, true)
         elseif type == 'DUST' then
-            tooltip:AddLine(format('Can disenchant from level %s |cff1eff00Uncommon|r items.', range), r, g, b, true)
+            tooltip:AddLine(format(DISENCHANT_MSG_4, range), r, g, b, true)
         end
     end
     local item_info = temp-info.item(item_id)
@@ -73,7 +73,7 @@ function extend_tooltip(tooltip, link, quantity)
         local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
         if getn(distribution) > 0 then
             if aux_tooltip_disenchant_distribution then
-                tooltip:AddLine('Disenchants into:', color.tooltip.disenchant.distribution())
+                tooltip:AddLine(DISENCHANT_INFO, color.tooltip.disenchant.distribution())
                 sort(distribution, function(a,b) return a.probability > b.probability end)
                 for i = 1, getn(distribution) do
 	                local event = distribution[i]
@@ -82,20 +82,20 @@ function extend_tooltip(tooltip, link, quantity)
             end
             if aux_tooltip_disenchant_value then
                 local disenchant_value = disenchant.value(item_info.slot, item_info.quality, item_info.level)
-                tooltip:AddLine('Disenchant: ' .. (disenchant_value and money.to_string2(disenchant_value) or UNKNOWN), color.tooltip.disenchant.value())
+                tooltip:AddLine(DISENCHANT .. (disenchant_value and money.to_string2(disenchant_value) or UNKNOWN), color.tooltip.disenchant.value())
             end
         end
     end
     if aux_tooltip_merchant_buy then
         local _, price, limited = cache.merchant_info(item_id)
         if price then
-            tooltip:AddLine('Vendor Buy ' .. (limited and '(limited): ' or ': ') .. money.to_string2(price * quantity), color.tooltip.merchant())
+            tooltip:AddLine(VENDOR_BUY .. (limited and LIMITED or ': ') .. money.to_string2(price * quantity), color.tooltip.merchant())
         end
     end
     if aux_tooltip_merchant_sell then
         local price = cache.merchant_info(item_id)
         if price ~= 0 then
-            tooltip:AddLine('Vendor: ' .. (price and money.to_string2(price * quantity) or UNKNOWN), color.tooltip.merchant())
+            tooltip:AddLine(VENDOR .. (price and money.to_string2(price * quantity) or UNKNOWN), color.tooltip.merchant())
         end
     end
     local auctionable = not item_info or info.auctionable(temp-info.tooltip('link', item_info.itemstring), item_info.quality)
@@ -103,11 +103,11 @@ function extend_tooltip(tooltip, link, quantity)
     local value = history.value(item_key)
     if auctionable then
         if aux_tooltip_value then
-            tooltip:AddLine('Value: ' .. (value and money.to_string2(value * quantity) or UNKNOWN), color.tooltip.value())
+            tooltip:AddLine(VALUE .. (value and money.to_string2(value * quantity) or UNKNOWN), color.tooltip.value())
         end
         if aux_tooltip_daily  then
             local market_value = history.market_value(item_key)
-            tooltip:AddLine('Today: ' .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. auction_listing.percentage_historical(round(market_value / value * 100)) .. ')' or UNKNOWN), color.tooltip.value())
+            tooltip:AddLine(TODAY .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. auction_listing.percentage_historical(round(market_value / value * 100)) .. ')' or UNKNOWN), color.tooltip.value())
         end
     end
 

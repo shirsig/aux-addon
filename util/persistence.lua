@@ -29,7 +29,7 @@ function M.read(schema, str)
     elseif type(schema) == 'table' and schema[1] == 'tuple' then
         return temp-read_tuple(schema, str)
     else
-        error('Invalid schema.', 2)
+        error(INVALID_SCHEMA, 2)
     end
 end
 
@@ -45,7 +45,7 @@ function M.write(schema, obj)
     elseif type(schema) == 'table' and schema[1] == 'tuple' then
         return write_tuple(schema, obj)
     else
-        error('Invalid schema.', 2)
+        error(INVALID_SCHEMA, 2)
     end
 end
 

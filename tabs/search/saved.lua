@@ -61,10 +61,10 @@ handlers = {
 			elseif st == favorite_searches_listing then
 				local auto_buy = data.search.auto_buy
 				gui.menu(
-					(auto_buy and 'Disable' or 'Enable') .. ' Auto Buy', function() if auto_buy then data.search.auto_buy = nil else enable_auto_buy(data.search) end u() end,
-					'Move Up', function() move_up(aux_favorite_searches, data.index); u() end,
-					'Move Down', function() move_down(aux_favorite_searches, data.index); u() end,
-					'Delete', function() tremove(aux_favorite_searches, data.index); u() end
+					(auto_buy and DISABLE or ENABLE) .. AUTO_BUY_1, function() if auto_buy then data.search.auto_buy = nil else enable_auto_buy(data.search) end u() end,
+					MOVE_UP, function() move_up(aux_favorite_searches, data.index); u() end,
+					MOVE_DOWN, function() move_down(aux_favorite_searches, data.index); u() end,
+					DELETE, function() tremove(aux_favorite_searches, data.index); u() end
 				)
 			end
 		end
@@ -107,7 +107,7 @@ function add_favorite(filter_string)
 		))
 		update_search_listings()
 	else
-		print('Invalid filter:', error)
+		print(INVALID_FILTER, error)
 	end
 end
 
@@ -115,14 +115,14 @@ function enable_auto_buy(search)
 	local queries, error = filter_util.queries(search.filter_string)
 	if queries then
 		if getn(queries) > 1 then
-			print('Error: Auto Buy does not support multi-queries')
+			print(ERROR_3)
 		elseif size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(search.filter_string).blizzard.exact then
-			print('Error: Auto Buy does not support Blizzard filters')
+			print(ERROR_4)
 		else
 			search.auto_buy = true
 		end
 	else
-		print('Invalid filter:', error)
+		print(INVALID_FILTER, error)
 	end
 end
 
