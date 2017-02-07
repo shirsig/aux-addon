@@ -5,11 +5,11 @@ include 'aux'
 
 local info = require 'aux.util.info'
 
-TAB 'Search'
+TAB(SEARCH)
 
 StaticPopupDialogs.AUX_SEARCH_TABLE_FULL = {
-    text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',
-    button1 = 'Ok',
+    text = TABLE_FULL,
+    button1 = OK,
     showAlert = 1,
     timeout = 0,
     hideOnEscape = 1,
@@ -86,4 +86,3 @@ function blizzard_page_index(str)
         return max(0, tonumber(str) - 1)
     end
 end
-

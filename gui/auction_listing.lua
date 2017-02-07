@@ -24,10 +24,10 @@ local AUCTION_PCT_COLORS = {
 }
 
 local TIME_LEFT_STRINGS = {
-	color.red'30m', -- Short
-	color.orange'2h', -- Medium
-	color.yellow'8h', -- Long
-	color.blue'24h', -- Very Long
+	color.red(SHORT), -- Short
+	color.orange(MEDIUM), -- Medium
+	color.yellow(LONG), -- Long
+	color.blue(VARY_LONG), -- Very Long
 }
 
 function item_column_init(rt, cell)
@@ -74,7 +74,7 @@ end
 
 M.search_columns = {
     {
-        title = 'Item',
+        title = ITEM,
         width = .35,
         init = item_column_init,
         fill = item_column_fill,
@@ -83,7 +83,7 @@ M.search_columns = {
         end,
     },
     {
-        title = 'Lvl',
+        title = LVL,
         width = .035,
         align = 'CENTER',
         fill = function(cell, record)
@@ -96,7 +96,7 @@ M.search_columns = {
         end,
     },
     {
-        title = 'Auctions',
+        title = AUCTIONS_1,
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
@@ -120,7 +120,7 @@ M.search_columns = {
         end,
     },
     {
-        title = 'Stack\nSize',
+        title = STACK_SIZE,
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
@@ -131,7 +131,7 @@ M.search_columns = {
         end,
     },
     {
-        title = 'Time\nLeft',
+        title = TIME_LEFT,
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
@@ -142,7 +142,7 @@ M.search_columns = {
         end,
     },
     {
-        title = 'Seller',
+        title = SELLER,
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
@@ -161,7 +161,7 @@ M.search_columns = {
         end,
     },
     {
-        title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
+        title = {AUCTION_BID, AUCTION_BID_1},
         width = .125,
         align = 'RIGHT',
         isPrice = true,
@@ -209,7 +209,7 @@ M.search_columns = {
         end,
     },
     {
-        title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
+        title = {AUCTION_BUYOUT, AUCTION_BUYOUT_1},
         width = .125,
         align = 'RIGHT',
         isPrice = true,
@@ -227,7 +227,7 @@ M.search_columns = {
         end,
     },
     {
-        title = '% Hist.\nValue',
+        title = HIST_VALUE,
         width = .08,
         align = 'CENTER',
         fill = function(cell, record)
@@ -244,7 +244,7 @@ M.search_columns = {
 
 M.auctions_columns = {
     {
-        title = 'Item',
+        title = ITEM,
         width = .35,
         init = item_column_init,
         fill = item_column_fill,
@@ -253,7 +253,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'Lvl',
+        title = LVL,
         width = .035,
         align = 'CENTER',
         fill = function(cell, record)
@@ -266,7 +266,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'Auctions',
+        title = AUCTIONS_1,
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
@@ -287,7 +287,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'Stack\nSize',
+        title = STACK_SIZE,
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
@@ -298,7 +298,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'Time\nLeft',
+        title = TIME_LEFT,
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
@@ -309,7 +309,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
+        title = {AUCTION_BID, AUCTION_BID_1},
         width = .125,
         align = 'RIGHT',
         isPrice = true,
@@ -339,7 +339,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
+        title = {AUCTION_BUYOUT, AUCTION_BUYOUT_1},
         width = .125,
         align = 'RIGHT',
         isPrice = true,
@@ -357,11 +357,11 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'High Bidder',
+        title = HIGH_BIDDER,
         width = .21,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(record.high_bidder or color.red 'No Bids')
+            cell.text:SetText(record.high_bidder or color.red (NO_BIDS))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.high_bidder and not record_b.high_bidder then
@@ -379,7 +379,7 @@ M.auctions_columns = {
 
 M.bids_columns = {
     {
-        title = 'Item',
+        title = ITEM,
         width = .35,
         init = item_column_init,
         fill = item_column_fill,
@@ -388,7 +388,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = 'Auctions',
+        title = AUCTIONS_1,
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
@@ -409,7 +409,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = 'Stack\nSize',
+        title = STACK_SIZE,
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
@@ -420,7 +420,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = 'Time\nLeft',
+        title = TIME_LEFT,
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
@@ -431,7 +431,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = 'Seller',
+        title = SELLER,
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
@@ -450,7 +450,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
+        title = {AUCTION_BID, AUCTION_BID_1},
         width = .125,
         align = 'RIGHT',
         isPrice = true,
@@ -480,7 +480,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
+        title = {AUCTION_BUYOUT, AUCTION_BUYOUT_1},
         width = .125,
         align = 'RIGHT',
         isPrice = true,
@@ -498,15 +498,15 @@ M.bids_columns = {
         end,
     },
     {
-        title = 'Status',
+        title = STATUS,
         width = .115,
         align = 'CENTER',
         fill = function(cell, record)
             local status
             if record.high_bidder then
-                status = color.yellow'High Bidder'
+                status = color.yellow(HIGH_BIDDER)
             else
-                status = color.red'Outbid'
+                status = color.red(OUTBID)
             end
             cell.text:SetText(status)
         end,
@@ -597,11 +597,11 @@ local methods = {
         local rt = this.rt
         if rt.expanded[this.data.expandKey] then
             GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:AddLine('Double-click to collapse this item and show only the cheapest auction.', 1, 1, 1, true)
+            GameTooltip:AddLine(MSG_1, 1, 1, 1, true)
             GameTooltip:Show()
         elseif this.data.expandable then
             GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:AddLine('Double-click to expand this item and show all the auctions.', 1, 1, 1, true)
+            GameTooltip:AddLine(MSG_2, 1, 1, 1, true)
             GameTooltip:Show()
         end
 

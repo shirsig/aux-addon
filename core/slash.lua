@@ -8,7 +8,7 @@ local cache = require 'aux.core.cache'
 _G.aux_ignore_owner = true
 
 function status(enabled)
-	return (enabled and color.green'on' or color.red'off')
+	return (enabled and color.green(ON) or color.red(OFF))
 end
 
 _G.SLASH_AUX1 = '/aux'
@@ -48,21 +48,21 @@ function SlashCmdList.AUX(command)
 	    _G.aux_items = T
 	    _G.aux_item_ids = T
 	    _G.aux_auctionable_items = T
-        print('Item cache cleared.')
+        print(CACHE_CLEARED)
     elseif arguments[1] == 'populate' and arguments[2] == 'wdb' then
 	    cache.populate_wdb()
 	else
 		print('Usage:')
 		print('- scale [' .. color.blue(aux_scale) .. ']')
-		print('- ignore owner [' .. status(aux_ignore_owner) .. ']')
-		print('- tooltip value [' .. status(aux_tooltip_value) .. ']')
-		print('- tooltip daily [' .. status(aux_tooltip_daily) .. ']')
-		print('- tooltip vendor buy [' .. status(aux_tooltip_merchant_buy) .. ']')
-		print('- tooltip vendor sell [' .. status(aux_tooltip_merchant_sell) .. ']')
-		print('- tooltip disenchant value [' .. status(aux_tooltip_disenchant_value) .. ']')
-		print('- tooltip disenchant distribution [' .. status(aux_tooltip_disenchant_distribution) .. ']')
-		print('- tooltip disenchant source [' .. status(aux_tooltip_disenchant_source) .. ']')
-		print('- clear item cache')
-		print('- populate wdb')
+		print('- ignore owner ['.. status(aux_ignore_owner) .. '|cffffff7f]|r' .. CMD_1)
+		print('- tooltip value [' .. status(aux_tooltip_value) .. '|cffffff7f]|r' .. CMD_2)
+		print('- tooltip daily [' .. status(aux_tooltip_daily) .. '|cffffff7f]|r' .. CMD_3)
+		print('- tooltip vendor buy [' .. status(aux_tooltip_merchant_buy) .. '|cffffff7f]|r' .. CMD_4)
+		print('- tooltip vendor sell [' .. status(aux_tooltip_merchant_sell) .. '|cffffff7f]|r' .. CMD_5)
+		print('- tooltip disenchant value [' .. status(aux_tooltip_disenchant_value) .. '|cffffff7f]|r' .. CMD_6)
+		print('- tooltip disenchant distribution [' .. status(aux_tooltip_disenchant_distribution) .. '|cffffff7f]|r' .. CMD_7)
+		print('- tooltip disenchant source [' .. status(aux_tooltip_disenchant_source) .. '|cffffff7f]|r' .. CMD_8)
+		print('- clear item cache' .. CMD_9)
+		print('- populate wdb' .. CMD_10)
     end
 end

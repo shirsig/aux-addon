@@ -14,7 +14,7 @@ local history = require 'aux.core.history'
 local item_listing = require 'aux.gui.item_listing'
 local al = require 'aux.gui.auction_listing'
 
-TAB 'Post'
+TAB(POST)
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'tuple', '#', {stack_size='number'}, {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
@@ -276,7 +276,7 @@ function update_item_configuration()
         item.texture:SetTexture(nil)
         item.count:SetText()
         item.name:SetTextColor(color.label.enabled())
-        item.name:SetText('No item selected')
+        item.name:SetText(NO_ITEM_SELECTED)
 
         unit_start_price_input:Hide()
         unit_buyout_price_input:Hide()
@@ -313,7 +313,7 @@ function update_item_configuration()
             local deposit_factor = neutral_faction() and .25 or .05
             local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
-            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, nil, color.text.enabled))
+            deposit:SetText(DEPOSIT .. money.to_string(amount, nil, nil, nil, color.text.enabled))
         end
 
         refresh_button:Enable()
@@ -442,7 +442,7 @@ function refresh_entries()
         bid_records[item_key], buyout_records[item_key] = nil, nil
         local query = scan_util.item_query(item_id)
         status_bar:update_status(0,0)
-        status_bar:set_text('Scanning auctions...')
+        status_bar:set_text(SCANNING_AUCTIONS)
 
 		scan_id = scan.start{
             type = 'list',
@@ -450,7 +450,7 @@ function refresh_entries()
 			queries = A(query),
 			on_page_loaded = function(page, total_pages)
                 status_bar:update_status((page - 1) / total_pages, 0) -- TODO
-                status_bar:set_text(format('Scanning Page %d / %d', page, total_pages))
+                status_bar:set_text(format(SCANNING, page, total_pages))
 			end,
 			on_auction = function(auction_record)
 				if auction_record.item_key == item_key then
@@ -467,14 +467,14 @@ function refresh_entries()
 			on_abort = function()
 				bid_records[item_key], buyout_records[item_key]= nil, nil
                 status_bar:update_status(1, 1)
-                status_bar:set_text('Scan aborted')
+                status_bar:set_text(SCAN_ABORTED)
 			end,
 			on_complete = function()
 				bid_records[item_key] = bid_records[item_key] or T
 				buyout_records[item_key] = buyout_records[item_key] or T
                 refresh = true
                 status_bar:update_status(1, 1)
-                status_bar:set_text('Scan complete')
+                status_bar:set_text(SCAN_COMPLETE)
             end,
 		}
 	end
@@ -532,17 +532,17 @@ function initialize_duration_dropdown()
         refresh = true
     end
     UIDropDownMenu_AddButton{
-        text = '2 Hours',
+        text = HOURS_2,
         value = DURATION_4,
         func = on_click,
     }
     UIDropDownMenu_AddButton{
-        text = '8 Hours',
+        text = HOURS_8,
         value = DURATION_8,
         func = on_click,
     }
     UIDropDownMenu_AddButton{
-        text = '24 Hours',
+        text = HOURS_24,
         value = DURATION_24,
         func = on_click,
     }

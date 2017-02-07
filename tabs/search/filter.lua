@@ -236,7 +236,7 @@ function formatted_post_filter(components)
 		str = str .. data_link(i, component_text)
 	end
 
-	return '<html><body><p>' .. data_link(0, 'Post Filter:') .. '</p><p>' .. str .. '</p></body></html>'
+	return '<html><body><p>' .. data_link(0, POST_FILTER) .. '</p><p>' .. str .. '</p></body></html>'
 end
 
 function data_link(id, str)
