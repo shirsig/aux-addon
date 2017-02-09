@@ -54,7 +54,7 @@ function M.size(t)
 	return size
 end
 
-function M.key(value, t)
+function M.key(t, value)
 	for k, v in t do if v == value then return k end end
 end
 

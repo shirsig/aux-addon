@@ -254,7 +254,7 @@ function parse_parameter(input_type, str)
     elseif input_type == 'string' then
         return str ~= '' and str or nil
     elseif type(input_type) == 'table' then
-        return key(str, input_type)
+        return key(input_type, str)
     end
 end
 

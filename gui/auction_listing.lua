@@ -855,7 +855,7 @@ local methods = {
     end,
 
     RemoveAuctionRecord = function(self, record)
-        local index = key(record, self.records)
+        local index = key(self.records, record)
         if index then
             tremove(self.records, index)
         end
@@ -863,7 +863,7 @@ local methods = {
     end,
 
     ContainsRecord = function(self, record)
-        if key(record, self.records) then
+        if key(self.records, record) then
             return true
         end
     end,
