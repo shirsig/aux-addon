@@ -107,22 +107,6 @@ function update_inventory_listing()
 	item_listing.populate(inventory_listing, records)
 end
 
-function price_color(record, reference)
-	local unit_undercut = undercut(record, stack_size_slider:GetValue())
-	unit_undercut = money.from_string(money.to_string(unit_undercut, true, nil, 3))
-
-	local stack_undercut = undercut(record, stack_size_slider:GetValue(), true)
-	stack_undercut = money.from_string(money.to_string(stack_undercut, true, nil, 3))
-
-	if unit_undercut < reference and stack_undercut < reference then
-		return color.red
-	elseif unit_undercut < reference then
-		return color.orange
-	elseif stack_undercut < reference then
-		return color.yellow
-	end
-end
-
 function update_auction_listing(listing, records, reference)
 	local rows = T
 	if selected_item then
@@ -135,7 +119,7 @@ function update_auction_listing(listing, records, reference)
 				O('value', record.own and color.yellow(record.count) or record.count),
 				O('value', al.time_left(record.duration)),
 				O('value', record.stack_size == stack_size and color.yellow(record.stack_size) or record.stack_size),
-				O('value', money.to_string(record.unit_price, true, nil, 3, price_color(record, reference, stack_size))),
+				O('value', money.to_string(record.unit_price, true, nil, 3, undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and color.red)),
 				O('value', historical_value and al.percentage_historical(round(record.unit_price / historical_value * 100)) or '---')
 			),
 				'record', record
@@ -155,8 +139,8 @@ function update_auction_listing(listing, records, reference)
 		end
 		sort(rows, function(a, b)
 			return sort_util.multi_lt(
-				a.record.unit_price,
-				b.record.unit_price,
+				a.record.unit_price * (listing == 'bid' and a.record.stack_size or 1),
+				b.record.unit_price * (listing == 'bid' and b.record.stack_size or 1),
 
 				a.record.historical_value and 1 or 0,
 				b.record.historical_value and 1 or 0,
@@ -172,12 +156,16 @@ function update_auction_listing(listing, records, reference)
 			)
 		end)
 	end
-	listing:SetData(rows)
+	if listing == 'bid' then
+		bid_listing:SetData(rows)
+	elseif listing == 'buyout' then
+		buyout_listing:SetData(rows)
+	end
 end
 
 function update_auction_listings()
-	update_auction_listing(bid_listing, bid_records, unit_start_price)
-	update_auction_listing(buyout_listing, buyout_records, unit_buyout_price)
+	update_auction_listing('bid', bid_records, unit_start_price)
+	update_auction_listing('buyout', buyout_records, unit_buyout_price)
 end
 
 function M.select_item(item_key)
@@ -195,14 +183,10 @@ function price_update()
 
         local historical_value = history.value(selected_item.key)
 
-        if aux_post_bid then
-	        if bid_listing:GetSelection() then
-		        unit_start_price = undercut(bid_listing:GetSelection().record, stack_size_slider:GetValue())
-	        end
-        else
-	        if buyout_listing:GetSelection() then
-		        unit_start_price = undercut(buyout_listing:GetSelection().record, stack_size_slider:GetValue())
-	        end
+        if bid_listing:GetSelection() then
+	        unit_start_price = undercut(bid_listing:GetSelection().record, stack_size_slider:GetValue(), true)
+        elseif buyout_listing:GetSelection() then
+	        unit_start_price = undercut(buyout_listing:GetSelection().record, stack_size_slider:GetValue())
         end
         settings.start_price = unit_start_price
         start_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_start_price / historical_value * 100)) or '---')
@@ -245,7 +229,7 @@ function post_auctions()
 			stack_count,
 			function(posted)
 				for i = 1, posted do
-                    record_auction(key, stack_size, unit_start_price, unit_buyout_price, duration_code, UnitName'player')
+                    record_auction(key, stack_size, unit_start_price * stack_size, unit_buyout_price, duration_code, UnitName'player')
                 end
                 update_inventory_records()
 				local same

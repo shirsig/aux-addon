@@ -77,7 +77,7 @@ bid_listing:SetColInfo{
     {name='Auctions', width=.17, align='CENTER'},
     {name='Time\nLeft', width=.11, align='CENTER'},
     {name='Stack\nSize', width=.11, align='CENTER'},
-    {name='Auction Bid\n(per item)', width=.4, align='RIGHT'},
+    {name='Auction Bid\n(per stack)', width=.4, align='RIGHT'},
     {name='% Hist.\nValue', width=.21, align='CENTER'},
 }
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
@@ -234,7 +234,7 @@ do
 	    end
     end)
     editbox.formatter = function() return money.to_string(unit_start_price, true, nil, 3) end
-    editbox.char = function() bid_listing:ClearSelection() end
+    editbox.char = function() bid_listing:ClearSelection(); buyout_listing:ClearSelection() end
     editbox.change = function() refresh = true end
     editbox.enter = function() this:ClearFocus() end
     editbox.focus_loss = function()
