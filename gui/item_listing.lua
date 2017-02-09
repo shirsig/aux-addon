@@ -105,7 +105,7 @@ function M.new(parent, on_click, selected)
 		local highlight = row:CreateTexture()
 		highlight:SetAllPoints(row)
 		highlight:Hide()
-		highlight:SetTexture(1, .9, 0, .5)
+		highlight:SetTexture(1, .9, 0, .3)
 		row.highlight = highlight
 
 		rows[row_index] = row
