@@ -211,22 +211,22 @@ local methods = {
     AddCell = function(self, rowNum)
         local row = self.rows[rowNum]
         local colNum = getn(row.cols) + 1
-        local col = CreateFrame('Frame', nil, row)
-        local text = col:CreateFontString()
-        col.text = text
+        local cell = CreateFrame('Frame', nil, row)
+        local text = cell:CreateFontString()
+        cell.text = text
         text:SetFont(gui.font, ROW_TEXT_SIZE)
         text:SetJustifyV('CENTER')
         text:SetPoint('TOPLEFT', 1, -1)
         text:SetPoint('BOTTOMRIGHT', -1, 1)
-        col:SetHeight(ROW_HEIGHT)
-        col.st = self
+        cell:SetHeight(ROW_HEIGHT)
+        cell.st = self
 
         if colNum == 1 then
-            col:SetPoint('TOPLEFT', 0, 0)
+	        cell:SetPoint('TOPLEFT', 0, 0)
         else
-            col:SetPoint('TOPLEFT', row.cols[colNum - 1], 'TOPRIGHT')
+	        cell:SetPoint('TOPLEFT', row.cols[colNum - 1], 'TOPRIGHT')
         end
-        tinsert(row.cols, col)
+        tinsert(row.cols, cell)
     end,
 
     AddRow = function(self)
