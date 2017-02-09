@@ -114,13 +114,13 @@ function update_auction_listing(listing, records, reference)
 		local stack_size = stack_size_slider:GetValue()
 		for i = 1, getn(records[selected_item.key] or empty) do
 			local record = records[selected_item.key][i]
-			local undercut = money.from_string(money.to_string(undercut(record, stack_size_slider:GetValue(), listing == 'bid'), true, nil, 3))
+			local price_color = money.from_string(money.to_string(undercut(record, stack_size_slider:GetValue(), listing == 'bid'), true, nil, 3)) < reference and color.red
 			tinsert(rows, O(
 				'cols', A(
 				O('value', record.own and color.yellow(record.count) or record.count),
 				O('value', al.time_left(record.duration)),
 				O('value', record.stack_size == stack_size and color.yellow(record.stack_size) or record.stack_size),
-				O('value', money.to_string(record.unit_price, true, nil, 3, undercut < reference and color.red)),
+				O('value', money.to_string(record.unit_price, true, nil, 3, price_color)),
 				O('value', historical_value and al.percentage_historical(round(record.unit_price / historical_value * 100)) or '---')
 			),
 				'record', record
