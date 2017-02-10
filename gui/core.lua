@@ -163,7 +163,6 @@ function M.button(parent, text_height)
     local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
     highlight:SetAllPoints()
     highlight:SetTexture(1, 1, 1, .2)
-    highlight:SetBlendMode('BLEND')
     button.highlight = highlight
     do
         local label = button:CreateFontString()
@@ -214,7 +213,6 @@ do
 		local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
 		highlight:SetAllPoints()
 		highlight:SetTexture(1, 1, 1, .2)
-		highlight:SetBlendMode('BLEND')
 		tab.highlight = highlight
 
 		tab.text = tab:CreateFontString()

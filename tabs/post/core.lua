@@ -401,7 +401,7 @@ function update_item(item)
     UIDropDownMenu_SetSelectedValue(duration_dropdown, settings.duration)
 
     hide_checkbox:SetChecked(settings.hidden)
-    
+
     if selected_item.max_charges then
 	    for i = selected_item.max_charges, 1, -1 do
 			if selected_item.availability[i] > 0 then
