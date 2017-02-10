@@ -350,11 +350,11 @@ function undercut(record, stack_size, stack)
     return price / stack_size
 end
 
-function quantity_update(max_count)
+function quantity_update(maximize_count)
     if selected_item then
         local max_stack_count = selected_item.max_charges and selected_item.availability[stack_size_slider:GetValue()] or floor(selected_item.availability[0] / stack_size_slider:GetValue())
         stack_count_slider:SetMinMaxValues(1, max_stack_count)
-        if max_count then
+        if maximize_count then
             stack_count_slider:SetValue(max_stack_count)
         end
     end
