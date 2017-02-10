@@ -28,7 +28,7 @@ local handlers = {
     OnLeave = function()
         this.mouseover = false
         if not this.data then return end
-        if not this.st.selected or this.st.selected ~= key(this.st.rowData, this.data) then
+        if not (this.st.selected and this.st.selected(this.data)) then
             this.highlight:Hide()
         end
 
@@ -40,10 +40,6 @@ local handlers = {
 
     OnClick = function()
         if not this.data then return end
-        this.st:ClearSelection()
-        this.st.selected = not this.st.selectionDisabled and key(this.st.rowData, this.data)
-        this.highlight:Show()
-
         local handler = this.st.handlers.OnClick
         if handler then
             handler(this.st, this.data, this, arg1)
@@ -132,7 +128,7 @@ local methods = {
                 if not data then break end
                 self.rows[i].data = data
 
-                if self.selected == key(self.rowData, data) or self.rows[i].mouseover then
+                if self.rows[i].mouseover or self.selected and self.selected(data) then
                     self.rows[i].highlight:Show()
                 else
                     self.rows[i].highlight:Hide()
@@ -161,19 +157,6 @@ local methods = {
         self.rowData = rowData
         self.updateSort = true
         self:Update()
-    end,
-
-    GetSelection = function(self)
-        return self.rowData[self.selected]
-    end,
-
-    ClearSelection = function(self)
-        self.selected = nil
-        self:Update()
-    end,
-
-    DisableSelection = function(self, value)
-        self.selectionDisabled = value
     end,
 
     AddColumn = function(self)
@@ -257,6 +240,10 @@ local methods = {
             self:AddCell(rowNum)
         end
     end,
+
+	SetSelection = function(self, f)
+		self.selected = f
+	end,
 
     SetHandler = function(self, event, handler)
 	    self.handlers[event] = handler

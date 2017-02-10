@@ -80,7 +80,11 @@ bid_listing:SetColInfo{
     {name='Auction Bid\n(per item)', width=.4, align='RIGHT'},
     {name='% Hist.\nValue', width=.21, align='CENTER'},
 }
+bid_listing:SetSelection(function(data)
+	return data.record == bid_selection
+end)
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
+	bid_selection = row_data.record
 	refresh = true
 end)
 bid_listing:SetHandler('OnDoubleClick', function(table, row_data, column, button)
@@ -96,7 +100,11 @@ buyout_listing:SetColInfo{
 	{name='Auction Buyout\n(per item)', width=.4, align='RIGHT'},
 	{name='% Hist.\nValue', width=.20, align='CENTER'},
 }
+buyout_listing:SetSelection(function(data)
+	return data.record == buyout_selection
+end)
 buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)
+	buyout_selection = row_data.record
 	refresh = true
 end)
 buyout_listing:SetHandler('OnDoubleClick', function(table, row_data, column, button)

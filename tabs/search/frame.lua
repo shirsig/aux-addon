@@ -542,7 +542,6 @@ recent_searches_listing = listing.new(frame.saved.recent)
 recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}
 
 for listing in temp-S(favorite_searches_listing, recent_searches_listing) do
-	listing:DisableSelection(true)
 	for k, v in handlers do
 		listing:SetHandler(k, v)
 	end

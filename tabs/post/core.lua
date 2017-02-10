@@ -19,7 +19,7 @@ TAB 'Post'
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'tuple', '#', {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
-local scan_id, inventory_records, bid_records, buyout_records = 0, T, T, T
+local scan_id, inventory_records, bid_records, buyout_records = 0, {}, {}, {}
 
 function get_default_settings()
 	return O('duration', DURATION_8, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
@@ -45,6 +45,26 @@ end
 function write_settings(settings, item_key)
 	item_key = item_key or selected_item.key
 	data[item_key] = persistence.write(settings_schema, settings)
+end
+
+do
+	local bid_selections, buyout_selections = {}, {}
+
+	function get_bid_selection()
+		return bid_selections[selected_item.key]
+	end
+
+	function set_bid_selection(record)
+		bid_selections[selected_item.key] = record
+	end
+
+	function get_buyout_selection()
+		return buyout_selections[selected_item.key]
+	end
+
+	function set_buyout_selection(record)
+		buyout_selections[selected_item.key] = record
+	end
 end
 
 function refresh_button_click()
@@ -184,16 +204,16 @@ function price_update()
 
         local historical_value = history.value(selected_item.key)
 
-        if bid_listing:GetSelection() then
-	        unit_start_price = undercut(bid_listing:GetSelection().record, stack_size_slider:GetValue(), true)
-        elseif buyout_listing:GetSelection() then
-	        unit_start_price = undercut(buyout_listing:GetSelection().record, stack_size_slider:GetValue())
+        if bid_selection then
+	        unit_start_price = undercut(bid_selection, stack_size_slider:GetValue(), true)
+        elseif buyout_selection then
+	        unit_start_price = undercut(buyout_selection, stack_size_slider:GetValue())
         end
         settings.start_price = unit_start_price
         start_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_start_price / historical_value * 100)) or '---')
 
-        if buyout_listing:GetSelection() then
-	        unit_buyout_price = undercut(buyout_listing:GetSelection().record, stack_size_slider:GetValue())
+        if buyout_selection then
+	        unit_buyout_price = undercut(buyout_selection, stack_size_slider:GetValue())
         end
         settings.buyout_price = unit_buyout_price
         buyout_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_buyout_price / historical_value * 100)) or '---')
@@ -375,11 +395,6 @@ function update_item(item)
 
     scan.abort(scan_id)
 
-    if not selected_item or item.key ~= selected_item.key then
-	    bid_listing:ClearSelection()
-	    buyout_listing:ClearSelection()
-    end
-
     selected_item = item
 
     UIDropDownMenu_Initialize(duration_dropdown, initialize_duration_dropdown)
@@ -457,6 +472,7 @@ function refresh_entries()
 	if selected_item then
 		local item_id, suffix_id = selected_item.item_id, selected_item.suffix_id
         local item_key = item_id .. ':' .. suffix_id
+		bid_selection, buyout_selection = nil, nil
         bid_records[item_key], buyout_records[item_key] = nil, nil
         local query = scan_util.item_query(item_id)
         status_bar:update_status(0,0)
@@ -483,7 +499,7 @@ function refresh_entries()
 				end
 			end,
 			on_abort = function()
-				bid_records[item_key], buyout_records[item_key]= nil, nil
+				bid_records[item_key], buyout_records[item_key] = nil, nil
                 status_bar:update_status(1, 1)
                 status_bar:set_text('Scan aborted')
 			end,
