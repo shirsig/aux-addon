@@ -81,10 +81,14 @@ bid_listing:SetColInfo{
     {name='% Hist.\nValue', width=.21, align='CENTER'},
 }
 bid_listing:SetSelection(function(data)
-	return data.record == bid_selection
+	return data.record == bid_selection or data.record.historical_value and bid_selection and bid_selection.historical_value
 end)
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
-	bid_selection = row_data.record
+	if row_data.record == bid_selection or row_data.record.historical_value and bid_selection and bid_selection.historical_value then
+		bid_selection = nil
+	else
+		bid_selection = row_data.record
+	end
 	refresh = true
 end)
 bid_listing:SetHandler('OnDoubleClick', function(table, row_data, column, button)
@@ -101,10 +105,14 @@ buyout_listing:SetColInfo{
 	{name='% Hist.\nValue', width=.20, align='CENTER'},
 }
 buyout_listing:SetSelection(function(data)
-	return data.record == buyout_selection
+	return data.record == buyout_selection or data.record.historical_value and buyout_selection and buyout_selection.historical_value
 end)
 buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)
-	buyout_selection = row_data.record
+	if row_data.record == buyout_selection or row_data.record.historical_value and buyout_selection and buyout_selection.historical_value then
+		buyout_selection = nil
+	else
+		buyout_selection = row_data.record
+	end
 	refresh = true
 end)
 buyout_listing:SetHandler('OnDoubleClick', function(table, row_data, column, button)
