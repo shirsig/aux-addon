@@ -469,11 +469,10 @@ end
 
 function refresh_entries()
 	if selected_item then
-		local item_id, suffix_id = selected_item.item_id, selected_item.suffix_id
-        local item_key = item_id .. ':' .. suffix_id
+        local item_key = selected_item.key
 		bid_selection, buyout_selection = nil, nil
         bid_records[item_key], buyout_records[item_key] = nil, nil
-        local query = scan_util.item_query(item_id)
+        local query = scan_util.item_query(selected_item.item_id)
         status_bar:update_status(0,0)
         status_bar:set_text('Scanning auctions...')
 
