@@ -166,11 +166,11 @@ function update_auction_listing(listing, records, reference)
 				a.record.historical_value and 1 or 0,
 				b.record.historical_value and 1 or 0,
 
+				b.record.own and 0 or 1,
+				a.record.own and 0 or 1,
+
 				a.record.stack_size,
 				b.record.stack_size,
-
-				b.record.own and 1 or 0,
-				a.record.own and 1 or 0,
 
 				a.record.duration,
 				b.record.duration
