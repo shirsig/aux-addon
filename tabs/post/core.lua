@@ -343,7 +343,7 @@ function update_item_configuration()
 end
 
 function undercut(record, stack_size, stack)
-    local price = round(record.unit_price * (stack and record.stack_size or stack_size))
+    local price = ceil(record.unit_price * (stack and record.stack_size or stack_size))
     if not record.own then
 	    price = max(0, price - 1)
     end
