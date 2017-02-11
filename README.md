@@ -90,7 +90,7 @@ Furthermore
 While it is faster to type filters directly into the search box this sub-tab serves as a tutorial to learn how to formulate queries.
 The filters on the left side are Blizzard filters which may reduce the number of pages to be scanned and those on the right side are post filters which do not affect the scan time but can be combined with logical operators to formulate very complex filters.
 ### Post
-![Alt text](http://i.imgur.com/wZks6L0.png)
+![Alt text](http://i.imgur.com/otzOT2I.png)
 - When entering prices **g**, **s** and **c** denote gold, silver and copper respectively.
 - A price value without explicit denotations will count as gold. (e.g., 10.5 = 10g50s)
 - Price values can contain decimals. (e.g., 1.5g = 1g50s)
