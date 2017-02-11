@@ -250,7 +250,7 @@ do
 	    end
     end)
     editbox.formatter = function() return money.to_string(unit_start_price, true, nil, 3) end
-    editbox.char = function() bid_listing:ClearSelection(); buyout_listing:ClearSelection() end
+    editbox.char = function() bid_selection, buyout_selection = nil, nil end
     editbox.change = function() refresh = true end
     editbox.enter = function() this:ClearFocus() end
     editbox.focus_loss = function()
@@ -286,7 +286,7 @@ do
         end
     end)
     editbox.formatter = function() return money.to_string(get_unit_buyout_price(), true, nil, 3) end
-    editbox.char = function() buyout_listing:ClearSelection() end
+    editbox.char = function() buyout_selection = nil end
     editbox.change = function() refresh = true end
     editbox.enter = function() this:ClearFocus() end
     editbox.focus_loss = function()
