@@ -135,13 +135,14 @@ function update_auction_listing(listing, records, reference)
 		for i = 1, getn(records[selected_item.key] or empty) do
 			local record = records[selected_item.key][i]
 			local price_color = money.from_string(money.to_string(undercut(record, stack_size_slider:GetValue(), listing == 'bid'), true, nil, 3)) < reference and color.red
+			local price = record.unit_price * (listing == 'bid' and record.stack_size / stack_size_slider:GetValue() or 1)
 			tinsert(rows, O(
 				'cols', A(
 				O('value', record.own and color.green(record.count) or record.count),
 				O('value', al.time_left(record.duration)),
 				O('value', record.stack_size == stack_size and color.green(record.stack_size) or record.stack_size),
-				O('value', money.to_string(record.unit_price, true, nil, 3, price_color)),
-				O('value', historical_value and al.percentage_historical(round(record.unit_price / historical_value * 100)) or '---')
+				O('value', money.to_string(price, true, nil, 3, price_color)),
+				O('value', historical_value and al.percentage_historical(round(price / historical_value * 100)) or '---')
 			),
 				'record', record
 			))
@@ -345,7 +346,7 @@ end
 function undercut(record, stack_size, stack)
     local price = ceil(record.unit_price * (stack and record.stack_size or stack_size))
     if not record.own then
-	    price = max(0, price - 1)
+	    price = price - 1
     end
     return price / stack_size
 end
