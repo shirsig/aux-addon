@@ -451,6 +451,8 @@ function prettified_filter_string(filter)
 	            else
 		            if filters[component[2]].input_type == 'money' then
 			            prettified.append(money.to_string(money.from_string(parameter), nil, true, nil, color.label.enabled))
+		            elseif component[2] == 'tooltip' then
+			            prettified.append(color.orange(parameter))
 		            else
 			            prettified.append(color.label.enabled(parameter))
 		            end
