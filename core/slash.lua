@@ -32,6 +32,9 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'tooltip' and arguments[2] == 'daily' then
 	    _G.aux_tooltip_daily = not aux_tooltip_daily
         print('tooltip daily ' .. status(aux_tooltip_daily))
+    elseif arguments[1] == 'tooltip' and arguments[2] == 'compare' then
+        _G.aux_tooltip_compare = not aux_tooltip_compare
+        print('tooltip compare ' .. status(aux_tooltip_compare))
     elseif arguments[1] == 'tooltip' and arguments[2] == 'vendor' and arguments[3] == 'buy' then
 	    _G.aux_tooltip_merchant_buy = not aux_tooltip_merchant_buy
         print('tooltip vendor buy ' .. status(aux_tooltip_merchant_buy))
@@ -61,6 +64,7 @@ function SlashCmdList.AUX(command)
 		print('- post bid [' .. status(aux_post_bid) .. ']')
 		print('- tooltip value [' .. status(aux_tooltip_value) .. ']')
 		print('- tooltip daily [' .. status(aux_tooltip_daily) .. ']')
+        print('- tooltip compare [' .. status(aux_tooltip_compare) .. ']')
 		print('- tooltip vendor buy [' .. status(aux_tooltip_merchant_buy) .. ']')
 		print('- tooltip vendor sell [' .. status(aux_tooltip_merchant_sell) .. ']')
 		print('- tooltip disenchant value [' .. status(aux_tooltip_disenchant_value) .. ']')
