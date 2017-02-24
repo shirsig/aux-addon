@@ -1,4 +1,5 @@
 ## Interface: 11200
+## Author: shirsig
 ## Title: aux
 ## Notes: Auction House replacement
 ## SavedVariablesPerCharacter: aux_tooltip_value, aux_tooltip_daily, aux_tooltip_merchant_buy, aux_tooltip_merchant_sell, aux_tooltip_disenchant_value, aux_tooltip_disenchant_distribution, aux_tooltip_disenchant_source
