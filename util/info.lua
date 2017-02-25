@@ -180,35 +180,37 @@ function M.set_tooltip(itemstring, owner, anchor)
 end
 
 function M.set_shopping_tooltip(slot)
-    local index1, index2 = inventory_index(slot)
-    local tooltips = temp-T
-    if index1 then
-        local tooltip = tooltip('inventory', 'player', index1)
-        if getn(tooltip) > 0 then
-            tinsert(tooltips, tooltip)
+    if _G.aux_tooltip_compare then
+            local index1, index2 = inventory_index(slot)
+        local tooltips = temp-T
+        if index1 then
+            local tooltip = tooltip('inventory', 'player', index1)
+            if getn(tooltip) > 0 then
+                tinsert(tooltips, tooltip)
+            end
         end
-    end
-    if index2 then
-        local tooltip = tooltip('inventory', 'player', index2)
-        if getn(tooltip) > 0 then
-            tinsert(tooltips, tooltip)
+        if index2 then
+            local tooltip = tooltip('inventory', 'player', index2)
+            if getn(tooltip) > 0 then
+                tinsert(tooltips, tooltip)
+            end
         end
-    end
 
-    if tooltips[1] then
-        tinsert(tooltips[1], 1, temp-O('left_text', 'Currently Equipped', 'left_color', temp-A(.5, .5, .5)))
-        ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_NONE')
-        ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
-        load_tooltip(ShoppingTooltip1, tooltips[1])
-        ShoppingTooltip1:Show()
-    end
+        if tooltips[1] then
+            tinsert(tooltips[1], 1, temp-O('left_text', 'Currently Equipped', 'left_color', temp-A(.5, .5, .5)))
+            ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_NONE')
+            ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
+            load_tooltip(ShoppingTooltip1, tooltips[1])
+            ShoppingTooltip1:Show()
+        end
 
-    if tooltips[2] then
-        tinsert(tooltips[2], 1, temp-O('left_text', 'Currently Equipped', 'left_color', temp-A(.5, .5, .5)))
-        ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_NONE')
-        ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
-        load_tooltip(ShoppingTooltip2, tooltips[2])
-        ShoppingTooltip2:Show()
+        if tooltips[2] then
+            tinsert(tooltips[2], 1, temp-O('left_text', 'Currently Equipped', 'left_color', temp-A(.5, .5, .5)))
+            ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_NONE')
+            ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
+            load_tooltip(ShoppingTooltip2, tooltips[2])
+            ShoppingTooltip2:Show()
+        end
     end
 end
 
