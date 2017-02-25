@@ -9,6 +9,7 @@ local money = require 'aux.util.money'
 local history = require 'aux.core.history'
 local gui = require 'aux.gui'
 local search_tab = require 'aux.tabs.search'
+local tooltip = require 'aux.core.tooltip'
 
 local price_per_unit = false
 
@@ -584,7 +585,9 @@ local methods = {
         local rt = this:GetParent().row.rt
         local rowData = this:GetParent().row.data
         if rowData and rowData.record then
-            info.set_tooltip(rowData.record.itemstring, this, 'ANCHOR_RIGHT')
+	        GameTooltip:SetOwner(this, 'ANCHOR_RIGHT')
+            info.load_tooltip(GameTooltip, rowData.record.tooltip)
+	        tooltip.extend_tooltip(GameTooltip, rowData.record.link, rowData.record.aux_quantity)
             info.set_shopping_tooltip(rowData.record.slot)
         end
     end,

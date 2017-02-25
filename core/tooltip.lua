@@ -52,7 +52,7 @@ function LOAD()
     end)
 end
 
-function extend_tooltip(tooltip, link, quantity)
+function M.extend_tooltip(tooltip, link, quantity)
     local item_id, suffix_id = info.parse_link(link)
     quantity = IsShiftKeyDown() and quantity or 1
     if aux_tooltip_disenchant_source then
