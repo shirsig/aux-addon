@@ -233,8 +233,8 @@ do
 				self[str] = A(str, 1)
 				return A('blizzard', str, str, 1)
 			elseif i == 1 and strlen(str) <= 63 then
-				self.name = A(str, unquote(str))
-				return A('blizzard', 'name', str, unquote(str))
+				self.name = unquote(str)
+				return A('blizzard', 'name', unquote(str), str)
 --				return nil, 'The name filter must not be longer than 63 characters' TODO
 			end
 		end,
@@ -407,7 +407,7 @@ function M.filter_string(components)
     for i = 1, getn(components) do
 	    local component = components[i]
 	    if component[1] == 'blizzard' then
-		    query_builder.append(filter[4] or filter[3])
+		    query_builder.append(component[4] or component[3])
         elseif component[1] == 'operator' then
             query_builder.append(component[2] .. (component[2] ~= 'not' and tonumber(component[3]) or ''))
         elseif component[1] == 'filter' then
@@ -431,9 +431,9 @@ function prettified_filter_string(filter)
 	    if component[1] == 'blizzard' then
 		    if component[2] == 'name' then
 			    if filter.blizzard.exact then
-			        prettified.append(info.display_name(cache.item_id(component[4])) or color.orange('[' .. component[4] .. ']'))
-			    elseif component[4] ~= '' then
-				    prettified.append(color.label.enabled(component[4]))
+			        prettified.append(info.display_name(cache.item_id(component[3])) or color.orange('[' .. component[3] .. ']'))
+			    elseif component[3] ~= '' then
+				    prettified.append(color.label.enabled(component[3]))
 			    end
 		    elseif component[2] ~= 'exact' then
 			    prettified.append(color.orange(component[3]))
@@ -441,7 +441,7 @@ function prettified_filter_string(filter)
         elseif component[1] == 'operator' then
 			prettified.append(color.orange(component[2] .. (component[2] ~= 'not' and tonumber(component[3]) or '')))
         elseif component[1] == 'filter' then
-            if component[2] ~= 'tooltip' then
+            if i == 1 or component[2] ~= 'tooltip' then
                 prettified.append(color.orange(component[2]))
             end
             local parameter = component[3]
@@ -451,8 +451,6 @@ function prettified_filter_string(filter)
 	            else
 		            if filters[component[2]].input_type == 'money' then
 			            prettified.append(money.to_string(money.from_string(parameter), nil, true, nil, color.label.enabled))
-		            elseif component[2] == 'tooltip' then
-			            prettified.append(color.orange(parameter))
 		            else
 			            prettified.append(color.label.enabled(parameter))
 		            end
@@ -472,14 +470,14 @@ function M.quote(name)
 end
 
 function M.unquote(name)
-    return select(3, strfind(name, '^<(.*)>$')) or name
+    return gsub(name, '[%[%]%<%>]', '')
 end
 
 function blizzard_query(filter)
     local filters = filter.blizzard
-    local query = O('name', filters.name and filters.name[2])
+    local query = O('name', filters.name)
     local item_info, class_index, subclass_index, slot_index
-    local item_id = filters.name and cache.item_id(filters.name[2])
+    local item_id = filters.name and cache.item_id(filters.name)
     item_info = item_id and info.item(item_id)
     if filters.exact and item_info then
 	    item_info = info.item(item_id)
@@ -512,7 +510,7 @@ function validator(filter)
         end
     end
     return function(record)
-        if filter.blizzard.exact and strlower(info.item(record.item_id).name) ~= filter.blizzard.name[2] then
+        if filter.blizzard.exact and strlower(info.item(record.item_id).name) ~= filter.blizzard.name then
             return false
         end
         local stack = temp-T
