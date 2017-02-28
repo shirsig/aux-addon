@@ -470,7 +470,7 @@ function M.quote(name)
 end
 
 function M.unquote(name)
-    return gsub(name, '[%[%]%<%>]', '')
+	return select(3, strfind(name, '^<(.*)>$')) or name
 end
 
 function blizzard_query(filter)
