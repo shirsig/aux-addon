@@ -93,12 +93,12 @@ end
 
 function UseContainerItem(...)
 	temp(arg)
-	if modified or not index(active_tab, 'USE_ITEM') then
+	if modified or not active_tab then
 		return orig.UseContainerItem(unpack(arg))
 	end
 	local item_info = info.container_item(arg[1], arg[2])
-	if item_info then
-		return active_tab.USE_ITEM(item_info)
+	if item_info and active_tab.USE_ITEM then
+		active_tab.USE_ITEM(item_info)
 	end
 end
 
