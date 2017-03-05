@@ -9,7 +9,7 @@ local history = require 'aux.core.history'
 local PAGE_SIZE = 50
 
 do
-	local scan_states = T
+	local scan_states = {}
 
 	function M.start(params)
 		local old_state = scan_states[params.type]

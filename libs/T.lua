@@ -84,7 +84,7 @@ do
 	end
 	code = code .. [[
 		overflow)
-		if overflow ~= nil then error("Vararg overflow.") end
+		if overflow ~= nil then error("T-vararg overflow.", 2) end
 		local n = 0
 		repeat
 	]]

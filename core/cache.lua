@@ -12,11 +12,11 @@ local MAX_ITEM_ID = 30000
 local items_schema = {'tuple', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
 local merchant_buy_schema = {'tuple', '#', {unit_price='number'}, {limited='boolean'}}
 
-_G.aux_items = T
-_G.aux_item_ids = T
-_G.aux_auctionable_items = T
-_G.aux_merchant_buy = T
-_G.aux_merchant_sell = T
+_G.aux_items = {}
+_G.aux_item_ids = {}
+_G.aux_auctionable_items = {}
+_G.aux_merchant_buy = {}
+_G.aux_merchant_sell = {}
 
 function LOAD()
 	scan_wdb()

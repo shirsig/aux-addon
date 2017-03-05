@@ -7,7 +7,7 @@ local persistence = require 'aux.util.persistence'
 
 local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='number'}, {data_points={'list', ';', {'tuple', '@', {value='number'}, {time='number'}}}}}
 
-local value_cache = T
+local value_cache = {}
 
 do
 	local cache

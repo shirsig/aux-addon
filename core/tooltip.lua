@@ -14,7 +14,7 @@ local UNKNOWN = GRAY_FONT_COLOR_CODE .. '?' .. FONT_COLOR_CODE_CLOSE
 
 _G.aux_tooltip_value = true
 
-local game_tooltip_hooks, game_tooltip_money = T, 0
+local game_tooltip_hooks, game_tooltip_money = {}, 0
 
 function LOAD()
 	do
@@ -55,19 +55,6 @@ end
 function M.extend_tooltip(tooltip, link, quantity)
     local item_id, suffix_id = info.parse_link(link)
     quantity = IsShiftKeyDown() and quantity or 1
-    if aux_tooltip_disenchant_source then
-        local r, g, b = color.tooltip.disenchant.source()
-        local type, range = disenchant.source(item_id)
-        if type == 'CRYSTAL' then
-            tooltip:AddLine(format('Can disenchant from level %s |cffa335eeEpic|r and |cff0070ddRare|r items.', range), r, g, b, true)
-        elseif type == 'SHARD' then
-            tooltip:AddLine(format('Can disenchant from level %s |cff0070ddRare|r and |cff1eff00Uncommon|r items.', range), r, g, b, true)
-        elseif type == 'ESSENCE' then
-            tooltip:AddLine(format('Can disenchant from level %s |cff1eff00Uncommon|r items.', range), r, g, b, true)
-        elseif type == 'DUST' then
-            tooltip:AddLine(format('Can disenchant from level %s |cff1eff00Uncommon|r items.', range), r, g, b, true)
-        end
-    end
     local item_info = temp-info.item(item_id)
     if item_info then
         local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)

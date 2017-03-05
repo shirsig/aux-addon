@@ -1,6 +1,5 @@
 module 'aux.core.slash'
 
-include 'T'
 include 'aux'
 
 local cache = require 'aux.core.cache'
@@ -44,13 +43,10 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'tooltip' and arguments[2] == 'disenchant' and arguments[3] == 'distribution' then
 	    _G.aux_tooltip_disenchant_distribution = not aux_tooltip_disenchant_distribution
         print('tooltip disenchant distribution ' .. status(aux_tooltip_disenchant_distribution))
-    elseif arguments[1] == 'tooltip' and arguments[2] == 'disenchant' and arguments[3] == 'source' then
-	    _G.aux_tooltip_disenchant_source = not aux_tooltip_disenchant_source
-        print('tooltip disenchant source ' .. status(aux_tooltip_disenchant_source))
     elseif arguments[1] == 'clear' and arguments[2] == 'item' and arguments[3] == 'cache' then
-	    _G.aux_items = T
-	    _G.aux_item_ids = T
-	    _G.aux_auctionable_items = T
+	    _G.aux_items = {}
+	    _G.aux_item_ids = {}
+	    _G.aux_auctionable_items = {}
         print('Item cache cleared.')
     elseif arguments[1] == 'populate' and arguments[2] == 'wdb' then
 	    cache.populate_wdb()
@@ -65,7 +61,6 @@ function SlashCmdList.AUX(command)
 		print('- tooltip vendor sell [' .. status(aux_tooltip_merchant_sell) .. ']')
 		print('- tooltip disenchant value [' .. status(aux_tooltip_disenchant_value) .. ']')
 		print('- tooltip disenchant distribution [' .. status(aux_tooltip_disenchant_distribution) .. ']')
-		print('- tooltip disenchant source [' .. status(aux_tooltip_disenchant_source) .. ']')
 		print('- clear item cache')
 		print('- populate wdb')
     end

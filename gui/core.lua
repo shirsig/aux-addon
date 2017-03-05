@@ -315,7 +315,7 @@ function M.editbox(parent)
 	    do (this.focus_loss or nop)() end
     end)
     editbox:SetScript('OnTextChanged', function()
-	    this.overlay:SetText((this.formatter or id)(this:GetText()))
+	    this.overlay:SetText(this.formatter and this.formatter(this:GetText()) or this:GetText())
 	    do (this.change or nop)() end
     end)
     editbox:SetScript('OnChar', function() (this.char or nop)() end)

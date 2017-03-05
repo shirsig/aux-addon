@@ -3,8 +3,8 @@ module 'aux.tabs.search'
 local filter_util = require 'aux.util.filter'
 local gui = require 'aux.gui'
 
-_G.aux_favorite_searches = T
-_G.aux_recent_searches = T
+_G.aux_favorite_searches = {}
+_G.aux_recent_searches = {}
 
 function update_search_listings()
 	local favorite_search_rows = T

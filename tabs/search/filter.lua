@@ -5,7 +5,7 @@ local money = require 'aux.util.money'
 local cache = require 'aux.core.cache'
 local filter_util = require 'aux.util.filter'
 
-local post_filter = T
+local post_filter = {}
 local post_filter_index = 0
 
 function valid_level(str)

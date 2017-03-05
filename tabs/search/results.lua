@@ -32,7 +32,7 @@ function update_real_time(enable)
 end
 
 do
-	local searches = T
+	local searches = {}
 	local search_index = 1
 
 	function get_current_search()
@@ -361,7 +361,7 @@ end
 
 do
 	local scan_id = 0
-	local IDLE, SEARCHING, FOUND = T, T, T
+	local IDLE, SEARCHING, FOUND = 1, 2, 3
 	local state = IDLE
 	local found_index
 

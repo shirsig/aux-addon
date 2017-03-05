@@ -7,42 +7,6 @@ local history = require 'aux.core.history'
 
 local UNCOMMON, RARE, EPIC = 2, 3, 4
 
-do
-	local data = O(
-		10940, A('DUST', '1-20'),
-		11083, A('DUST', '21-30'),
-		11137, A('DUST', '31-40'),
-		11176, A('DUST', '41-50'),
-		16204, A('DUST', '51-60'),
-
-		10938, A('ESSENCE', '1-10'),
-		10939, A('ESSENCE', '11-15'),
-		10998, A('ESSENCE', '16-20'),
-		11082, A('ESSENCE', '21-25'),
-		11134, A('ESSENCE', '26-30'),
-		11135, A('ESSENCE', '31-35'),
-		11174, A('ESSENCE', '36-40'),
-		11175, A('ESSENCE', '41-45'),
-		16202, A('ESSENCE', '46-50'),
-		16203, A('ESSENCE', '51-60'),
-
-		10978, A('SHARD', '1-20'),
-		11084, A('SHARD', '21-25'),
-		11138, A('SHARD', '26-30'),
-		11139, A('SHARD', '31-35'),
-		11177, A('SHARD', '36-40'),
-		11178, A('SHARD', '41-45'),
-		14343, A('SHARD', '46-50'),
-		14344, A('SHARD', '51-60'),
-
-		20725, A('CRYSTAL', '51+')
-	)
-
-	function M.source(item_id)
-	    return unpack(data[item_id] or empty)
-	end
-end
-
 local ARMOR = S(
 	'INVTYPE_HEAD',
 	'INVTYPE_NECK',

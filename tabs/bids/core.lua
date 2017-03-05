@@ -9,7 +9,7 @@ local scan = require 'aux.core.scan'
 
 TAB 'Bids'
 
-auction_records = T
+auction_records = {}
 
 function OPEN()
     frame:Show()

@@ -3,7 +3,7 @@ module 'aux.util.persistence'
 include 'T'
 include 'aux'
 
-_G.aux_datasets = T
+_G.aux_datasets = {}
 
 do
 	local dataset
