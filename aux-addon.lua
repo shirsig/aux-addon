@@ -19,7 +19,6 @@ function M.set_p(v)
 end
 
 function M.print(...)
-	temp(arg)
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '<aux> ' .. join(map(arg, tostring), ' '))
 end
 
@@ -29,8 +28,7 @@ function M.get_bids_loaded() return bids_loaded end
 local current_owner_page
 function M.get_current_owner_page() return current_owner_page end
 
-local event_frame = CreateFrame('Frame')
-
+local event_frame = CreateFrame'Frame'
 for event in temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
 end
