@@ -239,9 +239,19 @@ do
 		label = label .. LIGHTYELLOW_FONT_COLOR_CODE .. ')' .. FONT_COLOR_CODE_CLOSE
 		return label
 	end
+	local function hook_quest_item(f)
+		f:SetScript('OnMouseUp', function()
+			if arg1 == 'RightButton' then
+				if active_tab then
+					tab = 1
+					search_tab.filter = _G[this:GetName() .. 'Name']:GetText() .. '/exact'
+					search_tab.execute(nil, false)
+				end
+			end
+		end)
+	end
 	function ADDON_LOADED.Blizzard_CraftUI()
 		hook('CraftFrame_SetSelection', function(...)
-			temp(arg)
 			local ret = temp-A(orig.CraftFrame_SetSelection(unpack(arg)))
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
@@ -267,25 +277,11 @@ do
 			return unpack(ret)
 		end)
 		for i = 1, 8 do
-			local f = _G['CraftReagent' .. i]
-			f:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-			local orig = f:GetScript'OnClick'
-			f:SetScript('OnClick', function()
-				if arg1 == 'RightButton' then
-					if active_tab then
-						tab = 1
-						search_tab.filter = strlower(GetCraftReagentInfo(GetCraftSelectionIndex(), this:GetID())) .. '/exact'
-						search_tab.execute(nil, false)
-					end
-				else
-					orig() -- TODO weird bug with upvalue, somehow always the same function?
-				end
-			end)
+			hook_quest_item(_G['CraftReagent' .. i])
 		end
 	end
 	function ADDON_LOADED.Blizzard_TradeSkillUI()
 		hook('TradeSkillFrame_SetSelection', function(...)
-			temp(arg)
 			local ret = temp-A(orig.TradeSkillFrame_SetSelection(unpack(arg)))
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
@@ -311,20 +307,7 @@ do
 			return unpack(ret)
 		end)
 		for i = 1, 8 do
-			local f = _G['TradeSkillReagent' .. i]
-			f:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-			local orig = f:GetScript'OnClick'
-			f:SetScript('OnClick', function()
-				if arg1 == 'RightButton' then
-					if active_tab then
-						tab = 1
-						search_tab.filter = strlower(GetTradeSkillReagentInfo(GetTradeSkillSelectionIndex(), this:GetID())) .. '/exact'
-						search_tab.execute(nil, false)
-					end
-				else
-					orig() -- TODO weird bug with upvalue, somehow always the same function?
-				end
-			end)
+			hook_quest_item(_G['TradeSkillReagent' .. i])
 		end
 	end
 end
