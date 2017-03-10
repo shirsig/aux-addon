@@ -674,16 +674,16 @@ local methods = {
             local prevRecord = records[i - 1]
             if prevRecord and record.search_signature == prevRecord.search_signature then
                 -- it's an identical auction to the previous row so increment the number of auctions
-                self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].numAuctions = self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].numAuctions + 1
+                self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].count = self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].count + 1
             elseif not single_item and prevRecord and record.item_key == prevRecord.item_key then
                 -- it's the same base item as the previous row so insert a new auction
-                tinsert(self.rowInfo[getn(self.rowInfo)].children, O('numAuctions', 1, 'record', record))
+                tinsert(self.rowInfo[getn(self.rowInfo)].children, O('count', 1, 'record', record))
                 if self.expanded[self.rowInfo[getn(self.rowInfo)].expandKey] then
                     self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
                 end
             else
                 -- it's a different base item from the previous row
-                tinsert(self.rowInfo, O('item_key', record.item_key, 'expandKey', record.item_key, 'children', A(O('numAuctions', 1, 'record', record))))
+                tinsert(self.rowInfo, O('item_key', record.item_key, 'expandKey', record.item_key, 'children', A(O('count', 1, 'record', record))))
                 self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
             end
         end
@@ -692,9 +692,9 @@ local methods = {
 		    local info = self.rowInfo[i]
             local totalAuctions, totalPlayerAuctions = 0, 0
             for _, childInfo in info.children do
-                totalAuctions = totalAuctions + childInfo.numAuctions
+                totalAuctions = totalAuctions + childInfo.count
                 if is_player(childInfo.record.owner) then
-                    totalPlayerAuctions = totalPlayerAuctions + childInfo.numAuctions
+                    totalPlayerAuctions = totalPlayerAuctions + childInfo.count
                 end
             end
             info.totalAuctions = totalAuctions
@@ -772,17 +772,17 @@ local methods = {
             if self.expanded[info.expandKey] then
                 for j = 1, getn(info.children) do
 	                local childInfo = info.children[j]
-                    self:SetRowInfo(rowIndex, childInfo.record, childInfo.numAuctions, 0, j > 1, false, info.expandKey, childInfo.numAuctions)
+                    self:SetRowInfo(rowIndex, childInfo.record, childInfo.count, 0, j > 1, false, info.expandKey)
                     rowIndex = rowIndex + 1
                 end
             else
-                self:SetRowInfo(rowIndex, info.children[1].record, info.totalAuctions, getn(info.children) > 1 and info.totalPlayerAuctions or 0, false, getn(info.children) > 1, info.expandKey, info.children[1].numAuctions)
+                self:SetRowInfo(rowIndex, info.children[1].record, info.totalAuctions, getn(info.children) > 1 and info.totalPlayerAuctions or 0, false, getn(info.children) > 1, info.expandKey)
                 rowIndex = rowIndex + 1
             end
         end
     end,
 
-    SetRowInfo = function(self, rowIndex, record, displayNumAuctions, numPlayerAuctions, indented, expandable, expandKey, numAuctions)
+    SetRowInfo = function(self, rowIndex, record, totalAuctions, totalPlayerAuctions, indented, expandable, expandKey)
         if rowIndex <= 0 or rowIndex > getn(self.rows) then return end
         local row = self.rows[rowIndex]
         row:Show()
@@ -795,11 +795,10 @@ local methods = {
         row.record = record
         row.expandable = expandable
         row.indented = indented
-        row.numAuctions = numAuctions
         row.expandKey = expandKey
 
         for i, column in self.columns do
-	        column.fill(row.cells[i], record, displayNumAuctions, numPlayerAuctions, expandable, indented)
+	        column.fill(row.cells[i], record, totalAuctions, totalPlayerAuctions, expandable, indented)
         end
     end,
 
