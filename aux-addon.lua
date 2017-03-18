@@ -164,12 +164,12 @@ do
 end
 
 function M.is_player(name)
-	local key = GetCVar'realmName' .. '|' .. UnitFactionGroup'player'
+	local key = GetCVar'realmName'
 	return name and index(aux_characters, key, name) and true or false
 end
 
 function LOAD2()
-	local key = GetCVar'realmName' .. '|' .. UnitFactionGroup'player'
+	local key = GetCVar'realmName'
 	aux_characters[key] = aux_characters[key] or {}
 	for char, lastSeen in aux_characters[key] do
 		if GetTime() - lastSeen > 60 * 60 * 24 * 30 then
