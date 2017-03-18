@@ -327,8 +327,9 @@ function update_item_configuration()
 
         do
             local deposit_factor = UnitFactionGroup'npc' and .05 or .25
-            local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
-            local amount = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
+            local duration_factor = UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
+            local stack_size, stack_count = selected_item.max_charges and 1 or stack_size_slider:GetValue(), stack_count_slider:GetValue()
+            local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
             deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, nil, color.text.enabled))
         end
 
