@@ -34,9 +34,9 @@ do
 	end
 	for scope in temp-S('player', 'faction', 'realm', 'account') do
 		local scope = scope
-		M[scope] = function(k)
+		M[scope] = function(k, v)
 			if not cache[scope] then error('Cache not ready', 2) end
-			cache[scope][k] = cache[scope][k] or {}
+			cache[scope][k] = cache[scope][k] or v or {}
 			return cache[scope][k]
 		end
 	end
