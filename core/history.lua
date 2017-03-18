@@ -9,16 +9,8 @@ local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='n
 
 local value_cache = {}
 
-do
-	local cache
-	function get_data()
-		if not cache then
-			local dataset = persistence.dataset
-			cache = dataset.history or T
-			dataset.history = cache
-		end
-		return cache
-	end
+function LOAD2()
+	data = persistence.faction'history'
 end
 
 do

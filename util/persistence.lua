@@ -3,17 +3,38 @@ module 'aux.util.persistence'
 include 'T'
 include 'aux'
 
-_G.aux_datasets = {}
+_G.aux = {
+	player = {},
+	faction = {},
+	realm = {},
+	account = {},
+}
 
-do
-	local dataset
-	function M.get_dataset()
-		if not dataset then
-		    local dataset_key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
-		    dataset = aux_datasets[dataset_key] or T
-		    aux_datasets[dataset_key] = dataset
-	    end
-	    return dataset
+local cache = {account=aux.account}
+
+function LOAD2()
+	do
+		local key = format('%s|%s', GetCVar'realmName', UnitName'player')
+		aux.player[key] = aux.player[key] or {}
+		cache.player = aux.player[key]
+	end
+	do
+		local key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
+		aux.faction[key] = aux.faction[key] or {}
+		cache.faction = aux.faction[key]
+	end
+	do
+		local key = GetCVar'realmName'
+		aux.realm[key] = aux.realm[key] or {}
+		cache.realm = aux.realm[key]
+	end
+end
+
+for scope in temp-S('player', 'faction', 'realm', 'account') do
+	local scope = scope
+	M[scope] = function(k)
+		cache[scope][k] = cache[scope][k]
+		return cache[scope][k]
 	end
 end
 

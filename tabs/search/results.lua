@@ -4,6 +4,7 @@ local info = require 'aux.util.info'
 local filter_util = require 'aux.util.filter'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
+local cache = require 'aux.core.cache'
 
 function LOAD()
 	new_search()
@@ -368,7 +369,7 @@ do
 	function find_auction(record)
 		local search = current_search
 
-		if not search.table:ContainsRecord(record) or is_player(record.owner) then
+		if not search.table:ContainsRecord(record) or cache.is_player(record.owner) then
 			return
 		end
 

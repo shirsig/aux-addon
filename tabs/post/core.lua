@@ -11,6 +11,7 @@ local scan_util = require 'aux.util.scan'
 local post = require 'aux.core.post'
 local scan = require 'aux.core.scan'
 local history = require 'aux.core.history'
+local cache = require 'aux.core.cache'
 local item_listing = require 'aux.gui.item_listing'
 local al = require 'aux.gui.auction_listing'
 
@@ -25,16 +26,8 @@ function get_default_settings()
 	return O('duration', DURATION_8, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
 end
 
-do
-	local data
-	function get_data()
-		if not data then
-			local dataset = persistence.dataset
-			data = dataset.post or T
-			dataset.post = data
-		end
-		return data
-	end
+function LOAD2()
+	data = persistence.faction'post'
 end
 
 function read_settings(item_key)
@@ -333,7 +326,7 @@ function update_item_configuration()
         stack_count_slider.editbox:SetNumber(stack_count_slider:GetValue())
 
         do
-            local deposit_factor = neutral_faction() and .25 or .05
+            local deposit_factor = UnitFactionGroup'npc' and .25 or .05
             local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
             deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, nil, color.text.enabled))
@@ -518,12 +511,12 @@ function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price,
     do
 	    local entry
 	    for _, record in bid_records[key] do
-	        if unit_blizzard_bid == record.unit_price and aux_quantity == record.stack_size and duration == record.duration and is_player(owner) == record.own then
+	        if unit_blizzard_bid == record.unit_price and aux_quantity == record.stack_size and duration == record.duration and cache.is_player(owner) == record.own then
 	            entry = record
 	        end
 	    end
 	    if not entry then
-	        entry = O('stack_size', aux_quantity, 'unit_price', unit_blizzard_bid, 'duration', duration, 'own', is_player(owner), 'count', 0)
+	        entry = O('stack_size', aux_quantity, 'unit_price', unit_blizzard_bid, 'duration', duration, 'own', cache.is_player(owner), 'count', 0)
 	        tinsert(bid_records[key], entry)
 	    end
 	    entry.count = entry.count + 1
@@ -533,12 +526,12 @@ function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price,
     do
 	    local entry
 	    for _, record in buyout_records[key] do
-		    if unit_buyout_price == record.unit_price and aux_quantity == record.stack_size and duration == record.duration and is_player(owner) == record.own then
+		    if unit_buyout_price == record.unit_price and aux_quantity == record.stack_size and duration == record.duration and cache.is_player(owner) == record.own then
 			    entry = record
 		    end
 	    end
 	    if not entry then
-		    entry = O('stack_size', aux_quantity, 'unit_price', unit_buyout_price, 'duration', duration, 'own', is_player(owner), 'count', 0)
+		    entry = O('stack_size', aux_quantity, 'unit_price', unit_buyout_price, 'duration', duration, 'own', cache.is_player(owner), 'count', 0)
 		    tinsert(buyout_records[key], entry)
 	    end
 	    entry.count = entry.count + 1

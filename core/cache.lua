@@ -40,6 +40,22 @@ function LOAD()
 end
 
 do
+	local characters = empty
+	function M.is_player(name)
+		return characters[name] and true or false
+	end
+	function LOAD2()
+		characters = persistence.realm'characters'
+		for k, v in characters do
+			if GetTime() > v + 60 * 60 * 24 * 30 then
+				characters[k] = nil
+			end
+		end
+		characters[UnitName'player'] = GetTime()
+	end
+end
+
+do
 	local sell_scan_queued, incomplete_buy_data
 	function on_merchant_show()
 		merchant_sell_scan()

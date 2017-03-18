@@ -10,6 +10,7 @@ local history = require 'aux.core.history'
 local gui = require 'aux.gui'
 local search_tab = require 'aux.tabs.search'
 local tooltip = require 'aux.core.tooltip'
+local cache = require 'aux.core.cache'
 
 local price_per_unit = false
 
@@ -139,7 +140,7 @@ M.search_columns = {
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
+            cell.text:SetText(cache.is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -428,7 +429,7 @@ M.bids_columns = {
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
+            cell.text:SetText(cache.is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -693,7 +694,7 @@ local methods = {
             local totalAuctions, totalPlayerAuctions = 0, 0
             for _, childInfo in info.children do
                 totalAuctions = totalAuctions + childInfo.count
-                if is_player(childInfo.record.owner) then
+                if cache.is_player(childInfo.record.owner) then
                     totalPlayerAuctions = totalPlayerAuctions + childInfo.count
                 end
             end

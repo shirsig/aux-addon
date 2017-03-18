@@ -12,7 +12,6 @@ local scan = require 'aux.core.scan'
 local search_tab = require 'aux.tabs.search'
 
 _G.aux_scale = 1
-_G.aux_characters = {}
 
 function M.set_p(v)
 	inspect(nil, v)
@@ -163,29 +162,8 @@ do
 	end
 end
 
-function M.is_player(name)
-	local key = GetCVar'realmName'
-	return name and index(aux_characters, key, name) and true or false
-end
-
 function LOAD2()
-	local key = GetCVar'realmName'
-	aux_characters[key] = aux_characters[key] or {}
-	for char, lastSeen in aux_characters[key] do
-		if GetTime() - lastSeen > 60 * 60 * 24 * 30 then
-			aux_characters[key][char] = nil
-		end
-	end
-	aux_characters[key][UnitName'player'] = GetTime()
 	AuxFrame:SetScale(aux_scale)
-end
-
-function M.neutral_faction()
-	return not UnitFactionGroup'npc'
-end
-
-function M.min_bid_increment(current_bid)
-	return max(1, floor(current_bid / 100) * 5)
 end
 
 function AUCTION_HOUSE_SHOW()
@@ -210,11 +188,10 @@ end
 
 do
 	local last_owner_page_requested
-	function GetOwnerAuctionItems(...)
-		temp(arg)
-		local page = arg[1]
-		last_owner_page_requested = page
-		return orig.GetOwnerAuctionItems(unpack(arg))
+	function GetOwnerAuctionItems(index)
+		local page = index
+		last_owner_page_requested = index
+		return orig.GetOwnerAuctionItems(index)
 	end
 	function AUCTION_OWNED_LIST_UPDATE()
 		current_owner_page = last_owner_page_requested or 0
