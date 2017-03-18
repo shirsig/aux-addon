@@ -6,7 +6,7 @@ local cache = require 'aux.core.cache'
 local persistence = require 'aux.util.persistence'
 
 function LOAD2()
-	tooltip_settings = persistence.player'tooltip'
+	tooltip_settings = persistence.character'tooltip'
 end
 
 _G.aux_ignore_owner = true

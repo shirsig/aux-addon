@@ -16,7 +16,7 @@ local UNKNOWN = GRAY_FONT_COLOR_CODE .. '?' .. FONT_COLOR_CODE_CLOSE
 local game_tooltip_hooks, game_tooltip_money = {}, 0
 
 function LOAD()
-	settings = persistence.player('tooltip', {value=true})
+	settings = persistence.character('tooltip', {value=true})
 	do
 		local inside_hook = false
 	    for name, f in game_tooltip_hooks do

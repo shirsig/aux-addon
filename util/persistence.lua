@@ -4,7 +4,7 @@ include 'T'
 include 'aux'
 
 _G.aux = {
-	player = {},
+	character = {},
 	faction = {},
 	realm = {},
 	account = {},
@@ -16,8 +16,8 @@ do
 		cache.account = aux.account
 		do
 			local key = format('%s|%s', GetCVar'realmName', UnitName'player')
-			aux.player[key] = aux.player[key] or {}
-			cache.player = aux.player[key]
+			aux.character[key] = aux.character[key] or {}
+			cache.character = aux.character[key]
 		end
 		do
 			local key = GetCVar'realmName'
@@ -32,7 +32,7 @@ do
 			cache.faction = aux.faction[key]
 		end
 	end
-	for scope in temp-S('player', 'faction', 'realm', 'account') do
+	for scope in temp-S('character', 'faction', 'realm', 'account') do
 		local scope = scope
 		M[scope] = function(k, v)
 			if not cache[scope] then error('Cache not ready', 2) end
