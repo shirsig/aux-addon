@@ -87,10 +87,15 @@ do
 	end
 	for scope in temp-S('character', 'faction', 'realm', 'account') do
 		local scope = scope
-		M[scope .. '_data'] = function(k, v)
+		M[scope .. '_data'] = function(key, init)
 			if not cache[scope] then error('Cache not ready', 2) end
-			cache[scope][k] = cache[scope][k] or v or {}
-			return cache[scope][k]
+			cache[scope][key] = cache[scope][key] or {}
+			for k, v in init or empty do
+				if cache[scope][key][k] == nil then
+					cache[scope][key][k] = v
+				end
+			end
+			return cache[scope][key]
 		end
 	end
 end
