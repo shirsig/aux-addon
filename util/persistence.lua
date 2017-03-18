@@ -10,31 +10,35 @@ _G.aux = {
 	account = {},
 }
 
-local cache = {account=aux.account}
-
-function LOAD2()
-	do
-		local key = format('%s|%s', GetCVar'realmName', UnitName'player')
-		aux.player[key] = aux.player[key] or {}
-		cache.player = aux.player[key]
+do
+	local cache = {}
+	function LOAD()
+		cache.account = aux.account
+		do
+			local key = format('%s|%s', GetCVar'realmName', UnitName'player')
+			aux.player[key] = aux.player[key] or {}
+			cache.player = aux.player[key]
+		end
+		do
+			local key = GetCVar'realmName'
+			aux.realm[key] = aux.realm[key] or {}
+			cache.realm = aux.realm[key]
+		end
 	end
-	do
-		local key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
-		aux.faction[key] = aux.faction[key] or {}
-		cache.faction = aux.faction[key]
+	function LOAD2()
+		do
+			local key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
+			aux.faction[key] = aux.faction[key] or {}
+			cache.faction = aux.faction[key]
+		end
 	end
-	do
-		local key = GetCVar'realmName'
-		aux.realm[key] = aux.realm[key] or {}
-		cache.realm = aux.realm[key]
-	end
-end
-
-for scope in temp-S('player', 'faction', 'realm', 'account') do
-	local scope = scope
-	M[scope] = function(k)
-		cache[scope][k] = cache[scope][k]
-		return cache[scope][k]
+	for scope in temp-S('player', 'faction', 'realm', 'account') do
+		local scope = scope
+		M[scope] = function(k)
+			if not cache[scope] then error('Cache not ready', 2) end
+			cache[scope][k] = cache[scope][k] or {}
+			return cache[scope][k]
+		end
 	end
 end
 

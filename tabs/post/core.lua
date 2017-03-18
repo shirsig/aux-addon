@@ -326,7 +326,7 @@ function update_item_configuration()
         stack_count_slider.editbox:SetNumber(stack_count_slider:GetValue())
 
         do
-            local deposit_factor = UnitFactionGroup'npc' and .25 or .05
+            local deposit_factor = UnitFactionGroup'npc' and .05 or .25
             local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * (selected_item.max_charges and 1 or stack_size)) * stack_count * UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
             deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, nil, color.text.enabled))
