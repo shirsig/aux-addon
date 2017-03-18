@@ -27,7 +27,7 @@ function get_default_settings()
 end
 
 function LOAD2()
-	data = persistence.faction'post'
+	data = faction_data'post'
 end
 
 function read_settings(item_key)

@@ -6,7 +6,6 @@ include 'aux'
 local info = require 'aux.util.info'
 local money =  require 'aux.util.money'
 local cache = require 'aux.core.cache'
-local persistence = require 'aux.util.persistence'
 local disenchant = require 'aux.core.disenchant'
 local history = require 'aux.core.history'
 local auction_listing = require 'aux.gui.auction_listing'
@@ -16,7 +15,7 @@ local UNKNOWN = GRAY_FONT_COLOR_CODE .. '?' .. FONT_COLOR_CODE_CLOSE
 local game_tooltip_hooks, game_tooltip_money = {}, 0
 
 function LOAD()
-	settings = persistence.character('tooltip', {value=true})
+	settings = character_data('tooltip', {value=true})
 	do
 		local inside_hook = false
 	    for name, f in game_tooltip_hooks do

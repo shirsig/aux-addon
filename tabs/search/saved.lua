@@ -2,10 +2,9 @@ module 'aux.tabs.search'
 
 local filter_util = require 'aux.util.filter'
 local gui = require 'aux.gui'
-local persistence = require 'aux.util.persistence'
 
 function LOAD2()
-	recent_searches, favorite_searches = persistence.realm'recent_searches', persistence.realm'favorite_searches'
+	recent_searches, favorite_searches = realm_data'recent_searches', realm_data'favorite_searches'
 end
 
 function update_search_listings()

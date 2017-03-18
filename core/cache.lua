@@ -45,7 +45,7 @@ do
 		return characters[name] and true or false
 	end
 	function LOAD2()
-		characters = persistence.realm'characters'
+		characters = realm_data'characters'
 		for k, v in characters do
 			if GetTime() > v + 60 * 60 * 24 * 30 then
 				characters[k] = nil

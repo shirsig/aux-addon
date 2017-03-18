@@ -10,7 +10,7 @@ local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='n
 local value_cache = {}
 
 function LOAD2()
-	data = persistence.faction'history'
+	data = faction_data'history'
 end
 
 do

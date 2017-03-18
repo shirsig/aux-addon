@@ -3,45 +3,6 @@ module 'aux.util.persistence'
 include 'T'
 include 'aux'
 
-_G.aux = {
-	character = {},
-	faction = {},
-	realm = {},
-	account = {},
-}
-
-do
-	local cache = {}
-	function LOAD()
-		cache.account = aux.account
-		do
-			local key = format('%s|%s', GetCVar'realmName', UnitName'player')
-			aux.character[key] = aux.character[key] or {}
-			cache.character = aux.character[key]
-		end
-		do
-			local key = GetCVar'realmName'
-			aux.realm[key] = aux.realm[key] or {}
-			cache.realm = aux.realm[key]
-		end
-	end
-	function LOAD2()
-		do
-			local key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
-			aux.faction[key] = aux.faction[key] or {}
-			cache.faction = aux.faction[key]
-		end
-	end
-	for scope in temp-S('character', 'faction', 'realm', 'account') do
-		local scope = scope
-		M[scope] = function(k, v)
-			if not cache[scope] then error('Cache not ready', 2) end
-			cache[scope][k] = cache[scope][k] or v or {}
-			return cache[scope][k]
-		end
-	end
-end
-
 function M.read(schema, str)
     if schema == 'string' then
         return str

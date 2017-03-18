@@ -3,10 +3,9 @@ module 'aux.core.slash'
 include 'aux'
 
 local cache = require 'aux.core.cache'
-local persistence = require 'aux.util.persistence'
 
 function LOAD2()
-	tooltip_settings = persistence.character'tooltip'
+	tooltip_settings = character_data'tooltip'
 end
 
 _G.aux_ignore_owner = true

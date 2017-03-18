@@ -13,9 +13,12 @@ local search_tab = require 'aux.tabs.search'
 
 _G.aux_scale = 1
 
-function M.set_p(v)
-	inspect(nil, v)
-end
+_G.aux = {
+	character = {},
+	faction = {},
+	realm = {},
+	account = {},
+}
 
 function M.print(...)
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '<aux> ' .. join(map(arg, tostring), ' '))
@@ -32,7 +35,6 @@ for event in temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION
 	event_frame:RegisterEvent(event)
 end
 
-ADDON_LOADED = {}
 do
 	local handlers, handlers2 = {}, {}
 	function M.set_LOAD(f)
@@ -43,7 +45,13 @@ do
 	end
 	event_frame:SetScript('OnEvent', function()
 		if event == 'ADDON_LOADED' then
-			(ADDON_LOADED[arg1] or nop)()
+			if arg1 == 'Blizzard_AuctionUI' then
+				Blizzard_AuctionUI()
+			elseif arg1 == 'Blizzard_CraftUI' then
+				Blizzard_CraftUI()
+			elseif arg1 == 'Blizzard_TradeSkillUI' then
+				Blizzard_TradeSkillUI()
+			end
 		elseif event == 'VARIABLES_LOADED' then
 			for _, f in handlers do f() end
 		elseif event == 'PLAYER_LOGIN' then
@@ -53,6 +61,38 @@ do
 			_M[event]()
 		end
 	end)
+end
+
+do
+	local cache = {}
+	function LOAD()
+		cache.account = aux.account
+		do
+			local key = format('%s|%s', GetCVar'realmName', UnitName'player')
+			aux.character[key] = aux.character[key] or {}
+			cache.character = aux.character[key]
+		end
+		do
+			local key = GetCVar'realmName'
+			aux.realm[key] = aux.realm[key] or {}
+			cache.realm = aux.realm[key]
+		end
+	end
+	function LOAD2()
+		do
+			local key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
+			aux.faction[key] = aux.faction[key] or {}
+			cache.faction = aux.faction[key]
+		end
+	end
+	for scope in temp-S('character', 'faction', 'realm', 'account') do
+		local scope = scope
+		M[scope .. '_data'] = function(k, v)
+			if not cache[scope] then error('Cache not ready', 2) end
+			cache[scope][k] = cache[scope][k] or v or {}
+			return cache[scope][k]
+		end
+	end
 end
 
 tab_info = {}
@@ -198,7 +238,7 @@ do
 	end
 end
 
-function ADDON_LOADED.Blizzard_AuctionUI()
+function Blizzard_AuctionUI()
 	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
 	AuctionFrame:SetScript('OnHide', nil)
 	hook('ShowUIPanel', function(...)
@@ -227,7 +267,7 @@ do
 			end
 		end)
 	end
-	function ADDON_LOADED.Blizzard_CraftUI()
+	function Blizzard_CraftUI()
 		hook('CraftFrame_SetSelection', function(...)
 			local ret = temp-A(orig.CraftFrame_SetSelection(unpack(arg)))
 			local id = GetCraftSelectionIndex()
@@ -257,7 +297,7 @@ do
 			hook_quest_item(_G['CraftReagent' .. i])
 		end
 	end
-	function ADDON_LOADED.Blizzard_TradeSkillUI()
+	function Blizzard_TradeSkillUI()
 		hook('TradeSkillFrame_SetSelection', function(...)
 			local ret = temp-A(orig.TradeSkillFrame_SetSelection(unpack(arg)))
 			local id = GetTradeSkillSelectionIndex()
