@@ -17,7 +17,7 @@ listing = auction_listing.new(frame.listing, 20, auction_listing.bids_columns)
 listing:SetSort(1, 2, 3, 4, 5, 6, 7, 8)
 listing:Reset()
 listing:SetHandler('OnClick', function(row, button)
-    if IsAltKeyDown() and listing:GetSelection().record == row.data.record then
+    if IsAltKeyDown() and listing:GetSelection().record == row.record then
         if button == 'LeftButton' then
             buyout_button:Click()
         elseif button == 'RightButton' then

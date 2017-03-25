@@ -519,7 +519,7 @@ for _ = 1, 5 do
 
     local table = auction_listing.new(frame.results, 16, auction_listing.search_columns)
     table:SetHandler('OnClick', function(row, button)
-        if IsAltKeyDown() and current_search.table:GetSelection().record == row.data.record then
+        if IsAltKeyDown() and current_search.table:GetSelection().record == row.record then
             if button == 'LeftButton' then
                 buyout_button:Click()
             elseif button == 'RightButton' then
