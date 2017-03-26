@@ -382,7 +382,7 @@ function update_item(item)
 
     item.unit_vendor_price = unit_vendor_price(item.key)
     if not item.unit_vendor_price then
-        settings.hidden = 1
+        settings.hidden = true
         write_settings(settings, item.key)
         refresh = true
         return
