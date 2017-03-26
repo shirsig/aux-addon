@@ -172,7 +172,7 @@ M.search_columns = {
             else
                 price = price_per_unit and ceil(record.unit_bid_price) or record.bid_price
             end
-            cell.text:SetText(money.to_string(price, true, false, nil, price_color))
+            cell.text:SetText(money.to_string(price, true, false, price_color))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a
@@ -209,7 +209,7 @@ M.search_columns = {
         isPrice = true,
         fill = function(cell, record)
             local price = price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
-            cell.text:SetText(price > 0 and money.to_string(price, true, false) or '---')
+            cell.text:SetText(price > 0 and money.to_string(price, true) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
@@ -314,7 +314,7 @@ M.auctions_columns = {
             else
                 price = price_per_unit and ceil(record.start_price / record.aux_quantity) or record.start_price
             end
-            cell.text:SetText(money.to_string(price, true, false))
+            cell.text:SetText(money.to_string(price, true))
         end,
         cmp = function(record_a, record_b, desc)
             local price_a
@@ -339,7 +339,7 @@ M.auctions_columns = {
         isPrice = true,
         fill = function(cell, record)
             local price = price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
-            cell.text:SetText(price > 0 and money.to_string(price, true, false) or '---')
+            cell.text:SetText(price > 0 and money.to_string(price, true) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
@@ -480,7 +480,7 @@ M.bids_columns = {
         isPrice = true,
         fill = function(cell, record)
             local price = price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
-            cell.text:SetText(price > 0 and money.to_string(price, true, false) or '---')
+            cell.text:SetText(price > 0 and money.to_string(price, true) or '---')
         end,
         cmp = function(record_a, record_b, desc)
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price

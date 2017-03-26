@@ -99,7 +99,7 @@ function get_unit_start_price()
 end
 
 function set_unit_start_price(amount)
-    unit_start_price_input:SetText(money.to_string(amount, true, nil, 3, nil, true))
+    unit_start_price_input:SetText(money.to_string(amount, true, nil, nil, true))
 end
 
 function get_unit_buyout_price()
@@ -108,7 +108,7 @@ function get_unit_buyout_price()
 end
 
 function set_unit_buyout_price(amount)
-    unit_buyout_price_input:SetText(money.to_string(amount, true, nil, 3, nil, true))
+    unit_buyout_price_input:SetText(money.to_string(amount, true, nil, nil, true))
 end
 
 function update_inventory_listing()
@@ -127,14 +127,14 @@ function update_auction_listing(listing, records, reference)
 		local stack_size = stack_size_slider:GetValue()
 		for i = 1, getn(records[selected_item.key] or empty) do
 			local record = records[selected_item.key][i]
-			local price_color = money.from_string(money.to_string(undercut(record, stack_size_slider:GetValue(), listing == 'bid'), true, nil, 3)) < reference and color.red
+			local price_color = money.from_string(money.to_string(undercut(record, stack_size_slider:GetValue(), listing == 'bid'), true)) < reference and color.red
 			local price = record.unit_price * (listing == 'bid' and record.stack_size / stack_size_slider:GetValue() or 1)
 			tinsert(rows, O(
 				'cols', A(
 				O('value', record.own and color.green(record.count) or record.count),
 				O('value', al.time_left(record.duration)),
 				O('value', record.stack_size == stack_size and color.green(record.stack_size) or record.stack_size),
-				O('value', money.to_string(price, true, nil, 3, price_color)),
+				O('value', money.to_string(price, true, nil, price_color)),
 				O('value', historical_value and al.percentage_historical(round(price / historical_value * 100)) or '---')
 			),
 				'record', record
@@ -146,7 +146,7 @@ function update_auction_listing(listing, records, reference)
 				O('value', '---'),
 				O('value', '---'),
 				O('value', '---'),
-				O('value', money.to_string(historical_value, true, nil, 3, color.green)),
+				O('value', money.to_string(historical_value, true, nil, color.green)),
 				O('value', historical_value and al.percentage_historical(100) or '---')
 			),
 				'record', O('historical_value', true, 'stack_size', stack_size, 'unit_price', historical_value, 'own', true)
@@ -330,7 +330,7 @@ function update_item_configuration()
             local duration_factor = UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
             local stack_size, stack_count = selected_item.max_charges and 1 or stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
-            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, nil, color.text.enabled))
+            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, color.text.enabled))
         end
 
         refresh_button:Enable()
@@ -382,7 +382,7 @@ function update_item(item)
 
     item.unit_vendor_price = unit_vendor_price(item.key)
     if not item.unit_vendor_price then
-        settings.hidden = true
+        settings.hidden = 1
         write_settings(settings, item.key)
         refresh = true
         return
@@ -410,8 +410,8 @@ function update_item(item)
     stack_size_slider:SetValue(huge)
     quantity_update(true)
 
-    unit_start_price_input:SetText(money.to_string(settings.start_price, true, nil, 3, nil, true))
-    unit_buyout_price_input:SetText(money.to_string(settings.buyout_price, true, nil, 3, nil, true))
+    unit_start_price_input:SetText(money.to_string(settings.start_price, true, nil, nil, true))
+    unit_buyout_price_input:SetText(money.to_string(settings.buyout_price, true, nil, nil, true))
 
     if not bid_records[selected_item.key] then
         refresh_entries()

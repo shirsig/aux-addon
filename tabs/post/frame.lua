@@ -248,12 +248,12 @@ do
 		    unit_buyout_price_input:SetFocus()
 	    end
     end)
-    editbox.formatter = function() return money.to_string(unit_start_price, true, nil, 3) end
+    editbox.formatter = function() return money.to_string(unit_start_price, true) end
     editbox.char = function() bid_selection, buyout_selection = nil, nil end
     editbox.change = function() refresh = true end
     editbox.enter = function() this:ClearFocus() end
     editbox.focus_loss = function()
-	    this:SetText(money.to_string(unit_start_price, true, nil, 3, nil, true))
+	    this:SetText(money.to_string(unit_start_price, true, nil, nil, true))
     end
     do
         local label = gui.label(editbox, gui.font_size.small)
@@ -283,12 +283,12 @@ do
             stack_size_slider.editbox:SetFocus()
         end
     end)
-    editbox.formatter = function() return money.to_string(unit_buyout_price, true, nil, 3) end
+    editbox.formatter = function() return money.to_string(unit_buyout_price, true) end
     editbox.char = function() buyout_selection = nil end
     editbox.change = function() refresh = true end
     editbox.enter = function() this:ClearFocus() end
     editbox.focus_loss = function()
-	    this:SetText(money.to_string(unit_buyout_price, true, nil, 3, nil, true))
+	    this:SetText(money.to_string(unit_buyout_price, true, nil, nil, true))
     end
     do
         local label = gui.label(editbox, gui.font_size.small)

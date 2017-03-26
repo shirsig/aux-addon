@@ -415,7 +415,7 @@ function M.filter_string(components)
             local parameter = component[3]
             if parameter then
 	            if filter_util.filters[component[2]].input_type == 'money' then
-		            parameter = money.to_string(money.from_string(parameter), nil, true, nil, nil, true)
+		            parameter = money.to_string(money.from_string(parameter), nil, true, nil, true)
 	            end
                 query_builder.append(parameter)
             end
@@ -450,7 +450,7 @@ function prettified_filter_string(filter)
 		            prettified.append(info.display_name(cache.item_id(parameter)) or color.label.enabled('[' .. parameter .. ']'))
 	            else
 		            if filters[component[2]].input_type == 'money' then
-			            prettified.append(money.to_string(money.from_string(parameter), nil, true, nil, color.label.enabled))
+			            prettified.append(money.to_string(money.from_string(parameter), nil, true, color.label.enabled))
 		            else
 			            prettified.append(color.label.enabled(parameter))
 		            end
