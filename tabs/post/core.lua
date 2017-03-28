@@ -195,13 +195,13 @@ function price_update()
         if bid_selection or buyout_selection then
 	        unit_start_price = undercut(bid_selection or buyout_selection, stack_size_slider:GetValue(), bid_selection)
 	        unit_start_price_input:SetText(money.to_string(unit_start_price, true, nil, nil, true))
-	        start_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_start_price / historical_value * 100)) or '---')
         end
         if buyout_selection then
 	        unit_buyout_price = undercut(buyout_selection, stack_size_slider:GetValue())
 	        unit_buyout_price_input:SetText(money.to_string(unit_buyout_price, true, nil, nil, true))
-	        buyout_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_buyout_price / historical_value * 100)) or '---')
         end
+        start_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_start_price / historical_value * 100)) or '---')
+        buyout_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_buyout_price / historical_value * 100)) or '---')
     end
 end
 
