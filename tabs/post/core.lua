@@ -34,7 +34,6 @@ function read_settings(item_key)
 	item_key = item_key or selected_item.key
 	return data[item_key] and persistence.read(settings_schema, data[item_key]) or default_settings
 end
-
 function write_settings(settings, item_key)
 	item_key = item_key or selected_item.key
 	data[item_key] = persistence.write(settings_schema, settings)
@@ -42,19 +41,15 @@ end
 
 do
 	local bid_selections, buyout_selections = {}, {}
-
 	function get_bid_selection()
 		return bid_selections[selected_item.key]
 	end
-
 	function set_bid_selection(record)
 		bid_selections[selected_item.key] = record
 	end
-
 	function get_buyout_selection()
 		return buyout_selections[selected_item.key]
 	end
-
 	function set_buyout_selection(record)
 		buyout_selections[selected_item.key] = record
 	end
@@ -94,21 +89,23 @@ function USE_ITEM(item_info)
 end
 
 function get_unit_start_price()
-	local money_text = unit_start_price_input:GetText()
-	return money.from_string(money_text) or 0
+	return selected_item and read_settings().start_price or 0
 end
 
 function set_unit_start_price(amount)
-    unit_start_price_input:SetText(money.to_string(amount, true, nil, nil, true))
+	local settings = read_settings()
+	settings.start_price = amount
+	write_settings(settings)
 end
 
 function get_unit_buyout_price()
-    local money_text = unit_buyout_price_input:GetText()
-    return money.from_string(money_text) or 0
+	return selected_item and read_settings().buyout_price or 0
 end
 
 function set_unit_buyout_price(amount)
-    unit_buyout_price_input:SetText(money.to_string(amount, true, nil, nil, true))
+	local settings = read_settings()
+	settings.buyout_price = amount
+	write_settings(settings)
 end
 
 function update_inventory_listing()
@@ -127,7 +124,7 @@ function update_auction_listing(listing, records, reference)
 		local stack_size = stack_size_slider:GetValue()
 		for i = 1, getn(records[selected_item.key] or empty) do
 			local record = records[selected_item.key][i]
-			local price_color = money.from_string(money.to_string(undercut(record, stack_size_slider:GetValue(), listing == 'bid'), true)) < reference and color.red
+			local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and color.red
 			local price = record.unit_price * (listing == 'bid' and record.stack_size / stack_size_slider:GetValue() or 1)
 			tinsert(rows, O(
 				'cols', A(
@@ -194,25 +191,17 @@ end
 
 function price_update()
     if selected_item then
-        local settings = read_settings()
-
         local historical_value = history.value(selected_item.key)
-
-        if bid_selection then
-	        unit_start_price = undercut(bid_selection, stack_size_slider:GetValue(), true)
-        elseif buyout_selection then
-	        unit_start_price = undercut(buyout_selection, stack_size_slider:GetValue())
+        if bid_selection or buyout_selection then
+	        unit_start_price = undercut(bid_selection or buyout_selection, stack_size_slider:GetValue(), bid_selection)
+	        unit_start_price_input:SetText(money.to_string(unit_start_price, true, nil, nil, true))
+	        start_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_start_price / historical_value * 100)) or '---')
         end
-        settings.start_price = unit_start_price
-        start_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_start_price / historical_value * 100)) or '---')
-
         if buyout_selection then
 	        unit_buyout_price = undercut(buyout_selection, stack_size_slider:GetValue())
+	        unit_buyout_price_input:SetText(money.to_string(unit_buyout_price, true, nil, nil, true))
+	        buyout_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_buyout_price / historical_value * 100)) or '---')
         end
-        settings.buyout_price = unit_buyout_price
-        buyout_price_percentage:SetText(historical_value and al.percentage_historical(round(unit_buyout_price / historical_value * 100)) or '---')
-
-        write_settings(settings)
     end
 end
 
@@ -382,7 +371,7 @@ function update_item(item)
 
     item.unit_vendor_price = unit_vendor_price(item.key)
     if not item.unit_vendor_price then
-        settings.hidden = 1
+        settings.hidden = true
         write_settings(settings, item.key)
         refresh = true
         return

@@ -249,7 +249,7 @@ do
 	    end
     end)
     editbox.formatter = function() return money.to_string(unit_start_price, true) end
-    editbox.char = function() bid_selection, buyout_selection = nil, nil end
+    editbox.char = function() bid_selection, buyout_selection = nil, nil; unit_start_price = money.from_string(this:GetText()) end
     editbox.change = function() refresh = true end
     editbox.enter = function() this:ClearFocus() end
     editbox.focus_loss = function()
@@ -284,7 +284,7 @@ do
         end
     end)
     editbox.formatter = function() return money.to_string(unit_buyout_price, true) end
-    editbox.char = function() buyout_selection = nil end
+    editbox.char = function() buyout_selection = nil; unit_buyout_price = money.from_string(this:GetText()) end
     editbox.change = function() refresh = true end
     editbox.enter = function() this:ClearFocus() end
     editbox.focus_loss = function()

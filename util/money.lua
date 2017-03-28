@@ -34,7 +34,7 @@ function M.to_string2(money, exact, color)
 	local NONE = '|cffa0a0a0' .. TEXT_NONE .. FONT_COLOR_CODE_CLOSE
 
 	if not exact and money >= COPPER_PER_GOLD then
-		money = floor(money / COPPER_PER_SILVER + .5) * COPPER_PER_SILVER
+		money = round(money / COPPER_PER_SILVER) * COPPER_PER_SILVER
 	end
 	local g, s, c = to_gsc(money)
 
@@ -58,45 +58,43 @@ function M.to_string2(money, exact, color)
 	return str
 end
 
-function M.to_string(money, pad, trim, number_color, no_coin_color)
+function M.to_string(money, pad, trim, color, no_color)
 	local is_negative = money < 0
 	money = abs(money)
 	local gold, silver, copper = to_gsc(money)
 
 	local gold_text, silver_text, copper_text
-	if no_coin_color then
+	if no_color then
 		gold_text, silver_text, copper_text = 'g', 's', 'c'
 	else
 		gold_text, silver_text, copper_text = GOLD_TEXT, SILVER_TEXT, COPPER_TEXT
 	end
 
-	number_color = number_color or color.none
-
 	local text
 	if trim then
 		local parts = temp-T
 		if gold > 0 then
-			tinsert(parts, number_color(gold) .. gold_text)
+			tinsert(parts, format_number(gold, false, color) .. gold_text)
 		end
 		if silver > 0 then
-			tinsert(parts, number_color(silver) .. silver_text)
+			tinsert(parts, format_number(silver, pad, color) .. silver_text)
 		end
 		if copper > 0 or gold == 0 and silver == 0 then
-			tinsert(parts, number_color(copper) .. copper_text)
+			tinsert(parts, format_number(copper, pad, color) .. copper_text)
 		end
 		text = join(parts, ' ')
 	else
 		if gold > 0 then
-			text = number_color(gold) .. gold_text .. ' ' .. number_color(silver) .. silver_text .. ' ' .. number_color(copper) .. copper_text
+			text = format_number(gold, false, color) .. gold_text .. ' ' .. format_number(silver, pad, color) .. silver_text .. ' ' .. format_number(copper, pad, color) .. copper_text
 		elseif silver > 0 then
-			text = number_color(silver) .. silver_text .. ' ' .. number_color(copper) .. copper_text
+			text = format_number(silver, false, color) .. silver_text .. ' ' .. format_number(copper, pad, color) .. copper_text
 		else
-			text = number_color(copper) .. copper_text
+			text = format_number(copper, false, color) .. copper_text
 		end
 	end
 
 	if is_negative then
-		text = number_color'-' .. text
+		text = (color and color'-' or '-') .. text
 	end
 
 	return text
@@ -121,4 +119,13 @@ function M.from_string(value)
 	if strfind(value, '%S') then return end
 
 	return from_gsc(gold or 0, silver or 0, copper or 0)
+end
+
+function M.format_number(num, pad, color)
+	num = format('%0' .. (pad and 2 or 0) .. 'd', num)
+	if color then
+		return color .. num .. FONT_COLOR_CODE_CLOSE
+	else
+		return num
+	end
 end

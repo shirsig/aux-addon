@@ -291,7 +291,7 @@ function M.editbox(parent)
     set_content_style(editbox)
     editbox:SetScript('OnEscapePressed', function()
         this:ClearFocus()
-	    ;(this.escape or nop)()
+	    do (this.escape or nop)() end
     end)
     editbox:SetScript('OnEnterPressed', function() (this.enter or nop)() end)
     editbox:SetScript('OnEditFocusGained', function()
