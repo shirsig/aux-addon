@@ -457,7 +457,7 @@ function refresh_entries()
 		bid_selection, buyout_selection = nil, nil
         bid_records[item_key], buyout_records[item_key] = nil, nil
         local query = scan_util.item_query(selected_item.item_id)
-        status_bar:update_status(0,0)
+        status_bar:update_status(0, 0)
         status_bar:set_text('Scanning auctions...')
 
 		scan_id = scan.start{
@@ -465,7 +465,7 @@ function refresh_entries()
             ignore_owner = true,
 			queries = A(query),
 			on_page_loaded = function(page, total_pages)
-                status_bar:update_status((page - 1) / total_pages, 0) -- TODO
+                status_bar:update_status(page / total_pages, 0) -- TODO
                 status_bar:set_text(format('Scanning Page %d / %d', page, total_pages))
 			end,
 			on_auction = function(auction_record)

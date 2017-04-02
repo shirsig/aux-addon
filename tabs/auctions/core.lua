@@ -26,7 +26,7 @@ end
 
 function M.scan_auctions()
 
-    status_bar:update_status(0,0)
+    status_bar:update_status(0, 0)
     status_bar:set_text('Scanning auctions...')
 
     wipe(auction_records)
@@ -35,7 +35,7 @@ function M.scan_auctions()
         type = 'owner',
         queries = {{blizzard_query = T}},
         on_page_loaded = function(page, total_pages)
-            status_bar:update_status((page - 1) / total_pages, 0)
+            status_bar:update_status(page / total_pages, 0)
             status_bar:set_text(format('Scanning (Page %d / %d)', page, total_pages))
         end,
         on_auction = function(auction_record)
