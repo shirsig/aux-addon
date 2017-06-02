@@ -547,14 +547,14 @@ local methods = {
 
     ResizeColumns = function(self)
         local weight = 0
-        for _, cell in self.headCells do
+        for _, cell in pairs(self.headCells) do
             weight = weight + cell.info.width
         end
         weight = (self.contentFrame:GetRight() - self.contentFrame:GetLeft()) / weight
-        for i, cell in self.headCells do
+        for i, cell in pairs(self.headCells) do
             local width = cell.info.width * weight
             cell:SetWidth(width)
-            for _, row in self.rows do
+            for _, row in pairs(self.rows) do
                 row.cells[i]:SetWidth(width)
             end
         end
@@ -566,7 +566,7 @@ local methods = {
 
         if button == 'RightButton' and rt.headCells[this.columnIndex].info.isPrice then
             price_per_unit = not price_per_unit
-            for _, cell in rt.headCells do
+            for _, cell in pairs(rt.headCells) do
                 if cell.info.isPrice then
                     cell:SetText(cell.info.title[price_per_unit and 1 or 2])
                 end
@@ -652,11 +652,13 @@ local methods = {
     end,
 
     UpdateRowInfo = function(self)
-	    for _, info in self.rowInfo do
-		    if type(info) == 'table' then
-			    for _, child in info.children do release(child) end
-			    release(info.children)
-			    release(info)
+	    for _, v in ipairs(self.rowInfo) do
+		    if type(v) == 'table' then
+			    for _, child in pairs(v.children) do
+				    release(child)
+			    end
+			    release(v.children)
+			    release(v)
 		    end
 	    end
         wipe(self.rowInfo)
@@ -689,17 +691,16 @@ local methods = {
             end
         end
 
-	    for i = 1, getn(self.rowInfo) do
-		    local info = self.rowInfo[i]
+	    for _, v in ipairs(self.rowInfo) do
             local totalAuctions, totalPlayerAuctions = 0, 0
-            for _, childInfo in info.children do
+            for _, childInfo in pairs(v.children) do
                 totalAuctions = totalAuctions + childInfo.count
                 if cache.is_player(childInfo.record.owner) then
                     totalPlayerAuctions = totalPlayerAuctions + childInfo.count
                 end
             end
-            info.totalAuctions = totalAuctions
-            info.totalPlayerAuctions = totalPlayerAuctions
+            v.totalAuctions = totalAuctions
+            v.totalPlayerAuctions = totalPlayerAuctions
 	    end
     end,
 
@@ -718,7 +719,7 @@ local methods = {
 		    FauxScrollFrame_SetOffset(self.scrollFrame, maxOffset)
 	    end
 
-        for _, cell in self.headCells do
+        for _, cell in pairs(self.headCells) do
             local tex = cell:GetNormalTexture()
             tex:SetTexture[[Interface\AddOns\aux-AddOn\WorldStateFinalScore-Highlight]]
             tex:SetTexCoord(.017, 1, .083, .909)
@@ -746,7 +747,7 @@ local methods = {
                     record_b = b.record
                 end
 
-                for _, sort in self.sorts do
+                for _, sort in pairs(self.sorts) do
                     local ordering = self.columns[sort.index].cmp and self.columns[sort.index].cmp(record_a, record_b, sort.descending) or sort_util.EQ
 
                     if ordering == sort_util.LT then
@@ -759,25 +760,25 @@ local methods = {
                 return tostring(a) < tostring(b)
             end
 
-            for i = 1, getn(self.rowInfo) do
-                sort(self.rowInfo[i].children, sort_helper)
+            for _, v in ipairs(self.rowInfo) do
+                sort(v.children, sort_helper)
             end
             sort(self.rowInfo, sort_helper)
             self.isSorted = true
         end
 
-	    for _, row in self.rows do row:Hide() end
+	    for _, row in pairs(self.rows) do
+		    row:Hide()
+	    end
         local rowIndex = 1 - FauxScrollFrame_GetOffset(self.scrollFrame)
-        for i = 1, getn(self.rowInfo) do
-	        local info = self.rowInfo[i]
-            if self.expanded[info.expandKey] then
-                for j = 1, getn(info.children) do
-	                local childInfo = info.children[j]
-                    self:SetRowInfo(rowIndex, childInfo.record, childInfo.count, 0, j > 1, false, info.expandKey)
+        for _, v in ipairs(self.rowInfo) do
+            if self.expanded[v.expandKey] then
+                for j, childInfo in ipairs(v.children) do
+                    self:SetRowInfo(rowIndex, childInfo.record, childInfo.count, 0, j > 1, false, v.expandKey)
                     rowIndex = rowIndex + 1
                 end
             else
-                self:SetRowInfo(rowIndex, info.children[1].record, info.totalAuctions, getn(info.children) > 1 and info.totalPlayerAuctions or 0, false, getn(info.children) > 1, info.expandKey)
+                self:SetRowInfo(rowIndex, v.children[1].record, v.totalAuctions, getn(v.children) > 1 and v.totalPlayerAuctions or 0, false, getn(v.children) > 1, v.expandKey)
                 rowIndex = rowIndex + 1
             end
         end
@@ -798,7 +799,7 @@ local methods = {
         row.indented = indented
         row.expandKey = expandKey
 
-        for i, column in self.columns do
+        for i, column in pairs(self.columns) do
 	        column.fill(row.cells[i], record, totalAuctions, totalPlayerAuctions, expandable, indented)
         end
     end,
@@ -808,7 +809,7 @@ local methods = {
         local selectedData = self:GetSelection()
         self.selected = selectedData and self.selected or nil
 
-        for _, row in self.rows do
+        for _, row in pairs(self.rows) do
             if self.selected and row.record and row.record.search_signature == self.selected.search_signature then
                 row.highlight:Show()
             else
@@ -835,7 +836,7 @@ local methods = {
 
         local prevSelectedIndex
         if self.selected then
-            for i, row in self.rows do
+            for i, row in pairs(self.rows) do
                 if row:IsVisible() and row.record == self.selected then
                     prevSelectedIndex = i
                 end
@@ -877,14 +878,14 @@ local methods = {
 
     SetSort = vararg-function(arg)
 	    local self = tremove(arg, 1)
-        for k = 1, getn(arg) do
-            for i, sort in self.sorts do
-                if sort.index == abs(arg[k]) then
+        for _, v in ipairs(arg) do
+            for i, sort in pairs(self.sorts) do
+                if sort.index == abs(v) then
                     tremove(self.sorts, i)
                     break
                 end
             end
-            tinsert(self.sorts, 1, {index=abs(arg[k]), descending=arg[k] < 0})
+            tinsert(self.sorts, 1, {index=abs(v), descending=v < 0})
         end
 
         self.isSorted = nil
@@ -898,8 +899,8 @@ local methods = {
     GetSelection = function(self)
         if not self.selected then return end
         local selectedData
-        for i = 1, getn(self.rowInfo) do
-            for _, childInfo in self.rowInfo[i].children do
+        for _, v in ipairs(self.rowInfo) do
+            for _, childInfo in pairs(v.children) do
                 if childInfo.record.search_signature == self.selected.search_signature then
                     selectedData = childInfo
                     break
@@ -920,12 +921,12 @@ function M.new(parent, rows, columns)
     rt.records = {}
     rt.rowInfo = {numDisplayRows=0}
 
-    for name, func in methods do
+    for name, func in pairs(methods) do
         rt[name] = func
     end
 
     rt:SetScript('OnShow', function()
-        for _, cell in this.headCells do
+        for _, cell in pairs(this.headCells) do
             if cell.info.isPrice then
                 cell:SetText(cell.info.title[price_per_unit and 1 or 2])
             end
