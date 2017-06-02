@@ -76,7 +76,7 @@ local methods = {
 		    self:AddColumn()
 	    end
 
-	    for i, col in self.headCols do
+	    for i, col in pairs(self.headCols) do
 		    if self.colInfo[i] then
 			    col:Show()
 			    col:SetWidth(self.colInfo[i].width * width)
@@ -92,7 +92,7 @@ local methods = {
 		    self:AddRow()
 	    end
 
-	    for i, row in self.rows do
+	    for i, row in pairs(self.rows) do
 		    if i > self.numRows then
 			    row.data = nil
 			    row:Hide()
@@ -101,7 +101,7 @@ local methods = {
 			    while getn(row.cols) < getn(self.colInfo) do
 				    self:AddCell(i)
 			    end
-			    for j, col in row.cols do
+			    for j, col in pairs(row.cols) do
 				    if self.headCols[j] and self.colInfo[j] then
 					    col:Show()
 					    col:SetWidth(self.colInfo[j].width * width)
@@ -119,22 +119,23 @@ local methods = {
         self.offset = offset
 
         for i = 1, self.numRows do
-            self.rows[i].data = nil
+	        local row = self.rows[i]
+            row.data = nil
             if i > getn(self.rowData) then
-                self.rows[i]:Hide()
+	            row:Hide()
             else
-                self.rows[i]:Show()
+	            row:Show()
                 local data = self.rowData[i + offset]
                 if not data then break end
-                self.rows[i].data = data
+	            row.data = data
 
-                if self.rows[i].mouseover or self.selected and self.selected(data) then
-                    self.rows[i].highlight:Show()
+                if row.mouseover or self.selected and self.selected(data) then
+	                row.highlight:Show()
                 else
-                    self.rows[i].highlight:Hide()
+	                row.highlight:Hide()
                 end
 
-                for j, col in self.rows[i].cols do
+                for j, col in pairs(row.cols) do
                     if self.colInfo[j] then
                         local colData = data.cols[j]
                         if type(colData.value) == 'function' then
@@ -149,8 +150,8 @@ local methods = {
     end,
 
     SetData = function(self, rowData)
-	    for _, row in self.rowData or empty do
-		    for _, col in row.cols do release(col) end
+	    for _, row in pairs(self.rowData or empty) do
+		    for _, col in pairs(row.cols) do release(col) end
 		    release(row.cols)
 		    release(row)
 	    end
@@ -184,7 +185,7 @@ local methods = {
 
         tinsert(self.headCols, col)
         
-        for i, row in self.rows do
+        for i, row in pairs(self.rows) do
             while getn(row.cols) < getn(self.headCols) do
                 self:AddCell(i)
             end
@@ -216,7 +217,7 @@ local methods = {
         local row = CreateFrame('Button', nil, self.contentFrame)
         row:SetHeight(ROW_HEIGHT)
         row:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-        for name, func in handlers do
+        for name, func in pairs(handlers) do
 	        row:SetScript(name, func)
         end
         local rowNum = getn(self.rows) + 1
@@ -287,7 +288,7 @@ function M.new(parent)
     _G[scroll_bar:GetName() .. 'ScrollUpButton']:Hide()
     _G[scroll_bar:GetName() .. 'ScrollDownButton']:Hide()
 
-    for name, func in methods do
+    for name, func in pairs(methods) do
         st[name] = func
     end
     

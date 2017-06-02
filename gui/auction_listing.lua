@@ -959,8 +959,7 @@ function M.new(parent, rows, columns)
     _G[scrollBar:GetName() .. 'ScrollDownButton']:Hide()
 
     rt.headCells = {}
-    for i = 1, getn(rt.columns) do
-	    local column = rt.columns[i]
+    for i, column in ipairs(rt.columns) do
         local cell = CreateFrame('Button', nil, rt.contentFrame)
         cell:SetHeight(HEAD_HEIGHT)
         if i == 1 then
@@ -1024,12 +1023,12 @@ function M.new(parent, rows, columns)
         row.highlight = highlight
 
         row.cells = {}
-        for j = 1, getn(rt.columns) do
+        for j, column in ipairs(rt.columns) do
             local cell = CreateFrame('Frame', nil, row)
             local text = cell:CreateFontString()
             cell.text = text
             text:SetFont(gui.font, min(14, rt.ROW_HEIGHT))
-            text:SetJustifyH(rt.columns[j].align or 'LEFT')
+            text:SetJustifyH(column.align or 'LEFT')
             text:SetJustifyV('CENTER')
             text:SetPoint('TOPLEFT', 1, -1)
             text:SetPoint('BOTTOMRIGHT', -1, 1)
@@ -1049,8 +1048,8 @@ function M.new(parent, rows, columns)
                 tex:SetTexture(.3, .3, .3, .2)
             end
 
-            if rt.columns[j].init then
-                rt.columns[j].init(rt, cell)
+            if column.init then
+                column.init(rt, cell)
             end
 
             tinsert(row.cells, cell)

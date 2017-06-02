@@ -24,7 +24,7 @@ end
 
 function include(self, name)
 	local module = name and loaded[name] or error('No module "%s".', name)
-	for k, v in module.public_fields do define(self, k, v, true) end
+	for k, v in pairs(module.public_fields) do define(self, k, v, true) end
 end
 
 public_modifier_mt = {__metatable=false, __newindex=define}

@@ -255,7 +255,7 @@ do
 		do (self._on_select or nop)(id) end
 	end
 	function mt.__index:update()
-		for _, tab in self._tabs do
+		for _, tab in pairs(self._tabs) do
 			if tab.group._selected == tab.id then
 				tab.text:SetTextColor(color.label.enabled())
 				tab:Disable()

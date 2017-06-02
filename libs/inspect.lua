@@ -13,10 +13,10 @@ function format_value(v)
 end
 
 function print_table(t, depth)
-	for i = 1, getn(t) do
-		print_pair(i, t[i], depth)
+	for i, v in ipairs(t) do
+		print_pair(i, v, depth)
 	end
-	for k, v in t do
+	for k, v in pairs(t) do
 		if type(k) ~= 'number' or k < 1 or k > getn(t) then
 			print_pair(k, v, depth)
 		end

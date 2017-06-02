@@ -8,7 +8,7 @@ local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, {__
 
 function wipe(t)
 	setmetatable(t, nil)
-	for k, v in t do
+	for k, v in pairs(t) do
 		t[k] = nil
 	end
 	t.reset, t.reset = nil, 1
@@ -17,7 +17,7 @@ end
 M.wipe = wipe
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
-	for t in auto_release do release(t) end
+	for t in pairs(auto_release) do release(t) end
 	wipe(auto_release)
 end)
 
@@ -124,7 +124,7 @@ M.A = vararg(function(arg)
 end)
 M.S = vararg(function(arg)
 	local t = acquire()
-	for _, v in arg do
+	for _, v in pairs(arg) do
 		t[v] = true
 	end
 	return t
