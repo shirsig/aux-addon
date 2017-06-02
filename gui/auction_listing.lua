@@ -875,9 +875,9 @@ local methods = {
         end
     end,
 
-    SetSort = function(self, ...)
-	    temp(arg)
-        for k = 1, arg.n do
+    SetSort = vararg-function(arg)
+	    local self = tremove(arg, 1)
+        for k = 1, getn(arg) do
             for i, sort in self.sorts do
                 if sort.index == abs(arg[k]) then
                     tremove(self.sorts, i)

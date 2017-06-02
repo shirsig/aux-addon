@@ -20,7 +20,7 @@ _G.aux = {
 	account = {},
 }
 
-function M.print(...)
+M.print = vararg-function(arg)
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '<aux> ' .. join(map(arg, tostring), ' '))
 end
 
@@ -122,8 +122,7 @@ do
 	end
 end
 
-function SetItemRef(...)
-	temp(arg)
+SetItemRef = vararg-function(arg)
 	if arg[3] ~= 'RightButton' or not index(active_tab, 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
 		return orig.SetItemRef(unpack(arg))
 	end
@@ -133,8 +132,7 @@ function SetItemRef(...)
 	end
 end
 
-function UseContainerItem(...)
-	temp(arg)
+UseContainerItem = vararg-function(arg)
 	if modified or not active_tab then
 		return orig.UseContainerItem(unpack(arg))
 	end
@@ -145,15 +143,14 @@ function UseContainerItem(...)
 end
 
 M.orig = setmetatable({[_G]=T}, {__index=function(self, key) return self[_G][key] end})
-function M.hook(...)
-	temp(arg)
+M.hook = vararg-function(arg)
 	local name, object, handler
-	if arg.n == 3 then
+	if getn(arg) == 3 then
 		name, object, handler = unpack(arg)
 	else
 		object, name, handler = _G, unpack(arg)
 	end
-	handler = handler or getfenv(2)[name]
+	handler = handler or getfenv(3)[name]
 	orig[object] = orig[object] or T
 	assert(not orig[object][name], '"' .. name .. '" is already hooked into.')
 	orig[object][name], object[name] = object[name], handler
@@ -246,8 +243,7 @@ end
 function Blizzard_AuctionUI()
 	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
 	AuctionFrame:SetScript('OnHide', nil)
-	hook('ShowUIPanel', function(...)
-		temp(arg)
+	hook('ShowUIPanel', vararg-function(arg)
 		if arg[1] == AuctionFrame then return AuctionFrame:Show() end
 		return orig.ShowUIPanel(unpack(arg))
 	end)
@@ -273,7 +269,7 @@ do
 		end)
 	end
 	function Blizzard_CraftUI()
-		hook('CraftFrame_SetSelection', function(...)
+		hook('CraftFrame_SetSelection', vararg-function(arg)
 			local ret = temp-A(orig.CraftFrame_SetSelection(unpack(arg)))
 			local id = GetCraftSelectionIndex()
 			local reagent_count = GetCraftNumReagents(id)
@@ -303,7 +299,7 @@ do
 		end
 	end
 	function Blizzard_TradeSkillUI()
-		hook('TradeSkillFrame_SetSelection', function(...)
+		hook('TradeSkillFrame_SetSelection', vararg-function(arg)
 			local ret = temp-A(orig.TradeSkillFrame_SetSelection(unpack(arg)))
 			local id = GetTradeSkillSelectionIndex()
 			local reagent_count = GetTradeSkillNumReagents(id)
@@ -334,8 +330,7 @@ do
 	end
 end
 
-function AuctionFrameAuctions_OnEvent(...)
-	temp(arg)
+AuctionFrameAuctions_OnEvent = vararg-function(arg)
     if AuctionFrameAuctions:IsVisible() then
 	    return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
     end
