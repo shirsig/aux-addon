@@ -313,8 +313,7 @@ function M.query(filter_string)
     end
 
     local polish_notation_counter = 0
-    for i = 1, getn(filter.post) do
-	    local component = filter.post[i]
+    for _, component in ipairs(filter.post) do
         if component[1] == 'operator' then
             polish_notation_counter = max(polish_notation_counter, 1)
             polish_notation_counter = polish_notation_counter + (tonumber(component[2]) or 1) - 1
@@ -325,7 +324,7 @@ function M.query(filter_string)
 
     if polish_notation_counter > 0 then
         local suggestions = T
-        for key in filters do
+        for key in pairs(filters) do
             tinsert(suggestions, strlower(key))
         end
         tinsert(suggestions, 'and')
@@ -344,8 +343,7 @@ end
 function M.queries(filter_string)
     local parts = split(filter_string, ';')
     local queries = T
-    for i = 1, getn(parts) do
-        local str = trim(parts[i])
+    for _, str in ipairs(parts) do
         local query, _, error = query(str)
         if not query then
 	        return nil, error
@@ -363,7 +361,7 @@ function suggestions(filter)
 
     tinsert(suggestions, 'and'); tinsert(suggestions, 'or'); tinsert(suggestions, 'not'); tinsert(suggestions, 'tooltip')
 
-    for key in filters do tinsert(suggestions, key) end
+    for key in pairs(filters) do tinsert(suggestions, key) end
 
     -- classes
     if not filter.blizzard.class then
@@ -394,8 +392,8 @@ function suggestions(filter)
 
     -- item names
     if getn(filter.components) == 0 then
-	    for i = 1, getn(aux_auctionable_items) do
-            tinsert(suggestions, aux_auctionable_items[i] .. '/exact')
+	    for _, name in ipairs(aux_auctionable_items) do
+            tinsert(suggestions, name .. '/exact')
         end
     end
 
@@ -404,8 +402,7 @@ end
 
 function M.filter_string(components)
     local query_builder = query_builder()
-    for i = 1, getn(components) do
-	    local component = components[i]
+    for _, component in ipairs(components) do
 	    if component[1] == 'blizzard' then
 		    query_builder.append(component[4] or component[3])
         elseif component[1] == 'operator' then
@@ -494,7 +491,7 @@ function blizzard_query(filter)
         query.slot = slot_index
         query.quality = item_info.quality
     else
-	    for key in temp-S('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality') do
+	    for key in pairs(temp-S('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality')) do
             query[key] = index(filters[key], 2)
 	    end
     end
@@ -503,7 +500,7 @@ end
 
 function validator(filter)
     local validators = T
-    for i, component in filter.post do
+    for i, component in pairs(filter.post) do
 	    local type, name, param = unpack(component)
         if type == 'filter' then
             validators[i] = filters[name].validator(parse_parameter(filters[name].input_type, param))

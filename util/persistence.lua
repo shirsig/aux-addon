@@ -67,7 +67,7 @@ end
 function write_tuple(schema, tuple)
     local separator = schema[2]
     local parts = temp-T
-    for i = 3 , getn(schema) do
+    for i = 3, getn(schema) do
         local key, type = next(schema[i])
         tinsert(parts, write(type, tuple[key]))
     end
