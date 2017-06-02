@@ -185,7 +185,7 @@ M.filters = {
 
 function operator(str)
     local operator = str == 'not' and A('operator', 'not', 1)
-    for name in temp-S('and', 'or') do
+    for name in pairs(temp-S('and', 'or')) do
 	    local arity = select(3, strfind(str, '^' .. name .. '(%d*)$'))
 	    if arity then
 		    arity = tonumber(arity)
@@ -214,12 +214,12 @@ do
 					end
 				end
 			end
-			for _, parser in temp-A(
+			for _, parser in pairs(temp-A(
 				temp-A('class', info.item_class_index),
 				temp-A('subclass', vararg-function(arg) return info.item_subclass_index(index(self.class, 2) or 0, unpack(arg)) end),
 				temp-A('slot', vararg-function(arg) return info.item_slot_index(index(self.class, 2) == 2 and 2 or 0, index(self.subclass, 2) or 0, unpack(arg)) end),
 				temp-A('quality', info.item_quality_index)
-			) do
+			)) do
 				if not self[parser[1]] then
 					tinsert(parser, str)
 					local index, label = parser[2](select(3, unpack(parser)))
@@ -423,8 +423,7 @@ end
 
 function prettified_filter_string(filter)
     local prettified = query_builder()
-    for i = 1, getn(filter.components) do
-	    local component = filter.components[i]
+    for i, component in ipairs(filter.components) do
 	    if component[1] == 'blizzard' then
 		    if component[2] == 'name' then
 			    if filter.blizzard.exact then
