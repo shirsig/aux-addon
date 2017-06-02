@@ -14,14 +14,14 @@ function LOAD2()
 end
 
 do
-	local cache = 0
+	local next_push = 0
 	function get_next_push()
-		if time() > cache then
+		if time() > next_push then
 			local date = date('*t')
 			date.hour, date.min, date.sec = 24, 0, 0
-			cache = time(date)
+			next_push = time(date)
 		end
-		return cache
+		return next_push
 	end
 end
 
