@@ -31,7 +31,7 @@ local current_owner_page
 function M.get_current_owner_page() return current_owner_page end
 
 local event_frame = CreateFrame'Frame'
-for event in temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
+for event in pairs(temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE')) do
 	event_frame:RegisterEvent(event)
 end
 
@@ -53,9 +53,9 @@ do
 				Blizzard_TradeSkillUI()
 			end
 		elseif event == 'VARIABLES_LOADED' then
-			for _, f in handlers do f() end
+			for _, f in pairs(handlers) do f() end
 		elseif event == 'PLAYER_LOGIN' then
-			for _, f in handlers2 do f() end
+			for _, f in pairs(handlers2) do f() end
 			print('loaded - /aux')
 		else
 			_M[event]()
@@ -85,12 +85,12 @@ do
 			cache.faction = aux.faction[key]
 		end
 	end
-	for scope in temp-S('character', 'faction', 'realm', 'account') do
+	for scope in pairs(temp-S('character', 'faction', 'realm', 'account')) do
 		local scope = scope
 		M[scope .. '_data'] = function(key, init)
 			if not cache[scope] then error('Cache not ready', 2) end
 			cache[scope][key] = cache[scope][key] or {}
-			for k, v in init or empty do
+			for k, v in pairs(init or empty) do
 				if cache[scope][key][k] == nil then
 					cache[scope][key][k] = v
 				end
@@ -272,9 +272,8 @@ do
 		hook('CraftFrame_SetSelection', vararg-function(arg)
 			local ret = temp-A(orig.CraftFrame_SetSelection(unpack(arg)))
 			local id = GetCraftSelectionIndex()
-			local reagent_count = GetCraftNumReagents(id)
 			local total_cost = 0
-			for i = 1, reagent_count do
+			for i = 1, GetCraftNumReagents(id) do
 				local link = GetCraftReagentItemLink(id, i)
 				if not link then
 					total_cost = nil
@@ -302,9 +301,8 @@ do
 		hook('TradeSkillFrame_SetSelection', vararg-function(arg)
 			local ret = temp-A(orig.TradeSkillFrame_SetSelection(unpack(arg)))
 			local id = GetTradeSkillSelectionIndex()
-			local reagent_count = GetTradeSkillNumReagents(id)
 			local total_cost = 0
-			for i = 1, reagent_count do
+			for i = 1, GetTradeSkillNumReagents(id) do
 				local link = GetTradeSkillReagentItemLink(id, i)
 				if not link then
 					total_cost = nil
