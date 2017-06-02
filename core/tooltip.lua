@@ -18,7 +18,7 @@ function LOAD()
 	settings = character_data('tooltip', {value=true})
 	do
 		local inside_hook = false
-	    for name, f in game_tooltip_hooks do
+	    for name, f in pairs(game_tooltip_hooks) do
 	        local name, f = name, f
 	        hook(name, GameTooltip, vararg-function(arg)
 	            inside_hook = true
@@ -61,8 +61,7 @@ function M.extend_tooltip(tooltip, link, quantity)
             if settings.disenchant_distribution then
                 tooltip:AddLine('Disenchants into:', color.tooltip.disenchant.distribution())
                 sort(distribution, function(a,b) return a.probability > b.probability end)
-                for i = 1, getn(distribution) do
-	                local event = distribution[i]
+                for _, event in ipairs(distribution) do
                     tooltip:AddLine(format('  %s%% %s (%s-%s)', event.probability * 100, info.display_name(event.item_id, true) or 'item:' .. event.item_id, event.min_quantity, event.max_quantity), color.tooltip.disenchant.distribution())
                 end
             end

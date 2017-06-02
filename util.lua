@@ -32,7 +32,10 @@ end
 
 M.index = vararg-function(arg)
 	local t = tremove(arg, 1)
-	for i = 1, getn(arg) do t = t and t[arg[i]] end return t
+	for _, v in ipairs(arg) do
+		t = t and t[v]
+	end
+	return t
 end
 
 M.huge = 1.8 * 10 ^ 308
@@ -43,46 +46,58 @@ end
 
 function M.copy(t)
 	local copy = T
-	for k, v in t do copy[k] = v end
+	for k, v in pairs(t) do
+		copy[k] = v
+	end
 	table.setn(copy, getn(t))
 	return setmetatable(copy, getmetatable(t))
 end
 
 function M.size(t)
 	local size = 0
-	for _ in t do size = size + 1 end
+	for _ in pairs(t) do
+		size = size + 1
+	end
 	return size
 end
 
 function M.key(t, value)
-	for k, v in t do if v == value then return k end end
+	for k, v in pairs(t) do
+		if v == value then
+			return k
+		end
+	end
 end
 
 function M.keys(t)
 	local keys = T
-	for k in t do tinsert(keys, k) end
+	for k in pairs(t) do
+		tinsert(keys, k)
+	end
 	return keys
 end
 
 function M.values(t)
 	local values = T
-	for _, v in t do tinsert(values, v) end
+	for _, v in pairs(t) do
+		tinsert(values, v)
+	end
 	return values
 end
 
 function M.eq(t1, t2)
 	if not t1 or not t2 then return false end
-	for key, value in t1 do
+	for key, value in pairs(t1) do
 		if t2[key] ~= value then return false end
 	end
-	for key, value in t2 do
+	for key, value in pairs(t2) do
 		if t1[key] ~= value then return false end
 	end
 	return true
 end
 
 function M.any(t, predicate)
-	for _, v in t do
+	for _, v in pairs(t) do
 		if predicate then
 			if predicate(v) then return true end
 		elseif v then
@@ -93,7 +108,7 @@ function M.any(t, predicate)
 end
 
 function M.all(t, predicate)
-	for _, v in t do
+	for _, v in pairs(t) do
 		if predicate then
 			if not predicate(v) then return false end
 		elseif not v then
@@ -104,14 +119,16 @@ function M.all(t, predicate)
 end
 
 function M.filter(t, predicate)
-	for k, v in t do
+	for k, v in pairs(t) do
 		if not predicate(v, k) then t[k] = nil end
 	end
 	return t
 end
 
 function M.map(t, f)
-	for k, v in t do t[k] = f(v, k) end
+	for k, v in pairs(t) do
+		t[k] = f(v, k)
+	end
 	return t
 end
 
