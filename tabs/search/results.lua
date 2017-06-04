@@ -325,7 +325,7 @@ function M.execute(resume, real_time)
 	if resume then
 		current_search.table:SetSelectedRecord()
 	else
-		if filter_string ~= current_search.filter_string or first_page ~= current_search.first_page or last_page ~= current_search.last_page or real_time ~= current_search.real_time then
+		if filter_string ~= current_search.filter_string then
 			if current_search.filter_string then
 				new_search(filter_string, first_page, last_page, real_time)
 			else
