@@ -153,6 +153,7 @@ do
     item.button:SetScript('OnLeave', function()
         GameTooltip:Hide()
     end)
+    
 end
 do
     local slider = gui.slider(frame.parameters)
@@ -165,6 +166,7 @@ do
     slider.editbox.change = function()
         slider:SetValue(this:GetNumber())
         quantity_update(true)
+        
         if selected_item then
             local settings = read_settings()
             write_settings(settings)
@@ -289,6 +291,9 @@ do
     editbox.enter = function() this:ClearFocus() end
     editbox.focus_loss = function()
 	    this:SetText(money.to_string(unit_buyout_price, true, nil, nil, true))
+        unit_start_price = 0.85 * unit_buyout_price
+	    unit_start_price_input:SetText(money.to_string(unit_start_price, true, nil, nil, true))
+        stack_buyout_price:SetText('Stack Buyout Price: ' .. money.to_string(stack_size_slider:GetValue() * unit_buyout_price))
     end
     do
         local label = gui.label(editbox, gui.font_size.small)
@@ -306,10 +311,19 @@ do
 end
 do
 	local label = gui.label(frame.parameters, gui.font_size.medium)
-	label:SetPoint('TOPLEFT', unit_buyout_price_input, 'BOTTOMLEFT', 0, -24)
+	label:SetPoint('TOPLEFT', duration_dropdown, 'TOPRIGHT', 30, -1)
 	deposit = label
 end
-
+do
+	local label = gui.label(frame.parameters, gui.font_size.small)
+	label:SetPoint('BOTTOMLEFT', unit_start_price_input, 'TOPLEFT', -3, 30)
+	vendor_value = label
+end
+do
+	local label = gui.label(frame.parameters, gui.font_size.medium)
+	label:SetPoint('TOPLEFT', unit_buyout_price_input, 'BOTTOMLEFT', 0, -16)
+	stack_buyout_price = label
+end
 function LOAD()
 	if not aux_post_bid then
 		frame.bid_listing:Hide()
