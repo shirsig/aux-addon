@@ -12,10 +12,10 @@ end
 
 do
 	local id = 0
-	function get_search_scan_id()
+	function get.search_scan_id()
 		return id
 	end
-	function set_search_scan_id(v)
+	function set.search_scan_id(v)
 		id = v
 	end
 end
@@ -36,7 +36,7 @@ do
 	local searches = {}
 	local search_index = 1
 
-	function get_current_search()
+	function get.current_search()
 		return searches[search_index]
 	end
 

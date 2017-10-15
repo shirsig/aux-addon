@@ -15,7 +15,7 @@ end
 
 do
 	local next_push = 0
-	function get_next_push()
+	function get.next_push()
 		if time() > next_push then
 			local date = date('*t')
 			date.hour, date.min, date.sec = 24, 0, 0
@@ -25,7 +25,7 @@ do
 	end
 end
 
-function get_new_record()
+function get.new_record()
 	return temp-O('next_push', next_push, 'data_points', T)
 end
 

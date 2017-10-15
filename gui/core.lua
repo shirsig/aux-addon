@@ -88,7 +88,7 @@ M.font_size = immutable-{
 
 do
 	local id = 1
-	function M.get_unique_name()
+	function M.get.unique_name()
 		id = id + 1
 		return 'AuxFrame' .. id
 	end

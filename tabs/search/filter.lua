@@ -105,7 +105,7 @@ function update_form()
 	end
 end
 
-function get_filter_builder_query()
+function get.filter_builder_query()
 	local filter_string
 
 	local function add(part)
@@ -150,7 +150,7 @@ function get_filter_builder_query()
 	return filter_string or ''
 end
 
-function set_form(filter)
+function set.form(filter)
 	clear_form()
 	for _, component in ipairs(filter.components) do
 		if component[1] == 'blizzard' then
@@ -184,7 +184,7 @@ end
 function import_filter_string()
 	local filter, error = filter_util.parse_filter_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
 	if filter or print(error) then
-		set_form(filter)
+		set.form(filter)
 	end
 	update_form()
 end

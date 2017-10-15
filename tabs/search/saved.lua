@@ -82,7 +82,7 @@ handlers = {
 	end
 }
 
-function get_auto_buy_validator()
+function get.auto_buy_validator()
 	local validators = T
 	for _, search in pairs(favorite_searches) do
 		if search.auto_buy then

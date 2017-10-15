@@ -5,7 +5,7 @@ local event_frame = CreateFrame'Frame'
 local listeners, threads = T, T
 
 local thread_id
-function M.get_thread_id() return thread_id end
+function M.get.thread_id() return thread_id end
 
 function LOAD()
 	event_frame:SetScript('OnUpdate', UPDATE)
@@ -50,7 +50,7 @@ end
 
 do
 	local id = 0
-	function get_unique_id()
+	function get.unique_id()
 		id = id + 1
 		return id
 	end

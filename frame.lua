@@ -32,7 +32,7 @@ end
 do
 	tabs = gui.tabs(AuxFrame, 'DOWN')
 	tabs._on_select = on_tab_click
-	function M.set_tab(id) tabs:select(id) end
+	function M.set.tab(id) tabs:select(id) end
 end
 do
 	local btn = gui.button(AuxFrame)

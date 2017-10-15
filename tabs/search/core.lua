@@ -44,7 +44,7 @@ function USE_ITEM(item_info)
 	execute(nil, false)
 end
 
-function set_subtab(tab)
+function set.subtab(tab)
 	CloseDropDownMenus()
     search_results_button:UnlockHighlight()
     saved_searches_button:UnlockHighlight()
@@ -65,7 +65,7 @@ function set_subtab(tab)
     end
 end
 
-function M.set_filter(filter_string)
+function M.set.filter(filter_string)
 	search_box:SetFocus()
     search_box:SetText(filter_string)
 end

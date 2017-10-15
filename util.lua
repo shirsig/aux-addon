@@ -40,7 +40,7 @@ end
 
 M.huge = 1.8 * 10 ^ 308
 
-function M.get_modified()
+function M.get.modified()
 	return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown()
 end
 

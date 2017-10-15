@@ -25,10 +25,10 @@ M.print = vararg-function(arg)
 end
 
 local bids_loaded
-function M.get_bids_loaded() return bids_loaded end
+function M.get.bids_loaded() return bids_loaded end
 
 local current_owner_page
-function M.get_current_owner_page() return current_owner_page end
+function M.get.current_owner_page() return current_owner_page end
 
 local event_frame = CreateFrame'Frame'
 for event in pairs(temp-S('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE')) do
@@ -37,10 +37,10 @@ end
 
 do
 	local handlers, handlers2 = {}, {}
-	function M.set_LOAD(f)
+	function M.set.LOAD(f)
 		tinsert(handlers, f)
 	end
-	function M.set_LOAD2(f)
+	function M.set.LOAD2(f)
 		tinsert(handlers2, f)
 	end
 	event_frame:SetScript('OnEvent', function()
@@ -88,7 +88,7 @@ do
 	for scope in pairs(temp-S('character', 'faction', 'realm', 'account')) do
 		local scope = scope
 		M[scope .. '_data'] = function(key, init)
-			if not cache[scope] then error('Cache not ready', 2) end
+			if not cache[scope] then error('Cache for ' .. scope .. ' data not ready.', 2) end
 			cache[scope][key] = cache[scope][key] or {}
 			for k, v in pairs(init or empty) do
 				if cache[scope][key][k] == nil then
@@ -104,16 +104,16 @@ tab_info = {}
 function M.TAB(name)
 	local tab = O('name', name)
 	local env = getfenv(2)
-	function env.set_OPEN(f) tab.OPEN = f end
-	function env.set_CLOSE(f) tab.CLOSE = f end
-	function env.set_USE_ITEM(f) tab.USE_ITEM = f end
-	function env.set_CLICK_LINK(f) tab.CLICK_LINK = f end
+	function env.set.OPEN(f) tab.OPEN = f end
+	function env.set.CLOSE(f) tab.CLOSE = f end
+	function env.set.USE_ITEM(f) tab.USE_ITEM = f end
+	function env.set.CLICK_LINK(f) tab.CLICK_LINK = f end
 	tinsert(tab_info, tab)
 end
 
 do
 	local index
-	function get_active_tab() return tab_info[index] end
+	function get.active_tab() return tab_info[index] end
 	function on_tab_click(i)
 		CloseDropDownMenus()
 		do (index and active_tab.CLOSE or nop)() end
@@ -159,7 +159,7 @@ end
 
 do
 	local locked
-	function M.get_bid_in_progress() return locked end
+	function M.get.bid_in_progress() return locked end
 	function M.place_bid(type, index, amount, on_success)
 		if locked then return end
 		local money = GetMoney()
@@ -184,7 +184,7 @@ end
 
 do
 	local locked
-	function M.get_cancel_in_progress() return locked end
+	function M.get.cancel_in_progress() return locked end
 	function M.cancel_auction(index, on_success)
 		if locked then return end
 		locked = true

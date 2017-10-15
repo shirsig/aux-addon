@@ -22,7 +22,7 @@ local settings_schema = {'tuple', '#', {duration='number'}, {start_price='number
 
 local scan_id, inventory_records, bid_records, buyout_records = 0, {}, {}, {}
 
-function get_default_settings()
+function get.default_settings()
 	return O('duration', DURATION_8, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
 end
 
@@ -41,16 +41,16 @@ end
 
 do
 	local bid_selections, buyout_selections = {}, {}
-	function get_bid_selection()
+	function get.bid_selection()
 		return bid_selections[selected_item.key]
 	end
-	function set_bid_selection(record)
+	function set.bid_selection(record)
 		bid_selections[selected_item.key] = record
 	end
-	function get_buyout_selection()
+	function get.buyout_selection()
 		return buyout_selections[selected_item.key]
 	end
-	function set_buyout_selection(record)
+	function set.buyout_selection(record)
 		buyout_selections[selected_item.key] = record
 	end
 end
@@ -63,14 +63,14 @@ end
 
 do
 	local item
-	function get_selected_item() return item end
-	function set_selected_item(v) item = v end
+	function get.selected_item() return item end
+	function set.selected_item(v) item = v end
 end
 
 do
 	local c = 0
-	function get_refresh() return c end
-	function set_refresh(v) c = v end
+	function get.refresh() return c end
+	function set.refresh(v) c = v end
 end
 
 function OPEN()
@@ -88,21 +88,21 @@ function USE_ITEM(item_info)
 	select_item(item_info.item_key)
 end
 
-function get_unit_start_price()
+function get.unit_start_price()
 	return selected_item and read_settings().start_price or 0
 end
 
-function set_unit_start_price(amount)
+function set.unit_start_price(amount)
 	local settings = read_settings()
 	settings.start_price = amount
 	write_settings(settings)
 end
 
-function get_unit_buyout_price()
+function get.unit_buyout_price()
 	return selected_item and read_settings().buyout_price or 0
 end
 
-function set_unit_buyout_price(amount)
+function set.unit_buyout_price(amount)
 	local settings = read_settings()
 	settings.buyout_price = amount
 	write_settings(settings)

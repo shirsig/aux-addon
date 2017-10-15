@@ -56,7 +56,7 @@ do
 	M.static = setmetatable({}, {__metatable=false, __newindex=nop, __call=f, __sub=f})
 end
 
-M.get_T = acquire
+M.get.T = acquire
 
 do
 	local function ret(t)

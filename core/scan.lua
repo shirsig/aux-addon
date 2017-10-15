@@ -49,7 +49,7 @@ do
 		do (on_complete or nop)() end
 	end
 
-	function get_state()
+	function get.state()
 		for _, state in pairs(scan_states) do
 			if state.id == thread_id then
 				return state
@@ -58,7 +58,7 @@ do
 	end
 end
 
-function get_query()
+function get.query()
 	return state.params.queries[state.query_index]
 end
 
