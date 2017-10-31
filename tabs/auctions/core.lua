@@ -1,21 +1,22 @@
 module 'aux.tabs.auctions'
 
-include 'T'
 include 'aux'
+
+local T = require 'T'
 
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
 
-TAB 'Auctions'
+local tab = TAB 'Auctions'
 
-auction_records = T
+auction_records = T.acquire()
 
-function OPEN()
+function tab.OPEN()
     frame:Show()
     scan_auctions()
 end
 
-function CLOSE()
+function tab.CLOSE()
     frame:Hide()
 end
 
@@ -28,11 +29,11 @@ function M.scan_auctions()
     status_bar:update_status(0, 0)
     status_bar:set_text('Scanning auctions...')
 
-    wipe(auction_records)
+    T.wipe(auction_records)
     update_listing()
     scan.start{
         type = 'owner',
-        queries = {{blizzard_query = T}},
+        queries = {{blizzard_query = T.acquire()}},
         on_page_loaded = function(page, total_pages)
             status_bar:update_status(page / total_pages, 0)
             status_bar:set_text(format('Scanning (Page %d / %d)', page, total_pages))
@@ -54,7 +55,7 @@ end
 
 do
     local scan_id = 0
-    local IDLE, SEARCHING, FOUND = T, T, T
+    local IDLE, SEARCHING, FOUND = T.acquire(), T.acquire(), T.acquire()
     local state = IDLE
     local found_index
 
@@ -96,7 +97,7 @@ do
             find_auction(selection.record)
         elseif state == FOUND and not scan_util.test(selection.record, found_index) then
             cancel_button:Disable()
-            if not cancel_in_progress then state = IDLE end
+            if not cancel_in_progress() then state = IDLE end
         end
     end
 end

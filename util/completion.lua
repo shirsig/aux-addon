@@ -1,6 +1,5 @@
 module 'aux.util.completion'
 
-include 'T'
 include 'aux'
 
 local filter_util = require 'aux.util.filter'

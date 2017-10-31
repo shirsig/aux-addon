@@ -1,6 +1,5 @@
 module 'aux.core.post'
 
-include 'T'
 include 'aux'
 
 local info = require 'aux.util.info'

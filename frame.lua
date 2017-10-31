@@ -2,7 +2,7 @@ module 'aux'
 
 local gui = require 'aux.gui'
 
-function LOAD()
+function handle.LOAD()
 	for _, v in ipairs(tab_info) do
 		tabs:create_tab(v.name)
 	end
@@ -32,7 +32,7 @@ end
 do
 	tabs = gui.tabs(AuxFrame, 'DOWN')
 	tabs._on_select = on_tab_click
-	function M.set.tab(id) tabs:select(id) end
+	function M.set_tab(id) tabs:select(id) end
 end
 do
 	local btn = gui.button(AuxFrame)

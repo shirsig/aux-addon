@@ -1,7 +1,8 @@
 module 'aux.util.money'
 
-include 'T'
 include 'aux'
+
+local T = require 'T'
 
 M.GOLD_TEXT = '|cffffd70ag|r'
 M.SILVER_TEXT = '|cffc7c7cfs|r'
@@ -72,7 +73,7 @@ function M.to_string(money, pad, trim, color, no_color)
 
 	local text
 	if trim then
-		local parts = temp-T
+		local parts = T.temp-T.acquire()
 		if gold > 0 then
 			tinsert(parts, format_number(gold, false, color) .. gold_text)
 		end

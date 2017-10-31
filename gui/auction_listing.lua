@@ -1,7 +1,8 @@
 module 'aux.gui.auction_listing'
 
-include 'T'
 include 'aux'
+
+local T = require 'T'
 
 local info = require 'aux.util.info'
 local sort_util = require 'aux.util.sort'
@@ -10,7 +11,6 @@ local history = require 'aux.core.history'
 local gui = require 'aux.gui'
 local search_tab = require 'aux.tabs.search'
 local tooltip = require 'aux.core.tooltip'
-local cache = require 'aux.core.cache'
 
 local price_per_unit = false
 
@@ -140,7 +140,7 @@ M.search_columns = {
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(cache.is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
+            cell.text:SetText(info.is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -429,7 +429,7 @@ M.bids_columns = {
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(cache.is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
+            cell.text:SetText(info.is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -625,9 +625,9 @@ local methods = {
             DressUpItemLink(this.record.link)
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(this.record.link)
-        elseif not modified and button == 'RightButton' then -- TODO not when alt (how?)
-            tab = 1
-            search_tab.filter = strlower(info.item(this.record.item_id).name) .. '/exact'
+        elseif not modified() and button == 'RightButton' then -- TODO not when alt (how?)
+            set_tab(1)
+            search_tab.set_filter(strlower(info.item(this.record.item_id).name) .. '/exact')
             search_tab.execute(nil, false)
         else
             local selection = this.rt:GetSelection()
@@ -655,13 +655,13 @@ local methods = {
 	    for _, v in ipairs(self.rowInfo) do
 		    if type(v) == 'table' then
 			    for _, child in pairs(v.children) do
-				    release(child)
+				    T.release(child)
 			    end
-			    release(v.children)
-			    release(v)
+			    T.release(v.children)
+			    T.release(v)
 		    end
 	    end
-        wipe(self.rowInfo)
+        T.wipe(self.rowInfo)
         self.rowInfo.numDisplayRows = 0
         self.isSorted = nil
         self:SetSelectedRecord(nil, true)
@@ -680,13 +680,13 @@ local methods = {
                 self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].count = self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].count + 1
             elseif not single_item and prevRecord and record.item_key == prevRecord.item_key then
                 -- it's the same base item as the previous row so insert a new auction
-                tinsert(self.rowInfo[getn(self.rowInfo)].children, O('count', 1, 'record', record))
+                tinsert(self.rowInfo[getn(self.rowInfo)].children, T.map('count', 1, 'record', record))
                 if self.expanded[self.rowInfo[getn(self.rowInfo)].expandKey] then
                     self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
                 end
             else
                 -- it's a different base item from the previous row
-                tinsert(self.rowInfo, O('item_key', record.item_key, 'expandKey', record.item_key, 'children', A(O('count', 1, 'record', record))))
+                tinsert(self.rowInfo, T.map('item_key', record.item_key, 'expandKey', record.item_key, 'children', T.list(T.map('count', 1, 'record', record))))
                 self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
             end
         end
@@ -695,7 +695,7 @@ local methods = {
             local totalAuctions, totalPlayerAuctions = 0, 0
             for _, childInfo in pairs(v.children) do
                 totalAuctions = totalAuctions + childInfo.count
-                if cache.is_player(childInfo.record.owner) then
+                if info.is_player(childInfo.record.owner) then
                     totalPlayerAuctions = totalPlayerAuctions + childInfo.count
                 end
             end
@@ -823,7 +823,7 @@ local methods = {
     end,
 
     Reset = function(self)
-        wipe(self.expanded)
+        T.wipe(self.expanded)
         self:UpdateRowInfo()
         self:UpdateRows()
         self:SetSelectedRecord()
@@ -876,7 +876,7 @@ local methods = {
         end
     end,
 
-    SetSort = vararg-function(arg)
+    SetSort = T.vararg-function(arg)
 	    local self = tremove(arg, 1)
         for _, v in ipairs(arg) do
             for i, sort in pairs(self.sorts) do
@@ -938,7 +938,7 @@ function M.new(parent, rows, columns)
     contentFrame:SetPoint('BOTTOMRIGHT', 0, 0)
     rt.contentFrame = contentFrame
 
-    local scrollFrame = CreateFrame('ScrollFrame', gui.unique_name, rt, 'FauxScrollFrameTemplate')
+    local scrollFrame = CreateFrame('ScrollFrame', gui.unique_name(), rt, 'FauxScrollFrameTemplate')
     scrollFrame:SetScript('OnVerticalScroll', function()
 	    FauxScrollFrame_OnVerticalScroll(rt.ROW_HEIGHT, function() rt:UpdateRows() end)
     end)

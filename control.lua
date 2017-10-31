@@ -1,13 +1,15 @@
 module 'aux'
 
+local T = require 'T'
+
 local event_frame = CreateFrame'Frame'
 
-local listeners, threads = T, T
+local listeners, threads = T.acquire(), T.acquire()
 
 local thread_id
-function M.get.thread_id() return thread_id end
+function M.thread_id() return thread_id end
 
-function LOAD()
+function handle.LOAD()
 	event_frame:SetScript('OnUpdate', UPDATE)
 	event_frame:SetScript('OnEvent', EVENT)
 end
@@ -50,7 +52,7 @@ end
 
 do
 	local id = 0
-	function get.unique_id()
+	function unique_id()
 		id = id + 1
 		return id
 	end
@@ -71,11 +73,11 @@ function M.kill_thread(thread_id)
 end
 
 function M.event_listener(event, cb)
-	local listener_id = unique_id
-	listeners[listener_id] = O(
+	local listener_id = unique_id()
+	listeners[listener_id] = T.map(
 		'event', event,
 		'cb', cb,
-		'kill', vararg-function(arg) if getn(arg) == 0 or arg[1] then kill_listener(listener_id) end end
+		'kill', T.vararg-function(arg) if getn(arg) == 0 or arg[1] then kill_listener(listener_id) end end
 	)
 	event_frame:RegisterEvent(event)
 	return listener_id
@@ -88,27 +90,27 @@ end
 do
 	local mt = {
 		__call = function(self)
-			temp(self)
+			T.temp(self)
 			return self.f(unpack(self))
 		end,
 	}
 
-	M.thread = vararg-function(arg)
-		static(arg)
+	M.thread = T.vararg-function(arg)
+		T.static(arg)
 		arg.f = tremove(arg, 1)
-		local thread_id = unique_id
-		threads[thread_id] = O('k', setmetatable(arg, mt))
+		local thread_id = unique_id()
+		threads[thread_id] = T.map('k', setmetatable(arg, mt))
 		return thread_id
 	end
 
-	M.wait = vararg-function(arg)
-		static(arg)
+	M.wait = T.vararg-function(arg)
+		T.static(arg)
 		arg.f = tremove(arg, 1)
 		threads[thread_id].k = setmetatable(arg, mt)
 	end
 end
 
-M.when = vararg-function(arg)
+M.when = T.vararg-function(arg)
 	local c = tremove(arg, 1)
 	local k = tremove(arg, 1)
 	if c() then

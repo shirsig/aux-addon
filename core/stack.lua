@@ -1,34 +1,35 @@
 module 'aux.core.stack'
 
-include 'T'
 include 'aux'
+
+local T = require 'T'
 
 local info = require 'aux.util.info'
 
 local state
 
 function stack_size(slot)
-    local container_item_info = temp-info.container_item(unpack(slot))
+    local container_item_info = T.temp-info.container_item(unpack(slot))
     return container_item_info and container_item_info.count or 0
 end
 
 function charges(slot)
-    local container_item_info = temp-info.container_item(unpack(slot))
+    local container_item_info = T.temp-info.container_item(unpack(slot))
 	return container_item_info and container_item_info.charges
 end
 
 function max_stack(slot)
-	local container_item_info = temp-info.container_item(unpack(slot))
+	local container_item_info = T.temp-info.container_item(unpack(slot))
 	return container_item_info and container_item_info.max_stack
 end
 
 function locked(slot)
-	local container_item_info = temp-info.container_item(unpack(slot))
+	local container_item_info = T.temp-info.container_item(unpack(slot))
 	return container_item_info and container_item_info.locked
 end
 
 function find_item_slot(partial)
-	for slot in info.inventory do
+	for slot in info.inventory() do
 		if matching_item(slot, partial) and not eq(slot, state.target_slot) then
 			return slot
 		end
@@ -36,12 +37,12 @@ function find_item_slot(partial)
 end
 
 function matching_item(slot, partial)
-	local item_info = temp-info.container_item(unpack(slot))
+	local item_info = T.temp-info.container_item(unpack(slot))
 	return item_info and item_info.item_key == state.item_key and info.auctionable(item_info.tooltip, nil, true) and (not partial or item_info.count < item_info.max_stack)
 end
 
 function find_empty_slot()
-	for slot, type in info.inventory do
+	for slot, type in info.inventory() do
 		if type == 1 and not GetContainerItemInfo(unpack(slot)) then
 			return slot
 		end
@@ -49,7 +50,7 @@ function find_empty_slot()
 end
 
 function find_charge_item_slot()
-	for slot in info.inventory do
+	for slot in info.inventory() do
 		if matching_item(slot) and charges(slot) == state.target_size then
 			return slot
 		end

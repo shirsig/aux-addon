@@ -1,7 +1,8 @@
 module 'aux.gui.item_listing'
 
-include 'T'
 include 'aux'
+
+local T = require 'T'
 
 local info = require 'aux.util.info'
 local gui = require 'aux.gui'
@@ -10,7 +11,7 @@ local ROW_HEIGHT = 39
 
 function M:render()
 
-	if getn(self.item_records or empty) > getn(self.rows) then
+	if getn(self.item_records or T.empty) > getn(self.rows) then
 		self.content_frame:SetPoint('BOTTOMRIGHT', -15, 0)
 	else
 		self.content_frame:SetPoint('BOTTOMRIGHT', 0, 0)
@@ -51,7 +52,7 @@ function M.new(parent, on_click, selected)
 	local content_frame = CreateFrame('Frame', nil, parent)
 	content_frame:SetAllPoints()
 
-	local scroll_frame = CreateFrame('ScrollFrame', gui.unique_name, parent, 'FauxScrollFrameTemplate')
+	local scroll_frame = CreateFrame('ScrollFrame', gui.unique_name(), parent, 'FauxScrollFrameTemplate')
 	scroll_frame:SetScript('OnVerticalScroll', function()
 		FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() render(this.item_listing) end)
 	end)
@@ -71,7 +72,7 @@ function M.new(parent, on_click, selected)
 	_G[scroll_bar:GetName() .. 'ScrollUpButton']:Hide()
 	_G[scroll_bar:GetName() .. 'ScrollDownButton']:Hide()
 
-	local rows = T
+	local rows = T.acquire()
 	local row_index = 1
 	local max_height = content_frame:GetHeight()
 	local total_height = 0

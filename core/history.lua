@@ -1,7 +1,8 @@
 module 'aux.core.history'
 
-include 'T'
 include 'aux'
+
+local T = require 'T'
 
 local persistence = require 'aux.util.persistence'
 
@@ -9,13 +10,13 @@ local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='n
 
 local value_cache = {}
 
-function LOAD2()
+function handle.LOAD2()
 	data = faction_data'history'
 end
 
 do
 	local next_push = 0
-	function get.next_push()
+	function get_next_push()
 		if time() > next_push then
 			local date = date('*t')
 			date.hour, date.min, date.sec = 24, 0, 0
@@ -25,12 +26,12 @@ do
 	end
 end
 
-function get.new_record()
-	return temp-O('next_push', next_push, 'data_points', T)
+function new_record()
+	return T.temp-T.map('next_push', get_next_push(), 'data_points', T.acquire())
 end
 
 function read_record(item_key)
-	local record = data[item_key] and persistence.read(history_schema, data[item_key]) or new_record
+	local record = data[item_key] and persistence.read(history_schema, data[item_key]) or new_record()
 	if record.next_push <= time() then
 		push_record(record)
 		write_record(item_key, record)
@@ -41,7 +42,7 @@ end
 function write_record(item_key, record)
 	data[item_key] = persistence.write(history_schema, record)
 	if value_cache[item_key] then
-		release(value_cache[item_key])
+		T.release(value_cache[item_key])
 		value_cache[item_key] = nil
 	end
 end
@@ -64,11 +65,11 @@ function M.value(item_key)
 		local item_record, value
 		item_record = read_record(item_key)
 		if getn(item_record.data_points) > 0 then
-			local total_weight, weighted_values = 0, temp-T
+			local total_weight, weighted_values = 0, T.temp-T.acquire()
 			for _, data_point in pairs(item_record.data_points) do
 				local weight = .99 ^ round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
 				total_weight = total_weight + weight
-				tinsert(weighted_values, O('value', data_point.value, 'weight', weight))
+				tinsert(weighted_values, T.map('value', data_point.value, 'weight', weight))
 			end
 			for _, weighted_value in pairs(weighted_values) do
 				weighted_value.weight = weighted_value.weight / total_weight
@@ -77,7 +78,7 @@ function M.value(item_key)
 		else
 			value = item_record.daily_min_buyout
 		end
-		value_cache[item_key] = O('value', value, 'next_push', item_record.next_push)
+		value_cache[item_key] = T.map('value', value, 'next_push', item_record.next_push)
 	end
 	return value_cache[item_key].value
 end
@@ -99,11 +100,11 @@ end
 
 function push_record(item_record)
 	if item_record.daily_min_buyout then
-		tinsert(item_record.data_points, 1, O('value', item_record.daily_min_buyout, 'time', item_record.next_push))
+		tinsert(item_record.data_points, 1, T.map('value', item_record.daily_min_buyout, 'time', item_record.next_push))
 		while getn(item_record.data_points) > 11 do
-			release(item_record.data_points[getn(item_record.data_points)])
+			T.release(item_record.data_points[getn(item_record.data_points)])
 			tremove(item_record.data_points)
 		end
 	end
-	item_record.next_push, item_record.daily_min_buyout = next_push, nil
+	item_record.next_push, item_record.daily_min_buyout = get_next_push(), nil
 end

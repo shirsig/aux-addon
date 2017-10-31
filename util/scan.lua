@@ -1,32 +1,33 @@
 module 'aux.util.scan'
 
-include 'T'
 include 'aux'
+
+local T = require 'T'
 
 local info = require 'aux.util.info'
 local filter_util = require 'aux.util.filter'
 local scan = require 'aux.core.scan'
 
 function M.test(record, index)
-	local auction_record = temp-info.auction(index, record.query_type)
+	local auction_record = T.temp-info.auction(index, record.query_type)
 	return auction_record and auction_record.search_signature == record.search_signature
 end
 
 function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
-    local queries = A(T)
+    local queries = T.list(T.acquire())
 
     if auction_record.blizzard_query then
         local blizzard_query1 = copy(auction_record.blizzard_query)
         blizzard_query1.first_page = auction_record.page
         blizzard_query1.last_page = auction_record.page
-        tinsert(queries, O('blizzard_query', blizzard_query1))
+        tinsert(queries, T.map('blizzard_query', blizzard_query1))
 
         if auction_record.page > 0 then
             local blizzard_query2 = copy(auction_record.blizzard_query)
             blizzard_query2.first_page = auction_record.page - 1
             blizzard_query2.last_page = auction_record.page - 1
-            tinsert(queries, O('blizzard_query', blizzard_query2))
+            tinsert(queries, T.map('blizzard_query', blizzard_query2))
         end
 
         local item_query = item_query(auction_record.item_id, 0, 0)
@@ -78,6 +79,6 @@ function M.item_query(item_id, first_page, last_page)
         local query = filter_util.query(item_info.name .. '/exact')
         query.blizzard_query.first_page = first_page
         query.blizzard_query.last_page = last_page
-        return O('validator', query.validator, 'blizzard_query', query.blizzard_query)
+        return T.map('validator', query.validator, 'blizzard_query', query.blizzard_query)
     end
 end
