@@ -8,6 +8,10 @@ local info = require 'aux.util.info'
 
 local state
 
+function handle.CLOSE()
+	stop()
+end
+
 function stack_size(slot)
     local container_item_info = T.temp-info.container_item(unpack(slot))
     return container_item_info and container_item_info.count or 0

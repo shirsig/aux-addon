@@ -7,6 +7,10 @@ local stack = require 'aux.core.stack'
 
 local state
 
+function handle.CLOSE()
+	stop()
+end
+
 function process()
 	if state.posted < state.count then
 

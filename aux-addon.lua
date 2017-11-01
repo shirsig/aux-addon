@@ -218,14 +218,20 @@ function AUCTION_HOUSE_SHOW()
 	set_tab(1)
 end
 
-function AUCTION_HOUSE_CLOSED()
-	bids_loaded = false
-	current_owner_page = nil
-	post.stop()
-	stack.stop()
-	scan.abort()
-	set_tab()
-	AuxFrame:Hide()
+do
+	local handlers = {}
+	function set_handler.CLOSE(f)
+		tinsert(handlers, f)
+	end
+	function AUCTION_HOUSE_CLOSED()
+		bids_loaded = false
+		current_owner_page = nil
+		for _, handler in handlers do
+			handler()
+		end
+		set_tab()
+		AuxFrame:Hide()
+	end
 end
 
 function AUCTION_BIDDER_LIST_UPDATE()

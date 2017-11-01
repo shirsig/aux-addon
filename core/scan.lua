@@ -9,6 +9,10 @@ local history = require 'aux.core.history'
 
 local PAGE_SIZE = 50
 
+function handle.CLOSE()
+	abort()
+end
+
 do
 	local scan_states = {}
 
