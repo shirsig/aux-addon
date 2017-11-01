@@ -211,7 +211,6 @@ end
 do
 	local last_owner_page_requested
 	function GetOwnerAuctionItems(index)
-		local page = index
 		last_owner_page_requested = index
 		return orig.GetOwnerAuctionItems(index)
 	end
@@ -229,7 +228,6 @@ function Blizzard_AuctionUI()
 	end)
 	hook 'GetOwnerAuctionItems' 'SetItemRef' 'UseContainerItem' 'AuctionFrameAuctions_OnEvent'
 end
-
 
 AuctionFrameAuctions_OnEvent = T.vararg-function(arg)
     if AuctionFrameAuctions:IsVisible() then
