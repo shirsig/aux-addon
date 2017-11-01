@@ -42,7 +42,7 @@ do
 	event_frame:SetScript('OnEvent', function()
 		if event == 'ADDON_LOADED' then
 			if arg1 == 'Blizzard_AuctionUI' then
-				Blizzard_AuctionUI()
+                auction_ui_loaded()
 			end
 		elseif event == 'VARIABLES_LOADED' then
 			for _, f in pairs(handlers) do f() end
@@ -219,7 +219,7 @@ do
 	end
 end
 
-function Blizzard_AuctionUI()
+function auction_ui_loaded()
 	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
 	AuctionFrame:SetScript('OnHide', nil)
 	hook('ShowUIPanel', T.vararg-function(arg)

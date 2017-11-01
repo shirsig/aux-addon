@@ -11,14 +11,18 @@ local search_tab = require 'aux.tabs.search'
 
 function handle.LOAD()
     event_listener('ADDON_LOADED', function()
-        (_M[arg1] or nop)()
+        if arg1 == 'Blizzard_CraftUI' then
+            craft_ui_loaded()
+        elseif arg1 == 'Blizzard_TradeSkillUI' then
+            trade_skill_ui_loaded()
+        end
     end)
 end
 
 do
     local function cost_label(cost)
         local label = LIGHTYELLOW_FONT_COLOR_CODE .. '(Total Cost: ' .. FONT_COLOR_CODE_CLOSE
-        label = label .. (cost and money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE .. '---' .. FONT_COLOR_CODE_CLOSE)
+        label = label .. (cost and money.to_string2(cost, nil, LIGHTYELLOW_FONT_COLOR_CODE) or GRAY_FONT_COLOR_CODE .. '?' .. FONT_COLOR_CODE_CLOSE)
         label = label .. LIGHTYELLOW_FONT_COLOR_CODE .. ')' .. FONT_COLOR_CODE_CLOSE
         return label
     end
@@ -33,7 +37,7 @@ do
             end
         end)
     end
-    function Blizzard_CraftUI()
+    function craft_ui_loaded()
         hook('CraftFrame_SetSelection', T.vararg-function(arg)
             local ret = T.temp-T.list(orig.CraftFrame_SetSelection(unpack(arg)))
             local id = GetCraftSelectionIndex()
@@ -62,7 +66,7 @@ do
             hook_quest_item(_G['CraftReagent' .. i])
         end
     end
-    function Blizzard_TradeSkillUI()
+    function trade_skill_ui_loaded()
         hook('TradeSkillFrame_SetSelection', T.vararg-function(arg)
             local ret = T.temp-T.list(orig.TradeSkillFrame_SetSelection(unpack(arg)))
             local id = GetTradeSkillSelectionIndex()
