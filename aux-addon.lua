@@ -116,26 +116,6 @@ do
 	end
 end
 
-SetItemRef = T.vararg-function(arg)
-	if arg[3] ~= 'RightButton' or not index(get_active_tab(), 'CLICK_LINK') or not strfind(arg[1], '^item:%d+') then
-		return orig.SetItemRef(unpack(arg))
-	end
-	local item_info = info.item(tonumber(select(3, strfind(arg[1], '^item:(%d+)'))))
-	if item_info then
-		return get_active_tab().CLICK_LINK(item_info)
-	end
-end
-
-UseContainerItem = T.vararg-function(arg)
-	if modified() or not get_active_tab() then
-		return orig.UseContainerItem(unpack(arg))
-	end
-	local item_info = info.container_item(arg[1], arg[2])
-	if item_info and get_active_tab().USE_ITEM then
-		get_active_tab().USE_ITEM(item_info)
-	end
-end
-
 M.orig = setmetatable({[_G]=T.acquire()}, {__index=function(self, key) return self[_G][key] end})
 M.hook = T.vararg-function(arg)
 	local name, object, handler
