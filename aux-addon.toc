@@ -28,6 +28,7 @@ util\scan.lua
 core\stack.lua
 core\post.lua
 core\tooltip.lua
+core\crafting.lua
 
 gui\listing.lua
 gui\auction_listing.lua
