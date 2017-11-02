@@ -21,22 +21,22 @@ function handle.LOAD()
 	    for name, f in pairs(game_tooltip_hooks) do
 	        local name, f = name, f
 	        hook(name, GameTooltip, T.vararg-function(arg)
-	            inside_hook = true
-	            game_tooltip_money = 0
+                game_tooltip_money = 0
+                inside_hook = true
 	            local tmp = T.list(orig[GameTooltip][name](unpack(arg)))
 	            inside_hook = false
 	            f(unpack(arg))
 	            return T.unpack(tmp)
 	        end)
 	    end
-	    local orig = GameTooltip:GetScript'OnTooltipAddMoney'
-	    GameTooltip:SetScript('OnTooltipAddMoney', T.vararg-function(arg)
-		    if inside_hook then
-			    game_tooltip_money = arg1
-		    else
-			    return orig(unpack(arg))
-		    end
-	    end)
+        SetTooltipMoney = SetTooltipMoney
+        _G.SetTooltipMoney = T.vararg-function(arg)
+            if inside_hook then
+                game_tooltip_money = arg[2]
+            else
+                return SetTooltipMoney(unpack(arg))
+            end
+        end
     end
     local orig = SetItemRef
     setglobal('SetItemRef', T.vararg-function(arg)
