@@ -226,7 +226,7 @@ M.search_columns = {
         align = 'CENTER',
         fill = function(cell, record)
             local pct, bidPct = record_percentage(record)
-            cell.text:SetText((pct or bidPct) and percentage_historical(pct or bidPct, not pct) or '?')
+            cell.text:SetText((pct or bidPct) and gui.percentage_historical(pct or bidPct, not pct) or '?')
         end,
         cmp = function(record_a, record_b, desc)
             local pct_a = record_percentage(record_a) or (desc and -huge or huge)
@@ -519,23 +519,6 @@ function record_percentage(record)
             return round(100 * record.unit_buyout_price / historical_value)
         end
         return nil, round(100 * record.unit_bid_price / historical_value)
-    end
-end
-
-function M.percentage_historical(pct, bid)
-    local text = (pct > 10000 and '>10000' or pct) .. '%'
-    if bid then
-        return color.gray(text)
-    elseif pct < 50 then
-        return color.blue(text)
-    elseif pct < 80 then
-        return color.green(text)
-    elseif pct < 110 then
-        return color.yellow(text)
-    elseif pct < 135 then
-        return color.orange(text)
-    else
-        return color.red(text)
     end
 end
 

@@ -14,6 +14,7 @@ local scan = require 'aux.core.scan'
 local history = require 'aux.core.history'
 local item_listing = require 'aux.gui.item_listing'
 local al = require 'aux.gui.auction_listing'
+local gui = require 'aux.gui'
 
 local tab = TAB 'Post'
 
@@ -123,7 +124,7 @@ function update_auction_listing(listing, records, reference)
 				T.map('value', al.time_left(record.duration)),
 				T.map('value', record.stack_size == stack_size and color.green(record.stack_size) or record.stack_size),
 				T.map('value', money.to_string(price, true, nil, price_color)),
-				T.map('value', historical_value and al.percentage_historical(round(price / historical_value * 100)) or '---')
+				T.map('value', historical_value and gui.percentage_historical(round(price / historical_value * 100)) or '---')
 			),
 				'record', record
 			))
@@ -135,7 +136,7 @@ function update_auction_listing(listing, records, reference)
 				T.map('value', '---'),
 				T.map('value', '---'),
 				T.map('value', money.to_string(historical_value, true, nil, color.green)),
-				T.map('value', historical_value and al.percentage_historical(100) or '---')
+				T.map('value', historical_value and gui.percentage_historical(100) or '---')
 			),
 				'record', T.map('historical_value', true, 'stack_size', stack_size, 'unit_price', historical_value, 'own', true)
 			))
@@ -191,8 +192,8 @@ function price_update()
 	        set_unit_buyout_price(undercut(get_buyout_selection(), stack_size_slider:GetValue()))
 	        unit_buyout_price_input:SetText(money.to_string(get_unit_buyout_price(), true, nil, nil, true))
         end
-        start_price_percentage:SetText(historical_value and al.percentage_historical(round(get_unit_start_price() / historical_value * 100)) or '---')
-        buyout_price_percentage:SetText(historical_value and al.percentage_historical(round(get_unit_buyout_price() / historical_value * 100)) or '---')
+        start_price_percentage:SetText(historical_value and gui.percentage_historical(round(get_unit_start_price() / historical_value * 100)) or '---')
+        buyout_price_percentage:SetText(historical_value and gui.percentage_historical(round(get_unit_buyout_price() / historical_value * 100)) or '---')
     end
 end
 
