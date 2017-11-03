@@ -18,10 +18,10 @@ util\sort.lua
 util\money.lua
 core\cache.lua
 util\info.lua
-util\filter.lua
-util\completion.lua
 core\history.lua
 core\disenchant.lua
+util\filter.lua
+util\completion.lua
 core\slash.lua
 core\scan.lua
 util\scan.lua
