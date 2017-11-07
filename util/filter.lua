@@ -525,7 +525,7 @@ function validator(filter)
                     tinsert(stack, any(args))
                 end
             elseif type == 'filter' then
-                tinsert(stack, validators[i](record) and true or false)
+                tinsert(stack, not not validators[i](record))
             end
         end
         return all(stack)

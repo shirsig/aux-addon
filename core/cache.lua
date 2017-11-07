@@ -42,7 +42,7 @@ end
 do
 	local characters = T.empty
 	function M.is_player(name)
-		return characters[name] and true or false
+		return not not characters[name]
 	end
 	function handle.LOAD2()
 		characters = realm_data'characters'

@@ -1,40 +1,36 @@
 if module then return end
 local _G, setfenv, setmetatable = getfenv(0), setfenv, setmetatable
-local loaded = {}
+local environments, exports_data, interfaces = {}, {}, {}
 
 local function nop() end
 
 local function create_module(name)
-	local environment, public_fields = setmetatable({}, {__index=_G}), {}
-	local public_modifier = setmetatable({}, {
+	local environment, exports = setmetatable({_G=_G, nop=nop}, {__index=_G}), {}
+	environment.M = setmetatable({}, {
 		__metatable=false,
 		__newindex=function(_, k, v)
-			environment[k], public_fields[k] = v, v
+			environment[k], exports[k] = v, v
 		end,
 	})
-	environment._G, environment.nop, environment._M, environment.M = _G, nop, environment, public_modifier
 	environment.include = function(name)
-		local P = loaded[name] or error('No such module.', 2)
-		for k, v in P.public_fields do
+		for k, v in exports_data[name] or error('No such module.', 2) do
 			environment[k] = v
 		end
 	end
-	local interface = setmetatable({}, {__metatable=false, __index=public_fields, __newindex=nop})
-	local P = {environment=environment, public_fields=public_fields, interface=interface}
-	loaded[name] = P
-	return P
+	environment._M = environment
+	interfaces[name] = setmetatable({}, {__metatable=false, __index=exports, __newindex=nop})
+	environments[name], exports_data[name] = environment, exports
 end
 
 function module(name)
-	local defined = loaded[name] and true or false
+	local defined = not not environments[name]
 	if not defined then
 		create_module(name)
 	end
-	setfenv(2, loaded[name].environment)
+	setfenv(2, environments[name])
 	return defined
 end
 
 function require(name)
-	local P = loaded[name]
-	return P and P.interface
+	return interfaces[name]
 end
