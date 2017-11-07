@@ -18,7 +18,7 @@ function handle.LOAD()
 	settings = character_data('tooltip', {value=true})
 	do
 		local inside_hook = false
-	    for name, f in pairs(game_tooltip_hooks) do
+	    for name, f in game_tooltip_hooks do
 	        local name, f = name, f
 	        hook(name, GameTooltip, T.vararg-function(arg)
                 game_tooltip_money = 0

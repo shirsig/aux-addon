@@ -46,7 +46,7 @@ do
 	end
 	function handle.LOAD2()
 		characters = realm_data'characters'
-		for k, v in pairs(characters) do
+		for k, v in characters do
 			if GetTime() > v + 60 * 60 * 24 * 30 then
 				characters[k] = nil
 			end

@@ -48,7 +48,7 @@ end
 
 function M.copy(t)
 	local copy = T.acquire()
-	for k, v in pairs(t) do
+	for k, v in t do
 		copy[k] = v
 	end
 	table.setn(copy, getn(t))
@@ -57,14 +57,14 @@ end
 
 function M.size(t)
 	local size = 0
-	for _ in pairs(t) do
+	for _ in t do
 		size = size + 1
 	end
 	return size
 end
 
 function M.key(t, value)
-	for k, v in pairs(t) do
+	for k, v in t do
 		if v == value then
 			return k
 		end
@@ -73,7 +73,7 @@ end
 
 function M.keys(t)
 	local keys = T.acquire()
-	for k in pairs(t) do
+	for k in t do
 		tinsert(keys, k)
 	end
 	return keys
@@ -81,7 +81,7 @@ end
 
 function M.values(t)
 	local values = T.acquire()
-	for _, v in pairs(t) do
+	for _, v in t do
 		tinsert(values, v)
 	end
 	return values
@@ -89,17 +89,17 @@ end
 
 function M.eq(t1, t2)
 	if not t1 or not t2 then return false end
-	for key, value in pairs(t1) do
+	for key, value in t1 do
 		if t2[key] ~= value then return false end
 	end
-	for key, value in pairs(t2) do
+	for key, value in t2 do
 		if t1[key] ~= value then return false end
 	end
 	return true
 end
 
 function M.any(t, predicate)
-	for _, v in pairs(t) do
+	for _, v in t do
 		if predicate then
 			if predicate(v) then return true end
 		elseif v then
@@ -110,7 +110,7 @@ function M.any(t, predicate)
 end
 
 function M.all(t, predicate)
-	for _, v in pairs(t) do
+	for _, v in t do
 		if predicate then
 			if not predicate(v) then return false end
 		elseif not v then
@@ -121,14 +121,14 @@ function M.all(t, predicate)
 end
 
 function M.filter(t, predicate)
-	for k, v in pairs(t) do
+	for k, v in t do
 		if not predicate(v, k) then t[k] = nil end
 	end
 	return t
 end
 
 function M.map(t, f)
-	for k, v in pairs(t) do
+	for k, v in t do
 		t[k] = f(v, k)
 	end
 	return t

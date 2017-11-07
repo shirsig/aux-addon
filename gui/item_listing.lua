@@ -22,7 +22,7 @@ function M:render()
 
 	local rows = self.rows
 
-	for i, row in pairs(rows) do
+	for i, row in rows do
 		local item_record = self.item_records[i + offset]
 
         if item_record then

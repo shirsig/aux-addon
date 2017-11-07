@@ -185,7 +185,7 @@ M.filters = {
 
 function operator(str)
     local operator = str == 'not' and T.list('operator', 'not', 1)
-    for name in pairs(T.temp-T.set('and', 'or')) do
+    for name in T.temp-T.set('and', 'or') do
 	    local arity = select(3, strfind(str, '^' .. name .. '(%d*)$'))
 	    if arity then
 		    arity = tonumber(arity)
@@ -214,12 +214,12 @@ do
 					end
 				end
 			end
-			for _, parser in pairs(T.temp-T.list(
+			for _, parser in T.temp-T.list(
 				T.temp-T.list('class', info.item_class_index),
 				T.temp-T.list('subclass', T.vararg-function(arg) return info.item_subclass_index(index(self.class, 2) or 0, unpack(arg)) end),
 				T.temp-T.list('slot', T.vararg-function(arg) return info.item_slot_index(index(self.class, 2) == 2 and 2 or 0, index(self.subclass, 2) or 0, unpack(arg)) end),
 				T.temp-T.list('quality', info.item_quality_index)
-			)) do
+			) do
 				if not self[parser[1]] then
 					tinsert(parser, str)
 					local index, label = parser[2](select(3, unpack(parser)))
@@ -324,7 +324,7 @@ function M.query(filter_string)
 
     if polish_notation_counter > 0 then
         local suggestions = T.acquire()
-        for key in pairs(filters) do
+        for key in filters do
             tinsert(suggestions, strlower(key))
         end
         tinsert(suggestions, 'and')
@@ -361,7 +361,7 @@ function suggestions(filter)
 
     tinsert(suggestions, 'and'); tinsert(suggestions, 'or'); tinsert(suggestions, 'not'); tinsert(suggestions, 'tooltip')
 
-    for key in pairs(filters) do tinsert(suggestions, key) end
+    for key in filters do tinsert(suggestions, key) end
 
     -- classes
     if not filter.blizzard.class then
@@ -489,7 +489,7 @@ function blizzard_query(filter)
         query.slot = slot_index
         query.quality = item_info.quality
     else
-	    for key in pairs(T.temp-T.set('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality')) do
+	    for key in T.temp-T.set('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality') do
             query[key] = index(filters[key], 2)
 	    end
     end
@@ -498,7 +498,7 @@ end
 
 function validator(filter)
     local validators = T.acquire()
-    for i, component in pairs(filter.post) do
+    for i, component in filter.post do
 	    local type, name, param = unpack(component)
         if type == 'filter' then
             validators[i] = filters[name].validator(parse_parameter(filters[name].input_type, param))

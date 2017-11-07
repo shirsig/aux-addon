@@ -24,7 +24,7 @@ local current_owner_page
 function M.current_owner_page() return current_owner_page end
 
 local event_frame = CreateFrame'Frame'
-for event in pairs(T.temp-T.set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE')) do
+for event in T.temp-T.set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
 	event_frame:RegisterEvent(event)
 end
 
@@ -45,9 +45,9 @@ do
                 auction_ui_loaded()
 			end
 		elseif event == 'VARIABLES_LOADED' then
-			for _, f in pairs(handlers) do f() end
+			for _, f in handlers do f() end
 		elseif event == 'PLAYER_LOGIN' then
-			for _, f in pairs(handlers2) do f() end
+			for _, f in handlers2 do f() end
 			print('loaded - /aux')
 		else
 			_M[event]()
@@ -77,12 +77,12 @@ do
 			cache.faction = aux.faction[key]
 		end
 	end
-	for scope in pairs(T.temp-T.set('character', 'faction', 'realm', 'account')) do
+	for scope in T.temp-T.set('character', 'faction', 'realm', 'account') do
 		local scope = scope
 		M[scope .. '_data'] = function(key, init)
 			if not cache[scope] then error('Cache for ' .. scope .. ' data not ready.', 2) end
 			cache[scope][key] = cache[scope][key] or {}
-			for k, v in pairs(init or T.empty) do
+			for k, v in init or T.empty do
 				if cache[scope][key][k] == nil then
 					cache[scope][key][k] = v
 				end
