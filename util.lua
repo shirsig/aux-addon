@@ -40,7 +40,7 @@ M.index = T.vararg-function(arg)
 	return t
 end
 
-M.huge = 1.8 * 10 ^ 308
+M.huge = 1/0
 
 function M.modified()
 	return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown()
