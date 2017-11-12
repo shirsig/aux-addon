@@ -9,7 +9,6 @@ local sort_util = require 'aux.util.sort'
 local money = require 'aux.util.money'
 local history = require 'aux.core.history'
 local gui = require 'aux.gui'
-local search_tab = require 'aux.tabs.search'
 local tooltip = require 'aux.core.tooltip'
 
 local price_per_unit = false
@@ -608,17 +607,12 @@ local methods = {
             DressUpItemLink(this.record.link)
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
             ChatFrameEditBox:Insert(this.record.link)
-        elseif not modified() and button == 'RightButton' then -- TODO not when alt (how?)
-            set_tab(1)
-            search_tab.set_filter(strlower(info.item(this.record.item_id).name) .. '/exact')
-            search_tab.execute(nil, false)
         else
             local selection = this.rt:GetSelection()
             if not selection or selection.record ~= this.record then
                 this.rt:SetSelectedRecord(this.record)
-            elseif this.rt.handlers.OnClick then
-                this.rt.handlers.OnClick(this, button)
             end
+	        do (this.rt.handlers.OnClick or nop)(this, button) end
         end
     end,
 

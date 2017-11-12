@@ -1,7 +1,9 @@
 module 'aux.tabs.auctions'
 
+local info = require 'aux.util.info'
 local gui = require 'aux.gui'
 local auction_listing = require 'aux.gui.auction_listing'
+local search_tab = require 'aux.tabs.search'
 
 frame = CreateFrame('Frame', nil, AuxFrame)
 frame:SetAllPoints()
@@ -17,9 +19,17 @@ listing = auction_listing.new(frame.listing, 20, auction_listing.auctions_column
 listing:SetSort(1, 2, 3, 4, 5, 6, 7, 8)
 listing:Reset()
 listing:SetHandler('OnClick', function(row, button)
-    if IsAltKeyDown() and listing:GetSelection().record == row.record then
-        cancel_button:Click()
-    end
+	if IsAltKeyDown() then
+		if listing:GetSelection().record == row.record then
+			if IsAltKeyDown() and listing:GetSelection().record == row.record then
+				cancel_button:Click()
+			end
+		end
+	elseif button == 'RightButton' then
+		set_tab(1)
+		search_tab.set_filter(strlower(info.item(this.record.item_id).name) .. '/exact')
+		search_tab.execute(nil, false)
+	end
 end)
 listing:SetHandler('OnSelectionChanged', function(rt, datum)
     if not datum then return end
