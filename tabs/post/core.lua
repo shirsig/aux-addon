@@ -224,6 +224,9 @@ function post_auctions()
             unit_buyout_price,
 			stack_count,
 			function(posted)
+				if not frame:IsShown() then
+					return
+				end
 				for i = 1, posted do
                     record_auction(key, stack_size, unit_start_price * stack_size, unit_buyout_price, duration_code, UnitName'player')
                 end
