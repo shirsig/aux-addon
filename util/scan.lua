@@ -1,9 +1,7 @@
 module 'aux.util.scan'
 
-include 'aux'
-
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local filter_util = require 'aux.util.filter'
 local scan = require 'aux.core.scan'
@@ -18,20 +16,20 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
     local queries = T.list(T.acquire())
 
     if auction_record.blizzard_query then
-        local blizzard_query1 = copy(auction_record.blizzard_query)
+        local blizzard_query1 = aux.copy(auction_record.blizzard_query)
         blizzard_query1.first_page = auction_record.page
         blizzard_query1.last_page = auction_record.page
         tinsert(queries, T.map('blizzard_query', blizzard_query1))
 
         if auction_record.page > 0 then
-            local blizzard_query2 = copy(auction_record.blizzard_query)
+            local blizzard_query2 = aux.copy(auction_record.blizzard_query)
             blizzard_query2.first_page = auction_record.page - 1
             blizzard_query2.last_page = auction_record.page - 1
             tinsert(queries, T.map('blizzard_query', blizzard_query2))
         end
 
         local item_query = item_query(auction_record.item_id, 0, 0)
-        if not eq(auction_record.blizzard_query, item_query.blizzard_query) then
+        if not aux.eq(auction_record.blizzard_query, item_query.blizzard_query) then
             tinsert(queries, item_query)
         end
     end

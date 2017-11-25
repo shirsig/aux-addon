@@ -3,7 +3,7 @@ module 'aux'
 local T = require 'T'
 
 function C(r, g, b, a)
-	local mt = T.map('__metatable', false, '__newindex', nop, 'color', T.list(r, g, b, a))
+	local mt = T.map('__metatable', false, '__newindex', pass, 'color', T.list(r, g, b, a))
 	function mt:__call(text)
 		local r, g, b, a = unpack(mt.color)
 		if text then
@@ -20,7 +20,7 @@ function C(r, g, b, a)
 end
 
 M.color = immutable-{
-	none = setmetatable({}, {__metatable=false, __newindex=nop, __call=function(_, v) return v end, __concat=function(_, v) return v end}),
+	none = setmetatable({}, {__metatable=false, __newindex=pass, __call=function(_, v) return v end, __concat=function(_, v) return v end}),
 	text = immutable-{enabled = C(255, 254, 250, 1), disabled = C(147, 151, 139, 1)},
 	label = immutable-{enabled = C(216, 225, 211, 1), disabled = C(150, 148, 140, 1)},
 	link = C(153, 255, 255, 1),

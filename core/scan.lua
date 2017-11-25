@@ -1,15 +1,13 @@
 module 'aux.core.scan'
 
-include 'aux'
-
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local history = require 'aux.core.history'
 
 local PAGE_SIZE = 50
 
-function handle.CLOSE()
+function aux.handle.CLOSE()
 	abort()
 end
 
@@ -21,8 +19,8 @@ do
 		if old_state then
 			abort(old_state.id)
 		end
-		do (params.on_scan_start or nop)() end
-		local thread_id = thread(scan)
+		do (params.on_scan_start or pass)() end
+		local thread_id = aux.thread(scan)
 		scan_states[params.type] = {
 			id = thread_id,
 			params = params,
@@ -34,13 +32,13 @@ do
 		local aborted = T.acquire()
 		for type, state in scan_states do
 			if not scan_id or state.id == scan_id then
-				kill_thread(state.id)
+				aux.kill_thread(state.id)
 				scan_states[type] = nil
 				tinsert(aborted, state)
 			end
 		end
 		for _, state in aborted do
-			do (state.params.on_abort or nop)() end
+			do (state.params.on_abort or pass)() end
 		end
 	end
 
@@ -51,12 +49,12 @@ do
 	function complete()
 		local on_complete = get_state().params.on_complete
 		scan_states[get_state().params.type] = nil
-		do (on_complete or nop)() end
+		do (on_complete or pass)() end
 	end
 
 	function get_state()
 		for _, state in scan_states do
-			if state.id == thread_id() then
+			if state.id == aux.thread_id() then
 				return state
 			end
 		end
@@ -80,9 +78,9 @@ end
 function scan()
 	get_state().query_index = get_state().query_index and get_state().query_index + 1 or 1
 	if get_query() and not get_state().stopped then
-		do (get_state().params.on_start_query or nop)(get_state().query_index) end
+		do (get_state().params.on_start_query or pass)(get_state().query_index) end
 		if get_query().blizzard_query then
-			if (get_query().blizzard_query.first_page or 0) <= (get_query().blizzard_query.last_page or huge) then
+			if (get_query().blizzard_query.first_page or 0) <= (get_query().blizzard_query.last_page or aux.huge) then
 				get_state().page = get_query().blizzard_query.first_page or 0
 				return submit_query()
 			end
@@ -122,7 +120,7 @@ do
 		if get_state().params.type ~= 'list' then
 			return submit()
 		else
-			return when(CanSendAuctionQuery, submit)
+			return aux.when(CanSendAuctionQuery, submit)
 		end
 	end
 end
@@ -131,7 +129,7 @@ function scan_page(i)
 	i = i or 1
 
 	if i > PAGE_SIZE then
-		do (get_state().params.on_page_scanned or nop)() end
+		do (get_state().params.on_page_scanned or pass)() end
 		if get_query().blizzard_query and get_state().page < last_page(get_state().total_auctions) then
 			get_state().page = get_state().page + 1
 			return submit_query()
@@ -149,12 +147,12 @@ function scan_page(i)
 
 		history.process_auction(auction_info)
 
-		if (get_state().params.auto_buy_validator or nop)(auction_info) then
-			local send_signal, signal_received = signal()
-			when(signal_received, scan_page, i)
-			return place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
+		if (get_state().params.auto_buy_validator or pass)(auction_info) then
+			local send_signal, signal_received = aux.signal()
+			aux.when(signal_received, scan_page, i)
+			return aux.place_bid(auction_info.query_type, auction_info.index, auction_info.buyout_price, send_signal)
 		elseif not get_query().validator or get_query().validator(auction_info) then
-			do (get_state().params.on_auction or nop)(auction_info) end
+			do (get_state().params.on_auction or pass)(auction_info) end
 		end
 	end
 
@@ -163,7 +161,7 @@ end
 
 function wait_for_results()
     if get_state().params.type == 'bidder' then
-        return when(function() return bids_loaded() end, accept_results)
+        return aux.when(function() return aux.bids_loaded() end, accept_results)
     elseif get_state().params.type == 'owner' then
         return wait_for_owner_results()
     elseif get_state().params.type == 'list' then
@@ -174,7 +172,7 @@ end
 function accept_results()
 	_,  get_state().total_auctions = GetNumAuctionItems(get_state().params.type)
 	do
-		(get_state().params.on_page_loaded or nop)(
+		(get_state().params.on_page_loaded or pass)(
 			get_state().page - (get_query().blizzard_query.first_page or 0) + 1,
 			last_page(get_state().total_auctions) - (get_query().blizzard_query.first_page or 0) + 1,
 			total_pages(get_state().total_auctions) - 1
@@ -184,24 +182,24 @@ function accept_results()
 end
 
 function wait_for_owner_results()
-    if get_state().page == current_owner_page() then
+    if get_state().page == aux.current_owner_page() then
 	    return accept_results()
     else
 	    local updated
-        on_next_event('AUCTION_OWNED_LIST_UPDATE', function() updated = true end)
-	    return when(function() return updated end, accept_results)
+        aux.on_next_event('AUCTION_OWNED_LIST_UPDATE', function() updated = true end)
+	    return aux.when(function() return updated end, accept_results)
     end
 end
 
 function wait_for_list_results()
     local updated, last_update
-    local listener_id = event_listener('AUCTION_ITEM_LIST_UPDATE', function()
+    local listener_id = aux.event_listener('AUCTION_ITEM_LIST_UPDATE', function()
         last_update = GetTime()
         updated = true
     end)
-    local timeout = later(5, get_state().last_list_query)
+    local timeout = aux.later(5, get_state().last_list_query)
     local ignore_owner = get_state().params.ignore_owner or aux_ignore_owner
-	return when(function()
+	return aux.when(function()
 		if not last_update and timeout() then
 			return true
 		end
@@ -214,7 +212,7 @@ function wait_for_list_results()
 		end
 		updated = false
 	end, function()
-		kill_listener(listener_id)
+		aux.kill_listener(listener_id)
 		if not last_update and timeout() then
 			return submit_query()
 		else

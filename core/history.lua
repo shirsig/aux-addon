@@ -1,8 +1,7 @@
 module 'aux.core.history'
 
-include 'aux'
-
 local T = require 'T'
+local aux = require 'aux'
 
 local persistence = require 'aux.util.persistence'
 
@@ -10,8 +9,8 @@ local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='n
 
 local value_cache = {}
 
-function handle.LOAD2()
-	data = faction_data'history'
+function aux.handle.LOAD2()
+	data = aux.faction_data'history'
 end
 
 do
@@ -50,7 +49,7 @@ end
 function M.process_auction(auction_record)
 	local item_record = read_record(auction_record.item_key)
 	local unit_buyout_price = ceil(auction_record.buyout_price / auction_record.aux_quantity)
-	if unit_buyout_price > 0 and unit_buyout_price < (item_record.daily_min_buyout or huge) then
+	if unit_buyout_price > 0 and unit_buyout_price < (item_record.daily_min_buyout or aux.huge) then
 		item_record.daily_min_buyout = unit_buyout_price
 		write_record(auction_record.item_key, item_record)
 	end
@@ -67,7 +66,7 @@ function M.value(item_key)
 		if getn(item_record.data_points) > 0 then
 			local total_weight, weighted_values = 0, T.temp-T.acquire()
 			for _, data_point in item_record.data_points do
-				local weight = .99 ^ round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
+				local weight = .99 ^ aux.round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
 				total_weight = total_weight + weight
 				tinsert(weighted_values, T.map('value', data_point.value, 'weight', weight))
 			end

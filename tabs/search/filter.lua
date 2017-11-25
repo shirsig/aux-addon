@@ -1,7 +1,7 @@
 module 'aux.tabs.search'
 
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local money = require 'aux.util.money'
 local filter_util = require 'aux.util.filter'
@@ -11,7 +11,7 @@ local post_filter_index = 0
 
 function valid_level(str)
 	local level = tonumber(str)
-	return level and bounded(1, 60, level)
+	return level and aux.bounded(1, 60, level)
 end
 
 blizzard_query = setmetatable(T.acquire(), {
@@ -99,7 +99,7 @@ function update_form()
 		quality_dropdown.button:Enable()
 	end
 
-	if any(T.temp-T.list('min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'), function(key) return blizzard_query[key] end) then
+	if aux.any(T.temp-T.list('min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'), function(key) return blizzard_query[key] end) then
 		exact_checkbox:Disable()
 	else
 		exact_checkbox:Enable()
@@ -116,7 +116,7 @@ function get_filter_builder_query()
 	end
 
 	local name = blizzard_query.name
-	if not index(filter_util.parse_filter_string(name), 'blizzard', 'name') then
+	if not aux.index(filter_util.parse_filter_string(name), 'blizzard', 'name') then
 		name = filter_util.quote(name)
 	end
 	add((name ~= '' or blizzard_query.exact) and name)
@@ -183,8 +183,8 @@ function clear_form()
 end
 
 function import_filter_string()
-	local filter, error = filter_util.parse_filter_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
-	if filter or print(error) then
+	local filter, error = filter_util.parse_filter_string(aux.select(3, strfind(search_box:GetText(), '^([^;]*)')))
+	if filter or aux.print(error) then
 		set_form(filter)
 	end
 	update_form()
@@ -206,11 +206,11 @@ function formatted_post_filter(components)
 		end
 		str = str .. '</p><p>'
 		for _ = 1, getn(stack) + 1 do
-			str = str .. color.content.background'----'
+			str = str .. aux.color.content.background'----'
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
 
-		local filter_color = (post_filter_index == i and color.gold or color.orange)
+		local filter_color = (post_filter_index == i and aux.color.gold or aux.color.orange)
 		local component_text = filter_color(component[2])
 		if component[1] == 'operator' and component[2] ~= 'not' then
 			component_text = component_text .. filter_color(tonumber(component[3]) or '')
@@ -283,7 +283,7 @@ function add_form_component()
 			filter_input:HighlightText()
 			filter_input:SetFocus()
 		elseif error then
-			print(error)
+			aux.print(error)
 		end
 	end
 end
@@ -318,8 +318,8 @@ function set_filter_display_offset(x_offset, y_offset)
 	local x_upper_bound = 0
 	local y_lower_bound = 0
 	local y_upper_bound = max(0, height - scroll_frame:GetHeight())
-	scroll_frame:SetHorizontalScroll(bounded(x_lower_bound, x_upper_bound, x_offset))
-	scroll_frame:SetVerticalScroll(bounded(y_lower_bound, y_upper_bound, y_offset))
+	scroll_frame:SetHorizontalScroll(aux.bounded(x_lower_bound, x_upper_bound, x_offset))
+	scroll_frame:SetVerticalScroll(aux.bounded(y_lower_bound, y_upper_bound, y_offset))
 end
 
 function initialize_filter_dropdown()
@@ -329,7 +329,7 @@ function initialize_filter_dropdown()
 			'value', filter,
 			'func', function()
 				filter_input:SetText(this.value)
-				if index(filter_util.filters[this.value], 'input_type') == '' or this.value == 'not' then
+				if aux.index(filter_util.filters[this.value], 'input_type') == '' or this.value == 'not' then
 					add_form_component()
 				elseif filter_util.filters[this.value] then
 					filter_parameter_input:Show()

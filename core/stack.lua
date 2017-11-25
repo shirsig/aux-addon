@@ -1,14 +1,12 @@
 module 'aux.core.stack'
 
-include 'aux'
-
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 
 local state
 
-function handle.CLOSE()
+function aux.handle.CLOSE()
 	stop()
 end
 
@@ -34,7 +32,7 @@ end
 
 function find_item_slot(partial)
 	for slot in info.inventory() do
-		if matching_item(slot, partial) and not eq(slot, state.target_slot) then
+		if matching_item(slot, partial) and not aux.eq(slot, state.target_slot) then
 			return slot
 		end
 	end
@@ -63,7 +61,7 @@ end
 
 function move_item(from_slot, to_slot, amount, k)
 	if locked(from_slot) or locked(to_slot) then
-		return wait(k)
+		return aux.wait(k)
 	end
 
 	amount = min(max_stack(from_slot) - stack_size(to_slot), stack_size(from_slot), amount)
@@ -73,7 +71,7 @@ function move_item(from_slot, to_slot, amount, k)
 	SplitContainerItem(from_slot[1], from_slot[2], amount)
 	PickupContainerItem(unpack(to_slot))
 
-	return when(function() return stack_size(to_slot) == expected_size end, k)
+	return aux.when(function() return stack_size(to_slot) == expected_size end, k)
 end
 
 function process()
@@ -113,18 +111,18 @@ end
 
 function M.stop()
 	if state then
-		kill_thread(state.thread_id)
+		aux.kill_thread(state.thread_id)
 		local callback, slot = state.callback, state.target_slot
 		slot = slot and matching_item(slot) and slot or nil
 		state = nil
-		do (callback or nop)(slot) end
+		do (callback or pass)(slot) end
 	end
 end
 
 function M.start(item_key, size, callback)
 	stop()
 	state = {
-		thread_id = thread(process),
+		thread_id = aux.thread(process),
 		item_key = item_key,
 		target_size = size,
 		callback = callback,

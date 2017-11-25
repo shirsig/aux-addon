@@ -55,7 +55,7 @@ do
 			return v
 		end
 	end
-	M.temp = setmetatable({}, {__metatable=false, __newindex=nop, __call=f, __sub=f})
+	M.temp = setmetatable({}, {__metatable=false, __newindex=pass, __call=f, __sub=f})
 end
 do
 	local function f(_, v)
@@ -64,7 +64,7 @@ do
 			return v
 		end
 	end
-	M.static = setmetatable({}, {__metatable=false, __newindex=nop, __call=f, __sub=f})
+	M.static = setmetatable({}, {__metatable=false, __newindex=pass, __call=f, __sub=f})
 end
 
 do
@@ -78,7 +78,7 @@ do
 	M.unpack = unpack
 end
 
-M.empty = setmetatable({}, {__metatable=false, __newindex=nop})
+M.empty = setmetatable({}, {__metatable=false, __newindex=pass})
 
 local vararg
 do

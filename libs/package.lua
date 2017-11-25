@@ -1,25 +1,23 @@
 if module then return end
 local _G, setfenv, setmetatable = getfenv(0), setfenv, setmetatable
-local environments, exports_data, interfaces = {}, {}, {}
+local environments, interfaces = {}, {}
 
-local function nop() end
+local function pass() end
+
+local environment_mt = {__index=_G}
 
 local function create_module(name)
-	local environment, exports = setmetatable({_G=_G, nop=nop}, {__index=_G}), {}
+	local environment = setmetatable({_G=_G, pass=pass}, environment_mt)
+	local exports = {}
 	environment.M = setmetatable({}, {
 		__metatable=false,
 		__newindex=function(_, k, v)
 			environment[k], exports[k] = v, v
 		end,
 	})
-	environment.include = function(name)
-		for k, v in exports_data[name] or error('No such module.', 2) do
-			environment[k] = v
-		end
-	end
 	environment._M = environment
-	interfaces[name] = setmetatable({}, {__metatable=false, __index=exports, __newindex=nop})
-	environments[name], exports_data[name] = environment, exports
+	environments[name] = environment
+	interfaces[name] = setmetatable({}, {__metatable=false, __index=exports, __newindex=pass})
 end
 
 function module(name)

@@ -1,7 +1,7 @@
 module 'aux.tabs.search'
 
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local filter_util = require 'aux.util.filter'
 local scan_util = require 'aux.util.scan'
@@ -9,7 +9,7 @@ local scan = require 'aux.core.scan'
 
 search_scan_id = 0
 
-function handle.LOAD()
+function aux.handle.LOAD()
 	new_search()
 end
 
@@ -175,7 +175,7 @@ function start_real_time_scan(query, search, continuation)
 				map[record.sniping_signature] = record
 			end
 			T.release(new_records)
-			new_records = values(map)
+			new_records = aux.values(map)
 
 			if getn(new_records) > 2000 then
 				StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
@@ -303,14 +303,14 @@ function M.execute(resume, real_time)
 
 	local queries, error = filter_util.queries(filter_string)
 	if not queries then
-		print('Invalid filter:', error)
+		aux.print('Invalid filter:', error)
 		return
 	elseif real_time then
 		if getn(queries) > 1 then
-			print('Error: The real time mode does not support multi-queries')
+			aux.print('Error: The real time mode does not support multi-queries')
 			return
 		elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-			print('Error: The real time mode does not support page ranges')
+			aux.print('Error: The real time mode does not support page ranges')
 			return
 		end
 	end
@@ -324,7 +324,7 @@ function M.execute(resume, real_time)
 			else
 				get_current_search().filter_string = filter_string
 			end
-			new_recent_search(filter_string, join(map(copy(queries), function(filter) return filter.prettified end), ';'))
+			new_recent_search(filter_string, aux.join(aux.map(aux.copy(queries), function(filter) return filter.prettified end), ';'))
 		else
 			local search = get_current_search()
 			search.records = T.acquire()
@@ -391,7 +391,7 @@ do
 				if not record.high_bidder then
 					bid_button:SetScript('OnClick', function()
 						if scan_util.test(record, index) and search.table:ContainsRecord(record) then
-							place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
+							aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
 								info.bid_update(record)
 								search.table:SetDatabase()
 							end or function() search.table:RemoveAuctionRecord(record) end)
@@ -405,7 +405,7 @@ do
 				if record.buyout_price > 0 then
 					buyout_button:SetScript('OnClick', function()
 						if scan_util.test(record, index) and search.table:ContainsRecord(record) then
-							place_bid('list', index, record.buyout_price, function() search.table:RemoveAuctionRecord(record) end)
+							aux.place_bid('list', index, record.buyout_price, function() search.table:RemoveAuctionRecord(record) end)
 						end
 					end)
 					buyout_button:Enable()
@@ -432,7 +432,7 @@ do
 		elseif state == FOUND and not scan_util.test(selection.record, found_index) then
 			buyout_button:Disable()
 			bid_button:Disable()
-			if not bid_in_progress() then
+			if not aux.bid_in_progress() then
 				state = IDLE
 			end
 		end

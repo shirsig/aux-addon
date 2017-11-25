@@ -1,7 +1,5 @@
 module 'aux.util.sort'
 
-include 'aux'
-
 local T = require 'T'
 
 M.EQ = 0

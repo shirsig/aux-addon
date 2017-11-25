@@ -1,9 +1,7 @@
 module 'aux.gui.item_listing'
 
-include 'aux'
-
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local gui = require 'aux.gui'
 
@@ -66,7 +64,7 @@ function M.new(parent, on_click, selected)
 	scroll_bar:SetWidth(10)
 	local thumbTex = scroll_bar:GetThumbTexture()
 	thumbTex:SetPoint('CENTER', 0, 0)
-	thumbTex:SetTexture(color.content.background())
+	thumbTex:SetTexture(aux.color.content.background())
 	thumbTex:SetHeight(150)
 	thumbTex:SetWidth(scroll_bar:GetWidth())
 	_G[scroll_bar:GetName() .. 'ScrollUpButton']:Hide()

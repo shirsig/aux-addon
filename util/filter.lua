@@ -1,9 +1,7 @@
 module 'aux.util.filter'
 
-include 'aux'
-
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local money = require 'aux.util.money'
 local filter_util = require 'aux.util.filter'
@@ -15,7 +13,7 @@ function default_filter(str)
         input_type = '',
         validator = function()
             return function(auction_record)
-                return any(auction_record.tooltip, function(entry)
+                return aux.any(auction_record.tooltip, function(entry)
                     return strfind(strlower(entry.left_text or ''), str, 1, true) or strfind(strlower(entry.right_text or ''), str, 1, true)
                 end)
             end
@@ -186,7 +184,7 @@ M.filters = {
 function operator(str)
     local operator = str == 'not' and T.list('operator', 'not', 1)
     for name in T.temp-T.set('and', 'or') do
-	    local arity = select(3, strfind(str, '^' .. name .. '(%d*)$'))
+	    local arity = aux.select(3, strfind(str, '^' .. name .. '(%d*)$'))
 	    if arity then
 		    arity = tonumber(arity)
 		    operator = not (arity and arity < 2) and T.list('operator', name, arity)
@@ -203,7 +201,7 @@ do
 				return self
 			end
 			if self.exact then return end
-			local number = tonumber(select(3, strfind(str, '^(%d+)$')))
+			local number = tonumber(aux.select(3, strfind(str, '^(%d+)$')))
 			if number then
 				if number >= 1 and number <= 60 then
 					for _, key in ipairs(T.temp-T.list('min_level', 'max_level')) do
@@ -216,20 +214,20 @@ do
 			end
 			for _, parser in T.temp-T.list(
 				T.temp-T.list('class', info.item_class_index),
-				T.temp-T.list('subclass', T.vararg-function(arg) return info.item_subclass_index(index(self.class, 2) or 0, unpack(arg)) end),
-				T.temp-T.list('slot', T.vararg-function(arg) return info.item_slot_index(index(self.class, 2) == 2 and 2 or 0, index(self.subclass, 2) or 0, unpack(arg)) end),
+				T.temp-T.list('subclass', T.vararg-function(arg) return info.item_subclass_index(aux.index(self.class, 2) or 0, unpack(arg)) end),
+				T.temp-T.list('slot', T.vararg-function(arg) return info.item_slot_index(aux.index(self.class, 2) == 2 and 2 or 0, aux.index(self.subclass, 2) or 0, unpack(arg)) end),
 				T.temp-T.list('quality', info.item_quality_index)
 			) do
 				if not self[parser[1]] then
 					tinsert(parser, str)
-					local index, label = parser[2](select(3, unpack(parser)))
+					local index, label = parser[2](aux.select(3, unpack(parser)))
 					if index then
 						self[parser[1]] = T.list(label, index)
 						return T.list('blizzard', parser[1], label, index)
 					end
 				end
 			end
-			if not self[str] and (str == 'usable' or str == 'exact' and self.name and size(self) == 1) then
+			if not self[str] and (str == 'usable' or str == 'exact' and self.name and aux.size(self) == 1) then
 				self[str] = T.list(str, 1)
 				return T.list('blizzard', str, str, 1)
 			elseif i == 1 and strlen(str) <= 63 then
@@ -254,7 +252,7 @@ function parse_parameter(input_type, str)
     elseif input_type == 'string' then
         return str ~= '' and str or nil
     elseif type(input_type) == 'table' then
-        return key(input_type, str)
+        return aux.key(input_type, str)
     end
 end
 
@@ -262,7 +260,7 @@ function M.parse_filter_string(str)
     local filter, post_filter = T.acquire(), T.acquire()
     local blizzard_filter_parser = blizzard_filter_parser()
 
-    local parts = str and map(split(str, '/'), function(part) return strlower(trim(part)) end) or T.acquire()
+    local parts = str and aux.map(aux.split(str, '/'), function(part) return strlower(aux.trim(part)) end) or T.acquire()
 
     local i = 1
     while parts[i] do
@@ -341,7 +339,7 @@ function M.query(filter_string)
 end
 
 function M.queries(filter_string)
-    local parts = split(filter_string, ';')
+    local parts = aux.split(filter_string, ';')
     local queries = T.acquire()
     for _, str in ipairs(parts) do
         local query, _, error = query(str)
@@ -357,7 +355,7 @@ end
 function suggestions(filter)
     local suggestions = T.acquire()
 
-    if filter.blizzard.name and size(filter.blizzard) == 1 then tinsert(suggestions, 'exact') end
+    if filter.blizzard.name and aux.size(filter.blizzard) == 1 then tinsert(suggestions, 'exact') end
 
     tinsert(suggestions, 'and'); tinsert(suggestions, 'or'); tinsert(suggestions, 'not'); tinsert(suggestions, 'tooltip')
 
@@ -370,14 +368,14 @@ function suggestions(filter)
 
     -- subclasses
     if not filter.blizzard.subclass then
-        for _, subclass in ipairs(T.temp-T.list(GetAuctionItemSubClasses(index(filter.blizzard.class, 2) or 0))) do
+        for _, subclass in ipairs(T.temp-T.list(GetAuctionItemSubClasses(aux.index(filter.blizzard.class, 2) or 0))) do
             tinsert(suggestions, subclass)
         end
     end
 
     -- slots
     if not filter.blizzard.slot then
-        for _, invtype in ipairs(T.temp-T.list(GetAuctionInvTypes(index(filter.blizzard.class, 2) == 2 and 2 or 0, index(filter.blizzard.subclass, 2) or 0))) do
+        for _, invtype in ipairs(T.temp-T.list(GetAuctionInvTypes(aux.index(filter.blizzard.class, 2) == 2 and 2 or 0, aux.index(filter.blizzard.subclass, 2) or 0))) do
             tinsert(suggestions, _G[invtype])
         end
     end
@@ -427,35 +425,35 @@ function prettified_filter_string(filter)
 	    if component[1] == 'blizzard' then
 		    if component[2] == 'name' then
 			    if filter.blizzard.exact then
-			        prettified.append(info.display_name(info.item_id(component[3])) or color.orange('[' .. component[3] .. ']'))
+			        prettified.append(info.display_name(info.item_id(component[3])) or aux.color.orange('[' .. component[3] .. ']'))
 			    elseif component[3] ~= '' then
-				    prettified.append(color.label.enabled(component[3]))
+				    prettified.append(aux.color.label.enabled(component[3]))
 			    end
 		    elseif component[2] ~= 'exact' then
-			    prettified.append(color.orange(component[3]))
+			    prettified.append(aux.color.orange(component[3]))
 		    end
         elseif component[1] == 'operator' then
-			prettified.append(color.orange(component[2] .. (component[2] ~= 'not' and tonumber(component[3]) or '')))
+			prettified.append(aux.color.orange(component[2] .. (component[2] ~= 'not' and tonumber(component[3]) or '')))
         elseif component[1] == 'filter' then
             if i == 1 or component[2] ~= 'tooltip' then
-                prettified.append(color.orange(component[2]))
+                prettified.append(aux.color.orange(component[2]))
             end
             local parameter = component[3]
             if parameter then
 	            if component[2] == 'item' then
-		            prettified.append(info.display_name(info.item_id(parameter)) or color.label.enabled('[' .. parameter .. ']'))
+		            prettified.append(info.display_name(info.item_id(parameter)) or aux.color.label.enabled('[' .. parameter .. ']'))
 	            else
 		            if filters[component[2]].input_type == 'money' then
-			            prettified.append(money.to_string(money.from_string(parameter), nil, true, color.label.enabled))
+			            prettified.append(money.to_string(money.from_string(parameter), nil, true, aux.color.label.enabled))
 		            else
-			            prettified.append(color.label.enabled(parameter))
+			            prettified.append(aux.color.label.enabled(parameter))
 		            end
 	            end
             end
         end
     end
     if prettified.get() == '' then
-        return color.orange'<>'
+        return aux.color.orange'<>'
     else
         return prettified.get()
     end
@@ -466,7 +464,7 @@ function M.quote(name)
 end
 
 function M.unquote(name)
-	return select(3, strfind(name, '^<(.*)>$')) or name
+	return aux.select(3, strfind(name, '^<(.*)>$')) or name
 end
 
 function blizzard_query(filter)
@@ -490,7 +488,7 @@ function blizzard_query(filter)
         query.quality = item_info.quality
     else
 	    for key in T.temp-T.set('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality') do
-            query[key] = index(filters[key], 2)
+            query[key] = aux.index(filters[key], 2)
 	    end
     end
     return query
@@ -520,15 +518,15 @@ function validator(filter)
                 if name == 'not' then
                     tinsert(stack, not args[1])
                 elseif name == 'and' then
-                    tinsert(stack, all(args))
+                    tinsert(stack, aux.all(args))
                 elseif name == 'or' then
-                    tinsert(stack, any(args))
+                    tinsert(stack, aux.any(args))
                 end
             elseif type == 'filter' then
                 tinsert(stack, not not validators[i](record))
             end
         end
-        return all(stack)
+        return aux.all(stack)
     end
 end
 

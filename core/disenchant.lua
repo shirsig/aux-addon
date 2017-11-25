@@ -1,9 +1,6 @@
 module 'aux.core.disenchant'
 
-include 'aux'
-
 local T = require 'T'
-
 local history = require 'aux.core.history'
 
 local UNCOMMON, RARE, EPIC = 2, 3, 4

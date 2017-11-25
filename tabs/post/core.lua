@@ -1,9 +1,7 @@
 module 'aux.tabs.post'
 
-include 'aux'
-
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local sort_util = require 'aux.util.sort'
 local persistence = require 'aux.util.persistence'
@@ -16,7 +14,7 @@ local item_listing = require 'aux.gui.item_listing'
 local al = require 'aux.gui.auction_listing'
 local gui = require 'aux.gui'
 
-local tab = TAB 'Post'
+local tab = aux.tab 'Post'
 
 local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'tuple', '#', {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
@@ -31,8 +29,8 @@ function get_default_settings()
 	return T.map('duration', DURATION_8, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
 end
 
-function handle.LOAD2()
-	data = faction_data'post'
+function aux.handle.LOAD2()
+	data = aux.faction_data'post'
 end
 
 function read_settings(item_key)
@@ -102,7 +100,7 @@ function set_unit_buyout_price(amount)
 end
 
 function update_inventory_listing()
-	local records = values(filter(copy(inventory_records), function(record)
+	local records = aux.values(aux.filter(aux.copy(inventory_records), function(record)
 		local settings = read_settings(record.key)
 		return record.aux_quantity > 0 and (not settings.hidden or show_hidden_checkbox:GetChecked())
 	end))
@@ -116,15 +114,15 @@ function update_auction_listing(listing, records, reference)
 		local historical_value = history.value(selected_item.key)
 		local stack_size = stack_size_slider:GetValue()
 		for _, record in records[selected_item.key] or T.empty do
-			local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and color.red
+			local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and aux.color.red
 			local price = record.unit_price * (listing == 'bid' and record.stack_size / stack_size_slider:GetValue() or 1)
 			tinsert(rows, T.map(
 				'cols', T.list(
-				T.map('value', record.own and color.green(record.count) or record.count),
+				T.map('value', record.own and aux.color.green(record.count) or record.count),
 				T.map('value', al.time_left(record.duration)),
-				T.map('value', record.stack_size == stack_size and color.green(record.stack_size) or record.stack_size),
+				T.map('value', record.stack_size == stack_size and aux.color.green(record.stack_size) or record.stack_size),
 				T.map('value', money.to_string(price, true, nil, price_color)),
-				T.map('value', historical_value and gui.percentage_historical(round(price / historical_value * 100)) or '---')
+				T.map('value', historical_value and gui.percentage_historical(aux.round(price / historical_value * 100)) or '---')
 			),
 				'record', record
 			))
@@ -135,7 +133,7 @@ function update_auction_listing(listing, records, reference)
 				T.map('value', '---'),
 				T.map('value', '---'),
 				T.map('value', '---'),
-				T.map('value', money.to_string(historical_value, true, nil, color.green)),
+				T.map('value', money.to_string(historical_value, true, nil, aux.color.green)),
 				T.map('value', historical_value and gui.percentage_historical(100) or '---')
 			),
 				'record', T.map('historical_value', true, 'stack_size', stack_size, 'unit_price', historical_value, 'own', true)
@@ -173,7 +171,7 @@ function update_auction_listings()
 end
 
 function M.select_item(item_key)
-    for _, inventory_record in filter(copy(inventory_records), function(record) return record.aux_quantity > 0 end) do
+    for _, inventory_record in aux.filter(aux.copy(inventory_records), function(record) return record.aux_quantity > 0 end) do
         if inventory_record.key == item_key then
             update_item(inventory_record)
             return
@@ -192,8 +190,8 @@ function price_update()
 	        set_unit_buyout_price(undercut(get_buyout_selection(), stack_size_slider:GetValue()))
 	        unit_buyout_price_input:SetText(money.to_string(get_unit_buyout_price(), true, nil, nil, true))
         end
-        start_price_percentage:SetText(historical_value and gui.percentage_historical(round(get_unit_start_price() / historical_value * 100)) or '---')
-        buyout_price_percentage:SetText(historical_value and gui.percentage_historical(round(get_unit_buyout_price() / historical_value * 100)) or '---')
+        start_price_percentage:SetText(historical_value and gui.percentage_historical(aux.round(get_unit_start_price() / historical_value * 100)) or '---')
+        buyout_price_percentage:SetText(historical_value and gui.percentage_historical(aux.round(get_unit_buyout_price() / historical_value * 100)) or '---')
     end
 end
 
@@ -275,7 +273,7 @@ function update_item_configuration()
 
         item.texture:SetTexture(nil)
         item.count:SetText()
-        item.name:SetTextColor(color.label.enabled())
+        item.name:SetTextColor(aux.color.label.enabled())
         item.name:SetText('No item selected')
 
         unit_start_price_input:Hide()
@@ -314,7 +312,7 @@ function update_item_configuration()
             local duration_factor = UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
             local stack_size, stack_count = selected_item.max_charges and 1 or stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
-            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, color.text.enabled))
+            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))
         end
 
         refresh_button:Enable()
@@ -391,7 +389,7 @@ function update_item(item)
     else
 	    stack_size_slider:SetMinMaxValues(1, min(selected_item.max_stack, selected_item.aux_quantity))
     end
-    stack_size_slider:SetValue(huge)
+    stack_size_slider:SetValue(aux.huge)
     quantity_update(true)
 
     unit_start_price_input:SetText(money.to_string(settings.start_price, true, nil, nil, true))
@@ -442,7 +440,7 @@ function update_inventory_records()
         end
     end
     T.release(inventory_records)
-    inventory_records = values(auctionable_map)
+    inventory_records = aux.values(auctionable_map)
     refresh = true
 end
 

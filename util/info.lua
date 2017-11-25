@@ -1,8 +1,7 @@
 module 'aux.util.info'
 
-include 'aux'
-
 local T = require 'T'
+local aux = require 'aux'
 
 CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
 AuxTooltip:SetScript('OnTooltipAddMoney', function()
@@ -125,8 +124,8 @@ function M.auction(index, query_type)
             'link', link,
             'itemstring', item_info.itemstring,
             'item_key', item_id .. ':' .. suffix_id,
-            'search_signature', join(T.temp-T.list(item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), aux_ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')), ':'),
-            'sniping_signature', join(T.temp-T.list(item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, aux_ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')), ':'),
+            'search_signature', aux.join(T.temp-T.list(item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), aux_ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')), ':'),
+            'sniping_signature', aux.join(T.temp-T.list(item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, aux_ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')), ':'),
 
             'name', name,
             'texture', texture,
@@ -170,7 +169,7 @@ function M.bid_update(auction_record)
     auction_record.unit_blizzard_bid = auction_record.blizzard_bid / auction_record.aux_quantity
     auction_record.unit_bid_price = auction_record.bid_price / auction_record.aux_quantity
     auction_record.high_bidder = 1
-    auction_record.search_signature = join(T.temp-T.list(auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, aux_ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')), ':')
+    auction_record.search_signature = aux.join(T.temp-T.list(auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.duration, 1, aux_ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')), ':')
 end
 
 function M.set_tooltip(itemstring, owner, anchor)
@@ -210,7 +209,7 @@ function M.set_shopping_tooltip(slot)
 end
 
 function M.tooltip_match(entry, tooltip)
-    return any(tooltip, function(line)
+    return aux.any(tooltip, function(line)
         local left_match = line.left_text and strupper(line.left_text) == strupper(entry)
         local right_match = line.right_text and strupper(line.right_text) == strupper(entry)
         return left_match or right_match
@@ -254,7 +253,7 @@ function M.display_name(item_id, no_brackets, no_color)
             name = '[' .. name .. ']'
         end
         if not no_color then
-            name = select(4, GetItemQualityColor(item_info.quality)) .. name .. FONT_COLOR_CODE_CLOSE
+            name = aux.select(4, GetItemQualityColor(item_info.quality)) .. name .. FONT_COLOR_CODE_CLOSE
         end
         return name
     end

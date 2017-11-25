@@ -1,16 +1,14 @@
 module 'aux.core.crafting'
 
-include 'aux'
-
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local money = require 'aux.util.money'
 local history = require 'aux.core.history'
 local search_tab = require 'aux.tabs.search'
 
-function handle.LOAD()
-    event_listener('ADDON_LOADED', function()
+function aux.handle.LOAD()
+    aux.event_listener('ADDON_LOADED', function()
         if arg1 == 'Blizzard_CraftUI' then
             craft_ui_loaded()
         elseif arg1 == 'Blizzard_TradeSkillUI' then
@@ -29,8 +27,8 @@ do
     local function hook_quest_item(f)
         f:SetScript('OnMouseUp', function()
             if arg1 == 'RightButton' then
-                if get_active_tab() then
-                    set_tab(1)
+                if aux.get_tab() then
+                    aux.set_tab(1)
                     search_tab.set_filter(_G[this:GetName() .. 'Name']:GetText() .. '/exact')
                     search_tab.execute(nil, false)
                 end
@@ -38,8 +36,8 @@ do
         end)
     end
     function craft_ui_loaded()
-        hook('CraftFrame_SetSelection', T.vararg-function(arg)
-            local ret = T.temp-T.list(orig.CraftFrame_SetSelection(unpack(arg)))
+        aux.hook('CraftFrame_SetSelection', T.vararg-function(arg)
+            local ret = T.temp-T.list(aux.orig.CraftFrame_SetSelection(unpack(arg)))
             local id = GetCraftSelectionIndex()
             local total_cost = 0
             for i = 1, GetCraftNumReagents(id) do
@@ -49,7 +47,7 @@ do
                     break
                 end
                 local item_id, suffix_id = info.parse_link(link)
-                local count = select(3, GetCraftReagentInfo(id, i))
+                local count = aux.select(3, GetCraftReagentInfo(id, i))
                 local _, price, limited = info.merchant_info(item_id)
                 local value = price and not limited and price or history.value(item_id .. ':' .. suffix_id)
                 if not value then
@@ -67,8 +65,8 @@ do
         end
     end
     function trade_skill_ui_loaded()
-        hook('TradeSkillFrame_SetSelection', T.vararg-function(arg)
-            local ret = T.temp-T.list(orig.TradeSkillFrame_SetSelection(unpack(arg)))
+        aux.hook('TradeSkillFrame_SetSelection', T.vararg-function(arg)
+            local ret = T.temp-T.list(aux.orig.TradeSkillFrame_SetSelection(unpack(arg)))
             local id = GetTradeSkillSelectionIndex()
             local total_cost = 0
             for i = 1, GetTradeSkillNumReagents(id) do
@@ -78,7 +76,7 @@ do
                     break
                 end
                 local item_id, suffix_id = info.parse_link(link)
-                local count = select(3, GetTradeSkillReagentInfo(id, i))
+                local count = aux.select(3, GetTradeSkillReagentInfo(id, i))
                 local _, price, limited = info.merchant_info(item_id)
                 local value = price and not limited and price or history.value(item_id .. ':' .. suffix_id)
                 if not value then

@@ -1,9 +1,7 @@
 module 'aux.util.info'
 
-include 'aux'
-
 local T = require 'T'
-
+local aux = require 'aux'
 local persistence = require 'aux.util.persistence'
 
 local MIN_ITEM_ID = 1
@@ -18,17 +16,17 @@ _G.aux_auctionable_items = {}
 _G.aux_merchant_buy = {}
 _G.aux_merchant_sell = {}
 
-function handle.LOAD()
+function aux.handle.LOAD()
 	scan_wdb()
 
-	event_listener('MERCHANT_SHOW', on_merchant_show)
-	event_listener('MERCHANT_CLOSED', on_merchant_closed)
-	event_listener('MERCHANT_UPDATE', on_merchant_update)
-	event_listener('BAG_UPDATE', on_bag_update)
+	aux.event_listener('MERCHANT_SHOW', on_merchant_show)
+	aux.event_listener('MERCHANT_CLOSED', on_merchant_closed)
+	aux.event_listener('MERCHANT_UPDATE', on_merchant_update)
+	aux.event_listener('BAG_UPDATE', on_bag_update)
 
 	CreateFrame('Frame', nil, MerchantFrame):SetScript('OnUpdate', merchant_on_update)
 
-	event_listener('NEW_AUCTION_UPDATE', function()
+	aux.event_listener('NEW_AUCTION_UPDATE', function()
 		local data = auction_sell_item()
 		if data then
 			local item_id = item_id(data.name)
@@ -44,8 +42,8 @@ do
 	function M.is_player(name)
 		return not not characters[name]
 	end
-	function handle.LOAD2()
-		characters = realm_data'characters'
+	function aux.handle.LOAD2()
+		characters = aux.realm_data'characters'
 		for k, v in characters do
 			if GetTime() > v + 60 * 60 * 24 * 30 then
 				characters[k] = nil
@@ -199,7 +197,7 @@ function scan_wdb(item_id)
 	end
 
 	if item_id <= MAX_ITEM_ID then
-		thread(when, later(.5), scan_wdb, item_id)
+		aux.thread(when, aux.later(.5), scan_wdb, item_id)
 	else
 		sort(aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 	end
@@ -208,12 +206,12 @@ end
 function M.populate_wdb(item_id)
 	item_id = item_id or MIN_ITEM_ID
 	if item_id > MAX_ITEM_ID then
-		print'Cache populated.'
+		aux.print('Cache populated.')
 		return
 	end
 	if not GetItemInfo('item:' .. item_id) then
-		print('Fetching item ' .. item_id .. '.')
+		aux.print('Fetching item ' .. item_id .. '.')
 		AuxTooltip:SetHyperlink('item:' .. item_id)
 	end
-	thread(populate_wdb, item_id + 1)
+	aux.thread(populate_wdb, item_id + 1)
 end

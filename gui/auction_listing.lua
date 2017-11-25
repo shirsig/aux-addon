@@ -1,9 +1,7 @@
 module 'aux.gui.auction_listing'
 
-include 'aux'
-
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local sort_util = require 'aux.util.sort'
 local money = require 'aux.util.money'
@@ -17,10 +15,10 @@ local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
 
 local TIME_LEFT_STRINGS = {
-	color.red'30m', -- Short
-	color.orange'2h', -- Medium
-	color.yellow'8h', -- Long
-	color.blue'24h', -- Very Long
+	aux.color.red'30m', -- Short
+	aux.color.orange'2h', -- Medium
+	aux.color.yellow'8h', -- Long
+	aux.color.blue'24h', -- Very Long
 }
 
 function item_column_init(rt, cell)
@@ -81,7 +79,7 @@ M.search_columns = {
         align = 'CENTER',
         fill = function(cell, record)
             local display_level = max(record.level, 1)
-            display_level = UnitLevel'player' < record.level and color.red(display_level) or display_level
+            display_level = UnitLevel'player' < record.level and aux.color.red(display_level) or display_level
             cell.text:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
@@ -93,9 +91,9 @@ M.search_columns = {
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and color.link(count) or count
+            local numAuctionsText = expandable and aux.color.link(count) or count
             if own > 0 then
-                numAuctionsText = numAuctionsText .. (' ' .. color.yellow('(' .. own .. ')'))
+                numAuctionsText = numAuctionsText .. (' ' .. aux.color.yellow('(' .. own .. ')'))
             end
             cell.text:SetText(numAuctionsText)
         end,
@@ -139,7 +137,7 @@ M.search_columns = {
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(info.is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
+            cell.text:SetText(info.is_player(record.owner) and (aux.color.yellow(record.owner)) or (record.owner or '?'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -161,9 +159,9 @@ M.search_columns = {
         fill = function(cell, record)
             local price_color
             if record.high_bidder then
-	            price_color = color.green
+	            price_color = aux.color.green
             elseif record.high_bid ~= 0 then
-	            price_color = color.orange
+	            price_color = aux.color.orange
             end
             local price
             if record.high_bidder then
@@ -213,8 +211,8 @@ M.search_columns = {
         cmp = function(record_a, record_b, desc)
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
-            price_a = price_a > 0 and price_a or (desc and -huge or huge)
-            price_b = price_b > 0 and price_b or (desc and -huge or huge)
+            price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
+            price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
 
             return sort_util.compare(price_a, price_b, desc)
         end,
@@ -228,8 +226,8 @@ M.search_columns = {
             cell.text:SetText((pct or bidPct) and gui.percentage_historical(pct or bidPct, not pct) or '?')
         end,
         cmp = function(record_a, record_b, desc)
-            local pct_a = record_percentage(record_a) or (desc and -huge or huge)
-            local pct_b = record_percentage(record_b) or (desc and -huge or huge)
+            local pct_a = record_percentage(record_a) or (desc and -aux.huge or aux.huge)
+            local pct_b = record_percentage(record_b) or (desc and -aux.huge or aux.huge)
             return sort_util.compare(pct_a, pct_b, desc)
         end,
     },
@@ -251,7 +249,7 @@ M.auctions_columns = {
         align = 'CENTER',
         fill = function(cell, record)
             local display_level = max(record.level, 1)
-            display_level = UnitLevel('player') < record.level and color.red(display_level) or display_level
+            display_level = UnitLevel('player') < record.level and aux.color.red(display_level) or display_level
             cell.text:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
@@ -263,7 +261,7 @@ M.auctions_columns = {
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and color.link(count) or count
+            local numAuctionsText = expandable and aux.color.link(count) or count
             cell.text:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -343,8 +341,8 @@ M.auctions_columns = {
         cmp = function(record_a, record_b, desc)
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
-            price_a = price_a > 0 and price_a or (desc and -huge or huge)
-            price_b = price_b > 0 and price_b or (desc and -huge or huge)
+            price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
+            price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
 
             return sort_util.compare(price_a, price_b, desc)
         end,
@@ -354,7 +352,7 @@ M.auctions_columns = {
         width = .21,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(record.high_bidder or color.red 'No Bids')
+            cell.text:SetText(record.high_bidder or aux.color.red 'No Bids')
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.high_bidder and not record_b.high_bidder then
@@ -385,7 +383,7 @@ M.bids_columns = {
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
-            local numAuctionsText = expandable and color.link(count) or count
+            local numAuctionsText = expandable and aux.color.link(count) or count
             cell.text:SetText(numAuctionsText)
         end,
         cmp = function(record_a, record_b, desc)
@@ -428,7 +426,7 @@ M.bids_columns = {
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(info.is_player(record.owner) and (color.yellow(record.owner)) or (record.owner or '?'))
+            cell.text:SetText(info.is_player(record.owner) and (aux.color.yellow(record.owner)) or (record.owner or '?'))
         end,
         cmp = function(record_a, record_b, desc)
             if not record_a.owner and not record_b.owner then
@@ -484,8 +482,8 @@ M.bids_columns = {
         cmp = function(record_a, record_b, desc)
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
-            price_a = price_a > 0 and price_a or (desc and -huge or huge)
-            price_b = price_b > 0 and price_b or (desc and -huge or huge)
+            price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
+            price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
 
             return sort_util.compare(price_a, price_b, desc)
         end,
@@ -497,9 +495,9 @@ M.bids_columns = {
         fill = function(cell, record)
             local status
             if record.high_bidder then
-                status = color.yellow'High Bidder'
+                status = aux.color.yellow'High Bidder'
             else
-                status = color.red'Outbid'
+                status = aux.color.red'Outbid'
             end
             cell.text:SetText(status)
         end,
@@ -515,9 +513,9 @@ function record_percentage(record)
     local historical_value = history.value(record.item_key) or 0
     if historical_value > 0 then
         if record.unit_buyout_price > 0 then
-            return round(100 * record.unit_buyout_price / historical_value)
+            return aux.round(100 * record.unit_buyout_price / historical_value)
         end
-        return nil, round(100 * record.unit_bid_price / historical_value)
+        return nil, aux.round(100 * record.unit_bid_price / historical_value)
     end
 end
 
@@ -612,7 +610,7 @@ local methods = {
             if not selection or selection.record ~= this.record then
                 this.rt:SetSelectedRecord(this.record)
             end
-	        do (this.rt.handlers.OnClick or nop)(this, button) end
+	        do (this.rt.handlers.OnClick or pass)(this, button) end
         end
     end,
 
@@ -645,7 +643,7 @@ local methods = {
 
 	    local records = self.records
 
-	    local single_item = all(records, function(record) return record.item_key == records[1].item_key end)
+	    local single_item = aux.all(records, function(record) return record.item_key == records[1].item_key end)
 
         sort(records, function(a, b) return a.search_signature < b.search_signature or a.search_signature == b.search_signature and tostring(a) < tostring(b) end)
 
@@ -840,7 +838,7 @@ local methods = {
     end,
 
     RemoveAuctionRecord = function(self, record)
-        local index = key(self.records, record)
+        local index = aux.key(self.records, record)
         if index then
             tremove(self.records, index)
         end
@@ -848,7 +846,7 @@ local methods = {
     end,
 
     ContainsRecord = function(self, record)
-        if key(self.records, record) then
+        if aux.key(self.records, record) then
             return true
         end
     end,
@@ -930,7 +928,7 @@ function M.new(parent, rows, columns)
     scrollBar:SetWidth(10)
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
-    thumbTex:SetTexture(color.content.background())
+    thumbTex:SetTexture(aux.color.content.background())
     thumbTex:SetHeight(150)
     thumbTex:SetWidth(scrollBar:GetWidth())
     _G[scrollBar:GetName() .. 'ScrollUpButton']:Hide()
@@ -955,7 +953,7 @@ function M.new(parent, rows, columns)
         local text = cell:CreateFontString()
         text:SetJustifyH('CENTER')
         text:SetFont(gui.font, 12)
-        text:SetTextColor(color.label.enabled())
+        text:SetTextColor(aux.color.label.enabled())
         cell:SetFontString(text)
         if not column.isPrice then cell:SetText(column.title or '') end -- TODO
         text:SetAllPoints()

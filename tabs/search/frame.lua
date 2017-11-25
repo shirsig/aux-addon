@@ -1,7 +1,7 @@
 module 'aux.tabs.search'
 
 local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local completion = require 'aux.util.completion'
 local filter_util = require 'aux.util.filter'
@@ -12,19 +12,19 @@ local auction_listing = require 'aux.gui.auction_listing'
 
 local FILTER_SPACING = 28.5
 
-frame = CreateFrame('Frame', nil, AuxFrame)
+frame = CreateFrame('Frame', nil, aux.frame)
 frame:SetAllPoints()
 frame:SetScript('OnUpdate', on_update)
 frame:Hide()
 
 frame.filter = gui.panel(frame)
-frame.filter:SetAllPoints(AuxFrame.content)
+frame.filter:SetAllPoints(aux.frame.content)
 
 frame.results = gui.panel(frame)
-frame.results:SetAllPoints(AuxFrame.content)
+frame.results:SetAllPoints(aux.frame.content)
 
 frame.saved = CreateFrame('Frame', nil, frame)
-frame.saved:SetAllPoints(AuxFrame.content)
+frame.saved:SetAllPoints(aux.frame.content)
 
 frame.saved.favorite = gui.panel(frame.saved)
 frame.saved.favorite:SetWidth(393)
@@ -57,7 +57,7 @@ do
 	local btn = gui.button(frame, gui.font_size.small)
 	btn:SetHeight(25)
 	btn:SetWidth(60)
-	btn:SetText(color.label.enabled'Range:')
+	btn:SetText(aux.color.label.enabled'Range:')
 	btn:SetScript('OnClick', function()
 		update_real_time(true)
 	end)
@@ -68,7 +68,7 @@ do
 	btn:SetHeight(25)
 	btn:SetWidth(60)
 	btn:Hide()
-	btn:SetText(color.label.enabled'Real Time')
+	btn:SetText(aux.color.label.enabled'Real Time')
 	btn:SetScript('OnClick', function()
 		update_real_time(false)
 	end)
@@ -98,7 +98,7 @@ do
 		editbox.change = change
 		local label = gui.label(editbox, gui.font_size.medium)
 		label:SetPoint('LEFT', editbox, 'RIGHT', 0, 0)
-		label:SetTextColor(color.label.enabled())
+		label:SetTextColor(aux.color.label.enabled())
 		label:SetText('-')
 		first_page_input = editbox
 	end
@@ -149,7 +149,7 @@ do
     local btn = gui.button(frame)
     btn:SetHeight(25)
     btn:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
-    btn:SetBackdropColor(color.state.enabled())
+    btn:SetBackdropColor(aux.color.state.enabled())
     btn:SetText('Resume')
     btn:SetScript('OnClick', function()
         execute(true)
@@ -161,7 +161,7 @@ do
 	editbox:EnableMouse(1)
 	editbox.formatter = function(str)
 		local queries = filter_util.queries(str)
-		return queries and join(map(copy(queries), function(query) return query.prettified end), ';') or color.red(str)
+		return queries and aux.join(aux.map(aux.copy(queries), function(query) return query.prettified end), ';') or aux.color.red(str)
 	end
 	editbox.complete = completion.complete_filter
     editbox.escape = function() this:SetText(get_current_search().filter_string or '') end
@@ -184,7 +184,7 @@ do
 end
 do
     local btn = gui.button(frame, gui.font_size.large)
-    btn:SetPoint('BOTTOMLEFT', AuxFrame.content, 'TOPLEFT', 10, 8)
+    btn:SetPoint('BOTTOMLEFT', aux.frame.content, 'TOPLEFT', 10, 8)
     btn:SetWidth(243)
     btn:SetHeight(22)
     btn:SetText('Search Results')
@@ -213,7 +213,7 @@ do
     local frame = CreateFrame('Frame', nil, frame)
     frame:SetWidth(265)
     frame:SetHeight(25)
-    frame:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
+    frame:SetPoint('TOPLEFT', aux.frame.content, 'BOTTOMLEFT', 0, -6)
     status_bar_frame = frame
 end
 do
@@ -435,7 +435,7 @@ do
 	input:SetPoint('CENTER', filter_dropdown, 'CENTER', 0, 0)
 	input:SetWidth(150)
 	input:SetScript('OnTabPressed', function() filter_parameter_input:SetFocus() end)
-	input.complete = completion.complete(function() return T.temp-T.list('and', 'or', 'not', unpack(keys(filter_util.filters))) end)
+	input.complete = completion.complete(function() return T.temp-T.list('and', 'or', 'not', unpack(aux.keys(filter_util.filters))) end)
 	input.char = function() this:complete() end
 	input.change = function()
 		local text = this:GetText()
@@ -478,7 +478,7 @@ do
     scroll_frame:EnableMouseWheel(true)
     scroll_frame:SetScript('OnMouseWheel', function()
 	    local child = this:GetScrollChild()
-	    child:SetFont('p', [[Fonts\ARIALN.TTF]], bounded(gui.font_size.small, gui.font_size.large, select(2, child:GetFont()) + arg1*2))
+	    child:SetFont('p', [[Fonts\ARIALN.TTF]], aux.bounded(gui.font_size.small, gui.font_size.large, aux.select(2, child:GetFont()) + arg1*2))
 	    update_filter_display()
     end)
     scroll_frame:RegisterForDrag('LeftButton')
@@ -504,7 +504,7 @@ do
     local scroll_child = CreateFrame('SimpleHTML', nil, scroll_frame)
     scroll_frame:SetScrollChild(scroll_child)
     scroll_child:SetFont('p', [[Fonts\ARIALN.TTF]], gui.font_size.large)
-    scroll_child:SetTextColor('p', color.label.enabled())
+    scroll_child:SetTextColor('p', aux.color.label.enabled())
     scroll_child:SetWidth(1)
     scroll_child:SetHeight(1)
     scroll_child:SetScript('OnHyperlinkClick', data_link_click)
@@ -531,7 +531,7 @@ for _ = 1, 5 do
 			    end
 		    end
 	    elseif button == 'RightButton' then
-	        set_tab(1)
+	        aux.set_tab(1)
 		    set_filter(strlower(info.item(this.record.item_id).name) .. '/exact')
 		    execute(nil, false)
 	    end

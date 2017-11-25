@@ -1,18 +1,17 @@
 module 'aux.gui'
 
-include 'aux'
-
 local T = require 'T'
+local aux = require 'aux'
 
 M.font = [[Fonts\ARIALN.TTF]]
 
-M.font_size = immutable-{
+M.font_size = aux.immutable-{
 	small = 13,
 	medium = 15,
 	large = 18,
 }
 
---function handle.LOAD()
+--function aux.handle.LOAD()
 --	do
 --		local blizzard_backdrop, aux_background, aux_border
 --
@@ -22,14 +21,14 @@ M.font_size = immutable-{
 --		aux_border:SetPoint('BOTTOMRIGHT', DropDownList1Backdrop, 'BOTTOMRIGHT', 1.5, -1.5)
 --		aux_border:SetBlendMode('ADD')
 --		aux_background = DropDownList1:CreateTexture(nil, 'OVERLAY')
---		aux_background:SetTexture(color.content.background())
+--		aux_background:SetTexture(aux.color.content.background())
 --		aux_background:SetAllPoints(DropDownList1Backdrop)
 --		blizzard_backdrop = DropDownList1Backdrop:GetBackdrop()
---		hook('ToggleDropDownMenu', function(...)
+--		aux.hook('ToggleDropDownMenu', function(...)
 --			T.temp(arg)
---			local ret = T.temp-T.list(orig.ToggleDropDownMenu(unpack(arg)))
+--			local ret = T.temp-T.list(aux.orig.ToggleDropDownMenu(unpack(arg)))
 --			local dropdown = _G[arg[4] or ''] or this:GetParent()
---			if strfind(dropdown:GetName() or '', '^AuxFrame%d+$') then
+--			if strfind(dropdown:GetName() or '', '^aux.frame%d+$') then
 --				set_aux_dropdown_style(dropdown)
 --			else
 --				set_blizzard_dropdown_style()
@@ -91,7 +90,7 @@ do
 	local id = 1
 	function M.unique_name()
 		id = id + 1
-		return 'AuxFrame' .. id
+		return 'aux.frame' .. id
 	end
 end
 
@@ -120,15 +119,15 @@ function M.set_frame_style(frame, backdrop_color, border_color, left, right, top
 end
 
 function M.set_window_style(frame, left, right, top, bottom)
-    set_frame_style(frame, color.window.background, color.window.border, left, right, top, bottom)
+    set_frame_style(frame, aux.color.window.background, aux.color.window.border, left, right, top, bottom)
 end
 
 function M.set_panel_style(frame, left, right, top, bottom)
-    set_frame_style(frame, color.panel.background, color.panel.border, left, right, top, bottom)
+    set_frame_style(frame, aux.color.panel.background, aux.color.panel.border, left, right, top, bottom)
 end
 
 function M.set_content_style(frame, left, right, top, bottom)
-    set_frame_style(frame, color.content.background, color.content.border, left, right, top, bottom)
+    set_frame_style(frame, aux.color.content.background, aux.color.content.border, left, right, top, bottom)
 end
 
 function M.panel(parent)
@@ -140,13 +139,13 @@ end
 function M.checkbutton(parent, text_height)
     local button = button(parent, text_height)
     button.state = false
-    button:SetBackdropColor(color.state.disabled())
+    button:SetBackdropColor(aux.color.state.disabled())
     function button:SetChecked(state)
         if state then
-            self:SetBackdropColor(color.state.enabled())
+            self:SetBackdropColor(aux.color.state.enabled())
             self.state = true
         else
-            self:SetBackdropColor(color.state.disabled())
+            self:SetBackdropColor(aux.color.state.disabled())
             self.state = false
         end
     end
@@ -171,19 +170,19 @@ function M.button(parent, text_height)
         label:SetAllPoints(button)
         label:SetJustifyH('CENTER')
         label:SetJustifyV('CENTER')
-        label:SetTextColor(color.text.enabled())
+        label:SetTextColor(aux.color.text.enabled())
         button:SetFontString(label)
     end
     button.default_Enable = button.Enable
     function button:Enable()
 	    if self:IsEnabled() == 1 then return end
-        self:GetFontString():SetTextColor(color.text.enabled())
+        self:GetFontString():SetTextColor(aux.color.text.enabled())
         return self:default_Enable()
     end
     button.default_Disable = button.Disable
     function button:Disable()
 	    if self:IsEnabled() == 0 then return end
-        self:GetFontString():SetTextColor(color.text.disabled())
+        self:GetFontString():SetTextColor(aux.color.text.disabled())
         return self:default_Disable()
     end
 
@@ -209,7 +208,7 @@ do
 			dock:SetPoint('TOPLEFT', 1, 1)
 			dock:SetPoint('TOPRIGHT', -1, 1)
 		end
-		dock:SetTexture(color.panel.background())
+		dock:SetTexture(aux.color.panel.background())
 		tab.dock = dock
 		local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
 		highlight:SetAllPoints()
@@ -253,20 +252,20 @@ do
 	function mt.__index:select(id)
 		self._selected = id
 		self:update()
-		do (self._on_select or nop)(id) end
+		do (self._on_select or pass)(id) end
 	end
 	function mt.__index:update()
 		for _, tab in self._tabs do
 			if tab.group._selected == tab.id then
-				tab.text:SetTextColor(color.label.enabled())
+				tab.text:SetTextColor(aux.color.label.enabled())
 				tab:Disable()
-				tab:SetBackdropColor(color.panel.background())
+				tab:SetBackdropColor(aux.color.panel.background())
 				tab.dock:Show()
 				tab:SetHeight(29)
 			else
-				tab.text:SetTextColor(color.text.enabled())
+				tab.text:SetTextColor(aux.color.text.enabled())
 				tab:Enable()
-				tab:SetBackdropColor(color.content.background())
+				tab:SetBackdropColor(aux.color.content.background())
 				tab.dock:Hide()
 				tab:SetHeight(24)
 			end
@@ -292,9 +291,9 @@ function M.editbox(parent)
     set_content_style(editbox)
     editbox:SetScript('OnEscapePressed', function()
         this:ClearFocus()
-	    do (this.escape or nop)() end
+	    do (this.escape or pass)() end
     end)
-    editbox:SetScript('OnEnterPressed', function() (this.enter or nop)() end)
+    editbox:SetScript('OnEnterPressed', function() (this.enter or pass)() end)
     editbox:SetScript('OnEditFocusGained', function()
 	    if this.block_focus then
 		    this.block_focus = false
@@ -302,10 +301,10 @@ function M.editbox(parent)
 		    return
 	    end
 	    this.overlay:Hide()
-	    this:SetTextColor(color.text.enabled())
+	    this:SetTextColor(aux.color.text.enabled())
 	    this.focused = true
 	    this:HighlightText()
-	    do (this.focus_gain or nop)() end
+	    do (this.focus_gain or pass)() end
     end)
     editbox:SetScript('OnEditFocusLost', function()
 	    this.overlay:Show()
@@ -313,13 +312,13 @@ function M.editbox(parent)
 	    this.focused = false
 	    this:HighlightText(0, 0)
 	    this:SetScript('OnUpdate', nil)
-	    do (this.focus_loss or nop)() end
+	    do (this.focus_loss or pass)() end
     end)
     editbox:SetScript('OnTextChanged', function()
 	    this.overlay:SetText(this.formatter and this.formatter(this:GetText()) or this:GetText())
-	    do (this.change or nop)() end
+	    do (this.change or pass)() end
     end)
-    editbox:SetScript('OnChar', function() (this.char or nop)() end)
+    editbox:SetScript('OnChar', function() (this.char or pass)() end)
     do
         local last_click = T.map('t', 0)
         editbox:SetScript('OnMouseDown', function()
@@ -332,7 +331,7 @@ function M.editbox(parent)
 	            -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
 	            -- or use an overlay with itemlinks
 	            if GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
-	                thread(function() editbox:HighlightText() end)
+	                aux.thread(function() editbox:HighlightText() end)
 	            end
 	            T.wipe(last_click)
 	            last_click.t = GetTime()
@@ -352,7 +351,7 @@ function M.editbox(parent)
     local overlay = label(editbox)
     overlay:SetPoint('LEFT', 1.5, 0)
     overlay:SetPoint('RIGHT', -1.5, 0)
-    overlay:SetTextColor(color.text.enabled())
+    overlay:SetTextColor(aux.color.text.enabled())
     editbox.overlay = overlay
     editbox:SetAlignment('LEFT')
     editbox:SetFontSize(font_size.medium)
@@ -398,7 +397,7 @@ do
 	        text_frame:SetFrameLevel(level + 4)
 	        text_frame:SetAllPoints(self)
 	        local text = label(text_frame, font_size.medium)
-	        text:SetTextColor(color.text.enabled())
+	        text:SetTextColor(aux.color.text.enabled())
 	        text:SetPoint('CENTER', 0, 0)
 	        self.text = text
 	    end
@@ -439,7 +438,7 @@ end
 function M.label(parent, size)
     local label = parent:CreateFontString()
     label:SetFont(font, size or font_size.small)
-    label:SetTextColor(color.label.enabled())
+    label:SetTextColor(aux.color.label.enabled())
     return label
 end
 
@@ -449,9 +448,9 @@ function M.horizontal_line(parent, y_offset, inverted_color)
     texture:SetPoint('TOPRIGHT', parent, 'TOPRIGHT', -2, y_offset)
     texture:SetHeight(2)
     if inverted_color then
-        texture:SetTexture(color.panel.background())
+        texture:SetTexture(aux.color.panel.background())
     else
-        texture:SetTexture(color.content.background())
+        texture:SetTexture(aux.color.content.background())
     end
     return texture
 end
@@ -462,9 +461,9 @@ function M.vertical_line(parent, x_offset, top_offset, bottom_offset, inverted_c
     texture:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', x_offset, bottom_offset or 2)
     texture:SetWidth(2)
     if inverted_color then
-        texture:SetTexture(color.panel.background())
+        texture:SetTexture(aux.color.panel.background())
     else
-        texture:SetTexture(color.content.background())
+        texture:SetTexture(aux.color.content.background())
     end
     return texture
 end
@@ -504,7 +503,7 @@ function M.slider(parent)
     set_panel_style(slider)
     local thumb_texture = slider:CreateTexture(nil, 'ARTWORK')
     thumb_texture:SetPoint('CENTER', 0, 0)
-    thumb_texture:SetTexture(color.content.background())
+    thumb_texture:SetTexture(aux.color.content.background())
     thumb_texture:SetHeight(18)
     thumb_texture:SetWidth(8)
     set_size(thumb_texture, 8, 18)
@@ -516,7 +515,7 @@ function M.slider(parent)
     label:SetJustifyH('LEFT')
     label:SetHeight(13)
     label:SetFont(font, font_size.small)
-    label:SetTextColor(color.label.enabled())
+    label:SetTextColor(aux.color.label.enabled())
 
     local editbox = editbox(slider)
     editbox:SetPoint('LEFT', slider, 'RIGHT', 5, 0)
@@ -555,16 +554,16 @@ end
 function M.percentage_historical(pct, bid)
 	local text = (pct > 10000 and '>10000' or pct) .. '%'
 	if bid then
-		return color.gray(text)
+		return aux.color.gray(text)
 	elseif pct < 50 then
-		return color.blue(text)
+		return aux.color.blue(text)
 	elseif pct < 80 then
-		return color.green(text)
+		return aux.color.green(text)
 	elseif pct < 110 then
-		return color.yellow(text)
+		return aux.color.yellow(text)
 	elseif pct < 135 then
-		return color.orange(text)
+		return aux.color.orange(text)
 	else
-		return color.red(text)
+		return aux.color.red(text)
 	end
 end

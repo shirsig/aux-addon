@@ -1,5 +1,6 @@
 module 'aux.tabs.post'
 
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local money = require 'aux.util.money'
 local gui = require 'aux.gui'
@@ -7,15 +8,15 @@ local listing = require 'aux.gui.listing'
 local item_listing = require 'aux.gui.item_listing'
 local search_tab = require 'aux.tabs.search'
 
-frame = CreateFrame('Frame', nil, AuxFrame)
+frame = CreateFrame('Frame', nil, aux.frame)
 frame:SetAllPoints()
 frame:SetScript('OnUpdate', on_update)
 frame:Hide()
 
 frame.content = CreateFrame('Frame', nil, frame)
 frame.content:SetPoint('TOP', frame, 'TOP', 0, -8)
-frame.content:SetPoint('BOTTOMLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, 0)
-frame.content:SetPoint('BOTTOMRIGHT', AuxFrame.content, 'BOTTOMRIGHT', 0, 0)
+frame.content:SetPoint('BOTTOMLEFT', aux.frame.content, 'BOTTOMLEFT', 0, 0)
+frame.content:SetPoint('BOTTOMRIGHT', aux.frame.content, 'BOTTOMRIGHT', 0, 0)
 
 frame.inventory = gui.panel(frame.content)
 frame.inventory:SetWidth(212)
@@ -61,7 +62,7 @@ do
 	        if arg1 == 'LeftButton' then
 	            update_item(this.item_record)
 	        elseif arg1 == 'RightButton' then
-	            set_tab(1)
+	            aux.set_tab(1)
 	            search_tab.set_filter(strlower(info.item(this.item_record.item_id).name) .. '/exact')
 	            search_tab.execute(nil, false)
 	        end
@@ -124,7 +125,7 @@ do
 	status_bar = gui.status_bar(frame)
     status_bar:SetWidth(265)
     status_bar:SetHeight(25)
-    status_bar:SetPoint('TOPLEFT', AuxFrame.content, 'BOTTOMLEFT', 0, -6)
+    status_bar:SetPoint('TOPLEFT', aux.frame.content, 'BOTTOMLEFT', 0, -6)
     status_bar:update_status(1, 1)
     status_bar:set_text('')
 end
@@ -310,7 +311,7 @@ do
 	deposit = label
 end
 
-function handle.LOAD()
+function aux.handle.LOAD()
 	if not aux_post_bid then
 		frame.bid_listing:Hide()
 		frame.buyout_listing:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)

@@ -1,8 +1,7 @@
 module 'aux.util.money'
 
-include 'aux'
-
 local T = require 'T'
+local aux = require 'aux'
 
 M.GOLD_TEXT = '|cffffd70ag|r'
 M.SILVER_TEXT = '|cffc7c7cfs|r'
@@ -35,7 +34,7 @@ function M.to_string2(money, exact, color)
 	local NONE = '|cffa0a0a0' .. TEXT_NONE .. FONT_COLOR_CODE_CLOSE
 
 	if not exact and money >= COPPER_PER_GOLD then
-		money = round(money / COPPER_PER_SILVER) * COPPER_PER_SILVER
+		money = aux.round(money / COPPER_PER_SILVER) * COPPER_PER_SILVER
 	end
 	local g, s, c = to_gsc(money)
 
@@ -83,7 +82,7 @@ function M.to_string(money, pad, trim, color, no_color)
 		if copper > 0 or gold == 0 and silver == 0 then
 			tinsert(parts, format_number(copper, pad, color) .. copper_text)
 		end
-		text = join(parts, ' ')
+		text = aux.join(parts, ' ')
 	else
 		if gold > 0 then
 			text = format_number(gold, false, color) .. gold_text .. ' ' .. format_number(silver, pad, color) .. silver_text .. ' ' .. format_number(copper, pad, color) .. copper_text
@@ -109,9 +108,9 @@ function M.from_string(value)
 
 	value = gsub(gsub(strlower(value), '|c%x%x%x%x%x%x%x%x', ''), FONT_COLOR_CODE_CLOSE, '')
 
-	local gold = tonumber(select(3, strfind(value, '(%d*%.?%d+)g')))
-	local silver = tonumber(select(3, strfind(value, '(%d*%.?%d+)s')))
-	local copper = tonumber(select(3, strfind(value, '(%d*%.?%d+)c')))
+	local gold = tonumber(aux.select(3, strfind(value, '(%d*%.?%d+)g')))
+	local silver = tonumber(aux.select(3, strfind(value, '(%d*%.?%d+)s')))
+	local copper = tonumber(aux.select(3, strfind(value, '(%d*%.?%d+)c')))
 	if not gold and not silver and not copper then return end
 
 	value = gsub(value, '%d*%.?%d+g', '', 1)

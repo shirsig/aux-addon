@@ -1,8 +1,7 @@
 module 'aux.util.persistence'
 
-include 'aux'
-
 local T = require 'T'
+local aux = require 'aux'
 
 function M.read(schema, str)
     if schema == 'string' then
@@ -40,7 +39,7 @@ function read_list(schema, str)
     if str == '' then return T.acquire() end
     local separator = schema[2]
     local element_type = schema[3]
-    return map(split(str, separator), function(part)
+    return aux.map(aux.split(str, separator), function(part)
         return read(element_type, part)
     end)
 end
@@ -48,16 +47,16 @@ end
 function write_list(schema, list)
     local separator = schema[2]
     local element_type = schema[3]
-    local parts = map(T.temp-copy(list), function(element)
+    local parts = aux.map(T.temp-aux.copy(list), function(element)
         return write(element_type, element)
     end)
-    return join(parts, separator)
+    return aux.join(parts, separator)
 end
 
 function read_tuple(schema, str)
     local separator = schema[2]
     local tuple = T.acquire()
-    local parts = T.temp-split(str, separator)
+    local parts = T.temp-aux.split(str, separator)
     for i = 3, getn(schema) do
         local key, type = next(schema[i])
         tuple[key] = read(type, parts[i - 2])
@@ -72,5 +71,5 @@ function write_tuple(schema, tuple)
         local key, type = next(schema[i])
         tinsert(parts, write(type, tuple[key]))
     end
-    return join(parts, separator)
+    return aux.join(parts, separator)
 end

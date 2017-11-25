@@ -1,9 +1,7 @@
 module 'aux.gui.listing'
 
-include 'aux'
-
 local T = require 'T'
-
+local aux = require 'aux'
 local gui = require 'aux.gui'
 
 local ROW_HEIGHT = 15
@@ -175,7 +173,7 @@ local methods = {
 	    local text = col:CreateFontString()
 	    text:SetAllPoints()
 	    text:SetFont(gui.font, 12)
-	    text:SetTextColor(color.label.enabled())
+	    text:SetTextColor(aux.color.label.enabled())
         col.text = text
 
 	    local tex = col:CreateTexture()
@@ -283,7 +281,7 @@ function M.new(parent)
     scroll_bar:SetWidth(10)
     local thumbTex = scroll_bar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
-    thumbTex:SetTexture(color.content.background())
+    thumbTex:SetTexture(aux.color.content.background())
     thumbTex:SetHeight(150)
     thumbTex:SetWidth(scroll_bar:GetWidth())
     _G[scroll_bar:GetName() .. 'ScrollUpButton']:Hide()

@@ -1,13 +1,12 @@
 module 'aux.core.post'
 
-include 'aux'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 local stack = require 'aux.core.stack'
 
 local state
 
-function handle.CLOSE()
+function aux.handle.CLOSE()
 	stop()
 end
 
@@ -16,8 +15,8 @@ function process()
 
 		local stacking_complete
 
-		local send_signal, signal_received = signal()
-		when(signal_received, function()
+		local send_signal, signal_received = aux.signal()
+		aux.when(signal_received, function()
 			local slot = signal_received()[1]
 			if slot then
 				return post_auction(slot, process)
@@ -43,16 +42,16 @@ function post_auction(slot, k)
 		ClickAuctionSellItemButton()
 		ClearCursor()
 
-		StartAuction(max(1, round(state.unit_start_price * item_info.aux_quantity)), round(state.unit_buyout_price * item_info.aux_quantity), state.duration)
+		StartAuction(max(1, aux.round(state.unit_start_price * item_info.aux_quantity)), aux.round(state.unit_buyout_price * item_info.aux_quantity), state.duration)
 
-		local send_signal, signal_received = signal()
-		when(signal_received, function()
+		local send_signal, signal_received = aux.signal()
+		aux.when(signal_received, function()
 			state.posted = state.posted + 1
 			return k()
 		end)
 
 		local posted
-		event_listener('CHAT_MSG_SYSTEM', function(kill)
+		aux.event_listener('CHAT_MSG_SYSTEM', function(kill)
 			if arg1 == ERR_AUCTION_STARTED then
 				send_signal()
 				kill()
@@ -65,7 +64,7 @@ end
 
 function M.stop()
 	if state then
-		kill_thread(state.thread_id)
+		aux.kill_thread(state.thread_id)
 
 		local callback = state.callback
 		local posted = state.posted
@@ -81,7 +80,7 @@ end
 function M.start(item_key, stack_size, duration, unit_start_price, unit_buyout_price, count, callback)
 	stop()
 	state = {
-		thread_id = thread(process),
+		thread_id = aux.thread(process),
 		item_key = item_key,
 		stack_size = stack_size,
 		duration = duration,

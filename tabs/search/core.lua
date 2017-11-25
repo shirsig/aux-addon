@@ -1,12 +1,9 @@
 module 'aux.tabs.search'
 
-include 'aux'
-
-local T = require 'T'
-
+local aux = require 'aux'
 local info = require 'aux.util.info'
 
-local tab = TAB 'Search'
+local tab = aux.tab 'Search'
 
 StaticPopupDialogs.AUX_SEARCH_TABLE_FULL = {
     text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',
@@ -20,7 +17,7 @@ RESULTS = 1
 SAVED = 2
 FILTER = 3
 
-function handle.LOAD()
+function aux.handle.LOAD()
 	set_subtab(SAVED)
 end
 
@@ -73,7 +70,7 @@ end
 
 function add_filter(filter_string)
     local old_filter_string = search_box:GetText()
-    old_filter_string = trim(old_filter_string)
+    old_filter_string = aux.trim(old_filter_string)
 
     if old_filter_string ~= '' then
         old_filter_string = old_filter_string .. ';'

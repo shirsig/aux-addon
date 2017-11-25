@@ -1,12 +1,12 @@
 module 'aux.tabs.search'
 
 local T = require 'T'
-
+local aux = require 'aux'
 local filter_util = require 'aux.util.filter'
 local gui = require 'aux.gui'
 
-function handle.LOAD2()
-	recent_searches, favorite_searches = realm_data'recent_searches', realm_data'favorite_searches'
+function aux.handle.LOAD2()
+	recent_searches, favorite_searches = aux.realm_data'recent_searches', aux.realm_data'favorite_searches'
 end
 
 function update_search_listings()
@@ -15,7 +15,7 @@ function update_search_listings()
 		local search = favorite_searches[i]
 		local name = strsub(search.prettified, 1, 250)
 		tinsert(favorite_search_rows, T.map(
-			'cols', T.list(T.map('value', search.auto_buy and color.red'X' or ''), T.map('value', name)),
+			'cols', T.list(T.map('value', search.auto_buy and aux.color.red'X' or ''), T.map('value', name)),
 			'search', search,
 			'index', i
 		))
@@ -92,12 +92,12 @@ function get_auto_buy_validator()
 			if queries then
 				tinsert(validators, queries[1].validator)
 			else
-				print('Invalid auto buy filter:', error)
+				aux.print('Invalid auto buy filter:', error)
 			end
 		end
 	end
 	return function(record)
-		return any(validators, function(validator) return validator(record) end)
+		return aux.any(validators, function(validator) return validator(record) end)
 	end
 end
 
@@ -106,11 +106,11 @@ function add_favorite(filter_string)
 	if queries then
 		tinsert(favorite_searches, 1, T.map(
 			'filter_string', filter_string,
-			'prettified', join(map(queries, function(query) return query.prettified end), ';')
+			'prettified', aux.join(aux.map(queries, function(query) return query.prettified end), ';')
 		))
 		update_search_listings()
 	else
-		print('Invalid filter:', error)
+		aux.print('Invalid filter:', error)
 	end
 end
 
@@ -118,14 +118,14 @@ function enable_auto_buy(search)
 	local queries, error = filter_util.queries(search.filter_string)
 	if queries then
 		if getn(queries) > 1 then
-			print('Error: Auto Buy does not support multi-queries')
-		elseif size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(search.filter_string).blizzard.exact then
-			print('Error: Auto Buy does not support Blizzard filters')
+			aux.print('Error: Auto Buy does not support multi-queries')
+		elseif aux.size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(search.filter_string).blizzard.exact then
+			aux.print('Error: Auto Buy does not support Blizzard filters')
 		else
 			search.auto_buy = true
 		end
 	else
-		print('Invalid filter:', error)
+		aux.print('Invalid filter:', error)
 	end
 end
 

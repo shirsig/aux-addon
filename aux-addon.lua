@@ -2,8 +2,6 @@ module 'aux'
 
 local T = require 'T'
 
-local info = require 'aux.util.info'
-
 _G.aux_scale = 1
 
 _G.aux = {
@@ -93,7 +91,7 @@ do
 end
 
 tab_info = {}
-function M.TAB(name)
+function M.tab(name)
 	local tab = T.map('name', name)
 	local tab_event = {
 		OPEN = function(f) tab.OPEN = f end,
@@ -107,12 +105,12 @@ end
 
 do
 	local index
-	function M.get_active_tab() return tab_info[index] end
+	function M.get_tab() return tab_info[index] end
 	function on_tab_click(i)
 		CloseDropDownMenus()
-		do (index and get_active_tab().CLOSE or nop)() end
+		do (index and get_tab().CLOSE or pass)() end
 		index = i
-		do (index and get_active_tab().OPEN or nop)() end
+		do (index and get_tab().OPEN or pass)() end
 	end
 end
 
@@ -142,7 +140,7 @@ do
 			locked = true
 			local send_signal, signal_received = signal()
 			thread(when, signal_received, function()
-				do (on_success or nop)() end
+				do (on_success or pass)() end
 				locked = false
 			end)
 			thread(when, later(5), send_signal)
@@ -165,7 +163,7 @@ do
 		CancelAuction(index)
 		local send_signal, signal_received = signal()
 		thread(when, signal_received, function()
-			do (on_success or nop)() end
+			do (on_success or pass)() end
 			locked = false
 		end)
 		thread(when, later(5), send_signal)
@@ -179,12 +177,12 @@ do
 end
 
 function handle.LOAD2()
-	AuxFrame:SetScale(aux_scale)
+	frame:SetScale(aux_scale)
 end
 
 function AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
-	AuxFrame:Show()
+	frame:Show()
 	set_tab(1)
 end
 
@@ -200,7 +198,7 @@ do
 			handler()
 		end
 		set_tab()
-		AuxFrame:Hide()
+		frame:Hide()
 	end
 end
 
