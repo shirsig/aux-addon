@@ -4,7 +4,7 @@
 ## Notes: Auction House replacement
 ## SavedVariables: aux, aux_scale, aux_post_bid, aux_ignore_owner, aux_items, aux_item_ids, aux_auctionable_items, aux_merchant_buy, aux_merchant_sell
 
-libs\module.lua
+libs\package.lua
 libs\T.lua
 
 aux-addon.lua
