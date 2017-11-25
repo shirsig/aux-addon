@@ -53,7 +53,7 @@ end
 
 do
     local scan_id = 0
-    local IDLE, SEARCHING, FOUND = T.acquire(), T.acquire(), T.acquire()
+    local IDLE, SEARCHING, FOUND = aux.enum(3)
     local state = IDLE
     local found_index
 

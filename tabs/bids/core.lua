@@ -54,7 +54,7 @@ end
 
 do
     local scan_id = 0
-    local IDLE, SEARCHING, FOUND = 1, 2, 3
+    local IDLE, SEARCHING, FOUND = aux.enum(3)
     local state = IDLE
     local found_index
 
