@@ -28,7 +28,7 @@ function tab.OPEN()
 end
 
 function tab.CLOSE()
-    get_current_search().table:SetSelectedRecord()
+    current_search().table:SetSelectedRecord()
     frame:Hide()
 end
 

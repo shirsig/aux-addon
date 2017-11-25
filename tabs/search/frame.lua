@@ -129,7 +129,7 @@ do
     btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
     btn:SetScript('OnClick', function()
         if arg1 == 'RightButton' then
-            set_filter(get_current_search().filter_string)
+            set_filter(current_search().filter_string)
         end
         execute()
     end)
@@ -164,7 +164,7 @@ do
 		return queries and aux.join(aux.map(aux.copy(queries), function(query) return query.prettified end), ';') or aux.color.red(str)
 	end
 	editbox.complete = completion.complete_filter
-    editbox.escape = function() this:SetText(get_current_search().filter_string or '') end
+    editbox.escape = function() this:SetText(current_search().filter_string or '') end
 	editbox:SetHeight(25)
 	editbox.char = function()
 		this:complete()
@@ -235,8 +235,8 @@ do
     btn:SetPoint('TOPLEFT', buyout_button, 'TOPRIGHT', 5, 0)
     btn:SetText('Clear')
     btn:SetScript('OnClick', function()
-        while tremove(get_current_search().records) do end
-        get_current_search().table:SetDatabase()
+        while tremove(current_search().records) do end
+        current_search().table:SetDatabase()
     end)
 end
 do
@@ -523,7 +523,7 @@ for _ = 1, 5 do
     local table = auction_listing.new(frame.results, 16, auction_listing.search_columns)
     table:SetHandler('OnClick', function(row, button)
 	    if IsAltKeyDown() then
-		    if get_current_search().table:GetSelection().record == row.record then
+		    if current_search().table:GetSelection().record == row.record then
 			    if button == 'LeftButton' then
 	                buyout_button:Click()
 	            elseif button == 'RightButton' then
