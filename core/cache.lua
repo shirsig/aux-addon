@@ -197,7 +197,7 @@ function scan_wdb(item_id)
 	end
 
 	if item_id <= MAX_ITEM_ID then
-		aux.thread(when, aux.later(.5), scan_wdb, item_id)
+		aux.thread(aux.when, aux.later(.5), scan_wdb, item_id)
 	else
 		sort(aux_auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 	end
