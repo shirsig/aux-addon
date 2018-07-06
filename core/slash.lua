@@ -1,6 +1,7 @@
 module 'aux.core.slash'
 
 local aux = require 'aux'
+local info = require 'aux.util.info'
 
 function aux.handle.LOAD2()
 	tooltip_settings = aux.character_data'tooltip'
