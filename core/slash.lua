@@ -8,6 +8,7 @@ function aux.handle.LOAD2()
 end
 
 _G.aux_ignore_owner = true
+_G.aux_crafting_cost = true
 
 function status(enabled)
 	return (enabled and aux.color.green'on' or aux.color.red'off')
@@ -28,6 +29,9 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'post' and arguments[2] == 'bid' then
 	    _G.aux_post_bid = not aux_post_bid
 	    aux.print('post bid ' .. status(aux_post_bid))
+	elseif arguments[1] == 'crafting' and arguments[2] == 'cost' then
+		_G.aux_crafting_cost = not aux_crafting_cost
+		aux.print('crafting cost ' .. status(aux_crafting_cost))
     elseif arguments[1] == 'tooltip' and arguments[2] == 'value' then
 	    tooltip_settings.value = not tooltip_settings.value
         aux.print('tooltip value ' .. status(tooltip_settings.value))
@@ -58,6 +62,7 @@ function SlashCmdList.AUX(command)
 		aux.print('- scale [' .. aux.color.blue(aux_scale) .. ']')
 		aux.print('- ignore owner [' .. status(aux_ignore_owner) .. ']')
 		aux.print('- post bid [' .. status(aux_post_bid) .. ']')
+		aux.print('- crafting cost [' .. status(aux_crafting_cost) .. ']')
 		aux.print('- tooltip value [' .. status(tooltip_settings.value) .. ']')
 		aux.print('- tooltip daily [' .. status(tooltip_settings.daily) .. ']')
 		aux.print('- tooltip merchant buy [' .. status(tooltip_settings.merchant_buy) .. ']')
