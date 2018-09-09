@@ -36,6 +36,11 @@ function update_search_listings()
 end
 
 function new_recent_search(filter_string, prettified)
+	for i = getn(recent_searches), 1, -1 do
+		if recent_searches[i].filter_string == filter_string then
+			tremove(recent_searches, i)
+		end
+	end
 	tinsert(recent_searches, 1, T.map(
 		'filter_string', filter_string,
 		'prettified', prettified
