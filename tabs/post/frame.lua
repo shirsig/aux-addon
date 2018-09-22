@@ -85,13 +85,15 @@ bid_listing:SetSelection(function(data)
 	return data.record == get_bid_selection() or data.record.historical_value and get_bid_selection() and get_bid_selection().historical_value
 end)
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
-    if button == 'RightButton' then
-        stack_size_slider:SetValue(row_data.record.stack_size)
-	elseif row_data.record == get_bid_selection() or row_data.record.historical_value and get_bid_selection() and get_bid_selection().historical_value then
+	if row_data.record == get_bid_selection() or row_data.record.historical_value and get_bid_selection() and get_bid_selection().historical_value then
 		set_bid_selection()
 	else
 		set_bid_selection(row_data.record)
 	end
+	refresh = true
+end)
+bid_listing:SetHandler('OnDoubleClick', function(table, row_data, column, button)
+	stack_size_slider:SetValue(row_data.record.stack_size)
 	refresh = true
 end)
 
@@ -107,13 +109,15 @@ buyout_listing:SetSelection(function(data)
 	return data.record == get_buyout_selection() or data.record.historical_value and get_buyout_selection() and get_buyout_selection().historical_value
 end)
 buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)
-    if button == 'RightButton' then
-        stack_size_slider:SetValue(row_data.record.stack_size)
-    elseif row_data.record == get_buyout_selection() or row_data.record.historical_value and get_buyout_selection() and get_buyout_selection().historical_value then
+	if row_data.record == get_buyout_selection() or row_data.record.historical_value and get_buyout_selection() and get_buyout_selection().historical_value then
 		set_buyout_selection()
 	else
 		set_buyout_selection(row_data.record)
 	end
+	refresh = true
+end)
+buyout_listing:SetHandler('OnDoubleClick', function(table, row_data, column, button)
+	stack_size_slider:SetValue(row_data.record.stack_size)
 	refresh = true
 end)
 
