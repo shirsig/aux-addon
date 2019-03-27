@@ -59,6 +59,11 @@ function handle.LOAD()
         crafting_cost = true,
         post_bid = false,
         post_duration = post.DURATION_8,
+        items = {},
+        item_ids = {},
+        auctionable_items = {},
+        merchant_buy = {},
+        merchant_sell = {},
     })
     do
         local key = format('%s|%s', GetCVar'realmName', UnitName'player')
@@ -91,11 +96,6 @@ function handle.LOAD2()
     M.faction_data = assign(aux.faction[key], {
         history = {},
         post = {},
-        items = {},
-        item_ids = {},
-        auctionable_items = {},
-        merchant_buy = {},
-        merchant_sell = {},
     })
 end
 
