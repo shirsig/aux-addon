@@ -179,6 +179,15 @@ M.filters = {
             end
         end
     },
+
+    ['seller'] = {
+        input_type = 'string',
+        validator = function(name)
+            return function(auction_record)
+                return auction_record.owner and strupper(name) == strupper(auction_record.owner)
+            end
+        end
+    },
 }
 
 function operator(str)
