@@ -30,5 +30,8 @@ function module(name)
 end
 
 function require(name)
+    if not interfaces[name] then
+        create_module(name)
+    end
 	return interfaces[name]
 end

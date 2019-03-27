@@ -268,7 +268,7 @@ do
 end
 do
     local editbox = gui.editbox(frame.filter)
-    editbox.complete_item = completion.complete(function() return aux_auctionable_items end)
+    editbox.complete_item = completion.complete(function() return aux.account_data.auctionable_items end)
     editbox:SetPoint('TOPLEFT', 14, -FILTER_SPACING)
     editbox:SetWidth(260)
     editbox.char = function()

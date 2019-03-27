@@ -139,7 +139,7 @@ function scan_page(i)
 	end
 
 	local auction_info = info.auction(i, get_state().params.type)
-	if auction_info and (auction_info.owner or get_state().params.ignore_owner or aux_ignore_owner) then
+	if auction_info and (auction_info.owner or get_state().params.ignore_owner or aux.account_data.ignore_owner) then
 		auction_info.index = i
 		auction_info.page = get_state().page
 		auction_info.blizzard_query = get_query().blizzard_query
@@ -198,7 +198,7 @@ function wait_for_list_results()
         updated = true
     end)
     local timeout = aux.later(5, get_state().last_list_query)
-    local ignore_owner = get_state().params.ignore_owner or aux_ignore_owner
+    local ignore_owner = get_state().params.ignore_owner or aux.account_data.ignore_owner
 	return aux.when(function()
 		if not last_update and timeout() then
 			return true

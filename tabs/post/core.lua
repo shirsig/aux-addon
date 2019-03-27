@@ -16,21 +16,22 @@ local gui = require 'aux.gui'
 
 local tab = aux.tab 'Post'
 
-local DURATION_4, DURATION_8, DURATION_24 = 120, 480, 1440
 local settings_schema = {'tuple', '#', {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
 local scan_id, inventory_records, bid_records, buyout_records = 0, {}, {}, {}
+
+M.DURATION_2, M.DURATION_8, M.DURATION_24 = 120, 480, 1440
 
 refresh = true
 
 selected_item = nil
 
 function get_default_settings()
-	return T.map('duration', DURATION_8, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
+	return T.map('duration', aux.account_data.post_duration, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
 end
 
 function aux.handle.LOAD2()
-	data = aux.faction_data'post'
+	data = aux.faction_data.post
 end
 
 function read_settings(item_key)
@@ -206,7 +207,7 @@ function post_auctions()
 		local key = selected_item.key
 
         local duration_code
-		if duration == DURATION_4 then
+		if duration == DURATION_2 then
             duration_code = 2
 		elseif duration == DURATION_8 then
             duration_code = 3
@@ -543,7 +544,7 @@ function initialize_duration_dropdown()
     end
     UIDropDownMenu_AddButton{
         text = '2 Hours',
-        value = DURATION_4,
+        value = DURATION_2,
         func = on_click,
     }
     UIDropDownMenu_AddButton{

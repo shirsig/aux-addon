@@ -312,7 +312,7 @@ do
 end
 
 function aux.handle.LOAD()
-	if not aux_post_bid then
+	if not aux.account_data.post_bid then
 		frame.bid_listing:Hide()
 		frame.buyout_listing:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
 		buyout_listing:SetColInfo{

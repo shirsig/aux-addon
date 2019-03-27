@@ -41,8 +41,12 @@ The most advanced auction house addOn for the 1.12 client with some features mor
 
 ## Slash Commands
 ### General
+**/aux** (Lists the settings)<br/>
+**/aux scale _factor_** (Scales the aux GUI by _factor_)<br/>
 **/aux ignore owner** (Disables waiting for owner names when scanning. Recommended)<br/>
 **/aux post bid** (Adds a bid price listing to the post tab)<br/>
+**/aux crafting cost** (Toggles the crafting price information)<br/>
+**/aux post duration _hours_** (Sets the default auction duration to _2_/_8_/_24_ hours)<br/>
 ### Tooltip
 **/aux tooltip value**<br/>
 **/aux tooltip daily**<br/>

@@ -1,15 +1,7 @@
 module 'aux'
 
 local T = require 'T'
-
-_G.aux_scale = 1
-
-_G.aux = {
-	character = {},
-	faction = {},
-	realm = {},
-	account = {},
-}
+local post = require 'aux.tabs.post'
 
 M.print = T.vararg-function(arg)
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '<aux> ' .. join(map(arg, tostring), ' '))
@@ -53,41 +45,58 @@ do
 	end)
 end
 
-do
-	local cache = {}
-	function handle.LOAD()
-		cache.account = aux.account
-		do
-			local key = format('%s|%s', GetCVar'realmName', UnitName'player')
-			aux.character[key] = aux.character[key] or {}
-			cache.character = aux.character[key]
-		end
-		do
-			local key = GetCVar'realmName'
-			aux.realm[key] = aux.realm[key] or {}
-			cache.realm = aux.realm[key]
-		end
-	end
-	function handle.LOAD2()
-		do
-			local key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
-			aux.faction[key] = aux.faction[key] or {}
-			cache.faction = aux.faction[key]
-		end
-	end
-	for scope in T.temp-T.set('character', 'faction', 'realm', 'account') do
-		local scope = scope
-		M[scope .. '_data'] = function(key, init)
-			if not cache[scope] then error('Cache for ' .. scope .. ' data not ready.', 2) end
-			cache[scope][key] = cache[scope][key] or {}
-			for k, v in init or T.empty do
-				if cache[scope][key][k] == nil then
-					cache[scope][key][k] = v
-				end
-			end
-			return cache[scope][key]
-		end
-	end
+function handle.LOAD()
+    _G.aux = aux or {}
+    assign(aux, {
+        account = {},
+        realm = {},
+        faction = {},
+        character = {},
+    })
+    M.account_data = assign(aux.account, {
+        scale = 1,
+        ignore_owner = true,
+        crafting_cost = true,
+        post_bid = false,
+        post_duration = post.DURATION_8,
+    })
+    do
+        local key = format('%s|%s', GetCVar'realmName', UnitName'player')
+        aux.character[key] = aux.character[key] or {}
+        M.character_data = assign(aux.character[key], {
+            tooltip = {
+                value = true,
+                merchant_sell = false,
+                merchant_buy = false,
+                daily = false,
+                disenchant_value = false,
+                disenchant_distribution = false,
+            }
+        })
+    end
+    do
+        local key = GetCVar'realmName'
+        aux.realm[key] = aux.realm[key] or {}
+        M.realm_data = assign(aux.realm[key], {
+            characters = {},
+            recent_searches = {},
+            favorite_searches = {},
+        })
+    end
+end
+
+function handle.LOAD2()
+    local key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
+    aux.faction[key] = aux.faction[key] or {}
+    M.faction_data = assign(aux.faction[key], {
+        history = {},
+        post = {},
+        items = {},
+        item_ids = {},
+        auctionable_items = {},
+        merchant_buy = {},
+        merchant_sell = {},
+    })
 end
 
 tab_info = {}
@@ -177,7 +186,7 @@ do
 end
 
 function handle.LOAD2()
-	frame:SetScale(aux_scale)
+	frame:SetScale(account_data.scale)
 end
 
 function AUCTION_HOUSE_SHOW()

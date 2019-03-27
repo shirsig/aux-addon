@@ -5,8 +5,8 @@ local aux = require 'aux'
 local filter_util = require 'aux.util.filter'
 local gui = require 'aux.gui'
 
-function aux.handle.LOAD2()
-	recent_searches, favorite_searches = aux.realm_data'recent_searches', aux.realm_data'favorite_searches'
+function aux.handle.LOAD()
+	recent_searches, favorite_searches = aux.realm_data.recent_searches, aux.realm_data.favorite_searches
 end
 
 function update_search_listings()

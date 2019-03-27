@@ -10,6 +10,15 @@ M.immutable = setmetatable(T.acquire(), {
 	end
 })
 
+function M.assign(t1, t2)
+    for k, v in t2 do
+        if t1[k] == nil then
+            t1[k] = v
+        end
+    end
+    return t1
+end
+
 function M.enum(n)
 	if n > 0 then return immutable-{}, enum(n - 1) end
 end

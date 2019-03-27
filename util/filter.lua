@@ -282,7 +282,7 @@ function M.parse_filter_string(str)
             if input_type ~= '' then
                 if not parts[i + 1] or not parse_parameter(input_type, parts[i + 1]) then
                     if parts[i] == 'item' then
-                        return nil, 'Invalid item name', aux_auctionable_items
+                        return nil, 'Invalid item name', aux.account_data.auctionable_items
                     elseif type(input_type) == 'table' then
                         return nil, 'Invalid choice for ' .. parts[i], input_type
                     else
@@ -399,7 +399,7 @@ function suggestions(filter)
 
     -- item names
     if getn(filter.components) == 0 then
-	    for _, name in ipairs(aux_auctionable_items) do
+	    for _, name in ipairs(aux.account_data.auctionable_items) do
             tinsert(suggestions, name .. '/exact')
         end
     end

@@ -8,7 +8,7 @@ local history = require 'aux.core.history'
 local search_tab = require 'aux.tabs.search'
 
 function aux.handle.LOAD()
-    if not aux_crafting_cost then
+    if not aux.account_data.crafting_cost then
         return
     end
     aux.event_listener('ADDON_LOADED', function()

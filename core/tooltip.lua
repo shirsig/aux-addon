@@ -13,7 +13,7 @@ local UNKNOWN = GRAY_FONT_COLOR_CODE .. '?' .. FONT_COLOR_CODE_CLOSE
 local game_tooltip_hooks, game_tooltip_money = {}, 0
 
 function aux.handle.LOAD()
-	settings = aux.character_data('tooltip', {value=true})
+	settings = aux.character_data.tooltip
 	do
 		local inside_hook = false
 	    for name, f in game_tooltip_hooks do
