@@ -35,7 +35,7 @@ local WEAPON = T.set(
 
 function M.value(slot, quality, level)
     local expectation
-    for _, event in distribution(slot, quality, level) do
+    for _, event in pairs(distribution(slot, quality, level)) do
         local value = history.value(event.item_id .. ':' .. 0)
         if not value then
             return
