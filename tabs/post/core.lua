@@ -114,7 +114,7 @@ function update_auction_listing(listing, records, reference)
 	if selected_item then
 		local historical_value = history.value(selected_item.key)
 		local stack_size = stack_size_slider:GetValue()
-		for _, record in records[selected_item.key] or T.empty do
+		for _, record in pairs(records[selected_item.key] or T.empty) do
 			local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and aux.color.red
 			local price = record.unit_price * (listing == 'bid' and record.stack_size / stack_size_slider:GetValue() or 1)
 			tinsert(rows, T.map(
@@ -172,7 +172,7 @@ function update_auction_listings()
 end
 
 function M.select_item(item_key)
-    for _, inventory_record in aux.filter(aux.copy(inventory_records), function(record) return record.aux_quantity > 0 end) do
+    for _, inventory_record in pairs(aux.filter(aux.copy(inventory_records), function(record) return record.aux_quantity > 0 end)) do
         if inventory_record.key == item_key then
             update_item(inventory_record)
             return
@@ -231,7 +231,7 @@ function post_auctions()
                 end
                 update_inventory_records()
 				local same
-                for _, record in inventory_records do
+                for _, record in pairs(inventory_records) do
                     if record.key == key then
 	                    same = record
 	                    break
@@ -340,7 +340,7 @@ function quantity_update(maximize_count)
 end
 
 function unit_vendor_price(item_key)
-    for slot in info.inventory() do
+    for slot in pairs(info.inventory()) do
 	    T.temp(slot)
         local item_info = T.temp-info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
@@ -407,7 +407,7 @@ end
 
 function update_inventory_records()
     local auctionable_map = T.temp-T.acquire()
-    for slot in info.inventory() do
+    for slot in pairs(info.inventory()) do
 	    T.temp(slot)
 	    local item_info = T.temp-info.container_item(unpack(slot))
         if item_info then
@@ -495,7 +495,7 @@ function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price,
     bid_records[key] = bid_records[key] or T.acquire()
     do
 	    local entry
-	    for _, record in bid_records[key] do
+	    for _, record in pairs(bid_records[key]) do
 	        if unit_blizzard_bid == record.unit_price and aux_quantity == record.stack_size and duration == record.duration and info.is_player(owner) == record.own then
 	            entry = record
 	        end
@@ -510,7 +510,7 @@ function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price,
     if unit_buyout_price == 0 then return end
     do
 	    local entry
-	    for _, record in buyout_records[key] do
+	    for _, record in pairs(buyout_records[key]) do
 		    if unit_buyout_price == record.unit_price and aux_quantity == record.stack_size and duration == record.duration and info.is_player(owner) == record.own then
 			    entry = record
 		    end

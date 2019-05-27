@@ -168,10 +168,10 @@ function start_real_time_scan(query, search, continuation)
 		end,
 		on_complete = function()
 			local map = T.temp-T.acquire()
-			for _, record in search.records do
+			for _, record in pairs(search.records) do
 				map[record.sniping_signature] = record
 			end
-			for _, record in new_records do
+			for _, record in pairs(new_records) do
 				map[record.sniping_signature] = record
 			end
 			T.release(new_records)
@@ -347,7 +347,7 @@ function M.execute(resume, real_time)
 	if real_time then
 		start_real_time_scan(queries[1], nil, continuation)
 	else
-		for _, query in queries do
+		for _, query in pairs(queries) do
 			query.blizzard_query.first_page = current_search().first_page
 			query.blizzard_query.last_page = current_search().last_page
 		end

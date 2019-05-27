@@ -65,12 +65,12 @@ function M.value(item_key)
 		item_record = read_record(item_key)
 		if getn(item_record.data_points) > 0 then
 			local total_weight, weighted_values = 0, T.temp-T.acquire()
-			for _, data_point in item_record.data_points do
+			for _, data_point in pairs(item_record.data_points) do
 				local weight = .99 ^ aux.round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
 				total_weight = total_weight + weight
 				tinsert(weighted_values, T.map('value', data_point.value, 'weight', weight))
 			end
-			for _, weighted_value in weighted_values do
+			for _, weighted_value in pairs(weighted_values) do
 				weighted_value.weight = weighted_value.weight / total_weight
 			end
 			value = weighted_median(weighted_values)

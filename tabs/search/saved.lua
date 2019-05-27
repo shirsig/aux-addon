@@ -91,7 +91,7 @@ handlers = {
 
 function get_auto_buy_validator()
 	local validators = T.acquire()
-	for _, search in favorite_searches do
+	for _, search in pairs(favorite_searches) do
 		if search.auto_buy then
 			local queries, error = filter_util.queries(search.filter_string)
 			if queries then

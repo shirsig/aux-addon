@@ -38,7 +38,7 @@ do
 	end
 	function aux.handle.LOAD()
 		characters = aux.realm_data.characters
-		for k, v in characters do
+		for k, v in pairs(characters) do
 			if GetTime() > v + 60 * 60 * 24 * 30 then
 				characters[k] = nil
 			end
@@ -153,7 +153,7 @@ function merchant_buy_scan()
 end
 
 function merchant_sell_scan()
-	for slot in inventory() do
+	for slot in pairs(inventory()) do
 		T.temp(slot)
 		local item_info = T.temp-container_item(unpack(slot))
 		if item_info then

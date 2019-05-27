@@ -14,7 +14,7 @@ local current_owner_page
 function M.current_owner_page() return current_owner_page end
 
 local event_frame = CreateFrame'Frame'
-for event in T.temp-T.set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE') do
+for event in pairs(T.temp-T.set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE')) do
 	event_frame:RegisterEvent(event)
 end
 
@@ -29,15 +29,15 @@ do
 	function set_handler.LOAD2(f)
 		tinsert(handlers2, f)
 	end
-	event_frame:SetScript('OnEvent', function()
+	event_frame:SetScript('OnEvent', function(self, event)
 		if event == 'ADDON_LOADED' then
 			if arg1 == 'Blizzard_AuctionUI' then
                 auction_ui_loaded()
 			end
 		elseif event == 'VARIABLES_LOADED' then
-			for _, f in handlers do f() end
+			for _, f in ipairs(handlers) do f() end
 		elseif event == 'PLAYER_LOGIN' then
-			for _, f in handlers2 do f() end
+			for _, f in ipairs(handlers2) do f() end
 			print('loaded - /aux')
 		else
 			_M[event]()
@@ -66,7 +66,7 @@ function handle.LOAD()
         merchant_sell = {},
     })
     do
-        local key = format('%s|%s', GetCVar'realmName', UnitName'player')
+        local key = format('%s|%s', GetRealmName(), UnitName'player')
         aux.character[key] = aux.character[key] or {}
         M.character_data = assign(aux.character[key], {
             tooltip = {
@@ -80,7 +80,7 @@ function handle.LOAD()
         })
     end
     do
-        local key = GetCVar'realmName'
+        local key = GetRealmName()
         aux.realm[key] = aux.realm[key] or {}
         M.realm_data = assign(aux.realm[key], {
             characters = {},
@@ -88,15 +88,14 @@ function handle.LOAD()
             favorite_searches = {},
         })
     end
-end
-
-function handle.LOAD2()
-    local key = format('%s|%s', GetCVar'realmName', UnitFactionGroup'player')
-    aux.faction[key] = aux.faction[key] or {}
-    M.faction_data = assign(aux.faction[key], {
-        history = {},
-        post = {},
-    })
+    do
+        local key = format('%s|%s', GetRealmName(), UnitFactionGroup 'player')
+        aux.faction[key] = aux.faction[key] or {}
+        M.faction_data = assign(aux.faction[key], {
+            history = {},
+            post = {},
+        })
+    end
 end
 
 tab_info = {}

@@ -16,7 +16,7 @@ function aux.handle.LOAD()
 	settings = aux.character_data.tooltip
 	do
 		local inside_hook = false
-	    for name, f in game_tooltip_hooks do
+	    for name, f in pairs(game_tooltip_hooks) do
 	        local name, f = name, f
 	        aux.hook(name, GameTooltip, T.vararg-function(arg)
                 game_tooltip_money = 0
@@ -204,7 +204,7 @@ end
 function game_tooltip_hooks:SetAuctionSellItem()
     local name, _, quantity = GetAuctionSellItemInfo()
     if name then
-        for slot in info.inventory() do
+        for slot in pairs(info.inventory()) do
 	        T.temp(slot)
             local link = GetContainerItemLink(unpack(slot))
             if link and aux.select(5, info.parse_link(link)) == name then

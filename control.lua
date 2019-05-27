@@ -15,7 +15,7 @@ function handle.LOAD()
 end
 
 function EVENT()
-	for id, listener in listeners do
+	for id, listener in pairs(listeners) do
 		if listener.killed then
 			listeners[id] = nil
 		elseif event == listener.event then
@@ -26,9 +26,9 @@ end
 
 do
 	function UPDATE()
-		for _, listener in listeners do
+		for _, listener in pairs(listeners) do
 			local event, needed = listener.event, false
-			for _, listener in listeners do
+			for _, listener in pairs(listeners) do
 				needed = needed or listener.event == event and not listener.killed
 			end
 			if not needed then
@@ -36,7 +36,7 @@ do
 			end
 		end
 
-		for id, thread in threads do
+		for id, thread in pairs(threads) do
 			if thread.killed or not thread.k then
 				threads[id] = nil
 			else

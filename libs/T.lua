@@ -1,22 +1,21 @@
 if module 'T' then return end
 
-local next, getn, setn, tremove, setmetatable = next, getn, table.setn, tremove, setmetatable
+local next, getn, tremove, setmetatable = next, getn, tremove, setmetatable
 
 local wipe, acquire, release
 local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, {__mode='k'}), {}
 
 function wipe(t)
 	setmetatable(t, nil)
-	for k in t do
+	for k in pairs(t) do
 		t[k] = nil
 	end
 	t.reset, t.reset = nil, 1
-	setn(t, 0)
 end
 M.wipe = wipe
 
 CreateFrame'Frame':SetScript('OnUpdate', function()
-	for t in auto_release do
+	for t in pairs(auto_release) do
 		release(t)
 	end
 	wipe(auto_release)
@@ -85,7 +84,7 @@ do
 	local MAXPARAMS = 100
 
 	local code = [[
-		local f, setn, acquire, auto_release = f, setn, acquire, auto_release
+		local f, acquire, auto_release = f, acquire, auto_release
 		return function(
 	]]
 	for i = 1, MAXPARAMS - 1 do
@@ -104,7 +103,6 @@ do
 		until true
 		local t = acquire()
 		auto_release[t] = true
-		setn(t, n)
 		repeat
 	]]
 	for i = 1, MAXPARAMS - 1 do
@@ -118,7 +116,7 @@ do
 
 	function vararg(f)
 		local chunk = loadstring(code)
-		setfenv(chunk, {f=f, setn=setn, acquire=acquire, auto_release=auto_release})
+		setfenv(chunk, {f=f, acquire=acquire, auto_release=auto_release})
 		return chunk()
 	end
 	M.vararg = setmetatable({}, {
@@ -135,7 +133,7 @@ M.list = vararg(function(arg)
 end)
 M.set = vararg(function(arg)
 	local t = acquire()
-	for _, v in arg do
+	for _, v in pairs(arg) do
 		t[v] = true
 	end
 	return t

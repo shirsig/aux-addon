@@ -82,17 +82,17 @@ function update_form()
 
 	if blizzard_query.exact then
 		usable_checkbox:Disable()
-		for key in T.temp-T.set('min_level', 'max_level') do
+		for key in pairs(T.temp-T.set('min_level', 'max_level')) do
 			_M[key .. '_input']:EnableMouse(false)
 			_M[key .. '_input']:ClearFocus()
 		end
-		for key in T.temp-T.set('class', 'subclass', 'slot', 'quality') do
+		for key in pairs(T.temp-T.set('class', 'subclass', 'slot', 'quality')) do
 			_M[key .. '_dropdown'].button:Disable()
 		end
 		CloseDropDownMenus()
 	else
 		usable_checkbox:Enable()
-		for key in T.temp-T.set('min_level', 'max_level') do
+		for key in pairs(T.temp-T.set('min_level', 'max_level')) do
 			_M[key .. '_input']:EnableMouse(true)
 		end
 		class_dropdown.button:Enable()
@@ -126,9 +126,8 @@ function get_filter_builder_query()
 	add(blizzard_query.max_level)
 	add(blizzard_query.usable and 'usable')
 
-	local classes = T.temp-T.list(GetAuctionItemClasses())
 	if blizzard_query.class and blizzard_query.class > 0 then
-		add(strlower(classes[blizzard_query.class]))
+		add(strlower(GetItemClassInfo(blizzard_query.class)))
 	end
 	local subclasses = T.temp-T.list(GetAuctionItemSubClasses(blizzard_query.class or 0))
 	if blizzard_query.subclass and blizzard_query.subclass > 0 then
@@ -354,8 +353,8 @@ function initialize_class_dropdown()
 		end
 	end
 	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
-	for i, class in ipairs(T.temp-T.list(GetAuctionItemClasses())) do
-		UIDropDownMenu_AddButton(T.map('text', class, 'value', i, 'func', on_click))
+	for i = 1, 19 do
+		UIDropDownMenu_AddButton(T.map('text', GetItemClassInfo(i), 'value', i, 'func', on_click))
 	end
 end
 

@@ -226,7 +226,7 @@ do
 
 		tab:SetScript('OnClick', function()
 			if this.id ~= this.group.selected then
-				PlaySound('igCharacterInfoTab')
+				PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB)
 				this.group:select(this.id)
 			end
 		end)

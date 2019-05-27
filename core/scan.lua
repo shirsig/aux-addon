@@ -30,14 +30,14 @@ do
 
 	function M.abort(scan_id)
 		local aborted = T.acquire()
-		for type, state in scan_states do
+		for type, state in pairs(scan_states) do
 			if not scan_id or state.id == scan_id then
 				aux.kill_thread(state.id)
 				scan_states[type] = nil
 				tinsert(aborted, state)
 			end
 		end
-		for _, state in aborted do
+		for _, state in pairs(aborted) do
 			do (state.params.on_abort or pass)() end
 		end
 	end
@@ -53,7 +53,7 @@ do
 	end
 
 	function get_state()
-		for _, state in scan_states do
+		for _, state in pairs(scan_states) do
 			if state.id == aux.thread_id() then
 				return state
 			end
