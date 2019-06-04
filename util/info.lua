@@ -253,7 +253,7 @@ function M.display_name(item_id, no_brackets, no_color)
             name = '[' .. name .. ']'
         end
         if not no_color then
-            name = aux.select(4, GetItemQualityColor(item_info.quality)) .. name .. FONT_COLOR_CODE_CLOSE
+            name = '|c' .. aux.select(4, GetItemQualityColor(item_info.quality)) .. name .. FONT_COLOR_CODE_CLOSE
         end
         return name
     end
@@ -388,7 +388,7 @@ function M.item(item_id, suffix_id)
 end
 
 function M.item_class_index(item_class)
-    for i = 1, 19 do
+    for i = 1, 15 do
         if strupper(GetItemClassInfo(i)) == strupper(item_class) then
             return i, class
         end
@@ -405,7 +405,7 @@ end
 
 function M.item_slot_index(class_index, subclass_index, slot_name)
     for i, slot in pairs(T.temp-T.list(GetAuctionInvTypes(class_index, subclass_index))) do
-        if strupper(_G[slot]) == strupper(slot_name) then
+        if strupper(_G[slot] or '') == strupper(slot_name) then -- TODO retail why or ''
             return i, _G[slot]
         end
     end

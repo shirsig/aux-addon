@@ -204,7 +204,7 @@ end
 function game_tooltip_hooks:SetAuctionSellItem()
     local name, _, quantity = GetAuctionSellItemInfo()
     if name then
-        for slot in pairs(info.inventory()) do
+        for slot in info.inventory() do
 	        T.temp(slot)
             local link = GetContainerItemLink(unpack(slot))
             if link and aux.select(5, info.parse_link(link)) == name then

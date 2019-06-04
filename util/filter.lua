@@ -235,7 +235,7 @@ do
 						return T.list('blizzard', parser[1], label, index)
 					end
 				end
-			end
+            end
 			if not self[str] and (str == 'usable' or str == 'exact' and self.name and aux.size(self) == 1) then
 				self[str] = T.list(str, 1)
 				return T.list('blizzard', str, str, 1)
@@ -372,7 +372,7 @@ function suggestions(filter)
 
     -- classes
     if not filter.blizzard.class then
-        for i = 1, 19 do tinsert(suggestions, GetItemClassInfo(i)) end
+        for i = 1, 15 do tinsert(suggestions, GetItemClassInfo(i)) end
     end
 
     -- subclasses

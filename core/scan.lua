@@ -80,7 +80,7 @@ function scan()
 	if get_query() and not get_state().stopped then
 		do (get_state().params.on_start_query or pass)(get_state().query_index) end
 		if get_query().blizzard_query then
-			if (get_query().blizzard_query.first_page or 0) <= (get_query().blizzard_query.last_page or aux.huge) then
+			if (get_query().blizzard_query.first_page or 0) <= (get_query().blizzard_query.last_page or math.huge) then
 				get_state().page = get_query().blizzard_query.first_page or 0
 				return submit_query()
 			end

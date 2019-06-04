@@ -49,7 +49,7 @@ end
 function M.process_auction(auction_record)
 	local item_record = read_record(auction_record.item_key)
 	local unit_buyout_price = ceil(auction_record.buyout_price / auction_record.aux_quantity)
-	if unit_buyout_price > 0 and unit_buyout_price < (item_record.daily_min_buyout or aux.huge) then
+	if unit_buyout_price > 0 and unit_buyout_price < (item_record.daily_min_buyout or math.huge) then
 		item_record.daily_min_buyout = unit_buyout_price
 		write_record(auction_record.item_key, item_record)
 	end

@@ -153,7 +153,7 @@ function merchant_buy_scan()
 end
 
 function merchant_sell_scan()
-	for slot in pairs(inventory()) do
+	for slot in inventory() do
 		T.temp(slot)
 		local item_info = T.temp-container_item(unpack(slot))
 		if item_info then

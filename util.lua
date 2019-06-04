@@ -44,8 +44,6 @@ M.index = T.vararg-function(arg)
 	return t
 end
 
-M.huge = math.max
-
 function M.modified()
 	return IsShiftKeyDown() or IsControlKeyDown() or IsAltKeyDown()
 end

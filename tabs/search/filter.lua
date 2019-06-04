@@ -353,7 +353,7 @@ function initialize_class_dropdown()
 		end
 	end
 	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
-	for i = 1, 19 do
+	for i = 1, 15 do
 		UIDropDownMenu_AddButton(T.map('text', GetItemClassInfo(i), 'value', i, 'func', on_click))
 	end
 end

@@ -211,8 +211,8 @@ M.search_columns = {
         cmp = function(record_a, record_b, desc)
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
-            price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
-            price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
+            price_a = price_a > 0 and price_a or (desc and -math.huge or math.huge)
+            price_b = price_b > 0 and price_b or (desc and -math.huge or math.huge)
 
             return sort_util.compare(price_a, price_b, desc)
         end,
@@ -226,8 +226,8 @@ M.search_columns = {
             cell.text:SetText((pct or bidPct) and gui.percentage_historical(pct or bidPct, not pct) or '?')
         end,
         cmp = function(record_a, record_b, desc)
-            local pct_a = record_percentage(record_a) or (desc and -aux.huge or aux.huge)
-            local pct_b = record_percentage(record_b) or (desc and -aux.huge or aux.huge)
+            local pct_a = record_percentage(record_a) or (desc and -math.huge or math.huge)
+            local pct_b = record_percentage(record_b) or (desc and -math.huge or math.huge)
             return sort_util.compare(pct_a, pct_b, desc)
         end,
     },
@@ -341,8 +341,8 @@ M.auctions_columns = {
         cmp = function(record_a, record_b, desc)
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
-            price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
-            price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
+            price_a = price_a > 0 and price_a or (desc and -math.huge or math.huge)
+            price_b = price_b > 0 and price_b or (desc and -math.huge or math.huge)
 
             return sort_util.compare(price_a, price_b, desc)
         end,
@@ -482,8 +482,8 @@ M.bids_columns = {
         cmp = function(record_a, record_b, desc)
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
-            price_a = price_a > 0 and price_a or (desc and -aux.huge or aux.huge)
-            price_b = price_b > 0 and price_b or (desc and -aux.huge or aux.huge)
+            price_a = price_a > 0 and price_a or (desc and -math.huge or math.huge)
+            price_b = price_b > 0 and price_b or (desc and -math.huge or math.huge)
 
             return sort_util.compare(price_a, price_b, desc)
         end,

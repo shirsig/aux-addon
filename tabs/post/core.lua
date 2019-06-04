@@ -340,7 +340,7 @@ function quantity_update(maximize_count)
 end
 
 function unit_vendor_price(item_key)
-    for slot in pairs(info.inventory()) do
+    for slot in info.inventory() do
 	    T.temp(slot)
         local item_info = T.temp-info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
@@ -390,7 +390,7 @@ function update_item(item)
     else
 	    stack_size_slider:SetMinMaxValues(1, min(selected_item.max_stack, selected_item.aux_quantity))
     end
-    stack_size_slider:SetValue(aux.huge)
+    stack_size_slider:SetValue(math.huge)
     quantity_update(true)
 
     unit_start_price_input:SetText(money.to_string(settings.start_price, true, nil, nil, true))
@@ -407,7 +407,7 @@ end
 
 function update_inventory_records()
     local auctionable_map = T.temp-T.acquire()
-    for slot in pairs(info.inventory()) do
+    for slot in info.inventory() do
 	    T.temp(slot)
 	    local item_info = T.temp-info.container_item(unpack(slot))
         if item_info then
