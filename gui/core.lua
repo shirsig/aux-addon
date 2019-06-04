@@ -224,10 +224,10 @@ do
 
 		tab:SetText(text)
 
-		tab:SetScript('OnClick', function()
-			if this.id ~= this.group.selected then
+		tab:SetScript('OnClick', function(self)
+			if self.id ~= self.group.selected then
 				PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB)
-				this.group:select(this.id)
+                self.group:select(self.id)
 			end
 		end)
 
@@ -255,7 +255,7 @@ do
 		do (self._on_select or pass)(id) end
 	end
 	function mt.__index:update()
-		for _, tab in self._tabs do
+		for _, tab in pairs(self._tabs) do
 			if tab.group._selected == tab.id then
 				tab.text:SetTextColor(aux.color.label.enabled())
 				tab:Disable()
@@ -289,43 +289,43 @@ function M.editbox(parent)
     editbox:SetHeight(24)
     editbox:SetTextColor(0, 0, 0, 0)
     set_content_style(editbox)
-    editbox:SetScript('OnEscapePressed', function()
-        this:ClearFocus()
-	    do (this.escape or pass)() end
+    editbox:SetScript('OnEscapePressed', function(self)
+        self:ClearFocus()
+	    do (self.escape or pass)(self) end
     end)
-    editbox:SetScript('OnEnterPressed', function() (this.enter or pass)() end)
-    editbox:SetScript('OnEditFocusGained', function()
-	    if this.block_focus then
-		    this.block_focus = false
-		    this:ClearFocus()
+    editbox:SetScript('OnEnterPressed', function(self) (self.enter or pass)() end)
+    editbox:SetScript('OnEditFocusGained', function(self)
+	    if self.block_focus then
+            self.block_focus = false
+            self:ClearFocus()
 		    return
 	    end
-	    this.overlay:Hide()
-	    this:SetTextColor(aux.color.text.enabled())
-	    this.focused = true
-	    this:HighlightText()
-	    do (this.focus_gain or pass)() end
+        self.overlay:Hide()
+        self:SetTextColor(aux.color.text.enabled())
+        self.focused = true
+        self:HighlightText()
+	    do (self.focus_gain or pass)(self) end
     end)
-    editbox:SetScript('OnEditFocusLost', function()
-	    this.overlay:Show()
-	    this:SetTextColor(0, 0, 0, 0)
-	    this.focused = false
-	    this:HighlightText(0, 0)
-	    this:SetScript('OnUpdate', nil)
-	    do (this.focus_loss or pass)() end
+    editbox:SetScript('OnEditFocusLost', function(self)
+        self.overlay:Show()
+        self:SetTextColor(0, 0, 0, 0)
+        self.focused = false
+        self:HighlightText(0, 0)
+        self:SetScript('OnUpdate', nil)
+	    do (self.focus_loss or pass)(self) end
     end)
-    editbox:SetScript('OnTextChanged', function()
-	    this.overlay:SetText(this.formatter and this.formatter(this:GetText()) or this:GetText())
-	    do (this.change or pass)() end
+    editbox:SetScript('OnTextChanged', function(self)
+        self.overlay:SetText(self.formatter and self.formatter(self:GetText()) or self:GetText())
+	    do (self.change or pass)(self) end
     end)
-    editbox:SetScript('OnChar', function() (this.char or pass)() end)
+    editbox:SetScript('OnChar', function() (self.char or pass)() end)
     do
         local last_click = T.map('t', 0)
-        editbox:SetScript('OnMouseDown', function()
+        editbox:SetScript('OnMouseDown', function(self, arg1)
 	        if arg1 == 'RightButton' then
-		        this:SetText('')
-		        this:ClearFocus()
-		        this.block_focus = true
+                self:SetText('')
+                self:ClearFocus()
+                self.block_focus = true
 	        else
 	            local x, y = GetCursorPosition()
 	            -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
@@ -359,11 +359,11 @@ function M.editbox(parent)
 end
 
 do
-	local function update_bar()
-		if this:GetValue() < 1 then
-			this:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
+	local function update_bar(self)
+		if self:GetValue() < 1 then
+            self:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
 		else
-			this:SetAlpha(1)
+            self:SetAlpha(1)
 		end
 	end
 	function M.status_bar(parent)

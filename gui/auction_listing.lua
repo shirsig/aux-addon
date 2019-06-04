@@ -540,11 +540,11 @@ local methods = {
         end
     end,
 
-    OnHeadColumnClick = function()
+    OnHeadColumnClick = function(self, arg1)
         local button = arg1
-        local rt = this.rt
+        local rt = self.rt
 
-        if button == 'RightButton' and rt.headCells[this.columnIndex].info.isPrice then
+        if button == 'RightButton' and rt.headCells[self.columnIndex].info.isPrice then
             price_per_unit = not price_per_unit
             for _, cell in pairs(rt.headCells) do
                 if cell.info.isPrice then
@@ -556,17 +556,17 @@ local methods = {
         end
 
         local descending = false
-        if getn(rt.sorts) > 0 and rt.sorts[1].index == this.columnIndex then
+        if getn(rt.sorts) > 0 and rt.sorts[1].index == self.columnIndex then
             descending = not rt.sorts[1].descending
         end
-        rt:SetSort((descending and -1 or 1) * this.columnIndex)
+        rt:SetSort((descending and -1 or 1) * self.columnIndex)
     end,
 
-    OnIconEnter = function()
-        local rt = this:GetParent().row.rt
-        local row = this:GetParent().row
+    OnIconEnter = function(self)
+        local rt = self:GetParent().row.rt
+        local row = self:GetParent().row
         if row.record then
-	        GameTooltip:SetOwner(this, 'ANCHOR_RIGHT')
+	        GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
             info.load_tooltip(GameTooltip, row.record.tooltip)
 	        tooltip.extend_tooltip(GameTooltip, row.record.link, row.record.aux_quantity)
             info.set_shopping_tooltip(row.record.slot)
@@ -577,52 +577,52 @@ local methods = {
         GameTooltip:Hide()
     end,
 
-    OnEnter = function()
-        local rt = this.rt
-        if rt.expanded[this.expandKey] then
+    OnEnter = function(self)
+        local rt = self.rt
+        if rt.expanded[self.expandKey] then
             GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
             GameTooltip:AddLine('Double-click to collapse this item and show only the cheapest auction.', 1, 1, 1, true)
             GameTooltip:Show()
-        elseif this.expandable then
+        elseif self.expandable then
             GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
             GameTooltip:AddLine('Double-click to expand this item and show all the auctions.', 1, 1, 1, true)
             GameTooltip:Show()
         end
 
-        this.highlight:Show()
+        self.highlight:Show()
     end,
 
-    OnLeave = function()
+    OnLeave = function(self)
         GameTooltip:Hide()
-        if not this.rt.selected or this.rt.selected.search_signature ~= this.record.search_signature then
-            this.highlight:Hide()
+        if not self.rt.selected or self.rt.selected.search_signature ~= self.record.search_signature then
+            self.highlight:Hide()
         end
     end,
 
-    OnClick = function()
+    OnClick = function(self, arg1)
         local button = arg1
         if IsControlKeyDown() then
-            DressUpItemLink(this.record.link)
+            DressUpItemLink(self.record.link)
         elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
-            ChatFrameEditBox:Insert(this.record.link)
+            ChatFrameEditBox:Insert(self.record.link)
         else
-            local selection = this.rt:GetSelection()
-            if not selection or selection.record ~= this.record then
-                this.rt:SetSelectedRecord(this.record)
+            local selection = self.rt:GetSelection()
+            if not selection or selection.record ~= self.record then
+                self.rt:SetSelectedRecord(self.record)
             end
-	        do (this.rt.handlers.OnClick or pass)(this, button) end
+	        do (self.rt.handlers.OnClick or pass)(self, button) end
         end
     end,
 
-    OnDoubleClick = function()
-        local rt = this.rt
-        local expand = not rt.expanded[this.expandKey]
+    OnDoubleClick = function(self)
+        local rt = self.rt
+        local expand = not rt.expanded[self.expandKey]
 
-        rt.expanded[this.expandKey] = expand
+        rt.expanded[self.expandKey] = expand
         rt:UpdateRowInfo()
         rt:UpdateRows()
-        if not this.indented then
-            rt:SetSelectedRecord(this.record)
+        if not self.indented then
+            rt:SetSelectedRecord(self.record)
         end
     end,
 
@@ -900,8 +900,8 @@ function M.new(parent, rows, columns)
         rt[name] = func
     end
 
-    rt:SetScript('OnShow', function()
-        for _, cell in pairs(this.headCells) do
+    rt:SetScript('OnShow', function(self)
+        for _, cell in pairs(self.headCells) do
             if cell.info.isPrice then
                 cell:SetText(cell.info.title[price_per_unit and 1 or 2])
             end

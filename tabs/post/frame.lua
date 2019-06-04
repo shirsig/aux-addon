@@ -58,12 +58,12 @@ do
 	f:SetPoint('BOTTOMRIGHT', 0, 0)
 	inventory_listing = item_listing.new(
 		f,
-	    function()
+	    function(self, arg1)
 	        if arg1 == 'LeftButton' then
-	            update_item(this.item_record)
+	            update_item(self.item_record)
 	        elseif arg1 == 'RightButton' then
 	            aux.set_tab(1)
-	            search_tab.set_filter(strlower(info.item(this.item_record.item_id).name) .. '/exact')
+	            search_tab.set_filter(strlower(info.item(self.item_record.item_id).name) .. '/exact')
 	            search_tab.execute(nil, false)
 	        end
 	    end,
@@ -146,9 +146,9 @@ end
 do
 	item = gui.item(frame.parameters)
     item:SetPoint('TOPLEFT', 10, -6)
-    item.button:SetScript('OnEnter', function()
+    item.button:SetScript('OnEnter', function(self)
         if selected_item then
-            info.set_tooltip(selected_item.itemstring, this, 'ANCHOR_RIGHT')
+            info.set_tooltip(selected_item.itemstring, self, 'ANCHOR_RIGHT')
         end
     end)
     item.button:SetScript('OnLeave', function()
@@ -163,8 +163,8 @@ do
     slider:SetScript('OnValueChanged', function()
         quantity_update(true)
     end)
-    slider.editbox.change = function()
-        slider:SetValue(this:GetNumber())
+    slider.editbox.change = function(self)
+        slider:SetValue(self:GetNumber())
         quantity_update(true)
         if selected_item then
             local settings = read_settings()
@@ -193,8 +193,8 @@ do
     slider:SetScript('OnValueChanged', function()
         quantity_update()
     end)
-    slider.editbox.change = function()
-        slider:SetValue(this:GetNumber())
+    slider.editbox.change = function(self)
+        slider:SetValue(self:GetNumber())
         quantity_update()
     end
     slider.editbox:SetScript('OnTabPressed', function()
@@ -216,17 +216,17 @@ do
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
     label:SetText('Duration')
     UIDropDownMenu_Initialize(dropdown, initialize_duration_dropdown)
-    dropdown:SetScript('OnShow', function()
-        UIDropDownMenu_Initialize(this, initialize_duration_dropdown)
+    dropdown:SetScript('OnShow', function(self)
+        UIDropDownMenu_Initialize(self, initialize_duration_dropdown)
     end)
     duration_dropdown = dropdown
 end
 do
     local checkbox = gui.checkbox(frame.parameters)
     checkbox:SetPoint('TOPRIGHT', -83, -6)
-    checkbox:SetScript('OnClick', function()
+    checkbox:SetScript('OnClick', function(self)
         local settings = read_settings()
-        settings.hidden = this:GetChecked()
+        settings.hidden = self:GetChecked()
         write_settings(settings)
         refresh = true
     end)
@@ -250,11 +250,11 @@ do
 	    end
     end)
     editbox.formatter = function() return money.to_string(get_unit_start_price(), true) end
-    editbox.char = function() set_bid_selection(); set_buyout_selection(); set_unit_start_price(money.from_string(this:GetText())) end
+    editbox.char = function(self) set_bid_selection(); set_buyout_selection(); set_unit_start_price(money.from_string(self:GetText())) end
     editbox.change = function() refresh = true end
-    editbox.enter = function() this:ClearFocus() end
-    editbox.focus_loss = function()
-	    this:SetText(money.to_string(get_unit_start_price(), true, nil, nil, true))
+    editbox.enter = function(self) self:ClearFocus() end
+    editbox.focus_loss = function(self)
+        self:SetText(money.to_string(get_unit_start_price(), true, nil, nil, true))
     end
     do
         local label = gui.label(editbox, gui.font_size.small)
@@ -285,11 +285,11 @@ do
         end
     end)
     editbox.formatter = function() return money.to_string(get_unit_buyout_price(), true) end
-    editbox.char = function() set_buyout_selection(); set_unit_buyout_price(money.from_string(this:GetText())) end
+    editbox.char = function(self) set_buyout_selection(); set_unit_buyout_price(money.from_string(self:GetText())) end
     editbox.change = function() refresh = true end
-    editbox.enter = function() this:ClearFocus() end
-    editbox.focus_loss = function()
-	    this:SetText(money.to_string(get_unit_buyout_price(), true, nil, nil, true))
+    editbox.enter = function(self) self:ClearFocus() end
+    editbox.focus_loss = function(self)
+        self:SetText(money.to_string(get_unit_buyout_price(), true, nil, nil, true))
     end
     do
         local label = gui.label(editbox, gui.font_size.small)

@@ -4,8 +4,8 @@ local T = require 'T'
 local aux = require 'aux'
 
 CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
-AuxTooltip:SetScript('OnTooltipAddMoney', function()
-	this.money = arg1
+AuxTooltip:SetScript('OnTooltipAddMoney', function(self)
+    self.money = arg1
 end)
 
 do

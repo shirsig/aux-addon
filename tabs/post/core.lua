@@ -535,10 +535,10 @@ function on_update()
 end
 
 function initialize_duration_dropdown()
-    local function on_click()
-        UIDropDownMenu_SetSelectedValue(duration_dropdown, this.value)
+    local function on_click(self)
+        UIDropDownMenu_SetSelectedValue(duration_dropdown, self.value)
         local settings = read_settings()
-        settings.duration = this.value
+        settings.duration = self.value
         write_settings(settings)
         refresh = true
     end

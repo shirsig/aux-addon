@@ -159,7 +159,7 @@ end
 
 function M.tokenize(str)
 	local tokens = T.acquire()
-	for token in string.gfind(str, '%S+') do tinsert(tokens, token) end
+	for token in string.gmatch(str, '%S+') do tinsert(tokens, token) end
 	return tokens
 end
 

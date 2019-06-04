@@ -300,7 +300,7 @@ do
 		filter_display.measure:SetFont(font, font_size)
 		local lines = 0
 		local width = 0
-		for line in string.gfind(text, '<p>(.-)</p>') do
+		for line in string.gmatch(text, '<p>(.-)</p>') do
 			lines = lines + 1
 			filter_display.measure:SetText(line)
 			width = max(width, filter_display.measure:GetStringWidth())
@@ -326,11 +326,11 @@ function initialize_filter_dropdown()
 		UIDropDownMenu_AddButton(T.map(
 			'text', filter,
 			'value', filter,
-			'func', function()
-				filter_input:SetText(this.value)
-				if aux.index(filter_util.filters[this.value], 'input_type') == '' or this.value == 'not' then
+			'func', function(self)
+				filter_input:SetText(self.value)
+				if aux.index(filter_util.filters[self.value], 'input_type') == '' or self.value == 'not' then
 					add_form_component()
-				elseif filter_util.filters[this.value] then
+				elseif filter_util.filters[self.value] then
 					filter_parameter_input:Show()
 					filter_parameter_input:SetFocus()
 				else
@@ -342,9 +342,9 @@ function initialize_filter_dropdown()
 end
 
 function initialize_class_dropdown()
-	local function on_click()
-		if this.value ~= blizzard_query.class then
-			UIDropDownMenu_SetSelectedValue(class_dropdown, this.value)
+	local function on_click(self)
+		if self.value ~= blizzard_query.class then
+			UIDropDownMenu_SetSelectedValue(class_dropdown, self.value)
 			UIDropDownMenu_ClearAll(subclass_dropdown)
 			UIDropDownMenu_Initialize(subclass_dropdown, initialize_subclass_dropdown)
 			UIDropDownMenu_ClearAll(slot_dropdown)
@@ -359,9 +359,9 @@ function initialize_class_dropdown()
 end
 
 function initialize_subclass_dropdown()
-	local function on_click()
-		if this.value ~= blizzard_query.subclass then
-			UIDropDownMenu_SetSelectedValue(subclass_dropdown, this.value)
+	local function on_click(self)
+		if self.value ~= blizzard_query.subclass then
+			UIDropDownMenu_SetSelectedValue(subclass_dropdown, self.value)
 			update_form()
 		end
 	end
@@ -372,8 +372,8 @@ function initialize_subclass_dropdown()
 end
 
 function initialize_slot_dropdown()
-	local function on_click()
-		UIDropDownMenu_SetSelectedValue(slot_dropdown, this.value)
+	local function on_click(self)
+		UIDropDownMenu_SetSelectedValue(slot_dropdown, self.value)
 		update_form()
 	end
 	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
@@ -383,8 +383,8 @@ function initialize_slot_dropdown()
 end
 
 function initialize_quality_dropdown()
-	local function on_click()
-		UIDropDownMenu_SetSelectedValue(quality_dropdown, this.value)
+	local function on_click(self)
+		UIDropDownMenu_SetSelectedValue(quality_dropdown, self.value)
 		update_form()
 	end
 	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', -1, 'func', on_click))

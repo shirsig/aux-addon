@@ -75,11 +75,11 @@ do
 	real_time_button = btn
 end
 do
-	local function change()
-		local page = tonumber(this:GetText())
+	local function change(self)
+		local page = tonumber(self:GetText())
 		local valid_input = page and tostring(max(1, page)) or ''
-		if this:GetText() ~= valid_input then
-			this:SetText(valid_input)
+		if self:GetText() ~= valid_input then
+            self:SetText(valid_input)
 		end
 	end
 	do
@@ -164,16 +164,16 @@ do
 		return queries and aux.join(aux.map(aux.copy(queries), function(query) return query.prettified end), ';') or aux.color.red(str)
 	end
 	editbox.complete = completion.complete_filter
-    editbox.escape = function() this:SetText(current_search().filter_string or '') end
+    editbox.escape = function(self) self:SetText(current_search().filter_string or '') end
 	editbox:SetHeight(25)
-	editbox.char = function()
-		this:complete()
+	editbox.char = function(self)
+        self:complete()
 	end
 	editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
             last_page_input:SetFocus()
         else
-            this:HighlightText(0, 0)
+            self:HighlightText(0, 0)
         end
 	end)
 	editbox.enter = execute
@@ -271,9 +271,9 @@ do
     editbox.complete_item = completion.complete(function() return aux.account_data.auctionable_items end)
     editbox:SetPoint('TOPLEFT', 14, -FILTER_SPACING)
     editbox:SetWidth(260)
-    editbox.char = function()
+    editbox.char = function(self)
         if blizzard_query.exact then
-            this:complete_item()
+            self:complete_item()
         end
     end
     editbox:SetScript('OnTabPressed', function()
@@ -316,10 +316,10 @@ do
         end
     end)
     editbox.enter = function() editbox:ClearFocus() end
-    editbox.change = function()
-	    local valid_level = valid_level(this:GetText())
-	    if tostring(valid_level) ~= this:GetText() then
-		    this:SetText(valid_level or '')
+    editbox.change = function(self)
+	    local valid_level = valid_level(self:GetText())
+	    if tostring(valid_level) ~= self:GetText() then
+            self:SetText(valid_level or '')
 	    end
 	    update_form()
     end
@@ -342,10 +342,10 @@ do
         end
     end)
     editbox.enter = function() editbox:ClearFocus() end
-    editbox.change = function()
-	    local valid_level = valid_level(this:GetText())
-	    if tostring(valid_level) ~= this:GetText() then
-		    this:SetText(valid_level or '')
+    editbox.change = function(self)
+	    local valid_level = valid_level(self:GetText())
+	    if tostring(valid_level) ~= self:GetText() then
+            self:SetText(valid_level or '')
 	    end
 	    update_form()
     end
@@ -372,8 +372,8 @@ do
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
     label:SetText('Item Class')
     UIDropDownMenu_Initialize(dropdown, initialize_class_dropdown)
-    dropdown:SetScript('OnShow', function()
-        UIDropDownMenu_Initialize(this, initialize_class_dropdown)
+    dropdown:SetScript('OnShow', function(self)
+        UIDropDownMenu_Initialize(self, initialize_class_dropdown)
     end)
 end
 do
@@ -385,8 +385,8 @@ do
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
     label:SetText('Item Subclass')
     UIDropDownMenu_Initialize(dropdown, initialize_subclass_dropdown)
-    dropdown:SetScript('OnShow', function()
-        UIDropDownMenu_Initialize(this, initialize_subclass_dropdown)
+    dropdown:SetScript('OnShow', function(self)
+        UIDropDownMenu_Initialize(self, initialize_subclass_dropdown)
     end)
 end
 do
@@ -398,8 +398,8 @@ do
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
     label:SetText('Item Slot')
     UIDropDownMenu_Initialize(dropdown, initialize_slot_dropdown)
-    dropdown:SetScript('OnShow', function()
-        UIDropDownMenu_Initialize(this, initialize_slot_dropdown)
+    dropdown:SetScript('OnShow', function(self)
+        UIDropDownMenu_Initialize(self, initialize_slot_dropdown)
     end)
 end
 do
@@ -411,8 +411,8 @@ do
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
     label:SetText('Min Quality')
     UIDropDownMenu_Initialize(dropdown, initialize_quality_dropdown)
-    dropdown:SetScript('OnShow', function()
-        UIDropDownMenu_Initialize(this, initialize_quality_dropdown)
+    dropdown:SetScript('OnShow', function(self)
+        UIDropDownMenu_Initialize(self, initialize_quality_dropdown)
     end)
 end
 gui.vertical_line(frame.filter, 332)
@@ -421,8 +421,8 @@ do
     dropdown:SetPoint('TOPRIGHT', -174.5, -10)
     dropdown:SetWidth(150)
     UIDropDownMenu_Initialize(dropdown, initialize_filter_dropdown)
-    dropdown:SetScript('OnShow', function()
-        UIDropDownMenu_Initialize(this, initialize_filter_dropdown)
+    dropdown:SetScript('OnShow', function(self)
+        UIDropDownMenu_Initialize(self, initialize_filter_dropdown)
     end)
     _G[dropdown:GetName() .. 'Text']:Hide()
     local label = gui.label(dropdown, gui.font_size.medium)
@@ -436,9 +436,9 @@ do
 	input:SetWidth(150)
 	input:SetScript('OnTabPressed', function() filter_parameter_input:SetFocus() end)
 	input.complete = completion.complete(function() return T.temp-T.list('and', 'or', 'not', unpack(aux.keys(filter_util.filters))) end)
-	input.char = function() this:complete() end
-	input.change = function()
-		local text = this:GetText()
+	input.char = function(self) self:complete() end
+	input.change = function(self)
+		local text = self:GetText()
 		if filter_util.filters[text] and filter_util.filters[text].input_type ~= '' then
 			local _, _, suggestions = filter_util.parse_filter_string(text .. '/')
 			filter_parameter_input:SetNumeric(filter_util.filters[text].input_type == 'number')
@@ -464,7 +464,7 @@ do
     input:SetScript('OnTabPressed', function()
 	    filter_input:SetFocus()
     end)
-    input.char = function() this:complete() end
+    input.char = function(self) self:complete() end
     input.enter = add_form_component
     input:Hide()
     filter_parameter_input = input
@@ -476,29 +476,29 @@ do
     scroll_frame:SetPoint('TOPLEFT', 348.5, -50)
     scroll_frame:EnableMouse(true)
     scroll_frame:EnableMouseWheel(true)
-    scroll_frame:SetScript('OnMouseWheel', function()
-	    local child = this:GetScrollChild()
+    scroll_frame:SetScript('OnMouseWheel', function(self)
+	    local child = self:GetScrollChild()
 	    child:SetFont('p', [[Fonts\ARIALN.TTF]], aux.bounded(gui.font_size.small, gui.font_size.large, aux.select(2, child:GetFont()) + arg1*2))
 	    update_filter_display()
     end)
     scroll_frame:RegisterForDrag('LeftButton')
-    scroll_frame:SetScript('OnDragStart', function()
-	    this.x, this.y = GetCursorPosition()
-	    this.x_offset, this.y_offset = this:GetHorizontalScroll(), this:GetVerticalScroll()
-		this.x_extra, this.y_extra = 0, 0
-	    this:SetScript('OnUpdate', function()
+    scroll_frame:SetScript('OnDragStart', function(self)
+        self.x, self.y = GetCursorPosition()
+        self.x_offset, self.y_offset = self:GetHorizontalScroll(), self:GetVerticalScroll()
+        self.x_extra, self.y_extra = 0, 0
+        self:SetScript('OnUpdate', function()
 		    local x, y = GetCursorPosition()
-		    local new_x_offset = this.x_offset + x - this.x
-		    local new_y_offset = this.y_offset + y - this.y
+		    local new_x_offset = self.x_offset + x - self.x
+		    local new_y_offset = self.y_offset + y - self.y
 
-		    set_filter_display_offset(new_x_offset - this.x_extra, new_y_offset - this.y_extra)
+		    set_filter_display_offset(new_x_offset - self.x_extra, new_y_offset - self.y_extra)
 
-		    this.x_extra = max(this.x_extra, new_x_offset)
-		    this.y_extra = min(this.y_extra, new_y_offset)
+            self.x_extra = max(self.x_extra, new_x_offset)
+            self.y_extra = min(self.y_extra, new_y_offset)
 	    end)
     end)
-    scroll_frame:SetScript('OnDragStop', function()
-	    this:SetScript('OnUpdate', nil)
+    scroll_frame:SetScript('OnDragStop', function(self)
+        self:SetScript('OnUpdate', nil)
     end)
     gui.set_content_style(scroll_frame, -2, -2, -2, -2)
     local scroll_child = CreateFrame('SimpleHTML', nil, scroll_frame)

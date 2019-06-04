@@ -11,7 +11,7 @@ function aux.handle.LOAD()
     if not aux.account_data.crafting_cost then
         return
     end
-    aux.event_listener('ADDON_LOADED', function()
+    aux.event_listener('ADDON_LOADED', function(arg1)
         if arg1 == 'Blizzard_CraftUI' then
             craft_ui_loaded()
         elseif arg1 == 'Blizzard_TradeSkillUI' then
@@ -28,11 +28,11 @@ do
         return label
     end
     local function hook_quest_item(f)
-        f:SetScript('OnMouseUp', function()
+        f:SetScript('OnMouseUp', function(self, arg1)
             if arg1 == 'RightButton' then
                 if aux.get_tab() then
                     aux.set_tab(1)
-                    search_tab.set_filter(_G[this:GetName() .. 'Name']:GetText() .. '/exact')
+                    search_tab.set_filter(_G[self:GetName() .. 'Name']:GetText() .. '/exact')
                     search_tab.execute(nil, false)
                 end
             end

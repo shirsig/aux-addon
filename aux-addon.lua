@@ -3,6 +3,39 @@ module 'aux'
 local T = require 'T'
 local post = require 'aux.tabs.post'
 
+function _G.GetAuctionInvTypes() -- TODO retail
+    return {
+        "INVTYPE_HEAD",
+        "INVTYPE_NECK",
+        "INVTYPE_SHOULDER",
+        "INVTYPE_BODY",
+        "INVTYPE_CHEST",
+        "INVTYPE_WAIST",
+        "INVTYPE_LEGS",
+        "INVTYPE_FEET",
+        "INVTYPE_WRIST",
+        "INVTYPE_HAND",
+        "INVTYPE_FINGER",
+        "INVTYPE_TRINKET",
+        "INVTYPE_CLOAK",
+        "INVTYPE_HOLDABLE",
+        "INVTYPE_RANGEDRIGHT",
+        "INVTYPE_THROWN",
+        "INVTYPE_AMMO",
+        "INVTYPE_HOLDABLE",
+        "INVTYPE_WEAPONOFFHAND",
+        "INVTYPE_WEAPONMAINHAND",
+        "INVTYPE_ROBE",
+        "INVTYPE_TABARD",
+        "INVTYPE_BAG",
+        "INVTYPE_2HWEAPON",
+        "INVTYPE_CLOAK",
+        "INVTYPE_RANGED",
+        "INVTYPE_SHIELD",
+        "INVTYPE_WEAPON",
+    }
+end
+
 M.print = T.vararg-function(arg)
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '<aux> ' .. join(map(arg, tostring), ' '))
 end
@@ -29,18 +62,18 @@ do
 	function set_handler.LOAD2(f)
 		tinsert(handlers2, f)
 	end
-	event_frame:SetScript('OnEvent', function(self, event)
+	event_frame:SetScript('OnEvent', function(_, event, arg1, ...)
 		if event == 'ADDON_LOADED' then
 			if arg1 == 'Blizzard_AuctionUI' then
                 auction_ui_loaded()
 			end
 		elseif event == 'VARIABLES_LOADED' then
-			for _, f in ipairs(handlers) do f() end
+			for _, f in ipairs(handlers) do f(arg1, ...) end
 		elseif event == 'PLAYER_LOGIN' then
-			for _, f in ipairs(handlers2) do f() end
+			for _, f in ipairs(handlers2) do f(arg1, ...) end
 			print('loaded - /aux')
 		else
-			_M[event]()
+			_M[event](arg1, ...)
 		end
 	end)
 end
@@ -188,7 +221,7 @@ function handle.LOAD2()
 	frame:SetScale(account_data.scale)
 end
 
-function AUCTION_HOUSE_SHOW()
+function M.AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
 	frame:Show()
 	set_tab(1)
@@ -202,7 +235,7 @@ do
 	function AUCTION_HOUSE_CLOSED()
 		bids_loaded = false
 		current_owner_page = nil
-		for _, handler in handlers do
+		for _, handler in pairs(handlers) do
 			handler()
 		end
 		set_tab()

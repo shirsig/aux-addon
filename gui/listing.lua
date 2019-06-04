@@ -11,46 +11,46 @@ local HEAD_SPACE = 2
 local DEFAULT_COL_INFO = {{width=1}}
 
 local handlers = {
-    OnEnter = function()
-        this.mouseover = true
-        if not this.data then return end
-        if not this.st.highlightDisabled then
-            this.highlight:Show()
+    OnEnter = function(self)
+        self.mouseover = true
+        if not self.data then return end
+        if not self.st.highlightDisabled then
+            self.highlight:Show()
         end
 
-        local handler = this.st.handlers.OnEnter
+        local handler = self.st.handlers.OnEnter
         if handler then
-            handler(this.st, this.data, this)
+            handler(self.st, self.data, self)
         end
     end,
 
-    OnLeave = function()
-        this.mouseover = false
-        if not this.data then return end
-        if not (this.st.selected and this.st.selected(this.data)) then
-            this.highlight:Hide()
+    OnLeave = function(self)
+        self.mouseover = false
+        if not self.data then return end
+        if not (self.st.selected and self.st.selected(self.data)) then
+            self.highlight:Hide()
         end
 
-        local handler = this.st.handlers.OnLeave
+        local handler = self.st.handlers.OnLeave
         if handler then
-            handler(this.st, this.data, this)
+            handler(self.st, self.data, self)
         end
     end,
 
-    OnClick = function()
-        if not this.data then return end
-        local handler = this.st.handlers.OnClick
+    OnClick = function(self, arg1)
+        if not self.data then return end
+        local handler = self.st.handlers.OnClick
         if handler then
-            handler(this.st, this.data, this, arg1)
+            handler(self.st, self.data, self, arg1)
         end
     end,
 
-	OnDoubleClick = function()
-		if not this.data then return end
+	OnDoubleClick = function(self, arg1)
+		if not self.data then return end
 
-		local handler = this.st.handlers.OnDoubleClick
+		local handler = self.st.handlers.OnDoubleClick
 		if handler then
-			handler(this.st, this.data, this, arg1)
+			handler(self.st, self.data, self, arg1)
 		end
 	end,
 }
