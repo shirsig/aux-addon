@@ -293,7 +293,7 @@ function M.editbox(parent)
         self:ClearFocus()
 	    do (self.escape or pass)(self) end
     end)
-    editbox:SetScript('OnEnterPressed', function(self) (self.enter or pass)() end)
+    editbox:SetScript('OnEnterPressed', function(self) (self.enter or pass)(self) end)
     editbox:SetScript('OnEditFocusGained', function(self)
 	    if self.block_focus then
             self.block_focus = false
@@ -318,7 +318,7 @@ function M.editbox(parent)
         self.overlay:SetText(self.formatter and self.formatter(self:GetText()) or self:GetText())
 	    do (self.change or pass)(self) end
     end)
-    editbox:SetScript('OnChar', function() (self.char or pass)() end)
+    editbox:SetScript('OnChar', function(self) (self.char or pass)(self) end)
     do
         local last_click = T.map('t', 0)
         editbox:SetScript('OnMouseDown', function(self, arg1)

@@ -169,7 +169,7 @@ do
 	editbox.char = function(self)
         self:complete()
 	end
-	editbox:SetScript('OnTabPressed', function()
+	editbox:SetScript('OnTabPressed', function(self)
         if IsShiftKeyDown() then
             last_page_input:SetFocus()
         else

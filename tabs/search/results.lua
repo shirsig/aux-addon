@@ -288,7 +288,7 @@ function start_search(queries, continuation)
 	}
 end
 
-function M.execute(resume, real_time)
+function M.execute(_, resume, real_time)
 
 	if resume then
 		real_time = current_search().real_time

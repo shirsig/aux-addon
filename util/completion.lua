@@ -3,7 +3,7 @@ module 'aux.util.completion'
 local aux = require 'aux'
 local filter_util = require 'aux.util.filter'
 
-function M:complete_filter(self)
+function M.complete_filter(self)
 	if IsControlKeyDown() then -- TODO problem is ctrl-v, maybe find a better solution
 		return
 	end
