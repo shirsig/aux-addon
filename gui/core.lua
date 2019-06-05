@@ -16,7 +16,7 @@ M.font_size = aux.immutable-{
 --		local blizzard_backdrop, aux_background, aux_border
 --
 --		aux_border = DropDownList1:CreateTexture()
---		aux_border:SetTexture(1, 1, 1, .02)
+--		aux_border:SetColorTexture(1, 1, 1, .02)
 --		aux_border:SetPoint('TOPLEFT', DropDownList1Backdrop, 'TOPLEFT', -2, 2)
 --		aux_border:SetPoint('BOTTOMRIGHT', DropDownList1Backdrop, 'BOTTOMRIGHT', 1.5, -1.5)
 --		aux_border:SetBlendMode('ADD')
@@ -162,7 +162,7 @@ function M.button(parent, text_height)
     set_content_style(button)
     local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
     highlight:SetAllPoints()
-    highlight:SetTexture(1, 1, 1, .2)
+    highlight:SetColorTexture(1, 1, 1, .2)
     button.highlight = highlight
     do
         local label = button:CreateFontString()
@@ -208,11 +208,11 @@ do
 			dock:SetPoint('TOPLEFT', 1, 1)
 			dock:SetPoint('TOPRIGHT', -1, 1)
 		end
-		dock:SetTexture(aux.color.panel.background())
+		dock:SetColorTexture(aux.color.panel.background())
 		tab.dock = dock
 		local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
 		highlight:SetAllPoints()
-		highlight:SetTexture(1, 1, 1, .2)
+		highlight:SetColorTexture(1, 1, 1, .2)
 		tab.highlight = highlight
 
 		tab.text = tab:CreateFontString()
@@ -448,9 +448,9 @@ function M.horizontal_line(parent, y_offset, inverted_color)
     texture:SetPoint('TOPRIGHT', parent, 'TOPRIGHT', -2, y_offset)
     texture:SetHeight(2)
     if inverted_color then
-        texture:SetTexture(aux.color.panel.background())
+        texture:SetColorTexture(aux.color.panel.background())
     else
-        texture:SetTexture(aux.color.content.background())
+        texture:SetColorTexture(aux.color.content.background())
     end
     return texture
 end
@@ -461,9 +461,9 @@ function M.vertical_line(parent, x_offset, top_offset, bottom_offset, inverted_c
     texture:SetPoint('BOTTOMLEFT', parent, 'BOTTOMLEFT', x_offset, bottom_offset or 2)
     texture:SetWidth(2)
     if inverted_color then
-        texture:SetTexture(aux.color.panel.background())
+        texture:SetColorTexture(aux.color.panel.background())
     else
-        texture:SetTexture(aux.color.content.background())
+        texture:SetColorTexture(aux.color.content.background())
     end
     return texture
 end
@@ -503,7 +503,7 @@ function M.slider(parent)
     set_panel_style(slider)
     local thumb_texture = slider:CreateTexture(nil, 'ARTWORK')
     thumb_texture:SetPoint('CENTER', 0, 0)
-    thumb_texture:SetTexture(aux.color.content.background())
+    thumb_texture:SetColorTexture(aux.color.content.background())
     thumb_texture:SetHeight(18)
     thumb_texture:SetWidth(8)
     set_size(thumb_texture, 8, 18)
@@ -536,7 +536,7 @@ function M.checkbox(parent)
     checkbox:SetNormalTexture(nil)
     checkbox:SetPushedTexture(nil)
     checkbox:GetHighlightTexture():SetAllPoints()
-    checkbox:GetHighlightTexture():SetTexture(1, 1, 1, .2)
+    checkbox:GetHighlightTexture():SetColorTexture(1, 1, 1, .2)
     checkbox:GetCheckedTexture():SetTexCoord(.12, .88, .12, .88)
     checkbox:GetHighlightTexture('BLEND')
     return checkbox

@@ -64,7 +64,7 @@ function M.new(parent, on_click, selected)
 	scroll_bar:SetWidth(10)
 	local thumbTex = scroll_bar:GetThumbTexture()
 	thumbTex:SetPoint('CENTER', 0, 0)
-	thumbTex:SetTexture(aux.color.content.background())
+	thumbTex:SetColorTexture(aux.color.content.background())
 	thumbTex:SetHeight(150)
 	thumbTex:SetWidth(scroll_bar:GetWidth())
 	_G[scroll_bar:GetName() .. 'ScrollUpButton']:Hide()
@@ -104,7 +104,7 @@ function M.new(parent, on_click, selected)
 		local highlight = row:CreateTexture()
 		highlight:SetAllPoints(row)
 		highlight:Hide()
-		highlight:SetTexture(1, .9, 0, .4)
+		highlight:SetColorTexture(1, .9, 0, .4)
 		row.highlight = highlight
 
 		rows[row_index] = row

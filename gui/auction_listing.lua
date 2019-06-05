@@ -704,9 +704,9 @@ local methods = {
         if getn(self.sorts) > 0 then
             local last_sort = self.sorts[1]
             if last_sort.descending then
-                self.headCells[last_sort.index]:GetNormalTexture():SetTexture(.8, .6, 1, .8)
+                self.headCells[last_sort.index]:GetNormalTexture():SetColorTexture(.8, .6, 1, .8)
             else
-                self.headCells[last_sort.index]:GetNormalTexture():SetTexture(.6, .8, 1, .8)
+                self.headCells[last_sort.index]:GetNormalTexture():SetColorTexture(.6, .8, 1, .8)
             end
         end
 
@@ -928,7 +928,7 @@ function M.new(parent, rows, columns)
     scrollBar:SetWidth(10)
     local thumbTex = scrollBar:GetThumbTexture()
     thumbTex:SetPoint('CENTER', 0, 0)
-    thumbTex:SetTexture(aux.color.content.background())
+    thumbTex:SetColorTexture(aux.color.content.background())
     thumbTex:SetHeight(150)
     thumbTex:SetWidth(scrollBar:GetWidth())
     _G[scrollBar:GetName() .. 'ScrollUpButton']:Hide()
@@ -994,7 +994,7 @@ function M.new(parent, rows, columns)
         end
         local highlight = row:CreateTexture()
         highlight:SetAllPoints()
-        highlight:SetTexture(1, .9, 0, .5)
+        highlight:SetColorTexture(1, .9, 0, .5)
         highlight:Hide()
         row.highlight = highlight
 
@@ -1021,7 +1021,7 @@ function M.new(parent, rows, columns)
             if mod(j, 2) == 1 then
                 local tex = cell:CreateTexture()
                 tex:SetAllPoints()
-                tex:SetTexture(.3, .3, .3, .2)
+                tex:SetColorTexture(.3, .3, .3, .2)
             end
 
             if column.init then
@@ -1034,7 +1034,7 @@ function M.new(parent, rows, columns)
         if mod(i, 2) == 0 then
             local tex = row:CreateTexture()
             tex:SetAllPoints()
-            tex:SetTexture(.3, .3, .3, .3)
+            tex:SetColorTexture(.3, .3, .3, .3)
         end
 
         tinsert(rt.rows, row)
