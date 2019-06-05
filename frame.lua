@@ -17,6 +17,9 @@ do
 	frame:SetToplevel(true)
 	frame:SetMovable(true)
 	frame:EnableMouse(true)
+    frame:RegisterForDrag('LeftButton')
+    frame:SetScript('OnDragStart', frame.StartMoving)
+    frame:SetScript('OnDragStop', frame.StopMovingOrSizing)
 	frame:SetClampedToScreen(true)
 --	frame:CreateTitleRegion():SetAllPoints() TODO classic why
 	frame:SetScript('OnShow', function() PlaySound(SOUNDKIT.AUCTION_WINDOW_OPEN) end)
