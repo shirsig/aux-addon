@@ -1,5 +1,7 @@
 # aux - WoW 1.12 AddOn
 
+## Experimental retail classic beta version in branch "retail"
+
 The most advanced auction house addOn for the 1.12 client with some features more advanced than anything even on retail.
 
 ## Core Features
