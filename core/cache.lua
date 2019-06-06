@@ -98,9 +98,11 @@ function M.item_info(item_id)
 		local cached_data = persistence.read(items_schema, data_string)
 		return T.map(
 			'name', cached_data.name,
+            'link', cached_data.link,
 			'itemstring', 'item:' .. item_id .. ':0:0:0',
 			'quality', cached_data.quality,
 			'level', cached_data.level,
+            'requirement', cached_data.requirement,
 			'class', cached_data.class,
 			'subclass', cached_data.subclass,
 			'slot', cached_data.slot,

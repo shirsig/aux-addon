@@ -148,7 +148,7 @@ do
     item:SetPoint('TOPLEFT', 10, -6)
     item.button:SetScript('OnEnter', function(self)
         if selected_item then
-            info.set_tooltip(selected_item.itemstring, self, 'ANCHOR_RIGHT')
+            info.set_tooltip(selected_item.link, self, 'ANCHOR_RIGHT')
         end
     end)
     item.button:SetScript('OnLeave', function()

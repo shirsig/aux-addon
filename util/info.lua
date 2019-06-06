@@ -58,7 +58,6 @@ function M.container_item(bag, slot)
             'enchant_id', enchant_id,
 
             'link', link,
-            'itemstring', item_info.itemstring,
             'item_key', item_id .. ':' .. suffix_id,
 
             'name', item_info.name,
@@ -122,7 +121,6 @@ function M.auction(index, query_type)
             'enchant_id', enchant_id,
 
             'link', link,
-            'itemstring', item_info.itemstring,
             'item_key', item_id .. ':' .. suffix_id,
             'search_signature', aux.join(T.temp-T.list(item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')), ':'),
             'sniping_signature', aux.join(T.temp-T.list(item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')), ':'),
@@ -373,12 +371,14 @@ end
 
 function M.item(item_id, suffix_id)
     local itemstring = 'item:' .. (item_id or 0) .. ':0:' .. (suffix_id or 0) .. ':0'
-    local name, itemstring, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
+    local name, link, quality, level, requirement, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
     return name and T.map(
         'name', name,
+        'link', link,
         'itemstring', itemstring,
         'quality', quality,
         'level', level,
+        'requirement', requirement,
         'class', class,
         'subclass', subclass,
         'slot', slot,

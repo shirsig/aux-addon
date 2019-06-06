@@ -423,7 +423,7 @@ function update_inventory_records()
 	                    'item_id', item_info.item_id,
 	                    'suffix_id', item_info.suffix_id,
 	                    'key', item_info.item_key,
-	                    'itemstring', item_info.itemstring,
+	                    'link', item_info.link,
 	                    'name', item_info.name,
 	                    'texture', item_info.texture,
 	                    'quality', item_info.quality,

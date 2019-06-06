@@ -97,7 +97,7 @@ function M.new(parent, on_click, selected)
 		row.item:SetPoint('LEFT', 2.5, 0)
 		row.item:SetPoint('RIGHT', -2.5, 0)
 		row.item.button:SetScript('OnEnter', function(self)
-			info.set_tooltip(row.item_record.itemstring, self, 'ANCHOR_RIGHT')
+			info.set_tooltip(row.item_record.link, self, 'ANCHOR_RIGHT')
 		end)
 		row.item.button:SetScript('OnLeave', function() GameTooltip:Hide() end)
 

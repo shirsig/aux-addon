@@ -81,7 +81,7 @@ function M.extend_tooltip(tooltip, link, quantity)
             tooltip:AddLine('Vendor: ' .. (price and money.to_string2(price * quantity) or UNKNOWN), aux.color.tooltip.merchant())
         end
     end
-    local auctionable = not item_info or info.auctionable(T.temp-info.tooltip('link', item_info.itemstring), item_info.quality)
+    local auctionable = not item_info or info.auctionable(T.temp-info.tooltip('link', item_info.link), item_info.quality)
     local item_key = (item_id or 0) .. ':' .. (suffix_id or 0)
     local value = history.value(item_key)
     if auctionable then
@@ -148,9 +148,7 @@ function game_tooltip_hooks:SetInboxItem(index)
     local name, _, quantity = GetInboxItem(index)
     local id = name and info.item_id(name)
     if id then
-        local _, itemstring, quality = GetItemInfo(id)
-        local hex = aux.select(4, GetItemQualityColor(tonumber(quality)))
-        local link = hex ..  '|H' .. itemstring .. '|h[' .. name .. ']|h' .. FONT_COLOR_CODE_CLOSE
+        local _, link = GetItemInfo(id)
         extend_tooltip(GameTooltip, link, quantity)
     end
 end
