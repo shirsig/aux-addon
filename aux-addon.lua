@@ -67,6 +67,7 @@ do
 			end
 		elseif event == 'VARIABLES_LOADED' then
 			for _, f in ipairs(handlers) do f(arg1, ...) end
+			event_frame:UnregisterEvent('VARIABLES_LOADED') -- TODO retail why is this firing more than once?
 		elseif event == 'PLAYER_LOGIN' then
 			for _, f in ipairs(handlers2) do f(arg1, ...) end
 			print('loaded - /aux')
