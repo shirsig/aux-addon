@@ -30,8 +30,8 @@ function create_module(name)
 	local environment = setmetatable({_G = _G, pass = pass, require = require}, environment_mt)
 	local exports = {}
 	environment.M = setmetatable({}, {
-		__metatable=false,
-		__newindex=function(_, k, v)
+		__metatable = false,
+		__newindex = function(_, k, v)
 			environment[k], exports[k] = v, v
 		end,
 	})
