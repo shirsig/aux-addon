@@ -193,7 +193,7 @@ M.filters = {
 function operator(str)
     local operator = str == 'not' and T.list('operator', 'not', 1)
     for name in pairs(T.temp-T.set('and', 'or')) do
-	    local arity = aux.select(3, strfind(str, '^' .. name .. '(%d*)$'))
+	    local arity = select(3, strfind(str, '^' .. name .. '(%d*)$'))
 	    if arity then
 		    arity = tonumber(arity)
 		    operator = not (arity and arity < 2) and T.list('operator', name, arity)
@@ -210,7 +210,7 @@ do
 				return self
 			end
 			if self.exact then return end
-			local number = tonumber(aux.select(3, strfind(str, '^(%d+)$')))
+			local number = tonumber(select(3, strfind(str, '^(%d+)$')) or nil)
 			if number then
 				if number >= 1 and number <= 60 then
 					for _, key in ipairs(T.temp-T.list('min_level', 'max_level')) do
@@ -229,7 +229,7 @@ do
 			)) do
 				if not self[parser[1]] then
 					tinsert(parser, str)
-					local index, label = parser[2](aux.select(3, unpack(parser)))
+					local index, label = parser[2](select(3, unpack(parser)))
 					if index then
 						self[parser[1]] = T.list(label, index)
 						return T.list('blizzard', parser[1], label, index)
@@ -473,7 +473,7 @@ function M.quote(name)
 end
 
 function M.unquote(name)
-	return aux.select(3, strfind(name, '^<(.*)>$')) or name
+	return select(3, strfind(name, '^<(.*)>$')) or name
 end
 
 function blizzard_query(filter)

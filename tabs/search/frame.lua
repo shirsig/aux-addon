@@ -478,7 +478,7 @@ do
     scroll_frame:EnableMouseWheel(true)
     scroll_frame:SetScript('OnMouseWheel', function(self)
 	    local child = self:GetScrollChild()
-	    child:SetFont('p', [[Fonts\ARIALN.TTF]], aux.bounded(gui.font_size.small, gui.font_size.large, aux.select(2, child:GetFont()) + arg1*2))
+	    child:SetFont('p', [[Fonts\ARIALN.TTF]], aux.bounded(gui.font_size.small, gui.font_size.large, select(2, child:GetFont()) + arg1*2))
 	    update_filter_display()
     end)
     scroll_frame:RegisterForDrag('LeftButton')

@@ -182,7 +182,7 @@ function clear_form()
 end
 
 function import_filter_string()
-	local filter, error = filter_util.parse_filter_string(aux.select(3, strfind(search_box:GetText(), '^([^;]*)')))
+	local filter, error = filter_util.parse_filter_string(select(3, strfind(search_box:GetText(), '^([^;]*)')))
 	if filter or aux.print(error) then
 		set_form(filter)
 	end

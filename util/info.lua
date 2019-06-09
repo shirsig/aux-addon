@@ -252,7 +252,7 @@ function M.display_name(item_id, no_brackets, no_color)
             name = '[' .. name .. ']'
         end
         if not no_color then
-            name = '|c' .. aux.select(4, GetItemQualityColor(item_info.quality)) .. name .. FONT_COLOR_CODE_CLOSE
+            name = '|c' .. select(4, GetItemQualityColor(item_info.quality)) .. name .. FONT_COLOR_CODE_CLOSE
         end
         return name
     end

@@ -23,17 +23,6 @@ function M.enum(n)
 	if n > 0 then return immutable-{}, enum(n - 1) end
 end
 
-M.select = T.vararg-function(arg)
-	for _ = 1, arg[1] do
-		tremove(arg, 1)
-	end
-	if getn(arg) == 0 then
-		return nil
-	else
-		return unpack(arg)
-	end
-end
-
 M.join = table.concat
 
 M.index = T.vararg-function(arg)

@@ -108,9 +108,9 @@ function M.from_string(value)
 
 	value = gsub(gsub(strlower(value), '|c%x%x%x%x%x%x%x%x', ''), FONT_COLOR_CODE_CLOSE, '')
 
-	local gold = tonumber(aux.select(3, strfind(value, '(%d*%.?%d+)g')))
-	local silver = tonumber(aux.select(3, strfind(value, '(%d*%.?%d+)s')))
-	local copper = tonumber(aux.select(3, strfind(value, '(%d*%.?%d+)c')))
+	local gold = tonumber(select(3, strfind(value, '(%d*%.?%d+)g')) or nil)
+	local silver = tonumber(select(3, strfind(value, '(%d*%.?%d+)s')) or nil)
+	local copper = tonumber(select(3, strfind(value, '(%d*%.?%d+)c')) or nil)
 	if not gold and not silver and not copper then return end
 
 	value = gsub(value, '%d*%.?%d+g', '', 1)

@@ -50,7 +50,7 @@ do
                     break
                 end
                 local item_id, suffix_id = info.parse_link(link)
-                local count = aux.select(3, GetCraftReagentInfo(id, i))
+                local count = select(3, GetCraftReagentInfo(id, i))
                 local _, price, limited = info.merchant_info(item_id)
                 local value = price and not limited and price or history.value(item_id .. ':' .. suffix_id)
                 if not value then
@@ -79,7 +79,7 @@ do
                     break
                 end
                 local item_id, suffix_id = info.parse_link(link)
-                local count = aux.select(3, GetTradeSkillReagentInfo(id, i))
+                local count = select(3, GetTradeSkillReagentInfo(id, i))
                 local _, price, limited = info.merchant_info(item_id)
                 local value = price and not limited and price or history.value(item_id .. ':' .. suffix_id)
                 if not value then
