@@ -1,4 +1,4 @@
-module 'aux.util.completion'
+select(2, ...) 'aux.util.completion'
 
 local aux = require 'aux'
 local filter_util = require 'aux.util.filter'

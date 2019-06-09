@@ -1,4 +1,4 @@
-module 'aux.util.scan'
+select(2, ...) 'aux.util.scan'
 
 local T = require 'T'
 local aux = require 'aux'

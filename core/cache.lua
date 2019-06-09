@@ -1,4 +1,4 @@
-module 'aux.util.info'
+select(2, ...) 'aux.util.info'
 
 local T = require 'T'
 local aux = require 'aux'

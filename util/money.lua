@@ -1,4 +1,4 @@
-module 'aux.util.money'
+select(2, ...) 'aux.util.money'
 
 local T = require 'T'
 local aux = require 'aux'

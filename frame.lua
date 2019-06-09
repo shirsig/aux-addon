@@ -1,4 +1,4 @@
-module 'aux'
+select(2, ...) 'aux'
 
 local gui = require 'aux.gui'
 

@@ -1,4 +1,4 @@
-module 'aux'
+select(2, ...) 'aux'
 
 local T = require 'T'
 local post = require 'aux.tabs.post'

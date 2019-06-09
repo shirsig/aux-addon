@@ -1,4 +1,4 @@
-module 'aux.util.sort'
+select(2, ...) 'aux.util.sort'
 
 local T = require 'T'
 

@@ -1,4 +1,4 @@
-module 'aux.core.slash'
+select(2, ...) 'aux.core.slash'
 
 local T = require 'T'
 local aux = require 'aux'

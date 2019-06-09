@@ -1,6 +1,6 @@
-if module 'T' then return end
+select(2, ...) 'T'
 
-local next, getn, tremove, setmetatable = next, getn, tremove, setmetatable
+local next, tremove, setmetatable = next, tremove, setmetatable
 
 local wipe, acquire, release
 local pool, pool_size, overflow_pool, auto_release = {}, 0, setmetatable({}, {__mode='k'}), {}

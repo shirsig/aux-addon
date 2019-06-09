@@ -1,4 +1,4 @@
-module 'aux.core.disenchant'
+select(2, ...) 'aux.core.disenchant'
 
 local T = require 'T'
 local history = require 'aux.core.history'

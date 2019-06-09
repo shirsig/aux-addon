@@ -1,4 +1,4 @@
-module 'aux.util.filter'
+select(2, ...) 'aux.util.filter'
 
 local T = require 'T'
 local aux = require 'aux'

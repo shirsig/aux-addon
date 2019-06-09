@@ -1,4 +1,4 @@
-module 'aux.core.tooltip'
+select(2, ...) 'aux.core.tooltip'
 
 local T = require 'T'
 local aux = require 'aux'

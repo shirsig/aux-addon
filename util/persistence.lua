@@ -1,4 +1,4 @@
-module 'aux.util.persistence'
+select(2, ...) 'aux.util.persistence'
 
 local T = require 'T'
 local aux = require 'aux'

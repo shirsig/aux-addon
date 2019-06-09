@@ -1,4 +1,4 @@
-module 'aux.tabs.search'
+select(2, ...) 'aux.tabs.search'
 
 local T = require 'T'
 local aux = require 'aux'

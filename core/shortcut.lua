@@ -1,4 +1,4 @@
-module 'aux.core.shortcut'
+select(2, ...) 'aux.core.shortcut'
 
 local T = require 'T'
 local aux = require 'aux'

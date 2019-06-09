@@ -1,4 +1,4 @@
-module 'aux.gui.item_listing'
+select(2, ...) 'aux.gui.item_listing'
 
 local T = require 'T'
 local aux = require 'aux'

@@ -1,4 +1,4 @@
-module 'aux.core.history'
+select(2, ...) 'aux.core.history'
 
 local T = require 'T'
 local aux = require 'aux'

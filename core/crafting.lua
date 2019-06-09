@@ -1,4 +1,4 @@
-module 'aux.core.crafting'
+select(2, ...) 'aux.core.crafting'
 
 local T = require 'T'
 local aux = require 'aux'

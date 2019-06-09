@@ -1,4 +1,4 @@
-module 'aux.core.stack'
+select(2, ...) 'aux.core.stack'
 
 local T = require 'T'
 local aux = require 'aux'
