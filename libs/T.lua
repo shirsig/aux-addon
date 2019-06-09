@@ -68,7 +68,7 @@ end
 
 do
 	local function unpack(t)
-		if getn(t) > 0 then
+		if #t > 0 then
 			return tremove(t, 1), unpack(t)
 		else
 			release(t)
@@ -140,7 +140,7 @@ M.set = vararg(function(arg)
 end)
 M.map = vararg(function(arg)
 	local t = acquire()
-	for i = 1, getn(arg), 2 do
+	for i = 1, #arg, 2 do
 		t[arg[i]] = arg[i + 1]
 	end
 	return t

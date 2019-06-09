@@ -17,7 +17,7 @@ function M.compare(a, b, desc)
 end
 
 M.multi_lt = T.vararg-function(arg)
-	for i = 1, getn(arg), 2 do
+	for i = 1, #arg, 2 do
         if arg[i] and arg[i + 1] and arg[i] ~= arg[i + 1] then
             return arg[i] < arg[i + 1]
         elseif not arg[i] and arg[i + 1] then

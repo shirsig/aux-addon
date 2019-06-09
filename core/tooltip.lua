@@ -55,7 +55,7 @@ function M.extend_tooltip(tooltip, link, quantity)
     local item_info = T.temp-info.item(item_id)
     if item_info then
         local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
-        if getn(distribution) > 0 then
+        if #distribution > 0 then
             if settings.disenchant_distribution then
                 tooltip:AddLine('Disenchants into:', aux.color.tooltip.disenchant.distribution())
                 sort(distribution, function(a,b) return a.probability > b.probability end)

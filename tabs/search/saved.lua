@@ -11,7 +11,7 @@ end
 
 function update_search_listings()
 	local favorite_search_rows = T.acquire()
-	for i = 1, getn(favorite_searches) do
+	for i = 1, #favorite_searches do
 		local search = favorite_searches[i]
 		local name = strsub(search.prettified, 1, 250)
 		tinsert(favorite_search_rows, T.map(
@@ -23,7 +23,7 @@ function update_search_listings()
 	favorite_searches_listing:SetData(favorite_search_rows)
 
 	local recent_search_rows = T.acquire()
-	for i = 1, getn(recent_searches) do
+	for i = 1, #recent_searches do
 		local search = recent_searches[i]
 		local name = strsub(search.prettified, 1, 250)
 		tinsert(recent_search_rows, T.map(
@@ -36,7 +36,7 @@ function update_search_listings()
 end
 
 function new_recent_search(filter_string, prettified)
-	for i = getn(recent_searches), 1, -1 do
+	for i = #recent_searches, 1, -1 do
 		if recent_searches[i].filter_string == filter_string then
 			tremove(recent_searches, i)
 		end
@@ -45,7 +45,7 @@ function new_recent_search(filter_string, prettified)
 		'filter_string', filter_string,
 		'prettified', prettified
 	))
-	while getn(recent_searches) > 50 do
+	while #recent_searches > 50 do
 		tremove(recent_searches)
 	end
 	update_search_listings()
@@ -122,7 +122,7 @@ end
 function enable_auto_buy(search)
 	local queries, error = filter_util.queries(search.filter_string)
 	if queries then
-		if getn(queries) > 1 then
+		if #queries > 1 then
 			aux.print('Error: Auto Buy does not support multi-queries')
 		elseif aux.size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(search.filter_string).blizzard.exact then
 			aux.print('Error: Auto Buy does not support Blizzard filters')

@@ -181,13 +181,13 @@ function M.set_shopping_tooltip(slot)
     local tooltips = T.temp-T.acquire()
     if index1 then
         local tooltip = tooltip('inventory', 'player', index1)
-        if getn(tooltip) > 0 then
+        if #tooltip > 0 then
             tinsert(tooltips, tooltip)
         end
     end
     if index2 then
         local tooltip = tooltip('inventory', 'player', index2)
-        if getn(tooltip) > 0 then
+        if #tooltip > 0 then
             tinsert(tooltips, tooltip)
         end
     end
@@ -237,7 +237,7 @@ function M.load_tooltip(frame, tooltip)
             frame:AddLine(line.left_text, line.left_color[1], line.left_color[2], line.left_color[3], true)
         end
     end
-    for i = 1, getn(tooltip) do -- TODO why is this needed?
+    for i = 1, #tooltip do -- TODO why is this needed?
 	    _G[frame:GetName() .. 'TextLeft' .. i]:SetJustifyH('LEFT')
 	    _G[frame:GetName() .. 'TextRight' .. i]:SetJustifyH('LEFT')
     end

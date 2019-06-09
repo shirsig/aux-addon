@@ -51,7 +51,7 @@ do
 		else
 			previous_button:Enable()
 		end
-		if search_index == getn(searches) then
+		if search_index == #searches then
 			next_button:Hide()
 			range_button:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
 			real_time_button:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
@@ -66,28 +66,28 @@ do
 	end
 
 	function new_search(filter_string, first_page, last_page, real_time)
-		while getn(searches) > search_index do
+		while #searches > search_index do
 			tremove(searches)
 		end
 		local search = T.map('records', T.acquire(), 'filter_string', filter_string, 'first_page', first_page, 'last_page', last_page, 'real_time', real_time)
 		tinsert(searches, search)
-		if getn(searches) > 5 then
+		if #searches > 5 then
 			tremove(searches, 1)
 			tinsert(status_bars, tremove(status_bars, 1))
 			tinsert(tables, tremove(tables, 1))
 			search_index = 4
 		end
 
-		search.status_bar = status_bars[getn(searches)]
+		search.status_bar = status_bars[#searches]
 		search.status_bar:update_status(1, 1)
 		search.status_bar:set_text('')
 
-		search.table = tables[getn(searches)]
+		search.table = tables[#searches]
 		search.table:SetSort(1, 2, 3, 4, 5, 6, 7, 8, 9)
 		search.table:Reset()
 		search.table:SetDatabase(search.records)
 
-		update_search(getn(searches))
+		update_search(#searches)
 	end
 
 	function clear_control_focus()
@@ -177,7 +177,7 @@ function start_real_time_scan(query, search, continuation)
 			T.release(new_records)
 			new_records = aux.values(map)
 
-			if getn(new_records) > 2000 then
+			if #new_records > 2000 then
 				StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
 			else
 				search.records = new_records
@@ -209,7 +209,7 @@ function start_search(queries, continuation)
 
 	local search = current_search()
 
-	total_queries = getn(queries)
+	total_queries = #queries
 
 	if continuation then
 		start_query, start_page = unpack(continuation)
@@ -240,7 +240,7 @@ function start_search(queries, continuation)
 			total_scan_pages = total_scan_pages + (start_page - 1)
 			total_scan_pages = max(total_scan_pages, 1)
 			current_page = min(current_page, total_scan_pages)
-			search.status_bar:update_status((current_query - 1) / getn(queries), current_page / total_scan_pages)
+			search.status_bar:update_status((current_query - 1) / #queries, current_page / total_scan_pages)
 			search.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_scan_pages))
 		end,
 		on_page_scanned = function()
@@ -251,9 +251,9 @@ function start_search(queries, continuation)
 			current_page = current_page and 0 or start_page - 1
 		end,
 		on_auction = function(auction_record, ctrl)
-			if getn(search.records) < 2000 then
+			if #search.records < 2000 then
 				tinsert(search.records, auction_record)
-				if getn(search.records) == 2000 then
+				if #search.records == 2000 then
 					StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
 				end
 			end
@@ -262,7 +262,7 @@ function start_search(queries, continuation)
 			search.status_bar:update_status(1, 1)
 			search.status_bar:set_text('Scan complete')
 
-			if current_search() == search and frame.results:IsVisible() and getn(search.records) == 0 then
+			if current_search() == search and frame.results:IsVisible() and #search.records == 0 then
 				set_subtab(SAVED)
 			end
 
@@ -306,7 +306,7 @@ function M.execute(_, resume, real_time)
 		aux.print('Invalid filter:', error)
 		return
 	elseif real_time then
-		if getn(queries) > 1 then
+		if #queries > 1 then
 			aux.print('Error: The real time mode does not support multi-queries')
 			return
 		elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then

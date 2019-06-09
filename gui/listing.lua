@@ -57,13 +57,13 @@ local handlers = {
 
 local methods = {
     Update = function(self)
-	    if getn(self.colInfo) > 1 or self.colInfo[1].name then
+	    if #self.colInfo > 1 or self.colInfo[1].name then
 		    self.headHeight = HEAD_HEIGHT
 	    else
 		    self.headHeight = 0
 	    end
 
-	    if getn(self.rowData or T.empty) > self.numRows then
+	    if #(self.rowData or T.empty) > self.numRows then
 		    self.contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
 	    else
 		    self.contentFrame:SetPoint('BOTTOMRIGHT', 0, 0)
@@ -71,7 +71,7 @@ local methods = {
 
 	    local width = self.contentFrame:GetRight() - self.contentFrame:GetLeft()
 
-	    while getn(self.headCols) < getn(self.colInfo) do
+	    while #self.headCols < #self.colInfo do
 		    self:AddColumn()
 	    end
 
@@ -87,7 +87,7 @@ local methods = {
 		    end
 	    end
 
-	    while getn(self.rows) < self.numRows do
+	    while #self.rows < self.numRows do
 		    self:AddRow()
 	    end
 
@@ -97,7 +97,7 @@ local methods = {
 			    row:Hide()
 		    else
 			    row:Show()
-			    while getn(row.cols) < getn(self.colInfo) do
+			    while #row.cols < #self.colInfo do
 				    self:AddCell(i)
 			    end
 			    for j, col in ipairs(row.cols) do
@@ -113,14 +113,14 @@ local methods = {
 	    end
 	    
         if not self.rowData then return end
-        FauxScrollFrame_Update(self.scrollFrame, getn(self.rowData), self.numRows, ROW_HEIGHT)
+        FauxScrollFrame_Update(self.scrollFrame, #self.rowData, self.numRows, ROW_HEIGHT)
         local offset = FauxScrollFrame_GetOffset(self.scrollFrame)
         self.offset = offset
 
         for i = 1, self.numRows do
 	        local row = self.rows[i]
             row.data = nil
-            if i > getn(self.rowData) then
+            if i > #self.rowData then
 	            row:Hide()
             else
 	            row:Show()
@@ -160,7 +160,7 @@ local methods = {
     end,
 
     AddColumn = function(self)
-        local colNum = getn(self.headCols) + 1
+        local colNum = #self.headCols + 1
         local col = CreateFrame('Frame', nil, self.contentFrame)
         if colNum == 1 then
             col:SetPoint('TOPLEFT', 0, 0)
@@ -185,7 +185,7 @@ local methods = {
         tinsert(self.headCols, col)
         
         for i, row in ipairs(self.rows) do
-            while getn(row.cols) < getn(self.headCols) do
+            while #row.cols < #self.headCols do
                 self:AddCell(i)
             end
         end
@@ -193,7 +193,7 @@ local methods = {
 
     AddCell = function(self, rowNum)
         local row = self.rows[rowNum]
-        local colNum = getn(row.cols) + 1
+        local colNum = #row.cols + 1
         local cell = CreateFrame('Frame', nil, row)
         local text = cell:CreateFontString()
         cell.text = text
@@ -219,7 +219,7 @@ local methods = {
         for name, func in pairs(handlers) do
 	        row:SetScript(name, func)
         end
-        local rowNum = getn(self.rows) + 1
+        local rowNum = #self.rows + 1
         if rowNum == 1 then
             row:SetPoint('TOPLEFT', 0, -(self.headHeight + HEAD_SPACE))
             row:SetPoint('TOPRIGHT', 0, -(self.headHeight + HEAD_SPACE))
@@ -236,7 +236,7 @@ local methods = {
 
         row.cols = T.acquire()
         self.rows[rowNum] = row
-        for _ = 1, getn(self.colInfo) do
+        for _ = 1, #self.colInfo do
             self:AddCell(rowNum)
         end
     end,

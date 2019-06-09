@@ -57,7 +57,7 @@ function read_tuple(schema, str)
     local separator = schema[2]
     local tuple = T.acquire()
     local parts = T.temp-aux.split(str, separator)
-    for i = 3, getn(schema) do
+    for i = 3, #schema do
         local key, type = next(schema[i])
         tuple[key] = read(type, parts[i - 2])
     end
@@ -67,7 +67,7 @@ end
 function write_tuple(schema, tuple)
     local separator = schema[2]
     local parts = T.temp-T.acquire()
-    for i = 3, getn(schema) do
+    for i = 3, #schema do
         local key, type = next(schema[i])
         tinsert(parts, write(type, tuple[key]))
     end

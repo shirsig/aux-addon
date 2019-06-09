@@ -43,7 +43,7 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
             status_bar:set_text('Searching auction...')
         end,
         on_start_query = function(query_index)
-            status_bar:update_status((query_index - 1) / getn(queries), 0)
+            status_bar:update_status((query_index - 1) / #queries, 0)
         end,
         on_auction = function(record)
             if test(auction_record, record.index) then

@@ -157,7 +157,7 @@ end
 M.orig = setmetatable({[_G]=T.acquire()}, {__index=function(self, key) return self[_G][key] end})
 M.hook = T.vararg-function(arg)
 	local name, object, handler
-	if getn(arg) == 3 then
+	if #arg == 3 then
 		name, object, handler = unpack(arg)
 	else
 		object, name, handler = _G, unpack(arg)

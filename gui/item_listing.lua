@@ -9,13 +9,13 @@ local ROW_HEIGHT = 39
 
 function M:render()
 
-	if getn(self.item_records or T.empty) > getn(self.rows) then
+	if #(self.item_records or T.empty) > #self.rows then
 		self.content_frame:SetPoint('BOTTOMRIGHT', -15, 0)
 	else
 		self.content_frame:SetPoint('BOTTOMRIGHT', 0, 0)
 	end
 
-	FauxScrollFrame_Update(self.scroll_frame, getn(self.item_records), getn(self.rows), ROW_HEIGHT)
+	FauxScrollFrame_Update(self.scroll_frame, #self.item_records, #self.rows, ROW_HEIGHT)
 	local offset = FauxScrollFrame_GetOffset(self.scroll_frame)
 
 	local rows = self.rows

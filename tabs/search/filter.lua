@@ -204,7 +204,7 @@ function formatted_post_filter(components)
 			str = str .. ' '
 		end
 		str = str .. '</p><p>'
-		for _ = 1, getn(stack) + 1 do
+		for _ = 1, #stack + 1 do
 			str = str .. aux.color.content.background'----'
 		end
 		no_line_break = component[1] == 'operator' and component[2] == 'not'
@@ -224,7 +224,7 @@ function formatted_post_filter(components)
 				end
 				component_text = component_text .. filter_color(': ') .. parameter
 			end
-			while getn(stack) > 0 and stack[getn(stack)] do
+			while #stack > 0 and stack[#stack] do
 				local top = tremove(stack)
 				if tonumber(top) and top > 1 then
 					tinsert(stack, top - 1)
@@ -256,7 +256,7 @@ end
 function remove_component(index)
 	tremove(post_filter, index)
 	if post_filter_index >= index then
-		post_filter_index = max(post_filter_index - 1, min(1, getn(post_filter)))
+		post_filter_index = max(post_filter_index - 1, min(1, #post_filter))
 	end
 end
 
@@ -275,7 +275,7 @@ function add_form_component()
 			end
 		end
 		local components, error = filter_util.parse_filter_string(str)
-		if components and getn(components.blizzard) == 0 and getn(components.post) == 1 then
+		if components and #components.blizzard == 0 and #components.post == 1 then
 			add_component(components.post[1])
 			update_filter_display()
 			filter_parameter_input:SetText('')

@@ -99,7 +99,7 @@ do
 	M.menu = T.vararg-function(arg)
 		HideDropDownMenu(1)
 		UIDropDownMenu_Initialize(menu, function()
-			for i = 1, getn(arg), 2 do
+			for i = 1, #arg, 2 do
 				UIDropDownMenu_AddButton(T.map('text', arg[i], 'notCheckable', true, 'func', arg[i + 1]))
 			end
 		end, 'MENU')
@@ -192,7 +192,7 @@ end
 do
 	local mt = {__index=T.acquire()}
 	function mt.__index:create_tab(text)
-		local id = getn(self._tabs) + 1
+		local id = #self._tabs + 1
 
 		local tab = CreateFrame('Button', unique_name(), self._frame)
 		tab.id = id
@@ -231,7 +231,7 @@ do
 			end
 		end)
 
-		if getn(self._tabs) == 0 then
+		if #self._tabs == 0 then
 			if self._orientation == 'UP' then
 				tab:SetPoint('BOTTOMLEFT', self._frame, 'TOPLEFT', 4, -1)
 			elseif self._orientation == 'DOWN' then
@@ -239,9 +239,9 @@ do
 			end
 		else
 			if self._orientation == 'UP' then
-				tab:SetPoint('BOTTOMLEFT', self._tabs[getn(self._tabs)], 'BOTTOMRIGHT', 4, 0)
+				tab:SetPoint('BOTTOMLEFT', self._tabs[#self._tabs], 'BOTTOMRIGHT', 4, 0)
 			elseif self._orientation == 'DOWN' then
-				tab:SetPoint('TOPLEFT', self._tabs[getn(self._tabs)], 'TOPRIGHT', 4, 0)
+				tab:SetPoint('TOPLEFT', self._tabs[#self._tabs], 'TOPRIGHT', 4, 0)
 			end
 		end
 

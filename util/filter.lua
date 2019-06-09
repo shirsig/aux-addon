@@ -294,14 +294,14 @@ function M.parse_filter_string(str)
             else
                 tinsert(post_filter, T.list('filter', parts[i]))
             end
-            tinsert(filter, post_filter[getn(post_filter)])
+            tinsert(filter, post_filter[#post_filter])
         else
 	        local part = blizzard_filter_parser(parts[i], i)
 	        if part then
 		        tinsert(filter, part)
 	        elseif parts[i] ~= '' then
 		        tinsert(post_filter, T.list('filter', 'tooltip', parts[i]))
-		        tinsert(filter, post_filter[getn(post_filter)])
+		        tinsert(filter, post_filter[#post_filter])
 	        else
 	            return nil, 'Empty modifier'
 	        end
@@ -398,7 +398,7 @@ function suggestions(filter)
     end
 
     -- item names
-    if getn(filter.components) == 0 then
+    if #filter.components == 0 then
 	    for _, name in ipairs(aux.account_data.auctionable_items) do
             tinsert(suggestions, name .. '/exact')
         end
@@ -516,11 +516,11 @@ function validator(filter)
             return false
         end
         local stack = T.temp-T.acquire()
-        for i = getn(filter.post), 1, -1 do
+        for i = #filter.post, 1, -1 do
             local type, name, param = unpack(filter.post[i])
             if type == 'operator' then
                 local args = T.temp-T.acquire()
-                while (not param or param > 0) and getn(stack) > 0 do
+                while (not param or param > 0) and #stack > 0 do
                     tinsert(args, tremove(stack))
                     param = param and param - 1
                 end

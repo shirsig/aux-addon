@@ -63,7 +63,7 @@ function M.value(item_key)
 	if not value_cache[item_key] or value_cache[item_key].next_push <= time() then
 		local item_record, value
 		item_record = read_record(item_key)
-		if getn(item_record.data_points) > 0 then
+		if #item_record.data_points > 0 then
 			local total_weight, weighted_values = 0, T.temp-T.acquire()
 			for _, data_point in pairs(item_record.data_points) do
 				local weight = .99 ^ aux.round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
@@ -100,8 +100,8 @@ end
 function push_record(item_record)
 	if item_record.daily_min_buyout then
 		tinsert(item_record.data_points, 1, T.map('value', item_record.daily_min_buyout, 'time', item_record.next_push))
-		while getn(item_record.data_points) > 11 do
-			T.release(item_record.data_points[getn(item_record.data_points)])
+		while #item_record.data_points > 11 do
+			T.release(item_record.data_points[#item_record.data_points])
 			tremove(item_record.data_points)
 		end
 	end

@@ -556,7 +556,7 @@ local methods = {
         end
 
         local descending = false
-        if getn(rt.sorts) > 0 and rt.sorts[1].index == self.columnIndex then
+        if #rt.sorts > 0 and rt.sorts[1].index == self.columnIndex then
             descending = not rt.sorts[1].descending
         end
         rt:SetSort((descending and -1 or 1) * self.columnIndex)
@@ -647,16 +647,16 @@ local methods = {
 
         sort(records, function(a, b) return a.search_signature < b.search_signature or a.search_signature == b.search_signature and tostring(a) < tostring(b) end)
 
-        for i = 1, getn(records) do
+        for i = 1, #records do
             local record = records[i]
             local prevRecord = records[i - 1]
             if prevRecord and record.search_signature == prevRecord.search_signature then
                 -- it's an identical auction to the previous row so increment the number of auctions
-                self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].count = self.rowInfo[getn(self.rowInfo)].children[getn(self.rowInfo[getn(self.rowInfo)].children)].count + 1
+                self.rowInfo[#self.rowInfo].children[#self.rowInfo[#self.rowInfo].children].count = self.rowInfo[#self.rowInfo].children[#self.rowInfo[#self.rowInfo].children].count + 1
             elseif not single_item and prevRecord and record.item_key == prevRecord.item_key then
                 -- it's the same base item as the previous row so insert a new auction
-                tinsert(self.rowInfo[getn(self.rowInfo)].children, T.map('count', 1, 'record', record))
-                if self.expanded[self.rowInfo[getn(self.rowInfo)].expandKey] then
+                tinsert(self.rowInfo[#self.rowInfo].children, T.map('count', 1, 'record', record))
+                if self.expanded[self.rowInfo[#self.rowInfo].expandKey] then
                     self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
                 end
             else
@@ -680,16 +680,16 @@ local methods = {
     end,
 
     UpdateRows = function(self)
-	    if self.rowInfo.numDisplayRows > getn(self.rows) then
+	    if self.rowInfo.numDisplayRows > #self.rows then
 		    self.contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
 	    else
 		    self.contentFrame:SetPoint('BOTTOMRIGHT', 0, 0)
 	    end
 	    self:ResizeColumns()
 
-	    FauxScrollFrame_Update(self.scrollFrame, self.rowInfo.numDisplayRows, getn(self.rows), self.ROW_HEIGHT)
+	    FauxScrollFrame_Update(self.scrollFrame, self.rowInfo.numDisplayRows, #self.rows, self.ROW_HEIGHT)
 
-	    local maxOffset = max(self.rowInfo.numDisplayRows - getn(self.rows), 0)
+	    local maxOffset = max(self.rowInfo.numDisplayRows - #self.rows, 0)
 	    if FauxScrollFrame_GetOffset(self.scrollFrame) > maxOffset then
 		    FauxScrollFrame_SetOffset(self.scrollFrame, maxOffset)
 	    end
@@ -701,7 +701,7 @@ local methods = {
             tex:SetAlpha(.5)
         end
 
-        if getn(self.sorts) > 0 then
+        if #self.sorts > 0 then
             local last_sort = self.sorts[1]
             if last_sort.descending then
                 self.headCells[last_sort.index]:GetNormalTexture():SetColorTexture(.8, .6, 1, .8)
@@ -753,14 +753,14 @@ local methods = {
                     rowIndex = rowIndex + 1
                 end
             else
-                self:SetRowInfo(rowIndex, v.children[1].record, v.totalAuctions, getn(v.children) > 1 and v.totalPlayerAuctions or 0, false, getn(v.children) > 1, v.expandKey)
+                self:SetRowInfo(rowIndex, v.children[1].record, v.totalAuctions, #v.children > 1 and v.totalPlayerAuctions or 0, false, #v.children > 1, v.expandKey)
                 rowIndex = rowIndex + 1
             end
         end
     end,
 
     SetRowInfo = function(self, rowIndex, record, totalAuctions, totalPlayerAuctions, indented, expandable, expandKey)
-        if rowIndex <= 0 or rowIndex > getn(self.rows) then return end
+        if rowIndex <= 0 or rowIndex > #self.rows then return end
         local row = self.rows[rowIndex]
         row:Show()
         if self.selected and record.search_signature == self.selected.search_signature then

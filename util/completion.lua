@@ -34,7 +34,7 @@ function M.complete(candidates)
 		local text = self:GetText()
 
 		local t = candidates()
-		for i = 1, getn(t) do
+		for i = 1, #t do
 			if strsub(strupper(t[i]), 1, strlen(text)) == strupper(text) then
 				self:SetText(strlower(t[i]))
 				self:HighlightText(strlen(text), -1)
