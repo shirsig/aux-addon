@@ -96,7 +96,11 @@ end
 
 do
 	local menu = CreateFrame('Frame', unique_name(), UIParent, 'UIDropDownMenuTemplate')
-	M.menu = T.vararg-function(arg)
+	M.menu = function(...)
+        local arg
+        for i = 1, select('#', ...) do
+            tinsert(tselect(arg, ...))
+        end
 		HideDropDownMenu(1)
 		UIDropDownMenu_Initialize(menu, function()
 			for i = 1, #arg, 2 do

@@ -851,9 +851,8 @@ local methods = {
         end
     end,
 
-    SetSort = T.vararg-function(arg)
-	    local self = tremove(arg, 1)
-        for _, v in ipairs(arg) do
+    SetSort = function(self, ...)
+        for _, v in ipairs{...} do
             for i, sort in ipairs(self.sorts) do
                 if sort.index == abs(v) then
                     tremove(self.sorts, i)

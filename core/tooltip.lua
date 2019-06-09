@@ -18,31 +18,31 @@ function aux.handle.LOAD()
 		local inside_hook = false
 	    for name, f in pairs(game_tooltip_hooks) do
 	        local name, f = name, f
-	        aux.hook(name, GameTooltip, T.vararg-function(arg)
+	        aux.hook(name, GameTooltip, function(...)
                 game_tooltip_money = 0
                 inside_hook = true
-	            local tmp = T.list(aux.orig[GameTooltip][name](unpack(arg)))
+	            local tmp = T.list(aux.orig[GameTooltip][name](...))
 	            inside_hook = false
-	            f(unpack(arg))
+	            f(...)
 	            return T.unpack(tmp)
 	        end)
 	    end
         SetTooltipMoney = SetTooltipMoney
-        _G.SetTooltipMoney = T.vararg-function(arg)
+        _G.SetTooltipMoney = function(...)
             if inside_hook then
-                game_tooltip_money = arg[2]
+                game_tooltip_money = select(2, ...)
             else
-                return SetTooltipMoney(unpack(arg))
+                return SetTooltipMoney(...)
             end
         end
     end
     local orig = SetItemRef
-    setglobal('SetItemRef', T.vararg-function(arg)
-        local name, _, quality = GetItemInfo(arg[1])
-        local tmp = T.list(orig(unpack(arg)))
+    setglobal('SetItemRef', function(...)
+        local name, _, quality = GetItemInfo(...)
+        local tmp = T.list(orig(...))
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
             local color_code = select(4, GetItemQualityColor(quality))
-            local link = color_code ..  '|H' .. arg[1] .. '|h[' .. name .. ']|h' .. FONT_COLOR_CODE_CLOSE
+            local link = color_code ..  '|H' .. ... .. '|h[' .. name .. ']|h' .. FONT_COLOR_CODE_CLOSE
             extend_tooltip(ItemRefTooltip, link, 1)
         end
         return T.unpack(tmp)

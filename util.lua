@@ -25,9 +25,8 @@ end
 
 M.join = table.concat
 
-M.index = T.vararg-function(arg)
-	local t = tremove(arg, 1)
-	for _, v in ipairs(arg) do
+M.index = function(t, ...)
+	for _, v in ipairs{...} do
 		t = t and t[v]
 	end
 	return t
@@ -165,9 +164,10 @@ end
 
 function M.signal()
 	local params
-	return T.vararg-function(arg)
-		T.static(arg)
-		params = arg
+	return function(...)
+        for i = 1, select('#', ...) do
+            tinsert(params, select(i, ...))
+        end
 	end, function()
 		return params
 	end

@@ -16,13 +16,14 @@ function M.compare(a, b, desc)
     end
 end
 
-M.multi_lt = T.vararg-function(arg)
-	for i = 1, #arg, 2 do
-        if arg[i] and arg[i + 1] and arg[i] ~= arg[i + 1] then
-            return arg[i] < arg[i + 1]
-        elseif not arg[i] and arg[i + 1] then
+M.multi_lt = function(...)
+	for i = 1, select('#', ...), 2 do
+        local arg1, arg2 = select(i, ...)
+        if arg1 and arg2 and arg1 ~= arg2 then
+            return arg1 < arg2
+        elseif not arg1 and arg2 then
             return true
-        elseif not arg[i + 1] then
+        elseif not arg2 then
             return false
         end
 	end

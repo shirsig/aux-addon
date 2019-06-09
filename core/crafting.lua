@@ -39,8 +39,8 @@ do
         end)
     end
     function craft_ui_loaded()
-        aux.hook('CraftFrame_SetSelection', T.vararg-function(arg)
-            local ret = T.temp-T.list(aux.orig.CraftFrame_SetSelection(unpack(arg)))
+        aux.hook('CraftFrame_SetSelection', function(...)
+            local ret = T.temp-T.list(aux.orig.CraftFrame_SetSelection(...))
             local id = GetCraftSelectionIndex()
             local total_cost = 0
             for i = 1, GetCraftNumReagents(id) do
@@ -68,8 +68,8 @@ do
         end
     end
     function trade_skill_ui_loaded()
-        aux.hook('TradeSkillFrame_SetSelection', T.vararg-function(arg)
-            local ret = T.temp-T.list(aux.orig.TradeSkillFrame_SetSelection(unpack(arg)))
+        aux.hook('TradeSkillFrame_SetSelection', function(...)
+            local ret = T.temp-T.list(aux.orig.TradeSkillFrame_SetSelection(...))
             local id = GetTradeSkillSelectionIndex()
             local total_cost = 0
             for i = 1, GetTradeSkillNumReagents(id) do

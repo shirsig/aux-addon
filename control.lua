@@ -77,7 +77,7 @@ function M.event_listener(event, cb)
 	listeners[listener_id] = T.map(
 		'event', event,
 		'cb', cb,
-		'kill', T.vararg-function(arg) if #arg == 0 or arg[1] then kill_listener(listener_id) end end
+		'kill', function(...) if select('#', ...) == 0 or select(1, ...) then kill_listener(listener_id) end end
 	)
 	event_frame:RegisterEvent(event)
 	return listener_id
@@ -95,27 +95,21 @@ do
 		end,
 	}
 
-	M.thread = T.vararg-function(arg)
-		T.static(arg)
-		arg.f = tremove(arg, 1)
+	M.thread = function(f, ...)
 		local thread_id = unique_id()
-		threads[thread_id] = T.map('k', setmetatable(arg, mt))
+		threads[thread_id] = T.map('k', setmetatable({f = f, ...}, mt))
 		return thread_id
 	end
 
-	M.wait = T.vararg-function(arg)
-		T.static(arg)
-		arg.f = tremove(arg, 1)
-		threads[thread_id].k = setmetatable(arg, mt)
+	M.wait = function(f, ...)
+		threads[thread_id].k = setmetatable({f = f, ...}, mt)
 	end
 end
 
-M.when = T.vararg-function(arg)
-	local c = tremove(arg, 1)
-	local k = tremove(arg, 1)
+M.when = function(c, k, ...)
 	if c() then
-		return k(unpack(arg))
+		return k(...)
 	else
-		return wait(when, c, k, unpack(arg))
+		return wait(when, c, k, ...)
 	end
 end

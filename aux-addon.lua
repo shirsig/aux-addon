@@ -34,8 +34,8 @@ function _G.GetAuctionInvTypes() -- TODO retail
 --    "INVTYPE_WEAPON"
 end
 
-M.print = T.vararg-function(arg)
-	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '<aux> ' .. join(map(arg, tostring), ' '))
+M.print = function(...)
+	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '<aux> ' .. join(map({...}, tostring), ' '))
 end
 
 local bids_loaded
@@ -155,12 +155,12 @@ do
 end
 
 M.orig = setmetatable({[_G]=T.acquire()}, {__index=function(self, key) return self[_G][key] end})
-M.hook = T.vararg-function(arg)
+M.hook = function(...)
 	local name, object, handler
-	if #arg == 3 then
-		name, object, handler = unpack(arg)
+	if select('#', ...) == 3 then
+		name, object, handler = ...
 	else
-		object, name, handler = _G, unpack(arg)
+		object, name, handler = _G, ...
 	end
 	handler = handler or getfenv(3)[name]
 	orig[object] = orig[object] or T.acquire()
@@ -260,15 +260,15 @@ end
 function auction_ui_loaded()
 	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
 	AuctionFrame:SetScript('OnHide', nil)
-	hook('ShowUIPanel', T.vararg-function(arg)
-		if arg[1] == AuctionFrame then return AuctionFrame:Show() end
-		return orig.ShowUIPanel(unpack(arg))
+	hook('ShowUIPanel', function(...)
+		if select(1, ...) == AuctionFrame then return AuctionFrame:Show() end
+		return orig.ShowUIPanel(...)
 	end)
 	hook 'GetOwnerAuctionItems' 'SetItemRef' 'UseContainerItem' 'AuctionFrameAuctions_OnEvent'
 end
 
-AuctionFrameAuctions_OnEvent = T.vararg-function(arg)
+AuctionFrameAuctions_OnEvent = function(...)
     if AuctionFrameAuctions:IsVisible() then
-	    return orig.AuctionFrameAuctions_OnEvent(unpack(arg))
+	    return orig.AuctionFrameAuctions_OnEvent(...)
     end
 end

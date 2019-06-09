@@ -223,8 +223,8 @@ do
 			end
 			for _, parser in pairs(T.temp-T.list(
 				T.temp-T.list('class', info.item_class_index),
-				T.temp-T.list('subclass', T.vararg-function(arg) return info.item_subclass_index(aux.index(self.class, 2) or 0, unpack(arg)) end),
-				T.temp-T.list('slot', T.vararg-function(arg) return info.item_slot_index(aux.index(self.class, 2) == 2 and 2 or 0, aux.index(self.subclass, 2) or 0, unpack(arg)) end),
+				T.temp-T.list('subclass', function(...) return info.item_subclass_index(aux.index(self.class, 2) or 0, ...) end),
+				T.temp-T.list('slot', function(...) return info.item_slot_index(aux.index(self.class, 2) == 2 and 2 or 0, aux.index(self.subclass, 2) or 0, ...) end),
 				T.temp-T.list('quality', info.item_quality_index)
 			)) do
 				if not self[parser[1]] then
