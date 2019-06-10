@@ -5,7 +5,7 @@ local aux = require 'aux'
 local info = require 'aux.util.info'
 local history = require 'aux.core.history'
 
-local PAGE_SIZE = 50
+local PAGE_SIZE = NUM_AUCTION_ITEMS_PER_PAGE
 
 function aux.handle.CLOSE()
 	abort()

@@ -1,6 +1,6 @@
-local _, addonTable = ...
+local _, addon_table = ...
 
-local _G, setfenv, setmetatable = getfenv(0), setfenv, setmetatable
+local setfenv, setmetatable = setfenv, setmetatable
 local environments, interfaces = {}, {}
 local require, create_module, pass, environment_mt
 
@@ -13,7 +13,7 @@ local function module(_, name)
     return defined
 end
 
-setmetatable(addonTable, {__call = module})
+setmetatable(addon_table, {__call = module})
 
 function pass() end
 
@@ -27,7 +27,7 @@ function require(name)
 end
 
 function create_module(name)
-	local environment = setmetatable({_G = _G, pass = pass, require = require}, environment_mt)
+	local environment = setmetatable({pass = pass, require = require}, environment_mt)
 	local exports = {}
 	environment.M = setmetatable({}, {
 		__metatable = false,
