@@ -94,10 +94,12 @@ end
 
 do
 	local function submit()
-		if get_state().params.type == 'bidder' then
-			GetBidderAuctionItems(get_state().page)
-		elseif get_state().params.type == 'owner' then
-			GetOwnerAuctionItems(get_state().page)
+		if get_state().params.type == 'bidder' and not AuctionFrame.gotBids then
+            GetBidderAuctionItems()
+            AuctionFrame.gotBids = 1
+		elseif get_state().params.type == 'owner' and not AuctionFrame.gotAuctions then
+			GetOwnerAuctionItems()
+            AuctionFrame.gotAuctions = 1
         else
 			get_state().last_list_query = GetTime()
 			local blizzard_query = get_query().blizzard_query or T.acquire()
@@ -171,9 +173,9 @@ end
 
 function wait_for_results()
     if get_state().params.type == 'bidder' then
-        return aux.when(function() return aux.bids_loaded() end, accept_results)
+        return accept_results()
     elseif get_state().params.type == 'owner' then
-        return wait_for_owner_results()
+        return accept_results()
     elseif get_state().params.type == 'list' then
         return wait_for_list_results()
     end
@@ -189,16 +191,6 @@ function accept_results()
 		)
 	end
 	return scan_page()
-end
-
-function wait_for_owner_results()
-    if get_state().page == aux.current_owner_page() then
-	    return accept_results()
-    else
-	    local updated
-        aux.on_next_event('AUCTION_OWNED_LIST_UPDATE', function() updated = true end)
-	    return aux.when(function() return updated end, accept_results)
-    end
 end
 
 function wait_for_list_results()

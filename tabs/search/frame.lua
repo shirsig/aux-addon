@@ -35,6 +35,7 @@ frame.saved.recent = gui.panel(frame.saved)
 frame.saved.recent:SetWidth(364.5)
 frame.saved.recent:SetPoint('TOPRIGHT', 0, 0)
 frame.saved.recent:SetPoint('BOTTOMRIGHT', 0, 0)
+
 do
     local btn = gui.button(frame, 25)
     btn:SetPoint('TOPLEFT', 5, -8)
@@ -557,3 +558,4 @@ for listing in pairs(T.temp-T.set(favorite_searches_listing, recent_searches_lis
 		listing:SetHandler(k, v)
 	end
 end
+

@@ -372,7 +372,9 @@ function suggestions(filter)
 
     -- classes
     if not filter.blizzard.class then
-        for i = 1, 15 do tinsert(suggestions, GetItemClassInfo(i)) end
+        for i = 1, #AuctionCategories do
+            tinsert(suggestions, AuctionCategories[i].name)
+        end
     end
 
     -- subclasses

@@ -10,9 +10,13 @@ local tab = aux.tab 'Bids'
 
 auction_records = {}
 
+
+function aux.LOAD()
+    aux.event_listener('AUCTION_BIDDER_LIST_UPDATE', scan_bids)
+end
+
 function tab.OPEN()
     frame:Show()
-    scan_bids()
 end
 
 function tab.CLOSE()
@@ -32,11 +36,6 @@ function M.scan_bids()
     update_listing()
     scan.start{
         type = 'bidder',
-        queries = T.list(T.map('blizzard_query', T.acquire())),
-        on_page_loaded = function(page, total_pages)
-            status_bar:update_status(page / total_pages, 0)
-            status_bar:set_text(format('Scanning (Page %d / %d)', page, total_pages))
-        end,
         on_auction = function(auction_record)
             tinsert(auction_records, auction_record)
         end,

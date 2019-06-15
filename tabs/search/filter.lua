@@ -351,11 +351,13 @@ function initialize_class_dropdown()
 			UIDropDownMenu_Initialize(slot_dropdown, initialize_slot_dropdown)
 			update_form()
 		end
-	end
-	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
-	for i = 1, 15 do
-		UIDropDownMenu_AddButton(T.map('text', GetItemClassInfo(i), 'value', i, 'func', on_click))
-	end
+    end
+--    aux.when(function() return AuctionCategories end, function()
+--        UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
+--        for i = 1, #AuctionCategories do
+--            UIDropDownMenu_AddButton(T.map('text', AuctionCategories[i].name, 'value', i, 'func', on_click))
+--        end
+--    end)
 end
 
 function initialize_subclass_dropdown()

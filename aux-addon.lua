@@ -38,14 +38,8 @@ M.print = function(...)
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '<aux> ' .. join(map({...}, tostring), ' '))
 end
 
-local bids_loaded
-function M.bids_loaded() return bids_loaded end
-
-local current_owner_page
-function M.current_owner_page() return current_owner_page end
-
 local event_frame = CreateFrame'Frame'
-for event in pairs(T.temp-T.set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_BIDDER_LIST_UPDATE', 'AUCTION_OWNED_LIST_UPDATE')) do
+for event in pairs(T.temp-T.set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_OWNED_LIST_UPDATE')) do
 	event_frame:RegisterEvent(event)
 end
 
@@ -232,28 +226,11 @@ do
 		tinsert(handlers, f)
 	end
 	function AUCTION_HOUSE_CLOSED()
-		bids_loaded = false
-		current_owner_page = nil
 		for _, handler in pairs(handlers) do
 			handler()
 		end
 		set_tab()
 		frame:Hide()
-	end
-end
-
-function AUCTION_BIDDER_LIST_UPDATE()
-	bids_loaded = true
-end
-
-do
-	local last_owner_page_requested
-	function GetOwnerAuctionItems(index)
-		last_owner_page_requested = index
-		return orig.GetOwnerAuctionItems(index)
-	end
-	function AUCTION_OWNED_LIST_UPDATE()
-		current_owner_page = last_owner_page_requested or 0
 	end
 end
 
@@ -264,7 +241,7 @@ function auction_ui_loaded()
 		if select(1, ...) == AuctionFrame then return AuctionFrame:Show() end
 		return orig.ShowUIPanel(...)
 	end)
-	hook 'GetOwnerAuctionItems' 'SetItemRef' 'UseContainerItem' 'AuctionFrameAuctions_OnEvent'
+	hook 'SetItemRef' 'UseContainerItem' 'AuctionFrameAuctions_OnEvent'
 end
 
 AuctionFrameAuctions_OnEvent = function(...)

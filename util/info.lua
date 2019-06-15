@@ -389,8 +389,8 @@ function M.item(item_id, suffix_id)
 end
 
 function M.item_class_index(item_class)
-    for i = 1, 15 do
-        if strupper(GetItemClassInfo(i)) == strupper(item_class) then
+    for i = 1, #AuctionCategories do
+        if strupper(AuctionCategories[i].name) == strupper(item_class) then
             return i, class
         end
     end

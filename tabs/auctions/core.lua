@@ -9,9 +9,12 @@ local tab = aux.tab 'Auctions'
 
 auction_records = T.acquire()
 
+function aux.LOAD()
+    aux.event_listener('AUCTION_OWNED_LIST_UPDATE', scan_auctions)
+end
+
 function tab.OPEN()
     frame:Show()
-    scan_auctions()
 end
 
 function tab.CLOSE()
@@ -31,11 +34,6 @@ function M.scan_auctions()
     update_listing()
     scan.start{
         type = 'owner',
-        queries = {{blizzard_query = T.acquire()}},
-        on_page_loaded = function(page, total_pages)
-            status_bar:update_status(page / total_pages, 0)
-            status_bar:set_text(format('Scanning (Page %d / %d)', page, total_pages))
-        end,
         on_auction = function(auction_record)
             tinsert(auction_records, auction_record)
         end,
