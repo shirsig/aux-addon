@@ -913,8 +913,8 @@ function M.new(parent, rows, columns)
     rt.contentFrame = contentFrame
 
     local scrollFrame = CreateFrame('ScrollFrame', gui.unique_name(), rt, 'FauxScrollFrameTemplate')
-    scrollFrame:SetScript('OnVerticalScroll', function()
-	    FauxScrollFrame_OnVerticalScroll(rt.ROW_HEIGHT, function() rt:UpdateRows() end)
+    scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
+	    FauxScrollFrame_OnVerticalScroll(self, offset, rt.ROW_HEIGHT, function() rt:UpdateRows() end)
     end)
     scrollFrame:SetAllPoints(contentFrame)
     rt.scrollFrame = scrollFrame

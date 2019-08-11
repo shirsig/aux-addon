@@ -39,7 +39,7 @@ M.print = function(...)
 end
 
 local event_frame = CreateFrame'Frame'
-for event in pairs(T.temp-T.set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED', 'AUCTION_OWNED_LIST_UPDATE')) do
+for event in pairs(T.temp-T.set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED')) do
 	event_frame:RegisterEvent(event)
 end
 

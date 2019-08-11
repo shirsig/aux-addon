@@ -5,7 +5,7 @@ local aux = require 'aux'
 local info = require 'aux.util.info'
 local history = require 'aux.core.history'
 
-local PAGE_SIZE = NUM_AUCTION_ITEMS_PER_PAGE
+local PAGE_SIZE = 50
 
 function aux.handle.CLOSE()
 	abort()
@@ -183,6 +183,7 @@ end
 
 function accept_results()
 	_,  get_state().total_auctions = GetNumAuctionItems(get_state().params.type)
+    p.bur2(get_state())
 	do
 		(get_state().params.on_page_loaded or pass)(
 			get_state().page - (get_query().blizzard_query.first_page or 0) + 1,

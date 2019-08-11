@@ -268,8 +268,8 @@ function M.new(parent)
     st.contentFrame = contentFrame
 
     local scrollFrame = CreateFrame('ScrollFrame', st:GetName() .. 'ScrollFrame', st, 'FauxScrollFrameTemplate')
-    scrollFrame:SetScript('OnVerticalScroll', function()
-        FauxScrollFrame_OnVerticalScroll(ROW_HEIGHT, function() st:Update() end)
+    scrollFrame:SetScript('OnVerticalScroll', function(self, offset)
+        FauxScrollFrame_OnVerticalScroll(self, offset, ROW_HEIGHT, function() st:Update() end)
     end)
     scrollFrame:SetAllPoints(contentFrame)
     st.scrollFrame = scrollFrame
