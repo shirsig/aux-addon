@@ -4,7 +4,7 @@ local T = require 'T'
 local aux = require 'aux'
 
 CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
-AuxTooltip:SetScript('OnTooltipAddMoney', function(self)
+AuxTooltip:SetScript('OnTooltipAddMoney', function(self, arg1)
     self.money = arg1
 end)
 
@@ -294,7 +294,7 @@ function M.tooltip(setter, arg1, arg2)
 end
 
 do
---    local pattern = '^' .. gsub(gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)') .. '$' TODO classic
+--    local pattern = '^' .. gsub(gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)') .. '$' TODO retail
     local pattern = '^' .. gsub(gsub(ITEM_SPELL_CHARGES, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)') .. '$'
 	function item_charges(tooltip)
 		for _, line in pairs(tooltip) do
