@@ -200,8 +200,9 @@ function wait_for_list_results()
         updated = true
     end)
     local timeout = aux.later(5, get_state().last_list_query)
-    local ignore_owner = get_state().params.ignore_owner or aux.account_data.ignore_owner
-	return aux.when(function()
+    -- TODO retail is this still worth it? also needed for other types?
+    local ignore_owner = false -- get_state().params.ignore_owner or aux.account_data.ignore_owner
+    return aux.when(function()
 		if not last_update and timeout() then
 			return true
 		end
@@ -209,7 +210,7 @@ function wait_for_list_results()
 			return true
 		end
 		-- short circuiting order important, owner_data_complete must be called iif an update has happened.
-		if updated and (ignore_owner or owner_data_complete()) then
+		if updated and (ignore_owner or data_complete()) then
 			return true
 		end
 		updated = false
@@ -223,10 +224,10 @@ function wait_for_list_results()
 	end)
 end
 
-function owner_data_complete()
+function data_complete()
     for i = 1, PAGE_SIZE do
         local auction_info = info.auction(i, 'list')
-        if auction_info and not auction_info.owner then -- TODO retail hasAllInfo?
+        if ({GetAuctionItemInfo(i, 'list')})[17] == false then -- TODO retail can it be nil?
 	        return false
         end
     end
