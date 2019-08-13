@@ -95,18 +95,18 @@ do
 		end,
 	}
 
-	M.thread = function(f, ...)
+	 function M.thread(f, ...)
 		local thread_id = unique_id()
 		threads[thread_id] = T.map('k', setmetatable({f = f, ...}, mt))
 		return thread_id
 	end
 
-	M.wait = function(f, ...)
+	function M.wait(f, ...)
 		threads[thread_id].k = setmetatable({f = f, ...}, mt)
 	end
 end
 
-M.when = function(c, k, ...)
+function M.when(c, k, ...)
 	if c() then
 		return k(...)
 	else

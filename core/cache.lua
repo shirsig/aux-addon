@@ -170,7 +170,8 @@ function scan_wdb(item_id)
 	local processed = 0
 	while processed <= 100 and item_id <= MAX_ITEM_ID do
 		local itemstring = 'item:' .. item_id
-		local name, _, quality, level, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
+		local name, _, quality, level, _, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
+
 		if name and not aux.account_data.item_ids[strlower(name)] then
             aux.account_data.item_ids[strlower(name)] = item_id
 			aux.account_data.items[item_id] = persistence.write(items_schema, T.temp-T.map(

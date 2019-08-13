@@ -3,37 +3,6 @@ select(2, ...) 'aux'
 local T = require 'T'
 local post = require 'aux.tabs.post'
 
-function _G.GetAuctionInvTypes() -- TODO retail
---    "INVTYPE_HEAD",
---    "INVTYPE_NECK",
---    "INVTYPE_SHOULDER",
---    "INVTYPE_BODY",
---    "INVTYPE_CHEST",
---    "INVTYPE_WAIST",
---    "INVTYPE_LEGS",
---    "INVTYPE_FEET",
---    "INVTYPE_WRIST",
---    "INVTYPE_HAND",
---    "INVTYPE_FINGER",
---    "INVTYPE_TRINKET",
---    "INVTYPE_CLOAK",
---    "INVTYPE_HOLDABLE",
---    "INVTYPE_RANGEDRIGHT",
---    "INVTYPE_THROWN",
---    "INVTYPE_AMMO",
---    "INVTYPE_HOLDABLE",
---    "INVTYPE_WEAPONOFFHAND",
---    "INVTYPE_WEAPONMAINHAND",
---    "INVTYPE_ROBE",
---    "INVTYPE_TABARD",
---    "INVTYPE_BAG",
---    "INVTYPE_2HWEAPON",
---    "INVTYPE_CLOAK",
---    "INVTYPE_RANGED",
---    "INVTYPE_SHIELD",
---    "INVTYPE_WEAPON"
-end
-
 M.print = function(...)
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '<aux> ' .. join(map({...}, tostring), ' '))
 end

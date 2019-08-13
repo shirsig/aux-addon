@@ -68,13 +68,14 @@ blizzard_query = setmetatable(T.acquire(), {
 })
 
 function update_form()
-	if GetAuctionItemSubClasses(blizzard_query.class or 0) then
+	if (blizzard_query.class or 0) > 0 then
 		subclass_dropdown.button:Enable()
 	else
 		subclass_dropdown.button:Disable()
 	end
 
-	if blizzard_query.class == 2 then
+--	if blizzard_query.class == 2 then
+    if (blizzard_query.subclass or 0) > 0 then -- TODO retail
 		slot_dropdown.button:Enable()
 	else
 		slot_dropdown.button:Disable()
@@ -126,18 +127,19 @@ function get_filter_builder_query()
 	add(blizzard_query.max_level)
 	add(blizzard_query.usable and 'usable')
 
-	if blizzard_query.class and blizzard_query.class > 0 then
-		add(strlower(GetItemClassInfo(blizzard_query.class)))
+	if (blizzard_query.class or 0) > 0 then
+        local category = AuctionCategories[blizzard_query.class]
+		add(strlower(category.name))
+        if (blizzard_query.subclass or 0) > 0 then
+            local subcategory = category.subCategories[blizzard_query.subclass]
+            add(strlower(subcategory.name))
+            if (blizzard_query.slot or 0) > 0 then -- TODO retail is it still possible to query for slot without subclass?
+                local subsubcategory = subcategory.subCategories[blizzard_query.slot]
+                add(strlower(subsubcategory.name))
+            end
+        end
 	end
-	local subclasses = T.temp-T.list(GetAuctionItemSubClasses(blizzard_query.class or 0))
-	if blizzard_query.subclass and blizzard_query.subclass > 0 then
-		add(strlower(subclasses[blizzard_query.subclass]))
-	end
-	local slot_index = blizzard_query.slot
-	if slot_index then
-		local slots = T.temp-T.list(GetAuctionInvTypes(blizzard_query.class or 0, blizzard_query.subclass or 0))
-		add(strlower(_G[slots[slot_index]]))
-	end
+
 
 	local quality = blizzard_query.quality
 	if quality and quality >= 0 then
@@ -352,12 +354,12 @@ function initialize_class_dropdown()
 			update_form()
 		end
     end
---    aux.when(function() return AuctionCategories end, function()
---        UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
---        for i = 1, #AuctionCategories do
---            UIDropDownMenu_AddButton(T.map('text', AuctionCategories[i].name, 'value', i, 'func', on_click))
---        end
---    end)
+    UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
+    if AuctionCategories then
+        for i, category in ipairs(AuctionCategories) do
+            UIDropDownMenu_AddButton(T.map('text', category.name, 'value', i, 'func', on_click))
+        end
+    end
 end
 
 function initialize_subclass_dropdown()
@@ -368,9 +370,11 @@ function initialize_subclass_dropdown()
 		end
 	end
 	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
-	for i, subclass in ipairs(T.temp-T.list(GetAuctionItemSubClasses(blizzard_query.class or 0))) do
-		UIDropDownMenu_AddButton(T.map('text', subclass, 'value', i, 'func', on_click))
-	end
+    if AuctionCategories and (blizzard_query.class or 0) > 0 then
+        for i, subcategory in ipairs(AuctionCategories[blizzard_query.class].subCategories) do
+            UIDropDownMenu_AddButton(T.map('text', subcategory.name, 'value', i, 'func', on_click))
+        end
+    end
 end
 
 function initialize_slot_dropdown()
@@ -379,9 +383,11 @@ function initialize_slot_dropdown()
 		update_form()
 	end
 	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
-	for i, slot in ipairs(T.temp-T.list(GetAuctionInvTypes(blizzard_query.class == 2 and 2 or 0, blizzard_query.subclass or 0))) do
-		UIDropDownMenu_AddButton(T.map('text', _G[slot], 'value', i, 'func', on_click))
-	end
+    if AuctionCategories and (blizzard_query.class or 0) > 0 and (blizzard_query.subclass or 0) > 0 then -- TODO retail is it still possible to query for slot without subclass?
+        for i, subsubcategory in ipairs(AuctionCategories[blizzard_query.class][blizzard_query.subclass].subCategories) do
+            UIDropDownMenu_AddButton(T.map('text', subsubcategory.name, 'value', i, 'func', on_click))
+        end
+    end
 end
 
 function initialize_quality_dropdown()

@@ -222,9 +222,9 @@ do
 				end
 			end
 			for _, parser in pairs(T.temp-T.list(
-				T.temp-T.list('class', info.item_class_index),
-				T.temp-T.list('subclass', function(...) return info.item_subclass_index(aux.index(self.class, 2) or 0, ...) end),
-				T.temp-T.list('slot', function(...) return info.item_slot_index(aux.index(self.class, 2) == 2 and 2 or 0, aux.index(self.subclass, 2) or 0, ...) end),
+				T.temp-T.list('class', info.category_index),
+				T.temp-T.list('subclass', function(...) return info.subcategory_index(aux.index(self.class, 2) or 0, ...) end),
+				T.temp-T.list('slot', function(...) return info.subsubcategory_index(aux.index(self.class, 2) == 2 and 2 or 0, aux.index(self.subclass, 2) or 0, ...) end),
 				T.temp-T.list('quality', info.item_quality_index)
 			)) do
 				if not self[parser[1]] then
@@ -372,22 +372,22 @@ function suggestions(filter)
 
     -- classes
     if not filter.blizzard.class then
-        for i = 1, #AuctionCategories do
-            tinsert(suggestions, AuctionCategories[i].name)
+        for _, category in ipairs(AuctionCategories) do
+            tinsert(suggestions, category.name)
         end
     end
 
-    -- subclasses
-    if not filter.blizzard.subclass then
-        for _, subclass in ipairs(T.temp-T.list(GetAuctionItemSubClasses(aux.index(filter.blizzard.class, 2) or 0))) do
-            tinsert(suggestions, subclass)
+    if (filter.blizzard.class or 0) > 0 and not filter.blizzard.subclass then
+        -- subclasses
+        for _, subcategory in ipairs(AuctionCategories[filter.blizzard.class].subCategories) do
+            tinsert(suggestions, subcategory.name)
         end
-    end
 
-    -- slots
-    if not filter.blizzard.slot then
-        for _, invtype in ipairs(T.temp-T.list(GetAuctionInvTypes(aux.index(filter.blizzard.class, 2) == 2 and 2 or 0, aux.index(filter.blizzard.subclass, 2) or 0))) do
-            tinsert(suggestions, _G[invtype])
+        -- slots
+        if (filter.blizzard.subclass or 0) > 0 then -- TODO retail is it still possible to query for slot without subclass?
+            for _, subsubcategory in ipairs(AuctionCategories[filter.blizzard.class].subCategories[filter.blizzard.subclass].subCategories) do
+                tinsert(suggestions, subsubcategory.name)
+            end
         end
     end
 
@@ -485,9 +485,9 @@ function blizzard_query(filter)
     local item_id = filters.name and info.item_id(filters.name)
     item_info = item_id and info.item(item_id)
     if filters.exact and item_info then
-        class_index = info.item_class_index(item_info.class)
-        subclass_index = info.item_subclass_index(class_index or 0, item_info.subclass)
-        slot_index = info.item_slot_index(class_index or 0, subclass_index or 0, item_info.slot)
+        class_index = info.category_index(item_info.class)
+        subclass_index = info.subcategory_index(class_index or 0, item_info.subclass)
+        slot_index = info.subsubcategory_index(class_index or 0, subclass_index or 0, item_info.slot)
     end
     if item_info then
         query.min_level = item_info.level

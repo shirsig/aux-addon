@@ -388,28 +388,35 @@ function M.item(item_id, suffix_id)
     ) or item_info(item_id)
 end
 
-function M.item_class_index(item_class)
-    for i = 1, #AuctionCategories do
-        if strupper(AuctionCategories[i].name) == strupper(item_class) then
-            return i, class
+function M.category_index(category)
+    for i, v in ipairs(AuctionCategories) do
+        if v.name == category then
+            return i
         end
     end
+    return 0
 end
 
-function M.item_subclass_index(class_index, item_subclass)
-    for i, subclass in pairs(T.temp-T.list(GetAuctionItemSubClasses(class_index))) do
-        if strupper(subclass) == strupper(item_subclass) then
-            return i, subclass
+function M.subcategory_index(category_index, subcategory)
+    if category_index > 0 then
+        for i, v in ipairs(AuctionCategories[category_index].subCategories) do
+            if v.name == subcategory then
+                return i
+            end
         end
     end
+    return 0
 end
 
-function M.item_slot_index(class_index, subclass_index, slot_name)
-    for i, slot in pairs(T.temp-T.list(GetAuctionInvTypes(class_index, subclass_index))) do
-        if strupper(_G[slot] or '') == strupper(slot_name) then -- TODO retail why or ''
-            return i, _G[slot]
+function M.subsubcategory_index(category_index, subcategory_index, subsubcategory)
+    if category_index > 0 and subcategory_index > 0 then
+        for i, v in ipairs(AuctionCategories[category_index].subCategories[subcategory_index].subCategories) do
+            if v.name == subsubcategory then
+                return i
+            end
         end
     end
+    return 0
 end
 
 function M.item_quality_index(item_quality)
@@ -440,6 +447,6 @@ function M.bag_type(bag)
 	if link then
 		local item_id = parse_link(link)
 		local item_info = item(item_id)
-		return item_subclass_index(3, item_info.subclass)
+		return subcategory_index(3, item_info.subclass)
 	end
 end

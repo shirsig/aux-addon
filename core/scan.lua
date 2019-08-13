@@ -103,13 +103,13 @@ do
         else
 			get_state().last_list_query = GetTime()
 			local blizzard_query = get_query().blizzard_query or T.acquire()
-            local filterData
+            local category_filter
             if blizzard_query.class and blizzard_query.subclass and blizzard_query.slot then
-                filterData = AuctionCategories[blizzard_query.class].subCategories[blizzard_query.subclass].subCategories[blizzard_query.slot].filters
+                category_filter = AuctionCategories[blizzard_query.class].subCategories[blizzard_query.subclass].subCategories[blizzard_query.slot].filters
             elseif blizzard_query.class and blizzard_query.subclass then
-                filterData = AuctionCategories[blizzard_query.class].subCategories[blizzard_query.subclass].filters
+                category_filter = AuctionCategories[blizzard_query.class].subCategories[blizzard_query.subclass].filters
             elseif blizzard_query.class then
-                filterData = AuctionCategories[blizzard_query.class].filters
+                category_filter = AuctionCategories[blizzard_query.class].filters
             else
                 -- not filtering by category, leave nil for all
             end
@@ -122,7 +122,7 @@ do
                 blizzard_query.quality,
                 false, -- getAll
                 false, -- TODO retail exactMatch
-                filterData
+                category_filter
 			)
 		end
 		return wait_for_results()
@@ -183,7 +183,6 @@ end
 
 function accept_results()
 	_,  get_state().total_auctions = GetNumAuctionItems(get_state().params.type)
-    p.bur2(get_state())
 	do
 		(get_state().params.on_page_loaded or pass)(
 			get_state().page - (get_query().blizzard_query.first_page or 0) + 1,
