@@ -144,14 +144,11 @@ function game_tooltip_hooks:SetBagItem(bag, slot)
     end
 end
 
-function game_tooltip_hooks:SetInboxItem(index)
-    -- TODO retail why index nil?
---    local name, _, quantity = GetInboxItem(index)
---    local id = name and info.item_id(name)
---    if id then
---        local _, link = GetItemInfo(id)
---        extend_tooltip(GameTooltip, link, quantity)
---    end
+function game_tooltip_hooks:SetInboxItem(index, itemIndex)
+    local link = GetInboxItemLink(index, itemIndex)
+    if link then
+        extend_tooltip(GameTooltip, link, select(4, GetInboxItem(index, itemIndex)))
+    end
 end
 
 function game_tooltip_hooks:SetInventoryItem(unit, slot)
