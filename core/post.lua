@@ -42,7 +42,7 @@ function post_auction(slot, k)
 		ClickAuctionSellItemButton()
 		ClearCursor()
 
-		StartAuction(max(1, aux.round(state.unit_start_price * item_info.aux_quantity)), aux.round(state.unit_buyout_price * item_info.aux_quantity), state.duration)
+		PostAuction(max(1, aux.round(state.unit_start_price * item_info.aux_quantity)), aux.round(state.unit_buyout_price * item_info.aux_quantity), state.duration, item_info.count)
 
 		local send_signal, signal_received = aux.signal()
 		aux.when(signal_received, function()

@@ -20,7 +20,7 @@ local settings_schema = {'tuple', '#', {duration='number'}, {start_price='number
 
 local scan_id, inventory_records, bid_records, buyout_records = 0, {}, {}, {}
 
-M.DURATION_2, M.DURATION_8, M.DURATION_24 = 120, 480, 1440
+M.DURATION_2, M.DURATION_8, M.DURATION_24 = 1, 2, 3
 
 refresh = true
 
@@ -310,7 +310,7 @@ function update_item_configuration()
 
         do
             local deposit_factor = UnitFactionGroup'npc' and .05 or .25
-            local duration_factor = UIDropDownMenu_GetSelectedValue(duration_dropdown) / 120
+            local duration_factor = UIDropDownMenu_GetSelectedValue(duration_dropdown)
             local stack_size, stack_count = selected_item.max_charges and 1 or stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
             deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))

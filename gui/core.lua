@@ -105,7 +105,7 @@ do
 		UIDropDownMenu_Initialize(menu, function()
             local info = UIDropDownMenu_CreateInfo()
 			for i = 1, #arg, 2 do
-                info.text, info.notCheckable, info.func = arg[i], true, arg[i + 1]
+                info.text, info.notCheckable, info.func = arg[i], true, arg[i + 1] -- TODO notCheckable needed?
 				UIDropDownMenu_AddButton(info)
 			end
 		end, 'MENU')
