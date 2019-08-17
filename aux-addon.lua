@@ -3,7 +3,7 @@ select(2, ...) 'aux'
 local T = require 'T'
 local post = require 'aux.tabs.post'
 
-M.print = function(...)
+function M.print(...)
 	DEFAULT_CHAT_FRAME:AddMessage(LIGHTYELLOW_FONT_COLOR_CODE .. '<aux> ' .. join(map({...}, tostring), ' '))
 end
 
@@ -119,7 +119,7 @@ do
 end
 
 M.orig = setmetatable({[_G]=T.acquire()}, {__index=function(self, key) return self[_G][key] end})
-M.hook = function(...)
+function M.hook(...)
 	local name, object, handler
 	if select('#', ...) == 3 then
 		name, object, handler = ...
@@ -215,7 +215,7 @@ function auction_ui_loaded()
 	hook 'SetItemRef' 'UseContainerItem' 'AuctionFrameAuctions_OnEvent'
 end
 
-AuctionFrameAuctions_OnEvent = function(...)
+function AuctionFrameAuctions_OnEvent(...)
     if AuctionFrameAuctions:IsVisible() then
 	    return orig.AuctionFrameAuctions_OnEvent(...)
     end

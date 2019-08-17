@@ -6,7 +6,7 @@ local info = require 'aux.util.info'
 
 do
     local orig = SetItemRef
-    _G.SetItemRef = function(...)
+    function _G.SetItemRef(...)
         if select(3, ...) ~= 'RightButton' or not aux.index(aux.get_tab(), 'CLICK_LINK') or not strfind(..., '^item:%d+') then
             return orig(...)
         end
@@ -19,7 +19,7 @@ end
 
 do
     local orig = UseContainerItem
-    _G.UseContainerItem = function(...)
+    function _G.UseContainerItem(...)
         if aux.modified() or not aux.get_tab() then
             return orig(...)
         end

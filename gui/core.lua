@@ -96,15 +96,17 @@ end
 
 do
 	local menu = CreateFrame('Frame', unique_name(), UIParent, 'UIDropDownMenuTemplate')
-	M.menu = function(...)
-        local arg
+	function M.menu(...)
+        local arg = {}
         for i = 1, select('#', ...) do
-            tinsert(tselect(arg, ...))
+            arg[i] = select(i, ...)
         end
 		HideDropDownMenu(1)
 		UIDropDownMenu_Initialize(menu, function()
+            local info = UIDropDownMenu_CreateInfo()
 			for i = 1, #arg, 2 do
-				UIDropDownMenu_AddButton(T.map('text', arg[i], 'notCheckable', true, 'func', arg[i + 1]))
+                info.text, info.notCheckable, info.func = arg[i], true, arg[i + 1]
+				UIDropDownMenu_AddButton(info)
 			end
 		end, 'MENU')
 		ToggleDropDownMenu(1, nil, menu, 'cursor')

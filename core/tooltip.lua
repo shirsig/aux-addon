@@ -28,7 +28,7 @@ function aux.handle.LOAD()
 	        end)
 	    end
         SetTooltipMoney = SetTooltipMoney
-        _G.SetTooltipMoney = function(...)
+        function _G.SetTooltipMoney(...)
             if inside_hook then
                 game_tooltip_money = select(2, ...)
             else
@@ -37,7 +37,7 @@ function aux.handle.LOAD()
         end
     end
     local orig = SetItemRef
-    setglobal('SetItemRef', function(...)
+    function _G.SetItemRef(...)
         local name, _, quality = GetItemInfo(...)
         local tmp = T.list(orig(...))
         if not IsShiftKeyDown() and not IsControlKeyDown() and name then
@@ -46,7 +46,7 @@ function aux.handle.LOAD()
             extend_tooltip(ItemRefTooltip, link, 1)
         end
         return T.unpack(tmp)
-    end)
+    end
 end
 
 function M.extend_tooltip(tooltip, link, quantity)

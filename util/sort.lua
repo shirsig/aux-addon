@@ -16,7 +16,7 @@ function M.compare(a, b, desc)
     end
 end
 
-M.multi_lt = function(...)
+function M.multi_lt(...)
 	for i = 1, select('#', ...), 2 do
         local arg1, arg2 = select(i, ...)
         if arg1 and arg2 and arg1 ~= arg2 then
