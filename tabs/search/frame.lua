@@ -153,7 +153,7 @@ do
     btn:SetBackdropColor(aux.color.state.enabled())
     btn:SetText('Resume')
     btn:SetScript('OnClick', function()
-        execute(true)
+        execute(nil, true)
     end)
     resume_button = btn
 end
