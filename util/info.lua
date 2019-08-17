@@ -390,33 +390,30 @@ end
 
 function M.category_index(category)
     for i, v in ipairs(AuctionCategories) do
-        if v.name == category then
-            return i
+        if strupper(v.name) == strupper(category) then
+            return i, v.name
         end
     end
-    return 0
 end
 
 function M.subcategory_index(category_index, subcategory)
     if category_index > 0 then
         for i, v in ipairs(AuctionCategories[category_index].subCategories) do
-            if v.name == subcategory then
-                return i
+            if strupper(v.name) == strupper(subcategory) then
+                return i, v.name
             end
         end
     end
-    return 0
 end
 
 function M.subsubcategory_index(category_index, subcategory_index, subsubcategory)
     if category_index > 0 and subcategory_index > 0 then
         for i, v in ipairs(AuctionCategories[category_index].subCategories[subcategory_index].subCategories) do
-            if v.name == subsubcategory then
-                return i
+            if strupper(v.name) == strupper(subsubcategory) then
+                return i, v.name
             end
         end
     end
-    return 0
 end
 
 function M.item_quality_index(item_quality)

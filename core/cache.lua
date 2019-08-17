@@ -11,7 +11,8 @@ local items_schema = {'tuple', '#', {name='string'}, {quality='number'}, {level=
 local merchant_buy_schema = {'tuple', '#', {unit_price='number'}, {limited='boolean'}}
 
 function aux.handle.LOAD()
-	scan_wdb()
+    aux.event_listener('GET_ITEM_INFO_RECEIVED', on_get_item_info_received)
+    fetch_item_data()
 
 	aux.event_listener('MERCHANT_SHOW', on_merchant_show)
 	aux.event_listener('MERCHANT_CLOSED', on_merchant_closed)
@@ -164,51 +165,60 @@ function merchant_sell_scan()
 	end
 end
 
-function scan_wdb(item_id)
-	item_id = item_id or MIN_ITEM_ID
+function process_item(item_id)
+    local itemstring = 'item:' .. item_id
+    local name, _, quality, level, _, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 
-	local processed = 0
-	while processed <= 100 and item_id <= MAX_ITEM_ID do
-		local itemstring = 'item:' .. item_id
-		local name, _, quality, level, _, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
-
-		if name and not aux.account_data.item_ids[strlower(name)] then
-            aux.account_data.item_ids[strlower(name)] = item_id
-			aux.account_data.items[item_id] = persistence.write(items_schema, T.temp-T.map(
-				'name', name,
-				'quality', quality,
-				'level', level,
-				'class', class,
-				'subclass', subclass,
-				'slot', slot,
-				'max_stack', max_stack,
-				'texture', texture
-			))
-			local tooltip = tooltip('link', itemstring)
-			if auctionable(tooltip, quality) then
-				tinsert(aux.account_data.auctionable_items, strlower(name))
-			end
-			processed = processed + 1
-		end
-		item_id = item_id + 1
-	end
-
-	if item_id <= MAX_ITEM_ID then
-		aux.thread(aux.when, aux.later(.5), scan_wdb, item_id)
-	else
-		sort(aux.account_data.auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
-	end
+    if name then
+        aux.account_data.item_ids[strlower(name)] = item_id
+        aux.account_data.items[item_id] = persistence.write(items_schema, T.temp-T.map(
+            'name', name,
+            'quality', quality,
+            'level', level,
+            'class', class,
+            'subclass', subclass,
+            'slot', slot,
+            'max_stack', max_stack,
+            'texture', texture
+        ))
+        local tooltip = tooltip('link', itemstring)
+        if auctionable(tooltip, quality) then
+            tinsert(aux.account_data.auctionable_items, strlower(name))
+        end
+        return true
+    end
 end
 
-function M.populate_wdb(item_id)
-	item_id = item_id or MIN_ITEM_ID
-	if item_id > MAX_ITEM_ID then
-		aux.print('Cache populated.')
-		return
-	end
-	if not GetItemInfo('item:' .. item_id) then
-		aux.print('Fetching item ' .. item_id .. '.')
-		AuxTooltip:SetHyperlink('item:' .. item_id)
-	end
-	aux.thread(populate_wdb, item_id + 1)
+do
+    local requested_item_id
+
+    function fetch_item_data(item_id)
+        item_id = item_id or MIN_ITEM_ID
+
+        while aux.account_data.items[item_id] or aux.account_data.unused_item_ids[item_id] do
+            item_id = item_id + 1
+        end
+
+        if item_id > MAX_ITEM_ID then
+            return
+        end
+
+        if process_item(item_id) then
+            fetch_item_data(item_id + 1)
+        else
+            requested_item_id = item_id
+        end
+    end
+
+    function on_get_item_info_received(_, item_id, success)
+        if item_id ~= requested_item_id then
+            return
+        end
+        if success then
+            process_item(item_id)
+        elseif success == nil then
+            aux.account_data.unused_item_ids[item_id] = true
+        end
+        fetch_item_data(item_id + 1)
+    end
 end

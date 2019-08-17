@@ -228,8 +228,7 @@ do
 				T.temp-T.list('quality', info.item_quality_index)
 			)) do
 				if not self[parser[1]] then
-					tinsert(parser, str)
-					local index, label = parser[2](select(3, unpack(parser)))
+					local index, label = parser[2](str)
 					if index then
 						self[parser[1]] = T.list(label, index)
 						return T.list('blizzard', parser[1], label, index)
@@ -377,22 +376,26 @@ function suggestions(filter)
         end
     end
 
-    if (filter.blizzard.class or 0) > 0 and not filter.blizzard.subclass then
+    if filter.blizzard.class and (filter.blizzard.class[2] or 0) > 0 then
         -- subclasses
-        for _, subcategory in ipairs(AuctionCategories[filter.blizzard.class].subCategories) do
-            tinsert(suggestions, subcategory.name)
+        if not filter.blizzard.subclass then
+            for _, subcategory in ipairs(AuctionCategories[filter.blizzard.class[2]].subCategories or T.empty) do
+                tinsert(suggestions, subcategory.name)
+            end
         end
 
         -- slots
-        if (filter.blizzard.subclass or 0) > 0 then -- TODO retail is it still possible to query for slot without subclass?
-            for _, subsubcategory in ipairs(AuctionCategories[filter.blizzard.class].subCategories[filter.blizzard.subclass].subCategories) do
+        if filter.blizzard.subclass and (filter.blizzard.subclass[2] or 0) > 0 and not filter.blizzard.slot then -- TODO retail is it still possible to query for slot without subclass?
+            for _, subsubcategory in ipairs(AuctionCategories[filter.blizzard.class[2]].subCategories[filter.blizzard.subclass[2]].subCategories or T.empty) do
                 tinsert(suggestions, subsubcategory.name)
             end
         end
     end
 
     -- usable
-    if not filter.blizzard.usable then tinsert(suggestions, 'usable') end
+    if not filter.blizzard.usable then
+        tinsert(suggestions, 'usable')
+    end
 
     -- rarities
     if not filter.blizzard.quality then

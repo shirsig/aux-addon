@@ -20,7 +20,7 @@ do
 			local date = date('*t')
 			date.hour, date.min, date.sec = 24, 0, 0
 			next_push = time(date)
-		end
+        end
 		return next_push
 	end
 end

@@ -68,14 +68,15 @@ blizzard_query = setmetatable(T.acquire(), {
 })
 
 function update_form()
-	if (blizzard_query.class or 0) > 0 then
+    local category = AuctionCategories[blizzard_query.class or 0]
+	if category and category.subCategories then
 		subclass_dropdown.button:Enable()
 	else
 		subclass_dropdown.button:Disable()
 	end
 
---	if blizzard_query.class == 2 then
-    if (blizzard_query.subclass or 0) > 0 then -- TODO retail
+    local subcategory = category and category.subCategories and category.subCategories[blizzard_query.subclass or 0]
+    if subcategory and subcategory.subCategories then -- TODO retail is it still possible to query for slot without subclass?
 		slot_dropdown.button:Enable()
 	else
 		slot_dropdown.button:Disable()
@@ -371,7 +372,7 @@ function initialize_subclass_dropdown()
 	end
 	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
     if AuctionCategories and (blizzard_query.class or 0) > 0 then
-        for i, subcategory in ipairs(AuctionCategories[blizzard_query.class].subCategories) do
+        for i, subcategory in ipairs(AuctionCategories[blizzard_query.class].subCategories or T.empty) do
             UIDropDownMenu_AddButton(T.map('text', subcategory.name, 'value', i, 'func', on_click))
         end
     end
@@ -384,7 +385,7 @@ function initialize_slot_dropdown()
 	end
 	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
     if AuctionCategories and (blizzard_query.class or 0) > 0 and (blizzard_query.subclass or 0) > 0 then -- TODO retail is it still possible to query for slot without subclass?
-        for i, subsubcategory in ipairs(AuctionCategories[blizzard_query.class][blizzard_query.subclass].subCategories) do
+        for i, subsubcategory in ipairs(AuctionCategories[blizzard_query.class].subCategories[blizzard_query.subclass].subCategories or T.empty) do
             UIDropDownMenu_AddButton(T.map('text', subsubcategory.name, 'value', i, 'func', on_click))
         end
     end

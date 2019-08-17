@@ -56,6 +56,7 @@ function handle.LOAD()
         post_duration = post.DURATION_8,
         items = {},
         item_ids = {},
+        unused_item_ids = {},
         auctionable_items = {},
         merchant_buy = {},
         merchant_sell = {},
@@ -183,8 +184,9 @@ function handle.LOAD2()
 	frame:SetScale(account_data.scale)
 end
 
-function M.AUCTION_HOUSE_SHOW()
+function _G.AUCTION_HOUSE_SHOW()
 	AuctionFrame:Hide()
+    sort(account_data.auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
 	frame:Show()
 	set_tab(1)
 end

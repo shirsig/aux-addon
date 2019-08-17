@@ -2,7 +2,6 @@ select(2, ...) 'aux.core.slash'
 
 local T = require 'T'
 local aux = require 'aux'
-local info = require 'aux.util.info'
 local post = require 'aux.tabs.post'
 
 function status(enabled)
@@ -51,10 +50,9 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'clear' and arguments[2] == 'item' and arguments[3] == 'cache' then
 	    aux.account_data.items = {}
         aux.account_data.item_ids = {}
+        aux.account_data.unused_item_ids = {}
         aux.account_data.auctionable_items = {}
         aux.print('Item cache cleared.')
-    elseif arguments[1] == 'populate' and arguments[2] == 'wdb' then
-	    info.populate_wdb()
 	else
 		aux.print('Usage:')
 		aux.print('- scale [' .. aux.color.blue(aux.account_data.scale) .. ']')
@@ -69,6 +67,5 @@ function SlashCmdList.AUX(command)
 		aux.print('- tooltip disenchant value [' .. status(tooltip_settings.disenchant_value) .. ']')
 		aux.print('- tooltip disenchant distribution [' .. status(tooltip_settings.disenchant_distribution) .. ']')
 		aux.print('- clear item cache')
-		aux.print('- populate wdb')
     end
 end
