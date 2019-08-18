@@ -228,7 +228,7 @@ end
 function data_complete()
     for i = 1, PAGE_SIZE do
         local auction_info = info.auction(i, 'list')
-        if ({GetAuctionItemInfo(i, 'list')})[17] == false then -- TODO retail can it be nil?
+        if ({GetAuctionItemInfo('list', i)})[17] == false then -- TODO retail can it be nil?
 	        return false
         end
     end
