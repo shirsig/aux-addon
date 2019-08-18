@@ -62,7 +62,13 @@ do
 end
 
 function get_query()
-	return (get_state().params.queries or {{}})[get_state().query_index]
+    local queries
+    if get_state().params.type == 'list' then
+        queries = get_state().params.queries
+    else
+        queries =  {{blizzard_query={}}}
+    end
+	return queries[get_state().query_index]
 end
 
 function total_pages(total_auctions)
@@ -140,7 +146,7 @@ end
 function scan_page(i)
 	i = i or 1
 
-    local page_size = get_state().params.type ~= 'list' and PAGE_SIZE or get_state().total_auctions
+    local page_size = get_state().params.type == 'list' and PAGE_SIZE or get_state().total_auctions
 	if i > page_size then
 		do (get_state().params.on_page_scanned or pass)() end
 		if get_query().blizzard_query and get_state().page < last_page(get_state().total_auctions) then
