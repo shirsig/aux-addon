@@ -97,14 +97,12 @@ end
 do
 	local menu = CreateFrame('Frame', unique_name(), UIParent, 'UIDropDownMenuTemplate')
 	function M.menu(...)
-        local arg = {}
-        for i = 1, select('#', ...) do
-            arg[i] = select(i, ...)
-        end
+        local numArgs = select('#', ...)
+        local arg = {...}
 		HideDropDownMenu(1)
 		UIDropDownMenu_Initialize(menu, function()
             local info = UIDropDownMenu_CreateInfo()
-			for i = 1, #arg, 2 do
+			for i = 1, numArgs, 2 do
                 info.text, info.notCheckable, info.func = arg[i], true, arg[i + 1] -- TODO notCheckable needed?
 				UIDropDownMenu_AddButton(info)
 			end
