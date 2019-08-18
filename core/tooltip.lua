@@ -145,6 +145,7 @@ function game_tooltip_hooks:SetBagItem(bag, slot)
 end
 
 function game_tooltip_hooks:SetInboxItem(index, itemIndex)
+    itemIndex = itemIndex or 1 -- TODO is this default correct?
     local link = GetInboxItemLink(index, itemIndex)
     if link then
         extend_tooltip(GameTooltip, link, select(4, GetInboxItem(index, itemIndex)))
