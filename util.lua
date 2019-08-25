@@ -163,12 +163,10 @@ function M.later(t, t0)
 end
 
 function M.signal()
-	local params
+	local arg
 	return function(...)
-        for i = 1, select('#', ...) do
-            tinsert(params, select(i, ...))
-        end
+        arg = {...}
 	end, function()
-		return params
+		return arg
 	end
 end

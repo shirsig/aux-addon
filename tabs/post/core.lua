@@ -30,6 +30,14 @@ function get_default_settings()
 	return T.map('duration', aux.account_data.post_duration, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
 end
 
+function aux.handle.LOAD() -- TODO retail
+    aux.event_listener('CHAT_MSG_SYSTEM', function(kill, arg1)
+        if arg1 == ERR_AUCTION_STARTED then
+            update_inventory_listing()
+        end
+    end)
+end
+
 function aux.handle.LOAD2()
 	data = aux.faction_data.post
 end
@@ -201,50 +209,49 @@ function post_auctions()
         local unit_start_price = get_unit_start_price()
         local unit_buyout_price = get_unit_buyout_price()
         local stack_size = stack_size_slider:GetValue()
-        local stack_count
-        stack_count = stack_count_slider:GetValue()
+        local stack_count = stack_count_slider:GetValue()
         local duration = UIDropDownMenu_GetSelectedValue(duration_dropdown)
 		local key = selected_item.key
 
-        local duration_code
-		if duration == DURATION_2 then
-            duration_code = 2
-		elseif duration == DURATION_8 then
-            duration_code = 3
-		elseif duration == DURATION_24 then
-            duration_code = 4
-		end
+        ClearCursor()
+        ClickAuctionSellItemButton()
+        ClearCursor()
+        PickupContainerItem(selected_item.bag, selected_item.slot)
+        ClickAuctionSellItemButton()
+        ClearCursor()
+        PostAuction(unit_start_price * selected_item.aux_quantity, unit_buyout_price * selected_item.aux_quantity, unit_buyout_price * stack_size, duration, stack_size, stack_count) -- TODO retail deal with charges
 
-		post.start(
-			key,
-			stack_size,
-			duration,
-            unit_start_price,
-            unit_buyout_price,
-			stack_count,
-			function(posted)
-				if not frame:IsShown() then
-					return
-				end
-				for i = 1, posted do
-                    record_auction(key, stack_size, unit_start_price * stack_size, unit_buyout_price, duration_code, UnitName'player')
-                end
-                update_inventory_records()
-				local same
-                for _, record in pairs(inventory_records) do
-                    if record.key == key then
-	                    same = record
-	                    break
-                    end
-                end
-                if same then
-	                update_item(same)
-                else
-                    selected_item = nil
-                end
-                refresh = true
-			end
-		)
+--
+--		post.start(
+--			key,
+--			stack_size,
+--			duration,
+--            unit_start_price,
+--            unit_buyout_price,
+--			stack_count,
+--			function(posted)
+--				if not frame:IsShown() then
+--					return
+--				end
+--				for i = 1, posted do
+--                    record_auction(key, stack_size, unit_start_price * stack_size, unit_buyout_price, duration_code, UnitName'player')
+--                end
+--        update_inventory_records()
+--        local same
+--        for _, record in pairs(inventory_records) do
+--            if record.key == key then
+--                same = record
+--                break
+--            end
+--        end
+--        if same then
+--            update_item(same)
+--        else
+--            selected_item = nil
+--        end
+--        refresh = true
+--			end
+--		)
 	end
 end
 
@@ -430,7 +437,9 @@ function update_inventory_records()
 	                    'aux_quantity', item_info.charges or item_info.count,
 	                    'max_stack', item_info.max_stack,
 	                    'max_charges', item_info.max_charges,
-	                    'availability', availability
+	                    'availability', availability,
+                        'bag', slot[1], -- TODO retail
+                        'slot', slot[2]
                     )
                 else
                     local auctionable = auctionable_map[item_info.item_key]

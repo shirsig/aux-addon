@@ -502,6 +502,8 @@ function M.slider(parent)
     slider:SetOrientation('HORIZONTAL')
     slider:SetHeight(6)
     slider:SetHitRectInsets(0, 0, -12, -12)
+    slider:SetStepsPerPage(1)
+    slider:SetObeyStepOnDrag(true)
     slider:SetValue(0)
 
     set_panel_style(slider)

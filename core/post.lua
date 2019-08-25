@@ -42,7 +42,7 @@ function post_auction(slot, k)
 		ClickAuctionSellItemButton()
 		ClearCursor()
 
-		PostAuction(max(1, aux.round(state.unit_start_price * item_info.aux_quantity)), aux.round(state.unit_buyout_price * item_info.aux_quantity), state.duration, item_info.count)
+		StartAuction(max(1, aux.round(state.unit_start_price * item_info.aux_quantity)), aux.round(state.unit_buyout_price * item_info.aux_quantity))
 
 		local send_signal, signal_received = aux.signal()
 		aux.when(signal_received, function()
@@ -51,7 +51,7 @@ function post_auction(slot, k)
 		end)
 
 		local posted
-		aux.event_listener('CHAT_MSG_SYSTEM', function(kill)
+		aux.event_listener('CHAT_MSG_SYSTEM', function(kill, arg1)
 			if arg1 == ERR_AUCTION_STARTED then
 				send_signal()
 				kill()

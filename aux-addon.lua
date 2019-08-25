@@ -148,7 +148,7 @@ do
 				locked = false
 			end)
 			thread(when, later(5), send_signal)
-			event_listener('CHAT_MSG_SYSTEM', function(kill)
+			event_listener('CHAT_MSG_SYSTEM', function(kill, arg1)
 				if arg1 == ERR_AUCTION_BID_PLACED then
 					send_signal()
 					kill()
@@ -171,7 +171,7 @@ do
 			locked = false
 		end)
 		thread(when, later(5), send_signal)
-		event_listener('CHAT_MSG_SYSTEM', function(kill)
+		event_listener('CHAT_MSG_SYSTEM', function(kill, arg1)
 			if arg1 == ERR_AUCTION_REMOVED then
 				send_signal()
 				kill()

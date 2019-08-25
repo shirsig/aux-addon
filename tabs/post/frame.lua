@@ -166,10 +166,6 @@ do
     slider.editbox.change = function(self)
         slider:SetValue(self:GetNumber())
         quantity_update(true)
-        if selected_item then
-            local settings = read_settings()
-            write_settings(settings)
-        end
     end
     slider.editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
