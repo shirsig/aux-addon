@@ -99,13 +99,11 @@ end
 function M.auction(index, query_type)
     query_type = query_type or 'list'
 
-    local link = GetAuctionItemLink(query_type, index)
-	if link then
-        local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
-        local item_info = T.temp-item(item_id, suffix_id, unique_id, enchant_id)
+    local name, texture, count, quality, usable, level, _, start_price, min_increment, buyout_price, high_bid, high_bidder, _, owner, _, sale_status, item_id, has_all_info = GetAuctionItemInfo(query_type, index)
 
-        -- TODO retail bidderFullName, itemId?
-        local name, texture, count, quality, usable, level, _, start_price, min_increment, buyout_price, high_bid, high_bidder, bidderFullName, owner, sale_status, itemId = GetAuctionItemInfo(query_type, index)
+	if has_all_info then
+        local link = GetAuctionItemLink(query_type, index)
+        local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
 
     	local duration = GetAuctionItemTimeLeft(query_type, index)
         local tooltip, tooltip_money = tooltip('auction', query_type, index)
@@ -128,12 +126,8 @@ function M.auction(index, query_type)
 
             'name', name,
             'texture', texture,
-            'level', item_info.level,
-            'type', item_info.type,
-            'subtype', item_info.subtype,
-            'slot', item_info.slot,
             'quality', quality,
-            'max_stack', item_info.max_stack,
+            'level', level,
 
             'count', count,
             'start_price', start_price,

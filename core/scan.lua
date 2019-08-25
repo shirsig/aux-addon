@@ -6,6 +6,7 @@ local info = require 'aux.util.info'
 local history = require 'aux.core.history'
 
 local PAGE_SIZE = 50
+local TIMEOUT = 30
 
 function aux.handle.CLOSE()
 	abort()
@@ -206,14 +207,13 @@ function wait_for_list_results()
         last_update = GetTime()
         updated = true
     end)
-    local timeout = aux.later(5, get_state().last_list_query)
+    local timeout = aux.later(TIMEOUT, get_state().last_list_query)
     -- TODO retail is this still worth it? also needed for other types?
-    local ignore_owner = false -- get_state().params.ignore_owner or aux.account_data.ignore_owner
     return aux.when(function()
 		if not last_update and timeout() then
 			return true
 		end
-		if last_update and GetTime() - last_update > 5 then
+		if last_update and GetTime() - last_update > TIMEOUT then
 			return true
 		end
 		-- short circuiting order important, owner_data_complete must be called iif an update has happened.
@@ -232,9 +232,10 @@ function wait_for_list_results()
 end
 
 function data_complete()
+    local ignore_owner = get_state().params.ignore_owner or aux.account_data.ignore_owner
     for i = 1, PAGE_SIZE do
-        local auction_info = info.auction(i, 'list')
-        if ({GetAuctionItemInfo('list', i)})[17] == false then -- TODO retail can it be nil?
+        local _, _, _, _, _, _, _, _, _, _, _, _, _, owner, _, _, _, has_all_info = GetAuctionItemInfo('list', i)
+        if has_all_info == false or has_all_info and not ignore_owner and not owner then
 	        return false
         end
     end

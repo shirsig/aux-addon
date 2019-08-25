@@ -79,69 +79,24 @@ end
 
 M.empty = setmetatable({}, {__metatable=false, __newindex=pass})
 
-local vararg
-do
-	local MAXPARAMS = 100
-
-	local code = [[
-		local f, acquire, auto_release = f, acquire, auto_release
-		return function(
-	]]
-	for i = 1, MAXPARAMS - 1 do
-		code = code .. format('a%d,', i)
-	end
-	code = code .. [[
-		overflow)
-		if overflow ~= nil then error("T-vararg overflow.", 2) end
-		local n = 0
-		repeat
-	]]
-	for i = MAXPARAMS - 1, 1, -1 do
-		code = code .. format('if a%1$d ~= nil then n = %1$d; break end;', i)
-	end
-	code = code .. [[
-		until true
-		local t = acquire()
-		auto_release[t] = true
-		repeat
-	]]
-	for i = 1, MAXPARAMS - 1 do
-		code = code .. format('if %1$d > n then break end; t[%1$d] = a%1$d;', i)
-	end
-	code = code .. [[
-		until true
-		return f(t)
-		end
-	]]
-
-	function vararg(f)
-		local chunk = loadstring(code)
-		setfenv(chunk, {f=f, acquire=acquire, auto_release=auto_release})
-		return chunk()
-	end
-	M.vararg = setmetatable({}, {
-		__metatable = false,
-		__sub = function(_, v)
-			return vararg(v)
-		end,
-	})
+function M.list(...)
+    local t = acquire()
+    for i = 1, select('#', ...) do
+        t[i] = select(i, ...)
+    end
+	return t
 end
-
-M.list = vararg(function(arg)
-	auto_release[arg] = nil
-	return arg
-end)
-M.set = vararg(function(arg)
+function M.set(...)
 	local t = acquire()
-	for _, v in pairs(arg) do
-		t[v] = true
+    for i = 1, select('#', ...) do
+        t[select(i, ...)] = true
+    end
+	return t
+end
+function M.map(...)
+	local t = acquire()
+	for i = 1, select('#', ...), 2 do
+		t[select(i, ...)] = select(i + 1, ...)
 	end
 	return t
-end)
-M.map = vararg(function(arg)
-	local t = acquire()
-	for i = 1, #arg, 2 do
-		t[arg[i]] = arg[i + 1]
-	end
-	return t
-end)
+end
