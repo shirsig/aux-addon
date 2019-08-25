@@ -66,6 +66,6 @@ do
     btn:SetPoint('TOPLEFT', buyout_button, 'TOPRIGHT', 5, 0)
     btn:SetText('Refresh')
     btn:SetScript('OnClick', function()
-        scan_bids()
+        scan_auctions()
     end)
 end

@@ -10,11 +10,14 @@ local tab = aux.tab 'Auctions'
 auction_records = T.acquire()
 
 function aux.LOAD()
-    aux.event_listener('AUCTION_OWNED_LIST_UPDATE', scan_auctions)
+    aux.event_listener('AUCTION_OWNED_LIST_UPDATE', function()
+        refresh = true
+    end)
 end
 
 function tab.OPEN()
     frame:Show()
+    refresh = true
 end
 
 function tab.CLOSE()
@@ -80,6 +83,10 @@ do
     end
 
     function on_update()
+        if refresh then
+            scan_auctions()
+        end
+
         if state == IDLE or state == SEARCHING then
             cancel_button:Disable()
         end

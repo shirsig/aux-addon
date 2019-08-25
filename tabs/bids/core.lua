@@ -10,13 +10,15 @@ local tab = aux.tab 'Bids'
 
 auction_records = {}
 
-
 function aux.LOAD()
-    aux.event_listener('AUCTION_BIDDER_LIST_UPDATE', scan_bids)
+    aux.event_listener('AUCTION_BIDDER_LIST_UPDATE', function()
+        refresh = true
+    end)
 end
 
 function tab.OPEN()
     frame:Show()
+    refresh = true
 end
 
 function tab.CLOSE()
@@ -27,7 +29,7 @@ function update_listing()
     listing:SetDatabase(auction_records)
 end
 
-function M.scan_bids()
+function M.scan_auctions()
 
     status_bar:update_status(0, 0)
     status_bar:set_text('Scanning auctions...')
@@ -103,6 +105,10 @@ do
     end
 
     function on_update()
+        if refresh then
+            scan_auctions()
+        end
+
         if state == IDLE or state == SEARCHING then
             buyout_button:Disable()
             bid_button:Disable()
