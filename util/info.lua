@@ -367,11 +367,10 @@ end
 
 function M.item(item_id, suffix_id)
     local itemstring = 'item:' .. (item_id or 0) .. ':0:' .. (suffix_id or 0) .. ':0'
-    local name, link, quality, level, requirement, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
+    local name, link, quality, level, requirement, class, subclass, max_stack, slot, texture, sell_price = GetItemInfo(itemstring)
     return name and T.map(
         'name', name,
         'link', link,
-        'itemstring', itemstring,
         'quality', quality,
         'level', level,
         'requirement', requirement,
@@ -379,7 +378,8 @@ function M.item(item_id, suffix_id)
         'subclass', subclass,
         'slot', slot,
         'max_stack', max_stack,
-        'texture', texture
+        'texture', texture,
+        'sell_price', sell_price
     ) or item_info(item_id)
 end
 

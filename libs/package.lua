@@ -40,4 +40,6 @@ function create_module(name)
 	interfaces[name] = setmetatable({}, {__metatable = false, __index = exports, __newindex = pass})
 end
 
-onlyfortesting = interfaces
+-- for testing
+_G.module = create_module
+_G.require = require

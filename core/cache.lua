@@ -7,7 +7,7 @@ local persistence = require 'aux.util.persistence'
 local MIN_ITEM_ID = 1
 local MAX_ITEM_ID = 30000
 
-local items_schema = {'tuple', '#', {name='string'}, {quality='number'}, {level='number'}, {requirement='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
+local items_schema = {'tuple', '#', {name='string'}, {link='string'}, {quality='number'}, {level='number'}, {requirement='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}, {sell_price='number'}}
 local merchant_buy_schema = {'tuple', '#', {unit_price='number'}, {limited='boolean'}}
 
 function aux.handle.LOAD()
@@ -96,20 +96,7 @@ end
 function M.item_info(item_id)
 	local data_string = aux.account_data.items[item_id]
 	if data_string then
-		local cached_data = persistence.read(items_schema, data_string)
-		return T.map(
-			'name', cached_data.name,
-            'link', cached_data.link,
-			'itemstring', 'item:' .. item_id .. ':0:0:0',
-			'quality', cached_data.quality,
-			'level', cached_data.level,
-            'requirement', cached_data.requirement,
-			'class', cached_data.class,
-			'subclass', cached_data.subclass,
-			'slot', cached_data.slot,
-			'max_stack', cached_data.max_stack,
-			'texture', cached_data.texture
-		)
+		return aux.copy(persistence.read(items_schema, data_string))
 	end
 end
 
@@ -167,12 +154,13 @@ end
 
 function process_item(item_id)
     local itemstring = 'item:' .. item_id
-    local name, _, quality, level, requirement, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
+    local name, link, quality, level, requirement, class, subclass, max_stack, slot, texture, sell_price = GetItemInfo(itemstring)
 
     if name then
         aux.account_data.item_ids[strlower(name)] = item_id
         aux.account_data.items[item_id] = persistence.write(items_schema, T.temp-T.map(
             'name', name,
+            'link', link,
             'quality', quality,
             'level', level,
             'requirement', requirement,
@@ -180,7 +168,8 @@ function process_item(item_id)
             'subclass', subclass,
             'slot', slot,
             'max_stack', max_stack,
-            'texture', texture
+            'texture', texture,
+            'sell_price', sell_price
         ))
         local tooltip = tooltip('link', itemstring)
         if auctionable(tooltip, quality) then
