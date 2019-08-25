@@ -372,8 +372,8 @@ function M.item(item_id, suffix_id)
         'link', link,
         'itemstring', itemstring,
         'quality', quality,
-        'level', level,
-        'requirement', requirement,
+        'level', requirement,
+--        'requirement', requirement, TODO retail
         'class', class,
         'subclass', subclass,
         'slot', slot,
