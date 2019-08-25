@@ -249,10 +249,20 @@ do
 		    unit_buyout_price_input:SetFocus()
 	    end
     end)
-    editbox.formatter = function() return money.to_string(get_unit_start_price(), true) end
-    editbox.char = function(self) set_bid_selection(); set_buyout_selection(); set_unit_start_price(money.from_string(self:GetText())) end
-    editbox.change = function() refresh = true end
-    editbox.enter = function(self) self:ClearFocus() end
+    editbox.formatter = function()
+        return money.to_string(get_unit_start_price(), true)
+    end
+    editbox.change = function(self, is_user_input)
+        refresh = true
+        if is_user_input then
+            set_bid_selection()
+            set_buyout_selection()
+            set_unit_start_price(money.from_string(self:GetText()))
+        end
+    end
+    editbox.enter = function(self)
+        self:ClearFocus()
+    end
     editbox.focus_loss = function(self)
         self:SetText(money.to_string(get_unit_start_price(), true, nil, nil, true))
     end
@@ -284,10 +294,19 @@ do
             stack_size_slider.editbox:SetFocus()
         end
     end)
-    editbox.formatter = function() return money.to_string(get_unit_buyout_price(), true) end
-    editbox.char = function(self) set_buyout_selection(); set_unit_buyout_price(money.from_string(self:GetText())) end
-    editbox.change = function() refresh = true end
-    editbox.enter = function(self) self:ClearFocus() end
+    editbox.formatter = function()
+        return money.to_string(get_unit_buyout_price(), true)
+    end
+    editbox.change = function(self, is_user_input)
+        refresh = true
+        if is_user_input then
+            set_buyout_selection()
+            set_unit_buyout_price(money.from_string(self:GetText()))
+        end
+    end
+    editbox.enter = function(self)
+        self:ClearFocus()
+    end
     editbox.focus_loss = function(self)
         self:SetText(money.to_string(get_unit_buyout_price(), true, nil, nil, true))
     end

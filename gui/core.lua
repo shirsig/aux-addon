@@ -318,9 +318,9 @@ function M.editbox(parent)
         self:SetScript('OnUpdate', nil)
 	    do (self.focus_loss or pass)(self) end
     end)
-    editbox:SetScript('OnTextChanged', function(self)
+    editbox:SetScript('OnTextChanged', function(self, is_user_input)
+	    do (self.change or pass)(self, is_user_input) end
         self.overlay:SetText(self.formatter and self.formatter(self:GetText()) or self:GetText())
-	    do (self.change or pass)(self) end
     end)
     editbox:SetScript('OnChar', function(self) (self.char or pass)(self) end)
     do
