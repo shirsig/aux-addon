@@ -6,6 +6,12 @@ local stack = require 'aux.core.stack'
 
 local state
 
+StaticPopupDialogs.AUX_POST_HARDWARE_EVENT = {
+    text = 'Please click to provide a hardware event',
+    button1 = 'Ok',
+    timeout = 0,
+}
+
 function aux.handle.CLOSE()
 	stop()
 end
@@ -42,28 +48,35 @@ function post_auction(slot, k)
 		ClickAuctionSellItemButton()
 		ClearCursor()
 
-		StartAuction(max(1, aux.round(state.unit_start_price * item_info.aux_quantity)), aux.round(state.unit_buyout_price * item_info.aux_quantity))
+        StaticPopupDialogs.AUX_POST_HARDWARE_EVENT.OnAccept = function()
+            PostAuction(max(1, aux.round(state.unit_start_price * item_info.aux_quantity)), aux.round(state.unit_buyout_price * item_info.aux_quantity), item_info.count) -- TODO retail
+            StaticPopup_Hide('AUX_POST_HARDWARE_EVENT')
+        end
 
-		local send_signal, signal_received = aux.signal()
-		aux.when(signal_received, function()
-			state.posted = state.posted + 1
-			return k()
-		end)
+        StaticPopup_Show('AUX_POST_HARDWARE_EVENT')
 
-		local posted
-		aux.event_listener('CHAT_MSG_SYSTEM', function(kill, arg1)
-			if arg1 == ERR_AUCTION_STARTED then
-				send_signal()
-				kill()
-			end
-		end)
-	else
+        local send_signal, signal_received = aux.signal()
+        aux.when(signal_received, function()
+            state.posted = state.posted + 1
+            return k()
+        end)
+
+        local posted
+        aux.event_listener('CHAT_MSG_SYSTEM', function(kill, arg1)
+            if arg1 == ERR_AUCTION_STARTED then
+                send_signal()
+                kill()
+            end
+        end)
+    else
 		return stop()
 	end
 end
 
 function M.stop()
 	if state then
+        StaticPopup_Hide('AUX_POST_HARDWARE_EVENT')
+
 		aux.kill_thread(state.thread_id)
 
 		local callback = state.callback

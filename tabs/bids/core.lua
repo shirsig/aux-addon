@@ -106,6 +106,7 @@ do
 
     function on_update()
         if refresh then
+            refresh = false
             scan_auctions()
         end
 
