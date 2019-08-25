@@ -7,7 +7,7 @@ local persistence = require 'aux.util.persistence'
 local MIN_ITEM_ID = 1
 local MAX_ITEM_ID = 30000
 
-local items_schema = {'tuple', '#', {name='string'}, {quality='number'}, {level='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
+local items_schema = {'tuple', '#', {name='string'}, {quality='number'}, {level='number'}, {requirement='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}}
 local merchant_buy_schema = {'tuple', '#', {unit_price='number'}, {limited='boolean'}}
 
 function aux.handle.LOAD()
@@ -167,7 +167,7 @@ end
 
 function process_item(item_id)
     local itemstring = 'item:' .. item_id
-    local name, _, quality, level, _, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
+    local name, _, quality, level, requirement, class, subclass, max_stack, slot, texture = GetItemInfo(itemstring)
 
     if name then
         aux.account_data.item_ids[strlower(name)] = item_id
@@ -175,6 +175,7 @@ function process_item(item_id)
             'name', name,
             'quality', quality,
             'level', level,
+            'requirement', requirement,
             'class', class,
             'subclass', subclass,
             'slot', slot,

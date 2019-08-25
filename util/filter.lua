@@ -70,7 +70,7 @@ M.filters = {
         input_type = 'number',
         validator = function(level)
             return function(auction_record)
-                return auction_record.level >= level
+                return auction_record.requirement >= level
             end
         end
     },
@@ -79,7 +79,7 @@ M.filters = {
         input_type = 'number',
         validator = function(level)
             return function(auction_record)
-                return auction_record.level <= level
+                return auction_record.requirement <= level
             end
         end
     },
@@ -493,8 +493,8 @@ function blizzard_query(filter)
         slot_index = info.subsubcategory_index(class_index or 0, subclass_index or 0, item_info.slot)
     end
     if item_info then
-        query.min_level = item_info.level
-        query.max_level = item_info.level
+        query.min_level = item_info.requirement
+        query.max_level = item_info.requirement
         query.usable = item_info.usable
         query.class = class_index
         query.subclass = subclass_index

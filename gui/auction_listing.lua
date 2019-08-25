@@ -78,12 +78,12 @@ M.search_columns = {
         width = .035,
         align = 'CENTER',
         fill = function(cell, record)
-            local display_level = max(record.level, 1)
-            display_level = UnitLevel'player' < record.level and aux.color.red(display_level) or display_level
+            local display_level = max(record.requirement, 1)
+            display_level = UnitLevel'player' < record.requirement and aux.color.red(display_level) or display_level
             cell.text:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
-            return sort_util.compare(record_a.level, record_b.level, desc)
+            return sort_util.compare(record_a.requirement, record_b.requirement, desc)
         end,
     },
     {
@@ -248,12 +248,12 @@ M.auctions_columns = {
         width = .035,
         align = 'CENTER',
         fill = function(cell, record)
-            local display_level = max(record.level, 1)
-            display_level = UnitLevel('player') < record.level and aux.color.red(display_level) or display_level
+            local display_level = max(record.requirement, 1)
+            display_level = UnitLevel('player') < record.requirement and aux.color.red(display_level) or display_level
             cell.text:SetText(display_level)
         end,
         cmp = function(record_a, record_b, desc)
-            return sort_util.compare(record_a.level, record_b.level, desc)
+            return sort_util.compare(record_a.requirement, record_b.requirement, desc)
         end,
     },
     {

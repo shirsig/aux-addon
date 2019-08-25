@@ -63,6 +63,7 @@ function M.container_item(bag, slot)
             'name', item_info.name,
             'texture', texture,
             'level', item_info.level,
+            'requirement', item_info.requirement,
             'type', item_info.type,
             'subtype', item_info.subtype,
             'slot', item_info.slot,
@@ -127,7 +128,7 @@ function M.auction(index, query_type)
             'name', name,
             'texture', texture,
             'quality', quality,
-            'level', level,
+            'requirement', level,
 
             'count', count,
             'start_price', start_price,
@@ -372,8 +373,8 @@ function M.item(item_id, suffix_id)
         'link', link,
         'itemstring', itemstring,
         'quality', quality,
-        'level', requirement,
---        'requirement', requirement, TODO retail
+        'level', level,
+        'requirement', requirement,
         'class', class,
         'subclass', subclass,
         'slot', slot,
