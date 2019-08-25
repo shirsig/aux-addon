@@ -28,7 +28,7 @@ listing:SetHandler('OnClick', function(row, button)
 		end
 	elseif button == 'RightButton' then
 		aux.set_tab(1)
-		search_tab.set_filter(strlower(info.item(this.record.item_id).name) .. '/exact')
+		search_tab.set_filter(strlower(info.item(row.record.item_id).name) .. '/exact')
 		search_tab.execute(nil, false)
 	end
 end)

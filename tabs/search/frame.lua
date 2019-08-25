@@ -533,7 +533,7 @@ for _ = 1, 5 do
 		    end
 	    elseif button == 'RightButton' then
 	        aux.set_tab(1)
-		    set_filter(strlower(info.item(this.record.item_id).name) .. '/exact')
+		    set_filter(strlower(info.item(row.record.item_id).name) .. '/exact')
 		    execute(nil, false)
 	    end
     end)
