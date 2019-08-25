@@ -211,14 +211,13 @@ do
     end
 
     function on_get_item_info_received(_, item_id, success)
-        if item_id ~= requested_item_id then
-            return
-        end
         if success then
             process_item(item_id)
         elseif success == nil then
             aux.account_data.unused_item_ids[item_id] = true
         end
-        fetch_item_data(item_id + 1)
+        if item_id == requested_item_id then
+            fetch_item_data(item_id + 1)
+        end
     end
 end
