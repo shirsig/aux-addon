@@ -35,8 +35,8 @@ function tab.CLICK_LINK(item_info)
 	execute(nil, false)
 end
 
-function tab.USE_ITEM(item_info)
-	set_filter(strlower(info.item(item_info.item_id).name) .. '/exact')
+function tab.USE_ITEM(item_id)
+	set_filter(strlower(info.item(item_id).name) .. '/exact')
 	execute(nil, false)
 end
 

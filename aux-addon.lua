@@ -212,7 +212,7 @@ function auction_ui_loaded()
 		if select(1, ...) == AuctionFrame then return AuctionFrame:Show() end
 		return orig.ShowUIPanel(...)
 	end)
-	hook 'SetItemRef' 'UseContainerItem' 'AuctionFrameAuctions_OnEvent'
+	hook 'AuctionFrameAuctions_OnEvent'
 end
 
 function AuctionFrameAuctions_OnEvent(...)
