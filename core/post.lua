@@ -55,19 +55,25 @@ function post_auction(slot, k)
 
         StaticPopup_Show('AUX_POST_HARDWARE_EVENT')
 
-        local send_signal, signal_received = aux.signal()
-        aux.when(signal_received, function()
+        aux.when(function()
+            return not GetContainerItemInfo(unpack(slot))
+        end, function()
             state.posted = state.posted + 1
             return k()
         end)
 
-        local posted
-        aux.event_listener('CHAT_MSG_SYSTEM', function(kill, arg1)
-            if arg1 == ERR_AUCTION_STARTED then
-                send_signal()
-                kill()
-            end
-        end)
+--        local send_signal, signal_received = aux.signal()
+--        aux.when(signal_received, function()
+--            state.posted = state.posted + 1
+--            return k()
+--        end)
+--
+--        aux.event_listener('CHAT_MSG_SYSTEM', function(kill, arg1)
+--            if arg1 == ERR_AUCTION_STARTED then
+--                send_signal()
+--                kill()
+--            end
+--        end)
     else
 		return stop()
 	end
