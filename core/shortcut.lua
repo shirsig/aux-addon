@@ -1,6 +1,5 @@
 select(2, ...) 'aux.core.shortcut'
 
-local T = require 'T'
 local aux = require 'aux'
 local info = require 'aux.util.info'
 
@@ -18,17 +17,6 @@ do
 end
 
 do
---    local orig = UseContainerItem
---    function _G.UseContainerItem(...)
---        if aux.modified() or not aux.get_tab() then
---            return orig(...)
---        end
---        local item_info = info.container_item(...)
---        if item_info and aux.get_tab().USE_ITEM then
---            aux.get_tab().USE_ITEM(item_info)
---        end
---    end
-
     local orig = HandleModifiedItemClick
     function _G.HandleModifiedItemClick(...)
         if not IsAltKeyDown() or not aux.index(aux.get_tab(), 'USE_ITEM') then
