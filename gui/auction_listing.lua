@@ -540,8 +540,7 @@ local methods = {
         end
     end,
 
-    OnHeadColumnClick = function(self, arg1)
-        local button = arg1
+    OnHeadColumnClick = function(self, button)
         local rt = self.rt
 
         if button == 'RightButton' and rt.headCells[self.columnIndex].info.isPrice then
@@ -599,12 +598,9 @@ local methods = {
         end
     end,
 
-    OnClick = function(self, arg1)
-        local button = arg1
-        if IsControlKeyDown() then
-            DressUpItemLink(self.record.link)
-        elseif IsShiftKeyDown() and ChatFrameEditBox:IsVisible() then
-            ChatFrameEditBox:Insert(self.record.link)
+    OnClick = function(self, button)
+        if IsModifiedClick() then
+            HandleModifiedItemClick(self.record.link)
         else
             local selection = self.rt:GetSelection()
             if not selection or selection.record ~= self.record then
