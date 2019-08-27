@@ -6,10 +6,11 @@ local info = require 'aux.util.info'
 do
     local orig = SetItemRef
     function _G.SetItemRef(...)
-        if select(3, ...) ~= 'RightButton' or not aux.index(aux.get_tab(), 'CLICK_LINK') or not strfind(..., '^item:%d+') then
+        local item_id = select(3, strfind(..., '^item:(%d+)'))
+        if select(3, ...) ~= 'RightButton' or not aux.index(aux.get_tab(), 'CLICK_LINK') or not item_id then
             return orig(...)
         end
-        local item_info = info.item(tonumber(select(3, strfind(..., '^item:(%d+)'))))
+        local item_info = info.item(tonumber(item_id))
         if item_info then
             return aux.get_tab().CLICK_LINK(item_info)
         end

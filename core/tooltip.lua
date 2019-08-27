@@ -38,11 +38,9 @@ function aux.handle.LOAD()
     end
     local orig = SetItemRef
     function _G.SetItemRef(...)
-        local name, _, quality = GetItemInfo(...)
+        local _, link = GetItemInfo(...)
         local tmp = T.list(orig(...))
-        if not IsShiftKeyDown() and not IsControlKeyDown() and name then
-            local color_code = select(4, GetItemQualityColor(quality))
-            local link = color_code ..  '|H' .. ... .. '|h[' .. name .. ']|h' .. FONT_COLOR_CODE_CLOSE
+        if link and not IsShiftKeyDown() and not IsControlKeyDown() then
             extend_tooltip(ItemRefTooltip, link, 1)
         end
         return T.unpack(tmp)
