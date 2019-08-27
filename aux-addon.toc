@@ -1,4 +1,4 @@
-## Interface: 11200
+## Interface: 31650
 ## Author: shirsig
 ## Title: aux
 ## Notes: Auction House replacement
