@@ -501,7 +501,7 @@ function blizzard_query(filter)
         query.slot = slot_index
         query.quality = item_info.quality
     else
-	    for key in ipairs(T.temp-T.set('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality')) do
+	    for key in pairs(T.set('min_level', 'max_level', 'class', 'subclass', 'slot', 'usable', 'quality')) do
             query[key] = aux.index(filters[key], 2)
 	    end
     end
