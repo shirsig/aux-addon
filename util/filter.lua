@@ -517,9 +517,6 @@ function validator(filter)
         end
     end
     return function(record)
-        if filter.blizzard.exact and strlower(info.item(record.item_id).name) ~= filter.blizzard.name then
-            return false
-        end
         local stack = T.temp-T.acquire()
         for i = #filter.post, 1, -1 do
             local type, name, param = unpack(filter.post[i])

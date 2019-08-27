@@ -128,7 +128,7 @@ do
                 blizzard_query.usable,
                 blizzard_query.quality,
                 false, -- getAll
-                false, -- TODO retail exactMatch
+                blizzard_query.exact,
                 category_filter
 			)
 		end
