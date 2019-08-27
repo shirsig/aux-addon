@@ -67,7 +67,7 @@ function handle.LOAD()
         M.character_data = assign(aux.character[key], {
             tooltip = {
                 value = true,
-                merchant_sell = false,
+                merchant_sell = true,
                 merchant_buy = false,
                 daily = false,
                 disenchant_value = false,
