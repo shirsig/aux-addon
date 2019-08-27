@@ -17,8 +17,6 @@ function aux.handle.LOAD()
 	aux.event_listener('MERCHANT_SHOW', on_merchant_show)
 	aux.event_listener('MERCHANT_CLOSED', on_merchant_closed)
 	aux.event_listener('MERCHANT_UPDATE', on_merchant_update)
-
-	CreateFrame('Frame', nil, MerchantFrame):SetScript('OnUpdate', merchant_on_update)
 end
 
 do
