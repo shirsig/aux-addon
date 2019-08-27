@@ -8,7 +8,7 @@ function M.print(...)
 end
 
 local event_frame = CreateFrame'Frame'
-for event in pairs(T.temp-T.set('ADDON_LOADED', 'VARIABLES_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED')) do
+for event in pairs(T.temp-T.set('ADDON_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED')) do
 	event_frame:RegisterEvent(event)
 end
 
@@ -25,12 +25,11 @@ do
 	end
 	event_frame:SetScript('OnEvent', function(_, event, arg1, ...)
 		if event == 'ADDON_LOADED' then
-			if arg1 == 'Blizzard_AuctionUI' then
+            if arg1 == 'aux-addon' then
+                for _, f in ipairs(handlers) do f(arg1, ...) end
+            elseif arg1 == 'Blizzard_AuctionUI' then
                 auction_ui_loaded()
 			end
-		elseif event == 'VARIABLES_LOADED' then
-			for _, f in ipairs(handlers) do f(arg1, ...) end
-			event_frame:UnregisterEvent('VARIABLES_LOADED') -- TODO retail why is this firing more than once?
 		elseif event == 'PLAYER_LOGIN' then
 			for _, f in ipairs(handlers2) do f(arg1, ...) end
 			print('loaded - /aux')
