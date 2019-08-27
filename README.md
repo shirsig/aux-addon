@@ -54,8 +54,8 @@ The most advanced auction house addOn for the 1.12 client with some features mor
 **/aux tooltip daily**<br/>
 **/aux tooltip disenchant value**<br/>
 **/aux tooltip disenchant distribution**<br/>
-**/aux tooltip vendor buy**<br/>
-**/aux tooltip vendor sell**<br/>
+**/aux tooltip merchant buy**<br/>
+**/aux tooltip merchant sell**<br/>
 
 ## Usage
 ### General

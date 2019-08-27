@@ -59,7 +59,6 @@ function handle.LOAD()
         unused_item_ids = {},
         auctionable_items = {},
         merchant_buy = {},
-        merchant_sell = {},
     })
     do
         local key = format('%s|%s', GetRealmName(), UnitName'player')

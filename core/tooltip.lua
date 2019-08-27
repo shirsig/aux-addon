@@ -70,13 +70,13 @@ function M.extend_tooltip(tooltip, link, quantity)
         end
     end
     if settings.merchant_buy then
-        local _, price, limited = info.merchant_info(item_id)
+        local price, limited = info.merchant_buy_info(item_id)
         if price then
             tooltip:AddLine('Vendor Buy ' .. (limited and '(limited): ' or ': ') .. money.to_string2(price * quantity), aux.color.tooltip.merchant())
         end
     end
     if settings.merchant_sell then
-        local price = item_info.sell_price -- TODO retail info.merchant_info(item_id)
+        local price = item_info.sell_price
         if price ~= 0 then
             tooltip:AddLine('Vendor: ' .. (price and money.to_string2(price * quantity) or UNKNOWN), aux.color.tooltip.merchant())
         end

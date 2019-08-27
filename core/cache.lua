@@ -20,16 +20,6 @@ function aux.handle.LOAD()
 	aux.event_listener('BAG_UPDATE', on_bag_update)
 
 	CreateFrame('Frame', nil, MerchantFrame):SetScript('OnUpdate', merchant_on_update)
-
-	aux.event_listener('NEW_AUCTION_UPDATE', function()
-		local data = auction_sell_item()
-		if data then
-			local item_id = item_id(data.name)
-			if item_id then
-				aux.account_data.merchant_sell[item_id] = data.vendor_price / (max_item_charges(item_id) or data.count)
-			end
-		end
-	end)
 end
 
 do
@@ -49,29 +39,16 @@ do
 end
 
 do
-	local sell_scan_queued, incomplete_buy_data
+	local incomplete_buy_data
 	function on_merchant_show()
-		merchant_sell_scan()
 		incomplete_buy_data = not merchant_buy_scan()
 	end
 	function on_merchant_closed()
-		sell_scan_queued = nil
 		incomplete_buy_data = false
 	end
 	function on_merchant_update()
 		if incomplete_buy_data then
 			incomplete_buy_data = not merchant_buy_scan()
-		end
-	end
-	function on_bag_update()
-		if MerchantFrame:IsVisible() then
-			sell_scan_queued = true
-		end
-	end
-	function merchant_on_update()
-		if sell_scan_queued then
-			sell_scan_queued = nil
-			merchant_sell_scan()
 		end
 	end
 end
@@ -85,12 +62,12 @@ function merchant_loaded()
 	return true
 end
 
-function M.merchant_info(item_id)
+function M.merchant_buy_info(item_id)
 	local buy_info
 	if aux.account_data.merchant_buy[item_id] then
 		buy_info = persistence.read(merchant_buy_schema, aux.account_data.merchant_buy[item_id])
 	end
-	return aux.account_data.merchant_sell[item_id], buy_info and buy_info.unit_price, buy_info and buy_info.limited
+	return buy_info and buy_info.unit_price, buy_info and buy_info.limited
 end
 
 function M.item_info(item_id)
@@ -140,16 +117,6 @@ function merchant_buy_scan()
 	end
 
 	return not incomplete_data
-end
-
-function merchant_sell_scan()
-	for slot in inventory() do
-		T.temp(slot)
-		local item_info = T.temp-container_item(unpack(slot))
-		if item_info then
-			aux.account_data.merchant_sell[item_info.item_id] = item_info.tooltip_money / item_info.aux_quantity
-		end
-	end
 end
 
 function process_item(item_id)
