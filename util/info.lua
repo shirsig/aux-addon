@@ -393,7 +393,7 @@ end
 
 function M.subcategory_index(category_index, subcategory)
     if category_index > 0 then
-        for i, v in ipairs(AuctionCategories[category_index].subCategories) do
+        for i, v in ipairs(AuctionCategories[category_index].subCategories or T.empty) do
             if strupper(v.name) == strupper(subcategory) then
                 return i, v.name
             end
@@ -403,7 +403,7 @@ end
 
 function M.subsubcategory_index(category_index, subcategory_index, subsubcategory)
     if category_index > 0 and subcategory_index > 0 then
-        for i, v in ipairs(AuctionCategories[category_index].subCategories[subcategory_index].subCategories) do
+        for i, v in ipairs(AuctionCategories[category_index].subCategories[subcategory_index].subCategories or T.empty) do
             if strupper(v.name) == strupper(subsubcategory) then
                 return i, v.name
             end
