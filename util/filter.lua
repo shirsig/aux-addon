@@ -483,16 +483,13 @@ end
 
 function blizzard_query(filter)
     local filters = filter.blizzard
-    local query = T.map('name', filters.name)
-    local item_info, class_index, subclass_index, slot_index
+    local query = T.map('name', filters.name, 'exact', filters.exact)
     local item_id = filters.name and info.item_id(filters.name)
-    item_info = item_id and info.item(item_id)
+    local item_info = item_id and info.item(item_id)
     if filters.exact and item_info then
-        class_index = info.category_index(item_info.class)
-        subclass_index = info.subcategory_index(class_index or 0, item_info.subclass)
-        slot_index = info.subsubcategory_index(class_index or 0, subclass_index or 0, item_info.slot)
-    end
-    if item_info then
+        local class_index = info.category_index(item_info.class)
+        local subclass_index = info.subcategory_index(class_index or 0, item_info.subclass)
+        local slot_index = info.subsubcategory_index(class_index or 0, subclass_index or 0, item_info.slot)
         query.min_level = item_info.requirement
         query.max_level = item_info.requirement
         query.usable = item_info.usable
