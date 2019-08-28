@@ -49,7 +49,7 @@ function post_auction(slot, k)
 		ClearCursor()
 
         StaticPopupDialogs.AUX_POST_HARDWARE_EVENT.OnAccept = function()
-            PostAuction(max(1, aux.round(state.unit_start_price * item_info.aux_quantity)), aux.round(state.unit_buyout_price * item_info.aux_quantity), item_info.count) -- TODO retail
+            PostAuction(max(1, aux.round(state.unit_start_price * item_info.aux_quantity)), aux.round(state.unit_buyout_price * item_info.aux_quantity), state.duration, item_info.count) -- TODO retail
             StaticPopup_Hide('AUX_POST_HARDWARE_EVENT')
         end
 
