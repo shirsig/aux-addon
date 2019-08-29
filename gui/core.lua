@@ -443,6 +443,7 @@ function M.label(parent, size)
     local label = parent:CreateFontString()
     label:SetFont(font, size or font_size.small)
     label:SetTextColor(aux.color.label.enabled())
+    label:SetWordWrap(false)
     return label
 end
 
