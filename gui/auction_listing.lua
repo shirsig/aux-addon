@@ -566,9 +566,7 @@ local methods = {
         local row = self:GetParent().row
         if row.record then
 	        GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
---            GameTooltip:SetHyperlink(row.record.link) TODO retail
-            info.load_tooltip(GameTooltip, row.record.tooltip)
-	        tooltip.extend_tooltip(GameTooltip, row.record.link, row.record.aux_quantity)
+            GameTooltip:SetHyperlink(row.record.link)
             info.set_shopping_tooltip(row.record.slot)
         end
     end,
