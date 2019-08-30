@@ -86,7 +86,7 @@ Furthermore
 ![Alt text](http://i.imgur.com/dICDnxR.png)
 - When hovering over an entry the tooltip shows a longer and more nicely formatted version.
 - Left-click on an entry will start a search.
-- Right-click on an entry will show a menu with various options, including toggling Auto Buy.
+- Right-click on an entry will show a menu with various options, including toggling Alert.
 - Shift-left-click on an entry will copy a search to the search box.
 - Shift-right-click on an entry will add a search to the existing query in the search box.
 

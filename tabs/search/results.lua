@@ -150,7 +150,7 @@ function start_real_time_scan(query, search, continuation)
 	search_scan_id = scan.start{
 		type = 'list',
 		queries = {query},
-		auto_buy_validator = search.auto_buy_validator,
+        alert_validator = search.alert_validator,
 		on_scan_start = function()
 			search.status_bar:update_status(.9999, .9999)
 			search.status_bar:set_text('Scanning last page ...')
@@ -226,7 +226,7 @@ function start_search(queries, continuation)
 	search_scan_id = scan.start{
 		type = 'list',
 		queries = queries,
-		auto_buy_validator = search.auto_buy_validator,
+        alert_validator = search.alert_validator,
 		on_scan_start = function()
 			search.status_bar:update_status(0, 0)
 			if continuation then
@@ -335,7 +335,7 @@ function M.execute(_, resume, real_time)
 		search.first_page = first_page
 		search.last_page = last_page
 		search.real_time = real_time
-		search.auto_buy_validator = get_auto_buy_validator()
+		search.alert_validator = get_alert_validator()
 	end
 
 	local continuation = resume and current_search().continuation

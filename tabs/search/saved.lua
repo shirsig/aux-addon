@@ -15,7 +15,7 @@ function update_search_listings()
 		local search = favorite_searches[i]
 		local name = strsub(search.prettified, 1, 250)
 		tinsert(favorite_search_rows, T.map(
-			'cols', T.list(T.map('value', search.auto_buy and aux.color.red'X' or ''), T.map('value', name)),
+			'cols', T.list(T.map('value', search.alert and aux.color.red'X' or ''), T.map('value', name)),
 			'search', search,
 			'index', i
 		))
@@ -67,9 +67,9 @@ handlers = {
 				tinsert(favorite_searches, 1, data.search)
 				u(d)
 			elseif st == favorite_searches_listing then
-				local auto_buy = data.search.auto_buy
+				local alert = data.search.alert
 				gui.menu(
-					(auto_buy and 'Disable' or 'Enable') .. ' Auto Buy', function() if auto_buy then data.search.auto_buy = nil else enable_auto_buy(data.search) end u() end,
+					(alert and 'Disable' or 'Enable') .. ' Alert', function() if alert then data.search.alert = nil else enable_alert(data.search) end u() end,
 					'Move Up', function() move_up(favorite_searches, data.index); u() end,
 					'Move Down', function() move_down(favorite_searches, data.index); u() end,
 					'Delete', function() tremove(favorite_searches, data.index); u() end
@@ -89,15 +89,15 @@ handlers = {
 	end
 }
 
-function get_auto_buy_validator()
+function get_alert_validator()
 	local validators = T.acquire()
 	for _, search in pairs(favorite_searches) do
-		if search.auto_buy then
+		if search.alert then
 			local queries, error = filter_util.queries(search.filter_string)
 			if queries then
 				tinsert(validators, queries[1].validator)
 			else
-				aux.print('Invalid auto buy filter:', error)
+				aux.print('Invalid alert filter:', error)
 			end
 		end
 	end
@@ -119,15 +119,15 @@ function add_favorite(filter_string)
 	end
 end
 
-function enable_auto_buy(search)
+function enable_alert(search)
 	local queries, error = filter_util.queries(search.filter_string)
 	if queries then
 		if #queries > 1 then
-			aux.print('Error: Auto Buy does not support multi-queries')
+			aux.print('Error: Alert does not support multi-queries')
 		elseif aux.size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(search.filter_string).blizzard.exact then
-			aux.print('Error: Auto Buy does not support Blizzard filters')
+			aux.print('Error: Alert does not support Blizzard filters')
 		else
-			search.auto_buy = true
+			search.alert = true
 		end
 	else
 		aux.print('Invalid filter:', error)
