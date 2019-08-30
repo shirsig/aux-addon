@@ -137,15 +137,13 @@ end
 
 function start_real_time_scan(query, search, continuation)
 
-	local ignore_page
 	if not search then
 		search = current_search()
-		query.blizzard_query.first_page = tonumber(continuation) or 0
-		query.blizzard_query.last_page = tonumber(continuation) or 0
+		query.blizzard_query.first_page = 0
+		query.blizzard_query.last_page = 0
 		ignore_page = not tonumber(continuation)
 	end
 
-	local next_page
 	local new_records = T.acquire()
 	search_scan_id = scan.start{
 		type = 'list',
@@ -153,18 +151,10 @@ function start_real_time_scan(query, search, continuation)
         alert_validator = search.alert_validator,
 		on_scan_start = function()
 			search.status_bar:update_status(.9999, .9999)
-			search.status_bar:set_text('Scanning last page ...')
-		end,
-		on_page_loaded = function(_, _, last_page)
-			next_page = last_page
-			if last_page == 0 then
-				ignore_page = false
-			end
+			search.status_bar:set_text('Scanning ...')
 		end,
 		on_auction = function(auction_record)
-			if not ignore_page then
-				tinsert(new_records, auction_record)
-			end
+			tinsert(new_records, auction_record)
 		end,
 		on_complete = function()
 			local map = T.temp-T.acquire()
@@ -184,15 +174,13 @@ function start_real_time_scan(query, search, continuation)
 				search.table:SetDatabase(search.records)
 			end
 
-			query.blizzard_query.first_page = next_page
-			query.blizzard_query.last_page = next_page
 			start_real_time_scan(query, search)
 		end,
 		on_abort = function()
 			search.status_bar:update_status(1, 1)
 			search.status_bar:set_text('Scan paused')
 
-			search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
+			search.continuation = true
 
 			if current_search() == search then
 				update_continuation()

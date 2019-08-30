@@ -109,6 +109,10 @@ end
 
 do
 	local function submit()
+        SortAuctionClearSort(get_state().params.type)
+        SortAuctionItems(get_state().params.type, 'duration')
+        SortAuctionItems(get_state().params.type, 'duration')
+        SortAuctionApplySort(get_state().params.type)
 		if get_state().params.type == 'bidder' and not AuctionFrame.gotBids then
             GetBidderAuctionItems()
             AuctionFrame.gotBids = 1
