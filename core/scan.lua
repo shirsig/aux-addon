@@ -132,7 +132,7 @@ do
                 blizzard_query.usable,
                 blizzard_query.quality,
                 false, -- getAll
-                blizzard_query.exact,
+                blizzard_query.class ~= 1 and blizzard_query.class ~= 2 and blizzard_query.exact, -- Doesn't work for suffix items
                 category_filter
 			)
 		end

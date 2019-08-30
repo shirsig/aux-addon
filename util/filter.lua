@@ -514,6 +514,10 @@ function validator(filter)
         end
     end
     return function(record)
+        local item_info_without_suffix = info.item(record.item_id) -- TODO retail is this always available?
+        if filter.blizzard.exact and (not item_info_without_suffix or strlower(item_info_without_suffix.name) ~= filter.blizzard.name) then
+            return false
+        end
         local stack = T.temp-T.acquire()
         for i = #filter.post, 1, -1 do
             local type, name, param = unpack(filter.post[i])
