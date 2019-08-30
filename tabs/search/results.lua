@@ -7,6 +7,14 @@ local filter_util = require 'aux.util.filter'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
 
+StaticPopupDialogs.AUX_SCAN_ALERT = {
+    text = 'One of your alert queries matched!',
+    button1 = 'Ok',
+    showAlert = 1,
+    timeout = 0,
+    hideOnEscape = 1,
+}
+
 search_scan_id = 0
 
 function aux.handle.LOAD()
@@ -148,12 +156,14 @@ function start_real_time_scan(query, search, continuation)
 	search_scan_id = scan.start{
 		type = 'list',
 		queries = {query},
-        alert_validator = search.alert_validator,
 		on_scan_start = function()
 			search.status_bar:update_status(.9999, .9999)
 			search.status_bar:set_text('Scanning ...')
 		end,
 		on_auction = function(auction_record)
+            if (search.alert_validator or pass)(auction_record) then
+                StaticPopup_Show('AUX_SCAN_ALERT') -- TODO retail improve this
+            end
 			tinsert(new_records, auction_record)
 		end,
 		on_complete = function()
@@ -239,6 +249,9 @@ function start_search(queries, continuation)
 			current_page = current_page and 0 or start_page - 1
 		end,
 		on_auction = function(auction_record, ctrl)
+            if (search.alert_validator or pass)(auction_record) then
+                StaticPopup_Show('AUX_SCAN_ALERT') -- TODO retail improve this
+            end
 			if #search.records < 2000 then
 				tinsert(search.records, auction_record)
 				if #search.records == 2000 then

@@ -8,14 +8,6 @@ local history = require 'aux.core.history'
 local PAGE_SIZE = 50
 local TIMEOUT = 30
 
-StaticPopupDialogs.AUX_SCAN_ALERT = {
-    text = 'One of your alert queries matched!',
-    button1 = 'Ok',
-    showAlert = 1,
-    timeout = 0,
-    hideOnEscape = 1,
-}
-
 function aux.handle.CLOSE()
 	abort()
 end
@@ -179,9 +171,7 @@ function scan_page(i)
 
 		history.process_auction(auction_info)
 
-		if (get_state().params.alert_validator or pass)(auction_info) then
-            StaticPopup_Show('AUX_SCAN_ALERT') -- TODO retail improve this
-		elseif not get_query().validator or get_query().validator(auction_info) then
+		if not get_query().validator or get_query().validator(auction_info) then
 			do (get_state().params.on_auction or pass)(auction_info) end
 		end
 	end
