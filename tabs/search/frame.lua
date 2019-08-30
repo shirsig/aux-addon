@@ -128,8 +128,8 @@ do
     btn:SetPoint('TOPRIGHT', -5, -8)
     btn:SetText('Search')
     btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
-    btn:SetScript('OnClick', function()
-        if arg1 == 'RightButton' then
+    btn:SetScript('OnClick', function(_, button)
+        if button == 'RightButton' then
             set_filter(current_search().filter_string)
         end
         execute()
@@ -159,7 +159,7 @@ do
 end
 do
 	local editbox = gui.editbox(frame)
-	editbox:EnableMouse(1)
+	editbox:EnableMouse(true)
 	editbox.formatter = function(str)
 		local queries = filter_util.queries(str)
 		return queries and aux.join(aux.map(aux.copy(queries), function(query) return query.prettified end), ';') or aux.color.red(str)
@@ -477,9 +477,9 @@ do
     scroll_frame:SetPoint('TOPLEFT', 348.5, -50)
     scroll_frame:EnableMouse(true)
     scroll_frame:EnableMouseWheel(true)
-    scroll_frame:SetScript('OnMouseWheel', function(self)
+    scroll_frame:SetScript('OnMouseWheel', function(self, arg1)
 	    local child = self:GetScrollChild()
-	    child:SetFont('p', [[Fonts\ARIALN.TTF]], aux.bounded(gui.font_size.small, gui.font_size.large, select(2, child:GetFont()) + arg1*2))
+	    child:SetFont('p', [[Fonts\ARIALN.TTF]], aux.bounded(gui.font_size.small, gui.font_size.large, select(2, child:GetFont()) + arg1 * 2))
 	    update_filter_display()
     end)
     scroll_frame:RegisterForDrag('LeftButton')

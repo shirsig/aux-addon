@@ -37,20 +37,20 @@ local handlers = {
         end
     end,
 
-    OnClick = function(self, arg1)
+    OnClick = function(self, button)
         if not self.data then return end
         local handler = self.st.handlers.OnClick
         if handler then
-            handler(self.st, self.data, self, arg1)
+            handler(self.st, self.data, self, button)
         end
     end,
 
-	OnDoubleClick = function(self, arg1)
+	OnDoubleClick = function(self, button)
 		if not self.data then return end
 
 		local handler = self.st.handlers.OnDoubleClick
 		if handler then
-			handler(self.st, self.data, self, arg1)
+			handler(self.st, self.data, self, button)
 		end
 	end,
 }

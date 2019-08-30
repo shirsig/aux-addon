@@ -58,10 +58,10 @@ do
 	f:SetPoint('BOTTOMRIGHT', 0, 0)
 	inventory_listing = item_listing.new(
 		f,
-	    function(self, arg1)
-	        if arg1 == 'LeftButton' then
+	    function(self, button)
+	        if button == 'LeftButton' then
 	            update_item(self.item_record)
-	        elseif arg1 == 'RightButton' then
+	        elseif button == 'RightButton' then
 	            aux.set_tab(1)
 	            search_tab.set_filter(strlower(info.item(self.item_record.item_id).name) .. '/exact')
 	            search_tab.execute(nil, false)

@@ -245,9 +245,8 @@ function data_link(id, str)
 	return format('<a href="%s">%s</a>', id, str)
 end
 
-function data_link_click()
-	local button = arg3
-	local index = tonumber(arg1)
+function data_link_click(_, link, _, button)
+	local index = tonumber(link)
 	if button == 'LeftButton' then
 		post_filter_index = index
 	elseif button == 'RightButton' and index > 0 then
