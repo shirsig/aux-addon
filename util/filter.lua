@@ -483,7 +483,7 @@ end
 
 function blizzard_query(filter)
     local filters = filter.blizzard
-    local query = T.map('name', filters.name, 'exact', filters.exact)
+    local query = T.map('name', filters.name, 'exact', aux.index(filters.exact, 2))
     local item_id = filters.name and info.item_id(filters.name)
     local item_info = item_id and info.item(item_id)
     if filters.exact and item_info then
