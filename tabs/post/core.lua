@@ -218,6 +218,8 @@ function post_auction()
     local duration = UIDropDownMenu_GetSelectedValue(duration_dropdown)
 
     ClearCursor()
+    ClickAuctionSellItemButton()
+    ClearCursor()
     PickupContainerItem(unpack(slot))
     ClickAuctionSellItemButton()
     ClearCursor()
@@ -340,6 +342,8 @@ function unit_vendor_price(item_key)
         local item_info = T.temp-info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
             if info.auctionable(item_info.tooltip, nil, true) and not item_info.lootable then
+                ClearCursor()
+                ClickAuctionSellItemButton()
                 ClearCursor()
                 PickupContainerItem(unpack(slot))
                 ClickAuctionSellItemButton()
