@@ -10,7 +10,7 @@ local gui = require 'aux.gui'
 
 local UNKNOWN = GRAY_FONT_COLOR_CODE .. '?' .. FONT_COLOR_CODE_CLOSE
 
-local game_tooltip_money = 0
+--local game_tooltip_money = 0
 
 function aux.handle.LOAD()
 	settings = aux.character_data.tooltip

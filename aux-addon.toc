@@ -26,7 +26,6 @@ core\slash.lua
 core\scan.lua
 util\scan.lua
 core\stack.lua
-core\post.lua
 core\tooltip.lua
 core\shortcut.lua
 

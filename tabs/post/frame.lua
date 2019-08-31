@@ -133,7 +133,7 @@ do
     local btn = gui.button(frame.parameters)
     btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
     btn:SetText('Post')
-    btn:SetScript('OnClick', post_auctions)
+    btn:SetScript('OnClick', post_auction)
     post_button = btn
 end
 do
@@ -158,20 +158,18 @@ end
 do
     local slider = gui.slider(frame.parameters)
     slider:SetValueStep(1)
-    slider:SetPoint('TOPLEFT', 13, -73)
+    slider:SetPoint('TOPLEFT', 13, -82)
     slider:SetWidth(190)
     slider:SetScript('OnValueChanged', function()
-        quantity_update(true)
+        refresh = true
     end)
     slider.editbox.change = function(self)
         slider:SetValue(self:GetNumber())
-        quantity_update(true)
+        prepare_stack()
     end
     slider.editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
             unit_buyout_price_input:SetFocus()
-        elseif stack_count_slider.editbox:IsVisible() then
-            stack_count_slider.editbox:SetFocus()
         else
             unit_start_price_input:SetFocus()
         end
@@ -182,31 +180,8 @@ do
     stack_size_slider = slider
 end
 do
-    local slider = gui.slider(frame.parameters)
-    slider:SetValueStep(1)
-    slider:SetPoint('TOPLEFT', stack_size_slider, 'BOTTOMLEFT', 0, -32)
-    slider:SetWidth(190)
-    slider:SetScript('OnValueChanged', function()
-        quantity_update()
-    end)
-    slider.editbox.change = function(self)
-        slider:SetValue(self:GetNumber())
-        quantity_update()
-    end
-    slider.editbox:SetScript('OnTabPressed', function()
-        if IsShiftKeyDown() then
-            stack_size_slider.editbox:SetFocus()
-        else
-            unit_start_price_input:SetFocus()
-        end
-    end)
-    slider.editbox:SetNumeric(true)
-    slider.label:SetText('Stack Count')
-    stack_count_slider = slider
-end
-do
     local dropdown = gui.dropdown(frame.parameters)
-    dropdown:SetPoint('TOPLEFT', stack_count_slider, 'BOTTOMLEFT', 0, -22)
+    dropdown:SetPoint('TOPLEFT', stack_size_slider, 'BOTTOMLEFT', 0, -22)
     dropdown:SetWidth(90)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
@@ -240,7 +215,7 @@ do
     editbox:SetFontSize(17)
     editbox:SetScript('OnTabPressed', function()
 	    if IsShiftKeyDown() then
-		    stack_count_slider.editbox:SetFocus()
+		    stack_size_slider.editbox:SetFocus()
 	    else
 		    unit_buyout_price_input:SetFocus()
 	    end

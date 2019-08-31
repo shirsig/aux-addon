@@ -7,7 +7,7 @@ local sort_util = require 'aux.util.sort'
 local persistence = require 'aux.util.persistence'
 local money = require 'aux.util.money'
 local scan_util = require 'aux.util.scan'
-local post = require 'aux.core.post'
+local stack = require 'aux.core.stack'
 local scan = require 'aux.core.scan'
 local history = require 'aux.core.history'
 local item_listing = require 'aux.gui.item_listing'
@@ -25,6 +25,8 @@ M.DURATION_2, M.DURATION_8, M.DURATION_24 = 1, 2, 3
 refresh = true
 
 selected_item = nil
+
+prepared_stack_slot = nil
 
 function get_default_settings()
 	return T.map('duration', aux.account_data.post_duration, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
@@ -73,6 +75,10 @@ end
 
 function tab.CLOSE()
     selected_item = nil
+    ClearCursor()
+    ClickAuctionSellItemButton()
+    ClearCursor()
+    aux.kill_thread(post_thread_id)
     frame:Hide()
 end
 
@@ -196,50 +202,58 @@ function price_update()
     end
 end
 
-function post_auctions()
-	if selected_item then
-        local unit_start_price = get_unit_start_price()
-        local unit_buyout_price = get_unit_buyout_price()
-        local stack_size = stack_size_slider:GetValue()
-        local stack_count = stack_count_slider:GetValue()
-        local duration = UIDropDownMenu_GetSelectedValue(duration_dropdown)
-		local key = selected_item.key
+function post_auction()
+    local item_key = selected_item.key
+    local slot = prepared_stack_slot
+    if aux.index(info.container_item(unpack(slot)), 'item_key') ~= item_key then
+        prepare_stack()
+        return
+    end
 
-		post.start(
-			key,
-			stack_size,
-			duration,
-            unit_start_price,
-            unit_buyout_price,
-			stack_count,
-			function(posted)
-				if not frame:IsShown() then
-					return
-				end
-				for i = 1, posted do
-                    record_auction(key, stack_size, unit_start_price * stack_size, unit_buyout_price, duration_code, UnitName'player')
-                end
-                update_inventory_records()
-                local same
-                for _, record in pairs(inventory_records) do
-                    if record.key == key then
-                        same = record
-                        break
-                    end
-                end
-                if same then
-                    update_item(same)
-                else
-                    selected_item = nil
-                end
-                refresh = true
+    local unit_start_price = get_unit_start_price()
+    local unit_buyout_price = get_unit_buyout_price()
+    local stack_size = stack_size_slider:GetValue()
+    local start_price = max(1, aux.round(get_unit_start_price() * stack_size)) -- TODO retail
+    local buyout_price = aux.round(get_unit_buyout_price() * stack_size)
+    local duration = UIDropDownMenu_GetSelectedValue(duration_dropdown)
+
+    ClearCursor()
+    PickupContainerItem(unpack(slot))
+    ClickAuctionSellItemButton()
+    ClearCursor()
+    PostAuction(start_price, buyout_price, duration, stack_size)
+
+    post_thread_id = aux.thread(
+        aux.when,
+        function()
+            return not GetContainerItemInfo(unpack(slot))
+        end,
+        function()
+            if not frame:IsShown() then
+                return
             end
-		)
-	end
+            record_auction(item_key, stack_size, unit_start_price, unit_buyout_price, duration, UnitName'player')
+            update_inventory_records()
+            local same
+            for _, record in pairs(inventory_records) do
+                if record.key == item_key then
+                    same = record
+                    break
+                end
+            end
+            if same then
+                update_item(same)
+            else
+                selected_item = nil
+            end
+            post_thread_id = nil
+            refresh = true
+        end
+    )
 end
 
 function validate_parameters()
-    if not selected_item then
+    if post_thread_id or not selected_item or not prepared_stack_slot then
         post_button:Disable()
         return
     end
@@ -248,10 +262,6 @@ function validate_parameters()
         return
     end
     if get_unit_start_price() == 0 then
-        post_button:Disable()
-        return
-    end
-    if stack_count_slider:GetValue() == 0 then
         post_button:Disable()
         return
     end
@@ -270,7 +280,6 @@ function update_item_configuration()
         unit_start_price_input:Hide()
         unit_buyout_price_input:Hide()
         stack_size_slider:Hide()
-        stack_count_slider:Hide()
         deposit:Hide()
         duration_dropdown:Hide()
         hide_checkbox:Hide()
@@ -278,7 +287,6 @@ function update_item_configuration()
 		unit_start_price_input:Show()
         unit_buyout_price_input:Show()
         stack_size_slider:Show()
-        stack_count_slider:Show()
         deposit:Show()
         duration_dropdown:Show()
         hide_checkbox:Show()
@@ -296,13 +304,12 @@ function update_item_configuration()
         end
 
         stack_size_slider.editbox:SetNumber(stack_size_slider:GetValue())
-        stack_count_slider.editbox:SetNumber(stack_count_slider:GetValue())
 
         do
             local deposit_factor = UnitFactionGroup'npc' and .05 or .25
             local duration_factor = UIDropDownMenu_GetSelectedValue(duration_dropdown) * 4 -- TODO retail check
-            local stack_size, stack_count = selected_item.max_charges and 1 or stack_size_slider:GetValue(), stack_count_slider:GetValue()
-            local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
+            local stack_size = selected_item.max_charges and 1 or stack_size_slider:GetValue()
+            local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * duration_factor
             deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))
         end
 
@@ -318,15 +325,13 @@ function undercut(record, stack_size, stack)
     return price / stack_size
 end
 
-function quantity_update(maximize_count)
+function prepare_stack()
+    prepared_stack_slot = nil
     if selected_item then
-        local max_stack_count = selected_item.max_charges and selected_item.availability[stack_size_slider:GetValue()] or floor(selected_item.availability[0] / stack_size_slider:GetValue())
-        stack_count_slider:SetMinMaxValues(1, max_stack_count)
-        if maximize_count then
-            stack_count_slider:SetValue(max_stack_count)
-        end
+        stack.start(selected_item.key, stack_size_slider:GetValue(), function(slot)
+            prepared_stack_slot = slot
+        end)
     end
-    refresh = true
 end
 
 function unit_vendor_price(item_key)
@@ -363,34 +368,38 @@ function update_item(item)
 
     scan.abort(scan_id)
 
-    selected_item = item
-
     UIDropDownMenu_Initialize(duration_dropdown, initialize_duration_dropdown)
     UIDropDownMenu_SetSelectedValue(duration_dropdown, settings.duration)
 
     hide_checkbox:SetChecked(settings.hidden)
 
-    if selected_item.max_charges then
-	    for i = selected_item.max_charges, 1, -1 do
-			if selected_item.availability[i] > 0 then
+    if item.max_charges then
+	    for i = item.max_charges, 1, -1 do
+			if item.availability[i] > 0 then
 				stack_size_slider:SetMinMaxValues(1, i)
 				break
 			end
 	    end
     else
-	    stack_size_slider:SetMinMaxValues(1, min(selected_item.max_stack, selected_item.aux_quantity))
+	    stack_size_slider:SetMinMaxValues(1, min(item.max_stack, item.aux_quantity))
     end
-    stack_size_slider:SetValue(math.huge)
-    quantity_update(true)
 
     unit_start_price_input:SetText(money.to_string(settings.start_price, true, nil, nil, true))
     unit_buyout_price_input:SetText(money.to_string(settings.buyout_price, true, nil, nil, true))
+
+    write_settings(settings, item.key)
+
+
+    if not selected_item or selected_item.key ~= item.key then
+        stack_size_slider:SetValue(math.huge)
+    end
+    selected_item = item
 
     if not bid_records[selected_item.key] then
         refresh_entries()
     end
 
-    write_settings(settings, item.key)
+    prepare_stack()
 
     refresh = true
 end
