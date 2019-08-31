@@ -203,12 +203,8 @@ function price_update()
 end
 
 function post_auction()
-    local item_key = selected_item.key
     local slot = prepared_stack_slot
-    if aux.index(info.container_item(unpack(slot)), 'item_key') ~= item_key then
-        prepare_stack()
-        return
-    end
+    local item_key = selected_item.key
 
     local unit_start_price = get_unit_start_price()
     local unit_buyout_price = get_unit_buyout_price()
@@ -223,6 +219,12 @@ function post_auction()
     PickupContainerItem(unpack(slot))
     ClickAuctionSellItemButton()
     ClearCursor()
+
+    if not GetAuctionSellItemInfo() then
+        prepare_stack()
+        return
+    end
+
     PostAuction(start_price, buyout_price, duration, stack_size)
 
     post_thread_id = aux.thread(
@@ -255,10 +257,6 @@ function post_auction()
 end
 
 function validate_parameters()
-    if post_thread_id or not selected_item or not prepared_stack_slot then
-        post_button:Disable()
-        return
-    end
     if get_unit_buyout_price() > 0 and get_unit_start_price() > get_unit_buyout_price() then
         post_button:Disable()
         return
@@ -267,6 +265,16 @@ function validate_parameters()
         post_button:Disable()
         return
     end
+    if post_thread_id or not selected_item or not prepared_stack_slot or select(3, GetContainerItemInfo(unpack(prepared_stack_slot))) then
+        post_button:Disable()
+        return
+    end
+    local item_info = info.container_item(unpack(prepared_stack_slot))
+    if not item_info or item_info.item_key ~= selected_item.key or item_info.aux_quantity ~= stack_size_slider:GetValue() then
+        post_button:Disable()
+        return
+    end
+    -- TODO what if cannot afford deposit
     post_button:Enable()
 end
 
