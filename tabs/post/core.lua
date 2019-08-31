@@ -307,7 +307,7 @@ function update_item_configuration()
 
         do
             local deposit_factor = UnitFactionGroup'npc' and .05 or .25
-            local duration_factor = UIDropDownMenu_GetSelectedValue(duration_dropdown) * 4 -- TODO retail check
+            local duration_factor = info.duration_hours(UIDropDownMenu_GetSelectedValue(duration_dropdown)) / 2
             local stack_size = selected_item.max_charges and 1 or stack_size_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * duration_factor
             deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))

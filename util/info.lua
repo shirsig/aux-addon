@@ -40,6 +40,10 @@ do
 	end
 end
 
+function M.duration_hours(duration_code)
+    return T.map(1, 2, 2, 8, 3, 24)[duration_code]
+end
+
 function M.container_item(bag, slot)
 	local link = GetContainerItemLink(bag, slot)
     if link then
