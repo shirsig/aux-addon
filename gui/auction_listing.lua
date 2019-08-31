@@ -598,7 +598,7 @@ local methods = {
     end,
 
     OnClick = function(self, button)
-        if IsModifiedClick() then
+        if IsControlKeyDown() or IsShiftKeyDown() then
             HandleModifiedItemClick(self.record.link)
         else
             local selection = self.rt:GetSelection()

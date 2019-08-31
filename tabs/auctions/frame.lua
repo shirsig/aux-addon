@@ -22,9 +22,7 @@ listing:Reset()
 listing:SetHandler('OnClick', function(row, button)
 	if IsAltKeyDown() then
 		if listing:GetSelection().record == row.record then
-			if IsAltKeyDown() and listing:GetSelection().record == row.record then
-				cancel_button:Click()
-			end
+            cancel_button:Click()
 		end
 	elseif button == 'RightButton' then
 		aux.set_tab(1)
