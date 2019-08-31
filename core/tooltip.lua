@@ -79,7 +79,10 @@ function extend_tooltip(tooltip, link)
     if settings.merchant_sell then
         local price = item_info and item_info.sell_price
         if price ~= 0 then
-            tooltip:AddLine('Vendor: ' .. (price and money.to_string2(price) or UNKNOWN), aux.color.tooltip.merchant())
+            local count = tooltip:GetOwner().count
+            tooltip:AddDoubleLine('Vendor: ' .. (price and money.to_string2(price) or UNKNOWN),
+            (price and count and "x"..count.."   "..money.to_string2(price*count) or ""),
+            aux.color.tooltip.merchant())
         end
     end
     local auctionable = not item_info or info.auctionable(T.temp-info.tooltip('link', item_info.link), item_info.quality)
