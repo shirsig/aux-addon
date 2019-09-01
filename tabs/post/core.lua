@@ -213,6 +213,12 @@ function post_auction()
     local buyout_price = aux.round(get_unit_buyout_price() * stack_size)
     local duration = UIDropDownMenu_GetSelectedValue(duration_dropdown)
 
+    local item_info = info.container_item(unpack(slot))
+    if not item_info or item_info.item_key ~= item_key or item_info.aux_quantity ~= stack_size then
+        prepare_stack()
+        return
+    end
+
     ClearCursor()
     ClickAuctionSellItemButton()
     ClearCursor()
@@ -266,11 +272,6 @@ function validate_parameters()
         return
     end
     if post_thread_id or not selected_item or not prepared_stack_slot or select(3, GetContainerItemInfo(unpack(prepared_stack_slot))) then
-        post_button:Disable()
-        return
-    end
-    local item_info = info.container_item(unpack(prepared_stack_slot))
-    if not item_info or item_info.item_key ~= selected_item.key or item_info.aux_quantity ~= stack_size_slider:GetValue() then
         post_button:Disable()
         return
     end
