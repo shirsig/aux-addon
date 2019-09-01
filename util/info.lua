@@ -117,7 +117,6 @@ function M.auction(index, query_type)
         local aux_quantity = charges or count
         local blizzard_bid = high_bid > 0 and high_bid or start_price
         local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
-
         return T.map(
             'item_id', item_id,
             'suffix_id', suffix_id,
@@ -361,16 +360,12 @@ function M.item_key(link)
 end
 
 function M.parse_link(link)
-    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(link, '|c%x%x%x%x%x%x%x%x|Hitem:(%d*):(%d*):(%d*):(%d*)[:0-9]*|h%[(.-)%]|h|r')
+    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(link, '|c%x%x%x%x%x%x%x%x|Hitem:(%d*):(%d*):::::(%d*):(%d*)[:0-9]*|h%[(.-)%]|h|r')
     return tonumber(item_id) or 0, tonumber(suffix_id) or 0, tonumber(unique_id) or 0, tonumber(enchant_id) or 0, name
 end
 
-function M.itemstring(item_id, suffix_id, unique_id, enchant_id)
-    return 'item:' .. (item_id or 0) .. ':' .. (enchant_id or 0) .. ':' .. (suffix_id or 0) .. ':' .. (unique_id or 0)
-end
-
 function M.item(item_id, suffix_id)
-    local itemstring = 'item:' .. (item_id or 0) .. ':0:' .. (suffix_id or 0) .. ':0'
+    local itemstring = 'item:' .. (item_id or 0) .. '::::::' .. (suffix_id or 0)
     local name, link, quality, level, requirement, class, subclass, max_stack, slot, texture, sell_price = GetItemInfo(itemstring)
     return name and T.map(
         'name', name,
