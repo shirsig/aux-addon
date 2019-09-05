@@ -324,7 +324,7 @@ function set_filter_display_offset(x_offset, y_offset)
 end
 
 function initialize_filter_dropdown()
-	for _, filter in ipairs(T.temp-T.list('and', 'or', 'not', 'price', 'profit', 'vendor-profit', 'disenchant-profit', 'percent', 'bid-price', 'bid-profit', 'bid-vendor-profit', 'bid-disenchant-profit', 'bid-percent', 'item', 'tooltip', 'min-level', 'max-level', 'rarity', 'left', 'utilizable', 'seller')) do
+	for _, filter in ipairs(T.temp-T.list('and', 'or', 'not', 'price', 'profit', 'vendor-profit', 'disenchant-profit', 'percent', 'bid-price', 'bid-profit', 'buyout-bid-profit', 'bid-vendor-profit', 'bid-disenchant-profit', 'bid-percent', 'item', 'tooltip', 'min-level', 'max-level', 'rarity', 'left', 'utilizable', 'seller')) do
 		UIDropDownMenu_AddButton(T.map(
 			'text', filter,
 			'value', filter,
