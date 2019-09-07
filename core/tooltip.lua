@@ -18,7 +18,11 @@ function aux.handle.LOAD()
 --    do
 --        local inside_hook = false
     for name, f in pairs(game_tooltip_hooks) do
-        hooksecurefunc(GameTooltip, name, f)
+        hooksecurefunc(GameTooltip, name, function(self, ...)
+            if not self:IsForbidden() then
+                f(...)
+            end
+        end)
     end
 
     ItemRefTooltip:HookScript('OnTooltipSetItem', function(self)
@@ -107,49 +111,49 @@ function extend_tooltip(tooltip, link, quantity)
     tooltip:Show()
 end
 
-function game_tooltip_hooks:SetHyperlink(itemstring)
+function game_tooltip_hooks.SetHyperlink(itemstring)
     local _, link = GetItemInfo(itemstring)
     if link then
         extend_tooltip(GameTooltip, link, 1)
     end
 end
 
-function game_tooltip_hooks:SetAuctionItem(type, index)
+function game_tooltip_hooks.SetAuctionItem(type, index)
     local link = GetAuctionItemLink(type, index)
     if link then
         extend_tooltip(GameTooltip, link, select(3, GetAuctionItemInfo(type, index)))
     end
 end
 
-function game_tooltip_hooks:SetLootItem(slot)
+function game_tooltip_hooks.SetLootItem(slot)
     local link = GetLootSlotLink(slot)
     if link then
         extend_tooltip(GameTooltip, link, select(3, GetLootSlotInfo(slot)))
     end
 end
 
-function game_tooltip_hooks:SetQuestItem(qtype, slot)
+function game_tooltip_hooks.SetQuestItem(qtype, slot)
     local link = GetQuestItemLink(qtype, slot)
     if link then
         extend_tooltip(GameTooltip, link, select(3, GetQuestItemInfo(qtype, slot)))
     end
 end
 
-function game_tooltip_hooks:SetQuestLogItem(qtype, slot)
+function game_tooltip_hooks.SetQuestLogItem(qtype, slot)
     local link = GetQuestLogItemLink(qtype, slot)
     if link then
         extend_tooltip(GameTooltip, link, select(3, GetQuestLogRewardInfo(slot)))
     end
 end
 
-function game_tooltip_hooks:SetBagItem(bag, slot)
+function game_tooltip_hooks.SetBagItem(bag, slot)
     local link = GetContainerItemLink(bag, slot)
     if link then
         extend_tooltip(GameTooltip, link, select(2, GetContainerItemInfo(bag, slot)))
     end
 end
 
-function game_tooltip_hooks:SetInboxItem(index, itemIndex)
+function game_tooltip_hooks.SetInboxItem(index, itemIndex)
     itemIndex = itemIndex or 1 -- TODO is this default correct?
     local link = GetInboxItemLink(index, itemIndex)
     if link then
@@ -157,14 +161,14 @@ function game_tooltip_hooks:SetInboxItem(index, itemIndex)
     end
 end
 
-function game_tooltip_hooks:SetInventoryItem(unit, slot)
+function game_tooltip_hooks.SetInventoryItem(unit, slot)
     local link = GetInventoryItemLink(unit, slot)
     if link then
         extend_tooltip(GameTooltip, link, 1)
     end
 end
 
-function game_tooltip_hooks:SetMerchantItem(slot)
+function game_tooltip_hooks.SetMerchantItem(slot)
     local link = GetMerchantItemLink(slot)
     if link then
         local quantity = select(4, GetMerchantItemInfo(slot))
@@ -172,7 +176,7 @@ function game_tooltip_hooks:SetMerchantItem(slot)
     end
 end
 
-function game_tooltip_hooks:SetCraftItem(skill, slot)
+function game_tooltip_hooks.SetCraftItem(skill, slot)
     local link, quantity
     if slot then
         link, quantity = GetCraftReagentItemLink(skill, slot), select(3, GetCraftReagentInfo(skill, slot))
@@ -184,14 +188,14 @@ function game_tooltip_hooks:SetCraftItem(skill, slot)
     end
 end
 
-function game_tooltip_hooks:SetCraftSpell(slot)
+function game_tooltip_hooks.SetCraftSpell(slot)
     local link = GetCraftItemLink(slot)
     if link then
         extend_tooltip(GameTooltip, link, 1)
     end
 end
 
-function game_tooltip_hooks:SetTradeSkillItem(skill, slot)
+function game_tooltip_hooks.SetTradeSkillItem(skill, slot)
     local link, quantity
     if slot then
         link, quantity = GetTradeSkillReagentItemLink(skill, slot), select(3, GetTradeSkillReagentInfo(skill, slot))
@@ -203,7 +207,7 @@ function game_tooltip_hooks:SetTradeSkillItem(skill, slot)
     end
 end
 
-function game_tooltip_hooks:SetAuctionSellItem()
+function game_tooltip_hooks.SetAuctionSellItem()
     local name, _, quantity = GetAuctionSellItemInfo()
     if name then
         for slot in info.inventory() do
