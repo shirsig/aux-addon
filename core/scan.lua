@@ -5,7 +5,7 @@ local aux = require 'aux'
 local info = require 'aux.util.info'
 local history = require 'aux.core.history'
 
-local PAGE_SIZE = 50
+local DEFAULT_PAGE_SIZE = 50
 local TIMEOUT = 30
 
 function aux.handle.CLOSE()
@@ -73,13 +73,22 @@ function get_query()
 end
 
 function total_pages(total_auctions)
-    return ceil(total_auctions / PAGE_SIZE)
+    return ceil(total_auctions / page_size())
 end
 
 function last_page(total_auctions)
     local last_page = max(total_pages(total_auctions) - 1, 0)
     local last_page_limit = get_query().blizzard_query.last_page or last_page
     return min(last_page_limit, last_page)
+end
+
+function page_size()
+    if get_state().params.type == 'list' and not get_state().params.get_all then
+        return DEFAULT_PAGE_SIZE
+    else
+        p.kek(debugstack())
+        return get_state().total_auctions
+    end
 end
 
 function scan()
@@ -150,8 +159,7 @@ end
 function scan_page(i)
 	i = i or 1
 
-    local page_size = get_state().params.type == 'list' and PAGE_SIZE or get_state().total_auctions
-	if i > page_size then
+	if i > page_size() then
 		do (get_state().params.on_page_scanned or pass)() end
 		if get_query().blizzard_query and get_state().page < last_page(get_state().total_auctions) then
 			get_state().page = get_state().page + 1
@@ -232,7 +240,7 @@ end
 
 function data_complete()
     local ignore_owner = get_state().params.ignore_owner or aux.account_data.ignore_owner
-    for i = 1, PAGE_SIZE do
+    for i = 1, page_size() do
         local _, _, _, _, _, _, _, _, _, _, _, _, _, owner, _, _, _, has_all_info = GetAuctionItemInfo('list', i)
         if has_all_info == false or has_all_info and not ignore_owner and not owner then
 	        return false
