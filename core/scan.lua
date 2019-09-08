@@ -6,7 +6,7 @@ local info = require 'aux.util.info'
 local history = require 'aux.core.history'
 
 local DEFAULT_PAGE_SIZE = 50
-local TIMEOUT = 10
+local TIMEOUT = 30
 
 function aux.handle.CLOSE()
 	abort()
