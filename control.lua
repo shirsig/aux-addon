@@ -113,3 +113,39 @@ function M.when(c, k, ...)
 		return wait(when, c, k, ...)
 	end
 end
+
+do
+    local threads, kill_signals = {}, {}
+    CreateFrame'Frame':SetScript('OnUpdate', function()
+        for thread_id, thread in pairs(threads) do
+            local status = coroutine.status(thread)
+            if status == 'dead' or kill_signals[thread_id] then
+                kill_signals[thread_id] = nil
+                threads[thread_id] = nil
+            elseif status == 'suspended' then
+                assert(coroutine.resume(thread))
+                return -- TODO
+            end
+        end
+    end)
+
+    function M.coro_thread(f)
+        local thread = coroutine.create(f)
+        local thread_id = tostring(thread)
+        threads[thread_id] = thread
+        assert(coroutine.resume(thread))
+        return thread_id
+    end
+
+    function M.coro_wait()
+        coroutine.yield()
+    end
+
+    function M.coro_kill(thread_id)
+        kill_signals[thread_id] = true
+    end
+
+    function M.coro_id()
+        return tostring(coroutine.running())
+    end
+end

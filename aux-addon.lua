@@ -206,10 +206,10 @@ end
 function auction_ui_loaded()
 	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
 	AuctionFrame:SetScript('OnHide', nil)
-	hook('ShowUIPanel', function(...)
-		if select(1, ...) == AuctionFrame then return AuctionFrame:Show() end
-		return orig.ShowUIPanel(...)
-	end)
+--	hook('ShowUIPanel', function(...) -- TODO what was this for? Preventing the sound?
+--		if select(1, ...) == AuctionFrame then return AuctionFrame:Show() end
+--		return orig.ShowUIPanel(...)
+--	end)
 	hook 'AuctionFrameAuctions_OnEvent'
 end
 

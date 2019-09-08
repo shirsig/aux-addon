@@ -248,7 +248,7 @@ function start_search(queries, continuation)
 			current_query = current_query and current_query + 1 or start_query
 			current_page = current_page and 0 or start_page - 1
 		end,
-		on_auction = function(auction_record, ctrl)
+		on_auction = function(auction_record)
             if (search.alert_validator or pass)(auction_record) then
                 StaticPopup_Show('AUX_SCAN_ALERT') -- TODO retail improve this
             end

@@ -106,7 +106,9 @@ function M.auction(index, query_type)
 
     local name, texture, count, quality, usable, level, _, start_price, min_increment, buyout_price, high_bid, high_bidder, _, owner, _, sale_status, item_id, has_all_info = GetAuctionItemInfo(query_type, index)
 
-	if has_all_info then
+--    local ignore_owner = get_state().params.ignore_owner or aux.account_data.ignore_owner TODO
+
+    if has_all_info == true and (aux.account_data.ignore_owner or owner) then
         local link = GetAuctionItemLink(query_type, index)
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
 
