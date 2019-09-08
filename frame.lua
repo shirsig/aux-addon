@@ -49,6 +49,10 @@ do
 	gui.set_size(btn, 60, 24)
 	btn:SetText(color.blizzard'Blizzard UI')
 	btn:SetScript('OnClick',function()
-		if AuctionFrame:IsVisible() then HideUIPanel(AuctionFrame) else ShowUIPanel(AuctionFrame) end
+		if AuctionFrame:IsVisible() then
+            AuctionFrame_Hide()
+        else
+            AuctionFrame_Show()
+        end
 	end)
 end

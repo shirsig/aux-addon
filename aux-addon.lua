@@ -32,7 +32,8 @@ do
 			end
 		elseif event == 'PLAYER_LOGIN' then
 			for _, f in ipairs(handlers2) do f(arg1, ...) end
-			print('loaded - /aux')
+            sort(account_data.auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
+            print('loaded - /aux')
 		else
 			_M[event](arg1, ...)
 		end
@@ -182,11 +183,14 @@ function handle.LOAD2()
 	frame:SetScale(account_data.scale)
 end
 
-function _G.AUCTION_HOUSE_SHOW()
-	AuctionFrame:Hide()
-    sort(account_data.auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
-	frame:Show()
-	set_tab(1)
+function auction_ui_loaded()
+    _G.AuctionFrame_Show, _M.AuctionFrame_Show  = nil, _G.AuctionFrame_Show
+    AuctionFrame:SetScript('OnHide', nil)
+end
+
+function AUCTION_HOUSE_SHOW()
+    frame:Show()
+    set_tab(1)
 end
 
 do
@@ -201,20 +205,4 @@ do
 		set_tab()
 		frame:Hide()
 	end
-end
-
-function auction_ui_loaded()
-	AuctionFrame:UnregisterEvent('AUCTION_HOUSE_SHOW')
-	AuctionFrame:SetScript('OnHide', nil)
---	hook('ShowUIPanel', function(...) -- TODO what was this for? Preventing the sound?
---		if select(1, ...) == AuctionFrame then return AuctionFrame:Show() end
---		return orig.ShowUIPanel(...)
---	end)
-	hook 'AuctionFrameAuctions_OnEvent'
-end
-
-function AuctionFrameAuctions_OnEvent(...)
-    if AuctionFrameAuctions:IsVisible() then
-	    return orig.AuctionFrameAuctions_OnEvent(...)
-    end
 end
