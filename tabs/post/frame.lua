@@ -78,7 +78,7 @@ bid_listing:SetColInfo{
     {name='Auctions', width=.17, align='CENTER'},
     {name='Time\nLeft', width=.11, align='CENTER'},
     {name='Stack\nSize', width=.11, align='CENTER'},
-    {name='Auction Bid\n(per item)', width=.4, align='RIGHT'},
+    {name='Auction Bid\n(per stack)', width=.4, align='RIGHT'},
     {name='% Hist.\nValue', width=.21, align='CENTER'},
 }
 bid_listing:SetSelection(function(data)

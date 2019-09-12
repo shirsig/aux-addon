@@ -122,7 +122,7 @@ function update_auction_listing(listing, records, reference)
 		local stack_size = stack_size_slider:GetValue()
 		for _, record in pairs(records[selected_item.key] or T.empty) do
 			local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and aux.color.red
-			local price = record.unit_price * (listing == 'bid' and record.stack_size / stack_size_slider:GetValue() or 1)
+			local price = record.unit_price * (listing == 'bid' and record.stack_size or 1)
 			tinsert(rows, T.map(
 				'cols', T.list(
 				T.map('value', record.own and aux.color.green(record.count) or record.count),
@@ -140,7 +140,7 @@ function update_auction_listing(listing, records, reference)
 				T.map('value', '---'),
 				T.map('value', '---'),
 				T.map('value', '---'),
-				T.map('value', money.to_string(historical_value, true, nil, aux.color.green)),
+				T.map('value', money.to_string(historical_value * (listing == 'bid' and stack_size_slider:GetValue() or 1), true, nil, aux.color.green)),
 				T.map('value', historical_value and gui.percentage_historical(100) or '---')
 			),
 				'record', T.map('historical_value', true, 'stack_size', stack_size, 'unit_price', historical_value, 'own', true)
