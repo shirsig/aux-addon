@@ -1,4 +1,4 @@
-# aux - WoW Clasic (1.13) AddOn
+# aux - WoW Classic (1.13) AddOn
 
 Former Vanilla (1.12) addon - now also available for Classic!
 
