@@ -1,14 +1,12 @@
-# aux - WoW 1.12 AddOn
+# aux - WoW Clasic (1.13) AddOn
 
-## Experimental retail classic beta version in branch "retail"
-
-The most advanced auction house addOn for the 1.12 client with some features more advanced than anything even on retail.
+Former Vanilla (1.12) addon - now also available for Classic!
 
 ## Core Features
 
 ### General
 * Completely independent replacement for the Blizzard interface.
-* Elegant look based on the retail addOn TSM.
+* Elegant look stolen from TSM3.
 * Many convenient shortcuts.
 * Convenient access to the unaltered Blizzard interface.
 
@@ -22,17 +20,17 @@ The most advanced auction house addOn for the 1.12 client with some features mor
 * Sorting by percentage of historical value and unit price.
 * Sorting across all scanned pages.
 * Quick buying from any page without rescanning everything.
-* Real time mode which continuously scans the last page.
+* Real time mode which continuously scans the "newest" (actually longest duration) auctions.
 
 ### Post
-* Automatic assembling and posting of multiple stacks.
+* Automatic stacking.
 * Automatic scanning of existing auctions.
 * Concise listing of existing auctions.
 * Undercutting of existing auctions by click.
 * Concise listing of inventory items excluding the non auctionable.
 * Manual exclusion of specific items from the inventory listing.
 * Saving post configuration per item.
-* Efficient price input inspired by the retail addOn TSM.
+* Efficient price input inspired by TSM.
 
 ### History
 * Automatic gathering of historical data from all scans.
@@ -44,9 +42,10 @@ The most advanced auction house addOn for the 1.12 client with some features mor
 ## Slash Commands
 ### General
 **/aux** (Lists the settings)<br/>
+**/aux scan** (Scans the whole auction house. Currently only used for price history. May take about a minute)
 **/aux scale _factor_** (Scales the aux GUI by _factor_)<br/>
 **/aux ignore owner** (Disables waiting for owner names when scanning. Recommended)<br/>
-**/aux post bid** (Adds a bid price listing to the post tab)<br/>
+**/aux post bid** (Adds a bid price listing to the post tab. Requires **/run ReloadUI()** to take effect)<br/>
 **/aux crafting cost** (Toggles the crafting price information)<br/>
 **/aux post duration _hours_** (Sets the default auction duration to _2_/_8_/_24_ hours)<br/>
 ### Tooltip
@@ -74,8 +73,8 @@ Furthermore
 
 ### Search
 - Hitting tab in the search box will accept an autocompletion.
-- Dragging inventory items to the search box or right-clicking them will start a search.
-- Right-clicking item links will start a search.
+- Dragging inventory items to the search box or alt-clicking them will start a search.
+- Alt-clicking item links will start a search.
 
 #### Search Results
 ![Alt text](http://i.imgur.com/hI6ODqM.png)
@@ -100,7 +99,7 @@ The filters on the left side are Blizzard filters which may reduce the number of
 - A price value without explicit denotations will count as gold. (e.g., 10.5 = 10g50s)
 - Price values can contain decimals. (e.g., 1.5g = 1g50s)
 - Right-clicking an item in the inventory listing will start a search.
-- Right-clicking a bag item will select it in the listing.
+- Dragging an inventory item to the search box or alt-clicking it will select it in the listing.
 - In the listing of bids/buyouts a red price is undercutting stack/unit price.
 - Clicking an entry in the in the listings of bids/buyouts of existing auctions will undercut with your bid stack/buyout unit price.
 - Double-click in the bids/buyouts listings will also match the stack size.
@@ -150,9 +149,4 @@ This will scan the auction house for cloth armor which has a requirement of at l
 
 ## Historical Value
 
-aux condenses the prices you've scanned during a day (midnight to midnight) into a single value, similarly to retail Auctioneer's "stat-simple" module.
-This daily value is calculated as the minimum buyout of the day which in practice gives a similar enough value to that of retail TSM while using much less memory.
-Limiting the memory usage is important because like Auctioneer and unlike TSM aux is using a day based instead of scan based interval and thus has to store the daily progress in the savedvariables.
-Finally these daily values are collected in a list of the last 11 of them from which the market value is taken as the median. The values are weighted by their age but it doesn't have a large effect unless they're older than a month.
-
-The bottom line is that you get a fairly accurate market value for both very active markets as well as rarer items that has a reasonably short reaction time to market changes, recovers easily and never needs to be reset while still being reasonably stable and hard to manipulate and dealing with outliers very well, not getting distorted by multiple scans per day, not needing a single full scan per day but instead naturally picking up every price you scan while going about your usual business, letting you focus on a certain part of the auction house by scanning only that part regularly and avoiding information overload by giving you a single concise value for the tooltip.
+The historical value is a slightly time weighted median of up to 12 saved daily values where a daily value is the minimum unit buyout price for an item scanned over the course of the respective day.
