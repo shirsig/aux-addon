@@ -567,7 +567,8 @@ local methods = {
         if row.record then
 	        GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
             GameTooltip:SetHyperlink(row.record.link)
-            info.set_shopping_tooltip(row.record.slot)
+            GameTooltip_ShowCompareItem()
+--            info.set_shopping_tooltip(row.record.slot)
         end
     end,
 

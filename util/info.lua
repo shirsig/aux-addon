@@ -8,38 +8,6 @@ AuxTooltip:SetScript('OnTooltipAddMoney', function(self, arg1)
     self.money = arg1
 end)
 
-do
-	local inventory_index_map = {
-		INVTYPE_AMMO = {0},
-		INVTYPE_HEAD = {1},
-		INVTYPE_NECK = {2},
-		INVTYPE_SHOULDER = {3},
-		INVTYPE_BODY = {4},
-		INVTYPE_CHEST = {5},
-		INVTYPE_ROBE = {5},
-		INVTYPE_WAIST = {6},
-		INVTYPE_LEGS = {7},
-		INVTYPE_FEET = {8},
-		INVTYPE_WRIST = {9},
-		INVTYPE_HAND = {10},
-		INVTYPE_FINGER = {11, 12},
-		INVTYPE_TRINKET = {13, 14},
-		INVTYPE_CLOAK = {15},
-		INVTYPE_2HWEAPON = {16, 17},
-		INVTYPE_WEAPONMAINHAND = {16, 17},
-		INVTYPE_WEAPON = {16, 17},
-		INVTYPE_WEAPONOFFHAND = {16, 17},
-		INVTYPE_HOLDABLE = {16, 17},
-		INVTYPE_SHIELD = {16, 17},
-		INVTYPE_RANGED = {18},
-		INVTYPE_RANGEDRIGHT = {18},
-		INVTYPE_TABARD = {19},
-	}
-	function M.inventory_index(slot)
-	    return unpack(inventory_index_map[slot] or T.temp-T.acquire())
-	end
-end
-
 function M.duration_hours(duration_code)
     return T.map(1, 2, 2, 8, 3, 24)[duration_code]
 end
@@ -174,37 +142,6 @@ end
 function M.set_tooltip(itemstring, owner, anchor)
     GameTooltip:SetOwner(owner, anchor)
     GameTooltip:SetHyperlink(itemstring)
-end
-
-function M.set_shopping_tooltip(slot)
-    local index1, index2 = inventory_index(slot)
-    local tooltips = T.temp-T.acquire()
-    if index1 then
-        local tooltip = tooltip('inventory', 'player', index1)
-        if #tooltip > 0 then
-            tinsert(tooltips, tooltip)
-        end
-    end
-    if index2 then
-        local tooltip = tooltip('inventory', 'player', index2)
-        if #tooltip > 0 then
-            tinsert(tooltips, tooltip)
-        end
-    end
-
-    if tooltips[1] then
-        tinsert(tooltips[1], 1, T.temp-T.map('left_text', 'Currently Equipped', 'left_color', T.temp-T.list(.5, .5, .5)))
-        ShoppingTooltip1:SetOwner(GameTooltip, 'ANCHOR_NONE')
-        ShoppingTooltip1:SetPoint('TOPLEFT', GameTooltip, 'TOPRIGHT', 0, -10)
-        load_tooltip(ShoppingTooltip1, tooltips[1])
-    end
-
-    if tooltips[2] then
-        tinsert(tooltips[2], 1, T.temp-T.map('left_text', 'Currently Equipped', 'left_color', T.temp-T.list(.5, .5, .5)))
-        ShoppingTooltip2:SetOwner(ShoppingTooltip1, 'ANCHOR_NONE')
-        ShoppingTooltip2:SetPoint('TOPLEFT', ShoppingTooltip1, 'TOPRIGHT')
-        load_tooltip(ShoppingTooltip2, tooltips[2])
-    end
 end
 
 function M.tooltip_match(entry, tooltip)
