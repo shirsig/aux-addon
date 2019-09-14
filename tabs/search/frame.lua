@@ -159,7 +159,6 @@ do
 end
 do
 	local editbox = gui.editbox(frame)
-	editbox:EnableMouse(true)
 	editbox.formatter = function(str)
 		local queries = filter_util.queries(str)
 		return queries and aux.join(aux.map(aux.copy(queries), function(query) return query.prettified end), ';') or aux.color.red(str)
@@ -178,6 +177,16 @@ do
         end
 	end)
 	editbox.enter = execute
+    local function search_cursor_item()
+        local type, item_id = GetCursorInfo()
+        if type == 'item' then
+            set_filter(strlower(info.item(item_id).name) .. '/exact')
+            execute(nil, false)
+            ClearCursor()
+        end
+    end
+    editbox:HookScript('OnReceiveDrag', search_cursor_item)
+    editbox:HookScript('OnMouseDown', search_cursor_item)
 	search_box = editbox
 end
 do

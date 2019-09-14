@@ -154,6 +154,17 @@ do
     item.button:SetScript('OnLeave', function()
         GameTooltip:Hide()
     end)
+    local function select_cursor_item()
+        local type, item_id, item_link = GetCursorInfo()
+        if type == 'item' then
+            local _, suffix_id = info.parse_link(item_link)
+            select_item(item_id .. ':' .. suffix_id)
+            ClearCursor()
+        end
+    end
+    item.button:HookScript('OnReceiveDrag', select_cursor_item)
+    item.button:HookScript('OnMouseDown', select_cursor_item)
+    item.button:HookScript('OnClick', select_cursor_item)
 end
 do
     local slider = gui.slider(frame.parameters)
