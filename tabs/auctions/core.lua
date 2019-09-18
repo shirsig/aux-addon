@@ -9,7 +9,7 @@ local tab = aux.tab 'Auctions'
 
 auction_records = T.acquire()
 
-function aux.LOAD()
+function aux.handle.LOAD()
     aux.event_listener('AUCTION_OWNED_LIST_UPDATE', function()
         refresh = true
     end)
@@ -17,7 +17,6 @@ end
 
 function tab.OPEN()
     frame:Show()
-    refresh = true
 end
 
 function tab.CLOSE()
@@ -67,14 +66,17 @@ do
             record,
             status_bar,
             function() state = IDLE end,
-            function() state = IDLE; listing:RemoveAuctionRecord(record) end,
+            function()
+                state = IDLE
+                listing:RemoveAuctionRecord(record)
+            end,
             function(index)
                 state = FOUND
                 found_index = index
 
                 cancel_button:SetScript('OnClick', function()
                     if scan_util.test(record, index) and listing:ContainsRecord(record) then
-                        aux.cancel_auction(index, function() listing:RemoveAuctionRecord(record) end)
+                        aux.cancel_auction(index)
                     end
                 end)
                 cancel_button:Enable()

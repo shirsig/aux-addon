@@ -120,23 +120,21 @@ function submit_query()
         return
     end
 
-    if get_state().params.type == 'list' then
-        while not CanSendAuctionQuery() do
-            aux.coro_wait()
-        end
-    end
-
-    SortAuctionClearSort(get_state().params.type)
-    SortAuctionItems(get_state().params.type, 'duration')
-    SortAuctionItems(get_state().params.type, 'duration')
-
     if get_state().params.type == 'bidder' and not AuctionFrame.gotBids then
         GetBidderAuctionItems()
         AuctionFrame.gotBids = 1
     elseif get_state().params.type == 'owner' and not AuctionFrame.gotAuctions then
         GetOwnerAuctionItems()
         AuctionFrame.gotAuctions = 1
-    else
+    elseif get_state().params.type == 'list' then
+        while not CanSendAuctionQuery() do
+            aux.coro_wait()
+        end
+
+        SortAuctionClearSort(get_state().params.type)
+        SortAuctionItems(get_state().params.type, 'duration')
+        SortAuctionItems(get_state().params.type, 'duration')
+
         get_state().last_list_query = GetTime()
         local blizzard_query = get_query().blizzard_query or T.acquire()
         local category_filter

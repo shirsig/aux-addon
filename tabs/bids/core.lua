@@ -10,7 +10,7 @@ local tab = aux.tab 'Bids'
 
 auction_records = {}
 
-function aux.LOAD()
+function aux.handle.LOAD()
     aux.event_listener('AUCTION_BIDDER_LIST_UPDATE', function()
         refresh = true
     end)
@@ -18,7 +18,6 @@ end
 
 function tab.OPEN()
     frame:Show()
-    refresh = true
 end
 
 function tab.CLOSE()
@@ -79,10 +78,7 @@ do
                 if not record.high_bidder then
                     bid_button:SetScript('OnClick', function()
                         if scan_util.test(record, index) and listing:ContainsRecord(record) then
-                            aux.place_bid('bidder', index, record.bid_price, record.bid_price < record.buyout_price and function()
-                                info.bid_update(record)
-                                listing:SetDatabase()
-                            end or function() listing:RemoveAuctionRecord(record) end)
+                            aux.place_bid('bidder', index, record.bid_price)
                         end
                     end)
                     bid_button:Enable()
@@ -93,7 +89,7 @@ do
                 if record.buyout_price > 0 then
                     buyout_button:SetScript('OnClick', function()
                         if scan_util.test(record, index) and listing:ContainsRecord(record) then
-                            aux.place_bid('bidder', index, record.buyout_price, function() listing:RemoveAuctionRecord(record) end)
+                            aux.place_bid('bidder', index, record.buyout_price)
                         end
                     end)
                     buyout_button:Enable()
