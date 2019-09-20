@@ -120,13 +120,7 @@ function submit_query()
         return
     end
 
-    if get_state().params.type == 'bidder' and not AuctionFrame.gotBids then
-        GetBidderAuctionItems()
-        AuctionFrame.gotBids = 1
-    elseif get_state().params.type == 'owner' and not AuctionFrame.gotAuctions then
-        GetOwnerAuctionItems()
-        AuctionFrame.gotAuctions = 1
-    elseif get_state().params.type == 'list' then
+    if get_state().params.type == 'list' then
         while not CanSendAuctionQuery() do
             aux.coro_wait()
         end

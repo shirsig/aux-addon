@@ -397,7 +397,7 @@ M.auctions_columns = {
                     return sort_util.LT
                 end
             end
-            
+
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
             price_a = price_a > 0 and price_a or (desc and -math.huge or math.huge)

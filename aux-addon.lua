@@ -191,6 +191,8 @@ end
 function AUCTION_HOUSE_SHOW()
     frame:Show()
     set_tab(1)
+    GetOwnerAuctionItems()
+    GetBidderAuctionItems()
 end
 
 do

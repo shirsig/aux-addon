@@ -20,6 +20,7 @@ function tab.OPEN()
 end
 
 function tab.CLOSE()
+    listing:SetSelectedRecord()
     frame:Hide()
 end
 
@@ -51,59 +52,23 @@ function M.scan_auctions()
     }
 end
 
-do
-    local scan_id = 0
-    local IDLE, SEARCHING, FOUND = aux.enum(3)
-    local state = IDLE
-    local found_index
+function cancel_auction()
+    local record = listing:GetSelection().record
+    if scan_util.test(record, record.index) then
+        aux.cancel_auction(record.index)
+    end
+end
 
-    function find_auction(record)
-        if not listing:ContainsRecord(record) then return end
-
-        scan.abort(scan_id)
-        state = SEARCHING
-        scan_id = scan_util.find(
-            record,
-            status_bar,
-            function() state = IDLE end,
-            function()
-                state = IDLE
-                listing:RemoveAuctionRecord(record)
-            end,
-            function(index)
-                state = FOUND
-                found_index = index
-
-                cancel_button:SetScript('OnClick', function()
-                    if scan_util.test(record, index) and listing:ContainsRecord(record) then
-                        aux.cancel_auction(index)
-                    end
-                end)
-                cancel_button:Enable()
-            end
-        )
+function on_update()
+    if refresh then
+        refresh = false
+        scan_auctions()
     end
 
-    function on_update()
-        if refresh then
-            refresh = false
-            scan_auctions()
-        end
-
-        if state == IDLE or state == SEARCHING then
-            cancel_button:Disable()
-        end
-
-        if state == SEARCHING then return end
-
-        local selection = listing:GetSelection()
-        if not selection then
-            state = IDLE
-        elseif selection and state == IDLE then
-            find_auction(selection.record)
-        elseif state == FOUND and not scan_util.test(selection.record, found_index) then
-            cancel_button:Disable()
-            if not aux.cancel_in_progress() then state = IDLE end
-        end
+    local selection = listing:GetSelection()
+    if selection and selection.record.sale_status == 0 then
+        cancel_button:Enable()
+    else
+        cancel_button:Disable()
     end
 end

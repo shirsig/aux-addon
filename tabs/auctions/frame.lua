@@ -30,10 +30,6 @@ listing:SetHandler('OnClick', function(row, button)
 		search_tab.execute(nil, false)
 	end
 end)
-listing:SetHandler('OnSelectionChanged', function(rt, datum)
-    if not datum then return end
-    find_auction(datum.record)
-end)
 
 do
 	status_bar = gui.status_bar(frame)
@@ -48,5 +44,6 @@ do
     btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
     btn:SetText('Cancel')
     btn:Disable()
+    btn:SetScript('OnClick', cancel_auction)
     cancel_button = btn
 end

@@ -34,10 +34,6 @@ listing:SetHandler('OnClick', function(row, button)
 		search_tab.execute(nil, false)
 	end
 end)
-listing:SetHandler('OnSelectionChanged', function(rt, datum)
-    if not datum then return end
-    find_auction(datum.record)
-end)
 
 do
 	status_bar = gui.status_bar(frame)
@@ -52,6 +48,7 @@ do
     btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
     btn:SetText('Bid')
     btn:Disable()
+    btn:SetScript('OnClick', perform_bid)
     bid_button = btn
 end
 do
@@ -59,5 +56,6 @@ do
     btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
     btn:SetText('Buyout')
     btn:Disable()
+    btn:SetScript('OnClick', perform_buyout)
     buyout_button = btn
 end
