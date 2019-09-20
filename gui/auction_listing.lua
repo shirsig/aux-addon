@@ -63,6 +63,16 @@ function item_column_fill(cell, record, _, _, _, indented)
 	cell.text:SetText(gsub(record.link, '[%[%]]', ''))
 end
 
+function status_code(record)
+    if record.sale_status == 1 then
+        return 1
+    elseif not record.high_bidder then
+        return 2
+    else
+        return 3
+    end
+end
+
 M.search_columns = {
     {
         title = 'Item',
@@ -282,10 +292,18 @@ M.auctions_columns = {
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(record.aux_quantity)
+            cell.text:SetText(record.aux_quantity > 0 and record.aux_quantity or '?')
         end,
         cmp = function(record_a, record_b, desc)
-            return sort_util.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            if record_a.sale_status == 1 and record_b.sale_status == 1 then
+                return sort_util.EQ
+            elseif record_a.sale_status == 1 then
+                return sort_util.GT
+            elseif record_b.sale_status == 1 then
+                return sort_util.LT
+            else
+                return sort_util.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            end
         end,
     },
     {
@@ -293,10 +311,22 @@ M.auctions_columns = {
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '?')
+            if record.sale_status == 1 then
+                cell.text:SetText('?')
+            else
+                cell.text:SetText(TIME_LEFT_STRINGS[record.duration or 0] or '?')
+            end
         end,
         cmp = function(record_a, record_b, desc)
-            return sort_util.compare(record_a.duration, record_b.duration, desc)
+            if record_a.sale_status == 1 and record_b.sale_status == 1 then
+                return sort_util.EQ
+            elseif record_a.sale_status == 1 then
+                return sort_util.GT
+            elseif record_b.sale_status == 1 then
+                return sort_util.LT
+            else
+                return sort_util.compare(record_a.duration, record_b.duration, desc)
+            end
         end,
     },
     {
@@ -305,6 +335,10 @@ M.auctions_columns = {
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
+            if record.sale_status == 1 and price_per_unit then
+                cell.text:SetText('?')
+                return
+            end
             local price
             if record.high_bidder then
                 price = price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
@@ -314,6 +348,15 @@ M.auctions_columns = {
             cell.text:SetText(money.to_string(price, true))
         end,
         cmp = function(record_a, record_b, desc)
+            if price_per_unit then
+                if record_a.sale_status == 1 and record_b.sale_status == 1 then
+                    return sort_util.EQ
+                elseif record_a.sale_status == 1 then
+                    return sort_util.GT
+                elseif record_b.sale_status == 1 then
+                    return sort_util.LT
+                end
+            end
             local price_a
             if record_a.high_bidder then
                 price_a = price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
@@ -321,7 +364,9 @@ M.auctions_columns = {
                 price_a = price_per_unit and record_a.start_price / record_b.aux_quantity or record_a.start_price
             end
             local price_b
-            if record_b.high_bidder then
+            if record_b.sale_status == 1 and price_per_unit then
+                price_b = math.huge
+            elseif record_b.high_bidder then
                 price_b = price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
             else
                 price_b = price_per_unit and record_b.start_price / record_b.aux_quantity or record_b.start_price
@@ -335,10 +380,24 @@ M.auctions_columns = {
         align = 'RIGHT',
         isPrice = true,
         fill = function(cell, record)
+            if record.sale_status == 1 and price_per_unit then
+                cell.text:SetText('?')
+                return
+            end
             local price = price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
             cell.text:SetText(price > 0 and money.to_string(price, true) or '---')
         end,
         cmp = function(record_a, record_b, desc)
+            if price_per_unit then
+                if record_a.sale_status == 1 and record_b.sale_status == 1 then
+                    return sort_util.EQ
+                elseif record_a.sale_status == 1 then
+                    return sort_util.GT
+                elseif record_b.sale_status == 1 then
+                    return sort_util.LT
+                end
+            end
+            
             local price_a = price_per_unit and record_a.unit_buyout_price or record_a.buyout_price
             local price_b = price_per_unit and record_b.unit_buyout_price or record_b.buyout_price
             price_a = price_a > 0 and price_a or (desc and -math.huge or math.huge)
@@ -348,14 +407,25 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'High Bidder',
+        title = 'Status',
         width = .21,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(record.high_bidder or aux.color.red 'No Bids')
+            local text
+            if not record.high_bidder then
+                text = aux.color.red'No Bids'
+            elseif record.sale_status == 1 then
+                text = aux.color.blue'Sold: ' .. record.high_bidder
+            else
+                text = aux.color.green'Bid: ' .. record.high_bidder
+            end
+            cell.text:SetText(text)
         end,
         cmp = function(record_a, record_b, desc)
-            if not record_a.high_bidder and not record_b.high_bidder then
+            local status_order = sort_util.compare(status_code(record_a), status_code(record_b), desc)
+            if status_order ~= sort_util.EQ then
+                return status_order
+            elseif not record_a.high_bidder and not record_b.high_bidder then
                 return sort_util.EQ
             elseif not record_a.high_bidder then
                 return sort_util.GT
