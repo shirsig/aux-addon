@@ -139,6 +139,15 @@ M.filters = {
             end
         end
     },
+	
+    ['buyout-bid-profit'] = {
+	 input_type = 'money',
+	 	validator = function(amount)
+	 			return function(auction_record)
+	 		return auction_record.buyout_price > 0 and auction_record.buyout_price - auction_record.bid_price >= amount
+	 	end
+	 end
+     },
 
     ['bid-disenchant-profit'] = {
         input_type = 'money',
