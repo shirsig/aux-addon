@@ -16,7 +16,7 @@ function M.container_item(bag, slot)
 	local link = GetContainerItemLink(bag, slot)
     if link then
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
-        local item_info = T.temp-item(item_id, suffix_id, unique_id, enchant_id)
+        local item_info = item(item_id, suffix_id, unique_id, enchant_id)
 
         local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
         local tooltip, tooltip_money = tooltip('bag', bag, slot)
@@ -95,8 +95,8 @@ function M.auction(index, query_type)
 
             'link', link,
             'item_key', item_id .. ':' .. suffix_id,
-            'search_signature', aux.join(T.temp-T.list(item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, sale_status == 1 and 0 or duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')), ':'),
-            'sniping_signature', aux.join(T.temp-T.list(item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')), ':'),
+            'search_signature', aux.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, sale_status == 1 and 0 or duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+            'sniping_signature', aux.join({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
 
             'name', name,
             'texture', texture,
@@ -136,7 +136,7 @@ function M.bid_update(auction_record)
     auction_record.unit_blizzard_bid = auction_record.blizzard_bid / auction_record.aux_quantity
     auction_record.unit_bid_price = auction_record.bid_price / auction_record.aux_quantity
     auction_record.high_bidder = 1
-    auction_record.search_signature = aux.join(T.temp-T.list(auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.sale_status == 1 and 0 or auction_record.duration, 1, aux.account_data.ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')), ':')
+    auction_record.search_signature = aux.join({auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.sale_status == 1 and 0 or auction_record.duration, 1, aux.account_data.ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
 end
 
 function M.set_tooltip(itemstring, owner, anchor)
@@ -197,9 +197,9 @@ function M.tooltip(setter, arg1, arg2)
     elseif setter == 'link' then
 	    AuxTooltip:SetHyperlink(arg1)
     end
-    local tooltip = T.acquire()
+    local tooltip = {}
     for i = 1, AuxTooltip:NumLines() do
-        for side in T.set('Left', 'Right') do
+        for side in aux.iter('Left', 'Right') do
             local text = _G['AuxTooltipText' .. side .. i]:GetText()
             if text then
                 tinsert(tooltip, text)
@@ -310,7 +310,7 @@ end
 
 function M.subcategory_index(category_index, subcategory)
     if category_index > 0 then
-        for i, v in ipairs(AuctionCategories[category_index].subCategories or T.empty) do
+        for i, v in ipairs(AuctionCategories[category_index].subCategories or empty) do
             if strupper(v.name) == strupper(subcategory) then
                 return i, v.name
             end
@@ -320,7 +320,7 @@ end
 
 function M.subsubcategory_index(category_index, subcategory_index, subsubcategory)
     if category_index > 0 and subcategory_index > 0 then
-        for i, v in ipairs(AuctionCategories[category_index].subCategories[subcategory_index].subCategories or T.empty) do
+        for i, v in ipairs(AuctionCategories[category_index].subCategories[subcategory_index].subCategories or empty) do
             if strupper(v.name) == strupper(subsubcategory) then
                 return i, v.name
             end
@@ -346,7 +346,7 @@ function M.inventory()
 		else
 			slot = slot + 1
 		end
-		if bag <= 4 then return T.list(bag, slot), bag_type(bag) end
+		if bag <= 4 then return {bag, slot}, bag_type(bag) end
 	end
 end
 

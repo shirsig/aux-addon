@@ -33,7 +33,7 @@ function M.scan_auctions()
     status_bar:update_status(0, 0)
     status_bar:set_text('Scanning auctions...')
 
-    T.wipe(auction_records)
+    aux.wipe(auction_records)
     update_listing()
     scan.start{
         type = 'bidder',

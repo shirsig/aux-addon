@@ -1,11 +1,12 @@
 select(2, ...) 'aux.core.disenchant'
 
 local T = require 'T'
+local aux = require 'aux'
 local history = require 'aux.core.history'
 
 local UNCOMMON, RARE, EPIC = 2, 3, 4
 
-local ARMOR = T.set(
+local ARMOR = aux.set(
 	'INVTYPE_HEAD',
 	'INVTYPE_NECK',
 	'INVTYPE_SHOULDER',
@@ -23,7 +24,7 @@ local ARMOR = T.set(
 	'INVTYPE_HOLDABLE'
 )
 
-local WEAPON = T.set(
+local WEAPON = aux.set(
 	'INVTYPE_2HWEAPON',
 	'INVTYPE_WEAPONMAINHAND',
 	'INVTYPE_WEAPON',
@@ -48,7 +49,7 @@ end
 
 function M.distribution(slot, quality, level)
     if not ARMOR[slot] and not WEAPON[slot] or level == 0 then
-        return T.acquire()
+        return {}
     end
 
     local function p(probability_armor, probability_weapon)
@@ -61,103 +62,103 @@ function M.distribution(slot, quality, level)
 
     if quality == UNCOMMON then
         if level <= 15 then
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 10940, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.8, .2)),
-	            T.temp-T.map('item_id', 10938, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .8))
-            )
+            return {
+	            T.map('item_id', 10940, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.8, .2)),
+	            T.map('item_id', 10938, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .8)),
+            }
         elseif level <= 20 then
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 10940, 'min_quantity', 2, 'max_quantity', 3, 'probability', p(.75, .2)),
-	            T.temp-T.map('item_id', 10939, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            T.temp-T.map('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
-            )
+            return {
+	            T.map('item_id', 10940, 'min_quantity', 2, 'max_quantity', 3, 'probability', p(.75, .2)),
+	            T.map('item_id', 10939, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            T.map('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05),
+            }
         elseif level <= 25 then
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 10940, 'min_quantity', 4, 'max_quantity', 6, 'probability', p(.75, .15)),
-	            T.temp-T.map('item_id', 10998, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.15, .75)),
-	            T.temp-T.map('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', .10)
-            )
+            return {
+	            T.map('item_id', 10940, 'min_quantity', 4, 'max_quantity', 6, 'probability', p(.75, .15)),
+	            T.map('item_id', 10998, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.15, .75)),
+	            T.map('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', .10),
+            }
         elseif level <= 30 then
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 11083, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
-	            T.temp-T.map('item_id', 11082, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            T.temp-T.map('item_id', 11084, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
-			)
+            return {
+	            T.map('item_id', 11083, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
+	            T.map('item_id', 11082, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            T.map('item_id', 11084, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05),
+			}
         elseif level <= 35 then
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 11083, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .2)),
-	            T.temp-T.map('item_id', 11134, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            T.temp-T.map('item_id', 11138, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
-            )
+            return {
+	            T.map('item_id', 11083, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .2)),
+	            T.map('item_id', 11134, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            T.map('item_id', 11138, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05),
+            }
         elseif level <= 40 then
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 11137, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
-	            T.temp-T.map('item_id', 11135, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            T.temp-T.map('item_id', 11139, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
-            )
+            return {
+	            T.map('item_id', 11137, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
+	            T.map('item_id', 11135, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            T.map('item_id', 11139, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05),
+            }
         elseif level <= 45 then
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 11137, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .2)),
-	            T.temp-T.map('item_id', 11174, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            T.temp-T.map('item_id', 11177, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
-            )
+            return {
+	            T.map('item_id', 11137, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .2)),
+	            T.map('item_id', 11174, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            T.map('item_id', 11177, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05),
+            }
         elseif level <= 50 then
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 11176, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
-	            T.temp-T.map('item_id', 11175, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            T.temp-T.map('item_id', 11178, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05)
-            )
+            return {
+	            T.map('item_id', 11176, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .2)),
+	            T.map('item_id', 11175, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            T.map('item_id', 11178, 'min_quantity', 1, 'max_quantity', 1, 'probability', .05),
+            }
         elseif level <= 55 then
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 11176, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .22)),
-	            T.temp-T.map('item_id', 16202, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            T.temp-T.map('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
-            )
+            return {
+	            T.map('item_id', 11176, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .22)),
+	            T.map('item_id', 16202, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            T.map('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03)),
+            }
         elseif level <= 60 then
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 16204, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .22)),
-	            T.temp-T.map('item_id', 16203, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
-	            T.temp-T.map('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
-			)
+            return {
+	            T.map('item_id', 16204, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.75, .22)),
+	            T.map('item_id', 16203, 'min_quantity', 1, 'max_quantity', 2, 'probability', p(.2, .75)),
+	            T.map('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03)),
+			}
         else
-            return T.temp-T.list(
-	            T.temp-T.map('item_id', 16204, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .22)),
-	            T.temp-T.map('item_id', 16203, 'min_quantity', 2, 'max_quantity', 3, 'probability', p(.2, .75)),
-	            T.temp-T.map('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03))
-			)
+            return {
+	            T.map('item_id', 16204, 'min_quantity', 2, 'max_quantity', 5, 'probability', p(.75, .22)),
+	            T.map('item_id', 16203, 'min_quantity', 2, 'max_quantity', 3, 'probability', p(.2, .75)),
+	            T.map('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', p(.05, .03)),
+			}
         end
     elseif quality == RARE then
         if level <= 25 then
-            return T.temp-T.list(T.temp-T.map('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return {T.map('item_id', 10978, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1)}
         elseif level <= 30 then
-            return T.temp-T.list(T.temp-T.map('item_id', 11084, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return {T.map('item_id', 11084, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1)}
         elseif level <= 35 then
-            return T.temp-T.list(T.temp-T.map('item_id', 11138, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return {T.map('item_id', 11138, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1)}
         elseif level <= 40 then
-            return T.temp-T.list(T.temp-T.map('item_id', 11139, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return {T.map('item_id', 11139, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1)}
         elseif level <= 45 then
-            return T.temp-T.list(T.temp-T.map('item_id', 11177, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return {T.map('item_id', 11177, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1)}
         elseif level <= 50 then
-            return T.temp-T.list(T.temp-T.map('item_id', 11178, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return {T.map('item_id', 11178, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1)}
         elseif level <= 55 then
-            return T.temp-T.list(T.temp-T.map('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return {T.map('item_id', 14343, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1)}
         elseif level <= 60 then
-            return T.temp-T.list(T.temp-T.map('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), T.temp-T.map('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
+            return {T.map('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), T.map('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005)}
         else
-            return T.temp-T.list(T.temp-T.map('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), T.temp-T.map('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005))
+            return {T.map('item_id', 14344, 'min_quantity', 1, 'max_quantity', 1, 'probability', .995), T.map('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', .005)}
         end
     elseif quality == EPIC then
         if level <= 45 then
-            return T.temp-T.list(T.temp-T.map('item_id', 11177, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
+            return {T.map('item_id', 11177, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1)}
         elseif level <= 50 then
-            return T.temp-T.list(T.temp-T.map('item_id', 11178, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
+            return {T.map('item_id', 11178, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1)}
         elseif level <= 55 then
-            return T.temp-T.list(T.temp-T.map('item_id', 14343, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1))
+            return {T.map('item_id', 14343, 'min_quantity', 2, 'max_quantity', 4, 'probability', 1)}
         elseif level <= 60 then
-            return T.temp-T.list(T.temp-T.map('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1))
+            return {T.map('item_id', 20725, 'min_quantity', 1, 'max_quantity', 1, 'probability', 1)}
         else
-            return T.temp-T.list(T.temp-T.map('item_id', 20725, 'min_quantity', 1, 'max_quantity', 2, 'probability', 1))
+            return {T.map('item_id', 20725, 'min_quantity', 1, 'max_quantity', 2, 'probability', 1)}
         end
     end
-    return T.acquire()
+    return {}
 end

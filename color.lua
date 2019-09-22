@@ -3,7 +3,7 @@ select(2, ...) 'aux'
 local T = require 'T'
 
 function C(r, g, b, a)
-	local mt = T.map('__metatable', false, '__newindex', pass, 'color', T.list(r, g, b, a))
+	local mt = T.map('__metatable', false, '__newindex', pass, 'color', {r, g, b, a})
 	function mt:__call(text)
 		local r, g, b, a = unpack(mt.color)
 		if text then
@@ -16,7 +16,7 @@ function C(r, g, b, a)
 		local r, g, b, a = unpack(mt.color)
 		return format('|c%02X%02X%02X%02X', a, r, g, b) .. text
 	end
-	return setmetatable(T.acquire(), mt)
+	return setmetatable({}, mt)
 end
 
 M.color = immutable-{

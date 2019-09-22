@@ -63,7 +63,7 @@ local methods = {
 		    self.headHeight = 0
 	    end
 
-	    if #(self.rowData or T.empty) > self.numRows then
+	    if #(self.rowData or empty) > self.numRows then
 		    self.contentFrame:SetPoint('BOTTOMRIGHT', -15, 0)
 	    else
 		    self.contentFrame:SetPoint('BOTTOMRIGHT', 0, 0)
@@ -149,11 +149,6 @@ local methods = {
     end,
 
     SetData = function(self, rowData)
-	    for _, row in pairs(self.rowData or T.empty) do
-		    for _, col in pairs(row.cols) do T.release(col) end
-		    T.release(row.cols)
-		    T.release(row)
-	    end
         self.rowData = rowData
         self.updateSort = true
         self:Update()
@@ -234,7 +229,7 @@ local methods = {
         row.highlight = highlight
         row.st = self
 
-        row.cols = T.acquire()
+        row.cols = {}
         self.rows[rowNum] = row
         for _ = 1, #self.colInfo do
             self:AddCell(rowNum)
@@ -291,9 +286,9 @@ function M.new(parent)
         st[name] = func
     end
     
-    st.headCols = T.acquire()
-    st.rows = T.acquire()
-    st.handlers = T.acquire()
+    st.headCols = {}
+    st.rows = {}
+    st.handlers = {}
     st.colInfo = DEFAULT_COL_INFO
 
     return st

@@ -14,7 +14,7 @@ function valid_level(str)
 	return level and aux.bounded(1, 60, level)
 end
 
-blizzard_query = setmetatable(T.acquire(), {
+blizzard_query = setmetatable({}, {
 	__index = function(_, key)
 		if key == 'name' then
 			return name_input:GetText()
@@ -84,24 +84,24 @@ function update_form()
 
 	if blizzard_query.exact then
 		usable_checkbox:Disable()
-		for key in pairs(T.temp-T.set('min_level', 'max_level')) do
+		for key in aux.iter('min_level', 'max_level') do
 			_M[key .. '_input']:EnableMouse(false)
 			_M[key .. '_input']:ClearFocus()
 		end
-		for key in pairs(T.temp-T.set('class', 'subclass', 'slot', 'quality')) do
+		for key in aux.iter('class', 'subclass', 'slot', 'quality') do
 			_M[key .. '_dropdown'].button:Disable()
 		end
 		CloseDropDownMenus()
 	else
 		usable_checkbox:Enable()
-		for key in pairs(T.temp-T.set('min_level', 'max_level')) do
+		for key in aux.iter('min_level', 'max_level') do
 			_M[key .. '_input']:EnableMouse(true)
 		end
 		class_dropdown.button:Enable()
 		quality_dropdown.button:Enable()
 	end
 
-	if aux.any(T.temp-T.list('min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'), function(key) return blizzard_query[key] end) then
+	if aux.any({'min_level', 'max_level', 'usable', 'class', 'subclass', 'slot', 'quality'}, function(key) return blizzard_query[key] end) then
 		exact_checkbox:Disable()
 	else
 		exact_checkbox:Enable()
@@ -179,7 +179,7 @@ function clear_form()
 	UIDropDownMenu_ClearAll(slot_dropdown)
 	UIDropDownMenu_ClearAll(quality_dropdown)
 	filter_parameter_input:ClearFocus()
-	T.wipe(post_filter)
+    aux.wipe(post_filter)
 	post_filter_index = 0
 	update_filter_display()
 end
@@ -198,7 +198,7 @@ end
 
 function formatted_post_filter(components)
 	local no_line_break
-	local stack = T.temp-T.acquire()
+	local stack = {}
 	local str = ''
 
 	for i, component in ipairs(components) do
@@ -324,7 +324,7 @@ function set_filter_display_offset(x_offset, y_offset)
 end
 
 function initialize_filter_dropdown()
-	for _, filter in ipairs(T.temp-T.list('and', 'or', 'not', 'price', 'profit', 'vendor-profit', 'disenchant-profit', 'percent', 'bid-price', 'bid-profit', 'bid-vendor-profit', 'bid-disenchant-profit', 'bid-percent', 'item', 'tooltip', 'min-level', 'max-level', 'rarity', 'left', 'utilizable', 'seller')) do
+	for _, filter in ipairs{'and', 'or', 'not', 'price', 'profit', 'vendor-profit', 'disenchant-profit', 'percent', 'bid-price', 'bid-profit', 'bid-vendor-profit', 'bid-disenchant-profit', 'bid-percent', 'item', 'tooltip', 'min-level', 'max-level', 'rarity', 'left', 'utilizable', 'seller'} do
 		UIDropDownMenu_AddButton(T.map(
 			'text', filter,
 			'value', filter,
@@ -371,7 +371,7 @@ function initialize_subclass_dropdown()
 	end
 	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
     if AuctionCategories and (blizzard_query.class or 0) > 0 then
-        for i, subcategory in ipairs(AuctionCategories[blizzard_query.class].subCategories or T.empty) do
+        for i, subcategory in ipairs(AuctionCategories[blizzard_query.class].subCategories or empty) do
             UIDropDownMenu_AddButton(T.map('text', subcategory.name, 'value', i, 'func', on_click))
         end
     end
@@ -384,7 +384,7 @@ function initialize_slot_dropdown()
 	end
 	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
     if AuctionCategories and (blizzard_query.class or 0) > 0 and (blizzard_query.subclass or 0) > 0 then -- TODO retail is it still possible to query for slot without subclass?
-        for i, subsubcategory in ipairs(AuctionCategories[blizzard_query.class].subCategories[blizzard_query.subclass].subCategories or T.empty) do
+        for i, subsubcategory in ipairs(AuctionCategories[blizzard_query.class].subCategories[blizzard_query.subclass].subCategories or empty) do
             UIDropDownMenu_AddButton(T.map('text', subsubcategory.name, 'value', i, 'func', on_click))
         end
     end

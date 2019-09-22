@@ -98,12 +98,12 @@ function merchant_buy_scan()
 					unit_price = min(buy_info.unit_price, new_unit_price)
 				end
 
-                aux.account_data.merchant_buy[item_id] = persistence.write(merchant_buy_schema, T.temp-T.map(
+                aux.account_data.merchant_buy[item_id] = persistence.write(merchant_buy_schema, T.map(
 					'unit_price', unit_price,
 					'limited', buy_info.limited and new_limited
 				))
 			else
-				aux.account_data.merchant_buy[item_id] = persistence.write(merchant_buy_schema, T.temp-T.map(
+				aux.account_data.merchant_buy[item_id] = persistence.write(merchant_buy_schema, T.map(
 					'unit_price', new_unit_price,
 					'limited', new_limited
 				))
@@ -122,7 +122,7 @@ function process_item(item_id)
 
     if name then
         aux.account_data.item_ids[strlower(name)] = item_id
-        aux.account_data.items[item_id] = persistence.write(items_schema, T.temp-T.map(
+        aux.account_data.items[item_id] = persistence.write(items_schema, T.map(
             'name', name,
             'link', link,
             'quality', quality,

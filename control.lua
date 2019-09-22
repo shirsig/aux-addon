@@ -4,7 +4,7 @@ local T = require 'T'
 
 local event_frame = CreateFrame'Frame'
 
-local listeners, threads = T.acquire(), T.acquire()
+local listeners, threads = {}, {}
 
 local thread_id
 function M.thread_id() return thread_id end
@@ -90,7 +90,6 @@ end
 do
 	local mt = {
 		__call = function(self)
-			T.temp(self)
 			return self.f(unpack(self))
 		end,
 	}

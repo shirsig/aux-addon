@@ -10,24 +10,24 @@ function aux.handle.LOAD()
 end
 
 function update_search_listings()
-	local favorite_search_rows = T.acquire()
+	local favorite_search_rows = {}
 	for i = 1, #favorite_searches do
 		local search = favorite_searches[i]
 		local name = strsub(search.prettified, 1, 250)
 		tinsert(favorite_search_rows, T.map(
-			'cols', T.list(T.map('value', search.alert and aux.color.red'X' or ''), T.map('value', name)),
+			'cols', {T.map('value', search.alert and aux.color.red'X' or ''), T.map('value', name)},
 			'search', search,
 			'index', i
 		))
 	end
 	favorite_searches_listing:SetData(favorite_search_rows)
 
-	local recent_search_rows = T.acquire()
+	local recent_search_rows = {}
 	for i = 1, #recent_searches do
 		local search = recent_searches[i]
 		local name = strsub(search.prettified, 1, 250)
 		tinsert(recent_search_rows, T.map(
-			'cols', T.list(T.map('value', name)),
+			'cols', {T.map('value', name)},
 			'search', search,
 			'index', i
 		))
@@ -90,7 +90,7 @@ handlers = {
 }
 
 function get_alert_validator()
-	local validators = T.acquire()
+	local validators = {}
 	for _, search in pairs(favorite_searches) do
 		if search.alert then
 			local queries, error = filter_util.queries(search.filter_string)

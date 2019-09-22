@@ -116,33 +116,33 @@ function update_inventory_listing()
 end
 
 function update_auction_listing(listing, records, reference)
-	local rows = T.acquire()
+	local rows = {}
 	if selected_item then
 		local historical_value = history.value(selected_item.key)
 		local stack_size = stack_size_slider:GetValue()
-		for _, record in pairs(records[selected_item.key] or T.empty) do
+		for _, record in pairs(records[selected_item.key] or empty) do
 			local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and aux.color.red
 			local price = record.unit_price * (listing == 'bid' and record.stack_size or 1)
 			tinsert(rows, T.map(
-				'cols', T.list(
+				'cols', {
 				T.map('value', record.own and aux.color.green(record.count) or record.count),
 				T.map('value', al.time_left(record.duration)),
 				T.map('value', record.stack_size == stack_size and aux.color.green(record.stack_size) or record.stack_size),
 				T.map('value', money.to_string(price, true, nil, price_color)),
 				T.map('value', historical_value and gui.percentage_historical(aux.round(price / historical_value * 100)) or '---')
-			),
+            },
 				'record', record
 			))
 		end
 		if historical_value then
 			tinsert(rows, T.map(
-				'cols', T.list(
+				'cols', {
 				T.map('value', '---'),
 				T.map('value', '---'),
 				T.map('value', '---'),
 				T.map('value', money.to_string(historical_value * (listing == 'bid' and stack_size_slider:GetValue() or 1), true, nil, aux.color.green)),
 				T.map('value', historical_value and gui.percentage_historical(100) or '---')
-			),
+            },
 				'record', T.map('historical_value', true, 'stack_size', stack_size, 'unit_price', historical_value, 'own', true)
 			))
 		end
@@ -347,8 +347,7 @@ end
 
 function unit_vendor_price(item_key)
     for slot in info.inventory() do
-	    T.temp(slot)
-        local item_info = T.temp-info.container_item(unpack(slot))
+        local item_info = info.container_item(unpack(slot))
         if item_info and item_info.item_key == item_key then
             if info.auctionable(item_info.tooltip, nil, true) and not item_info.lootable then
                 ClearCursor()
@@ -356,7 +355,7 @@ function unit_vendor_price(item_key)
                 ClearCursor()
                 PickupContainerItem(unpack(slot))
                 ClickAuctionSellItemButton()
-                local auction_sell_item = T.temp-info.auction_sell_item()
+                local auction_sell_item = info.auction_sell_item()
                 ClearCursor()
                 ClickAuctionSellItemButton()
                 ClearCursor()
@@ -418,15 +417,14 @@ function update_item(item)
 end
 
 function update_inventory_records()
-    local auctionable_map = T.temp-T.acquire()
+    local auctionable_map = {}
     for slot in info.inventory() do
-	    T.temp(slot)
-	    local item_info = T.temp-info.container_item(unpack(slot))
+	    local item_info = info.container_item(unpack(slot))
         if item_info then
             local charge_class = item_info.charges or 0
             if info.auctionable(item_info.tooltip, nil, true) and not item_info.lootable then
                 if not auctionable_map[item_info.item_key] then
-                    local availability = T.acquire()
+                    local availability = {}
                     for i = 0, 10 do
                         availability[i] = 0
                     end
@@ -452,7 +450,6 @@ function update_inventory_records()
             end
         end
     end
-    T.release(inventory_records)
     inventory_records = aux.values(auctionable_map)
     refresh = true
 end
@@ -470,7 +467,7 @@ function refresh_entries()
 		scan_id = scan.start{
             type = 'list',
             ignore_owner = true,
-			queries = T.list(query),
+			queries = {query},
 			on_page_loaded = function(page, total_pages)
                 status_bar:update_status(page / total_pages, 0) -- TODO
                 status_bar:set_text(format('Scanning Page %d / %d', page, total_pages))
@@ -493,8 +490,8 @@ function refresh_entries()
                 status_bar:set_text('Scan aborted')
 			end,
 			on_complete = function()
-				bid_records[item_key] = bid_records[item_key] or T.acquire()
-				buyout_records[item_key] = buyout_records[item_key] or T.acquire()
+				bid_records[item_key] = bid_records[item_key] or {}
+				buyout_records[item_key] = buyout_records[item_key] or {}
                 refresh = true
                 status_bar:update_status(1, 1)
                 status_bar:set_text('Scan complete')
@@ -504,7 +501,7 @@ function refresh_entries()
 end
 
 function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
-    bid_records[key] = bid_records[key] or T.acquire()
+    bid_records[key] = bid_records[key] or {}
     do
 	    local entry
 	    for _, record in pairs(bid_records[key]) do
@@ -518,7 +515,7 @@ function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price,
 	    end
 	    entry.count = entry.count + 1
     end
-    buyout_records[key] = buyout_records[key] or T.acquire()
+    buyout_records[key] = buyout_records[key] or {}
     if unit_buyout_price == 0 then return end
     do
 	    local entry

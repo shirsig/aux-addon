@@ -8,7 +8,7 @@ function M.print(...)
 end
 
 local event_frame = CreateFrame'Frame'
-for event in pairs(T.temp-T.set('ADDON_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED')) do
+for _, event in pairs{'ADDON_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUCTION_HOUSE_CLOSED'} do
 	event_frame:RegisterEvent(event)
 end
 
@@ -117,7 +117,7 @@ do
 	end
 end
 
-M.orig = setmetatable({[_G]=T.acquire()}, {__index=function(self, key) return self[_G][key] end})
+M.orig = setmetatable({[_G]={}}, {__index=function(self, key) return self[_G][key] end})
 function M.hook(...)
 	local name, object, handler
 	if select('#', ...) == 3 then
@@ -126,7 +126,7 @@ function M.hook(...)
 		object, name, handler = _G, ...
 	end
 	handler = handler or getfenv(3)[name]
-	orig[object] = orig[object] or T.acquire()
+	orig[object] = orig[object] or {}
 	assert(not orig[object][name], '"' .. name .. '" is already hooked into.')
 	orig[object][name], object[name] = object[name], handler
 	return hook

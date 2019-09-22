@@ -445,14 +445,14 @@ do
 	input:SetPoint('CENTER', filter_dropdown, 'CENTER', 0, 0)
 	input:SetWidth(150)
 	input:SetScript('OnTabPressed', function() filter_parameter_input:SetFocus() end)
-	input.complete = completion.complete(function() return T.temp-T.list('and', 'or', 'not', unpack(aux.keys(filter_util.filters))) end)
+	input.complete = completion.complete(function() return {'and', 'or', 'not', unpack(aux.keys(filter_util.filters))} end)
 	input.char = function(self) self:complete() end
 	input.change = function(self)
 		local text = self:GetText()
 		if filter_util.filters[text] and filter_util.filters[text].input_type ~= '' then
 			local _, _, suggestions = filter_util.parse_filter_string(text .. '/')
 			filter_parameter_input:SetNumeric(filter_util.filters[text].input_type == 'number')
-			filter_parameter_input.complete = completion.complete(function() return suggestions or T.empty end)
+			filter_parameter_input.complete = completion.complete(function() return suggestions or empty end)
 			filter_parameter_input:Show()
 		else
 			filter_parameter_input:Hide()
@@ -562,7 +562,7 @@ favorite_searches_listing:SetColInfo{{name='Alert', width=.07, align='CENTER'}, 
 recent_searches_listing = listing.new(frame.saved.recent)
 recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}
 
-for listing in pairs(T.temp-T.set(favorite_searches_listing, recent_searches_listing)) do
+for listing in aux.iter(favorite_searches_listing, recent_searches_listing) do
 	for k, v in pairs(handlers) do
 		listing:SetHandler(k, v)
 	end

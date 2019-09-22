@@ -72,7 +72,7 @@ function M.to_string(money, pad, trim, color, no_color)
 
 	local text
 	if trim then
-		local parts = T.temp-T.acquire()
+		local parts = {}
 		if gold > 0 then
 			tinsert(parts, format_number(gold, false, color) .. gold_text)
 		end

@@ -7,7 +7,7 @@ local scan = require 'aux.core.scan'
 
 local tab = aux.tab 'Auctions'
 
-auction_records = T.acquire()
+auction_records = {}
 
 function aux.handle.LOAD()
     aux.event_listener('AUCTION_OWNED_LIST_UPDATE', function()
@@ -33,7 +33,7 @@ function M.scan_auctions()
     status_bar:update_status(0, 0)
     status_bar:set_text('Scanning auctions...')
 
-    T.wipe(auction_records)
+    aux.wipe(auction_records)
     update_listing()
     scan.start{
         type = 'owner',

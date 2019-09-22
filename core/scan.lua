@@ -30,7 +30,7 @@ do
 	end
 
 	function M.abort(scan_id)
-		local aborted = T.acquire()
+		local aborted = {}
 		for type, state in pairs(scan_states) do
 			if not scan_id or state.id == scan_id then
 				aux.coro_kill(state.id)
@@ -130,7 +130,7 @@ function submit_query()
         SortAuctionItems(get_state().params.type, 'duration')
 
         get_state().last_list_query = GetTime()
-        local blizzard_query = get_query().blizzard_query or T.acquire()
+        local blizzard_query = get_query().blizzard_query or {}
         local category_filter
         if blizzard_query.class and blizzard_query.subclass and blizzard_query.slot then
             category_filter = AuctionCategories[blizzard_query.class].subCategories[blizzard_query.subclass].subCategories[blizzard_query.slot].filters

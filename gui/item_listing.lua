@@ -9,7 +9,7 @@ local ROW_HEIGHT = 39
 
 function M:render()
 
-	if #(self.item_records or T.empty) > #self.rows then
+	if #(self.item_records or empty) > #self.rows then
 		self.content_frame:SetPoint('BOTTOMRIGHT', -15, 0)
 	else
 		self.content_frame:SetPoint('BOTTOMRIGHT', 0, 0)
@@ -70,7 +70,7 @@ function M.new(parent, on_click, selected)
 	_G[scroll_bar:GetName() .. 'ScrollUpButton']:Hide()
 	_G[scroll_bar:GetName() .. 'ScrollDownButton']:Hide()
 
-	local rows = T.acquire()
+	local rows = {}
 	local row_index = 1
 	local max_height = content_frame:GetHeight()
 	local total_height = 0

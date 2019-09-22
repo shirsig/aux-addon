@@ -26,7 +26,7 @@ do
 end
 
 function new_record()
-	return T.temp-T.map('next_push', get_next_push(), 'data_points', T.acquire())
+	return T.map('next_push', get_next_push(), 'data_points', {})
 end
 
 function read_record(item_key)
@@ -41,7 +41,6 @@ end
 function write_record(item_key, record)
 	data[item_key] = persistence.write(history_schema, record)
 	if value_cache[item_key] then
-		T.release(value_cache[item_key])
 		value_cache[item_key] = nil
 	end
 end
@@ -64,7 +63,7 @@ function M.value(item_key)
 		local item_record, value
 		item_record = read_record(item_key)
 		if #item_record.data_points > 0 then
-			local total_weight, weighted_values = 0, T.temp-T.acquire()
+			local total_weight, weighted_values = 0, {}
 			for _, data_point in pairs(item_record.data_points) do
 				local weight = .99 ^ aux.round((item_record.data_points[1].time - data_point.time) / (60 * 60 * 24))
 				total_weight = total_weight + weight
@@ -101,7 +100,6 @@ function push_record(item_record)
 	if item_record.daily_min_buyout then
 		tinsert(item_record.data_points, 1, T.map('value', item_record.daily_min_buyout, 'time', item_record.next_push))
 		while #item_record.data_points > 11 do
-			T.release(item_record.data_points[#item_record.data_points])
 			tremove(item_record.data_points)
 		end
 	end

@@ -11,22 +11,22 @@ function aux.handle.CLOSE()
 end
 
 function stack_size(slot)
-    local container_item_info = T.temp-info.container_item(unpack(slot))
+    local container_item_info = info.container_item(unpack(slot))
     return container_item_info and container_item_info.count or 0
 end
 
 function charges(slot)
-    local container_item_info = T.temp-info.container_item(unpack(slot))
+    local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.charges
 end
 
 function max_stack(slot)
-	local container_item_info = T.temp-info.container_item(unpack(slot))
+	local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.max_stack
 end
 
 function locked(slot)
-	local container_item_info = T.temp-info.container_item(unpack(slot))
+	local container_item_info = info.container_item(unpack(slot))
 	return container_item_info and container_item_info.locked
 end
 
@@ -39,7 +39,7 @@ function find_item_slot(partial)
 end
 
 function matching_item(slot, partial)
-	local item_info = T.temp-info.container_item(unpack(slot))
+	local item_info = info.container_item(unpack(slot))
 	return item_info and item_info.item_key == state.item_key and info.auctionable(item_info.tooltip, nil, true) and (not partial or item_info.count < item_info.max_stack)
 end
 

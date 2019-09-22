@@ -1,8 +1,8 @@
 local _, addon_table = ...
 
-local setfenv, setmetatable = setfenv, setmetatable
+local _G, setfenv, setmetatable = _G, setfenv, setmetatable
 local environments, interfaces = {}, {}
-local require, create_module, pass, environment_mt
+local require, create_module, pass, empty, environment_mt
 
 local function module(_, name)
     local defined = not not environments[name]
@@ -13,11 +13,13 @@ local function module(_, name)
     return defined
 end
 
-setmetatable(addon_table, {__call = module})
+setmetatable(addon_table, { __call = module })
 
 function pass() end
 
-environment_mt = {__index = _G}
+empty = setmetatable({}, { __metatable=false, __newindex=pass })
+
+environment_mt = { __index = _G }
 
 function require(name)
     if not interfaces[name] then
@@ -27,7 +29,7 @@ function require(name)
 end
 
 function create_module(name)
-	local environment = setmetatable({pass = pass, require = require}, environment_mt)
+	local environment = setmetatable({ pass = pass, empty = empty, require = require }, environment_mt)
 	local exports = {}
 	environment.M = setmetatable({}, {
 		__metatable = false,
@@ -37,7 +39,7 @@ function create_module(name)
 	})
 	environment._M = environment
 	environments[name] = environment
-	interfaces[name] = setmetatable({}, {__metatable = false, __index = exports, __newindex = pass})
+	interfaces[name] = setmetatable({}, { __metatable = false, __index = exports, __newindex = pass })
 end
 
 -- for testing

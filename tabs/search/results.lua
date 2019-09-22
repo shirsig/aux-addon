@@ -77,7 +77,7 @@ do
 		while #searches > search_index do
 			tremove(searches)
 		end
-		local search = T.map('records', T.acquire(), 'filter_string', filter_string, 'first_page', first_page, 'last_page', last_page, 'real_time', real_time)
+		local search = T.map('records', {}, 'filter_string', filter_string, 'first_page', first_page, 'last_page', last_page, 'real_time', real_time)
 		tinsert(searches, search)
 		if #searches > 5 then
 			tremove(searches, 1)
@@ -152,7 +152,7 @@ function start_real_time_scan(query, search, continuation)
 		ignore_page = not tonumber(continuation)
 	end
 
-	local new_records = T.acquire()
+	local new_records = {}
 	search_scan_id = scan.start{
 		type = 'list',
 		queries = {query},
@@ -167,14 +167,13 @@ function start_real_time_scan(query, search, continuation)
 			tinsert(new_records, auction_record)
 		end,
 		on_complete = function()
-			local map = T.temp-T.acquire()
+			local map = {}
 			for _, record in pairs(search.records) do
 				map[record.sniping_signature] = record
 			end
 			for _, record in pairs(new_records) do
 				map[record.sniping_signature] = record
 			end
-			T.release(new_records)
 			new_records = aux.values(map)
 
 			if #new_records > 2000 then
@@ -328,7 +327,7 @@ function M.execute(_, resume, real_time)
 			new_recent_search(filter_string, aux.join(aux.map(aux.copy(queries), function(filter) return filter.prettified end), ';'))
 		else
 			local search = current_search()
-			search.records = T.acquire()
+			search.records = {}
 			search.table:Reset()
 			search.table:SetDatabase(search.records)
 		end

@@ -7,13 +7,13 @@ local filter_util = require 'aux.util.filter'
 local scan = require 'aux.core.scan'
 
 function M.test(record, index)
-	local auction_record = T.temp-info.auction(index, record.query_type)
+	local auction_record = info.auction(index, record.query_type)
 	return auction_record and auction_record.search_signature == record.search_signature
 end
 
 function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
-    local queries = T.list(T.acquire())
+    local queries = {{}}
 
     if auction_record.blizzard_query then
         local blizzard_query1 = aux.copy(auction_record.blizzard_query)
