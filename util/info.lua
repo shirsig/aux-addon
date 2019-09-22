@@ -21,7 +21,9 @@ function M.container_item(bag, slot)
         local item_info = item(item_id, suffix_id, unique_id, enchant_id)
 
         local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- TODO quality not working?
+        local durability, max_durability = GetContainerItemDurability(bag, slot)
         local tooltip, tooltip_money = tooltip('bag', bag, slot)
+        local auctionable = auctionable(tooltip) and durability == max_durability and not lootable
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
         local aux_quantity = charges or count
@@ -47,7 +49,7 @@ function M.container_item(bag, slot)
             count = count,
             locked = locked,
             readable = readable,
-            lootable = lootable,
+            auctionable = auctionable,
 
             tooltip = tooltip,
     	    tooltip_money = tooltip_money,
@@ -176,15 +178,13 @@ function M.display_name(item_id, no_brackets, no_color)
     end
 end
 
-function M.auctionable(tooltip, quality, strict)
+function M.auctionable(tooltip, quality)
     local status = tooltip[2]
-    local durability, max_durability = durability(tooltip)
     return (not quality or quality < 6)
             and status ~= ITEM_BIND_ON_PICKUP
             and status ~= ITEM_BIND_QUEST
             and status ~= ITEM_SOULBOUND
             and (not tooltip_match(ITEM_CONJURED, tooltip) or tooltip_find(ITEM_MIN_LEVEL, tooltip) > 1)
-            and not (strict and durability and durability < max_durability)
 end
 
 function M.tooltip(setter, arg1, arg2)
@@ -255,19 +255,6 @@ do
 	}
 	function M.max_item_charges(item_id)
 	    return data[item_id]
-	end
-end
-
-do
-	local pattern = '^' .. gsub(gsub(DURABILITY_TEMPLATE, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)') .. '$'
-	function M.durability(tooltip)
-	    for _, entry in pairs(tooltip) do
-	        local _, _, durability_string, max_durability_string = strfind(entry or '', pattern)
-	        local durability, max_durability = tonumber(durability_string), tonumber(max_durability_string)
-	        if durability then
-	            return durability, max_durability
-	        end
-	    end
 	end
 end
 

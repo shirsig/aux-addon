@@ -347,20 +347,18 @@ end
 function unit_vendor_price(item_key)
     for slot in info.inventory() do
         local item_info = info.container_item(unpack(slot))
-        if item_info and item_info.item_key == item_key then
-            if info.auctionable(item_info.tooltip, nil, true) and not item_info.lootable then
-                ClearCursor()
-                ClickAuctionSellItemButton()
-                ClearCursor()
-                PickupContainerItem(unpack(slot))
-                ClickAuctionSellItemButton()
-                local auction_sell_item = info.auction_sell_item()
-                ClearCursor()
-                ClickAuctionSellItemButton()
-                ClearCursor()
-                if auction_sell_item then
-                    return auction_sell_item.vendor_price / auction_sell_item.count
-                end
+        if item_info and item_info.item_key == item_key and item_info.auctionable then
+            ClearCursor()
+            ClickAuctionSellItemButton()
+            ClearCursor()
+            PickupContainerItem(unpack(slot))
+            ClickAuctionSellItemButton()
+            local auction_sell_item = info.auction_sell_item()
+            ClearCursor()
+            ClickAuctionSellItemButton()
+            ClearCursor()
+            if auction_sell_item then
+                return auction_sell_item.vendor_price / auction_sell_item.count
             end
         end
     end
@@ -419,33 +417,31 @@ function update_inventory_records()
     local auctionable_map = {}
     for slot in info.inventory() do
 	    local item_info = info.container_item(unpack(slot))
-        if item_info then
-            local charge_class = item_info.charges or 0
-            if info.auctionable(item_info.tooltip, nil, true) and not item_info.lootable then
-                if not auctionable_map[item_info.item_key] then
-                    local availability = {}
-                    for i = 0, 10 do
-                        availability[i] = 0
-                    end
-                    availability[charge_class] = item_info.count
-                    auctionable_map[item_info.item_key] = {
-	                    item_id = item_info.item_id,
-	                    suffix_id = item_info.suffix_id,
-	                    key = item_info.item_key,
-	                    link = item_info.link,
-	                    name = item_info.name,
-	                    texture = item_info.texture,
-	                    quality = item_info.quality,
-	                    aux_quantity = item_info.charges or item_info.count,
-	                    max_stack = item_info.max_stack,
-	                    max_charges = item_info.max_charges,
-	                    availability = availability,
-                    }
-                else
-                    local auctionable = auctionable_map[item_info.item_key]
-                    auctionable.availability[charge_class] = (auctionable.availability[charge_class] or 0) + item_info.count
-                    auctionable.aux_quantity = auctionable.aux_quantity + (item_info.charges or item_info.count)
+        local charge_class = item_info and item_info.charges or 0
+        if item_info and item_info.auctionable then
+            if not auctionable_map[item_info.item_key] then
+                local availability = {}
+                for i = 0, 10 do
+                    availability[i] = 0
                 end
+                availability[charge_class] = item_info.count
+                auctionable_map[item_info.item_key] = {
+                    item_id = item_info.item_id,
+                    suffix_id = item_info.suffix_id,
+                    key = item_info.item_key,
+                    link = item_info.link,
+                    name = item_info.name,
+                    texture = item_info.texture,
+                    quality = item_info.quality,
+                    aux_quantity = item_info.charges or item_info.count,
+                    max_stack = item_info.max_stack,
+                    max_charges = item_info.max_charges,
+                    availability = availability,
+                }
+            else
+                local auctionable = auctionable_map[item_info.item_key]
+                auctionable.availability[charge_class] = (auctionable.availability[charge_class] or 0) + item_info.count
+                auctionable.aux_quantity = auctionable.aux_quantity + (item_info.charges or item_info.count)
             end
         end
     end
