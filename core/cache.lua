@@ -163,7 +163,7 @@ do
         end
     end
 
-    function on_get_item_info_received(_, item_id, success)
+    function on_get_item_info_received(item_id, success)
         if success then
             process_item(item_id)
         elseif success == nil then

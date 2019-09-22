@@ -2,58 +2,30 @@ select(2, ...) 'aux'
 
 local event_frame = CreateFrame'Frame'
 
-local listeners, threads = {}, {}
-
-local thread_id
-function M.thread_id() return thread_id end
+local listeners = {}
 
 function handle.LOAD()
-	event_frame:SetScript('OnUpdate', UPDATE)
-	event_frame:SetScript('OnEvent', EVENT)
-end
+	event_frame:SetScript('OnUpdate', function()
+        for _, listener in pairs(listeners) do
+            local event, needed = listener.event, false
+            for _, listener in pairs(listeners) do
+                needed = needed or listener.event == event and not listener.killed
+            end
+            if not needed then
+                event_frame:UnregisterEvent(event)
+            end
+        end
+    end)
 
-function EVENT(_, event, ...)
-	for id, listener in pairs(listeners) do
-		if listener.killed then
-			listeners[id] = nil
-		elseif event == listener.event then
-			listener.cb(listener.kill, ...)
-		end
-	end
-end
-
-do
-	function UPDATE()
-		for _, listener in pairs(listeners) do
-			local event, needed = listener.event, false
-			for _, listener in pairs(listeners) do
-				needed = needed or listener.event == event and not listener.killed
-			end
-			if not needed then
-				event_frame:UnregisterEvent(event)
-			end
-		end
-
-		for id, thread in pairs(threads) do
-			if thread.killed or not thread.k then
-				threads[id] = nil
-			else
-				local k = thread.k
-				thread.k = nil
-				thread_id = id
-				k()
-				thread_id = nil
-			end
-		end
-	end
-end
-
-do
-	local id = 0
-	function unique_id()
-		id = id + 1
-		return id
-	end
+	event_frame:SetScript('OnEvent', function(_, event, ...)
+        for id, listener in pairs(listeners) do
+            if listener.killed then
+                listeners[id] = nil
+            elseif event == listener.event then
+                listener.cb(...)
+            end
+        end
+    end)
 end
 
 function M.kill_listener(listener_id)
@@ -63,56 +35,23 @@ function M.kill_listener(listener_id)
 	end
 end
 
-function M.kill_thread(thread_id)
-	local thread = threads[thread_id]
-	if thread then
-		thread.killed = true
-	end
-end
-
-function M.event_listener(event, cb)
-	local listener_id = unique_id()
-	listeners[listener_id] = {
-		event = event,
-		cb = cb,
-		kill = function(...) if select('#', ...) == 0 or select(1, ...) then kill_listener(listener_id) end end
-    }
-	event_frame:RegisterEvent(event)
-	return listener_id
-end
-
-function M.on_next_event(event, callback)
-	event_listener(event, function(kill) callback(); kill() end)
-end
-
 do
-	local mt = {
-		__call = function(self)
-			return self.f(unpack(self))
-		end,
-	}
-
-	 function M.thread(f, ...)
-		local thread_id = unique_id()
-		threads[thread_id] = { k = setmetatable({f = f, ...}, mt) }
-		return thread_id
-	end
-
-	function M.wait(f, ...)
-		threads[thread_id].k = setmetatable({f = f, ...}, mt)
-	end
-end
-
-function M.when(c, k, ...)
-	if c() then
-		return k(...)
-	else
-		return wait(when, c, k, ...)
-	end
+    local id = 0
+    function M.event_listener(event, cb)
+        local listener_id = id
+        id = id + 1
+        listeners[listener_id] = {
+            event = event,
+            cb = cb,
+        }
+        event_frame:RegisterEvent(event)
+        return listener_id
+    end
 end
 
 do
     local threads, kill_signals = {}, {}
+
     CreateFrame'Frame':SetScript('OnUpdate', function()
         for thread_id, thread in pairs(threads) do
             local status = coroutine.status(thread)

@@ -10,7 +10,7 @@ function aux.handle.LOAD()
     if not aux.account_data.crafting_cost then
         return
     end
-    aux.event_listener('ADDON_LOADED', function(_, addon_name)
+    aux.event_listener('ADDON_LOADED', function(addon_name)
         if addon_name == 'Blizzard_CraftUI' then
             craft_ui_loaded()
         elseif addon_name == 'Blizzard_TradeSkillUI' then
