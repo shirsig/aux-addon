@@ -77,7 +77,10 @@ function tab.CLOSE()
     ClearCursor()
     ClickAuctionSellItemButton()
     ClearCursor()
-    aux.kill_thread(post_thread_id)
+    if post_thread_id then
+        aux.coro_kill(post_thread_id)
+        post_thread_id = nil
+    end
     frame:Hide()
 end
 
@@ -232,33 +235,33 @@ function post_auction()
 
     PostAuction(start_price, buyout_price, duration, stack_size)
 
-    post_thread_id = aux.thread(
-        aux.when,
-        function()
-            return not GetContainerItemInfo(unpack(slot))
-        end,
-        function()
-            if not frame:IsShown() then
-                return
-            end
-            record_auction(item_key, stack_size, unit_start_price, unit_buyout_price, duration, UnitName'player')
-            update_inventory_records()
-            local same
-            for _, record in pairs(inventory_records) do
-                if record.key == item_key then
-                    same = record
-                    break
-                end
-            end
-            if same then
-                update_item(same)
-            else
-                selected_item = nil
-            end
-            post_thread_id = nil
-            refresh = true
+    aux.coro_thread(function()
+        post_thread_id = aux.coro_id()
+
+        while GetContainerItemInfo(unpack(slot)) do
+            aux.coro_wait()
         end
-    )
+
+        if not frame:IsShown() then
+            return
+        end
+        record_auction(item_key, stack_size, unit_start_price, unit_buyout_price, duration, UnitName'player')
+        update_inventory_records()
+        local same
+        for _, record in pairs(inventory_records) do
+            if record.key == item_key then
+                same = record
+                break
+            end
+        end
+        if same then
+            update_item(same)
+        else
+            selected_item = nil
+        end
+        post_thread_id = nil
+        refresh = true
+    end)
 end
 
 function validate_parameters()
