@@ -54,6 +54,9 @@ function SlashCmdList.AUX(command)
         aux.account_data.unused_item_ids = {}
         aux.account_data.auctionable_items = {}
         aux.print('Item cache cleared.')
+    elseif arguments[1] == 'clear' and arguments[2] == 'post' then
+        aux.faction_data.post = {}
+        aux.print('Post data cleared.')
     elseif arguments[1] == 'scan' then
         if not aux.frame:IsShown() then
             aux.print('Must be at the auction house to scan.')
@@ -84,5 +87,6 @@ function SlashCmdList.AUX(command)
 		aux.print('- tooltip disenchant value [' .. status(tooltip_settings.disenchant_value) .. ']')
 		aux.print('- tooltip disenchant distribution [' .. status(tooltip_settings.disenchant_distribution) .. ']')
 		aux.print('- clear item cache')
+        aux.print('- clear post')
     end
 end
