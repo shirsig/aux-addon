@@ -6,11 +6,19 @@ local scan = require 'aux.core.scan'
 
 local tab = aux.tab 'Auctions'
 
-auction_records = {}
-
 function aux.handle.LOAD()
     aux.event_listener('AUCTION_OWNED_LIST_UPDATE', function()
+        locked = {}
         refresh = true
+    end)
+    aux.coro_thread(function()
+        repeat
+            local timestamp = GetTime()
+            while GetTime() - timestamp < 1 do
+                aux.coro_wait()
+            end
+            refresh = true
+        until false
     end)
 end
 
@@ -23,38 +31,22 @@ function tab.CLOSE()
     frame:Hide()
 end
 
-function update_listing()
-    listing:SetDatabase(auction_records)
-end
-
 function M.scan_auctions()
-
-    status_bar:update_status(0, 0)
-    status_bar:set_text('Scanning auctions...')
-
-    aux.wipe(auction_records)
-    update_listing()
-    scan.start{
-        type = 'owner',
-        on_auction = function(auction_record)
-            tinsert(auction_records, auction_record)
-        end,
-        on_complete = function()
-            status_bar:update_status(1, 1)
-            status_bar:set_text('Scan complete')
-            update_listing()
-        end,
-        on_abort = function()
-            status_bar:update_status(1, 1)
-            status_bar:set_text('Scan aborted')
-        end,
-    }
+    local auctions = {}
+    for _, auction in scan.owner_auctions() do
+        tinsert(auctions, auction)
+    end
+    listing:SetDatabase(auctions)
 end
 
 function cancel_auction()
     local record = listing:GetSelection().record
-    if scan_util.test(record, record.index) then
-        aux.cancel_auction(record.index)
+    for i in scan.owner_auctions() do
+        if not locked[i] and scan_util.test('owner', record, i) then
+            CancelAuction(i)
+            locked[i] = true
+            return
+        end
     end
 end
 

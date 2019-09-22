@@ -48,7 +48,7 @@ do
     btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
     btn:SetText('Bid')
     btn:Disable()
-    btn:SetScript('OnClick', perform_bid)
+    btn:SetScript('OnClick', function() place_bid() end)
     bid_button = btn
 end
 do
@@ -56,6 +56,6 @@ do
     btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
     btn:SetText('Buyout')
     btn:Disable()
-    btn:SetScript('OnClick', perform_buyout)
+    btn:SetScript('OnClick', function() place_bid(true) end)
     buyout_button = btn
 end

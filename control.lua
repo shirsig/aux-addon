@@ -121,7 +121,6 @@ do
                 threads[thread_id] = nil
             elseif status == 'suspended' then
                 assert(coroutine.resume(thread))
-                return -- TODO
             end
         end
     end)
@@ -131,7 +130,6 @@ do
         local thread_id = tostring(thread)
         threads[thread_id] = thread
         assert(coroutine.resume(thread))
-        return thread_id
     end
 
     function M.coro_wait()

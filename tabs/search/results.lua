@@ -14,8 +14,6 @@ StaticPopupDialogs.AUX_SCAN_ALERT = {
     hideOnEscape = 1,
 }
 
-search_scan_id = 0
-
 function aux.handle.LOAD()
 	new_search()
 end
@@ -127,7 +125,7 @@ function update_continuation()
 end
 
 function discard_continuation()
-	scan.abort(search_scan_id)
+	scan.abort()
 	current_search().continuation = nil
 	update_continuation()
 end
@@ -152,7 +150,7 @@ function start_real_time_scan(query, search, continuation)
 	end
 
 	local new_records = {}
-	search_scan_id = scan.start{
+	scan.start{
 		type = 'list',
 		queries = {query},
 		on_scan_start = function()
@@ -219,7 +217,7 @@ function start_search(queries, continuation)
 	end
 
 
-	search_scan_id = scan.start{
+	scan.start{
 		type = 'list',
 		queries = queries,
         alert_validator = search.alert_validator,
@@ -355,7 +353,6 @@ function M.execute(_, resume, real_time)
 end
 
 do
-	local scan_id = 0
 	local IDLE, SEARCHING, FOUND = aux.enum(3)
 	local state = IDLE
 	local found_index
@@ -367,9 +364,9 @@ do
 			return
 		end
 
-		scan.abort(scan_id)
+		scan.abort()
 		state = SEARCHING
-		scan_id = scan_util.find(
+		scan_util.find(
 			record,
 			current_search().status_bar,
 			function()
@@ -389,7 +386,7 @@ do
 
 				if not record.high_bidder then
 					bid_button:SetScript('OnClick', function()
-						if scan_util.test(record, index) and search.table:ContainsRecord(record) then
+						if scan_util.test('list', record, index) and search.table:ContainsRecord(record) then
 							aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
 								info.bid_update(record)
 								search.table:SetDatabase()
@@ -403,7 +400,7 @@ do
 
 				if record.buyout_price > 0 then
 					buyout_button:SetScript('OnClick', function()
-						if scan_util.test(record, index) and search.table:ContainsRecord(record) then
+						if scan_util.test('list', record, index) and search.table:ContainsRecord(record) then
 							aux.place_bid('list', index, record.buyout_price, function() search.table:RemoveAuctionRecord(record) end)
 						end
 					end)
@@ -428,7 +425,7 @@ do
 			state = IDLE
 		elseif selection and state == IDLE then
 			find_auction(selection.record)
-		elseif state == FOUND and not scan_util.test(selection.record, found_index) then
+		elseif state == FOUND and not scan_util.test('list', selection.record, found_index) then
 			buyout_button:Disable()
 			bid_button:Disable()
 			if not aux.bid_in_progress() then

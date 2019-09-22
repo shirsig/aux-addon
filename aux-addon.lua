@@ -135,7 +135,9 @@ do
 	local locked
 	function M.bid_in_progress() return locked end
 	function M.place_bid(type, index, amount, on_success)
-		if locked then return end
+		if locked then
+            return
+        end
 		local money = GetMoney()
 		PlaceAuctionBid(type, index, amount)
 		if money >= amount then
@@ -153,28 +155,6 @@ do
 				end
 			end)
 		end
-	end
-end
-
-do
-	local locked
-	function M.cancel_in_progress() return locked end
-	function M.cancel_auction(index, on_success)
-		if locked then return end
-		locked = true
-		CancelAuction(index)
-		local send_signal, signal_received = signal()
-		thread(when, signal_received, function()
-			do (on_success or pass)() end
-			locked = false
-		end)
-		thread(when, later(5), send_signal)
-		event_listener('CHAT_MSG_SYSTEM', function(kill, arg1)
-			if arg1 == ERR_AUCTION_REMOVED then
-				send_signal()
-				kill()
-			end
-		end)
 	end
 end
 

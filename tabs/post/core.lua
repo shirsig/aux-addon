@@ -17,7 +17,7 @@ local tab = aux.tab 'Post'
 
 local settings_schema = {'tuple', '#', {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
-local scan_id, inventory_records, bid_records, buyout_records = 0, {}, {}, {}
+local inventory_records, bid_records, buyout_records = 0, {}, {}, {}
 
 M.DURATION_2, M.DURATION_8, M.DURATION_24 = 1, 2, 3
 
@@ -61,7 +61,7 @@ do
 end
 
 function refresh_button_click()
-	scan.abort(scan_id)
+	scan.abort()
 	refresh_entries()
 	refresh = true
 end
@@ -375,7 +375,7 @@ function update_item(item)
         return
     end
 
-    scan.abort(scan_id)
+    scan.abort()
 
     UIDropDownMenu_Initialize(duration_dropdown, initialize_duration_dropdown)
     UIDropDownMenu_SetSelectedValue(duration_dropdown, settings.duration)
@@ -459,7 +459,7 @@ function refresh_entries()
         status_bar:update_status(0, 0)
         status_bar:set_text('Scanning auctions...')
 
-		scan_id = scan.start{
+		scan.start{
             type = 'list',
             ignore_owner = true,
 			queries = {query},

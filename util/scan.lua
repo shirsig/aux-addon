@@ -5,8 +5,8 @@ local info = require 'aux.util.info'
 local filter_util = require 'aux.util.filter'
 local scan = require 'aux.core.scan'
 
-function M.test(record, index)
-	local auction_record = info.auction(index, record.query_type)
+function M.test(type, record, index)
+	local auction_record = info.auction(index, type)
 	return auction_record and auction_record.search_signature == record.search_signature
 end
 
@@ -35,7 +35,6 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
 
     local found
     return scan.start{
-        type = auction_record.query_type,
         queries = queries,
         on_scan_start = function()
             status_bar:update_status(0, 0)
@@ -45,7 +44,7 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
             status_bar:update_status((query_index - 1) / #queries, 0)
         end,
         on_auction = function(record)
-            if test(auction_record, record.index) then
+            if test('list', auction_record, record.index) then
                 found = true
                 scan.stop()
                 status_bar:update_status(1, 1)

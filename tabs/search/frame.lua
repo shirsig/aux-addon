@@ -141,7 +141,7 @@ do
     btn:SetPoint('TOPRIGHT', -5, -8)
     btn:SetText('Pause')
     btn:SetScript('OnClick', function()
-        scan.abort(search_scan_id)
+        scan.abort()
     end)
     stop_button = btn
 end
@@ -540,7 +540,6 @@ for _ = 1, 5 do
 			    end
 		    end
 	    elseif button == 'RightButton' then
-	        aux.set_tab(1)
 		    set_filter(strlower(info.item(row.record.item_id).name) .. '/exact')
 		    execute(nil, false)
 	    end
