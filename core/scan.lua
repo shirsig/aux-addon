@@ -141,7 +141,7 @@ function submit_query()
     else
         -- not filtering by category, leave nil for all
     end
-    SortAuctionSetSort('list', 'duration', true)
+    SortAuctionClearSort('list')
     QueryAuctionItems(
         blizzard_query.name,
         blizzard_query.min_level,
