@@ -7,6 +7,8 @@ local history = require 'aux.core.history'
 local DEFAULT_PAGE_SIZE = 50
 local TIMEOUT = 30
 
+local state
+
 function aux.handle.CLOSE()
 	abort()
 end
@@ -127,10 +129,6 @@ function submit_query()
         aux.coro_wait()
     end
 
-    SortAuctionClearSort('list')
-    SortAuctionItems('list', 'duration')
-    SortAuctionItems('list', 'duration')
-
     state.last_list_query = GetTime()
     local blizzard_query = get_query().blizzard_query or {}
     local category_filter
@@ -143,6 +141,7 @@ function submit_query()
     else
         -- not filtering by category, leave nil for all
     end
+    SortAuctionSetSort('list', 'duration', true)
     QueryAuctionItems(
         blizzard_query.name,
         blizzard_query.min_level,
