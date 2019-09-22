@@ -145,40 +145,19 @@ function M.set_tooltip(itemstring, owner, anchor)
 end
 
 function M.tooltip_match(entry, tooltip)
-    return aux.any(tooltip, function(line)
-        local left_match = line.left_text and strupper(line.left_text) == strupper(entry)
-        local right_match = line.right_text and strupper(line.right_text) == strupper(entry)
-        return left_match or right_match
+    return aux.any(tooltip, function(text)
+        return strupper(entry) == strupper(text)
     end)
 end
 
 function M.tooltip_find(pattern, tooltip)
     local count = 0
-    for _, line in ipairs(tooltip) do
-        if line.left_text and strfind(line.left_text, pattern) then
-            count = count + 1
-        end
-        if line.right_text and strfind(line.right_text, pattern) then
+    for _, entry in pairs(tooltip) do
+        if strfind(entry, pattern) then
             count = count + 1
         end
     end
     return count
-end
-
-function M.load_tooltip(frame, tooltip)
-    frame:ClearLines()
-    for _, line in ipairs(tooltip) do
-        if line.right_text then
-            frame:AddDoubleLine(line.left_text, line.right_text, line.left_color[1], line.left_color[2], line.left_color[3], line.right_color[1], line.right_color[2], line.right_color[3])
-        else
-            frame:AddLine(line.left_text, line.left_color[1], line.left_color[2], line.left_color[3], true)
-        end
-    end
-    for i = 1, #tooltip do -- TODO why is this needed?
-	    _G[frame:GetName() .. 'TextLeft' .. i]:SetJustifyH('LEFT')
-	    _G[frame:GetName() .. 'TextRight' .. i]:SetJustifyH('LEFT')
-    end
-    frame:Show()
 end
 
 function M.display_name(item_id, no_brackets, no_color)
@@ -196,7 +175,7 @@ function M.display_name(item_id, no_brackets, no_color)
 end
 
 function M.auctionable(tooltip, quality, strict)
-    local status = tooltip[2] and tooltip[2].left_text
+    local status = tooltip[2]
     local durability, max_durability = durability(tooltip)
     return (not quality or quality < 6)
             and status ~= ITEM_BIND_ON_PICKUP
@@ -220,28 +199,27 @@ function M.tooltip(setter, arg1, arg2)
     end
     local tooltip = T.acquire()
     for i = 1, AuxTooltip:NumLines() do
-        tinsert(tooltip, T.map(
-            'left_text', _G['AuxTooltipTextLeft' .. i]:GetText(),
-            'left_color', T.list(_G['AuxTooltipTextLeft' .. i]:GetTextColor()),
-            'right_text', _G['AuxTooltipTextRight' .. i]:IsVisible() and _G['AuxTooltipTextRight' .. i]:GetText(),
-            'right_color', T.list(_G['AuxTooltipTextRight' .. i]:GetTextColor())
-        ))
+        for side in T.set('Left', 'Right') do
+            local text = _G['AuxTooltipText' .. side .. i]:GetText()
+            if text then
+                tinsert(tooltip, text)
+            end
+        end
     end
     return tooltip, AuxTooltip.money
 end
 
 do
---    local pattern = '^' .. gsub(gsub(ITEM_SPELL_CHARGES_P1, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)') .. '$' TODO retail
-    local pattern = '^' .. gsub(gsub(ITEM_SPELL_CHARGES, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)') .. '$'
-	function item_charges(tooltip)
-		for _, line in pairs(tooltip) do
-	        local _, _, left_charges_string = strfind(line.left_text or '', pattern)
-	        local _, _, right_charges_string = strfind(line.right_text or '', pattern)
+    local patterns = {}
+    for i = 1, 10 do
+        patterns[format(ITEM_SPELL_CHARGES, i)] = i
+    end
 
-	        local charges = tonumber(left_charges_string) or tonumber(right_charges_string)
-			if charges then
-				return max(1, charges) -- TODO kronos bug? should never be 0
-			end
+	function item_charges(tooltip)
+        for _, entry in pairs(tooltip) do
+            if patterns[entry] then
+                return patterns[entry]
+            end
 	    end
 	    return 1
 	end
@@ -281,11 +259,9 @@ end
 do
 	local pattern = '^' .. gsub(gsub(DURABILITY_TEMPLATE, '%%d', '(%%d+)'), '%%%d+%$d', '(%%d+)') .. '$'
 	function M.durability(tooltip)
-	    for _, line in pairs(tooltip) do
-	        local _, _, left_durability_string, left_max_durability_string = strfind(line.left_text or '', pattern)
-	        local _, _, right_durability_string, right_max_durability_string = strfind(line.right_text or '', pattern)
-	        local durability = tonumber(left_durability_string) or tonumber(right_durability_string)
-	        local max_durability = tonumber(left_max_durability_string) or tonumber(right_max_durability_string)
+	    for _, entry in pairs(tooltip) do
+	        local _, _, durability_string, max_durability_string = strfind(entry or '', pattern)
+	        local durability, max_durability = tonumber(durability_string), tonumber(max_durability_string)
 	        if durability then
 	            return durability, max_durability
 	        end

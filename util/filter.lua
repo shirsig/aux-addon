@@ -14,7 +14,7 @@ function default_filter(str)
         validator = function()
             return function(auction_record)
                 return aux.any(auction_record.tooltip, function(entry)
-                    return strfind(strlower(entry.left_text or ''), str, 1, true) or strfind(strlower(entry.right_text or ''), str, 1, true)
+                    return strfind(strlower(entry), str, 1, true)
                 end)
             end
         end,
@@ -22,7 +22,6 @@ function default_filter(str)
 end
 
 M.filters = {
-
     ['utilizable'] = {
         input_type = '',
         validator = function()
