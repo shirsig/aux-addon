@@ -363,9 +363,14 @@ function suggestions(filter)
 
     if filter.blizzard.name and aux.size(filter.blizzard) == 1 then tinsert(suggestions, 'exact') end
 
-    tinsert(suggestions, 'and'); tinsert(suggestions, 'or'); tinsert(suggestions, 'not'); tinsert(suggestions, 'tooltip')
+    tinsert(suggestions, 'and')
+    tinsert(suggestions, 'or')
+    tinsert(suggestions, 'not')
+    tinsert(suggestions, 'tooltip')
 
-    for key in ipairs(filters) do tinsert(suggestions, key) end
+    for key in pairs(filters) do
+        tinsert(suggestions, key)
+    end
 
     -- classes
     if not filter.blizzard.class then
