@@ -333,7 +333,10 @@ function M.editbox(parent)
 	            -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
 	            -- or use an overlay with itemlinks
 	            if GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
-	                aux.thread(function() editbox:HighlightText() end)
+	                aux.coro_thread(function()
+                        aux.coro_wait()
+                        editbox:HighlightText()
+                    end)
 	            end
                 aux.wipe(last_click)
 	            last_click.t = GetTime()
