@@ -1,6 +1,5 @@
 select(2, ...) 'aux.util.filter'
 
-local T = require 'T'
 local aux = require 'aux'
 local info = require 'aux.util.info'
 local money = require 'aux.util.money'
@@ -307,7 +306,7 @@ function M.parse_filter_string(str)
         i = i + 1
     end
 
-    return T.map('components', filter, 'blizzard', blizzard_filter_parser(), 'post', post_filter)
+    return { components = filter, blizzard = blizzard_filter_parser(), post = post_filter }
 end
 
 function M.query(filter_string)
@@ -482,7 +481,7 @@ end
 
 function blizzard_query(filter)
     local filters = filter.blizzard
-    local query = T.map('name', filters.name, 'exact', aux.index(filters.exact, 2))
+    local query = {name = filters.name, exact = aux.index(filters.exact, 2)}
     local item_id = filters.name and info.item_id(filters.name)
     local item_info = item_id and info.item(item_id)
     if filters.exact and item_info then
@@ -543,12 +542,12 @@ end
 
 function M.query_builder()
     local filter
-    return T.map(
-		'append', function(part)
+    return {
+		append = function(part)
             filter = not filter and part or filter .. '/' .. part
         end,
-		'get', function()
+		get = function()
             return filter or ''
         end
-    )
+    }
 end

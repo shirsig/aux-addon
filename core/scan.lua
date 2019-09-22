@@ -1,6 +1,5 @@
 select(2, ...) 'aux.core.scan'
 
-local T = require 'T'
 local aux = require 'aux'
 local info = require 'aux.util.info'
 local history = require 'aux.core.history'

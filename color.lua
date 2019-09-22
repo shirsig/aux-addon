@@ -1,9 +1,7 @@
 select(2, ...) 'aux'
 
-local T = require 'T'
-
 function C(r, g, b, a)
-	local mt = T.map('__metatable', false, '__newindex', pass, 'color', {r, g, b, a})
+	local mt = { __metatable = false, __newindex = pass, color = {r, g, b, a} }
 	function mt:__call(text)
 		local r, g, b, a = unpack(mt.color)
 		if text then

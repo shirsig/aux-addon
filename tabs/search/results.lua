@@ -1,6 +1,5 @@
 select(2, ...) 'aux.tabs.search'
 
-local T = require 'T'
 local aux = require 'aux'
 local info = require 'aux.util.info'
 local filter_util = require 'aux.util.filter'
@@ -77,7 +76,7 @@ do
 		while #searches > search_index do
 			tremove(searches)
 		end
-		local search = T.map('records', {}, 'filter_string', filter_string, 'first_page', first_page, 'last_page', last_page, 'real_time', real_time)
+		local search = { records = {}, filter_string = filter_string, first_page = first_page, last_page = last_page, real_time = real_time }
 		tinsert(searches, search)
 		if #searches > 5 then
 			tremove(searches, 1)

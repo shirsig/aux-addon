@@ -1,6 +1,5 @@
 select(2, ...) 'aux.util.persistence'
 
-local T = require 'T'
 local aux = require 'aux'
 
 function M.read(schema, str)

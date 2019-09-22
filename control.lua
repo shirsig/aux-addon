@@ -1,7 +1,5 @@
 select(2, ...) 'aux'
 
-local T = require 'T'
-
 local event_frame = CreateFrame'Frame'
 
 local listeners, threads = {}, {}
@@ -74,11 +72,11 @@ end
 
 function M.event_listener(event, cb)
 	local listener_id = unique_id()
-	listeners[listener_id] = T.map(
-		'event', event,
-		'cb', cb,
-		'kill', function(...) if select('#', ...) == 0 or select(1, ...) then kill_listener(listener_id) end end
-	)
+	listeners[listener_id] = {
+		event = event,
+		cb = cb,
+		kill = function(...) if select('#', ...) == 0 or select(1, ...) then kill_listener(listener_id) end end
+    }
 	event_frame:RegisterEvent(event)
 	return listener_id
 end
@@ -96,7 +94,7 @@ do
 
 	 function M.thread(f, ...)
 		local thread_id = unique_id()
-		threads[thread_id] = T.map('k', setmetatable({f = f, ...}, mt))
+		threads[thread_id] = { k = setmetatable({f = f, ...}, mt) }
 		return thread_id
 	end
 

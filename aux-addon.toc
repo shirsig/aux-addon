@@ -1,12 +1,11 @@
 ## Interface: 11302
 ## Author: shirsig
 ## Title: aux
-## Version: 0.4.1
+## Version: 0.4.2
 ## Notes: Auction House replacement
 ## SavedVariables: aux
 
 libs\package.lua
-libs\T.lua
 
 aux-addon.lua
 util.lua

@@ -1,6 +1,5 @@
 select(2, ...) 'aux.gui.listing'
 
-local T = require 'T'
 local aux = require 'aux'
 local gui = require 'aux.gui'
 

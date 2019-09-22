@@ -1,6 +1,5 @@
 select(2, ...) 'aux.gui.auction_listing'
 
-local T = require 'T'
 local aux = require 'aux'
 local info = require 'aux.util.info'
 local sort_util = require 'aux.util.sort'
@@ -712,13 +711,13 @@ local methods = {
                 self.rowInfo[#self.rowInfo].children[#self.rowInfo[#self.rowInfo].children].count = self.rowInfo[#self.rowInfo].children[#self.rowInfo[#self.rowInfo].children].count + 1
             elseif not single_item and prevRecord and record.item_key == prevRecord.item_key then
                 -- it's the same base item as the previous row so insert a new auction
-                tinsert(self.rowInfo[#self.rowInfo].children, T.map('count', 1, 'record', record))
+                tinsert(self.rowInfo[#self.rowInfo].children, { count = 1, record = record })
                 if self.expanded[self.rowInfo[#self.rowInfo].expandKey] then
                     self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
                 end
             else
                 -- it's a different base item from the previous row
-                tinsert(self.rowInfo, T.map('item_key', record.item_key, 'expandKey', record.item_key, 'children', {T.map('count', 1, 'record', record)}))
+                tinsert(self.rowInfo, { item_key = record.item_key, expandKey = record.item_key, children = {{ count = 1, record = record }} })
                 self.rowInfo.numDisplayRows = self.rowInfo.numDisplayRows + 1
             end
         end

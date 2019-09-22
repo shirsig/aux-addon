@@ -1,6 +1,5 @@
 select(2, ...) 'aux.tabs.search'
 
-local T = require 'T'
 local aux = require 'aux'
 local info = require 'aux.util.info'
 local completion = require 'aux.util.completion'

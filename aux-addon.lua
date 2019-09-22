@@ -1,6 +1,5 @@
 select(2, ...) 'aux'
 
-local T = require 'T'
 local post = require 'aux.tabs.post'
 
 function M.print(...)
@@ -95,7 +94,7 @@ end
 
 tab_info = {}
 function M.tab(name)
-	local tab = T.map('name', name)
+	local tab = { name = name }
 	local tab_event = {
 		OPEN = function(f) tab.OPEN = f end,
 		CLOSE = function(f) tab.CLOSE = f end,

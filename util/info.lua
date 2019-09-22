@@ -1,6 +1,5 @@
 select(2, ...) 'aux.util.info'
 
-local T = require 'T'
 local aux = require 'aux'
 
 CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
@@ -8,8 +7,11 @@ AuxTooltip:SetScript('OnTooltipAddMoney', function(self, arg1)
     self.money = arg1
 end)
 
-function M.duration_hours(duration_code)
-    return T.map(1, 2, 2, 8, 3, 24)[duration_code]
+do
+    local map = { [1] = 2, [2] = 8, [3] = 24 }
+    function M.duration_hours(duration_code)
+        return map[duration_code]
+    end
 end
 
 function M.container_item(bag, slot)
@@ -18,54 +20,54 @@ function M.container_item(bag, slot)
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = item(item_id, suffix_id, unique_id, enchant_id)
 
-        local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- quality not working?
+        local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- TODO quality not working?
         local tooltip, tooltip_money = tooltip('bag', bag, slot)
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
         local aux_quantity = charges or count
-        return T.map(
-            'item_id', item_id,
-            'suffix_id', suffix_id,
-            'unique_id', unique_id,
-            'enchant_id', enchant_id,
+        return {
+            item_id = item_id,
+            suffix_id = suffix_id,
+            unique_id = unique_id,
+            enchant_id = enchant_id,
 
-            'link', link,
-            'item_key', item_id .. ':' .. suffix_id,
+            link = link,
+            item_key = item_id .. ':' .. suffix_id,
 
-            'name', item_info.name,
-            'texture', texture,
-            'level', item_info.level,
-            'requirement', item_info.requirement,
-            'type', item_info.type,
-            'subtype', item_info.subtype,
-            'slot', item_info.slot,
-            'quality', item_info.quality,
-            'max_stack', item_info.max_stack,
+            name = item_info.name,
+            texture = texture,
+            level = item_info.level,
+            requirement = item_info.requirement,
+            type = item_info.type,
+            subtype = item_info.subtype,
+            slot = item_info.slot,
+            quality = item_info.quality,
+            max_stack = item_info.max_stack,
 
-            'count', count,
-            'locked', locked,
-            'readable', readable,
-            'lootable', lootable,
+            count = count,
+            locked = locked,
+            readable = readable,
+            lootable = lootable,
 
-            'tooltip', tooltip,
-    	    'tooltip_money', tooltip_money,
-            'max_charges', max_charges,
-            'charges', charges,
-            'aux_quantity', aux_quantity
-        )
+            tooltip = tooltip,
+    	    tooltip_money = tooltip_money,
+            max_charges = max_charges,
+            charges = charges,
+            aux_quantity = aux_quantity,
+        }
     end
 end
 
 function M.auction_sell_item()
 	for name, texture, count, quality, usable, vendor_price in GetAuctionSellItemInfo do
-        return T.map(
-			'name', name,
-			'texture', texture,
-            'quality', quality,
-			'count', count,
-			'usable', usable,
-            'vendor_price', vendor_price -- it seems for charge items this is always the price for full charges
-		)
+        return {
+			name = name,
+			texture = texture,
+            quality = quality,
+			count = count,
+			usable = usable,
+            vendor_price = vendor_price, -- it seems for charge items this is always the price for full charges
+        }
 	end
 end
 
@@ -87,44 +89,44 @@ function M.auction(index, query_type)
         local aux_quantity = charges or count
         local blizzard_bid = high_bid > 0 and high_bid or start_price
         local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
-        return T.map(
-            'item_id', item_id,
-            'suffix_id', suffix_id,
-            'unique_id', unique_id,
-            'enchant_id', enchant_id,
+        return {
+            item_id = item_id,
+            suffix_id = suffix_id,
+            unique_id = unique_id,
+            enchant_id = enchant_id,
 
-            'link', link,
-            'item_key', item_id .. ':' .. suffix_id,
-            'search_signature', aux.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, sale_status == 1 and 0 or duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
-            'sniping_signature', aux.join({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+            link = link,
+            item_key = item_id .. ':' .. suffix_id,
+            search_signature = aux.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, sale_status == 1 and 0 or duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+            sniping_signature = aux.join({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
 
-            'name', name,
-            'texture', texture,
-            'quality', quality,
-            'requirement', level,
+            name = name,
+            texture = texture,
+            quality = quality,
+            requirement = level,
 
-            'count', count,
-            'start_price', start_price,
-            'high_bid', high_bid,
-            'min_increment', min_increment,
-            'blizzard_bid', blizzard_bid,
-            'bid_price', bid_price,
-            'buyout_price', buyout_price,
-            'unit_blizzard_bid', blizzard_bid / aux_quantity,
-            'unit_bid_price', bid_price / aux_quantity,
-            'unit_buyout_price', buyout_price / aux_quantity,
-            'high_bidder', high_bidder,
-            'owner', owner,
-            'sale_status', sale_status,
-            'duration', duration,
-            'usable', usable,
+            count = count,
+            start_price = start_price,
+            high_bid = high_bid,
+            min_increment = min_increment,
+            blizzard_bid = blizzard_bid,
+            bid_price = bid_price,
+            buyout_price = buyout_price,
+            unit_blizzard_bid = blizzard_bid / aux_quantity,
+            unit_bid_price = bid_price / aux_quantity,
+            unit_buyout_price = buyout_price / aux_quantity,
+            high_bidder = high_bidder,
+            owner = owner,
+            sale_status = sale_status,
+            duration = duration,
+            usable = usable,
 
-            'tooltip', tooltip,
-    	    'tooltip_money', tooltip_money,
-            'max_charges', max_charges,
-            'charges', charges,
-            'aux_quantity', aux_quantity
-        )
+            tooltip = tooltip,
+    	    tooltip_money = tooltip_money,
+            max_charges = max_charges,
+            charges = charges,
+            aux_quantity = aux_quantity,
+        }
     end
 end
 
@@ -282,19 +284,19 @@ end
 function M.item(item_id, suffix_id)
     local itemstring = 'item:' .. (item_id or 0) .. '::::::' .. (suffix_id or 0)
     local name, link, quality, level, requirement, class, subclass, max_stack, slot, texture, sell_price = GetItemInfo(itemstring)
-    return name and T.map(
-        'name', name,
-        'link', link,
-        'quality', quality,
-        'level', level,
-        'requirement', requirement,
-        'class', class,
-        'subclass', subclass,
-        'slot', slot,
-        'max_stack', max_stack,
-        'texture', texture,
-        'sell_price', sell_price
-    ) or item_info(item_id)
+    return name and {
+        name = name,
+        link = link,
+        quality = quality,
+        level = level,
+        requirement = requirement,
+        class = class,
+        subclass = subclass,
+        slot = slot,
+        max_stack = max_stack,
+        texture = texture,
+        sell_price = sell_price
+    } or item_info(item_id)
 end
 
 function M.category_index(category)

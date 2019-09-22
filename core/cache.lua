@@ -1,6 +1,5 @@
 select(2, ...) 'aux.util.info'
 
-local T = require 'T'
 local aux = require 'aux'
 local persistence = require 'aux.util.persistence'
 
@@ -98,15 +97,15 @@ function merchant_buy_scan()
 					unit_price = min(buy_info.unit_price, new_unit_price)
 				end
 
-                aux.account_data.merchant_buy[item_id] = persistence.write(merchant_buy_schema, T.map(
-					'unit_price', unit_price,
-					'limited', buy_info.limited and new_limited
-				))
+                aux.account_data.merchant_buy[item_id] = persistence.write(merchant_buy_schema, {
+					unit_price = unit_price,
+					limited = buy_info.limited and new_limited,
+                })
 			else
-				aux.account_data.merchant_buy[item_id] = persistence.write(merchant_buy_schema, T.map(
-					'unit_price', new_unit_price,
-					'limited', new_limited
-				))
+				aux.account_data.merchant_buy[item_id] = persistence.write(merchant_buy_schema, {
+					unit_price = new_unit_price,
+					limited = new_limited,
+                })
 			end
 		else
 			incomplete_data = true
@@ -122,19 +121,19 @@ function process_item(item_id)
 
     if name then
         aux.account_data.item_ids[strlower(name)] = item_id
-        aux.account_data.items[item_id] = persistence.write(items_schema, T.map(
-            'name', name,
-            'link', link,
-            'quality', quality,
-            'level', level,
-            'requirement', requirement,
-            'class', class,
-            'subclass', subclass,
-            'slot', slot,
-            'max_stack', max_stack,
-            'texture', texture,
-            'sell_price', sell_price
-        ))
+        aux.account_data.items[item_id] = persistence.write(items_schema, {
+            name = name,
+            link = link,
+            quality = quality,
+            level = level,
+            requirement = requirement,
+            class = class,
+            subclass = subclass,
+            slot = slot,
+            max_stack = max_stack,
+            texture = texture,
+            sell_price = sell_price,
+        })
         local tooltip = tooltip('link', itemstring)
         if auctionable(tooltip, quality) then
             tinsert(aux.account_data.auctionable_items, strlower(name))

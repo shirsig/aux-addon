@@ -1,6 +1,5 @@
 select(2, ...) 'aux.util.money'
 
-local T = require 'T'
 local aux = require 'aux'
 
 M.GOLD_TEXT = '|cffffd70ag|r'

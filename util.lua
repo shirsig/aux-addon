@@ -1,12 +1,10 @@
 select(2, ...) 'aux'
 
-local T = require 'T'
-
 M.immutable = setmetatable({}, {
 	__metatable = false,
 	__newindex = pass,
 	__sub = function(_, t)
-		return setmetatable({}, T.map('__metatable', false, '__newindex', pass, '__index', t))
+		return setmetatable({}, { __metatable = false, __newindex = pass, __index = t })
 	end
 })
 

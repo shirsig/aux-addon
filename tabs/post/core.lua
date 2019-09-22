@@ -1,6 +1,5 @@
 select(2, ...) 'aux.tabs.post'
 
-local T = require 'T'
 local aux = require 'aux'
 local info = require 'aux.util.info'
 local sort_util = require 'aux.util.sort'
@@ -29,7 +28,7 @@ selected_item = nil
 prepared_stack_slot = nil
 
 function get_default_settings()
-	return T.map('duration', aux.account_data.post_duration, 'start_price', 0, 'buyout_price', 0, 'hidden', false)
+	return { duration = aux.account_data.post_duration, start_price = 0, buyout_price = 0, hidden = false }
 end
 
 function aux.handle.LOAD2()
@@ -123,28 +122,28 @@ function update_auction_listing(listing, records, reference)
 		for _, record in pairs(records[selected_item.key] or empty) do
 			local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and aux.color.red
 			local price = record.unit_price * (listing == 'bid' and record.stack_size or 1)
-			tinsert(rows, T.map(
-				'cols', {
-				T.map('value', record.own and aux.color.green(record.count) or record.count),
-				T.map('value', al.time_left(record.duration)),
-				T.map('value', record.stack_size == stack_size and aux.color.green(record.stack_size) or record.stack_size),
-				T.map('value', money.to_string(price, true, nil, price_color)),
-				T.map('value', historical_value and gui.percentage_historical(aux.round(price / historical_value * 100)) or '---')
+			tinsert(rows, {
+				cols = {
+                { value = record.own and aux.color.green(record.count) or record.count },
+				{ value = al.time_left(record.duration) },
+				{ value = record.stack_size == stack_size and aux.color.green(record.stack_size) or record.stack_size },
+				{ value = money.to_string(price, true, nil, price_color) },
+				{ value = historical_value and gui.percentage_historical(aux.round(price / historical_value * 100)) or '---' },
             },
-				'record', record
-			))
+				record = record,
+            })
 		end
 		if historical_value then
-			tinsert(rows, T.map(
-				'cols', {
-				T.map('value', '---'),
-				T.map('value', '---'),
-				T.map('value', '---'),
-				T.map('value', money.to_string(historical_value * (listing == 'bid' and stack_size_slider:GetValue() or 1), true, nil, aux.color.green)),
-				T.map('value', historical_value and gui.percentage_historical(100) or '---')
+			tinsert(rows, {
+				cols = {
+				{ value = '---' },
+				{ value = '---' },
+				{ value = '---' },
+				{ value = money.to_string(historical_value * (listing == 'bid' and stack_size_slider:GetValue() or 1), true, nil, aux.color.green) },
+				{ value = historical_value and gui.percentage_historical(100) or '---' },
             },
-				'record', T.map('historical_value', true, 'stack_size', stack_size, 'unit_price', historical_value, 'own', true)
-			))
+				record = { historical_value = true, stack_size = stack_size, unit_price = historical_value, own = true }
+            })
 		end
 		sort(rows, function(a, b)
 			return sort_util.multi_lt(
@@ -429,19 +428,19 @@ function update_inventory_records()
                         availability[i] = 0
                     end
                     availability[charge_class] = item_info.count
-                    auctionable_map[item_info.item_key] = T.map(
-	                    'item_id', item_info.item_id,
-	                    'suffix_id', item_info.suffix_id,
-	                    'key', item_info.item_key,
-	                    'link', item_info.link,
-	                    'name', item_info.name,
-	                    'texture', item_info.texture,
-	                    'quality', item_info.quality,
-	                    'aux_quantity', item_info.charges or item_info.count,
-	                    'max_stack', item_info.max_stack,
-	                    'max_charges', item_info.max_charges,
-	                    'availability', availability
-                    )
+                    auctionable_map[item_info.item_key] = {
+	                    item_id = item_info.item_id,
+	                    suffix_id = item_info.suffix_id,
+	                    key = item_info.item_key,
+	                    link = item_info.link,
+	                    name = item_info.name,
+	                    texture = item_info.texture,
+	                    quality = item_info.quality,
+	                    aux_quantity = item_info.charges or item_info.count,
+	                    max_stack = item_info.max_stack,
+	                    max_charges = item_info.max_charges,
+	                    availability = availability,
+                    }
                 else
                     local auctionable = auctionable_map[item_info.item_key]
                     auctionable.availability[charge_class] = (auctionable.availability[charge_class] or 0) + item_info.count
@@ -510,7 +509,7 @@ function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price,
 	        end
 	    end
 	    if not entry then
-	        entry = T.map('stack_size', aux_quantity, 'unit_price', unit_blizzard_bid, 'duration', duration, 'own', info.is_player(owner), 'count', 0)
+	        entry =  { stack_size = aux_quantity, unit_price = unit_blizzard_bid, duration = duration, own = info.is_player(owner), count = 0 }
 	        tinsert(bid_records[key], entry)
 	    end
 	    entry.count = entry.count + 1
@@ -525,7 +524,7 @@ function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price,
 		    end
 	    end
 	    if not entry then
-		    entry = T.map('stack_size', aux_quantity, 'unit_price', unit_buyout_price, 'duration', duration, 'own', info.is_player(owner), 'count', 0)
+		    entry = { stack_size = aux_quantity, unit_price = unit_buyout_price, duration = duration, own = info.is_player(owner), count = 0 }
 		    tinsert(buyout_records[key], entry)
 	    end
 	    entry.count = entry.count + 1

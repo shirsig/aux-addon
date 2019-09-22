@@ -1,6 +1,5 @@
 select(2, ...) 'aux.tabs.bids'
 
-local T = require 'T'
 local aux = require 'aux'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'

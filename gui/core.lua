@@ -1,6 +1,5 @@
 select(2, ...) 'aux.gui'
 
-local T = require 'T'
 local aux = require 'aux'
 
 M.font = [[Fonts\ARIALN.TTF]]
@@ -323,7 +322,7 @@ function M.editbox(parent)
     end)
     editbox:SetScript('OnChar', function(self) (self.char or pass)(self) end)
     do
-        local last_click = T.map('t', 0)
+        local last_click = { t = 0 }
         editbox:SetScript('OnMouseDown', function(self, button)
 	        if button == 'RightButton' then
                 self:SetText('')

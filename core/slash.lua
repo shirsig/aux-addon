@@ -1,6 +1,5 @@
 select(2, ...) 'aux.core.slash'
 
-local T = require 'T'
 local aux = require 'aux'
 local post = require 'aux.tabs.post'
 local info = require 'aux.util.info'
@@ -25,8 +24,8 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'post' and arguments[2] == 'bid' then
         aux.account_data.post_bid = not aux.account_data.post_bid
 	    aux.print('post bid ' .. status(aux.account_data.post_bid))
-    elseif arguments[1] == 'post' and arguments[2] == 'duration' and  T.map('2', post.DURATION_2, '8', post.DURATION_8, '24', post.DURATION_24)[arguments[3]] then
-        aux.account_data.post_duration = T.map('2', post.DURATION_2, '8', post.DURATION_8, '24', post.DURATION_24)[arguments[3]]
+    elseif arguments[1] == 'post' and arguments[2] == 'duration' and  ({['2'] = post.DURATION_2, ['8'] = post.DURATION_8, ['24'] = post.DURATION_24})[arguments[3]] then
+        aux.account_data.post_duration = ({['2'] = post.DURATION_2, ['8'] = post.DURATION_8, ['24'] = post.DURATION_24})[arguments[3]]
         aux.print('post duration ' .. aux.color.blue(info.duration_hours(aux.account_data.post_duration) .. 'h'))
     elseif arguments[1] == 'crafting' and arguments[2] == 'cost' then
 		aux.account_data.crafting_cost = not aux.account_data.crafting_cost

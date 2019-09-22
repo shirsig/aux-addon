@@ -1,6 +1,5 @@
 select(2, ...) 'aux.core.tooltip'
 
-local T = require 'T'
 local aux = require 'aux'
 local info = require 'aux.util.info'
 local money =  require 'aux.util.money'

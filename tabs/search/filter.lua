@@ -1,6 +1,5 @@
 select(2, ...) 'aux.tabs.search'
 
-local T = require 'T'
 local aux = require 'aux'
 local info = require 'aux.util.info'
 local money = require 'aux.util.money'
@@ -325,10 +324,10 @@ end
 
 function initialize_filter_dropdown()
 	for _, filter in ipairs{'and', 'or', 'not', 'price', 'profit', 'vendor-profit', 'disenchant-profit', 'percent', 'bid-price', 'bid-profit', 'bid-vendor-profit', 'bid-disenchant-profit', 'bid-percent', 'item', 'tooltip', 'min-level', 'max-level', 'rarity', 'left', 'utilizable', 'seller'} do
-		UIDropDownMenu_AddButton(T.map(
-			'text', filter,
-			'value', filter,
-			'func', function(self)
+		UIDropDownMenu_AddButton({
+			text = filter,
+			value = filter,
+			func = function(self)
 				filter_input:SetText(self.value)
 				if aux.index(filter_util.filters[self.value], 'input_type') == '' or self.value == 'not' then
 					add_form_component()
@@ -339,7 +338,7 @@ function initialize_filter_dropdown()
 					filter_input:SetFocus()
 				end
 			end
-		))
+        })
 	end
 end
 
@@ -354,10 +353,10 @@ function initialize_class_dropdown()
 			update_form()
 		end
     end
-    UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
+    UIDropDownMenu_AddButton({ text = ALL, value = 0, func = on_click })
     if AuctionCategories then
         for i, category in ipairs(AuctionCategories) do
-            UIDropDownMenu_AddButton(T.map('text', category.name, 'value', i, 'func', on_click))
+            UIDropDownMenu_AddButton({ text = category.name, value = i, func = on_click })
         end
     end
 end
@@ -369,10 +368,10 @@ function initialize_subclass_dropdown()
 			update_form()
 		end
 	end
-	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
+	UIDropDownMenu_AddButton({ text = ALL, value = 0, func = on_click })
     if AuctionCategories and (blizzard_query.class or 0) > 0 then
         for i, subcategory in ipairs(AuctionCategories[blizzard_query.class].subCategories or empty) do
-            UIDropDownMenu_AddButton(T.map('text', subcategory.name, 'value', i, 'func', on_click))
+            UIDropDownMenu_AddButton({ text = subcategory.name, value = i, func = on_click })
         end
     end
 end
@@ -382,10 +381,10 @@ function initialize_slot_dropdown()
 		UIDropDownMenu_SetSelectedValue(slot_dropdown, self.value)
 		update_form()
 	end
-	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', 0, 'func', on_click))
+	UIDropDownMenu_AddButton({ text = ALL, value = 0, func = on_click })
     if AuctionCategories and (blizzard_query.class or 0) > 0 and (blizzard_query.subclass or 0) > 0 then -- TODO retail is it still possible to query for slot without subclass?
         for i, subsubcategory in ipairs(AuctionCategories[blizzard_query.class].subCategories[blizzard_query.subclass].subCategories or empty) do
-            UIDropDownMenu_AddButton(T.map('text', subsubcategory.name, 'value', i, 'func', on_click))
+            UIDropDownMenu_AddButton({ text = subsubcategory.name, value = i, func = on_click })
         end
     end
 end
@@ -395,8 +394,8 @@ function initialize_quality_dropdown()
 		UIDropDownMenu_SetSelectedValue(quality_dropdown, self.value)
 		update_form()
 	end
-	UIDropDownMenu_AddButton(T.map('text', ALL, 'value', -1, 'func', on_click))
+	UIDropDownMenu_AddButton({ text = ALL, value = -1, func = on_click })
 	for i = 0, 4 do
-		UIDropDownMenu_AddButton(T.map('text', _G['ITEM_QUALITY' .. i .. '_DESC'], 'value', i, 'func', on_click))
+		UIDropDownMenu_AddButton({ text = _G['ITEM_QUALITY' .. i .. '_DESC'], value = i, func = on_click })
 	end
 end
