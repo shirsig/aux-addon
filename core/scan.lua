@@ -90,7 +90,7 @@ function last_page(total_auctions)
 end
 
 function page_size()
-    if not state.params.get_all then
+    if state.params.get_all then
         return GetNumAuctionItems('list')
     else
         return DEFAULT_PAGE_SIZE
