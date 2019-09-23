@@ -647,13 +647,18 @@ local methods = {
 
     OnEnter = function(self)
         local rt = self.rt
+
+        if rt.rowInfo.single_item then
+            return
+        end
+
         if rt.expanded[self.expandKey] then
             GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:AddLine('Double-click to collapse this item and show only the cheapest auction.', 1, 1, 1, true)
+            GameTooltip:AddLine('Double-click to collapse this item.', 1, 1, 1, true)
             GameTooltip:Show()
         elseif self.expandable then
             GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:AddLine('Double-click to expand this item and show all the auctions.', 1, 1, 1, true)
+            GameTooltip:AddLine('Double-click to expand this item.', 1, 1, 1, true)
             GameTooltip:Show()
         end
 
@@ -701,7 +706,7 @@ local methods = {
 
 	    local records = self.records
 
-	    local single_item = aux.all(records, function(record) return record.item_key == records[1].item_key end)
+        self.rowInfo.single_item = aux.all(records, function(record) return record.item_key == records[1].item_key end)
 
         sort(records, function(a, b) return a.search_signature < b.search_signature or a.search_signature == b.search_signature and tostring(a) < tostring(b) end)
 
@@ -711,7 +716,7 @@ local methods = {
             if prevRecord and record.search_signature == prevRecord.search_signature then
                 -- it's an identical auction to the previous row so increment the number of auctions
                 self.rowInfo[#self.rowInfo].children[#self.rowInfo[#self.rowInfo].children].count = self.rowInfo[#self.rowInfo].children[#self.rowInfo[#self.rowInfo].children].count + 1
-            elseif not single_item and prevRecord and record.item_key == prevRecord.item_key then
+            elseif not self.rowInfo.single_item and prevRecord and record.item_key == prevRecord.item_key then
                 -- it's the same base item as the previous row so insert a new auction
                 tinsert(self.rowInfo[#self.rowInfo].children, { count = 1, record = record })
                 if self.expanded[self.rowInfo[#self.rowInfo].expandKey] then
