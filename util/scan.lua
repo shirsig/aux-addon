@@ -46,7 +46,7 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
         on_auction = function(record)
             if test('list', auction_record, record.index) then
                 found = true
-                scan.stop()
+                scan.abort()
                 status_bar:update_status(1, 1)
                 status_bar:set_text('Auction found')
                 return on_success(record.index)

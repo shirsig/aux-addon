@@ -187,6 +187,7 @@ do
     end)
     slider.editbox:SetNumeric(true)
     slider.editbox:SetMaxLetters(3)
+    slider.editbox.reset_text = '1'
     slider.label:SetText('Stack Size')
     stack_size_slider = slider
 end

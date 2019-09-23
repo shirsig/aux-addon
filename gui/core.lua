@@ -325,7 +325,7 @@ function M.editbox(parent)
         local last_click = { t = 0 }
         editbox:SetScript('OnMouseDown', function(self, button)
 	        if button == 'RightButton' then
-                self:SetText('')
+                self:SetText(self.reset_text or '')
                 self:ClearFocus()
                 self.block_focus = true
 	        else

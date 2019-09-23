@@ -671,9 +671,11 @@ local methods = {
         if IsControlKeyDown() or IsShiftKeyDown() then
             HandleModifiedItemClick(self.record.link)
         else
-            local selection = self.rt:GetSelection()
-            if not selection or selection.record ~= self.record then
-                self.rt:SetSelectedRecord(self.record)
+            if button == 'LeftButton' then
+                local selection = self.rt:GetSelection()
+                if not selection or selection.record ~= self.record then
+                    self.rt:SetSelectedRecord(self.record)
+                end
             end
 	        do (self.rt.handlers.OnClick or pass)(self, button) end
         end

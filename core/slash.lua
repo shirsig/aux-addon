@@ -66,6 +66,7 @@ function SlashCmdList.AUX(command)
             aux.print('Scan started. Please wait...')
             scan.start{
                 type = 'list',
+                queries = {{blizzard_query = {}}},
                 get_all = true,
                 on_complete = function()
                     aux.print('Scan complete.')
