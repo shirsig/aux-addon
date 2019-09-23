@@ -169,7 +169,7 @@ function scan_page(page)
 
     local t0 = GetTime()
     while true do
-        if not last_update and GetTime() - t0 > (state.params.get_all and 3 or 1) * TIMEOUT then
+        if not last_update and GetTime() - t0 > TIMEOUT and not state.params.get_all then
             break
         elseif last_update and GetTime() - last_update > TIMEOUT then
             break
