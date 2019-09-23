@@ -12,13 +12,13 @@ function aux.handle.LOAD()
         refresh = true
     end)
     aux.coro_thread(function()
-        repeat
+        while true do
             local timestamp = GetTime()
             while GetTime() - timestamp < 1 do
                 aux.coro_wait()
             end
             refresh = true
-        until false
+        end
     end)
 end
 
