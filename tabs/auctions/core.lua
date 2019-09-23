@@ -42,9 +42,9 @@ end
 function cancel_auction()
     local record = listing:GetSelection().record
     for i in scan.owner_auctions() do
-        if not locked[i] and scan_util.test('owner', record, i) then
+        if GetTime() - (locked[i] or 0) > .5 and scan_util.test('owner', record, i) then
             CancelAuction(i)
-            locked[i] = true
+            locked[i] = GetTime()
             return
         end
     end

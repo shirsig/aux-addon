@@ -289,7 +289,7 @@ function M.parse_filter_string(str)
                 tinsert(post_filter, {'filter', parts[i], parts[i + 1]})
                 i = i + 1
             else
-                tinsert(post_filter, T{'filter', parts[i]})
+                tinsert(post_filter, {'filter', parts[i]})
             end
             tinsert(filter, post_filter[#post_filter])
         else

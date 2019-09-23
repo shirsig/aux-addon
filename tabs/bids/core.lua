@@ -42,12 +42,12 @@ end
 function place_bid(buyout)
     local record = listing:GetSelection().record
     for i in scan.bidder_auctions() do
-        if not locked[i] and scan_util.test('bidder', record, i) then
+        if GetTime() - (locked[i] or 0) > .5 and scan_util.test('bidder', record, i) then
             local money = GetMoney()
             local amount = buyout and record.buyout_price or record.bid_price
             PlaceAuctionBid('bidder', i, amount)
             if money >= amount then -- TODO maybe try to reset it after errors instead
-                locked[i] = true
+                locked[i] = GetTime()
             end
             return
         end
