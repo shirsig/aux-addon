@@ -648,18 +648,16 @@ local methods = {
     OnEnter = function(self)
         local rt = self.rt
 
-        if rt.rowInfo.single_item then
-            return
-        end
-
-        if rt.expanded[self.expandKey] then
-            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:AddLine('Double-click to collapse this item.', 1, 1, 1, true)
-            GameTooltip:Show()
-        elseif self.expandable then
-            GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-            GameTooltip:AddLine('Double-click to expand this item.', 1, 1, 1, true)
-            GameTooltip:Show()
+        if not rt.rowInfo.single_item then
+            if rt.expanded[self.expandKey] then
+                GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+                GameTooltip:AddLine('Double-click to collapse this item.', 1, 1, 1, true)
+                GameTooltip:Show()
+            elseif self.expandable then
+                GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
+                GameTooltip:AddLine('Double-click to expand this item.', 1, 1, 1, true)
+                GameTooltip:Show()
+            end
         end
 
         self.highlight:Show()
