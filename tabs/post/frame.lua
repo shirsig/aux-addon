@@ -244,7 +244,7 @@ do
         if is_user_input then
             set_bid_selection()
             set_buyout_selection()
-            set_unit_start_price(money.from_string(self:GetText()))
+            set_unit_start_price(money.from_string(self:GetText()) or 0)
         end
     end
     editbox.enter = function(self)
@@ -288,7 +288,7 @@ do
         refresh = true
         if is_user_input then
             set_buyout_selection()
-            set_unit_buyout_price(money.from_string(self:GetText()))
+            set_unit_buyout_price(money.from_string(self:GetText()) or 0)
         end
     end
     editbox.enter = function(self)
