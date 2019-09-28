@@ -93,7 +93,6 @@ function get_unit_start_price()
 end
 
 function set_unit_start_price(amount)
-    p.kek(amount)
 	local settings = read_settings()
 	settings.start_price = amount
 	write_settings(settings)
