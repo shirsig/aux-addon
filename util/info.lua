@@ -3,9 +3,6 @@ select(2, ...) 'aux.util.info'
 local aux = require 'aux'
 
 CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
-AuxTooltip:SetScript('OnTooltipAddMoney', function(self, arg1)
-    self.money = arg1
-end)
 
 do
     local map = { [1] = 2, [2] = 8, [3] = 24 }
@@ -22,7 +19,7 @@ function M.container_item(bag, slot)
 
         local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- TODO quality not working?
         local durability, max_durability = GetContainerItemDurability(bag, slot)
-        local tooltip, tooltip_money = tooltip('bag', bag, slot)
+        local tooltip = tooltip('bag', bag, slot)
         local auctionable = auctionable(tooltip) and durability == max_durability and not lootable
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
@@ -52,7 +49,6 @@ function M.container_item(bag, slot)
             auctionable = auctionable,
 
             tooltip = tooltip,
-    	    tooltip_money = tooltip_money,
             max_charges = max_charges,
             charges = charges,
             aux_quantity = aux_quantity,
@@ -85,7 +81,7 @@ function M.auction(index, query_type)
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
 
     	local duration = GetAuctionItemTimeLeft(query_type, index)
-        local tooltip, tooltip_money = tooltip('auction', query_type, index)
+        local tooltip = tooltip('auction', query_type, index)
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
         local aux_quantity = charges or count
@@ -124,7 +120,6 @@ function M.auction(index, query_type)
             usable = usable,
 
             tooltip = tooltip,
-    	    tooltip_money = tooltip_money,
             max_charges = max_charges,
             charges = charges,
             aux_quantity = aux_quantity,
@@ -189,7 +184,6 @@ end
 
 function M.tooltip(setter, arg1, arg2)
     AuxTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
-    AuxTooltip.money = 0
     if setter == 'auction' then
 	    AuxTooltip:SetAuctionItem(arg1, arg2)
     elseif setter == 'bag' then
@@ -208,7 +202,7 @@ function M.tooltip(setter, arg1, arg2)
             end
         end
     end
-    return tooltip, AuxTooltip.money
+    return tooltip
 end
 
 do
