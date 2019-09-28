@@ -52,6 +52,24 @@ local handlers = {
 			handler(self.st, self.data, self, button)
 		end
 	end,
+
+    OnMouseDown = function(self, button)
+        if not self.data then return end
+
+        local handler = self.st.handlers.OnMouseDown
+        if handler then
+            handler(self.st, self.data, self, button)
+        end
+    end,
+
+    OnMouseUp = function(self, button)
+        if not self.data then return end
+
+        local handler = self.st.handlers.OnMouseUp
+        if handler then
+            handler(self.st, self.data, self, button)
+        end
+    end,
 }
 
 local methods = {

@@ -637,7 +637,6 @@ local methods = {
 	        GameTooltip:SetOwner(self, 'ANCHOR_RIGHT')
             GameTooltip:SetHyperlink(row.record.link)
             GameTooltip_ShowCompareItem()
---            info.set_shopping_tooltip(row.record.slot)
         end
     end,
 

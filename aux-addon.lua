@@ -109,7 +109,6 @@ do
 	local index
 	function M.get_tab() return tab_info[index] end
 	function on_tab_click(i)
-		CloseDropDownMenus()
 		do (index and get_tab().CLOSE or pass)() end
 		index = i
 		do (index and get_tab().OPEN or pass)() end
@@ -126,7 +125,6 @@ function M.hook(...)
 	end
 	handler = handler or getfenv(3)[name]
 	orig[object] = orig[object] or {}
-	assert(not orig[object][name], '"' .. name .. '" is already hooked into.')
 	orig[object][name], object[name] = object[name], handler
 	return hook
 end

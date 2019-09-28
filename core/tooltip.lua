@@ -16,13 +16,13 @@ function aux.handle.LOAD()
     settings = aux.character_data.tooltip
 --    do
 --        local inside_hook = false
-    for name, f in pairs(game_tooltip_hooks) do
-        hooksecurefunc(GameTooltip, name, function(self, ...)
-            if not self:IsForbidden() then
-                f(...)
-            end
-        end)
-    end
+--    for name, f in pairs(game_tooltip_hooks) do
+--        hooksecurefunc(GameTooltip, name, function(self, ...)
+--            if not self:IsForbidden() then
+--                f(...)
+--            end
+--        end)
+--    end
 
     ItemRefTooltip:HookScript('OnTooltipSetItem', function(self)
         local _, link = self:GetItem()

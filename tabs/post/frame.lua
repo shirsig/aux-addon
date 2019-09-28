@@ -179,10 +179,8 @@ do
         prepare_stack()
     end
     slider.editbox:SetScript('OnTabPressed', function()
-        if IsShiftKeyDown() then
-            unit_buyout_price_input:SetFocus()
-        else
-            unit_start_price_input:SetFocus()
+        if not IsShiftKeyDown() then
+            duration_selector:SetFocus()
         end
     end)
     slider.editbox:SetNumeric(true)
@@ -192,17 +190,23 @@ do
     stack_size_slider = slider
 end
 do
-    local dropdown = gui.dropdown(frame.parameters)
-    dropdown:SetPoint('TOPLEFT', stack_size_slider, 'BOTTOMLEFT', 0, -22)
-    dropdown:SetWidth(90)
-    local label = gui.label(dropdown, gui.font_size.small)
-    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, -3)
-    label:SetText('Duration')
-    UIDropDownMenu_Initialize(dropdown, initialize_duration_dropdown)
-    dropdown:SetScript('OnShow', function(self)
-        UIDropDownMenu_Initialize(self, initialize_duration_dropdown)
+    local selector = gui.selector(frame.parameters)
+    selector.selection_change = function() duration_selection_change() end
+    selector:SetPoint('TOPLEFT', stack_size_slider, 'BOTTOMLEFT', 0, -25)
+    selector:SetWidth(90)
+    selector:SetHeight(22)
+    selector:SetFontSize(17)
+    selector:SetScript('OnTabPressed', function()
+        if IsShiftKeyDown() then
+            stack_size_slider:SetFocus()
+        else
+            unit_start_price_input:SetFocus()
+        end
     end)
-    duration_dropdown = dropdown
+    local label = gui.label(selector, gui.font_size.small)
+    label:SetPoint('BOTTOMLEFT', selector, 'TOPLEFT', -2, 1)
+    label:SetText('Duration')
+    duration_selector = selector
 end
 do
     local checkbox = gui.checkbox(frame.parameters)

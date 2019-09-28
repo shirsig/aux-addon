@@ -213,7 +213,7 @@ function post_auction()
     local stack_size = stack_size_slider:GetValue()
     local start_price = max(1, aux.round(get_unit_start_price() * stack_size)) -- TODO retail
     local buyout_price = aux.round(get_unit_buyout_price() * stack_size)
-    local duration = UIDropDownMenu_GetSelectedValue(duration_dropdown)
+    local duration = duration_selector:GetIndex()
 
     local item_info = info.container_item(unpack(slot))
     if not item_info or item_info.item_key ~= item_key or item_info.aux_quantity ~= stack_size then
@@ -294,14 +294,14 @@ function update_item_configuration()
         unit_buyout_price_input:Hide()
         stack_size_slider:Hide()
         deposit:Hide()
-        duration_dropdown:Hide()
+        duration_selector:Hide()
         hide_checkbox:Hide()
     else
 		unit_start_price_input:Show()
         unit_buyout_price_input:Show()
         stack_size_slider:Show()
         deposit:Show()
-        duration_dropdown:Show()
+        duration_selector:Show()
         hide_checkbox:Show()
 
         item.texture:SetTexture(selected_item.texture)
@@ -320,7 +320,7 @@ function update_item_configuration()
 
         do
             local deposit_factor = UnitFactionGroup'npc' and .05 or .25
-            local duration_factor = info.duration_hours(UIDropDownMenu_GetSelectedValue(duration_dropdown)) / 2
+            local duration_factor = info.duration_hours(duration_selector:GetIndex()) / 2
             local stack_size = selected_item.max_charges and 1 or stack_size_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * duration_factor
             deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))
@@ -380,8 +380,14 @@ function update_item(item)
 
     scan.abort()
 
-    UIDropDownMenu_Initialize(duration_dropdown, initialize_duration_dropdown)
-    UIDropDownMenu_SetSelectedValue(duration_dropdown, settings.duration)
+    do
+        local options = {}
+        for i in aux.iter(2, 8, 24) do
+            tinsert(options, i .. ' Hours')
+        end
+        duration_selector:SetOptions(options)
+    end
+    duration_selector:SetIndex(settings.duration)
 
     hide_checkbox:SetChecked(settings.hidden)
 
@@ -541,27 +547,11 @@ function on_update()
     validate_parameters()
 end
 
-function initialize_duration_dropdown()
-    local function on_click(self)
-        UIDropDownMenu_SetSelectedValue(duration_dropdown, self.value)
+function duration_selection_change()
+    if selected_item then
         local settings = read_settings()
-        settings.duration = self.value
+        settings.duration = duration_selector:GetIndex()
         write_settings(settings)
         refresh = true
     end
-    UIDropDownMenu_AddButton{
-        text = '2 Hours',
-        value = DURATION_2,
-        func = on_click,
-    }
-    UIDropDownMenu_AddButton{
-        text = '8 Hours',
-        value = DURATION_8,
-        func = on_click,
-    }
-    UIDropDownMenu_AddButton{
-        text = '24 Hours',
-        value = DURATION_24,
-        func = on_click,
-    }
 end

@@ -2,7 +2,8 @@ select(2, ...) 'aux.tabs.search'
 
 local aux = require 'aux'
 local filter_util = require 'aux.util.filter'
-local gui = require 'aux.gui'
+
+dragged_search = nil
 
 function aux.handle.LOAD()
 	recent_searches, favorite_searches = aux.realm_data.recent_searches, aux.realm_data.favorite_searches
@@ -52,8 +53,14 @@ end
 
 handlers = {
 	OnClick = function(st, data, _, button)
-		if not data then return end
-		if button == 'LeftButton' and IsShiftKeyDown() then
+        if IsAltKeyDown() and st == favorite_searches_listing then
+            if data.search.alert then
+                data.search.alert = nil
+            else
+                enable_alert(data.search)
+            end
+            update_search_listings()
+		elseif button == 'LeftButton' and IsShiftKeyDown() then
 			set_filter(data.search.filter_string)
 		elseif button == 'RightButton' and IsShiftKeyDown() then
 			add_filter(data.search.filter_string)
@@ -61,23 +68,39 @@ handlers = {
 			set_filter(data.search.filter_string)
 			execute()
 		elseif button == 'RightButton' then
-			local u = update_search_listings
 			if st == recent_searches_listing then
+                for _, entry in pairs(favorite_searches) do
+                    if entry.filter_string == data.search.filter_string then
+                        return
+                    end
+                end
 				tinsert(favorite_searches, 1, data.search)
-				u(d)
 			elseif st == favorite_searches_listing then
-				local alert = data.search.alert
-				gui.menu(
-					(alert and 'Disable' or 'Enable') .. ' Alert', function() if alert then data.search.alert = nil else enable_alert(data.search) end u() end,
-					'Move Up', function() move_up(favorite_searches, data.index); u() end,
-					'Move Down', function() move_down(favorite_searches, data.index); u() end,
-					'Delete', function() tremove(favorite_searches, data.index); u() end
-				)
-			end
-		end
+                tremove(favorite_searches, data.index)
+            end
+            update_search_listings()
+        end
 	end,
-	OnEnter = function(st, data, self)
-		if not data then return end
+    OnMouseDown = function(st, data)
+        if st == favorite_searches_listing then
+            dragged_search = favorite_searches[data.index]
+        end
+    end,
+    OnMouseUp = function(st)
+        if st == favorite_searches_listing then
+            dragged_search = nil
+        end
+    end,
+    OnEnter = function(st, data)
+        if st == favorite_searches_listing and dragged_search then
+            for i = #favorite_searches, 1, -1 do
+                if favorite_searches[i] == dragged_search then
+                    tremove(favorite_searches, i)
+                end
+            end
+            tinsert(favorite_searches, data.index, dragged_search)
+            update_search_listings()
+        end
 		GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
 		GameTooltip:AddLine(gsub(data.search.prettified, ';', '\n\n'), 255/255, 254/255, 250/255, true)
 		GameTooltip:Show()
@@ -130,17 +153,5 @@ function enable_alert(search)
 		end
 	else
 		aux.print('Invalid filter:', error)
-	end
-end
-
-function move_up(list, index)
-	if list[index - 1] then
-		list[index], list[index - 1] = list[index - 1], list[index]
-	end
-end
-
-function move_down(list, index)
-	if list[index + 1] then
-		list[index], list[index + 1] = list[index + 1], list[index]
 	end
 end
