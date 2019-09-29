@@ -383,7 +383,7 @@ function update_item(item)
     do
         local options = {}
         for _, i in ipairs{2, 8, 24} do
-            tinsert(options, i .. ' Hours')
+            tinsert(options, aux.pluralize(i .. ' ' .. HOURS))
         end
         duration_selector:SetOptions(options)
     end

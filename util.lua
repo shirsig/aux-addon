@@ -9,7 +9,7 @@ M.immutable = setmetatable({}, {
 })
 
 function M.pluralize(text)
-    return gsub(text, '(-?%d+) |4([^;]-);', function(number_string, number_forms)
+    local text = gsub(text, '(-?%d+)(.-)|4([^;]-);', function(number_string, gap, number_forms)
         local singular, dual, plural
         _, _, singular, dual, plural = strfind(number_forms, '(.+):(.+):(.+)');
         if not singular then
@@ -24,8 +24,9 @@ function M.pluralize(text)
         else
             number_form = plural
         end
-        return format('%s %s', number_string, number_form)
+        return number_string .. gap .. number_form
     end)
+    return text
 end
 
 function M.wipe(t)
