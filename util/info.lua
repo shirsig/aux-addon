@@ -208,7 +208,7 @@ end
 do
     local patterns = {}
     for i = 1, 10 do
-        patterns[format(ITEM_SPELL_CHARGES, i)] = i
+        patterns[aux.pluralize(format(ITEM_SPELL_CHARGES, i))] = i
     end
 
 	function item_charges(tooltip)

@@ -8,6 +8,26 @@ M.immutable = setmetatable({}, {
 	end
 })
 
+function M.pluralize(text)
+    return gsub(text, '(-?%d+) |4([^;]-);', function(number_string, number_forms)
+        local singular, dual, plural
+        _, _, singular, dual, plural = strfind(number_forms, '(.+):(.+):(.+)');
+        if not singular then
+            _, _, singular, plural = strfind(number_forms, '(.+):(.+)')
+        end
+        local i = abs(tonumber(number_string))
+        local number_form
+        if i == 1 then
+            number_form = singular
+        elseif i == 2 then
+            number_form = dual or plural
+        else
+            number_form = plural
+        end
+        return format('%s %s', number_string, number_form)
+    end)
+end
+
 function M.wipe(t)
     setmetatable(t, nil)
     for k in pairs(t) do

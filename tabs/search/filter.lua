@@ -332,16 +332,3 @@ function initialize_quality_selector()
     end
     quality_selector:SetOptions(options)
 end
-
---function filter_selection_change()
---    local value = filter_selector:GetText()
---    filter_input:SetText(value)
---    if aux.index(filter_util.filters[value], 'input_type') == '' or value == 'not' then
---        add_form_component()
---    elseif filter_util.filters[value] then
---        filter_parameter_input:Show()
---        filter_parameter_input:SetFocus()
---    else
---        filter_input:SetFocus()
---    end
---end
