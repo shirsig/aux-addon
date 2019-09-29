@@ -311,15 +311,6 @@ do
 	        status_bar:SetScript('OnUpdate', update_bar)
 	        self.primary_status_bar = status_bar
 	    end
-	    do
-	        local text_frame = CreateFrame('Frame', nil, self)
-	        text_frame:SetFrameLevel(level + 4)
-	        text_frame:SetAllPoints(self)
-	        local text = label(text_frame, font_size.medium)
-	        text:SetTextColor(aux.color.text.enabled())
-	        text:SetPoint('CENTER', 0, 0)
-	        self.text = text
-	    end
 	    function self:update_status(primary_status, secondary_status)
 	        if primary_status then
 	            self.primary_status_bar:SetValue(primary_status)
@@ -327,9 +318,6 @@ do
 	        if secondary_status then
 	            self.secondary_status_bar:SetValue(secondary_status)
 	        end
-	    end
-	    function self:set_text(text)
-	        self.text:SetText(text)
 	    end
 	    return self
 	end

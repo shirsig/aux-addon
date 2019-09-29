@@ -540,14 +540,8 @@ do
     filter_display = scroll_child
 end
 
-status_bars = {}
 tables = {}
 for _ = 1, 5 do
-    local status_bar = gui.status_bar(frame)
-    status_bar:SetAllPoints(status_bar_frame)
-    status_bar:Hide()
-    tinsert(status_bars, status_bar)
-
     local table = auction_listing.new(frame.results, 16, auction_listing.search_columns)
     table:SetHandler('OnClick', function(row, button)
 	    if IsAltKeyDown() then

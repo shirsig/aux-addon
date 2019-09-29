@@ -36,16 +36,8 @@ listing:SetHandler('OnClick', function(row, button)
 end)
 
 do
-	status_bar = gui.status_bar(frame)
-    status_bar:SetWidth(265)
-    status_bar:SetHeight(25)
-    status_bar:SetPoint('TOPLEFT', aux.frame.content, 'BOTTOMLEFT', 0, -6)
-    status_bar:update_status(1, 0)
-    status_bar:set_text('')
-end
-do
     local btn = gui.button(frame)
-    btn:SetPoint('TOPLEFT', status_bar, 'TOPRIGHT', 5, 0)
+    btn:SetPoint('TOPLEFT', aux.status_bar, 'TOPRIGHT', 5, 0)
     btn:SetText('Bid')
     btn:Disable()
     btn:SetScript('OnClick', function() place_bid() end)

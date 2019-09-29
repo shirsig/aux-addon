@@ -10,7 +10,7 @@ function M.test(type, record, index)
 	return auction_record and auction_record.search_signature == record.search_signature
 end
 
-function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
+function M.find(auction_record, on_abort, on_failure, on_success)
 
     local queries = {{}}
 
@@ -37,17 +37,15 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
     return scan.start{
         queries = queries,
         on_scan_start = function()
-            status_bar:update_status(0, 0)
-            status_bar:set_text('Searching auction...')
+            aux.status_bar:update_status(0, 0)
         end,
         on_start_query = function(query_index)
-            status_bar:update_status((query_index - 1) / #queries, 0)
+            aux.status_bar:update_status((query_index - 1) / #queries, 0)
         end,
         on_auction = function(record)
             if test('list', auction_record, record.index) then
                 found = true
-                status_bar:update_status(1, 1)
-                status_bar:set_text('Auction found')
+                aux.status_bar:update_status(1, 1)
                 on_success(record.index)
                 scan.abort()
                 aux.coro_wait()
@@ -55,15 +53,13 @@ function M.find(auction_record, status_bar, on_abort, on_failure, on_success)
         end,
         on_abort = function()
             if not found then
-                status_bar:update_status(1, 1)
-                status_bar:set_text('Auction not found')
+                aux.status_bar:update_status(1, 1)
                 on_abort()
             end
         end,
         on_complete = function()
 	        if not found then
-	            status_bar:update_status(1, 1)
-	            status_bar:set_text('Auction not found')
+	            aux.status_bar:update_status(1, 1)
 	            on_failure()
 	        end
         end,

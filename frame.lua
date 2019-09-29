@@ -31,6 +31,14 @@ do
 	M.frame = frame
 end
 do
+    local status_bar = gui.status_bar(frame.content)
+    status_bar:SetWidth(265)
+    status_bar:SetHeight(25)
+    status_bar:SetPoint('TOPLEFT', frame.content, 'BOTTOMLEFT', 0, -6)
+    status_bar:update_status(1, 1)
+    M.status_bar = status_bar
+end
+do
 	tabs = gui.tabs(frame, 'DOWN')
 	tabs._on_select = on_tab_click
 	function M.set_tab(id) tabs:select(id) end

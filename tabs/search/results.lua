@@ -39,13 +39,11 @@ do
 	end
 
 	function update_search(index)
-		searches[search_index].status_bar:Hide()
 		searches[search_index].table:Hide()
 		searches[search_index].table:SetSelectedRecord()
 
 		search_index = index
 
-		searches[search_index].status_bar:Show()
 		searches[search_index].table:Show()
 
 		search_box:SetText(searches[search_index].filter_string or '')
@@ -78,14 +76,11 @@ do
 		tinsert(searches, search)
 		if #searches > 5 then
 			tremove(searches, 1)
-			tinsert(status_bars, tremove(status_bars, 1))
 			tinsert(tables, tremove(tables, 1))
 			search_index = 4
 		end
 
-		search.status_bar = status_bars[#searches]
-		search.status_bar:update_status(1, 1)
-		search.status_bar:set_text('')
+		aux.status_bar:update_status(1, 1)
 
 		search.table = tables[#searches]
 		search.table:SetSort(1, 2, 3, 4, 5, 6, 7, 8, 9)
@@ -156,8 +151,7 @@ function start_real_time_scan(query, search, continuation)
 		type = 'list',
 		queries = {query},
 		on_scan_start = function()
-			search.status_bar:update_status(.9999, .9999)
-			search.status_bar:set_text('Scanning ...')
+			aux.status_bar:update_status(.9999, .9999)
 		end,
         on_page_loaded = function(_, _, last_page)
             next_page = last_page
@@ -195,8 +189,7 @@ function start_real_time_scan(query, search, continuation)
 			start_real_time_scan(query, search)
 		end,
 		on_abort = function()
-			search.status_bar:update_status(1, 1)
-			search.status_bar:set_text('Scan paused')
+			aux.status_bar:update_status(1, 1)
 
 			search.continuation = next_page or not ignore_page and query.blizzard_query.first_page or true
 
@@ -234,20 +227,14 @@ function start_search(queries, continuation)
 		queries = queries,
         alert_validator = search.alert_validator,
 		on_scan_start = function()
-			search.status_bar:update_status(0, 0)
-			if continuation then
-				search.status_bar:set_text('Resuming scan...')
-			else
-				search.status_bar:set_text('Scanning auctions...')
-			end
+			aux.status_bar:update_status(0, 0)
 		end,
 		on_page_loaded = function(_, total_scan_pages)
 			current_page = current_page + 1
 			total_scan_pages = total_scan_pages + (start_page - 1)
 			total_scan_pages = max(total_scan_pages, 1)
 			current_page = min(current_page, total_scan_pages)
-			search.status_bar:update_status((current_query - 1) / #queries, current_page / total_scan_pages)
-			search.status_bar:set_text(format('Scanning %d / %d (Page %d / %d)', current_query, total_queries, current_page, total_scan_pages))
+			aux.status_bar:update_status((current_query - 1) / #queries, current_page / total_scan_pages)
 		end,
 		on_page_scanned = function()
 			search.table:SetDatabase()
@@ -268,8 +255,7 @@ function start_search(queries, continuation)
 			end
 		end,
 		on_complete = function()
-			search.status_bar:update_status(1, 1)
-			search.status_bar:set_text('Scan complete')
+			aux.status_bar:update_status(1, 1)
 
 			if current_search() == search and frame.results:IsVisible() and #search.records == 0 then
 				set_subtab(SAVED)
@@ -279,8 +265,7 @@ function start_search(queries, continuation)
 			update_start_stop()
 		end,
 		on_abort = function()
-			search.status_bar:update_status(1, 1)
-			search.status_bar:set_text('Scan paused')
+			aux.status_bar:update_status(1, 1)
 
 			if current_query then
 				search.continuation = {current_query, current_page + 1}
@@ -380,7 +365,6 @@ do
 		state = SEARCHING
 		scan_util.find(
 			record,
-			current_search().status_bar,
 			function()
 				state = IDLE
 			end,
