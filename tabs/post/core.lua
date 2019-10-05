@@ -465,14 +465,16 @@ function refresh_entries()
         set_buyout_selection()
         bid_records[item_key], buyout_records[item_key] = nil, nil
         local query = scan_util.item_query(selected_item.item_id)
-        aux.status_bar:update_status(0, 0)
 
 		scan.start{
             type = 'list',
             ignore_owner = true,
 			queries = {query},
+            on_scan_start = function()
+                aux.status_bar:update_status(0, 0)
+            end,
 			on_page_loaded = function(page, total_pages)
-                aux.status_bar:update_status(page / total_pages, 0) -- TODO
+                aux.status_bar:update_status(page / total_pages, 0)
 			end,
 			on_auction = function(auction_record)
 				if auction_record.item_key == item_key then

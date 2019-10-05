@@ -1,6 +1,7 @@
 select(2, ...) 'aux'
 
 local gui = require 'aux.gui'
+local scan = require 'aux.core.scan'
 
 function event.AUX_LOADED()
 	for _, v in ipairs(tab_info) do
@@ -63,4 +64,45 @@ do
             AuctionFrame_Show()
         end
 	end)
+    blizzard_button = btn
+end
+do
+    local btn = gui.button(frame)
+    btn:SetPoint('RIGHT', blizzard_button, 'LEFT' , -5, 0)
+    gui.set_size(btn, 60, 24)
+    btn:SetText('Scan')
+    btn:SetScript('OnUpdate', function(self)
+        if select(2, CanSendAuctionQuery()) then
+            self:Enable()
+            self:SetBackdropColor(color.state.enabled())
+        else
+            self:Disable()
+            self:SetBackdropColor(color.content.background())
+        end
+    end)
+    btn:SetScript('OnClick', function()
+        local total
+        local count = 0
+        scan.start{
+            type = 'list',
+            queries = {{blizzard_query = {}}},
+            get_all = true,
+            on_scan_start = function()
+                status_bar:update_status(0, 0)
+            end,
+            on_page_loaded = function(_, _, _, page_size)
+                total = page_size
+            end,
+            on_auction = function()
+                count = count + 1
+                status_bar:update_status(count / total, 0)
+            end,
+            on_abort = function()
+                status_bar:update_status(1, 1)
+            end,
+            on_complete = function()
+                status_bar:update_status(1, 1)
+            end,
+        }
+    end)
 end

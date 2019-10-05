@@ -57,25 +57,8 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'clear' and arguments[2] == 'post' then
         aux.faction_data.post = {}
         aux.print('Post data cleared.')
-    elseif arguments[1] == 'scan' then
-        if not aux.frame:IsShown() then
-            aux.print('Must be at the auction house to scan.')
-        elseif not select(2, CanSendAuctionQuery()) then
-            aux.print('Can only scan once every 15 minutes.')
-        else
-            aux.print('Scan started. Please wait...')
-            scan.start{
-                type = 'list',
-                queries = {{blizzard_query = {}}},
-                get_all = true,
-                on_complete = function()
-                    aux.print('Scan complete.')
-                end,
-            }
-        end
 	else
 		aux.print('Usage:')
-        aux.print('- scan')
         aux.print('- scale [' .. aux.color.blue(aux.account_data.scale) .. ']')
 		aux.print('- ignore owner [' .. status(aux.account_data.ignore_owner) .. ']')
 		aux.print('- post bid [' .. status(aux.account_data.post_bid) .. ']')

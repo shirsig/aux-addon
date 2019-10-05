@@ -67,7 +67,7 @@ function get_query()
 end
 
 function total_pages()
-    local page_size, total_auctions = GetNumAuctionItems('list')
+    local page_size, total_auctions = GetNumAuctionItems'list'
     if not state.params.get_all then
         page_size = PAGE_SIZE
     end
@@ -75,7 +75,7 @@ function total_pages()
 end
 
 function last_page()
-    local _, total_auctions = GetNumAuctionItems('list')
+    local _, total_auctions = GetNumAuctionItems'list'
     local last_page = max(total_pages(total_auctions) - 1, 0)
     local last_page_limit = get_query().blizzard_query.last_page or last_page
     return min(last_page_limit, last_page)
@@ -94,8 +94,8 @@ function scan()
                     break
                 end
             end
-		elseif GetNumAuctionItems('list') <= PAGE_SIZE then
-			for i, auction in auctions('list') do
+		elseif GetNumAuctionItems'list' <= PAGE_SIZE then
+			for i, auction in auctions'list' do
                 process_auction(auction, i)
             end
         end
@@ -152,14 +152,16 @@ function scan_page(page)
 
     state.listener_id = aux.event_listener('AUCTION_ITEM_LIST_UPDATE', function()
         if not last_update then
-            for i = 1, GetNumAuctionItems('list') do
+            local page_size = GetNumAuctionItems'list'
+            for i = 1, page_size do
                 pending[i] = true
             end
             do
                 (state.params.on_page_loaded or pass)(
                     page - (get_query().blizzard_query.first_page or 0) + 1,
                     last_page() - (get_query().blizzard_query.first_page or 0) + 1,
-                    total_pages() - 1
+                    total_pages() - 1,
+                    page_size
                 )
             end
         end
@@ -176,7 +178,7 @@ function scan_page(page)
         elseif updated then
             updated = false
             local count = 0
-            for i = 1, GetNumAuctionItems('list') do
+            for i = 1, GetNumAuctionItems'list' do
                 if pending[i] then
                     local auction = info.auction(i, 'list')
                     if auction then
