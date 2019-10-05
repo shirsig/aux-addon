@@ -238,10 +238,9 @@ do
 			if not self[str] and (str == 'usable' or str == 'exact' and self.name and aux.size(self) == 1) then
 				self[str] = {str, 1}
 				return {'blizzard', str, str, 1}
-			elseif i == 1 and strlen(str) <= 63 then
+			elseif i == 1 then
 				self.name = unquote(str)
 				return {'blizzard', 'name', unquote(str), str}
---				return nil, 'The name filter must not be longer than 63 characters' TODO
 			end
 		end,
 	}
