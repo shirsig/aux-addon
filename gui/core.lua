@@ -421,11 +421,11 @@ do
                 return
             end
 
-            dropdown_frame:SetParent(editbox)
+            dropdown_frame:SetScale(editbox:GetEffectiveScale())
             dropdown_frame:ClearAllPoints()
             local width = editbox:GetWidth() + 4
             dropdown_frame:SetWidth(width)
-            dropdown_frame:SetPoint('TOP', editbox, 'BOTTOM', 0, -1)
+            dropdown_frame:SetPoint('TOP', editbox, 'BOTTOM', 0, 0)
             for i = 1, max(#options, #dropdown_item_buttons) do
                 local item_button = dropdown_item_buttons[i]
                 if not item_button then
@@ -440,7 +440,7 @@ do
                     item_button:SetWidth(width - 4)
                     item_button:SetText(' ' .. options[i])
                     if i == 1 then
-                        item_button:SetPoint('TOP', editbox, 'BOTTOM', 0, -3)
+                        item_button:SetPoint('TOP', editbox, 'BOTTOM', 0, -2)
                     else
                         item_button:SetPoint('TOP', dropdown_item_buttons[i - 1], 'BOTTOM', 0, -2)
                     end
