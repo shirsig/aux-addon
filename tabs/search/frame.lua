@@ -224,15 +224,8 @@ do
     new_filter_button = btn
 end
 do
-    local frame = CreateFrame('Frame', nil, frame)
-    frame:SetWidth(265)
-    frame:SetHeight(25)
-    frame:SetPoint('TOPLEFT', aux.frame.content, 'BOTTOMLEFT', 0, -6)
-    status_bar_frame = frame
-end
-do
     local btn = gui.button(frame.results)
-    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
+    btn:SetPoint('LEFT', aux.status_bar, 'RIGHT', 5, 0)
     btn:SetText('Bid')
     btn:Disable()
     bid_button = btn
@@ -255,7 +248,7 @@ do
 end
 do
     local btn = gui.button(frame.saved)
-    btn:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
+    btn:SetPoint('LEFT', aux.status_bar, 'RIGHT', 5, 0)
     btn:SetText('Favorite')
     btn:SetScript('OnClick', function()
         add_favorite(search_box:GetText())
@@ -263,7 +256,7 @@ do
 end
 do
     local btn1 = gui.button(frame.filter)
-    btn1:SetPoint('TOPLEFT', status_bar_frame, 'TOPRIGHT', 5, 0)
+    btn1:SetPoint('LEFT', aux.status_bar, 'RIGHT', 5, 0)
     btn1:SetText('Search')
     btn1:SetScript('OnClick', function()
 	    export_filter_string()

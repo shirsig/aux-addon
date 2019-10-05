@@ -278,40 +278,39 @@ function M.editbox(parent)
 end
 
 do
-	local function update_bar(self)
-		if self:GetValue() < 1 then
-            self:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
-		else
-            self:SetAlpha(1)
-		end
-	end
+	local function update_alpha(self)
+		self:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
+    end
+
 	function M.status_bar(parent)
 	    local self = CreateFrame('Frame', nil, parent)
-	    local level = parent:GetFrameLevel()
-	    self:SetFrameLevel(level + 1)
+        set_window_style(self)
 	    do
 	        local status_bar = CreateFrame('StatusBar', nil, self, 'TextStatusBar')
 	        status_bar:SetOrientation('HORIZONTAL')
 	        status_bar:SetMinMaxValues(0, 1)
-	        status_bar:SetAllPoints()
-	        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
+	        status_bar:SetPoint('TOPLEFT', 1.5, -1.5)
+            status_bar:SetPoint('BOTTOMRIGHT', -1.5, 1.5)
+            status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
 	        status_bar:SetStatusBarColor(.42, .42, .42, .7)
-	        status_bar:SetFrameLevel(level + 2)
-	        status_bar:SetScript('OnUpdate', update_bar)
 	        self.secondary_status_bar = status_bar
 	    end
 	    do
-	        local status_bar = CreateFrame('StatusBar', nil, self, 'TextStatusBar')
+	        local status_bar = CreateFrame('StatusBar', nil, self.secondary_status_bar, 'TextStatusBar')
 	        status_bar:SetOrientation('HORIZONTAL')
 	        status_bar:SetMinMaxValues(0, 1)
 	        status_bar:SetAllPoints()
 	        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
 	        status_bar:SetStatusBarColor(.19, .22, .33, .9)
-	        status_bar:SetFrameLevel(level + 3)
-	        status_bar:SetScript('OnUpdate', update_bar)
 	        self.primary_status_bar = status_bar
 	    end
 	    function self:update_status(primary_status, secondary_status)
+            if max(primary_status or 0, secondary_status or 0) < 1 then
+                self:SetScript('OnUpdate', update_alpha)
+            else
+                self:SetScript('OnUpdate', nil)
+                self:SetAlpha(1)
+            end
 	        if primary_status then
 	            self.primary_status_bar:SetValue(primary_status)
 	        end

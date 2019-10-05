@@ -123,7 +123,7 @@ end)
 
 do
     local btn = gui.button(frame.parameters)
-    btn:SetPoint('TOPLEFT', aux.status_bar, 'TOPRIGHT', 5, 0)
+    btn:SetPoint('LEFT', aux.status_bar, 'RIGHT', 5, 0)
     btn:SetText('Post')
     btn:SetScript('OnClick', post_auction)
     post_button = btn

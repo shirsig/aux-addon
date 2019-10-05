@@ -234,7 +234,7 @@ function start_search(queries, continuation)
 			total_scan_pages = total_scan_pages + (start_page - 1)
 			total_scan_pages = max(total_scan_pages, 1)
 			current_page = min(current_page, total_scan_pages)
-			aux.status_bar:update_status((current_query - 1) / #queries, current_page / total_scan_pages)
+			aux.status_bar:update_status(current_page / total_scan_pages, (current_query - 1) / #queries)
 		end,
 		on_page_scanned = function()
 			search.table:SetDatabase()

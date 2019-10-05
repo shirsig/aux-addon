@@ -33,8 +33,8 @@ end
 do
     local status_bar = gui.status_bar(frame.content)
     status_bar:SetWidth(265)
-    status_bar:SetHeight(25)
-    status_bar:SetPoint('TOPLEFT', frame.content, 'BOTTOMLEFT', 0, -6)
+    status_bar:SetHeight(27)
+    status_bar:SetPoint('TOPLEFT', frame.content, 'BOTTOMLEFT', 0, -3)
     status_bar:update_status(1, 1)
     M.status_bar = status_bar
 end

@@ -37,7 +37,7 @@ end)
 
 do
     local btn = gui.button(frame)
-    btn:SetPoint('TOPLEFT', aux.status_bar, 'TOPRIGHT', 5, 0)
+    btn:SetPoint('LEFT', aux.status_bar, 'RIGHT', 5, 0)
     btn:SetText('Bid')
     btn:Disable()
     btn:SetScript('OnClick', function() place_bid() end)
