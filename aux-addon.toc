@@ -1,7 +1,7 @@
 ## Interface: 11302
 ## Author: shirsig
 ## Title: aux
-## Version: 0.6.1
+## Version: 0.7.0
 ## Notes: Auction House replacement
 ## SavedVariables: aux
 
@@ -25,7 +25,6 @@ util\completion.lua
 core\slash.lua
 core\scan.lua
 util\scan.lua
-core\stack.lua
 core\tooltip.lua
 core\shortcut.lua
 

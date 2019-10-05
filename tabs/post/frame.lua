@@ -161,18 +161,23 @@ end
 do
     local slider = gui.slider(frame.parameters)
     slider:SetValueStep(1)
-    slider:SetPoint('TOPLEFT', 13, -82)
+    slider:SetPoint('TOPLEFT', 13, -73)
     slider:SetWidth(190)
-    slider:SetScript('OnValueChanged', function()
-        refresh = true
+    slider:SetScript('OnValueChanged', function(_, _, is_user_input)
+--        if is_user_input then -- TODO need to solve issue of slider click not counting as user input
+            quantity_update(true)
+            refresh = true
+--        end
     end)
-    slider.editbox.change = function(self)
-        slider:SetValue(self:GetNumber())
-        prepare_stack()
+    slider.editbox.change = function(self, is_user_input)
+        if is_user_input then
+            slider:SetValue(self:GetNumber())
+            quantity_update(true)
+        end
     end
     slider.editbox:SetScript('OnTabPressed', function()
         if not IsShiftKeyDown() then
-            duration_dropdown:SetFocus()
+            stack_count_slider.editbox:SetFocus()
         end
     end)
     slider.editbox:SetNumeric(true)
@@ -182,15 +187,42 @@ do
     stack_size_slider = slider
 end
 do
+    local slider = gui.slider(frame.parameters)
+    slider:SetValueStep(1)
+    slider:SetPoint('TOPLEFT', stack_size_slider, 'BOTTOMLEFT', 0, -32)
+    slider:SetWidth(190)
+    slider:SetScript('OnValueChanged', function(_, _, is_user_input)
+--        if is_user_input then
+            quantity_update()
+--        end
+    end)
+    slider.editbox.change = function(self, is_user_input)
+        if is_user_input then
+            slider:SetValue(self:GetNumber())
+            quantity_update()
+        end
+    end
+    slider.editbox:SetScript('OnTabPressed', function()
+        if IsShiftKeyDown() then
+            stack_size_slider.editbox:SetFocus()
+        else
+            duration_dropdown:SetFocus()
+        end
+    end)
+    slider.editbox:SetNumeric(true)
+    slider.label:SetText('Stack Count')
+    stack_count_slider = slider
+end
+do
     local dropdown = gui.dropdown(frame.parameters, gui.font_size.large)
     dropdown.selection_change = function() duration_selection_change() end
-    dropdown:SetPoint('TOPLEFT', stack_size_slider, 'BOTTOMLEFT', 0, -25)
+    dropdown:SetPoint('TOPLEFT', stack_count_slider, 'BOTTOMLEFT', 0, -25)
     dropdown:SetWidth(90)
     dropdown:SetHeight(22)
     dropdown:SetFontSize(17)
     dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            stack_size_slider:SetFocus()
+            stack_count_slider.editbox:SetFocus()
         else
             unit_start_price_input:SetFocus()
         end
@@ -223,7 +255,7 @@ do
     editbox:SetFontSize(17)
     editbox:SetScript('OnTabPressed', function()
 	    if IsShiftKeyDown() then
-		    stack_size_slider.editbox:SetFocus()
+		    duration_dropdown:SetFocus()
 	    else
 		    unit_buyout_price_input:SetFocus()
 	    end
@@ -269,8 +301,6 @@ do
     editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
             unit_start_price_input:SetFocus()
-        else
-            stack_size_slider.editbox:SetFocus()
         end
     end)
     editbox.formatter = function()
