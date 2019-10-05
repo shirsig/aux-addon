@@ -12,7 +12,7 @@ local UNKNOWN = GRAY_FONT_COLOR_CODE .. '?' .. FONT_COLOR_CODE_CLOSE
 local game_tooltip_hooks = {}
 --local game_tooltip_money = 0
 
-function aux.handle.LOAD()
+function aux.event.AUX_LOADED()
     settings = aux.character_data.tooltip
 --    do
 --        local inside_hook = false

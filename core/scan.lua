@@ -9,7 +9,7 @@ local TIMEOUT = 30
 
 local state
 
-function aux.handle.CLOSE()
+function aux.event.CLOSE()
 	abort()
 end
 

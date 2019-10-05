@@ -18,10 +18,6 @@ frame:Hide()
 
 frame.filter = gui.panel(frame)
 frame.filter:SetAllPoints(aux.frame.content)
-frame.filter:SetScript('OnShow', function()
-    initialize_class_selector()
-    initialize_quality_selector()
-end)
 
 frame.results = gui.panel(frame)
 frame.results:SetAllPoints(aux.frame.content)
@@ -297,7 +293,7 @@ do
     editbox:SetScript('OnTabPressed', function()
         if not IsShiftKeyDown() then
             if blizzard_query.exact then
-                filter_input:SetFocus()
+                filter_dropdown:SetFocus()
             else
                 min_level_input:SetFocus()
             end
@@ -353,7 +349,7 @@ do
         if IsShiftKeyDown() then
             min_level_input:SetFocus()
         else
-            class_selector:SetFocus()
+            class_dropdown:SetFocus()
         end
     end)
     editbox.enter = function() editbox:ClearFocus() end
@@ -377,89 +373,87 @@ do
     usable_checkbox = checkbox
 end
 do
-    local selector = gui.selector(frame.filter)
-    selector.selection_change = function() class_selection_change() end
-    selector:SetPoint('TOPLEFT', min_level_input, 'BOTTOMLEFT', 0, -FILTER_SPACING)
-    selector:SetWidth(300)
-    selector:SetScript('OnTabPressed', function()
+    local dropdown = gui.dropdown(frame.filter)
+    dropdown.selection_change = function() class_selection_change() end
+    dropdown:SetPoint('TOPLEFT', min_level_input, 'BOTTOMLEFT', 0, -FILTER_SPACING)
+    dropdown:SetWidth(300)
+    dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
             max_level_input:SetFocus()
         else
-            subclass_selector:SetFocus()
+            subclass_dropdown:SetFocus()
         end
     end)
-    local label = gui.label(selector, gui.font_size.small)
-    label:SetPoint('BOTTOMLEFT', selector, 'TOPLEFT', -2, 1)
+    local label = gui.label(dropdown, gui.font_size.small)
+    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, 1)
     label:SetText('Item Class')
-    class_selector = selector
+    class_dropdown = dropdown
 end
 do
-    local selector = gui.selector(frame.filter)
-    selector.selection_change = function() subclass_selection_change() end
-    selector:SetPoint('TOPLEFT', class_selector, 'BOTTOMLEFT', 0, -FILTER_SPACING)
-    selector:SetWidth(300)
-    selector:SetScript('OnTabPressed', function()
+    local dropdown = gui.dropdown(frame.filter)
+    dropdown.selection_change = function() subclass_selection_change() end
+    dropdown:SetPoint('TOPLEFT', class_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
+    dropdown:SetWidth(300)
+    dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            class_selector:SetFocus()
+            class_dropdown:SetFocus()
         else
-            slot_selector:SetFocus()
+            slot_dropdown:SetFocus()
         end
     end)
-    local label = gui.label(selector, gui.font_size.small)
-    label:SetPoint('BOTTOMLEFT', selector, 'TOPLEFT', -2, 1)
+    local label = gui.label(dropdown, gui.font_size.small)
+    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, 1)
     label:SetText('Item Subclass')
-    subclass_selector = selector
+    subclass_dropdown = dropdown
 end
 do
-    local selector = gui.selector(frame.filter)
-    selector:SetPoint('TOPLEFT', subclass_selector, 'BOTTOMLEFT', 0, -FILTER_SPACING)
-    selector:SetWidth(300)
-    selector:SetScript('OnTabPressed', function()
+    local dropdown = gui.dropdown(frame.filter)
+    dropdown:SetPoint('TOPLEFT', subclass_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
+    dropdown:SetWidth(300)
+    dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            subclass_selector:SetFocus()
+            subclass_dropdown:SetFocus()
         else
-            quality_selector:SetFocus()
+            quality_dropdown:SetFocus()
         end
     end)
-    local label = gui.label(selector, gui.font_size.small)
-    label:SetPoint('BOTTOMLEFT', selector, 'TOPLEFT', -2, 1)
+    local label = gui.label(dropdown, gui.font_size.small)
+    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, 1)
     label:SetText('Item Slot')
-    slot_selector = selector
+    slot_dropdown = dropdown
 end
 do
-    local selector = gui.selector(frame.filter)
-    selector:SetPoint('TOPLEFT', slot_selector, 'BOTTOMLEFT', 0, -FILTER_SPACING)
-    selector:SetWidth(300)
-    selector:SetScript('OnTabPressed', function()
+    local dropdown = gui.dropdown(frame.filter)
+    dropdown:SetPoint('TOPLEFT', slot_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
+    dropdown:SetWidth(300)
+    dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            slot_selector:SetFocus()
+            slot_dropdown:SetFocus()
         else
-            filter_input:SetFocus()
+            filter_dropdown:SetFocus()
         end
     end)
-    local label = gui.label(selector, gui.font_size.small)
-    label:SetPoint('BOTTOMLEFT', selector, 'TOPLEFT', -2, 1)
+    local label = gui.label(dropdown, gui.font_size.small)
+    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, 1)
     label:SetText('Min Quality')
-    quality_selector = selector
+    quality_dropdown = dropdown
 end
 gui.vertical_line(frame.filter, 332)
 do
-	local input = gui.editbox(frame.filter)
-    input:SetPoint('TOPRIGHT', -174.5, -10)
+	local input = gui.dropdown(frame.filter)
+    input:SetPoint('TOPRIGHT', -205, -10)
 	input:SetWidth(150)
     input:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
             if blizzard_query.exact then
                 name_input:SetFocus()
             else
-                quality_selector:SetFocus()
+                quality_dropdown:SetFocus()
             end
         else
             filter_parameter_input:SetFocus()
         end
     end)
-    input.complete = completion.complete(function() return {'and', 'or', 'not', unpack(aux.keys(filter_util.filters))} end)
-	input.char = function(self) self:complete() end
 	input.change = function(self)
 		local text = self:GetText()
 		if filter_util.filters[text] and filter_util.filters[text].input_type ~= '' then
@@ -478,18 +472,19 @@ do
 			add_form_component()
 		end
     end
+    input:SetOptions({'and', 'or', 'not', unpack(aux.keys(filter_util.filters))})
     local label = gui.label(input, gui.font_size.medium)
-    label:SetPoint('RIGHT', input, 'LEFT', -15, 0)
-    label:SetText('Component')
-	filter_input = input
+    label:SetPoint('RIGHT', input, 'LEFT', -8, 0)
+    label:SetText('Operator')
+	filter_dropdown = input
 end
 do
     local input = gui.editbox(frame.filter)
-    input:SetPoint('LEFT', filter_input, 'RIGHT', 10, 0)
+    input:SetPoint('LEFT', filter_dropdown, 'RIGHT', 10, 0)
     input:SetWidth(150)
     input:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            filter_input:SetFocus()
+            filter_dropdown:SetFocus()
         end
     end)
     input.char = function(self) self:complete() end
@@ -498,10 +493,17 @@ do
     filter_parameter_input = input
 end
 do
+    local button = gui.button(frame.filter)
+    button:SetPoint('LEFT', filter_parameter_input, 'RIGHT', 10, 0)
+    button:SetWidth(button:GetHeight())
+    button:SetText('+')
+    button:SetScript('OnClick', add_form_component)
+end
+do
     local scroll_frame = CreateFrame('ScrollFrame', nil, frame.filter)
     scroll_frame:SetWidth(395)
     scroll_frame:SetHeight(270)
-    scroll_frame:SetPoint('TOPLEFT', 348.5, -50)
+    scroll_frame:SetPoint('TOPLEFT', 348.5, -47)
     scroll_frame:EnableMouse(true)
     scroll_frame:EnableMouseWheel(true)
     scroll_frame:SetScript('OnMouseWheel', function(self, arg1)

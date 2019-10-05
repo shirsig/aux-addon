@@ -15,7 +15,7 @@ StaticPopupDialogs.AUX_SEARCH_TABLE_FULL = {
 
 RESULTS, SAVED, FILTER = aux.enum(3)
 
-function aux.handle.LOAD()
+function aux.event.AUX_LOADED()
 	set_subtab(SAVED)
 end
 

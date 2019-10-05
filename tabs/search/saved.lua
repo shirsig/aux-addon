@@ -5,7 +5,7 @@ local filter_util = require 'aux.util.filter'
 
 dragged_search = nil
 
-function aux.handle.LOAD()
+function aux.event.AUX_LOADED()
 	recent_searches, favorite_searches = aux.realm_data.recent_searches, aux.realm_data.favorite_searches
 end
 

@@ -6,7 +6,7 @@ local money = require 'aux.util.money'
 local history = require 'aux.core.history'
 local search_tab = require 'aux.tabs.search'
 
-function aux.handle.LOAD()
+function aux.event.AUX_LOADED()
     if not aux.account_data.crafting_cost then
         return
     end

@@ -14,7 +14,7 @@ StaticPopupDialogs.AUX_SCAN_ALERT = {
     hideOnEscape = 1,
 }
 
-function aux.handle.LOAD()
+function aux.event.AUX_LOADED()
 	new_search()
 end
 

@@ -172,7 +172,7 @@ do
     end
     slider.editbox:SetScript('OnTabPressed', function()
         if not IsShiftKeyDown() then
-            duration_selector:SetFocus()
+            duration_dropdown:SetFocus()
         end
     end)
     slider.editbox:SetNumeric(true)
@@ -182,23 +182,23 @@ do
     stack_size_slider = slider
 end
 do
-    local selector = gui.selector(frame.parameters)
-    selector.selection_change = function() duration_selection_change() end
-    selector:SetPoint('TOPLEFT', stack_size_slider, 'BOTTOMLEFT', 0, -25)
-    selector:SetWidth(90)
-    selector:SetHeight(22)
-    selector:SetFontSize(17)
-    selector:SetScript('OnTabPressed', function()
+    local dropdown = gui.dropdown(frame.parameters, gui.font_size.large)
+    dropdown.selection_change = function() duration_selection_change() end
+    dropdown:SetPoint('TOPLEFT', stack_size_slider, 'BOTTOMLEFT', 0, -25)
+    dropdown:SetWidth(90)
+    dropdown:SetHeight(22)
+    dropdown:SetFontSize(17)
+    dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
             stack_size_slider:SetFocus()
         else
             unit_start_price_input:SetFocus()
         end
     end)
-    local label = gui.label(selector, gui.font_size.small)
-    label:SetPoint('BOTTOMLEFT', selector, 'TOPLEFT', -2, 1)
+    local label = gui.label(dropdown, gui.font_size.small)
+    label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, 1)
     label:SetText('Duration')
-    duration_selector = selector
+    duration_dropdown = dropdown
 end
 do
     local checkbox = gui.checkbox(frame.parameters)
@@ -309,7 +309,7 @@ do
 	deposit = label
 end
 
-function aux.handle.LOAD()
+function aux.event.AUX_LOADED()
 	if not aux.account_data.post_bid then
 		frame.bid_listing:Hide()
 		frame.buyout_listing:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)

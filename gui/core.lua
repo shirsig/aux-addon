@@ -376,88 +376,120 @@ function M.vertical_line(parent, x_offset, top_offset, bottom_offset, inverted_c
     return texture
 end
 
-function M.selector(parent)
+do
+    local dropdown_frame = panel()
+    dropdown_frame:SetFrameStrata('FULLSCREEN_DIALOG')
+    dropdown_frame:SetHeight(1)
+    local dropdown_item_buttons = {}
 
-    local button_up, button_down, options, index, update
+    function M.dropdown(parent, text_height)
+        text_height = text_height or font_size.medium
 
+        local index, set_index, update_dropdown
+        local options = {}
 
-    local editbox = editbox(parent)
+        local editbox = editbox(parent)
 
-    editbox.complete = completion.complete(function() return options end)
+        editbox.complete = completion.complete(function() return options end)
 
-    function editbox:char()
-        self:complete()
-        for i, choice in pairs(options) do
-            if editbox:GetText() == choice then
-                index = i
-                update()
+        function editbox:char()
+            self:complete()
+            for i, choice in pairs(options) do
+                if editbox:GetText() == choice then
+                    set_index(i)
+                end
             end
         end
-    end
 
-    function update()
-        index = max(1, min(#options, index))
-        if editbox:GetText() ~= options[index] then
-            editbox:SetText(options[index])
+        function set_index(new_index)
+            if new_index then
+                new_index = max(1, min(#options, new_index))
+                if editbox:GetText() ~= options[new_index] then
+                    editbox:SetText(options[new_index])
+                end
+            else
+                editbox:SetText('')
+            end
+            if new_index ~= index then
+                index = new_index
+                do (editbox.selection_change or pass)() end
+            end
         end
-        do (editbox.selection_change or pass)() end
-        aux.coro_thread(function()
-            aux.coro_wait()
-            if index == 1 then
-                button_up:Disable()
-                button_up:GetNormalTexture():SetDesaturated(1)
-            else
-                button_up:Enable()
-                button_up:GetNormalTexture():SetDesaturated(nil)
+
+        local function update_dropdown()
+            if #options == 0 then
+                dropdown_frame:Hide()
+                return
             end
-            if index == #options then
-                button_down:Disable()
-                button_down:GetNormalTexture():SetDesaturated(1)
-            else
-                button_down:Enable()
-                button_down:GetNormalTexture():SetDesaturated(nil)
+
+            dropdown_frame:SetParent(editbox)
+            dropdown_frame:ClearAllPoints()
+            local width = editbox:GetWidth() + 4
+            dropdown_frame:SetWidth(width)
+            dropdown_frame:SetPoint('TOP', editbox, 'BOTTOM', 0, -1)
+            for i = 1, max(#options, #dropdown_item_buttons) do
+                local item_button = dropdown_item_buttons[i]
+                if not item_button then
+                    item_button = button(dropdown_frame, text_height)
+                    item_button:GetFontString():SetJustifyH('LEFT')
+                    dropdown_item_buttons[i] = item_button
+                end
+                if i > #options then
+                    item_button:Hide()
+                else
+                    item_button:ClearAllPoints()
+                    item_button:SetWidth(width - 4)
+                    item_button:SetText(' ' .. options[i])
+                    if i == 1 then
+                        item_button:SetPoint('TOP', editbox, 'BOTTOM', 0, -3)
+                    else
+                        item_button:SetPoint('TOP', dropdown_item_buttons[i - 1], 'BOTTOM', 0, -2)
+                    end
+                    item_button:SetScript('OnClick', function()
+                        set_index(i)
+                        editbox:ClearFocus()
+                    end)
+                    if index == i then
+                        item_button:LockHighlight()
+                    else
+                        item_button:UnlockHighlight()
+                    end
+                    item_button:Show()
+                end
+                if i == #options then
+                    dropdown_frame:SetPoint('BOTTOM', item_button, 'BOTTOM', 0, -2)
+                end
+                dropdown_frame:Show()
             end
-        end)
+        end
+
+        editbox.focus_gain = function()
+            update_dropdown()
+        end
+
+        editbox.focus_loss = function()
+            set_index(index)
+            dropdown_frame:Hide()
+        end
+
+        function editbox:SetOptions(new_options)
+            options = new_options
+            set_index(nil)
+            if editbox:HasFocus() then
+                update_dropdown()
+            end
+        end
+
+        function editbox:GetIndex()
+            return index
+        end
+
+        function editbox:SetIndex(new_index)
+            set_index(new_index)
+        end
+
+        return editbox
     end
-
-    editbox.focus_loss = update
-
-    button_up = CreateFrame('Button', nil, editbox)
-    button_up:SetNormalTexture([[Interface\ChatFrame\UI-ChatIcon-ScrollUp-Up]])
-    button_up:SetPushedTexture([[Interface\ChatFrame\UI-ChatIcon-ScrollUp-Down]])
-    set_size(button_up, 20, 20)
-    button_up:SetPoint('RIGHT', editbox, 3, 8)
-    button_up:SetScript('OnClick', function()
-        index = index - 1
-        update()
-    end)
-
-    button_down = CreateFrame('Button', nil, editbox)
-    button_down:SetNormalTexture([[Interface\ChatFrame\UI-ChatIcon-ScrollDown-Up]])
-    button_down:SetPushedTexture([[Interface\ChatFrame\UI-ChatIcon-ScrollDown-Down]])
-    set_size(button_down, 20, 20)
-    button_down:SetPoint('RIGHT', editbox, 3, -8)
-    button_down:SetScript('OnClick', function()
-        index = index + 1
-        update()
-    end)
-
-    function editbox:SetOptions(new_options)
-        options = new_options
-        index = 1
-        update()
-    end
-
-    function editbox:GetIndex()
-        return index
-    end
-
-    function editbox:SetIndex(new_index)
-        index = new_index
-        update()
-    end
-
-    return editbox
 end
 
 function M.slider(parent)

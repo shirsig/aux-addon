@@ -4,7 +4,7 @@ local event_frame = CreateFrame'Frame'
 
 local listeners = {}
 
-function handle.LOAD()
+function event.AUX_LOADED()
 	event_frame:SetScript('OnUpdate', function()
         for _, listener in pairs(listeners) do
             local event, needed = listener.event, false

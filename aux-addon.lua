@@ -11,24 +11,27 @@ for _, event in pairs{'ADDON_LOADED', 'PLAYER_LOGIN', 'AUCTION_HOUSE_SHOW', 'AUC
 	event_frame:RegisterEvent(event)
 end
 
-local set_handler = {}
-M.handle = setmetatable({}, {__metatable=false, __newindex=function(_, k, v) set_handler[k](v) end})
+local aux_events = {}
+M.event = setmetatable({}, {__metatable=false, __newindex=function(_, k, v) aux_events[k](v) end})
 
 do
-	local handlers, handlers2 = {}, {}
-	function set_handler.LOAD(f)
+	local handlers, handlers2, handlers3 = {}, {}, {}
+	function aux_events.AUX_LOADED(f)
 		tinsert(handlers, f)
 	end
-	function set_handler.LOAD2(f)
+	function aux_events.PLAYER_LOGIN(f)
 		tinsert(handlers2, f)
-	end
+    end
+    function aux_events.AUCTION_HOUSE_LOADED(f)
+        tinsert(handlers3, f)
+    end
 	event_frame:SetScript('OnEvent', function(_, event, arg1, ...)
 		if event == 'ADDON_LOADED' then
             if arg1 == 'aux-addon' then
                 for _, f in ipairs(handlers) do f(arg1, ...) end
             elseif arg1 == 'Blizzard_AuctionUI' then
-                auction_ui_loaded()
-			end
+                for _, f in ipairs(handlers3) do f(arg1, ...) end
+            end
 		elseif event == 'PLAYER_LOGIN' then
 			for _, f in ipairs(handlers2) do f(arg1, ...) end
             sort(account_data.auctionable_items, function(a, b) return strlen(a) < strlen(b) or (strlen(a) == strlen(b) and a < b) end)
@@ -39,7 +42,7 @@ do
 	end)
 end
 
-function handle.LOAD()
+function event.AUX_LOADED()
     _G.aux = aux or {}
     assign(aux, {
         account = {},
@@ -163,11 +166,11 @@ do
 	end
 end
 
-function handle.LOAD2()
+function event.PLAYER_LOGIN()
 	frame:SetScale(account_data.scale)
 end
 
-function auction_ui_loaded()
+function event.AUCTION_HOUSE_LOADED()
     _G.AuctionFrame_Show, _M.AuctionFrame_Show  = nil, _G.AuctionFrame_Show
     AuctionFrame:SetScript('OnHide', nil)
 end
@@ -181,7 +184,7 @@ end
 
 do
 	local handlers = {}
-	function set_handler.CLOSE(f)
+	function aux_events.CLOSE(f)
 		tinsert(handlers, f)
 	end
 	function AUCTION_HOUSE_CLOSED()

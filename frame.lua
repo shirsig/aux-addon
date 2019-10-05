@@ -2,7 +2,7 @@ select(2, ...) 'aux'
 
 local gui = require 'aux.gui'
 
-function handle.LOAD()
+function event.AUX_LOADED()
 	for _, v in ipairs(tab_info) do
 		tabs:create_tab(v.name)
 	end

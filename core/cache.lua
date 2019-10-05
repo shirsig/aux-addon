@@ -9,7 +9,7 @@ local MAX_ITEM_ID = 30000
 local items_schema = {'tuple', '#', {name='string'}, {link='string'}, {quality='number'}, {level='number'}, {requirement='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}, {sell_price='number'}}
 local merchant_buy_schema = {'tuple', '#', {unit_price='number'}, {limited='boolean'}}
 
-function aux.handle.LOAD()
+function aux.event.AUX_LOADED()
     aux.event_listener('GET_ITEM_INFO_RECEIVED', on_get_item_info_received)
     fetch_item_data()
 
@@ -23,7 +23,7 @@ do
 	function M.is_player(name)
 		return not not characters[name]
 	end
-	function aux.handle.LOAD()
+	function aux.event.AUX_LOADED()
 		characters = aux.realm_data.characters
 		for k, v in pairs(characters) do
 			if GetTime() > v + 60 * 60 * 24 * 30 then

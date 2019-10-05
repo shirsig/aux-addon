@@ -6,7 +6,7 @@ local scan = require 'aux.core.scan'
 
 local tab = aux.tab 'Auctions'
 
-function aux.handle.LOAD()
+function aux.event.AUX_LOADED()
     aux.event_listener('AUCTION_OWNED_LIST_UPDATE', function()
         locked = {}
         refresh = true

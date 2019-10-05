@@ -8,7 +8,7 @@ local history_schema = {'tuple', '#', {next_push='number'}, {daily_min_buyout='n
 
 local value_cache = {}
 
-function aux.handle.LOAD2()
+function aux.event.PLAYER_LOGIN()
 	data = aux.faction_data.history
 end
 

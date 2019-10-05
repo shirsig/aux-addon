@@ -5,7 +5,7 @@ local info = require 'aux.util.info'
 
 local state
 
-function aux.handle.CLOSE()
+function aux.event.CLOSE()
 	stop()
 end
 

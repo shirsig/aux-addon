@@ -31,7 +31,7 @@ function get_default_settings()
 	return { duration = aux.account_data.post_duration, start_price = 0, buyout_price = 0, hidden = false }
 end
 
-function aux.handle.LOAD2()
+function aux.event.PLAYER_LOGIN()
 	data = aux.faction_data.post
 end
 
@@ -213,7 +213,7 @@ function post_auction()
     local stack_size = stack_size_slider:GetValue()
     local start_price = max(1, aux.round(get_unit_start_price() * stack_size)) -- TODO retail
     local buyout_price = aux.round(get_unit_buyout_price() * stack_size)
-    local duration = duration_selector:GetIndex()
+    local duration = duration_dropdown:GetIndex()
 
     local item_info = info.container_item(unpack(slot))
     if not item_info or item_info.item_key ~= item_key or item_info.aux_quantity ~= stack_size then
@@ -294,14 +294,14 @@ function update_item_configuration()
         unit_buyout_price_input:Hide()
         stack_size_slider:Hide()
         deposit:Hide()
-        duration_selector:Hide()
+        duration_dropdown:Hide()
         hide_checkbox:Hide()
     else
 		unit_start_price_input:Show()
         unit_buyout_price_input:Show()
         stack_size_slider:Show()
         deposit:Show()
-        duration_selector:Show()
+        duration_dropdown:Show()
         hide_checkbox:Show()
 
         item.texture:SetTexture(selected_item.texture)
@@ -320,7 +320,7 @@ function update_item_configuration()
 
         do
             local deposit_factor = UnitFactionGroup'npc' and .05 or .25
-            local duration_factor = info.duration_hours(duration_selector:GetIndex()) / 2
+            local duration_factor = info.duration_hours(duration_dropdown:GetIndex()) / 2
             local stack_size = selected_item.max_charges and 1 or stack_size_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * duration_factor
             deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))
@@ -385,9 +385,9 @@ function update_item(item)
         for _, i in ipairs{2, 8, 24} do
             tinsert(options, aux.pluralize(i .. ' ' .. HOURS))
         end
-        duration_selector:SetOptions(options)
+        duration_dropdown:SetOptions(options)
     end
-    duration_selector:SetIndex(settings.duration)
+    duration_dropdown:SetIndex(settings.duration)
 
     hide_checkbox:SetChecked(settings.hidden)
 
@@ -546,7 +546,7 @@ end
 function duration_selection_change()
     if selected_item then
         local settings = read_settings()
-        settings.duration = duration_selector:GetIndex()
+        settings.duration = duration_dropdown:GetIndex()
         write_settings(settings)
         refresh = true
     end
