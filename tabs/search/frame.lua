@@ -62,69 +62,10 @@ do
 	local btn = gui.button(frame, gui.font_size.small)
 	btn:SetHeight(25)
 	btn:SetWidth(60)
-	btn:SetText(aux.color.label.enabled'Range:')
-	btn:SetScript('OnClick', function()
-		update_real_time(true)
+	btn:SetScript('OnClick', function(self)
+		update_mode(mode == NORMAL_MODE and FRESH_MODE or NORMAL_MODE)
 	end)
-	range_button = btn
-end
-do
-	local btn = gui.button(frame, gui.font_size.small)
-	btn:SetHeight(25)
-	btn:SetWidth(60)
-	btn:Hide()
-	btn:SetText(aux.color.label.enabled'Real Time')
-	btn:SetScript('OnClick', function()
-		update_real_time(false)
-	end)
-	real_time_button = btn
-end
-do
-	local function change(self)
-		local page = tonumber(self:GetText())
-		local valid_input = page and tostring(max(1, page)) or ''
-		if self:GetText() ~= valid_input then
-            self:SetText(valid_input)
-		end
-	end
-	do
-		local editbox = gui.editbox(range_button)
-		editbox:SetPoint('LEFT', range_button, 'RIGHT', 4, 0)
-		editbox:SetWidth(40)
-		editbox:SetHeight(25)
-		editbox:SetAlignment('CENTER')
-		editbox:SetNumeric(true)
-		editbox:SetScript('OnTabPressed', function()
-            if not IsShiftKeyDown() then
-                last_page_input:SetFocus()
-            end
-        end)
-		editbox.enter = execute
-		editbox.change = change
-		local label = gui.label(editbox, gui.font_size.medium)
-		label:SetPoint('LEFT', editbox, 'RIGHT', 0, 0)
-		label:SetTextColor(aux.color.label.enabled())
-		label:SetText('-')
-		first_page_input = editbox
-	end
-	do
-		local editbox = gui.editbox(range_button)
-		editbox:SetPoint('LEFT', first_page_input, 'RIGHT', 5.8, 0)
-		editbox:SetWidth(40)
-		editbox:SetHeight(25)
-		editbox:SetAlignment('CENTER')
-		editbox:SetNumeric(true)
-		editbox:SetScript('OnTabPressed', function()
-            if IsShiftKeyDown() then
-                first_page_input:SetFocus()
-            else
-                search_box:SetFocus()
-            end
-        end)
-		editbox.enter = execute
-		editbox.change = change
-		last_page_input = editbox
-	end
+	mode_button = btn
 end
 do
     local btn = gui.button(frame)
@@ -163,6 +104,7 @@ do
 end
 do
 	local editbox = gui.editbox(frame)
+    editbox:SetPoint('LEFT', mode_button, 'RIGHT', 4, 0)
 	editbox.formatter = function(str)
 		local queries = filter_util.queries(str)
 		return queries and aux.join(aux.map(aux.copy(queries), function(query) return query.prettified end), ';') or aux.color.red(str)
@@ -174,11 +116,7 @@ do
         self:complete()
 	end
 	editbox:SetScript('OnTabPressed', function(self)
-        if IsShiftKeyDown() then
-            last_page_input:SetFocus()
-        else
-            self:HighlightText(0, 0)
-        end
+        self:HighlightText(0, 0) -- TODO more edit features, shift backspace or something
 	end)
 	editbox.enter = execute
     local function search_cursor_item()

@@ -76,9 +76,3 @@ function add_filter(filter_string)
     set_filter(old_filter_string .. filter_string)
 end
 
-function blizzard_page_index(str)
-    if tonumber(str) then
-        return max(0, tonumber(str) - 1)
-    end
-end
-

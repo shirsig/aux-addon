@@ -6,6 +6,10 @@ local filter_util = require 'aux.util.filter'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
 
+NORMAL_MODE, FRESH_MODE, EXPIRING_MODE = {}, {}, {} -- TODO expiring
+
+mode = nil
+
 StaticPopupDialogs.AUX_SCAN_ALERT = {
     text = 'One of your alert queries matched!',
     button1 = 'Ok',
@@ -15,18 +19,15 @@ StaticPopupDialogs.AUX_SCAN_ALERT = {
 }
 
 function aux.event.AUX_LOADED()
-	new_search()
+	new_search(nil, NORMAL_MODE)
 end
 
-function update_real_time(enable)
-	if enable then
-		range_button:Hide()
-		real_time_button:Show()
-		search_box:SetPoint('LEFT', real_time_button, 'RIGHT', 4, 0)
-	else
-		real_time_button:Hide()
-		range_button:Show()
-		search_box:SetPoint('LEFT', last_page_input, 'RIGHT', 4, 0)
+function update_mode(mode)
+    _M.mode = mode
+	if mode == NORMAL_MODE then
+		mode_button:SetText('Normal')
+    else
+        mode_button:SetText('Fresh')
 	end
 end
 
@@ -47,8 +48,6 @@ do
 		searches[search_index].table:Show()
 
 		search_box:SetText(searches[search_index].filter_string or '')
-		first_page_input:SetText(searches[search_index].first_page and searches[search_index].first_page + 1 or '')
-		last_page_input:SetText(searches[search_index].last_page and searches[search_index].last_page + 1 or '')
 		if search_index == 1 then
 			previous_button:Disable()
 		else
@@ -56,23 +55,21 @@ do
 		end
 		if search_index == #searches then
 			next_button:Hide()
-			range_button:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
-			real_time_button:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
+			mode_button:SetPoint('LEFT', previous_button, 'RIGHT', 4, 0)
 		else
 			next_button:Show()
-			range_button:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
-			real_time_button:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
+			mode_button:SetPoint('LEFT', next_button, 'RIGHT', 4, 0)
 		end
-		update_real_time(searches[search_index].real_time)
+		update_mode(searches[search_index].mode)
 		update_start_stop()
 		update_continuation()
 	end
 
-	function new_search(filter_string, first_page, last_page, real_time)
+	function new_search(filter_string, mode)
 		while #searches > search_index do
 			tremove(searches)
 		end
-		local search = { records = {}, filter_string = filter_string, first_page = first_page, last_page = last_page, real_time = real_time }
+		local search = { records = {}, filter_string = filter_string, mode = mode }
 		tinsert(searches, search)
 		if #searches > 5 then
 			tremove(searches, 1)
@@ -90,20 +87,14 @@ do
 		update_search(#searches)
 	end
 
-	function clear_control_focus()
-		search_box:ClearFocus()
-		first_page_input:ClearFocus()
-		last_page_input:ClearFocus()
-	end
-
 	function previous_search()
-		clear_control_focus()
+        search_box:ClearFocus()
 		update_search(search_index - 1)
 		set_subtab(RESULTS)
 	end
 
 	function next_search()
-		clear_control_focus()
+        search_box:ClearFocus()
 		update_search(search_index + 1)
 		set_subtab(RESULTS)
 	end
@@ -135,7 +126,7 @@ function update_start_stop()
 	end
 end
 
-function start_real_time_scan(query, search, continuation)
+function start_fresh_scan(query, search, continuation)
 
     local ignore_page
     if not search then
@@ -186,7 +177,7 @@ function start_real_time_scan(query, search, continuation)
 
             query.blizzard_query.first_page = next_page
             query.blizzard_query.last_page = next_page
-			start_real_time_scan(query, search)
+			start_fresh_scan(query, search)
 		end,
 		on_abort = function()
 			aux.status_bar:update_status(1, 1)
@@ -282,29 +273,26 @@ function start_search(queries, continuation)
 	}
 end
 
-function M.execute(_, resume, real_time)
+function M.execute(_, resume, mode)
 
 	if resume then
-		real_time = current_search().real_time
-	elseif real_time == nil then
-		real_time = real_time_button:IsShown()
+		mode = current_search().mode
+	elseif mode == nil then
+		mode = _M.mode
 	end
 
 	if resume then
 		search_box:SetText(current_search().filter_string)
 	end
-	local filter_string, first_page, last_page = search_box:GetText(), blizzard_page_index(first_page_input:GetText()), blizzard_page_index(last_page_input:GetText())
+	local filter_string = search_box:GetText()
 
 	local queries, error = filter_util.queries(filter_string)
 	if not queries then
 		aux.print('Invalid filter:', error)
 		return
-	elseif real_time then
+	elseif mode == FRESH_MODE then
 		if #queries > 1 then
 			aux.print('Error: The real time mode does not support multi-queries')
-			return
-		elseif queries[1].blizzard_query.first_page or queries[1].blizzard_query.last_page then
-			aux.print('Error: The real time mode does not support page ranges')
 			return
 		end
 	end
@@ -314,7 +302,7 @@ function M.execute(_, resume, real_time)
 	else
 		if filter_string ~= current_search().filter_string then
 			if current_search().filter_string then
-				new_search(filter_string, first_page, last_page, real_time)
+				new_search(filter_string, mode)
 			else
 				current_search().filter_string = filter_string
 			end
@@ -326,9 +314,7 @@ function M.execute(_, resume, real_time)
 			search.table:SetDatabase(search.records)
 		end
 		local search = current_search()
-		search.first_page = first_page
-		search.last_page = last_page
-		search.real_time = real_time
+		search.mode = mode
 		search.alert_validator = get_alert_validator()
 	end
 
@@ -336,15 +322,11 @@ function M.execute(_, resume, real_time)
 	discard_continuation()
 	current_search().active = true
 	update_start_stop()
-	clear_control_focus()
+    search_box:ClearFocus()
 	set_subtab(RESULTS)
-	if real_time then
-		start_real_time_scan(queries[1], nil, continuation)
+	if mode == FRESH_MODE then
+		start_fresh_scan(queries[1], nil, continuation)
 	else
-		for _, query in pairs(queries) do
-			query.blizzard_query.first_page = current_search().first_page
-			query.blizzard_query.last_page = current_search().last_page
-		end
 		start_search(queries, continuation)
 	end
 end
