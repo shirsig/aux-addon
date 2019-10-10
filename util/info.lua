@@ -23,6 +23,9 @@ function M.container_item(bag, slot)
         local auctionable = auctionable(tooltip) and durability == max_durability and not lootable
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
+        if max_charges and not charges then -- TODO find better fix
+            return
+        end
         local aux_quantity = charges or count
         return {
             item_id = item_id,
@@ -76,7 +79,7 @@ function M.auction(index, query_type)
 
 --    local ignore_owner = get_state().params.ignore_owner or aux.account_data.ignore_owner TODO
 
-    if has_all_info == true and (aux.account_data.ignore_owner or owner) then
+    if has_all_info and (aux.account_data.ignore_owner or owner) then
         local link = GetAuctionItemLink(query_type, index)
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
 
@@ -84,6 +87,9 @@ function M.auction(index, query_type)
         local tooltip = tooltip('auction', query_type, index)
         local max_charges = max_item_charges(item_id)
         local charges = max_charges and item_charges(tooltip)
+        if max_charges and not charges then -- TODO find better fix
+            return
+        end
         local aux_quantity = charges or count
         local blizzard_bid = high_bid > 0 and high_bid or start_price
         local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
@@ -217,7 +223,6 @@ do
                 return patterns[entry]
             end
 	    end
-	    return 1
 	end
 end
 
