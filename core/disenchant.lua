@@ -20,7 +20,8 @@ local ARMOR = aux.set(
 	'INVTYPE_FINGER',
 	'INVTYPE_TRINKET',
 	'INVTYPE_CLOAK',
-	'INVTYPE_HOLDABLE'
+	'INVTYPE_HOLDABLE',
+    'INVTYPE_SHIELD'
 )
 
 local WEAPON = aux.set(
@@ -28,7 +29,6 @@ local WEAPON = aux.set(
 	'INVTYPE_WEAPONMAINHAND',
 	'INVTYPE_WEAPON',
 	'INVTYPE_WEAPONOFFHAND',
-	'INVTYPE_SHIELD',
 	'INVTYPE_RANGED',
 	'INVTYPE_RANGEDRIGHT'
 )
@@ -37,11 +37,7 @@ function M.value(slot, quality, level)
     local expectation
     for _, event in pairs(distribution(slot, quality, level)) do
         local value = history.value(event.item_id .. ':' .. 0)
-        if not value then
-            return
-        else
-            expectation = (expectation or 0) + event.probability * (event.min_quantity + event.max_quantity) / 2 * value
-        end
+        expectation = (expectation or 0) + event.probability * (event.min_quantity + event.max_quantity) / 2 * (value or 0)
     end
     return expectation
 end

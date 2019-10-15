@@ -1,7 +1,7 @@
 ## Interface: 11302
 ## Author: shirsig
 ## Title: aux
-## Version: 0.7.2
+## Version: 0.7.3
 ## Notes: Auction House replacement
 ## SavedVariables: aux
 
