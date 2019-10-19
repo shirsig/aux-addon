@@ -87,7 +87,6 @@ end
 function tab.OPEN()
     frame:Show()
     update_inventory_records()
---    p.kek(inventory_records)
     refresh = true
 end
 

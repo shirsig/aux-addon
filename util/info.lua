@@ -328,8 +328,8 @@ end
 function M.inventory()
 	local bag, slot = 0, 0
 	return function()
-		if not GetBagName(bag) or slot >= GetContainerNumSlots(bag) then
-			repeat bag = bag + 1 until GetBagName(bag) or bag > 4
+		if slot >= GetContainerNumSlots(bag) then
+			repeat bag = bag + 1 until GetContainerNumSlots(bag) > 0 or bag > 4
 			slot = 1
 		else
 			slot = slot + 1
