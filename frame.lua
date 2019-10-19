@@ -2,6 +2,7 @@ select(2, ...) 'aux'
 
 local gui = require 'aux.gui'
 local scan = require 'aux.core.scan'
+local post = require 'aux.tabs.post'
 
 function event.AUX_LOADED()
 	for _, v in ipairs(tab_info) do
@@ -89,13 +90,15 @@ do
             get_all = true,
             on_scan_start = function()
                 status_bar:update_status(0, 0)
+                post.clear_auctions()
             end,
             on_page_loaded = function(_, _, _, page_size)
                 total = page_size
             end,
-            on_auction = function()
+            on_auction = function(auction_record)
                 count = count + 1
                 status_bar:update_status(count / total, 0)
+                post.record_auction(auction_record)
             end,
             on_abort = function()
                 status_bar:update_status(1, 1)

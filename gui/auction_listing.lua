@@ -8,7 +8,7 @@ local history = require 'aux.core.history'
 local gui = require 'aux.gui'
 local tooltip = require 'aux.core.tooltip'
 
-local price_per_unit = false
+price_per_unit, percentage_for_bid = false, false
 
 local HEAD_HEIGHT = 27
 local HEAD_SPACE = 2
@@ -164,7 +164,7 @@ M.search_columns = {
         title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
         width = .125,
         align = 'RIGHT',
-        isPrice = true,
+        toggle = 'price_per_unit',
         fill = function(cell, record)
             local price_color
             if record.high_bidder then
@@ -212,7 +212,7 @@ M.search_columns = {
         title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
         width = .125,
         align = 'RIGHT',
-        isPrice = true,
+        toggle = 'price_per_unit',
         fill = function(cell, record)
             local price = price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
             cell.text:SetText(price > 0 and money.to_string(price, true) or '---')
@@ -227,12 +227,13 @@ M.search_columns = {
         end,
     },
     {
-        title = '% Hist.\nValue',
+        title = {'% Hist.\nValue (Bid)', '% Hist.\nValue'},
         width = .08,
         align = 'CENTER',
+        toggle = 'percentage_for_bid',
         fill = function(cell, record)
-            local pct, bidPct = record_percentage(record)
-            cell.text:SetText((pct or bidPct) and gui.percentage_historical(pct or bidPct, not pct) or '?')
+            local primary, secondary = record_percentage(record)
+            cell.text:SetText((primary or secondary) and gui.percentage_historical(primary or secondary, not primary) or '?')
         end,
         cmp = function(record_a, record_b, desc)
             local pct_a = record_percentage(record_a) or (desc and -math.huge or math.huge)
@@ -332,7 +333,7 @@ M.auctions_columns = {
         title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
         width = .125,
         align = 'RIGHT',
-        isPrice = true,
+        toggle = 'price_per_unit',
         fill = function(cell, record)
             if record.sale_status == 1 and price_per_unit then
                 cell.text:SetText('?')
@@ -377,7 +378,7 @@ M.auctions_columns = {
         title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
         width = .125,
         align = 'RIGHT',
-        isPrice = true,
+        toggle = 'price_per_unit',
         fill = function(cell, record)
             if record.sale_status == 1 and price_per_unit then
                 cell.text:SetText('?')
@@ -513,7 +514,7 @@ M.bids_columns = {
         title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
         width = .125,
         align = 'RIGHT',
-        isPrice = true,
+        toggle = 'price_per_unit',
         fill = function(cell, record)
             local price
             if record.high_bidder then
@@ -543,7 +544,7 @@ M.bids_columns = {
         title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
         width = .125,
         align = 'RIGHT',
-        isPrice = true,
+        toggle = 'price_per_unit',
         fill = function(cell, record)
             local price = price_per_unit and ceil(record.unit_buyout_price) or record.buyout_price
             cell.text:SetText(price > 0 and money.to_string(price, true) or '---')
@@ -581,8 +582,9 @@ function record_percentage(record)
 
     local historical_value = history.value(record.item_key) or 0
     if historical_value > 0 then
-        if record.unit_buyout_price > 0 then
-            return aux.round(100 * record.unit_buyout_price / historical_value)
+        if record.unit_buyout_price > 0 or percentage_for_bid then
+            local unit_price = percentage_for_bid and record.unit_bid_price or record.unit_buyout_price
+            return aux.round(100 * unit_price / historical_value)
         end
         return nil, aux.round(100 * record.unit_bid_price / historical_value)
     end
@@ -612,11 +614,12 @@ local methods = {
     OnHeadColumnClick = function(self, button)
         local rt = self.rt
 
-        if button == 'RightButton' and rt.headCells[self.columnIndex].info.isPrice then
-            price_per_unit = not price_per_unit
+        local toggle = rt.headCells[self.columnIndex].info.toggle
+        if button == 'RightButton' and toggle then
+            _M[toggle] = not _M[toggle]
             for _, cell in pairs(rt.headCells) do
-                if cell.info.isPrice then
-                    cell:SetText(cell.info.title[price_per_unit and 1 or 2])
+                if cell.info.toggle == toggle then
+                    cell:SetText(cell.info.title[_M[toggle] and 1 or 2])
                 end
             end
             rt:SetSort()
@@ -961,8 +964,8 @@ function M.new(parent, rows, columns)
 
     rt:SetScript('OnShow', function(self)
         for _, cell in pairs(self.headCells) do
-            if cell.info.isPrice then
-                cell:SetText(cell.info.title[price_per_unit and 1 or 2])
+            if cell.info.toggle then
+                cell:SetText(cell.info.title[_M[cell.info.toggle] and 1 or 2])
             end
         end
     end)
@@ -1014,7 +1017,7 @@ function M.new(parent, rows, columns)
         text:SetFont(gui.font, 12)
         text:SetTextColor(aux.color.label.enabled())
         cell:SetFontString(text)
-        if not column.isPrice then cell:SetText(column.title or '') end -- TODO
+        if not column.toggle then cell:SetText(column.title or '') end -- TODO
         text:SetAllPoints()
 
         local tex = cell:CreateTexture()

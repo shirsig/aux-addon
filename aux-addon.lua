@@ -53,6 +53,7 @@ function event.AUX_LOADED()
     M.account_data = assign(aux.account, {
         scale = 1,
         ignore_owner = true,
+        action_shortcuts = false,
         crafting_cost = true,
         post_bid = false,
         post_duration = post.DURATION_8,

@@ -87,6 +87,7 @@ end
 function tab.OPEN()
     frame:Show()
     update_inventory_records()
+--    p.kek(inventory_records)
     refresh = true
 end
 
@@ -482,14 +483,7 @@ function refresh_entries()
 			end,
 			on_auction = function(auction_record)
 				if auction_record.item_key == item_key then
-                    record_auction(
-                        auction_record.item_key,
-                        auction_record.aux_quantity,
-                        auction_record.unit_blizzard_bid,
-                        auction_record.unit_buyout_price,
-                        auction_record.duration,
-                        auction_record.owner
-                    )
+                    record_auction(auction_record)
 				end
 			end,
 			on_abort = function()
@@ -506,33 +500,37 @@ function refresh_entries()
 	end
 end
 
-function record_auction(key, aux_quantity, unit_blizzard_bid, unit_buyout_price, duration, owner)
-    bid_records[key] = bid_records[key] or {}
+function M.clear_auctions()
+    bid_records, buyout_records = {}, {}
+end
+
+function M.record_auction(auction)
+    bid_records[auction.item_key] = bid_records[auction.item_key] or {}
     do
 	    local entry
-	    for _, record in pairs(bid_records[key]) do
-	        if unit_blizzard_bid == record.unit_price and aux_quantity == record.stack_size and duration == record.duration and info.is_player(owner) == record.own then
+	    for _, record in pairs(bid_records[auction.item_key]) do
+	        if auction.unit_blizzard_bid == record.unit_price and auction.aux_quantity == record.stack_size and auction.duration == record.duration and info.is_player(auction.owner) == record.own then
 	            entry = record
 	        end
 	    end
 	    if not entry then
-	        entry =  { stack_size = aux_quantity, unit_price = unit_blizzard_bid, duration = duration, own = info.is_player(owner), count = 0 }
-	        tinsert(bid_records[key], entry)
+	        entry =  { stack_size = auction.aux_quantity, unit_price = auction.unit_blizzard_bid, duration = auction.duration, own = info.is_player(auction.owner), count = 0 }
+	        tinsert(bid_records[auction.item_key], entry)
 	    end
 	    entry.count = entry.count + 1
     end
-    buyout_records[key] = buyout_records[key] or {}
-    if unit_buyout_price == 0 then return end
+    buyout_records[auction.item_key] = buyout_records[auction.item_key] or {}
+    if auction.unit_buyout_price == 0 then return end
     do
 	    local entry
-	    for _, record in pairs(buyout_records[key]) do
-		    if unit_buyout_price == record.unit_price and aux_quantity == record.stack_size and duration == record.duration and info.is_player(owner) == record.own then
+	    for _, record in pairs(buyout_records[auction.item_key]) do
+		    if auction.unit_buyout_price == record.unit_price and auction.aux_quantity == record.stack_size and auction.duration == record.duration and info.is_player(auction.owner) == record.own then
 			    entry = record
 		    end
 	    end
 	    if not entry then
-		    entry = { stack_size = aux_quantity, unit_price = unit_buyout_price, duration = duration, own = info.is_player(owner), count = 0 }
-		    tinsert(buyout_records[key], entry)
+		    entry = { stack_size = auction.aux_quantity, unit_price = auction.unit_buyout_price, duration = auction.duration, own = info.is_player(auction.owner), count = 0 }
+		    tinsert(buyout_records[auction.item_key], entry)
 	    end
 	    entry.count = entry.count + 1
     end
