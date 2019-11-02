@@ -7,7 +7,9 @@ local MIN_ITEM_ID = 1
 local MAX_ITEM_ID = 30000
 
 local items_schema = {'tuple', '#', {name='string'}, {link='string'}, {quality='number'}, {level='number'}, {requirement='number'}, {class='string'}, {subclass='string'}, {slot='string'}, {max_stack='number'}, {texture='string'}, {sell_price='number'}}
-local merchant_buy_schema = {'tuple', '#', {unit_price='number'}, {limited='boolean'}}
+local merchant_buy_schema = {'tuple', '#', {unit_price='number'}, {limited='boolean'} }
+
+local trading
 
 function aux.event.AUX_LOADED()
     aux.event_listener('GET_ITEM_INFO_RECEIVED', on_get_item_info_received)
@@ -31,6 +33,13 @@ do
 			end
 		end
 		characters[UnitName'player'] = GetTime()
+
+        aux.event_listener('TRADE_SHOW', function()
+            trading = true
+        end)
+        aux.event_listener('TRADE_CLOSED', function()
+            trading = false
+        end)
 	end
 end
 
@@ -116,6 +125,10 @@ function merchant_buy_scan()
 end
 
 function process_item(item_id)
+    while trading do
+        aux.coro_wait()
+    end
+
     local itemstring = 'item:' .. item_id
     local name, link, quality, level, requirement, class, subclass, max_stack, slot, texture, sell_price = GetItemInfo(itemstring)
 
@@ -145,32 +158,25 @@ end
 do
     local requested_item_id
 
-    function fetch_item_data(item_id)
-        item_id = item_id or MIN_ITEM_ID
-
-        while aux.account_data.items[item_id] or aux.account_data.unused_item_ids[item_id] do
-            item_id = item_id + 1
-        end
-
-        if item_id > MAX_ITEM_ID then
-            return
-        end
-
-        if process_item(item_id) then
-            fetch_item_data(item_id + 1)
-        else
-            requested_item_id = item_id
-        end
+    function fetch_item_data()
+        aux.coro_thread(function()
+            for item_id = MIN_ITEM_ID, MAX_ITEM_ID do
+                while not aux.account_data.items[item_id] and not aux.account_data.unused_item_ids[item_id] and not process_item(item_id) do
+                    requested_item_id = item_id
+                    while requested_item_id do
+                        aux.coro_wait()
+                    end
+                end
+            end
+        end)
     end
 
     function on_get_item_info_received(item_id, success)
-        if success then
-            process_item(item_id)
-        elseif success == nil then
-            aux.account_data.unused_item_ids[item_id] = true
-        end
         if item_id == requested_item_id then
-            fetch_item_data(item_id + 1)
+            requested_item_id = nil
+            if success == nil then
+                aux.account_data.unused_item_ids[item_id] = true
+            end
         end
     end
 end

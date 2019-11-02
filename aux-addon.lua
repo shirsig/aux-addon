@@ -172,7 +172,7 @@ function event.PLAYER_LOGIN()
 end
 
 function event.AUCTION_HOUSE_LOADED()
-    _G.AuctionFrame_Show, _M.AuctionFrame_Show  = nil, _G.AuctionFrame_Show
+    _G.AuctionFrame_Show, AuctionFrame_Show = nil, _G.AuctionFrame_Show
     AuctionFrame:SetScript('OnHide', nil)
 end
 
