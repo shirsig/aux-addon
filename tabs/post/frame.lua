@@ -82,7 +82,7 @@ bid_listing:SetColInfo{
     {name='% Hist.\nValue', width=.21, align='CENTER'},
 }
 bid_listing:SetSelection(function(data)
-	return data.record == get_bid_selection() or data.record.historical_value and get_bid_selection() and get_bid_selection().historical_value
+	return selected_item and (data.record == get_bid_selection() or data.record.historical_value and get_bid_selection() and get_bid_selection().historical_value)
 end)
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
 	if button == 'RightButton' and row_data.record == get_bid_selection() or row_data.record.historical_value and get_bid_selection() and get_bid_selection().historical_value then
@@ -106,7 +106,7 @@ buyout_listing:SetColInfo{
 	{name='% Hist.\nValue', width=.20, align='CENTER'},
 }
 buyout_listing:SetSelection(function(data)
-	return data.record == get_buyout_selection() or data.record.historical_value and get_buyout_selection() and get_buyout_selection().historical_value
+	return selected_item and (data.record == get_buyout_selection() or data.record.historical_value and get_buyout_selection() and get_buyout_selection().historical_value)
 end)
 buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)
 	if button == 'RightButton' and row_data.record == get_buyout_selection() or row_data.record.historical_value and get_buyout_selection() and get_buyout_selection().historical_value then

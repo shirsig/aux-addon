@@ -16,46 +16,43 @@ function M.container_item(bag, slot)
     if link then
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = item(item_id, suffix_id, unique_id, enchant_id)
+        if item_info then -- TODO apparently this can be undefined
+            local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- TODO quality not working?
+            local durability, max_durability = GetContainerItemDurability(bag, slot)
+            local tooltip = tooltip('bag', bag, slot)
+            local auctionable = auctionable(tooltip) and durability == max_durability and not lootable
+            local max_charges = max_item_charges(item_id)
+            local charges = max_charges and item_charges(tooltip)
+            if max_charges and not charges then -- TODO find better fix
+                return
+            end
+            local aux_quantity = charges or count
+            return {
+                item_id = item_id,
+                suffix_id = suffix_id,
+                unique_id = unique_id,
+                enchant_id = enchant_id,
 
-        local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- TODO quality not working?
-        local durability, max_durability = GetContainerItemDurability(bag, slot)
-        local tooltip = tooltip('bag', bag, slot)
-        local auctionable = auctionable(tooltip) and durability == max_durability and not lootable
-        local max_charges = max_item_charges(item_id)
-        local charges = max_charges and item_charges(tooltip)
-        if max_charges and not charges then -- TODO find better fix
-            return
+                link = link,
+                item_key = item_id .. ':' .. suffix_id,
+
+                name = item_info.name,
+                texture = texture,
+                level = item_info.level,
+                quality = item_info.quality,
+                max_stack = item_info.max_stack,
+
+                count = count,
+                locked = locked,
+                readable = readable,
+                auctionable = auctionable,
+
+                tooltip = tooltip,
+                max_charges = max_charges,
+                charges = charges,
+                aux_quantity = aux_quantity,
+            }
         end
-        local aux_quantity = charges or count
-        return {
-            item_id = item_id,
-            suffix_id = suffix_id,
-            unique_id = unique_id,
-            enchant_id = enchant_id,
-
-            link = link,
-            item_key = item_id .. ':' .. suffix_id,
-
-            name = item_info.name,
-            texture = texture,
-            level = item_info.level,
-            requirement = item_info.requirement,
-            type = item_info.type,
-            subtype = item_info.subtype,
-            slot = item_info.slot,
-            quality = item_info.quality,
-            max_stack = item_info.max_stack,
-
-            count = count,
-            locked = locked,
-            readable = readable,
-            auctionable = auctionable,
-
-            tooltip = tooltip,
-            max_charges = max_charges,
-            charges = charges,
-            aux_quantity = aux_quantity,
-        }
     end
 end
 
