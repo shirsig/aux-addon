@@ -220,6 +220,7 @@ end
 
 function post_auction()
     local item_key = selected_item.key
+    local max_charges = selected_item.max_charges
 
     local unit_start_price = get_unit_start_price()
     local unit_buyout_price = get_unit_buyout_price()
@@ -242,7 +243,7 @@ function post_auction()
         end
     end
 
-    PostAuction(start_price, buyout_price, duration, stack_size, stack_count)
+    PostAuction(start_price, buyout_price, duration, max_charges and 1 or stack_size, stack_count)
 
     posting = stack_count == 1 and 'single' or 'multi'
     aux.coro_thread(function()
@@ -280,6 +281,10 @@ function validate_parameters()
         return
     end
     if get_unit_start_price() == 0 then
+        post_button:Disable()
+        return
+    end
+    if stack_count_slider:GetValue() == 0 then
         post_button:Disable()
         return
     end
@@ -349,8 +354,8 @@ end
 
 function quantity_update(maximize_count)
     if selected_item then
-        local max_stack_count = selected_item.max_charges and 1 or floor(selected_item.availability[0] / stack_size_slider:GetValue())
-        stack_count_slider:SetMinMaxValues(1, max_stack_count)
+        local max_stack_count = selected_item.max_charges and min(1, selected_item.availability[stack_size_slider:GetValue()]) or floor(selected_item.availability[0] / stack_size_slider:GetValue())
+        stack_count_slider:SetMinMaxValues(min(1, max_stack_count), max_stack_count)
         if maximize_count then
             stack_count_slider:SetValue(max_stack_count)
         end
