@@ -161,7 +161,7 @@ do
     function fetch_item_data()
         aux.coro_thread(function()
             for item_id = MIN_ITEM_ID, MAX_ITEM_ID do
-                while not aux.account_data.items[item_id] and not aux.account_data.unused_item_ids[item_id] and not process_item(item_id) do
+                if not aux.account_data.items[item_id] and not aux.account_data.unused_item_ids[item_id] and not process_item(item_id) then
                     requested_item_id = item_id
                     while requested_item_id do
                         aux.coro_wait()
