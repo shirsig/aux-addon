@@ -129,7 +129,7 @@ function submit_query(page)
         blizzard_query.usable,
         blizzard_query.quality,
         state.params.get_all,
-        blizzard_query.class ~= 1 and blizzard_query.class ~= 2 and blizzard_query.exact, -- Doesn't work for suffix items
+        blizzard_query.class and blizzard_query.class ~= 1 and blizzard_query.class ~= 2 and blizzard_query.exact, -- Excluding suffix items
         category_filter
     )
 end
@@ -186,7 +186,7 @@ function scan_page(page)
                         pending[i] = nil
                     end
                     count = count + 1
-                    if count % 100 == 0 then
+                    if state.params.get_all and count % 10 == 0 then
                         aux.coro_wait()
                     end
                 end

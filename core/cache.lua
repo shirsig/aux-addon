@@ -159,14 +159,18 @@ function fetch_item_data()
     aux.coro_thread(function()
         for item_id = MIN_ITEM_ID, MAX_ITEM_ID do
             if not aux.account_data.items[item_id] and not aux.account_data.unused_item_ids[item_id] and not process_item(item_id) then
-                aux.coro_wait()
+                for i = 1, 7 do
+                    aux.coro_wait()
+                end
             end
         end
     end)
 end
 
 function on_get_item_info_received(item_id, success)
-    if success == nil then
+    if success then
+        process_item(item_id)
+    else -- TODO if success == nil then
         aux.account_data.unused_item_ids[item_id] = true
     end
 end
