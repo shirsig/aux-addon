@@ -7,6 +7,8 @@ local disenchant = require 'aux.core.disenchant'
 local history = require 'aux.core.history'
 local gui = require 'aux.gui'
 
+local L = aux.localization
+
 local UNKNOWN = GRAY_FONT_COLOR_CODE .. '?' .. FONT_COLOR_CODE_CLOSE
 
 local game_tooltip_hooks = {}
@@ -67,7 +69,7 @@ function extend_tooltip(tooltip, link, quantity)
         local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
         if #distribution > 0 then
             if settings.disenchant_distribution then
-                tooltip:AddLine('Disenchants into:', aux.color.tooltip.disenchant.distribution())
+                tooltip:AddLine(L['Disenchants into:'], aux.color.tooltip.disenchant.distribution())
                 sort(distribution, function(a,b) return a.probability > b.probability end)
                 for _, event in ipairs(distribution) do
                     tooltip:AddLine(format('  %s%% %s (%s-%s)', event.probability * 100, info.display_name(event.item_id, true) or 'item:' .. event.item_id, event.min_quantity, event.max_quantity), aux.color.tooltip.disenchant.distribution())
@@ -75,20 +77,20 @@ function extend_tooltip(tooltip, link, quantity)
             end
             if settings.disenchant_value then
                 local disenchant_value = disenchant.value(item_info.slot, item_info.quality, item_info.level)
-                tooltip:AddLine('Disenchant: ' .. (disenchant_value and money.to_string2(disenchant_value) or UNKNOWN), aux.color.tooltip.disenchant.value())
+                tooltip:AddLine(L['Disenchant: '] .. (disenchant_value and money.to_string2(disenchant_value) or UNKNOWN), aux.color.tooltip.disenchant.value())
             end
         end
     end
     if settings.merchant_buy then
         local price, limited = info.merchant_buy_info(item_id)
         if price then
-            tooltip:AddLine('Vendor Buy ' .. (limited and '(limited): ' or ': ') .. money.to_string2(price * quantity), aux.color.tooltip.merchant())
+            tooltip:AddLine(L['Vendor Buy '] .. (limited and L['(limited): '] or ': ') .. money.to_string2(price * quantity), aux.color.tooltip.merchant())
         end
     end
     if settings.merchant_sell then
         local price = item_info and item_info.sell_price
         if price ~= 0 then
-            tooltip:AddLine('Vendor: ' .. (price and money.to_string2(price * quantity) or UNKNOWN), aux.color.tooltip.merchant())
+            tooltip:AddLine(L['Vendor: '] .. (price and money.to_string2(price * quantity) or UNKNOWN), aux.color.tooltip.merchant())
         end
     end
     local auctionable = not item_info or info.auctionable(info.tooltip('link', item_info.link), item_info.quality)
@@ -96,11 +98,11 @@ function extend_tooltip(tooltip, link, quantity)
     local value = history.value(item_key)
     if auctionable then
         if settings.value then
-            tooltip:AddLine('Value: ' .. (value and money.to_string2(value * quantity) or UNKNOWN), aux.color.tooltip.value())
+            tooltip:AddLine(L['Value: '] .. (value and money.to_string2(value * quantity) or UNKNOWN), aux.color.tooltip.value())
         end
         if settings.daily  then
             local market_value = history.market_value(item_key)
-            tooltip:AddLine('Today: ' .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. gui.percentage_historical(aux.round(market_value / value * 100)) .. ')' or UNKNOWN), aux.color.tooltip.value())
+            tooltip:AddLine(L['Today: '] .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. gui.percentage_historical(aux.round(market_value / value * 100)) .. ')' or UNKNOWN), aux.color.tooltip.value())
         end
     end
 

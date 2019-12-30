@@ -4,7 +4,9 @@ local aux = require 'aux'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
 
-local tab = aux.tab 'Bids'
+local L = aux.localization
+
+local tab = aux.tab(L['Bids'])
 
 function aux.event.AUX_LOADED()
     aux.event_listener('AUCTION_BIDDER_LIST_UPDATE', function()

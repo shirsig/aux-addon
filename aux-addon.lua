@@ -42,7 +42,7 @@ do
 	end)
 end
 
-function event.AUX_LOADED()
+function event.AUX_LOADED() -- modified
     _G.aux = aux or {}
     assign(aux, {
         account = {},
@@ -50,12 +50,12 @@ function event.AUX_LOADED()
         faction = {},
         character = {},
     })
-    M.account_data = assign(aux.account, {
+    M.account_data = assign(aux.account, { --hu71e@191228: new default settings
         scale = 1,
-        ignore_owner = true,
+        ignore_owner = false,
         action_shortcuts = false,
         crafting_cost = true,
-        post_bid = false,
+        post_bid = true,
         post_duration = post.DURATION_8,
         items = {},
         item_ids = {},
@@ -67,13 +67,13 @@ function event.AUX_LOADED()
         local key = format('%s|%s', GetRealmName(), UnitName'player')
         aux.character[key] = aux.character[key] or {}
         M.character_data = assign(aux.character[key], {
-            tooltip = {
+            tooltip = { --hu71e@191228: new default settings
                 value = true,
                 merchant_sell = true,
-                merchant_buy = false,
-                daily = false,
+                merchant_buy = true,
+                daily = true,
                 disenchant_value = false,
-                disenchant_distribution = false,
+                disenchant_distribution = true,
             }
         })
     end

@@ -13,7 +13,9 @@ local item_listing = require 'aux.gui.item_listing'
 local al = require 'aux.gui.auction_listing'
 local gui = require 'aux.gui'
 
-local tab = aux.tab 'Post'
+local L = aux.localization
+
+local tab = aux.tab(L['Post'])
 
 local settings_schema = {'tuple', '#', {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
@@ -131,14 +133,15 @@ function update_inventory_listing()
 	item_listing.populate(inventory_listing, records)
 end
 
-function update_auction_listing(listing, records, reference)
+function update_auction_listing(listing, records, reference) -- modified
 	local rows = {}
 	if selected_item then
 		local historical_value = history.value(selected_item.key)
 		local stack_size = stack_size_slider:GetValue()
 		for _, record in pairs(records[selected_item.key] or empty) do
-			local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and aux.color.red
-			local price = record.unit_price * (listing == 'bid' and record.stack_size or 1)
+            local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and aux.color.red
+            --hu71e@191230: the bid items in the post frame using the unit_price
+			local price = record.unit_price --remove: * (listing == 'bid' and record.stack_size or 1)
 			tinsert(rows, {
 				cols = {
                 { value = record.own and aux.color.green(record.count) or record.count },
@@ -155,8 +158,10 @@ function update_auction_listing(listing, records, reference)
 				cols = {
 				{ value = '---' },
 				{ value = '---' },
-				{ value = '---' },
-				{ value = money.to_string(historical_value * (listing == 'bid' and stack_size_slider:GetValue() or 1), true, nil, aux.color.green) },
+                { value = '---' },
+                --hu71e@191230: the bid items in the post frame using the historical unit_price
+                --remove: { value = money.to_string(historical_value * (listing == 'bid' and stack_size_slider:GetValue() or 1), true, nil, aux.color.green) },
+                { value = money.to_string(historical_value, true, nil, aux.color.green) },
 				{ value = historical_value and gui.percentage_historical(100) or '---' },
             },
 				record = { historical_value = true, stack_size = stack_size, unit_price = historical_value, own = true }
@@ -164,8 +169,9 @@ function update_auction_listing(listing, records, reference)
 		end
 		sort(rows, function(a, b)
 			return sort_util.multi_lt(
-				a.record.unit_price * (listing == 'bid' and a.record.stack_size or 1),
-				b.record.unit_price * (listing == 'bid' and b.record.stack_size or 1),
+                --hu71e@191230: always sort by unit_price
+				a.record.unit_price, --remove: * (listing == 'bid' and a.record.stack_size or 1),
+				b.record.unit_price, --remove: * (listing == 'bid' and b.record.stack_size or 1),
 
 				a.record.historical_value and 1 or 0,
 				b.record.historical_value and 1 or 0,
@@ -299,7 +305,7 @@ function update_item_configuration()
         item.texture:SetTexture(nil)
         item.count:SetText()
         item.name:SetTextColor(aux.color.label.enabled())
-        item.name:SetText('No item selected')
+        item.name:SetText(L['No item selected'])
 
         unit_start_price_input:Hide()
         unit_buyout_price_input:Hide()
@@ -337,19 +343,21 @@ function update_item_configuration()
             local duration_factor = info.duration_hours(duration_dropdown:GetIndex()) / 2
             local stack_size, stack_count = selected_item.max_charges and 1 or stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
-            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))
+            deposit:SetText(L['Deposit: '] .. money.to_string(amount, nil, nil, aux.color.text.enabled))
         end
 
         refresh_button:Enable()
 	end
 end
 
-function undercut(record, stack_size, stack)
-    local price = ceil(record.unit_price * (stack and record.stack_size or stack_size))
+function undercut(record, stack_size, stack) -- modified
+    --hu71e@191228: always return select.item.price='unit.price-1'
+    --remove: local price = ceil(record.unit_price * (stack and record.stack_size or stack_size))
+    local price = ceil(record.unit_price)
     if not record.own then
-	    price = price - 1
+        price = max(price-1, 1) --hu71e@191228: if price=0 then price=1
     end
-    return price / stack_size
+    return price --hu71e@191228: remove 'price / stack_size'
 end
 
 function quantity_update(maximize_count)

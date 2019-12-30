@@ -1,8 +1,8 @@
 ## Interface: 11303
-## Author: shirsig
+## Author: shirsig, hu71e
 ## Title: aux
-## Version: 1.0.0
-## Notes: Auction House replacement
+## Version: 1.0.0_hu_0.01
+## Notes: (Hu71e本地化修改版)Auction House replacement.
 ## SavedVariables: aux
 
 libs\package.lua
@@ -11,6 +11,8 @@ aux-addon.lua
 util.lua
 control.lua
 color.lua
+localization.lua
+
 gui\core.lua
 frame.lua
 util\persistence.lua

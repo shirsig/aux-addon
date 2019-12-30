@@ -6,6 +6,8 @@ local gui = require 'aux.gui'
 local auction_listing = require 'aux.gui.auction_listing'
 local search_tab = require 'aux.tabs.search'
 
+local L = aux.localization
+
 frame = CreateFrame('Frame', nil, aux.frame)
 frame:SetAllPoints()
 frame:SetScript('OnUpdate', on_update)
@@ -34,7 +36,7 @@ end)
 do
     local btn = gui.button(frame)
     btn:SetPoint('LEFT', aux.status_bar, 'RIGHT', 5, 0)
-    btn:SetText('Cancel')
+    btn:SetText(L['Cancel'])
     btn:Disable()
     btn:SetScript('OnClick', cancel_auction)
     cancel_button = btn

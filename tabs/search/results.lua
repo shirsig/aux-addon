@@ -6,13 +6,15 @@ local filter_util = require 'aux.util.filter'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
 
+local L = aux.localization
+
 NORMAL_MODE, FRESH_MODE, EXPIRING_MODE = {}, {}, {} -- TODO expiring
 
 mode = nil
 
 StaticPopupDialogs.AUX_SCAN_ALERT = {
-    text = 'One of your alert queries matched!',
-    button1 = 'Ok',
+    text = L['One of your alert queries matched!'],
+    button1 = L['Ok'],
     showAlert = 1,
     timeout = 0,
     hideOnEscape = 1,
@@ -25,9 +27,9 @@ end
 function update_mode(mode)
     _M.mode = mode
 	if mode == NORMAL_MODE then
-		mode_button:SetText('Normal')
+		mode_button:SetText(L['Normal'])
     else
-        mode_button:SetText('Fresh')
+        mode_button:SetText(L['Fresh'])
 	end
 end
 
