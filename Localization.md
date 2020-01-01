@@ -20,3 +20,4 @@
 * ./tabs/search/frame.lua
 * ./tabs/search/results.lua
 * ./tabs/search/saved.lua
+* ./util/filter.lua
