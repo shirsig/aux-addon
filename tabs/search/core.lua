@@ -2,12 +2,13 @@ select(2, ...) 'aux.tabs.search'
 
 local aux = require 'aux'
 local info = require 'aux.util.info'
+local L = aux.localization
 
-local tab = aux.tab 'Search'
+local tab = aux.tab(L['Search'])
 
 StaticPopupDialogs.AUX_SEARCH_TABLE_FULL = {
-    text = 'Table full!\nFurther results from this search will still be processed but no longer displayed in the table.',
-    button1 = 'Ok',
+    text = L['Table full!\nFurther results from this search will still be processed but no longer displayed in the table.'],
+    button1 = L['Ok'],
     showAlert = 1,
     timeout = 0,
     hideOnEscape = 1,

@@ -6,6 +6,7 @@ local money = require 'aux.util.money'
 local filter_util = require 'aux.util.filter'
 local history = require 'aux.core.history'
 local disenchant = require 'aux.core.disenchant'
+local L = aux.localization
 
 function default_filter(str)
     return {
@@ -21,7 +22,7 @@ function default_filter(str)
 end
 
 M.filters = {
-    ['utilizable'] = {
+    [L['utilizable']] = {
         input_type = '',
         validator = function()
             return function(auction_record)
@@ -30,14 +31,14 @@ M.filters = {
         end,
     },
 
-    ['tooltip'] = {
+    [L['tooltip']] = {
         input_type = 'string',
         validator = function(str)
             return default_filter(str).validator()
         end,
     },
 
-    ['item'] = {
+    [L['item']] = {
         input_type = 'string',
         validator = function(name)
             return function(auction_record)
@@ -46,7 +47,7 @@ M.filters = {
         end
     },
 
-    ['left'] = {
+    [L['left']] = {
         input_type = {'30m', '2h', '8h', '24h'},
         validator = function(index)
             return function(auction_record)
@@ -55,7 +56,7 @@ M.filters = {
         end
     },
 
-    ['rarity'] = {
+    [L['rarity']] = {
         input_type = {'poor', 'common', 'uncommon', 'rare', 'epic'},
         validator = function(index)
             return function(auction_record)
@@ -64,7 +65,7 @@ M.filters = {
         end
     },
 
-    ['min-level'] = {
+    [L['min-level']] = {
         input_type = 'number',
         validator = function(level)
             return function(auction_record)
@@ -73,7 +74,7 @@ M.filters = {
         end
     },
 
-    ['max-level'] = {
+    [L['max-level']] = {
         input_type = 'number',
         validator = function(level)
             return function(auction_record)
@@ -82,7 +83,7 @@ M.filters = {
         end
     },
 
-    ['bid-price'] = {
+    [L['bid-price']] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -91,7 +92,7 @@ M.filters = {
         end
     },
 
-    ['price'] = {
+    [L['price']] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -100,7 +101,7 @@ M.filters = {
         end
     },
 
-    ['bid-percent'] = {
+    [L['bid-percent']] = {
         input_type = 'number',
         validator = function(pct)
             return function(auction_record)
@@ -109,7 +110,7 @@ M.filters = {
         end
     },
 
-    ['percent'] = {
+    [L['percent']] = {
         input_type = 'number',
         validator = function(pct)
             return function(auction_record)
@@ -120,7 +121,7 @@ M.filters = {
         end
     },
 
-    ['bid-profit'] = {
+    [L['bid-profit']] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -129,7 +130,7 @@ M.filters = {
         end
     },
 
-    ['profit'] = {
+    [L['profit']] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -138,7 +139,7 @@ M.filters = {
         end
     },
 
-    ['bid-disenchant-profit'] = {
+    [L['bid-disenchant-profit']] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -149,7 +150,7 @@ M.filters = {
         end
     },
 
-    ['disenchant-profit'] = {
+    [L['disenchant-profit']] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -160,7 +161,7 @@ M.filters = {
         end
     },
 
-    ['bid-vendor-profit'] = {
+    [L['bid-vendor-profit']] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -170,7 +171,7 @@ M.filters = {
         end
     },
 
-    ['vendor-profit'] = {
+    [L['vendor-profit']] = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -180,7 +181,7 @@ M.filters = {
         end
     },
 
-    ['seller'] = {
+    [L['seller']] = {
         input_type = 'string',
         validator = function(name)
             return function(auction_record)
@@ -280,11 +281,11 @@ function M.parse_filter_string(str)
             if input_type ~= '' then
                 if not parts[i + 1] or not parse_parameter(input_type, parts[i + 1]) then
                     if parts[i] == 'item' then
-                        return nil, 'Invalid item name', aux.account_data.auctionable_items
+                        return nil, L['Invalid item name'], aux.account_data.auctionable_items
                     elseif type(input_type) == 'table' then
-                        return nil, 'Invalid choice for ' .. parts[i], input_type
+                        return nil, L['Invalid choice for '] .. parts[i], input_type
                     else
-                        return nil, 'Invalid input for ' .. parts[i] .. '. Expecting: ' .. input_type
+                        return nil, L['Invalid input for '] .. parts[i] .. L['. Expecting: '] .. input_type
                     end
                 end
                 tinsert(post_filter, {'filter', parts[i], parts[i + 1]})

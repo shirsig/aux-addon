@@ -4,6 +4,7 @@ local aux = require 'aux'
 local info = require 'aux.util.info'
 local money = require 'aux.util.money'
 local filter_util = require 'aux.util.filter'
+local L = aux.localization
 
 local post_filter = {}
 local post_filter_index = 0
@@ -199,7 +200,7 @@ function formatted_post_filter(components)
 		str = str .. data_link(i, component_text)
 	end
 
-	return '<html><body><p>' .. data_link(0, 'Post Filter:') .. '</p><p>' .. str .. '</p></body></html>'
+	return '<html><body><p>' .. data_link(0, L['Post Filter:']) .. '</p><p>' .. str .. '</p></body></html>'
 end
 
 function data_link(id, str)

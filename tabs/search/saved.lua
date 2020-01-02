@@ -2,6 +2,7 @@ select(2, ...) 'aux.tabs.search'
 
 local aux = require 'aux'
 local filter_util = require 'aux.util.filter'
+local L = aux.localization
 
 dragged_search = nil
 
@@ -119,7 +120,7 @@ function get_alert_validator()
 			if queries then
 				tinsert(validators, queries[1].validator)
 			else
-				aux.print('Invalid alert filter:', error)
+				aux.print(L['Invalid alert filter:'], error)
 			end
 		end
 	end
@@ -137,7 +138,7 @@ function add_favorite(filter_string)
         })
 		update_search_listings()
 	else
-		aux.print('Invalid filter:', error)
+		aux.print(L['Invalid filter:'], error)
 	end
 end
 
@@ -145,13 +146,13 @@ function enable_alert(search)
 	local queries, error = filter_util.queries(search.filter_string)
 	if queries then
 		if #queries > 1 then
-			aux.print('Error: Alert does not support multi-queries')
+			aux.print(L['Error: Alert does not support multi-queries'])
 		elseif aux.size(queries[1].blizzard_query) > 0 and not filter_util.parse_filter_string(search.filter_string).blizzard.exact then
-			aux.print('Error: Alert does not support Blizzard filters')
+			aux.print(L['Error: Alert does not support Blizzard filters'])
 		else
 			search.alert = true
 		end
 	else
-		aux.print('Invalid filter:', error)
+		aux.print(L['Invalid filter:'], error)
 	end
 end

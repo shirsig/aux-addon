@@ -3,6 +3,8 @@ select(2, ...) 'aux'
 local gui = require 'aux.gui'
 local scan = require 'aux.core.scan'
 local post = require 'aux.tabs.post'
+local aux = require 'aux'
+local L = aux.localization
 
 function event.AUX_LOADED()
 	for _, v in ipairs(tab_info) do
@@ -49,7 +51,7 @@ do
 	local btn = gui.button(frame)
 	btn:SetPoint('BOTTOMRIGHT', -5, 5)
 	gui.set_size(btn, 60, 24)
-	btn:SetText('Close')
+	btn:SetText(L['Close'])
 	btn:SetScript('OnClick', function() frame:Hide() end)
 	close_button = btn
 end
@@ -57,7 +59,7 @@ do
 	local btn = gui.button(frame, gui.font_size.small)
 	btn:SetPoint('RIGHT', close_button, 'LEFT' , -5, 0)
 	gui.set_size(btn, 60, 24)
-	btn:SetText(color.blizzard'Blizzard UI')
+	btn:SetText(color.blizzard(L['Blizzard UI']))
 	btn:SetScript('OnClick',function()
 		if AuctionFrame:IsVisible() then
             AuctionFrame_Hide()
@@ -71,7 +73,7 @@ do
     local btn = gui.button(frame)
     btn:SetPoint('RIGHT', blizzard_button, 'LEFT' , -5, 0)
     gui.set_size(btn, 60, 24)
-    btn:SetText('Scan')
+    btn:SetText(L['Scan'])
     btn:SetScript('OnUpdate', function(self)
         if select(2, CanSendAuctionQuery()) then
             self:Enable()

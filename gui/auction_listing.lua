@@ -7,6 +7,7 @@ local money = require 'aux.util.money'
 local history = require 'aux.core.history'
 local gui = require 'aux.gui'
 local tooltip = require 'aux.core.tooltip'
+local L = aux.localization
 
 price_per_unit, percentage_for_bid = false, false
 
@@ -74,7 +75,7 @@ end
 
 M.search_columns = {
     {
-        title = 'Item',
+        title = L['Item'],
         width = .35,
         init = item_column_init,
         fill = item_column_fill,
@@ -83,7 +84,7 @@ M.search_columns = {
         end,
     },
     {
-        title = 'Lvl',
+        title = L['Lvl'],
         width = .035,
         align = 'CENTER',
         fill = function(cell, record)
@@ -96,7 +97,7 @@ M.search_columns = {
         end,
     },
     {
-        title = 'Auctions',
+        title = L['Auctions'],
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
@@ -120,7 +121,7 @@ M.search_columns = {
         end,
     },
     {
-        title = 'Stack\nSize',
+        title = L['Stack\nSize'],
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
@@ -131,7 +132,7 @@ M.search_columns = {
         end,
     },
     {
-        title = 'Time\nLeft',
+        title = L['Time\nLeft'],
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
@@ -142,7 +143,7 @@ M.search_columns = {
         end,
     },
     {
-        title = 'Seller',
+        title = L['Seller'],
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
@@ -161,7 +162,7 @@ M.search_columns = {
         end,
     },
     {
-        title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
+        title = {L['Auction Bid\n(per item)'], L['Auction Bid\n(per stack)']},
         width = .125,
         align = 'RIGHT',
         toggle = 'price_per_unit',
@@ -209,7 +210,7 @@ M.search_columns = {
         end,
     },
     {
-        title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
+        title = {L['Auction Buyout\n(per item)'], L['Auction Buyout\n(per stack)']},
         width = .125,
         align = 'RIGHT',
         toggle = 'price_per_unit',
@@ -227,7 +228,7 @@ M.search_columns = {
         end,
     },
     {
-        title = {'% Hist.\nValue (Bid)', '% Hist.\nValue'},
+        title = {L['% Hist.\nValue (Bid)'], L['% Hist.\nValue']},
         width = .08,
         align = 'CENTER',
         toggle = 'percentage_for_bid',
@@ -245,7 +246,7 @@ M.search_columns = {
 
 M.auctions_columns = {
     {
-        title = 'Item',
+        title = L['Item'],
         width = .35,
         init = item_column_init,
         fill = item_column_fill,
@@ -254,7 +255,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'Lvl',
+        title = L['Lvl'],
         width = .035,
         align = 'CENTER',
         fill = function(cell, record)
@@ -267,7 +268,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'Auctions',
+        title = L['Auctions'],
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
@@ -288,7 +289,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'Stack\nSize',
+        title = L['Stack\nSize'],
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
@@ -307,7 +308,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'Time\nLeft',
+        title = L['Time\nLeft'],
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
@@ -330,7 +331,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
+        title = {L['Auction Bid\n(per item)'], L['Auction Bid\n(per stack)']},
         width = .125,
         align = 'RIGHT',
         toggle = 'price_per_unit',
@@ -375,7 +376,7 @@ M.auctions_columns = {
         end,
     },
     {
-        title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
+        title = {L['Auction Buyout\n(per item)'], L['Auction Buyout\n(per stack)']},
         width = .125,
         align = 'RIGHT',
         toggle = 'price_per_unit',
@@ -407,17 +408,17 @@ M.auctions_columns = {
         end,
     },
     {
-        title = 'Status',
+        title = L['Status'],
         width = .21,
         align = 'CENTER',
         fill = function(cell, record)
             local text
             if not record.high_bidder then
-                text = aux.color.red'No Bids'
+                text = aux.color.red(L['No Bids'])
             elseif record.sale_status == 1 then
-                text = aux.color.blue'Sold: ' .. record.high_bidder
+                text = aux.color.blue(L['Sold: ']) .. record.high_bidder
             else
-                text = aux.color.green'Bid: ' .. record.high_bidder
+                text = aux.color.green(L['Bid: ']) .. record.high_bidder
             end
             cell.text:SetText(text)
         end,
@@ -440,7 +441,7 @@ M.auctions_columns = {
 
 M.bids_columns = {
     {
-        title = 'Item',
+        title = L['Item'],
         width = .35,
         init = item_column_init,
         fill = item_column_fill,
@@ -449,7 +450,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = 'Auctions',
+        title = L['Auctions'],
         width = .06,
         align = 'CENTER',
         fill = function(cell, record, count, own, expandable)
@@ -470,7 +471,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = 'Stack\nSize',
+        title = L['Stack\nSize'],
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
@@ -481,7 +482,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = 'Time\nLeft',
+        title = L['Time\nLeft'],
         width = .04,
         align = 'CENTER',
         fill = function(cell, record)
@@ -492,7 +493,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = 'Seller',
+        title = L['Seller'],
         width = .13,
         align = 'CENTER',
         fill = function(cell, record)
@@ -511,7 +512,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = {'Auction Bid\n(per item)', 'Auction Bid\n(per stack)'},
+        title = {L['Auction Bid\n(per item)'], L['Auction Bid\n(per stack)']},
         width = .125,
         align = 'RIGHT',
         toggle = 'price_per_unit',
@@ -541,7 +542,7 @@ M.bids_columns = {
         end,
     },
     {
-        title = {'Auction Buyout\n(per item)', 'Auction Buyout\n(per stack)'},
+        title = {L['Auction Buyout\n(per item)'], L['Auction Buyout\n(per stack)']},
         width = .125,
         align = 'RIGHT',
         toggle = 'price_per_unit',
@@ -559,15 +560,15 @@ M.bids_columns = {
         end,
     },
     {
-        title = 'Status',
+        title = L['Status'],
         width = .115,
         align = 'CENTER',
         fill = function(cell, record)
             local status
             if record.high_bidder then
-                status = aux.color.yellow'High Bidder'
+                status = aux.color.yellow(L['High Bidder'])
             else
-                status = aux.color.red'Outbid'
+                status = aux.color.red(L['Outbid'])
             end
             cell.text:SetText(status)
         end,
@@ -653,11 +654,11 @@ local methods = {
         if not rt.rowInfo.single_item then
             if rt.expanded[self.expandKey] then
                 GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-                GameTooltip:AddLine('Double-click to collapse this item.', 1, 1, 1, true)
+                GameTooltip:AddLine(L['Double-click to collapse this item.'], 1, 1, 1, true)
                 GameTooltip:Show()
             elseif self.expandable then
                 GameTooltip_SetDefaultAnchor(GameTooltip, UIParent)
-                GameTooltip:AddLine('Double-click to expand this item.', 1, 1, 1, true)
+                GameTooltip:AddLine(L['Double-click to expand this item.'], 1, 1, 1, true)
                 GameTooltip:Show()
             end
         end

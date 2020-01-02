@@ -8,6 +8,7 @@ local scan = require 'aux.core.scan'
 local gui = require 'aux.gui'
 local listing = require 'aux.gui.listing'
 local auction_listing = require 'aux.gui.auction_listing'
+local L = aux.localization
 
 local FILTER_SPACING = 27
 
@@ -71,7 +72,7 @@ do
     local btn = gui.button(frame)
     btn:SetHeight(25)
     btn:SetPoint('TOPRIGHT', -5, -8)
-    btn:SetText('Search')
+    btn:SetText(L['Search'])
     btn:RegisterForClicks('LeftButtonUp', 'RightButtonUp')
     btn:SetScript('OnClick', function(_, button)
         if button == 'RightButton' then
@@ -85,7 +86,7 @@ do
     local btn = gui.button(frame)
     btn:SetHeight(25)
     btn:SetPoint('TOPRIGHT', -5, -8)
-    btn:SetText('Pause')
+    btn:SetText(L['Pause'])
     btn:SetScript('OnClick', function()
         scan.abort()
     end)
@@ -96,7 +97,7 @@ do
     btn:SetHeight(25)
     btn:SetPoint('RIGHT', start_button, 'LEFT', -4, 0)
     btn:SetBackdropColor(aux.color.state.enabled())
-    btn:SetText('Resume')
+    btn:SetText(L['Resume'])
     btn:SetScript('OnClick', function()
         execute(nil, true)
     end)
@@ -139,7 +140,7 @@ do
     btn:SetPoint('BOTTOMLEFT', aux.frame.content, 'TOPLEFT', 10, 8)
     btn:SetWidth(243)
     btn:SetHeight(22)
-    btn:SetText('Search Results')
+    btn:SetText(L['Search Results'])
     btn:SetScript('OnClick', function() set_subtab(RESULTS) end)
     search_results_button = btn
 end
@@ -148,7 +149,7 @@ do
     btn:SetPoint('TOPLEFT', search_results_button, 'TOPRIGHT', 5, 0)
     btn:SetWidth(243)
     btn:SetHeight(22)
-    btn:SetText('Saved Searches')
+    btn:SetText(L['Saved Searches'])
     btn:SetScript('OnClick', function() set_subtab(SAVED) end)
     saved_searches_button = btn
 end
@@ -157,28 +158,28 @@ do
     btn:SetPoint('TOPLEFT', saved_searches_button, 'TOPRIGHT', 5, 0)
     btn:SetWidth(243)
     btn:SetHeight(22)
-    btn:SetText('Filter Builder')
+    btn:SetText(L['Filter Builder'])
     btn:SetScript('OnClick', function() set_subtab(FILTER) end)
     new_filter_button = btn
 end
 do
     local btn = gui.button(frame.results)
     btn:SetPoint('LEFT', aux.status_bar, 'RIGHT', 5, 0)
-    btn:SetText('Bid')
+    btn:SetText(L['Bid'])
     btn:Disable()
     bid_button = btn
 end
 do
     local btn = gui.button(frame.results)
     btn:SetPoint('TOPLEFT', bid_button, 'TOPRIGHT', 5, 0)
-    btn:SetText('Buyout')
+    btn:SetText(L['Buyout'])
     btn:Disable()
     buyout_button = btn
 end
 do
     local btn = gui.button(frame.results)
     btn:SetPoint('TOPLEFT', buyout_button, 'TOPRIGHT', 5, 0)
-    btn:SetText('Clear')
+    btn:SetText(L['Clear'])
     btn:SetScript('OnClick', function()
         while tremove(current_search().records) do end
         current_search().table:SetDatabase()
@@ -187,7 +188,7 @@ end
 do
     local btn = gui.button(frame.saved)
     btn:SetPoint('LEFT', aux.status_bar, 'RIGHT', 5, 0)
-    btn:SetText('Favorite')
+    btn:SetText(L['Favorite'])
     btn:SetScript('OnClick', function()
         add_favorite(search_box:GetText())
     end)
@@ -195,7 +196,7 @@ end
 do
     local btn1 = gui.button(frame.filter)
     btn1:SetPoint('LEFT', aux.status_bar, 'RIGHT', 5, 0)
-    btn1:SetText('Search')
+    btn1:SetText(L['Search'])
     btn1:SetScript('OnClick', function()
 	    export_filter_string()
         execute()
@@ -203,12 +204,12 @@ do
 
     local btn2 = gui.button(frame.filter)
     btn2:SetPoint('LEFT', btn1, 'RIGHT', 5, 0)
-    btn2:SetText('Export')
+    btn2:SetText(L['Export'])
     btn2:SetScript('OnClick', export_filter_string)
 
     local btn3 = gui.button(frame.filter)
     btn3:SetPoint('LEFT', btn2, 'RIGHT', 5, 0)
-    btn3:SetText('Import')
+    btn3:SetText(L['Import'])
     btn3:SetScript('OnClick', import_filter_string)
 end
 do
@@ -233,7 +234,7 @@ do
     editbox.enter = function() editbox:ClearFocus() end
     local label = gui.label(editbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-    label:SetText('Name')
+    label:SetText(L['Name'])
     name_input = editbox
 end
 do
@@ -242,7 +243,7 @@ do
     checkbox:SetScript('OnClick', exact_update)
     local label = gui.label(checkbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
-    label:SetText('Exact')
+    label:SetText(L['Exact'])
     exact_checkbox = checkbox
 end
 do
@@ -267,7 +268,7 @@ do
     end
     local label = gui.label(editbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -2, 1)
-    label:SetText('Level Range')
+    label:SetText(L['Level Range'])
     min_level_input = editbox
 end
 do
@@ -300,7 +301,7 @@ do
     checkbox:SetPoint('TOPLEFT', max_level_input, 'TOPRIGHT', 16, 0)
     local label = gui.label(checkbox, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', checkbox, 'TOPLEFT', -2, 1)
-    label:SetText('Usable')
+    label:SetText(L['Usable'])
     usable_checkbox = checkbox
 end
 do
@@ -317,7 +318,7 @@ do
     end)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, 1)
-    label:SetText('Item Class')
+    label:SetText(L['Item Class'])
     class_dropdown = dropdown
 end
 do
@@ -334,7 +335,7 @@ do
     end)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, 1)
-    label:SetText('Item Subclass')
+    label:SetText(L['Item Subclass'])
     subclass_dropdown = dropdown
 end
 do
@@ -350,7 +351,7 @@ do
     end)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, 1)
-    label:SetText('Item Slot')
+    label:SetText(L['Item Slot'])
     slot_dropdown = dropdown
 end
 do
@@ -366,7 +367,7 @@ do
     end)
     local label = gui.label(dropdown, gui.font_size.small)
     label:SetPoint('BOTTOMLEFT', dropdown, 'TOPLEFT', -2, 1)
-    label:SetText('Min Quality')
+    label:SetText(L['Min Quality'])
     quality_dropdown = dropdown
 end
 gui.vertical_line(frame.filter, 332)
@@ -406,7 +407,7 @@ do
     input:SetOptions({'and', 'or', 'not', unpack(aux.keys(filter_util.filters))})
     local label = gui.label(input, gui.font_size.medium)
     label:SetPoint('RIGHT', input, 'LEFT', -8, 0)
-    label:SetText('Operator')
+    label:SetText(L['Operator'])
 	filter_dropdown = input
 end
 do
@@ -501,10 +502,10 @@ for _ = 1, 5 do
 end
 
 favorite_searches_listing = listing.new(frame.saved.favorite)
-favorite_searches_listing:SetColInfo{{name='Alert', width=.07, align='CENTER'}, {name='Favorite Searches', width=.93}}
+favorite_searches_listing:SetColInfo{{name=L['Alert'], width=.07, align='CENTER'}, {name=L['Favorite Searches'], width=.93}}
 
 recent_searches_listing = listing.new(frame.saved.recent)
-recent_searches_listing:SetColInfo{{name='Recent Searches', width=1}}
+recent_searches_listing:SetColInfo{{name=L['Recent Searches'], width=1}}
 
 for listing in aux.iter(favorite_searches_listing, recent_searches_listing) do
 	for k, v in pairs(handlers) do
