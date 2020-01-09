@@ -117,6 +117,13 @@ function game_tooltip_hooks.SetHyperlink(itemstring)
     end
 end
 
+function game_tooltip_hooks.SetItemByID(itemId)
+    local _, link = GetItemInfo(itemId)
+    if link then
+        extend_tooltip(GameTooltip, link, 1)
+    end
+end
+
 function game_tooltip_hooks.SetAuctionItem(type, index)
     local link = GetAuctionItemLink(type, index)
     if link then
