@@ -138,7 +138,7 @@ function update_auction_listing(listing, records, reference)
 		local stack_size = stack_size_slider:GetValue()
 		for _, record in pairs(records[selected_item.key] or empty) do
 			local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and aux.color.red
-			local price = record.unit_price * (listing == 'bid' and record.stack_size or 1)
+			local price = record.unit_price
 			tinsert(rows, {
 				cols = {
                 { value = record.own and aux.color.green(record.count) or record.count },
@@ -156,7 +156,7 @@ function update_auction_listing(listing, records, reference)
 				{ value = '---' },
 				{ value = '---' },
 				{ value = '---' },
-				{ value = money.to_string(historical_value * (listing == 'bid' and stack_size_slider:GetValue() or 1), true, nil, aux.color.green) },
+				{ value = money.to_string(historical_value, true, nil, aux.color.green) },
 				{ value = historical_value and gui.percentage_historical(100) or '---' },
             },
 				record = { historical_value = true, stack_size = stack_size, unit_price = historical_value, own = true }
@@ -164,8 +164,8 @@ function update_auction_listing(listing, records, reference)
 		end
 		sort(rows, function(a, b)
 			return sort_util.multi_lt(
-				a.record.unit_price * (listing == 'bid' and a.record.stack_size or 1),
-				b.record.unit_price * (listing == 'bid' and b.record.stack_size or 1),
+				a.record.unit_price,
+				b.record.unit_price,
 
 				a.record.historical_value and 1 or 0,
 				b.record.historical_value and 1 or 0,
@@ -206,7 +206,7 @@ function price_update()
     if selected_item then
         local historical_value = history.value(selected_item.key)
         if get_bid_selection() or get_buyout_selection() then
-	        set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), stack_size_slider:GetValue(), get_bid_selection()))
+	        set_unit_start_price(undercut(get_bid_selection() or get_buyout_selection(), get_bid_selection().stack_size, get_bid_selection()))
 	        unit_start_price_input:SetText(money.to_string(get_unit_start_price(), true, nil, nil, true))
         end
         if get_buyout_selection() then
