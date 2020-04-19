@@ -3,8 +3,9 @@ select(2, ...) 'aux.tabs.auctions'
 local aux = require 'aux'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
+local L = aux.localization
 
-local tab = aux.tab 'Auctions'
+local tab = aux.tab(L['Auctions'])
 
 function aux.event.AUX_LOADED()
     aux.event_listener('AUCTION_OWNED_LIST_UPDATE', function()

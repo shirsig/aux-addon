@@ -11,6 +11,8 @@ aux-addon.lua
 util.lua
 control.lua
 color.lua
+localization.lua
+
 gui\core.lua
 frame.lua
 util\persistence.lua

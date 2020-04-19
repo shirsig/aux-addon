@@ -4,6 +4,7 @@ local aux = require 'aux'
 local post = require 'aux.tabs.post'
 local info = require 'aux.util.info'
 local scan = require 'aux.core.scan'
+local L = aux.localization
 
 function status(enabled)
 	return (enabled and aux.color.green'on' or aux.color.red'off')
@@ -56,10 +57,10 @@ function SlashCmdList.AUX(command)
         aux.account_data.item_ids = {}
         aux.account_data.unused_item_ids = {}
         aux.account_data.auctionable_items = {}
-        aux.print('Item cache cleared.')
+        aux.print(L['Item cache cleared.'])
     elseif arguments[1] == 'clear' and arguments[2] == 'post' then
         aux.faction_data.post = {}
-        aux.print('Post data cleared.')
+        aux.print(L['Post data cleared.'])
 	else
 		aux.print('Usage:')
         aux.print('- scale [' .. aux.color.blue(aux.account_data.scale) .. ']')

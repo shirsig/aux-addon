@@ -12,8 +12,10 @@ local history = require 'aux.core.history'
 local item_listing = require 'aux.gui.item_listing'
 local al = require 'aux.gui.auction_listing'
 local gui = require 'aux.gui'
+local L = aux.localization
 
-local tab = aux.tab 'Post'
+local tab = aux.tab(L['Post'])
+
 
 local settings_schema = {'tuple', '#', {duration='number'}, {start_price='number'}, {buyout_price='number'}, {hidden='boolean'}}
 
@@ -299,7 +301,7 @@ function update_item_configuration()
         item.texture:SetTexture(nil)
         item.count:SetText()
         item.name:SetTextColor(aux.color.label.enabled())
-        item.name:SetText('No item selected')
+        item.name:SetText(L['No item selected'])
 
         unit_start_price_input:Hide()
         unit_buyout_price_input:Hide()
@@ -337,7 +339,7 @@ function update_item_configuration()
             local duration_factor = info.duration_hours(duration_dropdown:GetIndex()) / 2
             local stack_size, stack_count = selected_item.max_charges and 1 or stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
-            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))
+            deposit:SetText(L['Deposit: '] .. money.to_string(amount, nil, nil, aux.color.text.enabled))
         end
 
         refresh_button:Enable()
