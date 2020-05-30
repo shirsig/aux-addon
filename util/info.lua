@@ -278,7 +278,7 @@ function M.item(item_id, suffix_id)
         slot = slot,
         max_stack = max_stack,
         texture = texture,
-        sell_price = sell_price
+        sell_price = sell_price / (max_item_charges(item_id) or 1)
     } or item_info(item_id)
 end
 
