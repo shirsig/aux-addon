@@ -28,6 +28,7 @@ function aux.event.AUX_LOADED()
         local _, link = self:GetItem()
         extend_tooltip(self, link)
     end)
+
 --        for name, hook in pairs(game_tooltip_hooks) do
 --            local name, f = name, f
 --            aux.hook(name, GameTooltip, function(...)
@@ -223,5 +224,33 @@ function game_tooltip_hooks.SetAuctionSellItem()
                 return
             end
         end
+    end
+end
+
+function game_tooltip_hooks.SetTradePlayerItem(index)
+    local link = GetTradePlayerItemLink(index)
+    if link then
+        extend_tooltip(GameTooltip, link, select(3, GetTradePlayerItemInfo(index)))
+    end
+end
+
+function game_tooltip_hooks.SetTradeTargetItem(index)
+    local link = GetTradeTargetItemLink(index)
+    if link then
+        extend_tooltip(GameTooltip, link, select(3, GetTradeTargetItemInfo(index)))
+    end
+end
+
+function game_tooltip_hooks.SetSendMailItem(sendMailIndex)
+    local link = GetSendMailItemLink(sendMailIndex)
+    if link then
+        extend_tooltip(GameTooltip, link, select(4, GetSendMailItem(sendMailIndex)))
+    end
+end
+
+function game_tooltip_hooks.SetBuybackItem(slot)
+    local link = GetBuybackItemLink(slot)
+    if link then
+        extend_tooltip(GameTooltip, link, select(4, GetBuybackItemInfo(slot)))
     end
 end
