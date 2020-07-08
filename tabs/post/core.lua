@@ -262,8 +262,12 @@ function post_auction()
                 break
             end
         end
-        if all_posted and selected_item and selected_item.key == item_key then
-            selected_item = nil
+        if selected_item and selected_item.key == item_key then
+            if all_posted then
+                selected_item = nil
+            else
+                update_item(selected_item)
+            end
         end
         refresh = true
     end)
