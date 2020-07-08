@@ -3,6 +3,7 @@ select(2, ...) 'aux'
 local gui = require 'aux.gui'
 local scan = require 'aux.core.scan'
 local post = require 'aux.tabs.post'
+local search = require 'aux.tabs.search'
 
 function event.AUX_LOADED()
 	for _, v in ipairs(tab_info) do
@@ -91,6 +92,7 @@ do
             on_scan_start = function()
                 status_bar:update_status(0, 0)
                 post.clear_auctions()
+                search.clear_selection()
             end,
             on_page_loaded = function(_, _, _, page_size)
                 total = page_size

@@ -35,6 +35,12 @@ do
 	local searches = {}
 	local search_index = 1
 
+    function M.clear_selection()
+        if searches[search_index] then
+            searches[search_index].table:SetSelectedRecord()
+        end
+    end
+
 	function current_search()
 		return searches[search_index]
 	end
@@ -412,3 +418,4 @@ do
 		end
 	end
 end
+
