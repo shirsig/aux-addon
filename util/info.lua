@@ -187,6 +187,7 @@ end
 
 function M.tooltip(setter, arg1, arg2)
     AuxTooltip:SetOwner(UIParent, 'ANCHOR_NONE')
+    AuxTooltip:ClearLines()
     if setter == 'auction' then
 	    AuxTooltip:SetAuctionItem(arg1, arg2)
     elseif setter == 'bag' then
