@@ -3,6 +3,15 @@ select(2, ...) 'aux.tabs.search'
 local aux = require 'aux'
 local filter_util = require 'aux.util.filter'
 
+StaticPopupDialogs.AUX_REMOVE_FAVORITE_CONFIRMATION = {
+    text = 'Are you sure you want to remove this search from your favorites?',
+    button1 = 'Yes',
+    button2 = 'No',
+    showAlert = 1,
+    timeout = 0,
+    hideOnEscape = 1,
+}
+
 dragged_search = nil
 
 function aux.event.AUX_LOADED()
@@ -75,10 +84,14 @@ handlers = {
                     end
                 end
 				tinsert(favorite_searches, 1, data.search)
+                update_search_listings()
 			elseif st == favorite_searches_listing then
-                tremove(favorite_searches, data.index)
+                StaticPopupDialogs.AUX_REMOVE_FAVORITE_CONFIRMATION.OnAccept = function()
+                    tremove(favorite_searches, data.index)
+                    update_search_listings()
+                end
+                StaticPopup_Show('AUX_REMOVE_FAVORITE_CONFIRMATION')
             end
-            update_search_listings()
         end
 	end,
     OnMouseDown = function(st, data)

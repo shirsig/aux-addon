@@ -6,10 +6,6 @@ local filter_util = require 'aux.util.filter'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
 
-ALL_MODE, NEW_MODE = {}, {}
-
-mode = nil
-
 StaticPopupDialogs.AUX_SCAN_ALERT = {
     text = 'One of your alert queries matched!',
     button1 = 'Ok',
@@ -17,6 +13,10 @@ StaticPopupDialogs.AUX_SCAN_ALERT = {
     timeout = 0,
     hideOnEscape = 1,
 }
+
+ALL_MODE, NEW_MODE = {}, {}
+
+mode = nil
 
 function aux.event.AUX_LOADED()
 	new_search(nil, ALL_MODE)

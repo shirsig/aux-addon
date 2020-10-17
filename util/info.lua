@@ -20,13 +20,12 @@ function M.container_item(bag, slot)
             local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- TODO quality not working?
             local durability, max_durability = GetContainerItemDurability(bag, slot)
             local tooltip = tooltip('bag', bag, slot)
-            local auctionable = auctionable(tooltip) and durability == max_durability and not lootable
             local max_charges = max_item_charges(item_id)
             local charges = max_charges and item_charges(tooltip)
+            local auctionable = auctionable(tooltip) and durability == max_durability and charges == max_charges and not lootable
             if max_charges and not charges then -- TODO find better fix
                 return
             end
-            local aux_quantity = charges or count
             return {
                 item_id = item_id,
                 suffix_id = suffix_id,
@@ -50,7 +49,6 @@ function M.container_item(bag, slot)
                 tooltip = tooltip,
                 max_charges = max_charges,
                 charges = charges,
-                aux_quantity = aux_quantity,
             }
         end
     end
@@ -87,7 +85,6 @@ function M.auction(index, query_type)
         if max_charges and not charges then -- TODO find better fix
             return
         end
-        local aux_quantity = charges or count
         local blizzard_bid = high_bid > 0 and high_bid or start_price
         local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
         return {
@@ -98,8 +95,8 @@ function M.auction(index, query_type)
 
             link = link,
             item_key = item_id .. ':' .. suffix_id,
-            search_signature = aux.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, aux_quantity, sale_status == 1 and 0 or duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), sale_status, aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
-            sniping_signature = aux.join({item_id, suffix_id, enchant_id, start_price, buyout_price, aux_quantity, aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+            search_signature = aux.join({item_id, suffix_id, enchant_id, start_price, buyout_price, bid_price, count, sale_status == 1 and 0 or duration, query_type == 'owner' and high_bidder or (high_bidder and 1 or 0), sale_status, aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
+            sniping_signature = aux.join({item_id, suffix_id, enchant_id, start_price, buyout_price, count, aux.account_data.ignore_owner and (is_player(owner) and 0 or 1) or (owner or '?')}, ':'),
 
             name = name,
             texture = texture,
@@ -113,9 +110,9 @@ function M.auction(index, query_type)
             blizzard_bid = blizzard_bid,
             bid_price = bid_price,
             buyout_price = buyout_price,
-            unit_blizzard_bid = blizzard_bid / aux_quantity,
-            unit_bid_price = bid_price / aux_quantity,
-            unit_buyout_price = buyout_price / aux_quantity,
+            unit_blizzard_bid = blizzard_bid / count,
+            unit_bid_price = bid_price / count,
+            unit_buyout_price = buyout_price / count,
             high_bidder = high_bidder,
             owner = owner,
             sale_status = sale_status,
@@ -125,7 +122,6 @@ function M.auction(index, query_type)
             tooltip = tooltip,
             max_charges = max_charges,
             charges = charges,
-            aux_quantity = aux_quantity,
         }
     end
 end
@@ -135,10 +131,10 @@ function M.bid_update(auction_record)
     auction_record.blizzard_bid = auction_record.bid_price
     auction_record.min_increment = max(1, floor(auction_record.bid_price / 100) * 5)
     auction_record.bid_price = auction_record.bid_price + auction_record.min_increment
-    auction_record.unit_blizzard_bid = auction_record.blizzard_bid / auction_record.aux_quantity
-    auction_record.unit_bid_price = auction_record.bid_price / auction_record.aux_quantity
+    auction_record.unit_blizzard_bid = auction_record.blizzard_bid / auction_record.count
+    auction_record.unit_bid_price = auction_record.bid_price / auction_record.count
     auction_record.high_bidder = 1
-    auction_record.search_signature = aux.join({auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.aux_quantity, auction_record.sale_status == 1 and 0 or auction_record.duration, 1, 0, aux.account_data.ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
+    auction_record.search_signature = aux.join({auction_record.item_id, auction_record.suffix_id, auction_record.enchant_id, auction_record.start_price, auction_record.buyout_price, auction_record.bid_price, auction_record.count, auction_record.sale_status == 1 and 0 or auction_record.duration, 1, 0, aux.account_data.ignore_owner and (is_player(auction_record.owner) and 0 or 1) or (auction_record.owner or '?')}, ':')
 end
 
 function M.set_tooltip(itemstring, owner, anchor)
@@ -279,7 +275,7 @@ function M.item(item_id, suffix_id)
         slot = slot,
         max_stack = max_stack,
         texture = texture,
-        sell_price = sell_price / (max_item_charges(item_id) or 1)
+        sell_price = sell_price
     } or item_info(item_id)
 end
 

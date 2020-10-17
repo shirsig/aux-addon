@@ -124,7 +124,7 @@ M.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                return history.value(auction_record.item_key) and history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.bid_price >= amount
+                return history.value(auction_record.item_key) and history.value(auction_record.item_key) * auction_record.count - auction_record.bid_price >= amount
             end
         end
     },
@@ -133,7 +133,7 @@ M.filters = {
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
-                return auction_record.buyout_price > 0 and history.value(auction_record.item_key) and history.value(auction_record.item_key) * auction_record.aux_quantity - auction_record.buyout_price >= amount
+                return auction_record.buyout_price > 0 and history.value(auction_record.item_key) and history.value(auction_record.item_key) * auction_record.count - auction_record.buyout_price >= amount
             end
         end
     },
@@ -165,7 +165,7 @@ M.filters = {
         validator = function(amount)
             return function(auction_record)
                 local vendor_price = info.item(auction_record.item_id).sell_price
-                return vendor_price and vendor_price * auction_record.aux_quantity - auction_record.bid_price >= amount
+                return vendor_price and vendor_price * auction_record.count - auction_record.bid_price >= amount
             end
         end
     },
@@ -175,7 +175,7 @@ M.filters = {
         validator = function(amount)
             return function(auction_record)
                 local vendor_price = info.item(auction_record.item_id).sell_price
-                return auction_record.buyout_price > 0 and vendor_price and vendor_price * auction_record.aux_quantity - auction_record.buyout_price >= amount
+                return auction_record.buyout_price > 0 and vendor_price and vendor_price * auction_record.count - auction_record.buyout_price >= amount
             end
         end
     },

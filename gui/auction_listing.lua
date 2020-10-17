@@ -124,10 +124,10 @@ M.search_columns = {
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(record.aux_quantity)
+            cell.text:SetText(record.count)
         end,
         cmp = function(record_a, record_b, desc)
-            return sort_util.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            return sort_util.compare(record_a.count, record_b.count, desc)
         end,
     },
     {
@@ -174,7 +174,7 @@ M.search_columns = {
             end
             local price
             if record.high_bidder then
-                price = price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
+                price = price_per_unit and ceil(record.high_bid / record.count) or record.high_bid
             else
                 price = price_per_unit and ceil(record.unit_bid_price) or record.bid_price
             end
@@ -183,13 +183,13 @@ M.search_columns = {
         cmp = function(record_a, record_b, desc)
             local price_a
             if record_a.high_bidder then
-                price_a = price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
+                price_a = price_per_unit and record_a.high_bid / record_a.count or record_a.high_bid
             else
                 price_a = price_per_unit and record_a.unit_bid_price or record_a.bid_price
             end
             local price_b
             if record_b.high_bidder then
-                price_b = price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
+                price_b = price_per_unit and record_b.high_bid / record_b.count or record_b.high_bid
             else
                 price_b = price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end
@@ -292,7 +292,7 @@ M.auctions_columns = {
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(record.aux_quantity > 0 and record.aux_quantity or '?')
+            cell.text:SetText(record.count > 0 and record.count or '?')
         end,
         cmp = function(record_a, record_b, desc)
             if record_a.sale_status == 1 and record_b.sale_status == 1 then
@@ -302,7 +302,7 @@ M.auctions_columns = {
             elseif record_b.sale_status == 1 then
                 return sort_util.LT
             else
-                return sort_util.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+                return sort_util.compare(record_a.count, record_b.count, desc)
             end
         end,
     },
@@ -341,9 +341,9 @@ M.auctions_columns = {
             end
             local price
             if record.high_bidder then
-                price = price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
+                price = price_per_unit and ceil(record.high_bid / record.count) or record.high_bid
             else
-                price = price_per_unit and ceil(record.start_price / record.aux_quantity) or record.start_price
+                price = price_per_unit and ceil(record.start_price / record.count) or record.start_price
             end
             cell.text:SetText(money.to_string(price, true))
         end,
@@ -359,17 +359,17 @@ M.auctions_columns = {
             end
             local price_a
             if record_a.high_bidder then
-                price_a = price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
+                price_a = price_per_unit and record_a.high_bid / record_a.count or record_a.high_bid
             else
-                price_a = price_per_unit and record_a.start_price / record_b.aux_quantity or record_a.start_price
+                price_a = price_per_unit and record_a.start_price / record_b.count or record_a.start_price
             end
             local price_b
             if record_b.sale_status == 1 and price_per_unit then
                 price_b = math.huge
             elseif record_b.high_bidder then
-                price_b = price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
+                price_b = price_per_unit and record_b.high_bid / record_b.count or record_b.high_bid
             else
-                price_b = price_per_unit and record_b.start_price / record_b.aux_quantity or record_b.start_price
+                price_b = price_per_unit and record_b.start_price / record_b.count or record_b.start_price
             end
             return sort_util.compare(price_a, price_b, desc)
         end,
@@ -474,10 +474,10 @@ M.bids_columns = {
         width = .055,
         align = 'CENTER',
         fill = function(cell, record)
-            cell.text:SetText(record.aux_quantity)
+            cell.text:SetText(record.count)
         end,
         cmp = function(record_a, record_b, desc)
-            return sort_util.compare(record_a.aux_quantity, record_b.aux_quantity, desc)
+            return sort_util.compare(record_a.count, record_b.count, desc)
         end,
     },
     {
@@ -518,7 +518,7 @@ M.bids_columns = {
         fill = function(cell, record)
             local price
             if record.high_bidder then
-                price = price_per_unit and ceil(record.high_bid / record.aux_quantity) or record.high_bid
+                price = price_per_unit and ceil(record.high_bid / record.count) or record.high_bid
             else
                 price = price_per_unit and ceil(record.unit_bid_price) or record.bid_price
             end
@@ -527,13 +527,13 @@ M.bids_columns = {
         cmp = function(record_a, record_b, desc)
             local price_a
             if record_a.high_bidder then
-                price_a = price_per_unit and record_a.high_bid / record_a.aux_quantity or record_a.high_bid
+                price_a = price_per_unit and record_a.high_bid / record_a.count or record_a.high_bid
             else
                 price_a = price_per_unit and record_a.unit_bid_price or record_a.bid_price
             end
             local price_b
             if record_b.high_bidder then
-                price_b = price_per_unit and record_b.high_bid / record_b.aux_quantity or record_b.high_bid
+                price_b = price_per_unit and record_b.high_bid / record_b.count or record_b.high_bid
             else
                 price_b = price_per_unit and record_b.unit_bid_price or record_b.bid_price
             end

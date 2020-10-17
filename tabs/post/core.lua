@@ -125,7 +125,7 @@ end
 function update_inventory_listing()
 	local records = aux.values(aux.filter(aux.copy(inventory_records), function(record)
 		local settings = read_settings(record.key)
-		return record.aux_quantity > 0 and (not settings.hidden or show_hidden_checkbox:GetChecked())
+		return record.count > 0 and (not settings.hidden or show_hidden_checkbox:GetChecked())
 	end))
 	sort(records, function(a, b) return a.name < b.name end)
 	item_listing.populate(inventory_listing, records)
@@ -194,7 +194,7 @@ function update_auction_listings()
 end
 
 function M.select_item(item_key)
-    for _, inventory_record in pairs(aux.filter(aux.copy(inventory_records), function(record) return record.aux_quantity > 0 end)) do
+    for _, inventory_record in pairs(aux.filter(aux.copy(inventory_records), function(record) return record.count > 0 end)) do
         if inventory_record.key == item_key then
             update_item(inventory_record)
             return
@@ -220,7 +220,6 @@ end
 
 function post_auction()
     local item_key = selected_item.key
-    local max_charges = selected_item.max_charges
 
     local unit_start_price = get_unit_start_price()
     local unit_buyout_price = get_unit_buyout_price()
@@ -232,7 +231,7 @@ function post_auction()
 
     for slot in info.inventory() do
         local item_info = info.container_item(unpack(slot))
-        if item_info and item_info.auctionable and not item_info.locked and item_info.item_key == item_key and (not item_info.max_charges or item_info.charges == stack_size)  then
+        if item_info and item_info.auctionable and not item_info.locked and item_info.item_key == item_key and (not item_info.max_charges or item_info.charges == item_info.max_charges) then
             ClearCursor()
             ClickAuctionSellItemButton()
             ClearCursor()
@@ -243,7 +242,7 @@ function post_auction()
         end
     end
 
-    PostAuction(start_price, buyout_price, duration, max_charges and 1 or stack_size, stack_count)
+    PostAuction(start_price, buyout_price, duration, stack_size, stack_count)
 
     posting = stack_count == 1 and 'single' or 'multi'
     aux.coro_thread(function()
@@ -325,8 +324,8 @@ function update_item_configuration()
 	        local color = ITEM_QUALITY_COLORS[selected_item.quality]
 	        item.name:SetTextColor(color.r, color.g, color.b)
         end
-		if selected_item.aux_quantity > 1 then
-            item.count:SetText(selected_item.aux_quantity)
+		if selected_item.count > 1 then
+            item.count:SetText(selected_item.count)
 		else
             item.count:SetText()
         end
@@ -337,7 +336,7 @@ function update_item_configuration()
         do
             local deposit_factor = UnitFactionGroup'npc' and .05 or .25
             local duration_factor = info.duration_hours(duration_dropdown:GetIndex()) / 2
-            local stack_size, stack_count = selected_item.max_charges and 1 or stack_size_slider:GetValue(), stack_count_slider:GetValue()
+            local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
             local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
             deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))
         end
@@ -356,7 +355,7 @@ end
 
 function quantity_update(maximize_count)
     if selected_item then
-        local max_stack_count = selected_item.max_charges and min(1, selected_item.availability[stack_size_slider:GetValue()]) or floor(selected_item.availability[0] / stack_size_slider:GetValue())
+        local max_stack_count = floor(selected_item.count / stack_size_slider:GetValue())
         stack_count_slider:SetMinMaxValues(min(1, max_stack_count), max_stack_count)
         if maximize_count then
             stack_count_slider:SetValue(max_stack_count)
@@ -410,16 +409,7 @@ function update_item(item)
     hide_checkbox:SetChecked(settings.hidden)
 
     selected_item = item -- must be here for quantity_update triggered by slider change
-    if item.max_charges then
-	    for i = item.max_charges, 1, -1 do
-			if item.availability[i] > 0 then
-				stack_size_slider:SetMinMaxValues(1, i)
-				break
-			end
-	    end
-    else
-	    stack_size_slider:SetMinMaxValues(1, min(item.max_stack, item.aux_quantity))
-    end
+    stack_size_slider:SetMinMaxValues(1, min(item.max_stack, item.count))
     stack_size_slider:SetValue(math.huge)
     quantity_update(true)
 
@@ -438,14 +428,8 @@ function update_inventory_records(reset)
     local auctionable_map = {}
     for slot in info.inventory() do
 	    local item_info = info.container_item(unpack(slot))
-        local charge_class = item_info and item_info.charges or 0
         if item_info and item_info.auctionable then
             if not auctionable_map[item_info.item_key] then
-                local availability = {}
-                for i = 0, 10 do
-                    availability[i] = 0
-                end
-                availability[charge_class] = item_info.count
                 auctionable_map[item_info.item_key] = {
                     item_id = item_info.item_id,
                     suffix_id = item_info.suffix_id,
@@ -454,15 +438,13 @@ function update_inventory_records(reset)
                     name = item_info.name,
                     texture = item_info.texture,
                     quality = item_info.quality,
-                    aux_quantity = item_info.charges or item_info.count,
+                    count = item_info.count,
                     max_stack = item_info.max_stack,
                     max_charges = item_info.max_charges,
-                    availability = availability,
                 }
             else
                 local auctionable = auctionable_map[item_info.item_key]
-                auctionable.availability[charge_class] = (auctionable.availability[charge_class] or 0) + item_info.count
-                auctionable.aux_quantity = auctionable.aux_quantity + (item_info.charges or item_info.count)
+                auctionable.count = auctionable.count + item_info.count
             end
         end
     end
@@ -529,12 +511,12 @@ function M.record_auction(auction)
     do
 	    local entry
 	    for _, record in pairs(bid_records[auction.item_key]) do
-	        if auction.unit_blizzard_bid == record.unit_price and auction.aux_quantity == record.stack_size and auction.duration == record.duration and info.is_player(auction.owner) == record.own then
+	        if auction.unit_blizzard_bid == record.unit_price and auction.count == record.stack_size and auction.duration == record.duration and info.is_player(auction.owner) == record.own then
 	            entry = record
 	        end
 	    end
 	    if not entry then
-	        entry =  { stack_size = auction.aux_quantity, unit_price = auction.unit_blizzard_bid, duration = auction.duration, own = info.is_player(auction.owner), count = 0 }
+	        entry =  { stack_size = auction.count, unit_price = auction.unit_blizzard_bid, duration = auction.duration, own = info.is_player(auction.owner), count = 0 }
 	        tinsert(bid_records[auction.item_key], entry)
 	    end
 	    entry.count = entry.count + 1
@@ -544,12 +526,12 @@ function M.record_auction(auction)
     do
 	    local entry
 	    for _, record in pairs(buyout_records[auction.item_key]) do
-		    if auction.unit_buyout_price == record.unit_price and auction.aux_quantity == record.stack_size and auction.duration == record.duration and info.is_player(auction.owner) == record.own then
+		    if auction.unit_buyout_price == record.unit_price and auction.count == record.stack_size and auction.duration == record.duration and info.is_player(auction.owner) == record.own then
 			    entry = record
 		    end
 	    end
 	    if not entry then
-		    entry = { stack_size = auction.aux_quantity, unit_price = auction.unit_buyout_price, duration = auction.duration, own = info.is_player(auction.owner), count = 0 }
+		    entry = { stack_size = auction.count, unit_price = auction.unit_buyout_price, duration = auction.duration, own = info.is_player(auction.owner), count = 0 }
 		    tinsert(buyout_records[auction.item_key], entry)
 	    end
 	    entry.count = entry.count + 1

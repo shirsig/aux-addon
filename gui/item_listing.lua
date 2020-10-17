@@ -33,8 +33,8 @@ function M:render()
 			row.item.name:SetText('[' .. item_record.name .. ']')
 			local color = ITEM_QUALITY_COLORS[item_record.quality]
 			row.item.name:SetTextColor(color.r, color.g, color.b)
-			if item_record.aux_quantity > 1 then
-				row.item.count:SetText(item_record.aux_quantity)
+			if item_record.count > 1 then
+				row.item.count:SetText(item_record.count)
 			else
 				row.item.count:SetText()
 			end

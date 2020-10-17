@@ -145,7 +145,7 @@ function process_item(item_id)
             slot = slot,
             max_stack = max_stack,
             texture = texture,
-            sell_price = sell_price / (max_item_charges(item_id) or 1),
+            sell_price = sell_price,
         })
         local tooltip = tooltip('link', itemstring)
         if auctionable(tooltip, quality) then
