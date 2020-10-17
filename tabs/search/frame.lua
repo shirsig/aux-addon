@@ -61,9 +61,9 @@ end
 do
 	local btn = gui.button(frame, gui.font_size.small)
 	btn:SetHeight(25)
-	btn:SetWidth(60)
+	btn:SetWidth(45)
 	btn:SetScript('OnClick', function(self)
-		update_mode(mode == NORMAL_MODE and FRESH_MODE or NORMAL_MODE)
+		update_mode(mode == ALL_MODE and NEW_MODE or ALL_MODE)
 	end)
 	mode_button = btn
 end

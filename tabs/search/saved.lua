@@ -82,7 +82,7 @@ handlers = {
         end
 	end,
     OnMouseDown = function(st, data)
-        if st == favorite_searches_listing then
+        if st == favorite_searches_listing and IsAltKeyDown() then
             dragged_search = favorite_searches[data.index]
         end
     end,

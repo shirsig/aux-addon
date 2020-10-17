@@ -6,7 +6,7 @@ local filter_util = require 'aux.util.filter'
 local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
 
-NORMAL_MODE, FRESH_MODE, EXPIRING_MODE = {}, {}, {} -- TODO expiring
+ALL_MODE, NEW_MODE = {}, {}
 
 mode = nil
 
@@ -19,15 +19,15 @@ StaticPopupDialogs.AUX_SCAN_ALERT = {
 }
 
 function aux.event.AUX_LOADED()
-	new_search(nil, NORMAL_MODE)
+	new_search(nil, ALL_MODE)
 end
 
 function update_mode(mode)
     _M.mode = mode
-	if mode == NORMAL_MODE then
-		mode_button:SetText('Normal')
+	if mode == ALL_MODE then
+		mode_button:SetText('All')
     else
-        mode_button:SetText('Fresh')
+        mode_button:SetText('New')
 	end
 end
 
@@ -296,7 +296,7 @@ function M.execute(_, resume, mode)
 	if not queries then
 		aux.print('Invalid filter:', error)
 		return
-	elseif mode == FRESH_MODE then
+	elseif mode == NEW_MODE then
 		if #queries > 1 then
 			aux.print('Error: The real time mode does not support multi-queries')
 			return
@@ -330,7 +330,7 @@ function M.execute(_, resume, mode)
 	update_start_stop()
     search_box:ClearFocus()
 	set_subtab(RESULTS)
-	if mode == FRESH_MODE then
+	if mode == NEW_MODE then
 		start_fresh_scan(queries[1], nil, continuation)
 	else
 		start_search(queries, continuation)
