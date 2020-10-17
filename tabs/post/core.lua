@@ -289,7 +289,10 @@ function validate_parameters()
         post_button:Disable()
         return
     end
-    -- TODO what if cannot afford deposit
+    if deposit_amount() > GetMoney() then
+        post_button:Disable()
+        return
+    end
     post_button:Enable()
 end
 
@@ -334,15 +337,19 @@ function update_item_configuration()
         stack_count_slider.editbox:SetNumber(stack_count_slider:GetValue())
 
         do
-            local deposit_factor = UnitFactionGroup'npc' and .05 or .25
-            local duration_factor = info.duration_hours(duration_dropdown:GetIndex()) / 2
-            local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
-            local amount = floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
-            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, aux.color.text.enabled))
+            local amount = deposit_amount()
+            deposit:SetText('Deposit: ' .. money.to_string(amount, nil, nil, amount > GetMoney() and aux.color.red or aux.color.text.enabled))
         end
 
         refresh_button:Enable()
 	end
+end
+
+function deposit_amount()
+    local deposit_factor = UnitFactionGroup'npc' and .05 or .25
+    local duration_factor = info.duration_hours(duration_dropdown:GetIndex()) / 2
+    local stack_size, stack_count = stack_size_slider:GetValue(), stack_count_slider:GetValue()
+    return floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
 end
 
 function undercut(record, stack_size, stack)
