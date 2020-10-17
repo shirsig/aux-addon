@@ -353,11 +353,13 @@ function deposit_amount()
 end
 
 function undercut(record, stack_size, stack)
-    local price = record.unit_price
-    if not record.own then
-        price = ceil(price * (stack and record.stack_size or stack_size)) - 1
+    if record.own then
+        return record.unit_price
+    else
+        local stack_price = ceil(record.unit_price * (stack and record.stack_size or stack_size))
+        stack_price = stack_price - 1
+        return stack_price / stack_size
     end
-    return price / stack_size
 end
 
 function quantity_update(maximize_count)
