@@ -353,9 +353,9 @@ function deposit_amount()
 end
 
 function undercut(record, stack_size, stack)
-    local price = ceil(record.unit_price * (stack and record.stack_size or stack_size))
+    local price = record.unit_price
     if not record.own then
-	    price = price - 1
+        price = ceil(price * (stack and record.stack_size or stack_size)) - 1
     end
     return price / stack_size
 end
