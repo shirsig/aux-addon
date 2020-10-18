@@ -9,6 +9,8 @@ M.COPPER_TEXT = '|cffeda55fc|r'
 local COPPER_PER_GOLD = 10000
 local COPPER_PER_SILVER = 100
 
+local MAX_INT = 2147483647
+
 function M.to_gsc(money)
 	local gold = floor(money / COPPER_PER_GOLD)
 	local silver = floor(mod(money, COPPER_PER_GOLD) / COPPER_PER_SILVER)
@@ -41,15 +43,15 @@ function M.to_string2(money, exact, color)
 
 	local fmt = START
 	if g > 0 then
-		str = str .. format(fmt, GOLD, g)
+		str = str .. format(fmt, GOLD, min(g, MAX_INT))
 		fmt = PART
 	end
 	if s > 0 or c > 0 then
-		str = str .. format(fmt, SILVER, s)
+		str = str .. format(fmt, SILVER, min(s, MAX_INT))
 		fmt = PART
 	end
 	if c > 0 then
-		str = str .. format(fmt, COPPER, c)
+		str = str .. format(fmt, COPPER, min(c, MAX_INT))
 	end
 	if str == '' then
 		str = NONE
@@ -121,7 +123,7 @@ function M.from_string(value)
 end
 
 function M.format_number(num, pad, color)
-	num = format('%0' .. (pad and 2 or 0) .. 'd', num)
+	num = format('%0' .. (pad and 2 or 0) .. 'd', min(num, MAX_INT))
 	if color then
 		return color .. num .. FONT_COLOR_CODE_CLOSE
 	else

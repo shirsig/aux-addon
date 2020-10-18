@@ -137,7 +137,7 @@ function update_auction_listing(listing, records, reference)
 		local historical_value = history.value(selected_item.key)
 		local stack_size = stack_size_slider:GetValue()
 		for _, record in pairs(records[selected_item.key] or empty) do
-			local price_color = undercut(record, stack_size_slider:GetValue(), listing == 'bid') < reference and aux.color.red
+			local price_color = tonumber(tostring(undercut(record, stack_size_slider:GetValue(), listing == 'bid'))) < reference and aux.color.red
 			local price = record.unit_price * (listing == 'bid' and record.stack_size or 1)
 			tinsert(rows, {
 				cols = {
@@ -159,7 +159,7 @@ function update_auction_listing(listing, records, reference)
 				{ value = money.to_string(historical_value * (listing == 'bid' and stack_size_slider:GetValue() or 1), true, nil, aux.color.green) },
 				{ value = historical_value and gui.percentage_historical(100) or '---' },
             },
-				record = { historical_value = true, stack_size = stack_size, unit_price = historical_value, own = true }
+				record = { historical_value = true, stack_size = stack_size, unit_price = historical_value }
             })
 		end
 		sort(rows, function(a, b)
@@ -353,7 +353,7 @@ function deposit_amount()
 end
 
 function undercut(record, stack_size, stack)
-    if record.own then
+    if record.historical_value or record.own then
         return record.unit_price
     else
         local stack_price = ceil(record.unit_price * (stack and record.stack_size or stack_size))
@@ -398,6 +398,7 @@ function update_item(item)
 
     item.unit_vendor_price = unit_vendor_price(item.key)
     if not item.unit_vendor_price then
+        item.unit_vendor_price = 0
         settings.hidden = true
         write_settings(settings, item.key)
         refresh = true
