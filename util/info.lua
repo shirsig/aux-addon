@@ -47,8 +47,6 @@ function M.container_item(bag, slot)
                 auctionable = auctionable,
 
                 tooltip = tooltip,
-                max_charges = max_charges,
-                charges = charges,
             }
         end
     end
@@ -62,7 +60,7 @@ function M.auction_sell_item()
             quality = quality,
 			count = count,
 			usable = usable,
-            vendor_price = vendor_price, -- it seems for charge items this is always the price for full charges
+            vendor_price = vendor_price,
         }
 	end
 end
@@ -80,11 +78,6 @@ function M.auction(index, query_type)
 
     	local duration = GetAuctionItemTimeLeft(query_type, index)
         local tooltip = tooltip('auction', query_type, index)
-        local max_charges = max_item_charges(item_id)
-        local charges = max_charges and item_charges(tooltip)
-        if max_charges and not charges then -- TODO find better fix
-            return
-        end
         local blizzard_bid = high_bid > 0 and high_bid or start_price
         local bid_price = high_bid > 0 and (high_bid + min_increment) or start_price
         return {
@@ -120,8 +113,6 @@ function M.auction(index, query_type)
             usable = usable,
 
             tooltip = tooltip,
-            max_charges = max_charges,
-            charges = charges,
         }
     end
 end

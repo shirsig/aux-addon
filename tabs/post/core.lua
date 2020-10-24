@@ -231,7 +231,7 @@ function post_auction()
 
     for slot in info.inventory() do
         local item_info = info.container_item(unpack(slot))
-        if item_info and item_info.auctionable and not item_info.locked and item_info.item_key == item_key and (not item_info.max_charges or item_info.charges == item_info.max_charges) then
+        if item_info and item_info.auctionable and not item_info.locked and item_info.item_key == item_key then
             ClearCursor()
             ClickAuctionSellItemButton()
             ClearCursor()
@@ -450,7 +450,6 @@ function update_inventory_records(reset)
                     quality = item_info.quality,
                     count = item_info.count,
                     max_stack = item_info.max_stack,
-                    max_charges = item_info.max_charges,
                 }
             else
                 local auctionable = auctionable_map[item_info.item_key]

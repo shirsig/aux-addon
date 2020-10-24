@@ -160,6 +160,7 @@ function start_fresh_scan(query, search, continuation)
             if not ignore_page then
                 if (search.alert_validator or pass)(auction_record) then
                     StaticPopup_Show('AUX_SCAN_ALERT') -- TODO retail improve this
+                    FlashClientIcon()
                 end
                 tinsert(new_records, auction_record)
             end
