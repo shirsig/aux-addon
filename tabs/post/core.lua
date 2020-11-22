@@ -407,6 +407,8 @@ function update_item(item)
 
     scan.abort()
 
+    selected_item = item -- must be before the dropdown and slider setup
+
     do
         local options = {}
         for _, i in ipairs{2, 8, 24} do
@@ -418,7 +420,6 @@ function update_item(item)
 
     hide_checkbox:SetChecked(settings.hidden)
 
-    selected_item = item -- must be here for quantity_update triggered by slider change
     stack_size_slider:SetMinMaxValues(1, min(item.max_stack, item.count))
     stack_size_slider:SetValue(math.huge)
     quantity_update(true)
