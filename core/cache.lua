@@ -169,7 +169,11 @@ end
 
 function on_get_item_info_received(item_id, success)
     if success then
-        aux.coro_thread(function() process_item(item_id) end)
+        aux.coro_thread(function()
+            if not aux.account_data.items[item_id] and not aux.account_data.unused_item_ids[item_id] then
+                process_item(item_id)
+            end
+        end)
     else -- TODO if success == nil then
         aux.account_data.unused_item_ids[item_id] = true
     end
