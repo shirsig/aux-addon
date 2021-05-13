@@ -16,8 +16,8 @@ local HEAD_SPACE = 2
 local TIME_LEFT_STRINGS = {
 	aux.color.red'30m', -- Short
 	aux.color.orange'2h', -- Medium
-	aux.color.yellow'8h', -- Long
-	aux.color.blue'24h', -- Very Long
+	aux.color.yellow'12h', -- Long
+	aux.color.blue'48h', -- Very Long
 }
 
 function item_column_init(rt, cell)

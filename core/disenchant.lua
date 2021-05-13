@@ -114,45 +114,112 @@ function M.distribution(slot, quality, level)
 	            { item_id = 16204, min_quantity = 1, max_quantity = 2, probability = probability(.75, .22) },
 	            { item_id = 16203, min_quantity = 1, max_quantity = 2, probability = probability(.2, .75) },
 	            { item_id = 14344, min_quantity = 1, max_quantity = 1, probability = probability(.05, .03) },
-			}
+            }
+        elseif level <= 65 then
+            return {
+                { item_id = 16204, min_quantity = 2, max_quantity = 5, probability = probability(.75, .22) },
+                { item_id = 16203, min_quantity = 2, max_quantity = 3, probability = probability(.2, .75) },
+                { item_id = 14344, min_quantity = 1, max_quantity = 1, probability = probability(.05, .03) },
+            }
+        elseif level <= 79 then
+            return {
+                { item_id = 22445, min_quantity = 1, max_quantity = 3, probability = probability(.75, .22) },
+                { item_id = 22447, min_quantity = 1, max_quantity = 3, probability = probability(.22, .75) },
+                { item_id = 22448, min_quantity = 1, max_quantity = 1, probability = probability(.03, .03) },
+            }
+        elseif level <= 99 then
+            return {
+                { item_id = 22445, min_quantity = 2, max_quantity = 3, probability = probability(.75, .22) },
+                { item_id = 22447, min_quantity = 2, max_quantity = 3, probability = probability(.22, .75) },
+                { item_id = 22448, min_quantity = 1, max_quantity = 1, probability = probability(.03, .03) },
+            }
         else
             return {
-	            { item_id = 16204, min_quantity = 2, max_quantity = 5, probability = probability(.75, .22) },
-	            { item_id = 16203, min_quantity = 2, max_quantity = 3, probability = probability(.2, .75) },
-	            { item_id = 14344, min_quantity = 1, max_quantity = 1, probability = probability(.05, .03) },
+	            { item_id = 22445, min_quantity = 2, max_quantity = 5, probability = probability(.75, .22) },
+	            { item_id = 22446, min_quantity = 1, max_quantity = 2, probability = probability(.22, .75) },
+	            { item_id = 22449, min_quantity = 1, max_quantity = 1, probability = probability(.03, .03) },
 			}
         end
     elseif quality == RARE then
         if level <= 25 then
-            return {{ item_id = 10978, min_quantity = 1, max_quantity = 1, probability = 1 }}
+            return {
+                { item_id = 10978, min_quantity = 1, max_quantity = 1, probability = 1 },
+            }
         elseif level <= 30 then
-            return {{ item_id = 11084, min_quantity = 1, max_quantity = 1, probability = 1 }}
+            return {
+                { item_id = 11084, min_quantity = 1, max_quantity = 1, probability = 1 },
+            }
         elseif level <= 35 then
-            return {{ item_id = 11138, min_quantity = 1, max_quantity = 1, probability = 1 }}
+            return {
+                { item_id = 11138, min_quantity = 1, max_quantity = 1, probability = 1 },
+            }
         elseif level <= 40 then
-            return {{ item_id = 11139, min_quantity = 1, max_quantity = 1, probability = 1 }}
+            return {
+                { item_id = 11139, min_quantity = 1, max_quantity = 1, probability = 1 },
+            }
         elseif level <= 45 then
-            return {{ item_id = 11177, min_quantity = 1, max_quantity = 1, probability = 1 }}
+            return {
+                { item_id = 11177, min_quantity = 1, max_quantity = 1, probability = 1 },
+            }
         elseif level <= 50 then
-            return {{ item_id = 11178, min_quantity = 1, max_quantity = 1, probability = 1 }}
+            return {
+                { item_id = 11178, min_quantity = 1, max_quantity = 1, probability = 1 },
+            }
         elseif level <= 55 then
-            return {{ item_id = 14343, min_quantity = 1, max_quantity = 1, probability = 1 }}
-        elseif level <= 60 then
-            return {{ item_id = 14344, min_quantity = 1, max_quantity = 1, probability = .995}, { item_id = 20725, min_quantity = 1, max_quantity = 1, probability = .005 }}
+            return {
+                { item_id = 14343, min_quantity = 1, max_quantity = 1, probability = 1 },
+            }
+        elseif level <= 65 then
+            return {
+                { item_id = 14344, min_quantity = 1, max_quantity = 1, probability = .995 },
+                { item_id = 20725, min_quantity = 1, max_quantity = 1, probability = .005 },
+            }
+        elseif level <= 99 then
+            return {
+                { item_id = 22448, min_quantity = 1, max_quantity = 1, probability = .995 },
+                { item_id = 20725, min_quantity = 1, max_quantity = 1, probability = .005 },
+            }
         else
-            return {{ item_id = 14344, min_quantity = 1, max_quantity = 1, probability = .995}, { item_id = 20725, min_quantity = 1, max_quantity = 1, probability = .005 }}
+            return {
+                { item_id = 22449, min_quantity = 1, max_quantity = 1, probability = .995 },
+                { item_id = 22450, min_quantity = 1, max_quantity = 1, probability = .005 },
+            }
         end
     elseif quality == EPIC then
         if level <= 45 then
-            return {{ item_id = 11177, min_quantity = 2, max_quantity = 4, probability = 1 }}
+            return {
+                { item_id = 11177, min_quantity = 2, max_quantity = 4, probability = 1 },
+            }
         elseif level <= 50 then
-            return {{ item_id = 11178, min_quantity = 2, max_quantity = 4, probability = 1 }}
+            return {
+                { item_id = 11178, min_quantity = 2, max_quantity = 4, probability = 1 },
+            }
         elseif level <= 55 then
-            return {{ item_id = 14343, min_quantity = 2, max_quantity = 4, probability = 1 }}
+            return {
+                { item_id = 14343, min_quantity = 2, max_quantity = 4, probability = 1 },
+            }
         elseif level <= 60 then
-            return {{ item_id = 20725, min_quantity = 1, max_quantity = 1, probability = 1 }}
+            return {
+                { item_id = 20725, min_quantity = 1, max_quantity = 1, probability = 1 },
+            }
+        elseif level <= 75 then
+            return {
+                { item_id = 20725, min_quantity = 1, max_quantity = 2, probability = 1 },
+            }
+        elseif level <= 80 then
+            return {
+                { item_id = 20725, min_quantity = 1, max_quantity = 1, probability = probability(.5, .33) },
+                { item_id = 20725, min_quantity = 2, max_quantity = 2, probability = probability(.5, .67) },
+            }
+        elseif level <= 100 then
+            return {
+                { item_id = 22450, min_quantity = 1, max_quantity = 2, probability = 1 },
+            }
         else
-            return {{ item_id = 20725, min_quantity = 1, max_quantity = 2, probability = 1 }}
+            return {
+                { item_id = 22450, min_quantity = 1, max_quantity = 1, probability = .33 },
+                { item_id = 22450, min_quantity = 2, max_quantity = 2, probability = .67 },
+            }
         end
     end
     return {}

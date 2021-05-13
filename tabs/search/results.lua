@@ -25,9 +25,9 @@ end
 function update_mode(mode)
     _M.mode = mode
 	if mode == ALL_MODE then
-		mode_button:SetText('All')
+        mode_button:SetBackdropColor(aux.color.content.background())
     else
-        mode_button:SetText('New')
+        mode_button:SetBackdropColor(aux.color.state.enabled())
 	end
 end
 

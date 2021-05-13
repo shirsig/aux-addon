@@ -25,10 +25,10 @@ function SlashCmdList.AUX(command)
         aux.account_data.action_shortcuts = not aux.account_data.action_shortcuts
         aux.print('action shortcuts ' .. status(aux.account_data.action_shortcuts))
     elseif arguments[1] == 'post' and arguments[2] == 'bid' then
-        aux.account_data.post_bid = not aux.account_data.post_bid
-	    aux.print('post bid ' .. status(aux.account_data.post_bid))
-    elseif arguments[1] == 'post' and arguments[2] == 'duration' and  ({['2'] = post.DURATION_2, ['8'] = post.DURATION_8, ['24'] = post.DURATION_24})[arguments[3]] then
-        aux.account_data.post_duration = ({['2'] = post.DURATION_2, ['8'] = post.DURATION_8, ['24'] = post.DURATION_24})[arguments[3]]
+        aux.account_data.post_bid = ({ unit = 'unit', stack = 'stack' })[arguments[3]]
+	    aux.print('post bid ' .. aux.color.blue(aux.account_data.post_bid or 'off'))
+    elseif arguments[1] == 'post' and arguments[2] == 'duration' and  ({ ['12'] = post.DURATION_12, ['24'] = post.DURATION_24, ['48'] = post.DURATION_48 })[arguments[3]] then
+        aux.account_data.post_duration = ({ ['12'] = post.DURATION_12, ['24'] = post.DURATION_24, ['48'] = post.DURATION_48 })[arguments[3]]
         aux.print('post duration ' .. aux.color.blue(info.duration_hours(aux.account_data.post_duration) .. 'h'))
     elseif arguments[1] == 'crafting' and arguments[2] == 'cost' then
 		aux.account_data.crafting_cost = not aux.account_data.crafting_cost
@@ -65,7 +65,7 @@ function SlashCmdList.AUX(command)
         aux.print('- scale [' .. aux.color.blue(aux.account_data.scale) .. ']')
 		aux.print('- ignore owner [' .. status(aux.account_data.ignore_owner) .. ']')
         aux.print('- action shortcuts [' .. status(aux.account_data.action_shortcuts) .. ']')
-        aux.print('- post bid [' .. status(aux.account_data.post_bid) .. ']')
+        aux.print('- post bid [' .. aux.color.blue(aux.account_data.post_bid or 'off') .. ']')
         aux.print('- post duration [' .. aux.color.blue(info.duration_hours(aux.account_data.post_duration) .. 'h') .. ']')
         aux.print('- crafting cost [' .. status(aux.account_data.crafting_cost) .. ']')
 		aux.print('- tooltip value [' .. status(tooltip_settings.value) .. ']')

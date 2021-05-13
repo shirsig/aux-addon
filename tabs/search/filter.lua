@@ -15,7 +15,7 @@ end
 
 function valid_level(str)
 	local level = tonumber(str)
-	return level and aux.bounded(1, 60, level)
+	return level and aux.bounded(1, 70, level)
 end
 
 blizzard_query = setmetatable({}, {

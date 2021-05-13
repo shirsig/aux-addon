@@ -10,28 +10,28 @@ M.font = (function()
 end)()
 
 M.font_size = aux.immutable-{
-	small = 13,
-	medium = 15,
-	large = 18,
+    small = 13,
+    medium = 15,
+    large = 18,
 }
 
 do
-	local id = 1
-	function M.unique_name()
-		id = id + 1
-		return 'aux.frame' .. id
-	end
+    local id = 1
+    function M.unique_name()
+        id = id + 1
+        return 'aux.frame' .. id
+    end
 end
 
 function M.set_size(frame, width, height)
-	frame:SetWidth(width)
-	frame:SetHeight(height or width)
+    frame:SetWidth(width)
+    frame:SetHeight(height or width)
 end
 
 function M.set_frame_style(frame, backdrop_color, border_color, left, right, top, bottom)
-	frame:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5, tile=true, insets={left=left, right=right, top=top, bottom=bottom}}
-	frame:SetBackdropColor(backdrop_color())
-	frame:SetBackdropBorderColor(border_color())
+    frame:SetBackdrop{bgFile=[[Interface\Buttons\WHITE8X8]], edgeFile=[[Interface\Buttons\WHITE8X8]], edgeSize=1.5, tile=true, insets={left=left, right=right, top=top, bottom=bottom}}
+    frame:SetBackdropColor(backdrop_color())
+    frame:SetBackdropBorderColor(border_color())
 end
 
 function M.set_window_style(frame, left, right, top, bottom)
@@ -47,7 +47,7 @@ function M.set_content_style(frame, left, right, top, bottom)
 end
 
 function M.panel(parent)
-    local panel = CreateFrame('Frame', nil, parent)
+    local panel = CreateFrame('Frame', nil, parent, 'BackdropTemplate')
     set_panel_style(panel)
     return panel
 end
@@ -73,7 +73,7 @@ end
 
 function M.button(parent, text_height)
     text_height = text_height or font_size.large
-    local button = CreateFrame('Button', nil, parent)
+    local button = CreateFrame('Button', nil, parent, 'BackdropTemplate')
     set_size(button, 80, 24)
     set_content_style(button)
     local highlight = button:CreateTexture(nil, 'HIGHLIGHT')
@@ -91,13 +91,13 @@ function M.button(parent, text_height)
     end
     button.default_Enable = button.Enable
     function button:Enable()
-	    if self:IsEnabled() == 1 then return end
+        if self:IsEnabled() == 1 then return end
         self:GetFontString():SetTextColor(aux.color.text.enabled())
         return self:default_Enable()
     end
     button.default_Disable = button.Disable
     function button:Disable()
-	    if self:IsEnabled() == 0 then return end
+        if self:IsEnabled() == 0 then return end
         self:GetFontString():SetTextColor(aux.color.text.disabled())
         return self:default_Disable()
     end
@@ -106,99 +106,99 @@ function M.button(parent, text_height)
 end
 
 do
-	local mt = {__index={}}
-	function mt.__index:create_tab(text)
-		local id = #self._tabs + 1
+    local mt = {__index={}}
+    function mt.__index:create_tab(text)
+        local id = #self._tabs + 1
 
-		local tab = CreateFrame('Button', unique_name(), self._frame)
-		tab.id = id
-		tab.group = self
-		tab:SetHeight(24)
-		set_panel_style(tab)
-		local dock = tab:CreateTexture(nil, 'OVERLAY')
-		dock:SetHeight(3)
-		if self._orientation == 'UP' then
-			dock:SetPoint('BOTTOMLEFT', 1, -1)
-			dock:SetPoint('BOTTOMRIGHT', -1, -1)
-		elseif self._orientation == 'DOWN' then
-			dock:SetPoint('TOPLEFT', 1, 1)
-			dock:SetPoint('TOPRIGHT', -1, 1)
-		end
-		dock:SetColorTexture(aux.color.panel.background())
-		tab.dock = dock
-		local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
-		highlight:SetAllPoints()
-		highlight:SetColorTexture(1, 1, 1, .2)
-		tab.highlight = highlight
+        local tab = CreateFrame('Button', unique_name(), self._frame, 'BackdropTemplate')
+        tab.id = id
+        tab.group = self
+        tab:SetHeight(24)
+        set_panel_style(tab)
+        local dock = tab:CreateTexture(nil, 'OVERLAY')
+        dock:SetHeight(3)
+        if self._orientation == 'UP' then
+            dock:SetPoint('BOTTOMLEFT', 1, -1)
+            dock:SetPoint('BOTTOMRIGHT', -1, -1)
+        elseif self._orientation == 'DOWN' then
+            dock:SetPoint('TOPLEFT', 1, 1)
+            dock:SetPoint('TOPRIGHT', -1, 1)
+        end
+        dock:SetColorTexture(aux.color.panel.background())
+        tab.dock = dock
+        local highlight = tab:CreateTexture(nil, 'HIGHLIGHT')
+        highlight:SetAllPoints()
+        highlight:SetColorTexture(1, 1, 1, .2)
+        tab.highlight = highlight
 
-		tab.text = tab:CreateFontString()
-		tab.text:SetAllPoints()
-		tab.text:SetJustifyH('CENTER')
-		tab.text:SetJustifyV('CENTER')
-		tab.text:SetFont(font, font_size.large)
-		tab:SetFontString(tab.text)
+        tab.text = tab:CreateFontString()
+        tab.text:SetAllPoints()
+        tab.text:SetJustifyH('CENTER')
+        tab.text:SetJustifyV('CENTER')
+        tab.text:SetFont(font, font_size.large)
+        tab:SetFontString(tab.text)
 
-		tab:SetText(text)
+        tab:SetText(text)
 
-		tab:SetScript('OnClick', function(self)
-			if self.id ~= self.group.selected then
-				PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB)
+        tab:SetScript('OnClick', function(self)
+            if self.id ~= self.group.selected then
+                PlaySound(SOUNDKIT.IG_CHARACTER_INFO_TAB)
                 self.group:select(self.id)
-			end
-		end)
+            end
+        end)
 
-		if #self._tabs == 0 then
-			if self._orientation == 'UP' then
-				tab:SetPoint('BOTTOMLEFT', self._frame, 'TOPLEFT', 4, -1)
-			elseif self._orientation == 'DOWN' then
-				tab:SetPoint('TOPLEFT', self._frame, 'BOTTOMLEFT', 4, 1)
-			end
-		else
-			if self._orientation == 'UP' then
-				tab:SetPoint('BOTTOMLEFT', self._tabs[#self._tabs], 'BOTTOMRIGHT', 4, 0)
-			elseif self._orientation == 'DOWN' then
-				tab:SetPoint('TOPLEFT', self._tabs[#self._tabs], 'TOPRIGHT', 4, 0)
-			end
-		end
+        if #self._tabs == 0 then
+            if self._orientation == 'UP' then
+                tab:SetPoint('BOTTOMLEFT', self._frame, 'TOPLEFT', 4, -1)
+            elseif self._orientation == 'DOWN' then
+                tab:SetPoint('TOPLEFT', self._frame, 'BOTTOMLEFT', 4, 1)
+            end
+        else
+            if self._orientation == 'UP' then
+                tab:SetPoint('BOTTOMLEFT', self._tabs[#self._tabs], 'BOTTOMRIGHT', 4, 0)
+            elseif self._orientation == 'DOWN' then
+                tab:SetPoint('TOPLEFT', self._tabs[#self._tabs], 'TOPRIGHT', 4, 0)
+            end
+        end
 
-		tab:SetWidth(tab:GetFontString():GetStringWidth() + 14)
+        tab:SetWidth(tab:GetFontString():GetStringWidth() + 14)
 
-		tinsert(self._tabs, tab)
-	end
-	function mt.__index:select(id)
-		self._selected = id
-		self:update()
-		do (self._on_select or pass)(id) end
-	end
-	function mt.__index:update()
-		for _, tab in pairs(self._tabs) do
-			if tab.group._selected == tab.id then
-				tab.text:SetTextColor(aux.color.label.enabled())
-				tab:Disable()
-				tab:SetBackdropColor(aux.color.panel.background())
-				tab.dock:Show()
-				tab:SetHeight(29)
-			else
-				tab.text:SetTextColor(aux.color.text.enabled())
-				tab:Enable()
-				tab:SetBackdropColor(aux.color.content.background())
-				tab.dock:Hide()
-				tab:SetHeight(24)
-			end
-		end
-	end
-	function M.tabs(parent, orientation)
-		local self = {
-			_frame = parent,
-			_orientation = orientation,
-			_tabs = {},
-		}
-	    return setmetatable(self, mt)
-	end
+        tinsert(self._tabs, tab)
+    end
+    function mt.__index:select(id)
+        self._selected = id
+        self:update()
+        do (self._on_select or pass)(id) end
+    end
+    function mt.__index:update()
+        for _, tab in pairs(self._tabs) do
+            if tab.group._selected == tab.id then
+                tab.text:SetTextColor(aux.color.label.enabled())
+                tab:Disable()
+                tab:SetBackdropColor(aux.color.panel.background())
+                tab.dock:Show()
+                tab:SetHeight(29)
+            else
+                tab.text:SetTextColor(aux.color.text.enabled())
+                tab:Enable()
+                tab:SetBackdropColor(aux.color.content.background())
+                tab.dock:Hide()
+                tab:SetHeight(24)
+            end
+        end
+    end
+    function M.tabs(parent, orientation)
+        local self = {
+            _frame = parent,
+            _orientation = orientation,
+            _tabs = {},
+        }
+        return setmetatable(self, mt)
+    end
 end
 
 function M.editbox(parent)
-    local editbox = CreateFrame('EditBox', nil, parent)
+    local editbox = CreateFrame('EditBox', nil, parent, 'BackdropTemplate')
     editbox:SetAutoFocus(false)
     editbox:SetTextInsets(1.5, 1.5, 3, 3)
     editbox:SetMaxLetters(nil)
@@ -207,20 +207,22 @@ function M.editbox(parent)
     set_content_style(editbox)
     editbox:SetScript('OnEscapePressed', function(self)
         self:ClearFocus()
-	    do (self.escape or pass)(self) end
+        do (self.escape or pass)(self) end
     end)
-    editbox:SetScript('OnEnterPressed', function(self) (self.enter or pass)(self) end)
+    editbox:SetScript('OnEnterPressed', function(self)
+        (self.enter or pass)(self)
+    end)
     editbox:SetScript('OnEditFocusGained', function(self)
-	    if self.block_focus then
+        if self.block_focus then
             self.block_focus = false
             self:ClearFocus()
-		    return
-	    end
+            return
+        end
         self.overlay:Hide()
         self:SetTextColor(aux.color.text.enabled())
         self.focused = true
         self:HighlightText()
-	    do (self.focus_gain or pass)(self) end
+        do (self.focus_gain or pass)(self) end
     end)
     editbox:SetScript('OnEditFocusLost', function(self)
         self.overlay:Show()
@@ -228,44 +230,45 @@ function M.editbox(parent)
         self.focused = false
         self:HighlightText(0, 0)
         self:SetScript('OnUpdate', nil)
-	    do (self.focus_loss or pass)(self) end
+        do (self.focus_loss or pass)(self) end
     end)
     editbox:SetScript('OnTextChanged', function(self, is_user_input)
-	    do (self.change or pass)(self, is_user_input) end
+        do (self.change or pass)(self, is_user_input) end
         self.overlay:SetText(self.formatter and self.formatter(self:GetText()) or self:GetText())
     end)
     editbox:SetScript('OnChar', function(self) (self.char or pass)(self) end)
     do
         local last_click = { t = 0 }
         editbox:SetScript('OnMouseDown', function(self, button)
-	        if button == 'RightButton' then
+            if button == 'RightButton' then
                 self:SetText(self.reset_text or '')
+                do (self.change or pass)(self, true) end
                 self:ClearFocus()
                 self.block_focus = true
-	        else
-	            local x, y = GetCursorPosition()
-	            -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
-	            -- or use an overlay with itemlinks
-	            if GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
-	                aux.coro_thread(function()
+            else
+                local x, y = GetCursorPosition()
+                -- local offset = x - editbox:GetLeft()*editbox:GetEffectiveScale() TODO use a fontstring to measure getstringwidth for structural highlighting
+                -- or use an overlay with itemlinks
+                if GetTime() - last_click.t < .5 and x == last_click.x and y == last_click.y then
+                    aux.coro_thread(function()
                         aux.coro_wait()
                         editbox:HighlightText()
                     end)
-	            end
+                end
                 aux.wipe(last_click)
-	            last_click.t = GetTime()
-	            last_click.x = x
-	            last_click.y = y
-	        end
+                last_click.t = GetTime()
+                last_click.x = x
+                last_click.y = y
+            end
         end)
     end
     function editbox:SetAlignment(alignment)
-	    self:SetJustifyH(alignment)
-	    self.overlay:SetJustifyH(alignment)
+        self:SetJustifyH(alignment)
+        self.overlay:SetJustifyH(alignment)
     end
     function editbox:SetFontSize(size)
-	    self:SetFont(font, size)
-	    self.overlay:SetFont(font, size)
+        self:SetFont(font, size)
+        self.overlay:SetFont(font, size)
     end
     local overlay = label(editbox)
     overlay:SetPoint('LEFT', 1.5, 0)
@@ -278,48 +281,48 @@ function M.editbox(parent)
 end
 
 do
-	local function update_alpha(self)
-		self:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
+    local function update_alpha(self)
+        self:SetAlpha(1 - (sin(GetTime() * 180) + 1) / 4)
     end
 
-	function M.status_bar(parent)
-	    local self = CreateFrame('Frame', nil, parent)
+    function M.status_bar(parent)
+        local self = CreateFrame('Frame', nil, parent, 'BackdropTemplate')
         set_window_style(self)
-	    do
-	        local status_bar = CreateFrame('StatusBar', nil, self, 'TextStatusBar')
-	        status_bar:SetOrientation('HORIZONTAL')
-	        status_bar:SetMinMaxValues(0, 1)
-	        status_bar:SetPoint('TOPLEFT', 1.5, -1.5)
+        do
+            local status_bar = CreateFrame('StatusBar', nil, self, 'TextStatusBar')
+            status_bar:SetOrientation('HORIZONTAL')
+            status_bar:SetMinMaxValues(0, 1)
+            status_bar:SetPoint('TOPLEFT', 1.5, -1.5)
             status_bar:SetPoint('BOTTOMRIGHT', -1.5, 1.5)
             status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
-	        status_bar:SetStatusBarColor(.42, .42, .42, .7)
-	        self.secondary_status_bar = status_bar
-	    end
-	    do
-	        local status_bar = CreateFrame('StatusBar', nil, self.secondary_status_bar, 'TextStatusBar')
-	        status_bar:SetOrientation('HORIZONTAL')
-	        status_bar:SetMinMaxValues(0, 1)
-	        status_bar:SetAllPoints()
-	        status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
-	        status_bar:SetStatusBarColor(.19, .22, .33, .9)
-	        self.primary_status_bar = status_bar
-	    end
-	    function self:update_status(primary_status, secondary_status)
+            status_bar:SetStatusBarColor(.42, .42, .42, .7)
+            self.secondary_status_bar = status_bar
+        end
+        do
+            local status_bar = CreateFrame('StatusBar', nil, self.secondary_status_bar, 'TextStatusBar')
+            status_bar:SetOrientation('HORIZONTAL')
+            status_bar:SetMinMaxValues(0, 1)
+            status_bar:SetAllPoints()
+            status_bar:SetStatusBarTexture([[Interface\Buttons\WHITE8X8]])
+            status_bar:SetStatusBarColor(.19, .22, .33, .9)
+            self.primary_status_bar = status_bar
+        end
+        function self:update_status(primary_status, secondary_status)
             if min(primary_status or 0, secondary_status or 0) < 1 then
                 self:SetScript('OnUpdate', update_alpha)
             else
                 self:SetScript('OnUpdate', nil)
                 self:SetAlpha(1)
             end
-	        if primary_status then
-	            self.primary_status_bar:SetValue(primary_status)
-	        end
-	        if secondary_status then
-	            self.secondary_status_bar:SetValue(secondary_status)
-	        end
-	    end
-	    return self
-	end
+            if primary_status then
+                self.primary_status_bar:SetValue(primary_status)
+            end
+            if secondary_status then
+                self.secondary_status_bar:SetValue(secondary_status)
+            end
+        end
+        return self
+    end
 end
 
 function M.item(parent)
@@ -432,6 +435,8 @@ do
                     item_button = button(dropdown_frame, text_height)
                     item_button:GetFontString():SetJustifyH('LEFT')
                     dropdown_item_buttons[i] = item_button
+                else
+                    item_button:GetFontString():SetFont(font, text_height)
                 end
                 if i > #options then
                     item_button:Hide()
@@ -493,7 +498,7 @@ end
 
 function M.slider(parent)
 
-    local slider = CreateFrame('Slider', nil, parent)
+    local slider = CreateFrame('Slider', nil, parent, 'BackdropTemplate')
     slider:SetOrientation('HORIZONTAL')
     slider:SetHeight(6)
     slider:SetHitRectInsets(0, 0, -12, -12)
@@ -530,10 +535,10 @@ function M.slider(parent)
 end
 
 function M.checkbox(parent)
-    local checkbox = CreateFrame('CheckButton', nil, parent, 'UICheckButtonTemplate')
+    local checkbox = CreateFrame('CheckButton', nil, parent, 'UICheckButtonTemplate,BackdropTemplate')
     checkbox:SetWidth(16)
     checkbox:SetHeight(16)
-	set_content_style(checkbox)
+    set_content_style(checkbox)
     checkbox:SetNormalTexture(nil)
     checkbox:SetPushedTexture(nil)
     checkbox:GetHighlightTexture():SetAllPoints()
@@ -544,27 +549,27 @@ function M.checkbox(parent)
 end
 
 do
-	local editbox = CreateFrame('EditBox')
-	editbox:SetAutoFocus(false)
-	function M.clear_focus()
-		editbox:SetFocus()
-		editbox:ClearFocus()
-	end
+    local editbox = CreateFrame('EditBox')
+    editbox:SetAutoFocus(false)
+    function M.clear_focus()
+        editbox:SetFocus()
+        editbox:ClearFocus()
+    end
 end
 
 function M.percentage_historical(pct, bid)
-	local text = (pct > 10000 and '>10000' or pct) .. '%'
-	if bid then
-		return aux.color.gray(text)
-	elseif pct < 50 then
-		return aux.color.blue(text)
-	elseif pct < 80 then
-		return aux.color.green(text)
-	elseif pct < 110 then
-		return aux.color.yellow(text)
-	elseif pct < 135 then
-		return aux.color.orange(text)
-	else
-		return aux.color.red(text)
-	end
+    local text = (pct > 10000 and '>10000' or pct) .. '%'
+    if bid then
+        return aux.color.gray(text)
+    elseif pct < 50 then
+        return aux.color.blue(text)
+    elseif pct < 80 then
+        return aux.color.green(text)
+    elseif pct < 110 then
+        return aux.color.yellow(text)
+    elseif pct < 135 then
+        return aux.color.orange(text)
+    else
+        return aux.color.red(text)
+    end
 end

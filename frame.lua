@@ -12,7 +12,7 @@ function event.AUX_LOADED()
 end
 
 do
-	local frame = CreateFrame('Frame', 'aux_frame', UIParent)
+	local frame = CreateFrame('Frame', 'aux_frame', UIParent, 'BackdropTemplate')
 	tinsert(UISpecialFrames, 'aux_frame')
 	gui.set_window_style(frame)
 	gui.set_size(frame, 768, 447)

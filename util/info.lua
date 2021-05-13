@@ -5,7 +5,7 @@ local aux = require 'aux'
 CreateFrame('GameTooltip', 'AuxTooltip', nil, 'GameTooltipTemplate')
 
 do
-    local map = { [1] = 2, [2] = 8, [3] = 24 }
+    local map = { [1] = 12, [2] = 24, [3] = 48 }
     function M.duration_hours(duration_code)
         return map[duration_code]
     end
@@ -248,7 +248,7 @@ function M.item_key(link)
 end
 
 function M.parse_link(link)
-    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(link, '|Hitem:(%d*):(%d*):::::(%d*):(%d*)[:0-9]*|h%[(.-)%]|h')
+    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(link, '|Hitem:(%d*):(%d*):::::(%-?%d*):(%d*)[:0-9]*|h%[(.-)%]|h')
     return tonumber(item_id) or 0, tonumber(suffix_id) or 0, tonumber(unique_id) or 0, tonumber(enchant_id) or 0, name
 end
 

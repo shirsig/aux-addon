@@ -62,6 +62,7 @@ do
 	local btn = gui.button(frame, gui.font_size.small)
 	btn:SetHeight(25)
 	btn:SetWidth(45)
+    btn:SetText('Live')
 	btn:SetScript('OnClick', function(self)
 		update_mode(mode == ALL_MODE and NEW_MODE or ALL_MODE)
 	end)
@@ -431,7 +432,7 @@ do
     button:SetScript('OnClick', add_form_component)
 end
 do
-    local scroll_frame = CreateFrame('ScrollFrame', nil, frame.filter)
+    local scroll_frame = CreateFrame('ScrollFrame', nil, frame.filter, 'BackdropTemplate')
     scroll_frame:SetWidth(395)
     scroll_frame:SetHeight(270)
     scroll_frame:SetPoint('TOPLEFT', 348.5, -47)
