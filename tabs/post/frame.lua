@@ -159,8 +159,8 @@ do
 end
 do
     local editbox = gui.editbox(frame.parameters)
-    editbox:SetPoint('TOPLEFT', 68, -63)
-    editbox:SetWidth(88)
+    editbox:SetPoint('TOPLEFT', 71, -63)
+    editbox:SetWidth(82)
     editbox:SetHeight(22)
     editbox:SetFontSize(17)
     editbox:SetAlignment('CENTER')
@@ -178,12 +178,12 @@ do
     editbox.max_value = 1
     do
         local label = gui.label(editbox, gui.font_size.small)
-        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -48, 1)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -51, 1)
         label:SetText('Stack Size')
     end
     do
         local btn = gui.button(editbox, 17)
-        btn:SetPoint('RIGHT', editbox, 'LEFT', -1, 0)
+        btn:SetPoint('RIGHT', editbox, 'LEFT', -2.5, 0)
         btn:SetWidth(22)
         btn:SetHeight(22)
         btn:SetText('<')
@@ -193,7 +193,7 @@ do
     end
     do
         local btn = gui.button(editbox, 17)
-        btn:SetPoint('RIGHT', editbox, 'LEFT', -24, 0)
+        btn:SetPoint('RIGHT', editbox, 'LEFT', -27, 0)
         btn:SetWidth(22)
         btn:SetHeight(22)
         btn:SetText('<<')
@@ -203,7 +203,7 @@ do
     end
     do
         local btn = gui.button(editbox, 17)
-        btn:SetPoint('LEFT', editbox, 'RIGHT', 1, 0)
+        btn:SetPoint('LEFT', editbox, 'RIGHT', 2.5, 0)
         btn:SetWidth(22)
         btn:SetHeight(22)
         btn:SetText('>')
@@ -213,7 +213,7 @@ do
     end
     do
         local btn = gui.button(editbox, 17)
-        btn:SetPoint('LEFT', editbox, 'RIGHT', 24, 0)
+        btn:SetPoint('LEFT', editbox, 'RIGHT', 27, 0)
         btn:SetWidth(22)
         btn:SetHeight(22)
         btn:SetText('>>')
@@ -226,7 +226,7 @@ end
 do
     local editbox = gui.editbox(frame.parameters)
     editbox:SetPoint('TOPLEFT', stack_size_input, 'BOTTOMLEFT', 0, -19)
-    editbox:SetWidth(88)
+    editbox:SetWidth(82)
     editbox:SetHeight(22)
     editbox:SetFontSize(17)
     editbox:SetAlignment('CENTER')
@@ -246,12 +246,12 @@ do
     editbox.max_value = 1
     do
         local label = gui.label(editbox, gui.font_size.small)
-        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -48, 1)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -51, 1)
         label:SetText('Stack Count')
     end
     do
         local btn = gui.button(editbox, 17)
-        btn:SetPoint('RIGHT', editbox, 'LEFT', -1, 0)
+        btn:SetPoint('RIGHT', editbox, 'LEFT', -2.5, 0)
         btn:SetWidth(22)
         btn:SetHeight(22)
         btn:SetText('<')
@@ -261,7 +261,7 @@ do
     end
     do
         local btn = gui.button(editbox, 17)
-        btn:SetPoint('RIGHT', editbox, 'LEFT', -24, 0)
+        btn:SetPoint('RIGHT', editbox, 'LEFT', -27, 0)
         btn:SetWidth(22)
         btn:SetHeight(22)
         btn:SetText('<<')
@@ -271,7 +271,7 @@ do
     end
     do
         local btn = gui.button(editbox, 17)
-        btn:SetPoint('LEFT', editbox, 'RIGHT', 1, 0)
+        btn:SetPoint('LEFT', editbox, 'RIGHT', 2.5, 0)
         btn:SetWidth(22)
         btn:SetHeight(22)
         btn:SetText('>')
@@ -281,7 +281,7 @@ do
     end
     do
         local btn = gui.button(editbox, 17)
-        btn:SetPoint('LEFT', editbox, 'RIGHT', 24, 0)
+        btn:SetPoint('LEFT', editbox, 'RIGHT', 27, 0)
         btn:SetWidth(22)
         btn:SetHeight(22)
         btn:SetText('>>')
@@ -296,7 +296,7 @@ do
     dropdown.selection_change = function()
         duration_selection_change()
     end
-    dropdown:SetPoint('TOPLEFT', stack_count_input, 'BOTTOMLEFT', -45, -19)
+    dropdown:SetPoint('TOPLEFT', stack_count_input, 'BOTTOMLEFT', -48, -19)
     dropdown:SetWidth(90)
     dropdown:SetHeight(22)
     dropdown:SetFontSize(17)
