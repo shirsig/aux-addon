@@ -9,6 +9,15 @@ local TIMEOUT = 30
 
 local state
 
+function aux.event.AUCTION_HOUSE_LOADED()
+    local AuctionFrameBrowse_Update = AuctionFrameBrowse_Update
+    _G.AuctionFrameBrowse_Update = function(...)
+        if not state then
+            return AuctionFrameBrowse_Update(...)
+        end
+    end
+end
+
 function aux.event.CLOSE()
 	abort()
 end
