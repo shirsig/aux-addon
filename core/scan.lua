@@ -169,7 +169,7 @@ function scan_page(page)
                 (state.params.on_page_loaded or pass)(
                     page - (get_query().blizzard_query.first_page or 0) + 1,
                     last_page() - (get_query().blizzard_query.first_page or 0) + 1,
-                    total_pages() - 1,
+                    max(0, total_pages() - 1),
                     page_size
                 )
             end

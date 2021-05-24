@@ -343,7 +343,7 @@ function update_item_configuration()
 end
 
 function deposit_amount()
-    local deposit_factor = UnitFactionGroup'npc' and .15 or .75
+    local deposit_factor = UnitFactionGroup'npc' and .05 or .25
     local duration_factor = info.duration_hours(duration_dropdown:GetIndex()) / 12
     local stack_size, stack_count = stack_size_input:GetNumber(), stack_count_input:GetNumber()
     return floor(selected_item.unit_vendor_price * deposit_factor * stack_size) * stack_count * duration_factor
