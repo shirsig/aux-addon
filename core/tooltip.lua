@@ -171,7 +171,7 @@ end
 function game_tooltip_hooks.SetInventoryItem(unit, slot)
     local link = GetInventoryItemLink(unit, slot)
     if link then
-        extend_tooltip(GameTooltip, link, 1)
+        extend_tooltip(GameTooltip, link, GetInventoryItemCount(unit, slot))
     end
 end
 
