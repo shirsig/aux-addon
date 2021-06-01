@@ -51,6 +51,9 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'tooltip' and arguments[2] == 'disenchant' and arguments[3] == 'distribution' then
 	    tooltip_settings.disenchant_distribution = not tooltip_settings.disenchant_distribution
         aux.print('tooltip disenchant distribution ' .. status(tooltip_settings.disenchant_distribution))
+    elseif arguments[1] == 'tooltip' and arguments[2] == 'money'  and arguments[3] == 'icons' then
+	    tooltip_settings.money_icons = not tooltip_settings.money_icons
+        aux.print('tooltip money icons ' .. status(tooltip_settings.money_icons))
     elseif arguments[1] == 'clear' and arguments[2] == 'item' and arguments[3] == 'cache' then
 	    aux.account_data.items = {}
         aux.account_data.item_ids = {}
@@ -74,6 +77,7 @@ function SlashCmdList.AUX(command)
 		aux.print('- tooltip merchant sell [' .. status(tooltip_settings.merchant_sell) .. ']')
 		aux.print('- tooltip disenchant value [' .. status(tooltip_settings.disenchant_value) .. ']')
 		aux.print('- tooltip disenchant distribution [' .. status(tooltip_settings.disenchant_distribution) .. ']')
+        aux.print('- tooltip money icons [' .. status(tooltip_settings.money_icons) .. ']')
 		aux.print('- clear item cache')
         aux.print('- clear post')
     end
