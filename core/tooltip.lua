@@ -110,7 +110,7 @@ function extend_tooltip(tooltip, link, quantity)
     if auctionable then
         if settings.value then
             if settings.money_icons then
-                tooltip:AddLine('Value: ' .. (value and GetCoinTextureString(value) or UNKNOWN), aux.color.tooltip.value())
+                tooltip:AddLine('Value: ' .. (value and GetCoinTextureString(value * quantity) or UNKNOWN), aux.color.tooltip.value())
             else
                 tooltip:AddLine('Value: ' .. (value and money.to_string2(value * quantity) or UNKNOWN), aux.color.tooltip.value())
             end
@@ -118,7 +118,7 @@ function extend_tooltip(tooltip, link, quantity)
         if settings.daily  then
             local market_value = history.market_value(item_key)
             if settings.money_icons then
-                tooltip:AddLine('Today: ' .. (market_value and GetCoinTextureString(market_value) .. ' (' .. gui.percentage_historical(aux.round(market_value / value * 100)) .. ')' or UNKNOWN))
+                tooltip:AddLine('Today: ' .. (market_value and GetCoinTextureString(market_value * quantity) .. ' (' .. gui.percentage_historical(aux.round(market_value / value * 100)) .. ')' or UNKNOWN))
             else
                 tooltip:AddLine('Today: ' .. (market_value and money.to_string2(market_value * quantity) .. ' (' .. gui.percentage_historical(aux.round(market_value / value * 100)) .. ')' or UNKNOWN), aux.color.tooltip.value())
             end
