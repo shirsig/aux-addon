@@ -12,6 +12,7 @@ StaticPopupDialogs.AUX_SCAN_ALERT = {
     showAlert = 1,
     timeout = 0,
     hideOnEscape = 1,
+    preferredIndex = STATICPOPUP_NUMDIALOGS,
 }
 
 ALL_MODE, NEW_MODE = {}, {}

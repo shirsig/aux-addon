@@ -31,6 +31,12 @@ function get_default_settings()
 	return { duration = aux.account_data.post_duration, start_price = 0, buyout_price = 0, hidden = false }
 end
 
+function aux.event.AUCTION_HOUSE_LOADED()
+    for slot in info.inventory() do
+        AuxTooltip:SetBagItem(unpack(slot))
+    end
+end
+
 function aux.event.AUX_LOADED()
     aux.event_listener('BAG_UPDATE', function()
         if posting == 'single' then

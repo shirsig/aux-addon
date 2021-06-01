@@ -11,6 +11,7 @@ StaticPopupDialogs.AUX_SEARCH_TABLE_FULL = {
     showAlert = 1,
     timeout = 0,
     hideOnEscape = 1,
+    preferredIndex = STATICPOPUP_NUMDIALOGS,
 }
 
 RESULTS, SAVED, FILTER = aux.enum(3)
@@ -28,11 +29,6 @@ end
 function tab.CLOSE()
     current_search().table:SetSelectedRecord()
     frame:Hide()
-end
-
-function tab.CLICK_LINK(item_info)
-	set_filter(strlower(item_info.name) .. '/exact')
-	execute(nil, false)
 end
 
 function tab.USE_ITEM(item_id)

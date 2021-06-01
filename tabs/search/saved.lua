@@ -10,6 +10,7 @@ StaticPopupDialogs.AUX_REMOVE_FAVORITE_CONFIRMATION = {
     showAlert = 1,
     timeout = 0,
     hideOnEscape = 1,
+    preferredIndex = STATICPOPUP_NUMDIALOGS,
 }
 
 dragged_search = nil
