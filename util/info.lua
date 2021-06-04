@@ -254,7 +254,7 @@ function M.item_key(link)
 end
 
 function M.parse_link(link)
-    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(link, '|Hitem:(%d*):(%d*):::::(%-?%d*):(%-?%d*)[:0-9]*|h%[(.-)%]|h')
+    local _, _, item_id, enchant_id, suffix_id, unique_id, name = strfind(link, '|Hitem:(%d*):(%d*):%d*:%d*:%d*:%d*:(%-?%d*):(%-?%d*)[:0-9]*|h%[(.-)%]|h')
     return tonumber(item_id) or 0, tonumber(suffix_id) or 0, tonumber(unique_id) or 0, tonumber(enchant_id) or 0, name
 end
 
