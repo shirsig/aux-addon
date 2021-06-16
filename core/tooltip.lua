@@ -26,7 +26,9 @@ function aux.event.AUX_LOADED()
 
     ItemRefTooltip:HookScript('OnTooltipSetItem', function(self)
         local _, link = self:GetItem()
-        extend_tooltip(self, link)
+        if link then
+            extend_tooltip(self, link)
+        end
     end)
 
 --        for name, hook in pairs(game_tooltip_hooks) do
