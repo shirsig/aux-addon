@@ -86,6 +86,24 @@ function extend_tooltip(tooltip, link, quantity)
             end
         end
     end
+    local distribution = prospecting.distribution(item_id)
+    if #distribution > 0 then
+        if settings.prospecting_distribution then
+            tooltip:AddLine('Prospecting into:', aux.color.tooltip.prospecting.distribution())
+            sort(distribution, function(a,b) return a.probability > b.probability end)
+            for _, event in ipairs(distribution) do
+                tooltip:AddLine(format('  %s%% %s (%s-%s)', event.probability * 100, info.display_name(event.item_id, true) or 'item:' .. event.item_id, event.min_quantity, event.max_quantity), aux.color.tooltip.prospecting.distribution())
+            end
+        end
+        if settings.prospecting_value then
+            local prospecting_value = disenchant.value(item_id)
+            if settings.money_icons then
+                tooltip:AddLine('Prospecting: ' .. (prospecting_value and GetCoinTextureString(prospecting_value) or UNKNOWN), aux.color.tooltip.disenchant.value())
+            else
+                tooltip:AddLine('Prospecting: ' .. (prospecting_value and money.to_string2(prospecting_value) or UNKNOWN), aux.color.tooltip.disenchant.value())
+            end
+        end
+    end
     if settings.merchant_buy then
         local price, limited = info.merchant_buy_info(item_id)
         if price then 

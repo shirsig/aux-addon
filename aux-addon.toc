@@ -20,6 +20,7 @@ core\cache.lua
 util\info.lua
 core\history.lua
 core\disenchant.lua
+core\prospecting.lua
 util\filter.lua
 util\completion.lua
 core\slash.lua

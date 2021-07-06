@@ -34,6 +34,11 @@ M.color = immutable-{
 			value = C(25, 153, 153, 1),
 			distribution = C(204, 204, 51, 1),
 			source = C(178, 178, 178, 1),
+		},
+		prospecting = immutable-{
+			value = C(25, 153, 153, 1),
+			distribution = C(204, 204, 51, 1),
+			source = C(178, 178, 178, 1),
 		}
 	},
 
