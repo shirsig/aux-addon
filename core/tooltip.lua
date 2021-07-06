@@ -4,6 +4,7 @@ local aux = require 'aux'
 local info = require 'aux.util.info'
 local money =  require 'aux.util.money'
 local disenchant = require 'aux.core.disenchant'
+local prospecting = require 'aux.core.prospecting'
 local history = require 'aux.core.history'
 local gui = require 'aux.gui'
 
@@ -96,11 +97,11 @@ function extend_tooltip(tooltip, link, quantity)
             end
         end
         if settings.prospecting_value then
-            local prospecting_value = disenchant.value(item_id)
+            local prospecting_value = prospecting.value(item_id)
             if settings.money_icons then
-                tooltip:AddLine('Prospecting: ' .. (prospecting_value and GetCoinTextureString(prospecting_value) or UNKNOWN), aux.color.tooltip.disenchant.value())
+                tooltip:AddLine('Prospecting: ' .. (prospecting_value and GetCoinTextureString(prospecting_value) or UNKNOWN), aux.color.tooltip.prospecting.value())
             else
-                tooltip:AddLine('Prospecting: ' .. (prospecting_value and money.to_string2(prospecting_value) or UNKNOWN), aux.color.tooltip.disenchant.value())
+                tooltip:AddLine('Prospecting: ' .. (prospecting_value and money.to_string2(prospecting_value) or UNKNOWN), aux.color.tooltip.prospecting.value())
             end
         end
     end
