@@ -1,7 +1,7 @@
 ## Interface: 20501
 ## Author: shirsig
 ## Title: aux
-## Version: 2.1.4
+## Version: 2.1.5
 ## Notes: Auction House replacement
 ## SavedVariables: aux
 
