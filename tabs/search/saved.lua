@@ -36,11 +36,13 @@ StaticPopupDialogs.AUX_RENAME_FAVORITE = {
         self.wideEditBox:SetText('')
     end,
     OnAccept = function(self, data)
-        data.filter_name = self.wideEditBox:GetText()
+        local text = self.wideEditBox:GetText()
+        data.filter_name = text and text ~= '' and text or data.prettified
         update_search_listings()
     end,
     EditBoxOnEnterPressed = function(self, data)
-        data.filter_name = self:GetText()
+        local text = self:GetText()
+        data.filter_name = text and text ~= '' and text or data.prettified
         self:GetParent():Hide()
         update_search_listings()
     end,
