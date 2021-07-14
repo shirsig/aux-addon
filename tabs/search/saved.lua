@@ -11,6 +11,10 @@ StaticPopupDialogs.AUX_REMOVE_FAVORITE_CONFIRMATION = {
     timeout = 0,
     hideOnEscape = 1,
     preferredIndex = STATICPOPUP_NUMDIALOGS,
+    OnAccept = function(self, index)
+        tremove(favorite_searches, index)
+        update_search_listings()
+    end
 }
 
 dragged_search = nil
@@ -87,11 +91,7 @@ handlers = {
 				tinsert(favorite_searches, 1, data.search)
                 update_search_listings()
 			elseif st == favorite_searches_listing then
-                StaticPopupDialogs.AUX_REMOVE_FAVORITE_CONFIRMATION.OnAccept = function()
-                    tremove(favorite_searches, data.index)
-                    update_search_listings()
-                end
-                StaticPopup_Show('AUX_REMOVE_FAVORITE_CONFIRMATION')
+                StaticPopup_Show('AUX_REMOVE_FAVORITE_CONFIRMATION', nil, nil, data.index)
             end
         end
 	end,
