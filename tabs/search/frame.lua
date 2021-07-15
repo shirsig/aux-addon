@@ -9,7 +9,7 @@ local gui = require 'aux.gui'
 local listing = require 'aux.gui.listing'
 local auction_listing = require 'aux.gui.auction_listing'
 
-local FILTER_SPACING = 27
+FILTER_SPACING = 27
 
 frame = CreateFrame('Frame', nil, aux.frame)
 frame:SetAllPoints()

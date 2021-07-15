@@ -9,8 +9,7 @@ local post_filter = {}
 local post_filter_index = 0
 
 function aux.event.AUCTION_HOUSE_LOADED()
-    initialize_class_dropdown()
-    initialize_quality_dropdown()
+    clear_form()
 end
 
 function valid_level(str)
@@ -316,9 +315,13 @@ function initialize_subclass_dropdown()
     end
     if #options > 0 then
         tinsert(options, 1, ALL)
+        subclass_dropdown:Show()
+    else
+        subclass_dropdown:Hide()
     end
     subclass_dropdown:SetOptions(options)
     subclass_dropdown:SetIndex(#options > 0 and 1 or nil)
+    update_quality_dropdown_point()
 end
 
 function subclass_selection_change()
@@ -334,9 +337,13 @@ function initialize_slot_dropdown()
     end
     if #options > 0 then
         tinsert(options, 1, ALL)
+        slot_dropdown:Show()
+    else
+        slot_dropdown:Hide()
     end
     slot_dropdown:SetOptions(options)
     slot_dropdown:SetIndex(#options > 0 and 1 or nil)
+    update_quality_dropdown_point()
 end
 
 function initialize_quality_dropdown()
@@ -346,4 +353,16 @@ function initialize_quality_dropdown()
     end
     quality_dropdown:SetOptions(options)
     quality_dropdown:SetIndex(1)
+end
+
+function update_quality_dropdown_point()
+    if not subclass_dropdown:IsShown() then
+        quality_dropdown:SetPoint(subclass_dropdown:GetPoint())
+    else
+        if not slot_dropdown:IsShown() then
+            quality_dropdown:SetPoint(slot_dropdown:GetPoint())
+        else
+            quality_dropdown:SetPoint('TOPLEFT', slot_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
+        end
+    end
 end
