@@ -11,6 +11,45 @@ StaticPopupDialogs.AUX_REMOVE_FAVORITE_CONFIRMATION = {
     timeout = 0,
     hideOnEscape = 1,
     preferredIndex = STATICPOPUP_NUMDIALOGS,
+    OnAccept = function(self, index)
+        tremove(favorite_searches, index)
+        update_search_listings()
+    end
+}
+
+StaticPopupDialogs.AUX_RENAME_FAVORITE = {
+    text = 'Enter name for filter:\n%s',
+    button1 = 'Accept',
+    button2 = 'Cancel',
+	maxLetters = 50,
+    hasEditBox = 1,
+    hasWideEditBox = 1,
+    timeout = 0,
+    hideOnEscape = 1,
+    preferredIndex = STATICPOPUP_NUMDIALOGS,
+    OnShow = function(self, data)
+        self.wideEditBox:SetText(data.filter_name or data.prettified)
+        self.wideEditBox:SetFocus()
+        self.wideEditBox:HighlightText()
+    end,
+    OnHide = function(self)
+        self.wideEditBox:SetText('')
+    end,
+    OnAccept = function(self, data)
+        local text = self.wideEditBox:GetText()
+        data.filter_name = text and text ~= '' and text or data.prettified
+        update_search_listings()
+    end,
+    EditBoxOnEnterPressed = function(self, data)
+        local text = self:GetText()
+        data.filter_name = text and text ~= '' and text or data.prettified
+        self:GetParent():Hide()
+        update_search_listings()
+    end,
+    EditBoxOnEscapePressed = function(self, data)
+        self:SetText('')
+        self:GetParent():Hide()
+    end,
 }
 
 dragged_search = nil
@@ -23,7 +62,7 @@ function update_search_listings()
 	local favorite_search_rows = {}
 	for i = 1, #favorite_searches do
 		local search = favorite_searches[i]
-		local name = strsub(search.prettified, 1, 250)
+        local name = search.filter_name or strsub(search.prettified, 1, 250)
 		tinsert(favorite_search_rows, {
 			cols = {{ value = search.alert and aux.color.red'X' or '' }, { value = name }},
 			search = search,
@@ -77,6 +116,10 @@ handlers = {
 		elseif button == 'LeftButton' then
 			set_filter(data.search.filter_string)
 			execute()
+        elseif button == 'RightButton' and IsControlKeyDown() then
+            if st == favorite_searches_listing then
+                StaticPopup_Show('AUX_RENAME_FAVORITE', favorite_searches[data.index].prettified, nil, favorite_searches[data.index])
+            end
 		elseif button == 'RightButton' then
 			if st == recent_searches_listing then
                 for _, entry in pairs(favorite_searches) do
@@ -87,11 +130,7 @@ handlers = {
 				tinsert(favorite_searches, 1, data.search)
                 update_search_listings()
 			elseif st == favorite_searches_listing then
-                StaticPopupDialogs.AUX_REMOVE_FAVORITE_CONFIRMATION.OnAccept = function()
-                    tremove(favorite_searches, data.index)
-                    update_search_listings()
-                end
-                StaticPopup_Show('AUX_REMOVE_FAVORITE_CONFIRMATION')
+                StaticPopup_Show('AUX_REMOVE_FAVORITE_CONFIRMATION', nil, nil, data.index)
             end
         end
 	end,
