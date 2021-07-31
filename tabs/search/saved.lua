@@ -23,20 +23,20 @@ StaticPopupDialogs.AUX_RENAME_FAVORITE = {
     button2 = 'Cancel',
 	maxLetters = 50,
     hasEditBox = 1,
-    hasWideEditBox = 1,
+    editBoxWidth = editBoxWidth ,
     timeout = 0,
     hideOnEscape = 1,
     preferredIndex = STATICPOPUP_NUMDIALOGS,
     OnShow = function(self, data)
-        self.wideEditBox:SetText(data.filter_name or data.prettified)
-        self.wideEditBox:SetFocus()
-        self.wideEditBox:HighlightText()
+        self.editBox:SetText(data.filter_name or data.prettified)
+        self.editBox:SetFocus()
+        self.editBox:HighlightText()
     end,
     OnHide = function(self)
-        self.wideEditBox:SetText('')
+        self.editBox:SetText('')
     end,
     OnAccept = function(self, data)
-        local text = self.wideEditBox:GetText()
+        local text = self.editBox:GetText()
         data.filter_name = text and text ~= '' and text or data.prettified
         update_search_listings()
     end,
