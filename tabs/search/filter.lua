@@ -342,7 +342,7 @@ end
 function initialize_quality_dropdown()
     local options = {ALL}
     for i = 0, 4 do
-        tinsert(options, _G['ITEM_QUALITY' .. i .. '_DESC'])
+        tinsert(options, ITEM_QUALITY_COLORS[i].hex .. _G['ITEM_QUALITY' .. i .. '_DESC'])
     end
     quality_dropdown:SetOptions(options)
     quality_dropdown:SetIndex(1)
