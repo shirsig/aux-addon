@@ -9,8 +9,7 @@ local post_filter = {}
 local post_filter_index = 0
 
 function aux.event.AUCTION_HOUSE_LOADED()
-    initialize_class_dropdown()
-    initialize_quality_dropdown()
+    clear_form()
 end
 
 function valid_level(str)
@@ -292,6 +291,8 @@ function exact_update()
             _M[name]:Show()
         end
     end
+    update_subclass_dropdown()
+    update_slot_dropdown()
 end
 
 function initialize_class_dropdown()
@@ -319,10 +320,22 @@ function initialize_subclass_dropdown()
     end
     subclass_dropdown:SetOptions(options)
     subclass_dropdown:SetIndex(#options > 0 and 1 or nil)
+    update_subclass_dropdown(true)
 end
 
 function subclass_selection_change()
     initialize_slot_dropdown()
+end
+
+function update_subclass_dropdown(update_quality_dropdown)
+   if class_dropdown:IsShown() and subclass_dropdown:GetIndex() then
+        subclass_dropdown:Show()
+    else
+        subclass_dropdown:Hide()
+    end
+    if update_quality_dropdown then
+        update_quality_dropdown_point()
+    end
 end
 
 function initialize_slot_dropdown()
@@ -337,6 +350,18 @@ function initialize_slot_dropdown()
     end
     slot_dropdown:SetOptions(options)
     slot_dropdown:SetIndex(#options > 0 and 1 or nil)
+    update_slot_dropdown(true)
+end
+
+function update_slot_dropdown(update_quality_dropdown)
+    if subclass_dropdown:IsShown() and slot_dropdown:GetIndex() then
+        slot_dropdown:Show()
+    else
+        slot_dropdown:Hide()
+    end
+    if update_quality_dropdown then
+        update_quality_dropdown_point()
+    end
 end
 
 function initialize_quality_dropdown()
@@ -346,4 +371,16 @@ function initialize_quality_dropdown()
     end
     quality_dropdown:SetOptions(options)
     quality_dropdown:SetIndex(1)
+end
+
+function update_quality_dropdown_point()
+    if not subclass_dropdown:IsShown() then
+        quality_dropdown:SetPoint('TOPLEFT', class_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
+    else
+        if not slot_dropdown:IsShown() then
+            quality_dropdown:SetPoint('TOPLEFT', subclass_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
+        else
+            quality_dropdown:SetPoint('TOPLEFT', slot_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
+        end
+    end
 end
