@@ -367,7 +367,12 @@ end
 
 function quantity_update(maximize_count)
     if selected_item then
-        local max_stack_count = floor(selected_item.count / stack_size_input:GetNumber())
+        local max_stack_count
+        if selected_item.suffix_id == 0 then
+            max_stack_count = floor(selected_item.count / stack_size_input:GetNumber())
+        else
+            max_stack_count = 1
+        end
         stack_count_input.max_value = max_stack_count
         if maximize_count then
             stack_count_input:SetNumber(max_stack_count)
