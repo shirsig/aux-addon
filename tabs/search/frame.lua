@@ -307,6 +307,7 @@ end
 do
     local dropdown = gui.dropdown(frame.filter)
     dropdown.selection_change = function() class_selection_change() end
+    dropdown.enter = dropdown.ClearFocus
     dropdown:SetPoint('TOPLEFT', min_level_input, 'BOTTOMLEFT', 0, -FILTER_SPACING)
     dropdown:SetWidth(300)
     dropdown:SetScript('OnTabPressed', function()
@@ -324,6 +325,7 @@ end
 do
     local dropdown = gui.dropdown(frame.filter)
     dropdown.selection_change = function() subclass_selection_change() end
+    dropdown.enter = dropdown.ClearFocus
     dropdown:SetPoint('TOPLEFT', class_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
     dropdown:SetWidth(300)
     dropdown:SetScript('OnTabPressed', function()
@@ -340,6 +342,7 @@ do
 end
 do
     local dropdown = gui.dropdown(frame.filter)
+    dropdown.enter = dropdown.ClearFocus
     dropdown:SetPoint('TOPLEFT', subclass_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
     dropdown:SetWidth(300)
     dropdown:SetScript('OnTabPressed', function()
@@ -356,6 +359,7 @@ do
 end
 do
     local dropdown = gui.dropdown(frame.filter)
+    dropdown.enter = dropdown.ClearFocus
     dropdown:SetPoint('TOPLEFT', slot_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
     dropdown:SetWidth(300)
     dropdown:SetScript('OnTabPressed', function()
