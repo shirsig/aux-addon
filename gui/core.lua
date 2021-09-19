@@ -390,6 +390,7 @@ do
 
         local index, set_index, update_dropdown
         local options = {}
+        local color_table = {}
 
         local editbox = editbox(parent)
 
@@ -406,9 +407,15 @@ do
 
         function set_index(new_index)
             if new_index then
+                local color = color_table[new_index]
                 new_index = max(1, min(#options, new_index))
                 if editbox:GetText() ~= options[new_index] then
                     editbox:SetText(options[new_index])
+                end
+                if color then
+                    editbox.overlay:SetTextColor(color.r, color.g, color.b)
+                else
+                    editbox.overlay:SetTextColor(aux.color.text.enabled())
                 end
             else
                 editbox:SetText('')
@@ -431,6 +438,7 @@ do
             dropdown_frame:SetWidth(width)
             dropdown_frame:SetPoint('TOP', editbox, 'BOTTOM', 0, 0)
             for i = 1, max(#options, #dropdown_item_buttons) do
+                local color = color_table[i]
                 local item_button = dropdown_item_buttons[i]
                 if not item_button then
                     item_button = button(dropdown_frame, text_height)
@@ -445,6 +453,11 @@ do
                     item_button:ClearAllPoints()
                     item_button:SetWidth(width - 4)
                     item_button:SetText(' ' .. options[i])
+                    if color then
+                        item_button.label:SetTextColor(color.r, color.g, color.b)
+                    else
+                        item_button.label:SetTextColor(aux.color.text.enabled())
+                    end
                     if i == 1 then
                         item_button:SetPoint('TOP', editbox, 'BOTTOM', 0, -2)
                     else
@@ -468,6 +481,18 @@ do
             end
         end
 
+        local function set_color_table(new_color_table)
+            --[[
+            Example:
+                table = {
+                    [1] = {r=1,g=1,b=1},
+                    ...
+                    [n] = {r=1,g=1,b=1},
+                }
+            --]]
+            color_table = new_color_table or {}
+        end
+
         editbox.focus_gain = function()
             update_dropdown()
         end
@@ -477,8 +502,9 @@ do
             dropdown_frame:Hide()
         end
 
-        function editbox:SetOptions(new_options)
+        function editbox:SetOptions(new_options, new_color_table)
             options = new_options
+            set_color_table(new_color_table)
             set_index(nil)
             if editbox:HasFocus() then
                 update_dropdown()
