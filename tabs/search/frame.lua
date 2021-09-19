@@ -314,7 +314,11 @@ do
         if IsShiftKeyDown() then
             max_level_input:SetFocus()
         else
-            subclass_dropdown:SetFocus()
+            if subclass_dropdown:IsVisible() then
+                subclass_dropdown:SetFocus()
+            else
+                quality_dropdown:SetFocus()
+            end
         end
     end)
     local label = gui.label(dropdown, gui.font_size.small)
@@ -332,7 +336,11 @@ do
         if IsShiftKeyDown() then
             class_dropdown:SetFocus()
         else
-            slot_dropdown:SetFocus()
+            if slot_dropdown:IsVisible() then
+                slot_dropdown:SetFocus()
+            else
+                quality_dropdown:SetFocus()
+            end
         end
     end)
     local label = gui.label(dropdown, gui.font_size.small)
@@ -364,7 +372,13 @@ do
     dropdown:SetWidth(300)
     dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            slot_dropdown:SetFocus()
+            if slot_dropdown:IsVisible() then
+                slot_dropdown:SetFocus()
+            elseif subclass_dropdown:IsVisible() then
+                subclass_dropdown:SetFocus()
+            else
+                class_dropdown:SetFocus()
+            end
         else
             filter_dropdown:SetFocus()
         end
