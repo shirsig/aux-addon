@@ -80,15 +80,15 @@ function M.button(parent, text_height)
     highlight:SetAllPoints()
     highlight:SetColorTexture(1, 1, 1, .2)
     button.highlight = highlight
-    do
-        local label = button:CreateFontString()
-        label:SetFont(font, text_height)
-        label:SetAllPoints(button)
-        label:SetJustifyH('CENTER')
-        label:SetJustifyV('CENTER')
-        label:SetTextColor(aux.color.text.enabled())
-        button:SetFontString(label)
-    end
+
+    local label = button:CreateFontString()
+    label:SetFont(font, text_height)
+    label:SetAllPoints(button)
+    label:SetJustifyH('CENTER')
+    label:SetJustifyV('CENTER')
+    label:SetTextColor(aux.color.text.enabled())
+    button:SetFontString(label)
+
     button.default_Enable = button.Enable
     function button:Enable()
         if self:IsEnabled() == 1 then return end
@@ -102,6 +102,7 @@ function M.button(parent, text_height)
         return self:default_Disable()
     end
 
+    button.label = label
     return button
 end
 
@@ -433,10 +434,10 @@ do
                 local item_button = dropdown_item_buttons[i]
                 if not item_button then
                     item_button = button(dropdown_frame, text_height)
-                    item_button:GetFontString():SetJustifyH('LEFT')
+                    item_button.label:SetJustifyH('LEFT')
                     dropdown_item_buttons[i] = item_button
                 else
-                    item_button:GetFontString():SetFont(font, text_height)
+                    item_button.label:SetFont(font, text_height)
                 end
                 if i > #options then
                     item_button:Hide()
