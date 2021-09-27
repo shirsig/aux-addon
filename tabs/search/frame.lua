@@ -307,13 +307,18 @@ end
 do
     local dropdown = gui.dropdown(frame.filter)
     dropdown.selection_change = function() class_selection_change() end
+    dropdown.enter = dropdown.ClearFocus
     dropdown:SetPoint('TOPLEFT', min_level_input, 'BOTTOMLEFT', 0, -FILTER_SPACING)
     dropdown:SetWidth(300)
     dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
             max_level_input:SetFocus()
         else
-            subclass_dropdown:SetFocus()
+            if subclass_dropdown:IsVisible() then
+                subclass_dropdown:SetFocus()
+            else
+                quality_dropdown:SetFocus()
+            end
         end
     end)
     local label = gui.label(dropdown, gui.font_size.small)
@@ -324,13 +329,18 @@ end
 do
     local dropdown = gui.dropdown(frame.filter)
     dropdown.selection_change = function() subclass_selection_change() end
+    dropdown.enter = dropdown.ClearFocus
     dropdown:SetPoint('TOPLEFT', class_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
     dropdown:SetWidth(300)
     dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
             class_dropdown:SetFocus()
         else
-            slot_dropdown:SetFocus()
+            if slot_dropdown:IsVisible() then
+                slot_dropdown:SetFocus()
+            else
+                quality_dropdown:SetFocus()
+            end
         end
     end)
     local label = gui.label(dropdown, gui.font_size.small)
@@ -340,6 +350,7 @@ do
 end
 do
     local dropdown = gui.dropdown(frame.filter)
+    dropdown.enter = dropdown.ClearFocus
     dropdown:SetPoint('TOPLEFT', subclass_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
     dropdown:SetWidth(300)
     dropdown:SetScript('OnTabPressed', function()
@@ -356,11 +367,18 @@ do
 end
 do
     local dropdown = gui.dropdown(frame.filter)
+    dropdown.enter = dropdown.ClearFocus
     dropdown:SetPoint('TOPLEFT', slot_dropdown, 'BOTTOMLEFT', 0, -FILTER_SPACING)
     dropdown:SetWidth(300)
     dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            slot_dropdown:SetFocus()
+            if slot_dropdown:IsVisible() then
+                slot_dropdown:SetFocus()
+            elseif subclass_dropdown:IsVisible() then
+                subclass_dropdown:SetFocus()
+            else
+                class_dropdown:SetFocus()
+            end
         else
             filter_dropdown:SetFocus()
         end
