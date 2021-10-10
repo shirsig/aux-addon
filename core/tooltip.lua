@@ -119,7 +119,7 @@ function extend_tooltip(tooltip, link, quantity)
         local price = item_info and item_info.sell_price
         if price ~= 0 then
             if settings.money_icons then
-                tooltip:AddLine('Vendor: ' .. (price and GetCoinTextureString(price * quantity) or UNKNOWN),aux.color.tooltip.merchant())
+                tooltip:AddLine('Vendor: ' .. (price and GetCoinTextureString(price * quantity) or UNKNOWN), aux.color.tooltip.merchant())
             else
                 tooltip:AddLine('Vendor: ' .. (price and money.to_string2(price * quantity) or UNKNOWN), aux.color.tooltip.merchant())
             end    
