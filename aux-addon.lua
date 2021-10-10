@@ -55,7 +55,7 @@ function event.AUX_LOADED()
         ignore_owner = true,
         action_shortcuts = false,
         crafting_cost = true,
-        post_bid = false,
+        post_bid = nil,
         post_duration = post.DURATION_8,
         items = {},
         item_ids = {},
@@ -74,6 +74,7 @@ function event.AUX_LOADED()
                 daily = false,
                 disenchant_value = false,
                 disenchant_distribution = false,
+                money_icons = false
             }
         })
     end

@@ -12,6 +12,7 @@ StaticPopupDialogs.AUX_SCAN_ALERT = {
     showAlert = 1,
     timeout = 0,
     hideOnEscape = 1,
+    preferredIndex = STATICPOPUP_NUMDIALOGS,
 }
 
 ALL_MODE, NEW_MODE = {}, {}
@@ -25,9 +26,9 @@ end
 function update_mode(mode)
     _M.mode = mode
 	if mode == ALL_MODE then
-		mode_button:SetText('All')
+        mode_button:SetBackdropColor(aux.color.content.background())
     else
-        mode_button:SetText('New')
+        mode_button:SetBackdropColor(aux.color.state.enabled())
 	end
 end
 
@@ -132,7 +133,7 @@ function update_start_stop()
 	end
 end
 
-function start_fresh_scan(query, search, continuation)
+function start_live_scan(query, search, continuation)
 
     local ignore_page
     if not search then
@@ -184,7 +185,7 @@ function start_fresh_scan(query, search, continuation)
 
             query.blizzard_query.first_page = next_page
             query.blizzard_query.last_page = next_page
-			start_fresh_scan(query, search)
+			start_live_scan(query, search)
 		end,
 		on_abort = function()
 			aux.status_bar:update_status(1, 1)
@@ -332,7 +333,7 @@ function M.execute(_, resume, mode)
     search_box:ClearFocus()
 	set_subtab(RESULTS)
 	if mode == NEW_MODE then
-		start_fresh_scan(queries[1], nil, continuation)
+		start_live_scan(queries[1], nil, continuation)
 	else
 		start_search(queries, continuation)
 	end

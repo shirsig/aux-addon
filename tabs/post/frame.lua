@@ -32,10 +32,11 @@ frame.bid_listing = gui.panel(frame.content)
 frame.bid_listing:SetHeight(228)
 frame.bid_listing:SetWidth(271.5)
 frame.bid_listing:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
+frame.bid_listing:Hide()
 
 frame.buyout_listing = gui.panel(frame.content)
 frame.buyout_listing:SetHeight(228)
-frame.buyout_listing:SetWidth(271.5)
+frame.buyout_listing:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
 frame.buyout_listing:SetPoint('BOTTOMRIGHT', 0, 0)
 
 do
@@ -74,50 +75,47 @@ do
 end
 
 bid_listing = listing.new(frame.bid_listing)
-bid_listing:SetColInfo{
-    {name='Auctions', width=.17, align='CENTER'},
-    {name='Time\nLeft', width=.11, align='CENTER'},
-    {name='Stack\nSize', width=.11, align='CENTER'},
-    {name='Auction Bid\n(per stack)', width=.4, align='RIGHT'},
-    {name='% Hist.\nValue', width=.21, align='CENTER'},
-}
 bid_listing:SetSelection(function(data)
 	return selected_item and (data.record == get_bid_selection() or data.record.historical_value and get_bid_selection() and get_bid_selection().historical_value)
 end)
 bid_listing:SetHandler('OnClick', function(table, row_data, column, button)
-	if button == 'RightButton' and row_data.record == get_bid_selection() or row_data.record.historical_value and get_bid_selection() and get_bid_selection().historical_value then
-		set_bid_selection()
+	if button == 'RightButton' then
+        if row_data.record == get_bid_selection() or row_data.record.historical_value and get_bid_selection() and get_bid_selection().historical_value then
+            set_bid_selection()
+        end
 	else
 		set_bid_selection(row_data.record)
 	end
 	refresh = true
 end)
 bid_listing:SetHandler('OnDoubleClick', function(table, row_data, column, button)
-	stack_size_slider:SetValue(row_data.record.stack_size)
+	stack_size_input:SetNumber(row_data.record.stack_size)
 	refresh = true
 end)
 
 buyout_listing = listing.new(frame.buyout_listing)
 buyout_listing:SetColInfo{
-	{name='Auctions', width=.17, align='CENTER'},
-	{name='Time\nLeft', width=.11, align='CENTER'},
-	{name='Stack\nSize', width=.12, align='CENTER'},
-	{name='Auction Buyout\n(per item)', width=.4, align='RIGHT'},
-	{name='% Hist.\nValue', width=.20, align='CENTER'},
+    {name='Auctions', width=.15, align='CENTER'},
+    {name='Time Left', width=.15, align='CENTER'},
+    {name='Stack Size', width=.15, align='CENTER'},
+    {name='Auction Buyout (per item)', width=.4, align='RIGHT'},
+    {name='% Hist. Value', width=.15, align='CENTER'},
 }
 buyout_listing:SetSelection(function(data)
 	return selected_item and (data.record == get_buyout_selection() or data.record.historical_value and get_buyout_selection() and get_buyout_selection().historical_value)
 end)
 buyout_listing:SetHandler('OnClick', function(table, row_data, column, button)
-	if button == 'RightButton' and row_data.record == get_buyout_selection() or row_data.record.historical_value and get_buyout_selection() and get_buyout_selection().historical_value then
-		set_buyout_selection()
+	if button == 'RightButton' then
+        if row_data.record == get_buyout_selection() or row_data.record.historical_value and get_buyout_selection() and get_buyout_selection().historical_value then
+            set_buyout_selection()
+        end
 	else
 		set_buyout_selection(row_data.record)
 	end
 	refresh = true
 end)
 buyout_listing:SetHandler('OnDoubleClick', function(table, row_data, column, button)
-	stack_size_slider:SetValue(row_data.record.stack_size)
+	stack_size_input:SetNumber(row_data.record.stack_size)
 	refresh = true
 end)
 
@@ -138,6 +136,7 @@ end
 do
 	item = gui.item(frame.parameters)
     item:SetPoint('TOPLEFT', 10, -6)
+    item:SetScale(.9)
     item.button:SetScript('OnEnter', function(self)
         if selected_item then
             info.set_tooltip(selected_item.link, self, 'ANCHOR_RIGHT')
@@ -159,70 +158,151 @@ do
     item.button:HookScript('OnClick', select_cursor_item)
 end
 do
-    local slider = gui.slider(frame.parameters)
-    slider:SetValueStep(1)
-    slider:SetPoint('TOPLEFT', 13, -73)
-    slider:SetWidth(190)
-    slider:SetScript('OnValueChanged', function(_, _, is_user_input)
---        if is_user_input then -- TODO need to solve issue of slider click not counting as user input
-            quantity_update(true)
-            refresh = true
---        end
-    end)
-    slider.editbox.change = function(self, is_user_input)
-        if is_user_input then
-            slider:SetValue(self:GetNumber())
-            quantity_update(true)
-        end
+    local editbox = gui.editbox(frame.parameters)
+    editbox:SetPoint('TOPLEFT', 66, -63)
+    editbox:SetWidth(92)
+    editbox:SetHeight(22)
+    editbox:SetFontSize(17)
+    editbox:SetAlignment('CENTER')
+    editbox:SetNumeric(true)
+    editbox.reset_text = '1'
+    editbox.change = function(self)
+        self:SetNumber(aux.bounded(1, self.max_value, self:GetNumber()))
+        quantity_update(true)
     end
-    slider.editbox:SetScript('OnTabPressed', function()
+    editbox:SetScript('OnTabPressed', function()
         if not IsShiftKeyDown() then
-            stack_count_slider.editbox:SetFocus()
+            stack_count_input:SetFocus()
         end
     end)
-    slider.editbox:SetNumeric(true)
-    slider.editbox:SetMaxLetters(3)
-    slider.editbox.reset_text = '1'
-    slider.label:SetText('Stack Size')
-    stack_size_slider = slider
+    editbox.max_value = 1
+    do
+        local label = gui.label(editbox, gui.font_size.small)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -46, 1)
+        label:SetText('Stack Size')
+    end
+    do
+        local btn = gui.button(editbox, 17)
+        btn:SetPoint('RIGHT', editbox, 'LEFT', 0, 0)
+        btn:SetWidth(22)
+        btn:SetHeight(22)
+        btn:SetText('<')
+        btn:SetScript('OnClick', function()
+            editbox:SetNumber(editbox:GetNumber() - 1)
+        end)
+    end
+    do
+        local btn = gui.button(editbox, 17)
+        btn:SetPoint('RIGHT', editbox, 'LEFT', -22, 0)
+        btn:SetWidth(22)
+        btn:SetHeight(22)
+        btn:SetText('<<')
+        btn:SetScript('OnClick', function()
+            editbox:SetNumber(1)
+        end)
+    end
+    do
+        local btn = gui.button(editbox, 17)
+        btn:SetPoint('LEFT', editbox, 'RIGHT', 0, 0)
+        btn:SetWidth(22)
+        btn:SetHeight(22)
+        btn:SetText('>')
+        btn:SetScript('OnClick', function()
+            editbox:SetNumber(editbox:GetNumber() + 1)
+        end)
+    end
+    do
+        local btn = gui.button(editbox, 17)
+        btn:SetPoint('LEFT', editbox, 'RIGHT', 22, 0)
+        btn:SetWidth(22)
+        btn:SetHeight(22)
+        btn:SetText('>>')
+        btn:SetScript('OnClick', function()
+            editbox:SetNumber(editbox.max_value)
+        end)
+    end
+    stack_size_input = editbox
 end
 do
-    local slider = gui.slider(frame.parameters)
-    slider:SetValueStep(1)
-    slider:SetPoint('TOPLEFT', stack_size_slider, 'BOTTOMLEFT', 0, -32)
-    slider:SetWidth(190)
-    slider:SetScript('OnValueChanged', function(_, _, is_user_input)
---        if is_user_input then
-            quantity_update()
---        end
-    end)
-    slider.editbox.change = function(self, is_user_input)
-        if is_user_input then
-            slider:SetValue(self:GetNumber())
-            quantity_update()
-        end
+    local editbox = gui.editbox(frame.parameters)
+    editbox:SetPoint('TOPLEFT', stack_size_input, 'BOTTOMLEFT', 0, -19)
+    editbox:SetWidth(92)
+    editbox:SetHeight(22)
+    editbox:SetFontSize(17)
+    editbox:SetAlignment('CENTER')
+    editbox:SetNumeric(true)
+    editbox.reset_text = '1'
+    editbox.change = function(self)
+        self:SetNumber(aux.bounded(1, self.max_value, self:GetNumber()))
+        quantity_update()
     end
-    slider.editbox:SetScript('OnTabPressed', function()
+    editbox:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            stack_size_slider.editbox:SetFocus()
+            stack_size_input:SetFocus()
         else
             duration_dropdown:SetFocus()
         end
     end)
-    slider.editbox:SetNumeric(true)
-    slider.label:SetText('Stack Count')
-    stack_count_slider = slider
+    editbox.max_value = 1
+    do
+        local label = gui.label(editbox, gui.font_size.small)
+        label:SetPoint('BOTTOMLEFT', editbox, 'TOPLEFT', -46, 1)
+        label:SetText('Stack Count')
+    end
+    do
+        local btn = gui.button(editbox, 17)
+        btn:SetPoint('RIGHT', editbox, 'LEFT', -0, 0)
+        btn:SetWidth(22)
+        btn:SetHeight(22)
+        btn:SetText('<')
+        btn:SetScript('OnClick', function()
+            editbox:SetNumber(editbox:GetNumber() - 1)
+        end)
+    end
+    do
+        local btn = gui.button(editbox, 17)
+        btn:SetPoint('RIGHT', editbox, 'LEFT', -22, 0)
+        btn:SetWidth(22)
+        btn:SetHeight(22)
+        btn:SetText('<<')
+        btn:SetScript('OnClick', function()
+            editbox:SetNumber(1)
+        end)
+    end
+    do
+        local btn = gui.button(editbox, 17)
+        btn:SetPoint('LEFT', editbox, 'RIGHT', 0, 0)
+        btn:SetWidth(22)
+        btn:SetHeight(22)
+        btn:SetText('>')
+        btn:SetScript('OnClick', function()
+            editbox:SetNumber(editbox:GetNumber() + 1)
+        end)
+    end
+    do
+        local btn = gui.button(editbox, 17)
+        btn:SetPoint('LEFT', editbox, 'RIGHT', 22, 0)
+        btn:SetWidth(22)
+        btn:SetHeight(22)
+        btn:SetText('>>')
+        btn:SetScript('OnClick', function()
+            editbox:SetNumber(editbox.max_value)
+        end)
+    end
+    stack_count_input = editbox
 end
 do
     local dropdown = gui.dropdown(frame.parameters, gui.font_size.large)
-    dropdown.selection_change = function() duration_selection_change() end
-    dropdown:SetPoint('TOPLEFT', stack_count_slider, 'BOTTOMLEFT', 0, -25)
+    dropdown.selection_change = function()
+        duration_selection_change()
+    end
+    dropdown:SetPoint('TOPLEFT', stack_count_input, 'BOTTOMLEFT', -43, -19)
     dropdown:SetWidth(90)
     dropdown:SetHeight(22)
     dropdown:SetFontSize(17)
     dropdown:SetScript('OnTabPressed', function()
         if IsShiftKeyDown() then
-            stack_count_slider.editbox:SetFocus()
+            stack_count_input:SetFocus()
         else
             unit_start_price_input:SetFocus()
         end
@@ -248,7 +328,7 @@ do
 end
 do
     local editbox = gui.editbox(frame.parameters)
-    editbox:SetPoint('TOPRIGHT', -71, -60)
+    editbox:SetPoint('TOPRIGHT', -71, -63)
     editbox:SetWidth(180)
     editbox:SetHeight(22)
     editbox:SetAlignment('RIGHT')
@@ -270,6 +350,7 @@ do
             set_buyout_selection()
             set_unit_start_price(money.from_string(self:GetText()) or 0)
         end
+        unit_buyout_price_input.reset_text = self:GetText()
     end
     editbox.enter = function(self)
         self:ClearFocus()
@@ -312,6 +393,7 @@ do
             set_buyout_selection()
             set_unit_buyout_price(money.from_string(self:GetText()) or 0)
         end
+        unit_start_price_input.reset_text = self:GetText()
     end
     editbox.enter = function(self)
         self:ClearFocus()
@@ -340,15 +422,24 @@ do
 end
 
 function aux.event.AUX_LOADED()
-	if not aux.account_data.post_bid then
-		frame.bid_listing:Hide()
-		frame.buyout_listing:SetPoint('BOTTOMLEFT', frame.inventory, 'BOTTOMRIGHT', 2.5, 0)
-		buyout_listing:SetColInfo{
-			{name='Auctions', width=.15, align='CENTER'},
-			{name='Time Left', width=.15, align='CENTER'},
-			{name='Stack Size', width=.15, align='CENTER'},
-			{name='Auction Buyout (per item)', width=.4, align='RIGHT'},
-			{name='% Hist. Value', width=.15, align='CENTER'},
-		}
+	if aux.account_data.post_bid then
+        frame.bid_listing:Show()
+        bid_listing:SetColInfo{
+            {name='Auctions', width=.17, align='CENTER'},
+            {name='Time\nLeft', width=.11, align='CENTER'},
+            {name='Stack\nSize', width=.11, align='CENTER'},
+            {name='Auction Bid\n' .. (aux.account_data.post_bid == 'unit' and '(per item)' or '(per stack)'), width=.4, align='RIGHT'},
+            {name='% Hist.\nValue', width=.21, align='CENTER'},
+        }
+        frame.buyout_listing:ClearAllPoints()
+        frame.buyout_listing:SetWidth(271.5)
+        frame.buyout_listing:SetPoint('BOTTOMRIGHT', 0, 0)
+        buyout_listing:SetColInfo{
+            {name='Auctions', width=.17, align='CENTER'},
+            {name='Time\nLeft', width=.11, align='CENTER'},
+            {name='Stack\nSize', width=.12, align='CENTER'},
+            {name='Auction Buyout\n(per item)', width=.4, align='RIGHT'},
+            {name='% Hist.\nValue', width=.20, align='CENTER'},
+        }
 	end
 end

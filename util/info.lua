@@ -74,6 +74,10 @@ function M.auction(index, query_type)
 
     if has_all_info and (aux.account_data.ignore_owner or owner) then
         local link = GetAuctionItemLink(query_type, index)
+        if not link then
+            return
+        end
+
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
 
     	local duration = GetAuctionItemTimeLeft(query_type, index)

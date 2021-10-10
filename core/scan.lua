@@ -9,6 +9,15 @@ local TIMEOUT = 30
 
 local state
 
+function aux.event.AUCTION_HOUSE_LOADED()
+    local AuctionFrameBrowse_Update = AuctionFrameBrowse_Update
+    _G.AuctionFrameBrowse_Update = function(...)
+        if not state then
+            return AuctionFrameBrowse_Update(...)
+        end
+    end
+end
+
 function aux.event.CLOSE()
 	abort()
 end
@@ -160,7 +169,7 @@ function scan_page(page)
                 (state.params.on_page_loaded or pass)(
                     page - (get_query().blizzard_query.first_page or 0) + 1,
                     last_page() - (get_query().blizzard_query.first_page or 0) + 1,
-                    total_pages() - 1,
+                    max(0, total_pages() - 1),
                     page_size
                 )
             end

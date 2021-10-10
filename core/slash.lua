@@ -25,8 +25,8 @@ function SlashCmdList.AUX(command)
         aux.account_data.action_shortcuts = not aux.account_data.action_shortcuts
         aux.print('action shortcuts ' .. status(aux.account_data.action_shortcuts))
     elseif arguments[1] == 'post' and arguments[2] == 'bid' then
-        aux.account_data.post_bid = not aux.account_data.post_bid
-	    aux.print('post bid ' .. status(aux.account_data.post_bid))
+        aux.account_data.post_bid = ({ unit = 'unit', stack = 'stack' })[arguments[3]]
+	    aux.print('post bid ' .. aux.color.blue(aux.account_data.post_bid or 'off'))
     elseif arguments[1] == 'post' and arguments[2] == 'duration' and  ({['2'] = post.DURATION_2, ['8'] = post.DURATION_8, ['24'] = post.DURATION_24})[arguments[3]] then
         aux.account_data.post_duration = ({['2'] = post.DURATION_2, ['8'] = post.DURATION_8, ['24'] = post.DURATION_24})[arguments[3]]
         aux.print('post duration ' .. aux.color.blue(info.duration_hours(aux.account_data.post_duration) .. 'h'))
@@ -51,6 +51,9 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'tooltip' and arguments[2] == 'disenchant' and arguments[3] == 'distribution' then
 	    tooltip_settings.disenchant_distribution = not tooltip_settings.disenchant_distribution
         aux.print('tooltip disenchant distribution ' .. status(tooltip_settings.disenchant_distribution))
+    elseif arguments[1] == 'tooltip' and arguments[2] == 'money'  and arguments[3] == 'icons' then
+	    tooltip_settings.money_icons = not tooltip_settings.money_icons
+        aux.print('tooltip money icons ' .. status(tooltip_settings.money_icons))
     elseif arguments[1] == 'clear' and arguments[2] == 'item' and arguments[3] == 'cache' then
 	    aux.account_data.items = {}
         aux.account_data.item_ids = {}
@@ -65,7 +68,7 @@ function SlashCmdList.AUX(command)
         aux.print('- scale [' .. aux.color.blue(aux.account_data.scale) .. ']')
 		aux.print('- ignore owner [' .. status(aux.account_data.ignore_owner) .. ']')
         aux.print('- action shortcuts [' .. status(aux.account_data.action_shortcuts) .. ']')
-        aux.print('- post bid [' .. status(aux.account_data.post_bid) .. ']')
+        aux.print('- post bid [' .. aux.color.blue(aux.account_data.post_bid or 'off') .. ']')
         aux.print('- post duration [' .. aux.color.blue(info.duration_hours(aux.account_data.post_duration) .. 'h') .. ']')
         aux.print('- crafting cost [' .. status(aux.account_data.crafting_cost) .. ']')
 		aux.print('- tooltip value [' .. status(tooltip_settings.value) .. ']')
@@ -74,6 +77,7 @@ function SlashCmdList.AUX(command)
 		aux.print('- tooltip merchant sell [' .. status(tooltip_settings.merchant_sell) .. ']')
 		aux.print('- tooltip disenchant value [' .. status(tooltip_settings.disenchant_value) .. ']')
 		aux.print('- tooltip disenchant distribution [' .. status(tooltip_settings.disenchant_distribution) .. ']')
+        aux.print('- tooltip money icons [' .. status(tooltip_settings.money_icons) .. ']')
 		aux.print('- clear item cache')
         aux.print('- clear post')
     end

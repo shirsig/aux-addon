@@ -11,7 +11,7 @@ M.immutable = setmetatable({}, {
 function M.pluralize(text)
     local text = gsub(text, '(-?%d+)(.-)|4([^;]-);', function(number_string, gap, number_forms)
         local singular, dual, plural
-        _, _, singular, dual, plural = strfind(number_forms, '(.+):(.+):(.+)');
+        _, _, singular, dual, plural = strfind(number_forms, '(.+):(.+):(.+)')
         if not singular then
             _, _, singular, plural = strfind(number_forms, '(.+):(.+)')
         end
