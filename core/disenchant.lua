@@ -81,7 +81,7 @@ function M.value(item_id, slot, quality, level)
 end
 
 function M.distribution(item_id, slot, quality, level)
-    if IGNORE[item_id] or not ARMOR[slot] and not WEAPON[slot] or level == 0 then
+    if not item_id or IGNORE[item_id] or not ARMOR[slot] and not WEAPON[slot] or level == 0 then
         return {}
     end
 
