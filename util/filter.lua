@@ -188,6 +188,26 @@ M.filters = {
             end
         end
     },
+
+    ['min-item-level'] = {
+        input_type = 'number',
+        validator = function(ilevel)
+            return function(auction_record)
+                local item_level = info.item(auction_record.item_id).level
+                return item_level and item_level >= ilevel
+            end
+        end
+    },
+
+    ['max-item-level'] = {
+        input_type = 'number',
+        validator = function(ilevel)
+            return function(auction_record)
+                local item_level = info.item(auction_record.item_id).level
+                return item_level and item_level <= ilevel
+            end
+        end
+    },
 }
 
 function operator(str)
