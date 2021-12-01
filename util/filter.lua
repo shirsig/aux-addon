@@ -21,6 +21,20 @@ function default_filter(str)
 end
 
 M.filters = {
+    [L.post_filters['and']] = {
+        input_type = 'number',
+        validator = function(arity)
+            return arity and arity > 0
+        end
+    },
+
+    [L.post_filters['or']] = {
+        input_type = 'number',
+        validator = function(arity)
+            return arity and arity > 0
+        end
+    },
+
     ['utilizable'] = {
         input_type = '',
         validator = function()
