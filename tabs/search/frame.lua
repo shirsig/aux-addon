@@ -422,7 +422,7 @@ do
 			add_form_component()
 		end
     end
-    input:SetOptions({'not', unpack(aux.keys(filter_util.filters))})
+    input:SetOptions({unpack(aux.keys(filter_util.filters))})
     local label = gui.label(input, gui.font_size.medium)
     label:SetPoint('RIGHT', input, 'LEFT', -8, 0)
     label:SetText('Operator')

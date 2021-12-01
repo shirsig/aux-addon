@@ -21,6 +21,10 @@ function default_filter(str)
 end
 
 M.filters = {
+    [L.post_filters['not']] = {
+        input_type = '',
+    },
+
     [L.post_filters['and']] = {
         input_type = 'number',
         validator = function(arity)
