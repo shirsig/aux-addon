@@ -81,6 +81,7 @@ function M.value(item_id, slot, quality, level)
 end
 
 function M.distribution(item_id, slot, quality, level)
+    assert(item_id, '`item_id` parameter is mandatory')
     if IGNORE[item_id] or not ARMOR[slot] and not WEAPON[slot] or level == 0 then
         return {}
     end

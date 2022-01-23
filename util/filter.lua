@@ -143,7 +143,7 @@ M.filters = {
         validator = function(amount)
             return function(auction_record)
                 local item_info = info.item(auction_record.item_id)
-                local disenchant_value = item_info and disenchant.value(item_info.item_id, item_info.slot, item_info.quality, item_info.level)
+                local disenchant_value = item_info and disenchant.value(auction_record.item_id, item_info.slot, item_info.quality, item_info.level)
                 return disenchant_value and disenchant_value - auction_record.bid_price >= amount
             end
         end
@@ -154,7 +154,7 @@ M.filters = {
         validator = function(amount)
             return function(auction_record)
                 local item_info = info.item(auction_record.item_id)
-                local disenchant_value = item_info and disenchant.value(item_info.item_id, item_info.slot, item_info.quality, item_info.level)
+                local disenchant_value = item_info and disenchant.value(auction_record.item_id, item_info.slot, item_info.quality, item_info.level)
                 return auction_record.buyout_price > 0 and disenchant_value and disenchant_value - auction_record.buyout_price >= amount
             end
         end
