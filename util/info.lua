@@ -325,16 +325,6 @@ function M.inventory()
 		else
 			slot = slot + 1
 		end
-		if bag <= 4 then return {bag, slot}, bag_type(bag) end
-	end
-end
-
-function M.bag_type(bag)
-	if bag == 0 then return 1 end
-	local link = GetInventoryItemLink('player', ContainerIDToInventoryID(bag))
-	if link then
-		local item_id = parse_link(link)
-		local item_info = item(item_id)
-		return subcategory_index(3, item_info.subclass)
+		if bag <= 4 then return {bag, slot} end
 	end
 end
