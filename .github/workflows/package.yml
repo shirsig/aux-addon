@@ -1,0 +1,26 @@
+name: Package and release
+
+on:
+  push:
+    tags:
+      - '**'
+
+env:
+  GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # we first have to clone the AddOn project, this is a required step
+      - name: Clone project
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0  # gets git history for changelogs
+
+      - name: Package and release for Burning Crusade Classic
+        uses: BigWigsMods/packager@v2
+        with:
+          args: -g bcc -n "{package-name}-{project-version}"
