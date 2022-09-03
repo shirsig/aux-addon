@@ -172,12 +172,24 @@ function M.distribution(item_id, slot, quality, level)
                 { item_id = 22447, min_quantity = 2, max_quantity = 3, probability = probability(.22, .75) },
                 { item_id = 22448, min_quantity = 1, max_quantity = 1, probability = probability(.03, .03) },
             }
-        else
+        elseif level <= 120 then
             return {
 	            { item_id = 22445, min_quantity = 2, max_quantity = 5, probability = probability(.75, .22) },
 	            { item_id = 22446, min_quantity = 1, max_quantity = 2, probability = probability(.22, .75) },
 	            { item_id = 22449, min_quantity = 1, max_quantity = 1, probability = probability(.03, .03) },
-			}
+            }
+        elseif level <= 151 then
+            return {
+                { item_id = 34054, min_quantity = 2, max_quantity = 3, probability = probability(.75, .22) },
+                { item_id = 34056, min_quantity = 1, max_quantity = 3, probability = probability(.22, .75) },
+                { item_id = 34053, min_quantity = 1, max_quantity = 1, probability = probability(.03, .03) },
+            }
+        else
+            return {
+                { item_id = 34054, min_quantity = 4, max_quantity = 7, probability = probability(.75, .22) },
+                { item_id = 34055, min_quantity = 1, max_quantity = 2, probability = probability(.22, .75) },
+                { item_id = 34052, min_quantity = 1, max_quantity = 1, probability = probability(.03, .03) },
+            }
         end
     elseif quality == RARE then
         if level <= 25 then
@@ -218,10 +230,20 @@ function M.distribution(item_id, slot, quality, level)
                 { item_id = 22448, min_quantity = 1, max_quantity = 1, probability = .995 },
                 { item_id = 20725, min_quantity = 1, max_quantity = 1, probability = .005 },
             }
-        else
+        elseif level <= 115 then
             return {
                 { item_id = 22449, min_quantity = 1, max_quantity = 1, probability = .995 },
                 { item_id = 22450, min_quantity = 1, max_quantity = 1, probability = .005 },
+            }
+        elseif level <= 164 then
+            return {
+                { item_id = 34053, min_quantity = 1, max_quantity = 1, probability = .995 },
+                { item_id = 34057, min_quantity = 1, max_quantity = 1, probability = .005 },
+            }
+        else
+            return {
+                { item_id = 34052, min_quantity = 1, max_quantity = 1, probability = .995 },
+                { item_id = 34057, min_quantity = 1, max_quantity = 1, probability = .005 },
             }
         end
     elseif quality == EPIC then
@@ -254,10 +276,18 @@ function M.distribution(item_id, slot, quality, level)
             return {
                 { item_id = 22450, min_quantity = 1, max_quantity = 2, probability = 1 },
             }
-        else
+        elseif level <= 164 then
             return {
                 { item_id = 22450, min_quantity = 1, max_quantity = 1, probability = .33 },
                 { item_id = 22450, min_quantity = 2, max_quantity = 2, probability = .67 },
+            }
+        elseif level <= 200 then
+            return {
+                { item_id = 34057, min_quantity = 1, max_quantity = 1, probability = 1 },
+            }
+        else
+            return {
+                { item_id = 34057, min_quantity = 1, max_quantity = 2, probability = 1 },
             }
         end
     end

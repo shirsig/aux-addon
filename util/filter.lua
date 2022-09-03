@@ -232,7 +232,7 @@ do
 			if self.exact then return end
 			local number = tonumber(select(3, strfind(str, '^(%d+)$')) or nil)
 			if number then
-				if number >= 1 and number <= 70 then
+				if number >= 1 and number <= 80 then
 					for _, key in ipairs{'min_level', 'max_level'} do
 						if not self[key] then
 							self[key] = {str, number}
