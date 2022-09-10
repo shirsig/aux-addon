@@ -25,6 +25,8 @@ refresh = true
 
 posting = nil
 
+last_post_update = nil
+
 selected_item = nil
 
 function get_default_settings()
@@ -41,16 +43,19 @@ function aux.event.AUX_LOADED()
     aux.event_listener('BAG_UPDATE', function()
         if posting == 'single' then
             posting = nil
+            last_post_update = nil
         end
     end)
     aux.event_listener('AUCTION_MULTISELL_FAILURE', function()
         if posting == 'multi' then
             posting = nil
+            last_post_update = nil
         end
     end)
     aux.event_listener('AUCTION_MULTISELL_UPDATE', function(count, total)
         if posting == 'multi' and count == total then
             posting = 'single'
+            last_post_update = GetTime()
         end
     end)
 end
@@ -252,7 +257,13 @@ function post_auction()
 
     posting = stack_count == 1 and 'single' or 'multi'
     aux.coro_thread(function()
+        last_post_update = GetTime()
         while posting do
+            if GetTime() - last_post_update > 5 then
+                posting = nil
+                last_post_update = nil
+                break
+            end
             aux.coro_wait()
             if not frame:IsShown() then
                 return
