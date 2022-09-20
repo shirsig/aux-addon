@@ -157,13 +157,20 @@ do
 					pending = false
 				end
 			end)
-            local t0 = GetTime()
             coro_thread(function()
-                while pending and GetTime() - t0 < 5 do
+                local t0 = GetTime()
+                local timeout = false
+                while pending do
+                    if GetTime() - t0 >= 5 then
+                        timeout = true
+                        break
+                    end
                     coro_wait()
                 end
                 kill_listener(listener_id)
-                do (on_success or pass)() end
+                if not timeout then
+                    (on_success or pass)()
+                end
                 locked = false
             end)
 		end
