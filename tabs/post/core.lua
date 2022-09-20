@@ -310,6 +310,10 @@ function validate_parameters()
         post_button:Disable()
         return
     end
+    if not CanSendAuctionQuery() then
+        post_button:Disable()
+        return
+    end
     post_button:Enable()
 end
 

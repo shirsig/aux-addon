@@ -62,6 +62,11 @@ function on_update()
 
     local selection = listing:GetSelection()
     if selection then
+        if not CanSendAuctionQuery() then
+            bid_button:Disable()
+            buyout_button:Disable()
+            return
+        end
         if not selection.record.high_bidder then
             bid_button:Enable()
         else

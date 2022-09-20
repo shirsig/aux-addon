@@ -19,6 +19,9 @@ ALL_MODE, NEW_MODE = {}, {}
 
 mode = nil
 
+bid_enabled = false
+buyout_enabled = false
+
 function aux.event.AUX_LOADED()
 	new_search(nil, ALL_MODE)
 end
@@ -379,9 +382,9 @@ do
 							end or function() search.table:RemoveAuctionRecord(record) end)
 						end
 					end)
-					bid_button:Enable()
-				else
-					bid_button:Disable()
+					bid_enabled = true
+                else
+                    bid_enabled = false
 				end
 
 				if record.buyout_price > 0 then
@@ -390,9 +393,9 @@ do
 							aux.place_bid('list', index, record.buyout_price, function() search.table:RemoveAuctionRecord(record) end)
 						end
 					end)
-					buyout_button:Enable()
+					buyout_enabled = true
 				else
-					buyout_button:Disable()
+					buyout_enabled = false
 				end
 			end
 		)
@@ -400,8 +403,8 @@ do
 
 	function on_update()
 		if state == IDLE or state == SEARCHING then
-			buyout_button:Disable()
-			bid_button:Disable()
+            bid_enabled = false
+            buyout_enabled = false
 		end
 
 		if state == SEARCHING then return end
@@ -417,7 +420,23 @@ do
 			if not aux.bid_in_progress() then
 				state = IDLE
 			end
-		end
+        end
+
+        if CanSendAuctionQuery() then
+            if bid_enabled then
+                bid_button:Enable()
+            else
+                bid_button:Disable()
+            end
+            if buyout_enabled then
+                buyout_button:Enable()
+            else
+                buyout_button:Disable()
+            end
+        else
+            bid_button:Disable()
+            buyout_button:Disable()
+        end
 	end
 end
 
