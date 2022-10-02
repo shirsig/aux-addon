@@ -87,6 +87,7 @@ do
         local count = 0
         scan.start{
             type = 'list',
+            sort_type = 'unitprice',
             queries = {{blizzard_query = {}}},
             get_all = true,
             on_scan_start = function()

@@ -15,7 +15,7 @@ StaticPopupDialogs.AUX_SCAN_ALERT = {
     preferredIndex = STATICPOPUP_NUMDIALOGS,
 }
 
-ALL_MODE, NEW_MODE = {}, {}
+NORMAL_MODE, LIVE_MODE = {}, {}
 
 mode = nil
 
@@ -23,12 +23,12 @@ bid_enabled = false
 buyout_enabled = false
 
 function aux.event.AUX_LOADED()
-	new_search(nil, ALL_MODE)
+	new_search(nil, NORMAL_MODE)
 end
 
 function update_mode(mode)
     _M.mode = mode
-	if mode == ALL_MODE then
+	if mode == NORMAL_MODE then
         mode_button:SetBackdropColor(aux.color.content.background())
     else
         mode_button:SetBackdropColor(aux.color.state.enabled())
@@ -150,6 +150,7 @@ function start_live_scan(query, search, continuation)
 	local new_records = {}
 	scan.start{
 		type = 'list',
+        sort_type = search.sort_type,
 		queries = {query},
 		on_scan_start = function()
 			aux.status_bar:update_status(.9999, .9999)
@@ -226,6 +227,7 @@ function start_search(queries, continuation)
 
 	scan.start{
 		type = 'list',
+        sort_type = search.sort_type,
 		queries = queries,
         alert_validator = search.alert_validator,
 		on_scan_start = function()
@@ -301,7 +303,7 @@ function M.execute(_, resume, mode)
 	if not queries then
 		aux.print('Invalid filter:', error)
 		return
-	elseif mode == NEW_MODE then
+	elseif mode == LIVE_MODE then
 		if #queries > 1 then
 			aux.print('Error: The real time mode does not support multi-queries')
 			return
@@ -326,6 +328,9 @@ function M.execute(_, resume, mode)
 		end
 		local search = current_search()
 		search.mode = mode
+        if mode ~= LIVE_MODE then
+            search.sort_type = 'unitprice'
+        end
 		search.alert_validator = get_alert_validator()
 	end
 
@@ -335,7 +340,7 @@ function M.execute(_, resume, mode)
 	update_start_stop()
     search_box:ClearFocus()
 	set_subtab(RESULTS)
-	if mode == NEW_MODE then
+	if mode == LIVE_MODE then
 		start_live_scan(queries[1], nil, continuation)
 	else
 		start_search(queries, continuation)
@@ -357,6 +362,7 @@ do
 		scan.abort()
 		state = SEARCHING
 		scan_util.find(
+            search.sort_type,
 			record,
 			function()
 				state = IDLE

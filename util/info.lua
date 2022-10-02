@@ -277,11 +277,9 @@ function M.item(item_id, suffix_id)
 end
 
 function M.category_index(category)
-    if category == 'Weapon' then -- TODO retail apparently the names aren't always the same as from GetAuctionItemInfo?
-        return 1
-    end
     for i, v in ipairs(AuctionCategories) do
-        if strupper(v.name) == strupper(category) then
+        -- ignoring trailing s because sometimes type and category differ in number
+        if gsub(strupper(v.name), 'S$', '') == gsub(strupper(category), 'S$', '') then
             return i, v.name
         end
     end
