@@ -20,7 +20,7 @@ jobs:
         with:
           fetch-depth: 0  # gets git history for changelogs
 
-      - name: Package and release for Burning Crusade Classic
+      - name: Package and release for WotLK Classic
         uses: BigWigsMods/packager@v2
         with:
           args: -g wrath -n "{package-name}-{project-version}"
