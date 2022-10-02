@@ -521,10 +521,11 @@ function refresh_entries()
             on_page_scanned = function()
                 bid_records[item_key] = bid_records[item_key] or {}
                 buyout_records[item_key] = buyout_records[item_key] or {}
+                refresh = true
                 if not aux.account_data.post_full_scan and next(buyout_records) then
                     scan.abort()
+                    aux.coro_wait()
                 end
-                refresh = true
             end,
 			on_auction = function(auction_record)
 				if auction_record.item_key == item_key then
