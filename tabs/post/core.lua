@@ -522,7 +522,7 @@ function refresh_entries()
                 bid_records[item_key] = bid_records[item_key] or {}
                 buyout_records[item_key] = buyout_records[item_key] or {}
                 refresh = true
-                if not aux.account_data.post_full_scan and next(buyout_records) then
+                if not aux.account_data.post_full_scan and next(buyout_records[item_key]) then
                     scan.abort()
                     aux.coro_wait()
                 end
