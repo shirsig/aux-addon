@@ -173,6 +173,8 @@ function M.auctionable(tooltip, quality)
             and status ~= ITEM_BIND_ON_PICKUP
             and status ~= ITEM_BIND_QUEST
             and status ~= ITEM_SOULBOUND
+            and status ~= ITEM_BIND_TO_ACCOUNT
+            and status ~= ITEM_HEROIC
             and (not tooltip_match(ITEM_CONJURED, tooltip) or tooltip_find(ITEM_MIN_LEVEL, tooltip) > 1)
 end
 
