@@ -21,6 +21,7 @@ util\info.lua
 core\history.lua
 core\disenchant.lua
 core\prospecting.lua
+core\milling.lua
 util\filter.lua
 util\completion.lua
 core\slash.lua

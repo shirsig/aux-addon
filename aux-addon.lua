@@ -77,6 +77,8 @@ function event.AUX_LOADED()
                 disenchant_distribution = false,
                 prospecting_value = false,
                 prospecting_distribution = false,
+                milling_value = false,
+                milling_distribution = false,
                 money_icons = false
             }
         })
