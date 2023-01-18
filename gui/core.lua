@@ -268,8 +268,8 @@ function M.editbox(parent)
         self.overlay:SetJustifyH(alignment)
     end
     function editbox:SetFontSize(size)
-        self:SetFont(font, size)
-        self.overlay:SetFont(font, size)
+        self:SetFont(font, size, "")
+        self.overlay:SetFont(font, size, "")
     end
     local overlay = label(editbox)
     overlay:SetPoint('LEFT', 1.5, 0)
