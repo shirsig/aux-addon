@@ -107,7 +107,7 @@ function extend_tooltip(tooltip, link, quantity)
     end
     if settings.merchant_buy then
         local price, limited = info.merchant_buy_info(item_id)
-        if price then 
+        if price then
             if settings.money_icons then
                 tooltip:AddLine('Vendor Buy ' .. (limited and '(limited): ' or ': ') .. GetCoinTextureString(price * quantity), aux.color.tooltip.merchant())
             else
@@ -122,7 +122,7 @@ function extend_tooltip(tooltip, link, quantity)
                 tooltip:AddLine('Vendor: ' .. (price and GetCoinTextureString(price * quantity) or UNKNOWN), aux.color.tooltip.merchant())
             else
                 tooltip:AddLine('Vendor: ' .. (price and money.to_string2(price * quantity) or UNKNOWN), aux.color.tooltip.merchant())
-            end    
+            end
         end
     end
     local auctionable = not item_info or info.auctionable(info.tooltip('link', item_info.link), item_info.quality)
