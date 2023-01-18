@@ -195,9 +195,9 @@ function game_tooltip_hooks.SetQuestLogItem(qtype, slot)
 end
 
 function game_tooltip_hooks.SetBagItem(bag, slot)
-    local link = GetContainerItemLink(bag, slot)
+    local link = C_Container.GetContainerItemLink(bag, slot)
     if link then
-        extend_tooltip(GameTooltip, link, select(2, GetContainerItemInfo(bag, slot)))
+        extend_tooltip(GameTooltip, link, select(2, C_Container.GetContainerItemInfo(bag, slot)))
     end
 end
 
@@ -259,7 +259,7 @@ function game_tooltip_hooks.SetAuctionSellItem()
     local name, _, quantity = GetAuctionSellItemInfo()
     if name then
         for slot in info.inventory() do
-            local link = GetContainerItemLink(unpack(slot))
+            local link = C_Container.GetContainerItemLink(unpack(slot))
             if link and select(5, info.parse_link(link)) == name then
                 extend_tooltip(GameTooltip, link, quantity)
                 return
