@@ -332,7 +332,7 @@ function M.item(parent)
     local btn = CreateFrame('CheckButton', unique_name(), item, 'ActionButtonTemplate')
     item.button = btn
     btn:SetPoint('LEFT', 2, .5)
-    btn:SetHighlightTexture(nil)
+    btn:SetHighlightTexture('')
     btn:RegisterForClicks()
     item.texture = _G[btn:GetName() .. 'Icon']
     item.texture:SetTexCoord(.06, .94, .06, .94)
