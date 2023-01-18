@@ -258,7 +258,7 @@ do
 		filter_display:SetText(text)
 	end
 	function filter_display_size()
-		local font, font_size = filter_display:GetFont()
+		local font, font_size, flags = filter_display:GetFont('p')
 		filter_display.measure:SetFont(font, font_size)
 		local lines = 0
 		local width = 0
