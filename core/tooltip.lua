@@ -197,7 +197,7 @@ end
 function game_tooltip_hooks.SetBagItem(bag, slot)
     local link = C_Container.GetContainerItemLink(bag, slot)
     if link then
-        extend_tooltip(GameTooltip, link, select(2, C_Container.GetContainerItemInfo(bag, slot)))
+        extend_tooltip(GameTooltip, link, C_Container.GetContainerItemInfo(bag, slot).stackCount)
     end
 end
 
