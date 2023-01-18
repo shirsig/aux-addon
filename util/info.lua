@@ -12,13 +12,13 @@ do
 end
 
 function M.container_item(bag, slot)
-	local link = GetContainerItemLink(bag, slot)
+	local link = C_Container.GetContainerItemLink(bag, slot)
     if link then
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = item(item_id, suffix_id, unique_id, enchant_id)
         if item_info then -- TODO apparently this can be undefined
-            local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- TODO quality not working?
-            local durability, max_durability = GetContainerItemDurability(bag, slot)
+            local texture, count, locked, quality, readable, lootable = C_Container.GetContainerItemInfo(bag, slot) -- TODO quality not working?
+            local durability, max_durability = C_Container.GetContainerItemDurability(bag, slot)
             local tooltip = tooltip('bag', bag, slot)
             local max_charges = max_item_charges(item_id)
             local charges = max_charges and item_charges(tooltip)
@@ -317,8 +317,8 @@ end
 function M.inventory()
 	local bag, slot = 0, 0
 	return function()
-		if slot >= GetContainerNumSlots(bag) then
-			repeat bag = bag + 1 until GetContainerNumSlots(bag) > 0 or bag > 4
+		if slot >= C_Container.GetContainerNumSlots(bag) then
+			repeat bag = bag + 1 until C_Container.GetContainerNumSlots(bag) > 0 or bag > 4
 			slot = 1
 		else
 			slot = slot + 1
