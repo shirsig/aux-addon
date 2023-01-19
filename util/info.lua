@@ -36,7 +36,7 @@ function M.container_item(bag, slot)
                 item_key = item_id .. ':' .. suffix_id,
 
                 name = item_info.name,
-                texture = info.texture,
+                texture = info.iconFileID,
                 level = item_info.level,
                 quality = info.quality,
                 max_stack = item_info.max_stack,
