@@ -17,7 +17,7 @@ function M.container_item(bag, slot)
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = item(item_id, suffix_id, unique_id, enchant_id)
         if item_info then -- TODO apparently this can be undefined
-            local texture, count, locked, quality, readable, lootable = C_Container.GetContainerItemInfo(bag, slot) -- TODO quality not working?
+            local info = C_Container.GetContainerItemInfo(bag, slot) -- TODO quality not working?
             local durability, max_durability = C_Container.GetContainerItemDurability(bag, slot)
             local tooltip = tooltip('bag', bag, slot)
             local max_charges = max_item_charges(item_id)
@@ -36,15 +36,16 @@ function M.container_item(bag, slot)
                 item_key = item_id .. ':' .. suffix_id,
 
                 name = item_info.name,
-                texture = texture,
+                texture = info.texture,
                 level = item_info.level,
-                quality = item_info.quality,
+                quality = info.quality,
                 max_stack = item_info.max_stack,
 
-                count = count,
-                locked = locked,
-                readable = readable,
+                count = info.stackCount,
+                locked = info.isLocked,
+                readable = info.isReadable,
                 auctionable = auctionable,
+                lootable = info.isLootable,
 
                 tooltip = tooltip,
             }
