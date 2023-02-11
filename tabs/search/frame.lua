@@ -422,7 +422,7 @@ do
 			add_form_component()
 		end
     end
-    input:SetOptions({'and', 'or', 'not', unpack(aux.keys(filter_util.filters))})
+    input:SetOptions(filter_util.ordered_filter_names)
     local label = gui.label(input, gui.font_size.medium)
     label:SetPoint('RIGHT', input, 'LEFT', -8, 0)
     label:SetText('Operator')

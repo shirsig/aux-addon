@@ -233,7 +233,11 @@ function add_form_component()
 		local filter = filter_util.filters[str]
 		if filter then
 			if filter.input_type ~= '' then
-				str = str .. '/' .. filter_parameter_input:GetText()
+				if str == 'and' or str == 'or' then
+					str = str .. filter_parameter_input:GetText()
+				else
+					str = str .. '/' .. filter_parameter_input:GetText()
+				end
 			end
 		end
 		local components, error = filter_util.parse_filter_string(str)

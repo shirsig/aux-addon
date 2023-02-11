@@ -21,7 +21,29 @@ function default_filter(str)
 end
 
 M.filters = {
+    ['and'] = {
+        order = 1,
+        input_type = 'number',
+        validator = function(arity)
+            return arity and arity > 0
+        end
+    },
+
+    ['or'] = {
+        order = 2,
+        input_type = 'number',
+        validator = function(arity)
+            return arity and arity > 0
+        end
+    },
+
+    ['not'] = {
+        order = 3,
+        input_type = '',
+    },
+
     ['utilizable'] = {
+        order = 4,
         input_type = '',
         validator = function()
             return function(auction_record)
@@ -31,6 +53,7 @@ M.filters = {
     },
 
     ['tooltip'] = {
+        order = 5,
         input_type = 'string',
         validator = function(str)
             return default_filter(str).validator()
@@ -38,6 +61,7 @@ M.filters = {
     },
 
     ['item'] = {
+        order = 6,
         input_type = 'string',
         validator = function(name)
             return function(auction_record)
@@ -47,6 +71,7 @@ M.filters = {
     },
 
     ['left'] = {
+        order = 7,
         input_type = {'30m', '2h', '8h', '24h'},
         validator = function(index)
             return function(auction_record)
@@ -56,6 +81,7 @@ M.filters = {
     },
 
     ['rarity'] = {
+        order = 8,
         input_type = {'poor', 'common', 'uncommon', 'rare', 'epic'},
         validator = function(index)
             return function(auction_record)
@@ -65,6 +91,7 @@ M.filters = {
     },
 
     ['min-level'] = {
+        order = 9,
         input_type = 'number',
         validator = function(level)
             return function(auction_record)
@@ -74,6 +101,7 @@ M.filters = {
     },
 
     ['max-level'] = {
+        order = 10,
         input_type = 'number',
         validator = function(level)
             return function(auction_record)
@@ -83,6 +111,7 @@ M.filters = {
     },
 
     ['bid-price'] = {
+        order = 11,
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -92,6 +121,7 @@ M.filters = {
     },
 
     ['price'] = {
+        order = 12,
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -101,6 +131,7 @@ M.filters = {
     },
 
     ['bid-percent'] = {
+        order = 13,
         input_type = 'number',
         validator = function(pct)
             return function(auction_record)
@@ -110,6 +141,7 @@ M.filters = {
     },
 
     ['percent'] = {
+        order = 14,
         input_type = 'number',
         validator = function(pct)
             return function(auction_record)
@@ -121,6 +153,7 @@ M.filters = {
     },
 
     ['bid-profit'] = {
+        order = 15,
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -130,6 +163,7 @@ M.filters = {
     },
 
     ['profit'] = {
+        order = 16,
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -139,6 +173,7 @@ M.filters = {
     },
 
     ['bid-disenchant-profit'] = {
+        order = 17,
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -150,6 +185,7 @@ M.filters = {
     },
 
     ['disenchant-profit'] = {
+        order = 18,
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -161,6 +197,7 @@ M.filters = {
     },
 
     ['bid-vendor-profit'] = {
+        order = 19,
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -171,6 +208,7 @@ M.filters = {
     },
 
     ['vendor-profit'] = {
+        order = 20,
         input_type = 'money',
         validator = function(amount)
             return function(auction_record)
@@ -181,6 +219,7 @@ M.filters = {
     },
 
     ['seller'] = {
+        order = 21,
         input_type = 'string',
         validator = function(name)
             return function(auction_record)
@@ -209,6 +248,10 @@ M.filters = {
         end
     },
 }
+M.ordered_filter_names = {}
+for filter_name, filter_data in pairs(filters) do
+    ordered_filter_names[filter_data.order] = filter_name
+end
 
 function operator(str)
     local operator = str == 'not' and {'operator', 'not', 1}
