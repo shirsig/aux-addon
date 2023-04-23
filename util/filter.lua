@@ -47,7 +47,7 @@ M.filters = {
     },
 
     ['left'] = {
-        input_type = {'30m', '2h', '8h', '24h'},
+        input_type = {'30m', '2h', '12h', '24h'},
         validator = function(index)
             return function(auction_record)
                 return auction_record.duration == index
