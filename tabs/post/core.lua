@@ -515,9 +515,9 @@ function refresh_entries()
             on_scan_start = function()
                 aux.status_bar:update_status(0, 0)
             end,
-			on_page_loaded = function(page, total_pages)
+            on_page_loaded = function(page, total_pages)
                 aux.status_bar:update_status(page / total_pages, 0)
-			end,
+            end,
             on_page_scanned = function()
                 bid_records[item_key] = bid_records[item_key] or {}
                 buyout_records[item_key] = buyout_records[item_key] or {}

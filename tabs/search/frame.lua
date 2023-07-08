@@ -64,7 +64,7 @@ do
 	btn:SetWidth(45)
     btn:SetText('Live')
 	btn:SetScript('OnClick', function(self)
-		update_mode(mode == NORMAL_MODE and LIVE_MODE or NORMAL_MODE)
+        update_mode(mode == NORMAL_MODE and LIVE_MODE or NORMAL_MODE)
 	end)
 	mode_button = btn
 end
