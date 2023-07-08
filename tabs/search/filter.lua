@@ -14,7 +14,7 @@ end
 
 function valid_level(str)
 	local level = tonumber(str)
-	return level and aux.bounded(1, 70, level)
+	return level and aux.bounded(1, 60, level)
 end
 
 blizzard_query = setmetatable({}, {
@@ -258,7 +258,7 @@ do
 		filter_display:SetText(text)
 	end
 	function filter_display_size()
-		local font, font_size = filter_display:GetFont()
+		local font, font_size = filter_display:GetFont('p')
 		filter_display.measure:SetFont(font, font_size)
 		local lines = 0
 		local width = 0

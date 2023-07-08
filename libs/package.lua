@@ -41,7 +41,3 @@ function create_module(name)
 	environments[name] = environment
 	interfaces[name] = setmetatable({}, { __metatable = false, __index = exports, __newindex = pass })
 end
-
--- for testing
-_G.module = create_module
-_G.require = require

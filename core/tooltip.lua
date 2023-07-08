@@ -88,7 +88,7 @@ function extend_tooltip(tooltip, link, quantity)
     end
     if settings.merchant_buy then
         local price, limited = info.merchant_buy_info(item_id)
-        if price then 
+        if price then
             if settings.money_icons then
                 tooltip:AddLine('Vendor Buy ' .. (limited and '(limited): ' or ': ') .. GetCoinTextureString(price * quantity), aux.color.tooltip.merchant())
             else
@@ -103,7 +103,7 @@ function extend_tooltip(tooltip, link, quantity)
                 tooltip:AddLine('Vendor: ' .. (price and GetCoinTextureString(price * quantity) or UNKNOWN), aux.color.tooltip.merchant())
             else
                 tooltip:AddLine('Vendor: ' .. (price and money.to_string2(price * quantity) or UNKNOWN), aux.color.tooltip.merchant())
-            end    
+            end
         end
     end
     local auctionable = not item_info or info.auctionable(info.tooltip('link', item_info.link), item_info.quality)
@@ -176,9 +176,9 @@ function game_tooltip_hooks.SetQuestLogItem(qtype, slot)
 end
 
 function game_tooltip_hooks.SetBagItem(bag, slot)
-    local link = GetContainerItemLink(bag, slot)
+    local link = C_Container.GetContainerItemLink(bag, slot)
     if link then
-        extend_tooltip(GameTooltip, link, select(2, GetContainerItemInfo(bag, slot)))
+        extend_tooltip(GameTooltip, link, C_Container.GetContainerItemInfo(bag, slot).stackCount)
     end
 end
 
@@ -240,7 +240,7 @@ function game_tooltip_hooks.SetAuctionSellItem()
     local name, _, quantity = GetAuctionSellItemInfo()
     if name then
         for slot in info.inventory() do
-            local link = GetContainerItemLink(unpack(slot))
+            local link = C_Container.GetContainerItemLink(unpack(slot))
             if link and select(5, info.parse_link(link)) == name then
                 extend_tooltip(GameTooltip, link, quantity)
                 return

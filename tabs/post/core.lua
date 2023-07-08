@@ -25,6 +25,8 @@ refresh = true
 
 posting = nil
 
+last_post_update = nil
+
 selected_item = nil
 
 function get_default_settings()
@@ -41,16 +43,19 @@ function aux.event.AUX_LOADED()
     aux.event_listener('BAG_UPDATE', function()
         if posting == 'single' then
             posting = nil
+            last_post_update = nil
         end
     end)
     aux.event_listener('AUCTION_MULTISELL_FAILURE', function()
         if posting == 'multi' then
             posting = nil
+            last_post_update = nil
         end
     end)
     aux.event_listener('AUCTION_MULTISELL_UPDATE', function(count, total)
         if posting == 'multi' and count == total then
             posting = 'single'
+            last_post_update = GetTime()
         end
     end)
 end
@@ -241,7 +246,7 @@ function post_auction()
             ClearCursor()
             ClickAuctionSellItemButton()
             ClearCursor()
-            PickupContainerItem(unpack(slot))
+            C_Container.PickupContainerItem(unpack(slot))
             ClickAuctionSellItemButton()
             ClearCursor()
             break
@@ -252,7 +257,13 @@ function post_auction()
 
     posting = stack_count == 1 and 'single' or 'multi'
     aux.coro_thread(function()
+        last_post_update = GetTime()
         while posting do
+            if GetTime() - last_post_update > 5 then
+                posting = nil
+                last_post_update = nil
+                break
+            end
             aux.coro_wait()
             if not frame:IsShown() then
                 return
@@ -296,6 +307,10 @@ function validate_parameters()
         return
     end
     if deposit_amount() > GetMoney() then
+        post_button:Disable()
+        return
+    end
+    if not CanSendAuctionQuery() then
         post_button:Disable()
         return
     end
@@ -388,7 +403,7 @@ function unit_vendor_price(item_key)
             ClearCursor()
             ClickAuctionSellItemButton()
             ClearCursor()
-            PickupContainerItem(unpack(slot))
+            C_Container.PickupContainerItem(unpack(slot))
             ClickAuctionSellItemButton()
             local auction_sell_item = info.auction_sell_item()
             ClearCursor()
@@ -494,27 +509,33 @@ function refresh_entries()
 
 		scan.start{
             type = 'list',
+            sort_type = 'unitprice',
             ignore_owner = true,
 			queries = {query},
             on_scan_start = function()
                 aux.status_bar:update_status(0, 0)
             end,
-			on_page_loaded = function(page, total_pages)
+            on_page_loaded = function(page, total_pages)
                 aux.status_bar:update_status(page / total_pages, 0)
-			end,
+            end,
+            on_page_scanned = function()
+                bid_records[item_key] = bid_records[item_key] or {}
+                buyout_records[item_key] = buyout_records[item_key] or {}
+                refresh = true
+                if not aux.account_data.post_full_scan and next(buyout_records[item_key]) then
+                    scan.abort()
+                    aux.coro_wait()
+                end
+            end,
 			on_auction = function(auction_record)
 				if auction_record.item_key == item_key then
                     record_auction(auction_record)
 				end
 			end,
 			on_abort = function()
-				bid_records[item_key], buyout_records[item_key] = nil, nil
                 aux.status_bar:update_status(1, 1)
 			end,
 			on_complete = function()
-				bid_records[item_key] = bid_records[item_key] or {}
-				buyout_records[item_key] = buyout_records[item_key] or {}
-                refresh = true
                 aux.status_bar:update_status(1, 1)
             end,
 		}

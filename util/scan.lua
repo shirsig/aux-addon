@@ -10,7 +10,7 @@ function M.test(type, record, index)
 	return auction_record and auction_record.search_signature == record.search_signature
 end
 
-function M.find(auction_record, on_abort, on_failure, on_success)
+function M.find(sort_type, auction_record, on_abort, on_failure, on_success)
 
     local queries = {{}}
 
@@ -35,6 +35,7 @@ function M.find(auction_record, on_abort, on_failure, on_success)
 
     local found
     return scan.start{
+        sort_type = sort_type,
         queries = queries,
         on_scan_start = function()
             aux.status_bar:update_status(0, 0)

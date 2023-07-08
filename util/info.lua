@@ -12,13 +12,13 @@ do
 end
 
 function M.container_item(bag, slot)
-	local link = GetContainerItemLink(bag, slot)
+	local link = C_Container.GetContainerItemLink(bag, slot)
     if link then
         local item_id, suffix_id, unique_id, enchant_id = parse_link(link)
         local item_info = item(item_id, suffix_id, unique_id, enchant_id)
         if item_info then -- TODO apparently this can be undefined
-            local texture, count, locked, quality, readable, lootable = GetContainerItemInfo(bag, slot) -- TODO quality not working?
-            local durability, max_durability = GetContainerItemDurability(bag, slot)
+            local containerInfo = C_Container.GetContainerItemInfo(bag, slot) -- TODO quality not working?
+            local durability, max_durability = C_Container.GetContainerItemDurability(bag, slot)
             local tooltip = tooltip('bag', bag, slot)
             local max_charges = max_item_charges(item_id)
             local charges = max_charges and item_charges(tooltip)
@@ -36,14 +36,14 @@ function M.container_item(bag, slot)
                 item_key = item_id .. ':' .. suffix_id,
 
                 name = item_info.name,
-                texture = texture,
+                texture = containerInfo.iconFileID,
                 level = item_info.level,
                 quality = item_info.quality,
                 max_stack = item_info.max_stack,
 
-                count = count,
-                locked = locked,
-                readable = readable,
+                count = containerInfo.stackCount,
+                locked = containerInfo.isLocked,
+                readable = containerInfo.isReadable,
                 auctionable = auctionable,
 
                 tooltip = tooltip,
@@ -275,11 +275,9 @@ function M.item(item_id, suffix_id)
 end
 
 function M.category_index(category)
-    if category == 'Weapon' then -- TODO retail apparently the names aren't always the same as from GetAuctionItemInfo?
-        return 1
-    end
     for i, v in ipairs(AuctionCategories) do
-        if strupper(v.name) == strupper(category) then
+        -- ignoring trailing s because sometimes type and category differ in number
+        if gsub(strupper(v.name), 'S$', '') == gsub(strupper(category), 'S$', '') then
             return i, v.name
         end
     end
@@ -317,8 +315,8 @@ end
 function M.inventory()
 	local bag, slot = 0, 0
 	return function()
-		if slot >= GetContainerNumSlots(bag) then
-			repeat bag = bag + 1 until GetContainerNumSlots(bag) > 0 or bag > 4
+		if slot >= C_Container.GetContainerNumSlots(bag) then
+			repeat bag = bag + 1 until C_Container.GetContainerNumSlots(bag) > 0 or bag > 4
 			slot = 1
 		else
 			slot = slot + 1

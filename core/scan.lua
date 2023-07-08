@@ -129,7 +129,11 @@ function submit_query(page)
     else
         -- not filtering by category, leave nil for all
     end
-    SortAuctionClearSort('list')
+    if state.params.sort_type then
+        SortAuctionSetSort('list', state.params.sort_type, state.params.sort_reverse)
+    else
+        SortAuctionClearSort('list')
+    end
     QueryAuctionItems(
         blizzard_query.name,
         blizzard_query.min_level,
