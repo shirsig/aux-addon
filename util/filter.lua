@@ -149,7 +149,7 @@ M.filters = {
         end
     },
 
-    ['bid-disenchant-profit-pct'] = {
+    ['bid-disenchant-profit-percent'] = {
         input_type = 'number',
         validator = function(pct)
             return function(auction_record)
@@ -171,7 +171,7 @@ M.filters = {
         end
     },
 
-    ['disenchant-profit-pct'] = {
+    ['disenchant-profit-percent'] = {
         input_type = 'number',
         validator = function(pct)
             return function(auction_record)
