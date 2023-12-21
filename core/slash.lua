@@ -60,6 +60,12 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'tooltip' and arguments[2] == 'prospecting' and arguments[3] == 'distribution' then
         tooltip_settings.prospecting_distribution = not tooltip_settings.prospecting_distribution
         aux.print('tooltip prospecting distribution ' .. status(tooltip_settings.prospecting_distribution))
+    elseif arguments[1] == 'tooltip' and arguments[2] == 'milling' and arguments[3] == 'value' then
+        tooltip_settings.milling_value = not tooltip_settings.milling_value
+        aux.print('tooltip milling value ' .. status(tooltip_settings.milling_value))
+    elseif arguments[1] == 'tooltip' and arguments[2] == 'milling' and arguments[3] == 'distribution' then
+        tooltip_settings.milling_distribution = not tooltip_settings.milling_distribution
+        aux.print('tooltip milling distribution ' .. status(tooltip_settings.milling_distribution))
     elseif arguments[1] == 'tooltip' and arguments[2] == 'money'  and arguments[3] == 'icons' then
 	    tooltip_settings.money_icons = not tooltip_settings.money_icons
         aux.print('tooltip money icons ' .. status(tooltip_settings.money_icons))
@@ -89,6 +95,8 @@ function SlashCmdList.AUX(command)
 		aux.print('- tooltip disenchant distribution [' .. status(tooltip_settings.disenchant_distribution) .. ']')
         aux.print('- tooltip prospecting value [' .. status(tooltip_settings.prospecting_value) .. ']')
         aux.print('- tooltip prospecting distribution [' .. status(tooltip_settings.prospecting_distribution) .. ']')
+        aux.print('- tooltip milling value [' .. status(tooltip_settings.milling_value) .. ']')
+        aux.print('- tooltip milling distribution [' .. status(tooltip_settings.milling_distribution) .. ']')
         aux.print('- tooltip money icons [' .. status(tooltip_settings.money_icons) .. ']')
 		aux.print('- clear item cache')
         aux.print('- clear post')
