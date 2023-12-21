@@ -149,6 +149,17 @@ M.filters = {
         end
     },
 
+    ['bid-disenchant-percent'] = {
+        input_type = 'number',
+        validator = function(pct)
+            return function(auction_record)
+                local item_info = info.item(auction_record.item_id)
+                local disenchant_value = item_info and disenchant.value(item_info.slot, item_info.quality, item_info.level)
+                return disenchant_value and auction_record.bid_price / disenchant_value * 100 <= pct
+            end
+        end
+    },
+
     ['disenchant-profit'] = {
         input_type = 'money',
         validator = function(amount)
@@ -156,6 +167,17 @@ M.filters = {
                 local item_info = info.item(auction_record.item_id)
                 local disenchant_value = item_info and disenchant.value(auction_record.item_id, item_info.slot, item_info.quality, item_info.level)
                 return auction_record.buyout_price > 0 and disenchant_value and disenchant_value - auction_record.buyout_price >= amount
+            end
+        end
+    },
+
+    ['disenchant-percent'] = {
+        input_type = 'number',
+        validator = function(pct)
+            return function(auction_record)
+                local item_info = info.item(auction_record.item_id)
+                local disenchant_value = item_info and disenchant.value(item_info.slot, item_info.quality, item_info.level)
+                return auction_record.buyout_price > 0 and disenchant_value and auction_record.buyout_price / disenchant_value * 100 <= pct
             end
         end
     },
