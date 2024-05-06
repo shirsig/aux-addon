@@ -1,4 +1,4 @@
-## Interface: 30403
+## Interface: 40400
 ## Author: shirsig
 ## Title: aux
 ## Version: @project-version@
