@@ -1067,7 +1067,7 @@ function M.new(parent, rows, columns)
             cell.text = text
             text:SetFont(gui.font, min(14, rt.ROW_HEIGHT))
             text:SetJustifyH(column.align or 'LEFT')
-            text:SetJustifyV('CENTER')
+            text:SetJustifyV('MIDDLE')
             text:SetPoint('TOPLEFT', 1, -1)
             text:SetPoint('BOTTOMRIGHT', -1, 1)
             cell:SetHeight(rt.ROW_HEIGHT)

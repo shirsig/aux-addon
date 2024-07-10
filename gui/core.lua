@@ -85,7 +85,7 @@ function M.button(parent, text_height)
     label:SetFont(font, text_height)
     label:SetAllPoints(button)
     label:SetJustifyH('CENTER')
-    label:SetJustifyV('CENTER')
+    label:SetJustifyV('MIDDLE')
     label:SetTextColor(aux.color.text.enabled())
     button:SetFontString(label)
 
@@ -135,7 +135,7 @@ do
         tab.text = tab:CreateFontString()
         tab.text:SetAllPoints()
         tab.text:SetJustifyH('CENTER')
-        tab.text:SetJustifyV('CENTER')
+        tab.text:SetJustifyV('MIDDLE')
         tab.text:SetFont(font, font_size.large)
         tab:SetFontString(tab.text)
 
