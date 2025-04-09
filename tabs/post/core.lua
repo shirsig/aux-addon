@@ -253,7 +253,7 @@ function post_auction()
         end
     end
 
-    PostAuction(start_price, buyout_price, duration, stack_size, stack_count)
+    PostAuction(start_price, buyout_price, duration, stack_size, stack_count, true)
 
     posting = stack_count == 1 and 'single' or 'multi'
     aux.coro_thread(function()
