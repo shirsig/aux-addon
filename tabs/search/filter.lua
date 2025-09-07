@@ -26,7 +26,12 @@ blizzard_query = setmetatable({}, {
 		elseif key == 'min_level' then
 			return tonumber(min_level_input:GetText())
 		elseif key == 'max_level' then
-			return tonumber(max_level_input:GetText())
+			max_level_test = tonumber(max_level_input:GetText())
+			if max_level_test then
+				return max_level_test
+	    	else
+	            return UnitLevel("player")
+	        end
 		elseif key == 'usable' then
 			return usable_checkbox:GetChecked()
 		elseif key == 'class' then
