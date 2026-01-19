@@ -4,6 +4,7 @@ local aux = require 'aux'
 local info = require 'aux.util.info'
 local money =  require 'aux.util.money'
 local disenchant = require 'aux.core.disenchant'
+local prospecting = require 'aux.core.prospecting'
 local history = require 'aux.core.history'
 local gui = require 'aux.gui'
 
@@ -67,7 +68,7 @@ function extend_tooltip(tooltip, link, quantity)
     quantity = IsShiftKeyDown() and quantity or 1
     local item_info = info.item(item_id)
     if item_info then
-        local distribution = disenchant.distribution(item_info.slot, item_info.quality, item_info.level)
+        local distribution = disenchant.distribution(item_id, item_info.slot, item_info.quality, item_info.level)
         if #distribution > 0 then
             if settings.disenchant_distribution then
                 tooltip:AddLine('Disenchants into:', aux.color.tooltip.disenchant.distribution())
@@ -77,12 +78,30 @@ function extend_tooltip(tooltip, link, quantity)
                 end
             end
             if settings.disenchant_value then
-                local disenchant_value = disenchant.value(item_info.slot, item_info.quality, item_info.level)
+                local disenchant_value = disenchant.value(item_id, item_info.slot, item_info.quality, item_info.level)
                 if settings.money_icons then
                     tooltip:AddLine('Disenchant: ' .. (disenchant_value and GetCoinTextureString(disenchant_value) or UNKNOWN), aux.color.tooltip.disenchant.value())
                 else
                     tooltip:AddLine('Disenchant: ' .. (disenchant_value and money.to_string2(disenchant_value) or UNKNOWN), aux.color.tooltip.disenchant.value())
                 end
+            end
+        end
+    end
+    local distribution = prospecting.distribution(item_id)
+    if #distribution > 0 then
+        if settings.prospecting_distribution then
+            tooltip:AddLine('Prospecting into:', aux.color.tooltip.prospecting.distribution())
+            sort(distribution, function(a,b) return a.probability > b.probability end)
+            for _, event in ipairs(distribution) do
+                tooltip:AddLine(format('  %s%% %s (%s-%s)', event.probability * 100, info.display_name(event.item_id, true) or 'item:' .. event.item_id, event.min_quantity, event.max_quantity), aux.color.tooltip.prospecting.distribution())
+            end
+        end
+        if settings.prospecting_value then
+            local prospecting_value = prospecting.value(item_id)
+            if settings.money_icons then
+                tooltip:AddLine('Prospecting: ' .. (prospecting_value and GetCoinTextureString(prospecting_value) or UNKNOWN), aux.color.tooltip.prospecting.value())
+            else
+                tooltip:AddLine('Prospecting: ' .. (prospecting_value and money.to_string2(prospecting_value) or UNKNOWN), aux.color.tooltip.prospecting.value())
             end
         end
     end

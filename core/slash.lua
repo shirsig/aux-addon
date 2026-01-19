@@ -30,8 +30,8 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'post' and arguments[2] == 'bid' then
         aux.account_data.post_bid = ({ unit = 'unit', stack = 'stack' })[arguments[3]]
 	    aux.print('post bid ' .. aux.color.blue(aux.account_data.post_bid or 'off'))
-    elseif arguments[1] == 'post' and arguments[2] == 'duration' and  ({['2'] = post.DURATION_2, ['8'] = post.DURATION_8, ['24'] = post.DURATION_24})[arguments[3]] then
-        aux.account_data.post_duration = ({['2'] = post.DURATION_2, ['8'] = post.DURATION_8, ['24'] = post.DURATION_24})[arguments[3]]
+    elseif arguments[1] == 'post' and arguments[2] == 'duration' and  ({ ['12'] = post.DURATION_12, ['24'] = post.DURATION_24, ['48'] = post.DURATION_48 })[arguments[3]] then
+        aux.account_data.post_duration = ({ ['12'] = post.DURATION_12, ['24'] = post.DURATION_24, ['48'] = post.DURATION_48 })[arguments[3]]
         aux.print('post duration ' .. aux.color.blue(info.duration_hours(aux.account_data.post_duration) .. 'h'))
     elseif arguments[1] == 'crafting' and arguments[2] == 'cost' then
 		aux.account_data.crafting_cost = not aux.account_data.crafting_cost
@@ -54,6 +54,12 @@ function SlashCmdList.AUX(command)
     elseif arguments[1] == 'tooltip' and arguments[2] == 'disenchant' and arguments[3] == 'distribution' then
 	    tooltip_settings.disenchant_distribution = not tooltip_settings.disenchant_distribution
         aux.print('tooltip disenchant distribution ' .. status(tooltip_settings.disenchant_distribution))
+    elseif arguments[1] == 'tooltip' and arguments[2] == 'prospecting' and arguments[3] == 'value' then
+        tooltip_settings.prospecting_value = not tooltip_settings.prospecting_value
+        aux.print('tooltip prospecting value ' .. status(tooltip_settings.prospecting_value))
+    elseif arguments[1] == 'tooltip' and arguments[2] == 'prospecting' and arguments[3] == 'distribution' then
+        tooltip_settings.prospecting_distribution = not tooltip_settings.prospecting_distribution
+        aux.print('tooltip prospecting distribution ' .. status(tooltip_settings.prospecting_distribution))
     elseif arguments[1] == 'tooltip' and arguments[2] == 'money'  and arguments[3] == 'icons' then
 	    tooltip_settings.money_icons = not tooltip_settings.money_icons
         aux.print('tooltip money icons ' .. status(tooltip_settings.money_icons))
@@ -81,6 +87,8 @@ function SlashCmdList.AUX(command)
 		aux.print('- tooltip merchant sell [' .. status(tooltip_settings.merchant_sell) .. ']')
 		aux.print('- tooltip disenchant value [' .. status(tooltip_settings.disenchant_value) .. ']')
 		aux.print('- tooltip disenchant distribution [' .. status(tooltip_settings.disenchant_distribution) .. ']')
+        aux.print('- tooltip prospecting value [' .. status(tooltip_settings.prospecting_value) .. ']')
+        aux.print('- tooltip prospecting distribution [' .. status(tooltip_settings.prospecting_distribution) .. ']')
         aux.print('- tooltip money icons [' .. status(tooltip_settings.money_icons) .. ']')
 		aux.print('- clear item cache')
         aux.print('- clear post')

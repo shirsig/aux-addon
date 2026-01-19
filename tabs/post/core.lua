@@ -19,7 +19,7 @@ local settings_schema = {'tuple', '#', {duration='number'}, {start_price='number
 
 local inventory_records, bid_records, buyout_records = {}, {}, {}
 
-M.DURATION_2, M.DURATION_8, M.DURATION_24 = 1, 2, 3
+M.DURATION_12, M.DURATION_24, M.DURATION_48 = 1, 2, 3
 
 refresh = true
 
@@ -434,7 +434,7 @@ function update_item(item)
 
     do
         local options = {}
-        for _, i in ipairs{2, 8, 24} do
+        for _, i in ipairs{12, 24, 48} do
             tinsert(options, aux.pluralize(i .. ' ' .. HOURS))
         end
         duration_dropdown:SetOptions(options)
