@@ -41,7 +41,7 @@ function update_search_bought_count_display()
         search_bought_count_label:SetText(search_bought_count > 0 and (search_bought_count .. ' bought') or '')
     end
     if search_bought_count > 0 then
-        DEFAULT_CHAT_FRAME:AddMessage('<aux> Purchased: ' .. search_bought_count)
+        DEFAULT_CHAT_FRAME:AddMessage('<aux> Bought: ' .. search_bought_count)
     end
 end
 
