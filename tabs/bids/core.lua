@@ -95,5 +95,5 @@ function update_bought_count_display()
     if bought_count_label then
         bought_count_label:SetText(bought_count > 0 and (bought_count .. ' bought') or '')
     end
-    DEFAULT_CHAT_FRAME:AddMessage('<aux> Gekauft: ' .. bought_count)
+    DEFAULT_CHAT_FRAME:AddMessage('<aux> Bought: ' .. bought_count)
 end
