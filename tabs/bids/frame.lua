@@ -51,3 +51,15 @@ do
     btn:SetScript('OnClick', function() place_bid(true) end)
     buyout_button = btn
 end
+
+do
+    local bought_label = buyout_button:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    bought_label:SetPoint('BOTTOM', buyout_button, 'BOTTOM', 0, 2)
+    bought_label:SetText('')
+    bought_count_label = bought_label
+    
+    local qty_label = buyout_button:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    qty_label:SetPoint('LEFT', bought_label, 'RIGHT', 5, 0)
+    qty_label:SetText('')
+    quantity_label = qty_label
+end

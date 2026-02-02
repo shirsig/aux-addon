@@ -14,6 +14,14 @@ FILTER_SPACING = 27
 frame = CreateFrame('Frame', nil, aux.frame)
 frame:SetAllPoints()
 frame:SetScript('OnUpdate', on_update)
+frame:SetScript('OnHide', function()
+    if search_bought_count_label then
+        search_bought_count_label:SetText('')
+    end
+    if search_quantity_label then
+        search_quantity_label:SetText('')
+    end
+end)
 frame:Hide()
 
 frame.filter = gui.panel(frame)
@@ -184,6 +192,17 @@ do
         while tremove(current_search().records) do end
         current_search().table:SetDatabase()
     end)
+    clear_button = btn
+    
+    local bought_label = btn:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    bought_label:SetPoint('LEFT', btn, 'RIGHT', 5, 0)
+    bought_label:SetText('')
+    search_bought_count_label = bought_label
+    
+    local qty_label = btn:CreateFontString(nil, 'OVERLAY', 'GameFontNormalSmall')
+    qty_label:SetPoint('LEFT', bought_label, 'RIGHT', 15, 0)
+    qty_label:SetText('')
+    search_quantity_label = qty_label
 end
 do
     local btn = gui.button(frame.saved)

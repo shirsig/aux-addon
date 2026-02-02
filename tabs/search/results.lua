@@ -21,6 +21,7 @@ mode = nil
 
 bid_enabled = false
 buyout_enabled = false
+search_bought_count = 0
 
 function aux.event.AUX_LOADED()
     new_search(nil, NORMAL_MODE)
@@ -32,6 +33,15 @@ function update_mode(mode)
         mode_button:SetBackdropColor(aux.color.content.background())
     else
         mode_button:SetBackdropColor(aux.color.state.enabled())
+    end
+end
+
+function update_search_bought_count_display()
+    if search_bought_count_label then
+        search_bought_count_label:SetText(search_bought_count > 0 and (search_bought_count .. ' bought') or '')
+    end
+    if search_bought_count > 0 then
+        DEFAULT_CHAT_FRAME:AddMessage('<aux> Purchased: ' .. search_bought_count)
     end
 end
 
@@ -94,6 +104,8 @@ do
         search.table:Reset()
         search.table:SetDatabase(search.records)
 
+        search_bought_count = 0
+        update_search_bought_count_display()
         update_search(#searches)
     end
 
@@ -180,7 +192,7 @@ function start_live_scan(query, search, continuation)
             end
             new_records = aux.values(map)
 
-            if #new_records > 2000 then
+            if #new_records > 5000 then
                 StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
             else
                 search.records = new_records
@@ -251,9 +263,9 @@ function start_search(queries, continuation)
             if (search.alert_validator or pass)(auction_record) then
                 StaticPopup_Show('AUX_SCAN_ALERT') -- TODO retail improve this
             end
-            if #search.records < 2000 then
+            if #search.records < 5000 then
                 tinsert(search.records, auction_record)
-                if #search.records == 2000 then
+                if #search.records == 5000 then
                     StaticPopup_Show('AUX_SEARCH_TABLE_FULL')
                 end
             end
@@ -351,6 +363,7 @@ do
     local IDLE, SEARCHING, FOUND = aux.enum(3)
     local state = IDLE
     local found_index
+    local last_selected_item
 
     function find_auction(record)
         local search = current_search()
@@ -360,6 +373,14 @@ do
         end
 
         scan.abort()
+        
+        -- Reset counter only when switching to a different item
+        if last_selected_item ~= record.item_id then
+            search_bought_count = 0
+            update_search_bought_count_display()
+            last_selected_item = record.item_id
+        end
+        
         state = SEARCHING
         scan_util.find(search.sort_type,
             record,
@@ -378,13 +399,22 @@ do
                 state = FOUND
                 found_index = index
 
+                -- Update quantity label
+                if search_quantity_label then
+                    search_quantity_label:SetText('+' .. record.count)
+                end
+
                 if not record.high_bidder then
                     bid_button:SetScript('OnClick', function()
                         if scan_util.test('list', record, index) and search.table:ContainsRecord(record) then
                             aux.place_bid('list', index, record.bid_price, record.bid_price < record.buyout_price and function()
                                 info.bid_update(record)
                                 search.table:SetDatabase()
-                            end or function() search.table:RemoveAuctionRecord(record) end)
+                            end or function()
+                                search_bought_count = search_bought_count + record.count
+                                update_search_bought_count_display()
+                                search.table:RemoveAuctionRecord(record)
+                            end)
                         end
                     end)
                     bid_enabled = true
@@ -395,7 +425,11 @@ do
                 if record.buyout_price > 0 then
                     buyout_button:SetScript('OnClick', function()
                         if scan_util.test('list', record, index) and search.table:ContainsRecord(record) then
-                            aux.place_bid('list', index, record.buyout_price, function() search.table:RemoveAuctionRecord(record) end)
+                            aux.place_bid('list', index, record.buyout_price, function()
+                                search_bought_count = search_bought_count + record.count
+                                update_search_bought_count_display()
+                                search.table:RemoveAuctionRecord(record)
+                            end)
                         end
                     end)
                     buyout_enabled = true

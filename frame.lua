@@ -15,7 +15,7 @@ do
 	local frame = CreateFrame('Frame', 'aux_frame', UIParent, 'BackdropTemplate')
 	tinsert(UISpecialFrames, 'aux_frame')
 	gui.set_window_style(frame)
-	gui.set_size(frame, 768, 447)
+	gui.set_size(frame, 850, 447)
 	frame:SetPoint('LEFT', 100, 0)
 	frame:SetToplevel(true)
 	frame:SetMovable(true)

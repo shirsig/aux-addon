@@ -5,6 +5,7 @@ local scan_util = require 'aux.util.scan'
 local scan = require 'aux.core.scan'
 
 local tab = aux.tab 'Bids'
+local bought_count = 0
 
 function aux.event.AUX_LOADED()
     aux.event_listener('AUCTION_BIDDER_LIST_UPDATE', function()
@@ -29,6 +30,8 @@ end
 function tab.CLOSE()
     listing:SetSelectedRecord()
     frame:Hide()
+    bought_count = 0
+    update_bought_count_display()
 end
 
 function M.scan_auctions()
@@ -45,9 +48,13 @@ function place_bid(buyout)
         if GetTime() - (locked[i] or 0) > .5 and scan_util.test('bidder', record, i) then
             local money = GetMoney()
             local amount = buyout and record.buyout_price or record.bid_price
-            PlaceAuctionBid('bidder', i, amount)
+            local on_success = function()
+                bought_count = bought_count + record.quantity
+                update_bought_count_display()
+            end
             if money >= amount then -- TODO maybe try to reset it after errors instead
                 locked[i] = GetTime()
+                aux.place_bid('bidder', i, amount, on_success)
             end
             return
         end
@@ -77,5 +84,16 @@ function on_update()
         else
             buyout_button:Disable()
         end
+        -- Update quantity label
+        if quantity_label then
+            quantity_label:SetText('+' .. selection.record.count)
+        end
     end
+end
+
+function update_bought_count_display()
+    if bought_count_label then
+        bought_count_label:SetText(bought_count > 0 and (bought_count .. ' bought') or '')
+    end
+    DEFAULT_CHAT_FRAME:AddMessage('<aux> Gekauft: ' .. bought_count)
 end
